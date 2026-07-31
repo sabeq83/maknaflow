@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.121 — Hapus menu G Labs Campaign di Sidebar (31/07/2026)
+- Menghapus menu G Labs Campaign dan key map terkait di Sidebar
+
 ## V2.2.120 — Integrasi Redis dan BullMQ untuk Antrean Asinkron G-Labs (31/07/2026)
 - Integrasi Redis Node 3 & antrean BullMQ
 - Implementasi daemon worker Node 2 dengan concurrency limit
