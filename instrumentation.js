@@ -56,15 +56,6 @@ export async function register() {
     } catch (err) {
       console.error('❌ Failed to start MAKNA Campaign Local Scheduler:', err.message);
     }
-
-    // Always start cloud sync scheduler in background
-    try {
-      const { startCloudSyncScheduler } = await import('./lib/cloud-sync-scheduler.js');
-      startCloudSyncScheduler();
-      console.log('☁️  MAKNA Cloud Hub Sync Daemon auto-started.');
-    } catch (err) {
-      console.error('❌ Failed to start MAKNA Cloud Hub Sync Daemon:', err.message);
-    }
   }
 }
 

@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.124 — Hapus total modul MAKNA Hub Sync dan reposisi Content Planner di Sidebar (31/07/2026)
+- Menghapus modul cloud sync daemon, halaman frontend, API sync route, dan menempatkan Content Planner di posisi paling atas Workflow sidebar
+
 ## V2.2.123 — Hapus total modul dan API routing Strategic & G-Labs Campaign (31/07/2026)
 - Menghapus berkas frontend, backend, engine, scheduler loop, dan scheduler processor Strategic & G-Labs Campaign
 
