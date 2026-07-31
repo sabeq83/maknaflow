@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.127 — Fix Port API dari 4000 ke 6000 (31/07/2026)
+- Memperbaiki deploy-production.js untuk menggunakan Port 6000 bagi API maknaflow untuk menghindari konflik dengan API maknagrid
+
 ## V2.2.126 — Fix Port UI dari 3000 ke 5000 (31/07/2026)
 - Memperbaiki deploy-production.js untuk menggunakan Port 5000 bagi UI maknaflow untuk menghindari konflik dengan maknagrid
 
