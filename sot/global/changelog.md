@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.122 — Hapus menu Strategic Campaign di Sidebar (31/07/2026)
+- Menghapus menu Strategic Campaign dan key map terkait di Sidebar
+
 ## V2.2.121 — Hapus menu G Labs Campaign di Sidebar (31/07/2026)
 - Menghapus menu G Labs Campaign dan key map terkait di Sidebar
 
