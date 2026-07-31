@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.2.125 — Penyelarasan Skema Database dan UI (31/07/2026)
+- Melakukan renaming tabel fisik database PostgreSQL (product_extractions->products, bridge_injector->product_bridging, ffmpeg_studio->video_studio, dll)
+- Membuat Updatable Views untuk kompatibilitas ke belakang
+- Menambahkan tabel pillar_campaigns dan pillar_campaign_items yang hilang di skrip PostgreSQL
+- Menyelaraskan label menu Sidebar UI (Organic Pillar -> Pillar Campaign, Instant Factory -> Instant Campaign)
+
 ## V2.2.124 — Hapus total modul MAKNA Hub Sync dan reposisi Content Planner di Sidebar (31/07/2026)
 - Menghapus modul cloud sync daemon, halaman frontend, API sync route, dan menempatkan Content Planner di posisi paling atas Workflow sidebar
 
