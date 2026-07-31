@@ -1,0 +1,116 @@
+# **Facebook Graph API Integration Blueprint**
+
+This blueprint defines the architecture, data structures, and implementation logic for publishing automated or manual draft posts directly to a target Facebook Page. 
+
+---
+
+## **1. Architecture & Workflow**
+
+Unlike other scheduling modules that use a dedicated queue table, the Facebook integration acts as a **Direct Dispatcher Service** embedded inside the existing workflows (such as Recipe Labs campaigns) and manual action buttons.
+
+1. **Credentials Management:** Credentials (`fb_page_id` and `fb_page_token`) are configured globally by the user via the settings panel and stored as key-value entries in the `settings` database table.
+2. **Context Enrichment & Formatting:** When a post is generated (e.g., a recipe item in Recipe Labs), the raw markdown content is passed to `formatFacebookRecipeCaption()` in `lib/facebook-helper.js`. This function dynamically formats headings, replaces ingredient bullet points with cooking-related emojis, numbers instructions, and appends a randomized Call to Action (CTA) and hashtags.
+3. **Draft Guardrail:** To prevent unintended live posts, all posts sent by MAKNA are forced to be **unpublished drafts**. The API call explicitly sets `published: false` and `unpublished_content_type: 'DRAFT'`, making them visible only within the Meta Business Suite draft workspace.
+4. **Token Exchange:** The system exchanges the configured User Token for a true Page Access Token via the Page ID endpoint. This guarantees proper publishing scopes and bypasses scope expiration issues.
+5. **Execution Paths:**
+   - **Manual Trigger:** Initiated via a POST request to `/api/recipe-labs/items/[id]/post-fb`.
+   - **Automated Scheduler Trigger:** Fired by the background runner in `lib/scheduler-processors.js` (`recipe_generator` or `recipe_exporter`) depending on the `post_to_facebook` campaign setting.
+
+---
+
+## **2. Database & Storage Mapping**
+
+There is no custom `facebook_queue` or `social_accounts` table. Instead, the integration maps to:
+
+### **Settings Table (`settings`)**
+Stores key-value integration credentials:
+- `fb_page_id`: Target Facebook Page ID.
+- `fb_page_token`: Page Access Token (User-generated from Meta App Dashboard).
+
+### **Campaign & Item Status Tracking**
+Using the Recipe Labs schema as a primary consumer:
+- `recipe_campaigns.post_to_facebook`: Integer flag (`1` = enabled, `0` = disabled).
+- `recipe_items.fb_post_id`: Stored Facebook post/draft ID returned by the Graph API upon success.
+- `recipe_items.fb_post_status`: Tracks current status (`draft_created` or `failed: <error_message>`).
+
+---
+
+## **3. Code Implementation (`lib/facebook-helper.js`)**
+
+The core dispatcher resides in `lib/facebook-helper.js`. Below is the official implementation flow:
+
+### **A. Token Exchange & API Request**
+```javascript
+const FB_GRAPH_URL = 'https://graph.facebook.com/v19.0';
+
+/**
+ * Exchanges the user access token for a true Page Access Token.
+ */
+async function getPageAccessToken(pageId, token) {
+  try {
+    const res = await fetch(`${FB_GRAPH_URL}/${pageId}?fields=access_token&access_token=${encodeURIComponent(token)}`);
+    const data = await res.json();
+    if (data && data.access_token) {
+      return data.access_token;
+    }
+  } catch (err) {
+    console.warn('[Facebook Token Exchange Warning]:', err.message);
+  }
+  return token;
+}
+
+/**
+ * Dispatches draft text or photos to the Facebook Page Graph API.
+ */
+export async function postDraftToFacebookPage({ message, mediaUrl, mediaType = 'text_only' }) {
+  const pageId = getSetting('fb_page_id');
+  const pageToken = getSetting('fb_page_token');
+
+  if (!pageId || !pageToken) {
+    throw new Error('Kredensial Facebook Page (ID / Token) belum dikonfigurasi di Pengaturan.');
+  }
+
+  const cleanPageId = pageId.trim();
+  const cleanToken = pageToken.trim();
+  
+  // Exchange token for page-level publishing permissions
+  const truePageToken = await getPageAccessToken(cleanPageId, cleanToken);
+
+  const isImage = mediaType === 'image' && mediaUrl;
+  const endpoint = isImage ? `/${cleanPageId}/photos` : `/${cleanPageId}/feed`;
+  
+  const payload = {
+    access_token: truePageToken,
+    published: false,                     // MANDATORY GUARDRAIL: Never publish live directly
+    unpublished_content_type: 'DRAFT'     // Always route to Meta Business Suite draft tab
+  };
+
+  if (isImage) {
+    payload.message = message;
+    payload.url = mediaUrl; // Must be a publicly reachable file (e.g. Nextcloud share URL /download)
+  } else {
+    payload.message = message;
+  }
+
+  const response = await fetch(`${FB_GRAPH_URL}${endpoint}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  const result = await response.json();
+  if (result.error) {
+    return { success: false, error: result.error.message };
+  }
+  return { success: true, fb_post_id: result.id };
+}
+```
+
+### **B. Media URL Resolution Strategy**
+For image posts (such as collages generated by Recipe Labs), Meta's servers must pull the file directly from a public URL. Since MAKNA is running on a local host, the system utilizes the Nextcloud WebDAV shared link.
+- In `app/api/recipe-labs/items/[id]/post-fb/route.js`, if the category dictates an image, the sharing link is cleaned up and appended with `/download`:
+  ```javascript
+  const cleanShareUrl = campaign.nextcloud_folder_url.replace(/\/+$/, '');
+  mediaUrl = cleanShareUrl.includes('/download') ? cleanShareUrl : `${cleanShareUrl}/download`;
+  ```
+- This allows Facebook to pull the compiled `.jpg` image from Nextcloud and attach it as the post photo draft.

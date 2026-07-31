@@ -1,0 +1,75 @@
+# Dependencies
+node_modules/
+
+# Next.js build
+.next/
+out/
+
+# Database (contains local data, not code)
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+data/chrome_debug/
+
+# Environment
+.env
+.env.local
+.env.production.local
+
+# Temp files
+migrate.js
+migrate_audience.js
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Uploads (media files ignored, but not route code)
+uploads/
+!app/uploads/
+
+data/temp/
+fb_cookies.txt
+
+# Local media libraries
+data/thumbnails/
+data/video_library/
+
+# Local databases and backups
+maknagen.db
+*.db-wal
+*.db-shm
+
+# Temp / debug files
+debug_latest.json
+temp_raw.json
+test_gemini.js
+kb_prompt_system.txt
+brainstorming/
+
+# Binaries and local media temp
+bin/
+public/temp/
+public/rendered/
+renders_test/
+temp_glabs/
+scratch/
+
+# Log files (runtime-generated, not code)
+public/*_logs.txt
+*.log
+logs/
+renders_output/
+
+# Deployment script
+deploy.sh
+
+# Production Mount Pointer
+/production_server
+
+# Playwright profiles and local chrome data
+data/playwright-profile/
+

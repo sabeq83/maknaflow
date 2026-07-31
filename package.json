@@ -1,0 +1,41 @@
+{
+  "name": "maknaflow",
+  "version": "2.2.120",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --webpack -p 3005",
+    "dev:port": "next dev -p 3005",
+    "deploy:cluster": "node scripts/deploy-cluster.js",
+    "deploy:node1": "node scripts/deploy-production.js",
+    "deploy:production": "node scripts/deploy-production.js",
+    "deploy:staging": "node scripts/deploy-staging.js",
+    "build": "next build --webpack",
+    "start": "next start",
+    "release": "node scripts/release.js",
+    "release-non-interactive": "node scripts/release.js --non-interactive"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@imgly/background-removal-node": "^1.4.5",
+    "adm-zip": "^0.5.17",
+    "archiver": "^8.0.0",
+    "better-sqlite3": "^12.9.0",
+    "bullmq": "^6.0.2",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "ffprobe-static": "^3.1.0",
+    "fluent-ffmpeg": "^2.1.3",
+    "googleapis": "^171.4.0",
+    "ioredis": "^5.11.1",
+    "jsonrepair": "^3.14.0",
+    "next": "16.2.5",
+    "pg": "^8.22.0",
+    "playwright": "^1.60.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "sharp": "^0.35.2",
+    "uuid": "^14.0.0",
+    "webdav": "^5.10.0",
+    "xlsx": "^0.18.5"
+  }
+}

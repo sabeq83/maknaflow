@@ -1,0 +1,1325 @@
+diff --git a/lib/sheets-autopilot-worker.js b/lib/sheets-autopilot-worker.js
+index 72e1acd..f39e4ad 100644
+--- a/lib/sheets-autopilot-worker.js
++++ b/lib/sheets-autopilot-worker.js
+@@ -1,17 +1,18 @@
+-import { getSheetsCampaigns, getSheetsCampaign, getSheetsJobs, createSheetsJob, updateSheetsJobStatus, getDb } from './db';
++import { getSheetsCampaigns, getSheetsCampaign, getSheetsJobs, createSheetsJob, updateSheetsJobStatus, getDb, insertGlabsTask, updateGlabsTaskStatus } from './db';
+ import { getAuthorizedClient } from './google-auth';
+ import { google } from 'googleapis';
+ import fs from 'fs';
+ import path from 'path';
+ import { GoogleGenerativeAI } from '@google/generative-ai';
+-import { executeWithKeyPool } from './gemini';
++import { executeWithKeyPool, uploadVideoToGemini, generateContentFlexible } from './gemini';
+ import { generateMinimaxVO } from './minimax-tts';
+ import { scrapeUrl, downloadECommerceImage } from './url-scraper';
+ import { generateImage, generateVideo, getTaskStatus, getFileUrl } from './webhook-client';
+ import { processVideoMuxing } from './video-studio-processor';
+ import { getOrCreateCampaignFolder, getOrCreateFolderInFolder, uploadMarkdownToCampaignFolder, uploadLocalFileToFolder } from './drive-uploader';
+ import { parseGeminiJSON } from './json-parser';
+-import { buildReverseEngineeringBridgePrompt, buildOrganicPillarPrompt } from './prompts';
++import { buildReverseEngineeringBridgePrompt, buildOrganicPillarPrompt, buildReverseEngineeringPrompt, DEMOGRAPHIC_PRESETS, WARDROBE_PRESETS, LIGHTING_PRESETS } from './prompts';
++import { downloadFromUrl, cleanupTempFile } from './video-downloader';
+ 
+ // Log to file for UI terminal
+ export function logToAutopilot(message) {
+@@ -46,7 +47,19 @@ export function getColumnLetter(colIndex) {
+ const fileToBase64 = (filePath) => {
+   const absolutePath = filePath.startsWith('/') ? path.join(process.cwd(), 'public', filePath) : filePath;
+   if (!fs.existsSync(absolutePath)) return null;
+-  return fs.readFileSync(absolutePath).toString('base64');
++  const buffer = fs.readFileSync(absolutePath);
++  
++  // Detect MIME type by magic bytes
++  let mimeType = 'image/png'; // default fallback
++  if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) {
++    mimeType = 'image/jpeg';
++  } else if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) {
++    mimeType = 'image/png';
++  } else if (buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46) {
++    mimeType = 'image/webp';
++  }
++  
++  return `data:${mimeType};base64,${buffer.toString('base64')}`;
+ };
+ 
+ // Update cell helper
+@@ -133,68 +146,88 @@ export async function ensureTabAndAppendRows(sheets, spreadsheetId, tabName, hea
+ // Main background poller logic
+ export async function runSyncWorker() {
+   logToAutopilot('=== MESIN AUTOPILOT SINKRONISASI MULAI ===');
+-  
++  const db = getDb();
++
++  // 1. Process active jobs first (State Machine)
++  const activeJobs = db.prepare(`
++    SELECT j.*, c.campaign_name, c.campaign_type, c.spreadsheet_id, c.gdrive_folder_id, c.video_model, c.aspect_ratio, c.enable_tts, c.enable_glabs, c.enable_ffmpeg, c.voice_provider, c.voice_persona, c.voice_speed, c.voice_volume, c.ffmpeg_sync_option, c.ffmpeg_video_scale, c.ffmpeg_sfx_volume, c.ffmpeg_bgm_volume, c.tts_model_quality, c.target_language
++    FROM sheets_jobs j
++    JOIN sheets_campaigns c ON j.campaign_id = c.id
++    WHERE j.status = 'processing' AND c.status = 'active'
++  `).all();
++
++  if (activeJobs.length > 0) {
++    logToAutopilot(`Menemukan ${activeJobs.length} pekerjaan autopilot aktif yang sedang berjalan.`);
++    for (const job of activeJobs) {
++      try {
++        await processActiveJob(job);
++      } catch (err) {
++        logToAutopilot(`[ERROR] Gagal memproses pekerjaan aktif ${job.id}: ${err.message}`);
++        updateSheetsJobStatus(job.id, { status: 'failed' });
++        try {
++          const auth = getAuthorizedClient();
++          const sheets = google.sheets({ version: 'v4', auth });
++          const sheetName = job.campaign_type === 'RE' ? 'CAMPAIGN_RE' : (job.campaign_type === 'OPC' ? 'CAMPAIGN_OPC' : 'CAMPAIGN_IFC');
++          const meta = await sheets.spreadsheets.get({ spreadsheetId: job.spreadsheet_id });
++          const rowsRes = await sheets.spreadsheets.values.get({
++            spreadsheetId: job.spreadsheet_id,
++            range: `'${sheetName}'!A1:Z1000`
++          });
++          const rows = rowsRes.data.values;
++          if (rows) {
++            const headers = rows[0].map(h => h.trim().toLowerCase());
++            await updateCell(sheets, job.spreadsheet_id, sheetName, headers.indexOf('pipeline_status'), job.row_index, 'Failed');
++            await updateCell(sheets, job.spreadsheet_id, sheetName, headers.indexOf('processed_at'), job.row_index, new Date().toISOString());
++          }
++        } catch (sheetErr) {
++          logToAutopilot(`[ERROR] Gagal memperbarui status 'Failed' di Google Sheets: ${sheetErr.message}`);
++        }
++      }
++    }
++    logToAutopilot('=== MESIN AUTOPILOT SINKRONISASI SELESAI ===');
++    return;
++  }
++
++  // 2. If no active jobs, scan spreadsheet for new Approved rows
+   const campaigns = getSheetsCampaigns().filter(c => c.status === 'active');
+   if (campaigns.length === 0) {
+     logToAutopilot('Tidak ada kampanye autopilot aktif ditemukan di database.');
++    logToAutopilot('=== MESIN AUTOPILOT SINKRONISASI SELESAI ===');
+     return;
+   }
+ 
+-  logToAutopilot(`Menemukan ${campaigns.length} kampanye autopilot aktif.`);
+-
+   for (const campaign of campaigns) {
+     logToAutopilot(`\n--------------------------------------------------`);
+-    logToAutopilot(`Memproses kampanye: ${campaign.campaign_name} (Tipe: ${campaign.campaign_type})`);
++    logToAutopilot(`Memindai baris baru untuk kampanye: ${campaign.campaign_name} (Tipe: ${campaign.campaign_type})`);
+     
+     try {
+       const auth = getAuthorizedClient();
+       const sheets = google.sheets({ version: 'v4', auth });
+-      const drive = google.drive({ version: 'v3', auth });
+ 
+-      // Retrieve spreadsheet metadata
+       const meta = await sheets.spreadsheets.get({ spreadsheetId: campaign.spreadsheet_id });
+       const sheetName = campaign.campaign_type === 'RE' ? 'CAMPAIGN_RE' : (campaign.campaign_type === 'OPC' ? 'CAMPAIGN_OPC' : 'CAMPAIGN_IFC');
+ 
+       const sheetExists = meta.data.sheets.some(s => s.properties.title === sheetName);
+       if (!sheetExists) {
+-        logToAutopilot(`[PERINGATAN] Tab "${sheetName}" tidak ditemukan di Spreadsheet ID: ${campaign.spreadsheet_id}. Melewati kampanye.`);
++        logToAutopilot(`[PERINGATAN] Tab "${sheetName}" tidak ditemukan di Spreadsheet ID: ${campaign.spreadsheet_id}. Melewati.`);
+         continue;
+       }
+ 
+-      // Read rows from sheet
+       const response = await sheets.spreadsheets.values.get({
+         spreadsheetId: campaign.spreadsheet_id,
+         range: `'${sheetName}'!A1:Z1000`
+       });
+ 
+       const rows = response.data.values;
+-      if (!rows || rows.length <= 1) {
+-        logToAutopilot(`Tab "${sheetName}" kosong atau hanya memiliki header. Melewati.`);
+-        continue;
+-      }
++      if (!rows || rows.length <= 1) continue;
+ 
+       const headers = rows[0].map(h => h.trim().toLowerCase());
+-      
+-      // Dynamic Column Mapping Helper
+-      const getHeaderIndex = (aliases) => {
+-        for (const alias of aliases) {
+-          const idx = headers.indexOf(alias.toLowerCase().trim());
+-          if (idx !== -1) return idx;
+-        }
+-        return -1;
+-      };
+-
+-      const reviewStatusIdx = getHeaderIndex(['review_status', 'review status']);
+-      if (reviewStatusIdx === -1) {
+-        logToAutopilot(`[PERINGATAN] Kolom "review_status" tidak ditemukan di tab "${sheetName}". Melewati kampanye.`);
+-        continue;
+-      }
++      const reviewStatusIdx = headers.indexOf('review_status') !== -1 ? headers.indexOf('review_status') : headers.indexOf('review status');
++      if (reviewStatusIdx === -1) continue;
+ 
+-      // Ensure outputs exist, append if missing
+       const requiredOutputs = ['batch_id', 'pipeline_status', 'markdown_url', 'asset_url', 'processed_at'];
+       for (const req of requiredOutputs) {
+-        const idx = headers.indexOf(req);
+-        if (idx === -1) {
++        if (headers.indexOf(req) === -1) {
+           const nextColIndex = headers.length;
+           const colLetter = getColumnLetter(nextColIndex);
+           await sheets.spreadsheets.values.update({
+@@ -204,36 +237,17 @@ export async function runSyncWorker() {
+             requestBody: { values: [[req]] }
+           });
+           headers.push(req);
+-          logToAutopilot(`Menambahkan kolom output baru "${req}" pada posisi ${colLetter}1`);
+         }
+       }
+ 
+-      // Read mapped columns
+-      const urlSourceIdx = getHeaderIndex(['url_source', 'url source', 'source url', 'source_url']);
+-      const namaProdukIdx = getHeaderIndex(['nama produk', 'nama_produk', 'product name', 'product_name']);
+-      const linkAffIdx = getHeaderIndex(['link aff', 'link_aff', 'link affiliate', 'affiliate link', 'linkaff']);
+-      const linkProductIdx = getHeaderIndex(['link product', 'link_product', 'link produk', 'url produk']);
+-      const linkPostFbIdx = getHeaderIndex(['link post fb', 'link_post_fb', 'link post facebook']);
+-      const videoIdx = getHeaderIndex(['video']);
+-      const publishIdx = getHeaderIndex(['publish']);
+-
+-      // OPC specific
+-      const pilarContentIdx = getHeaderIndex(['pilar_content', 'pilar content', 'topik', 'topic']);
+-      const hookIdx = getHeaderIndex(['hook']);
+-      const visualActionIdx = getHeaderIndex(['visual_action', 'visual action']);
+-
+-      // IFC specific
+-      const uspIdx = getHeaderIndex(['usp', 'unique selling point', 'unique_selling_point']);
+-      const tautanGambarIdx = getHeaderIndex(['tautan_gambar_produk', 'tautan gambar produk', 'tautan gambar', 'product image url', 'product_image_url']);
+-      const hookCustomIdx = getHeaderIndex(['hook_visual_action_custom_instruction', 'hook visual action custom instruction', 'custom instruction']);
+-
+-      // Scan rows for processing
++      const urlSourceIdx = headers.indexOf('url_source') !== -1 ? headers.indexOf('url_source') : headers.indexOf('url source') !== -1 ? headers.indexOf('url source') : headers.indexOf('source url') !== -1 ? headers.indexOf('source url') : headers.indexOf('source_url');
++      const pilarContentIdx = headers.indexOf('pilar_content') !== -1 ? headers.indexOf('pilar_content') : headers.indexOf('pilar content') !== -1 ? headers.indexOf('pilar content') : headers.indexOf('topik') !== -1 ? headers.indexOf('topik') : headers.indexOf('topic');
++      const namaProdukIdx = headers.indexOf('nama produk') !== -1 ? headers.indexOf('nama produk') : headers.indexOf('nama_produk') !== -1 ? headers.indexOf('nama_produk') : headers.indexOf('product name') !== -1 ? headers.indexOf('product name') : headers.indexOf('product_name');
++
+       for (let i = 1; i < rows.length; i++) {
+         const row = rows[i];
+         const getVal = (idx) => {
+-          if (idx !== -1 && row[idx] !== undefined) {
+-            return row[idx].trim();
+-          }
++          if (idx !== -1 && row[idx] !== undefined) return row[idx].trim();
+           return '';
+         };
+ 
+@@ -241,7 +255,7 @@ export async function runSyncWorker() {
+         const pipelineStatus = getVal(headers.indexOf('pipeline_status'));
+ 
+         if (reviewStatus === 'Approved' && pipelineStatus !== 'Completed' && pipelineStatus !== 'Processing') {
+-          // Check if there is a previous failed job for this row (V10.5 Auto-Retry System)
++          // Check if retry count exceeded
+           const previousJobs = getSheetsJobs(campaign.id)
+             .filter(j => j.row_index === i + 1)
+             .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+@@ -251,19 +265,17 @@ export async function runSyncWorker() {
+           if (latestJob) {
+             currentRetryCount = latestJob.retry_count || 0;
+             if (latestJob.status === 'failed' && currentRetryCount >= 3) {
+-              logToAutopilot(`[LEWATI] Baris ${i + 1} sudah gagal 3 kali secara berturut-turut. Melewati untuk mencegah pemborosan kuota API.`);
++              logToAutopilot(`[LEWATI] Baris ${i + 1} sudah gagal 3 kali. Melewati.`);
+               continue;
+             }
+           }
+ 
+-          // Found row to process!
++          // Found a row to start!
+           const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+           const batchId = `${campaign.campaign_type}_${dateStr}_${String(i + 1).padStart(3, '0')}`;
+           
+           if (latestJob && latestJob.status === 'failed') {
+             logToAutopilot(`\n🔄 [Auto-Retry] Mencoba kembali baris ${i + 1} dengan Batch ID: ${batchId} (Percobaan #${currentRetryCount + 1}/3)...`);
+-          } else {
+-            logToAutopilot(`\n>> Memproses baris ${i + 1} dengan Batch ID: ${batchId}`);
+           }
+ 
+           const urlOrTopic = campaign.campaign_type === 'RE'
+@@ -272,7 +284,7 @@ export async function runSyncWorker() {
+ 
+           const jobId = `job_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+ 
+-          // 1. Create Job in SQLite
++          // Create Job in SQLite
+           createSheetsJob({
+             id: jobId,
+             campaign_id: campaign.id,
+@@ -287,26 +299,161 @@ export async function runSyncWorker() {
+           await updateCell(sheets, campaign.spreadsheet_id, sheetName, headers.indexOf('batch_id'), i + 1, batchId);
+           await updateCell(sheets, campaign.spreadsheet_id, sheetName, headers.indexOf('pipeline_status'), i + 1, 'Processing');
+ 
+-          try {
+-            let storyboardRows = [];
+-            // 2. JIT Product Sourcing
+-            let product = null;
+-            const productUrl = getVal(linkProductIdx);
+-            
+-            if (campaign.is_bridging_active === 1 && productUrl && productUrl.startsWith('http')) {
+-              logToAutopilot(`Product Bridging aktif. Mencari URL produk di database: ${productUrl}`);
+-              const db = getDb();
+-              product = db.prepare('SELECT * FROM product_extractions WHERE input_source = ? OR source_url = ?').get(productUrl, productUrl);
+-              
+-              if (product) {
+-                logToAutopilot(`Aset produk ditemukan di database: "${product.product_name}".`);
+-              } else {
+-                logToAutopilot(`Aset produk tidak ditemukan. Memulai Playwright scraping JIT untuk URL: ${productUrl}`);
+-                const scrapeResult = await scrapeUrl(productUrl);
+-                logToAutopilot('Scraping HTML berhasil. Mengekstrak metadata menggunakan Gemini...');
+-
+-                const extractedData = await executeWithKeyPool(1, async (apiKey) => {
+-                  const prompt = `Lakukan ekstraksi terstruktur detail produk dari konten halaman toko berikut ke dalam JSON.
++          // Fetch the created job to pass to processActiveJob
++          const newJob = db.prepare('SELECT * FROM sheets_jobs WHERE id = ?').get(jobId);
++          const mergedJob = {
++            ...newJob,
++            campaign_name: campaign.campaign_name,
++            campaign_type: campaign.campaign_type,
++            spreadsheet_id: campaign.spreadsheet_id,
++            gdrive_folder_id: campaign.gdrive_folder_id,
++            video_model: campaign.video_model,
++            aspect_ratio: campaign.aspect_ratio,
++            enable_tts: campaign.enable_tts,
++            enable_glabs: campaign.enable_glabs,
++            enable_ffmpeg: campaign.enable_ffmpeg,
++            voice_provider: campaign.voice_provider,
++            voice_persona: campaign.voice_persona,
++            voice_speed: campaign.voice_speed,
++            voice_volume: campaign.voice_volume,
++            ffmpeg_sync_option: campaign.ffmpeg_sync_option,
++            ffmpeg_video_scale: campaign.ffmpeg_video_scale,
++            ffmpeg_sfx_volume: campaign.ffmpeg_sfx_volume,
++            ffmpeg_bgm_volume: campaign.ffmpeg_bgm_volume,
++            tts_model_quality: campaign.tts_model_quality,
++            target_language: campaign.target_language
++          };
++
++          // Dispatch the tasks!
++          await processActiveJob(mergedJob);
++          
++          logToAutopilot('Selesai memulai pengerjaan baris baru. Tick scheduler berikutnya akan memproses status.');
++          logToAutopilot('=== MESIN AUTOPILOT SINKRONISASI SELESAI ===');
++          return;
++        }
++      }
++    } catch (campaignErr) {
++      logToAutopilot(`[ERROR] Terjadi kesalahan fatal pada kampanye ${campaign.campaign_name}: ${campaignErr.message}`);
++    }
++  }
++
++  logToAutopilot('=== MESIN AUTOPILOT SINKRONISASI SELESAI ===');
++}
++
++async function processActiveJob(job) {
++  const db = getDb();
++  const auth = getAuthorizedClient();
++  const sheets = google.sheets({ version: 'v4', auth });
++  const drive = google.drive({ version: 'v3', auth });
++
++  const sheetName = job.campaign_type === 'RE' ? 'CAMPAIGN_RE' : (job.campaign_type === 'OPC' ? 'CAMPAIGN_OPC' : 'CAMPAIGN_IFC');
++  const meta = await sheets.spreadsheets.get({ spreadsheetId: job.spreadsheet_id });
++  const rowsRes = await sheets.spreadsheets.values.get({
++    spreadsheetId: job.spreadsheet_id,
++    range: `'${sheetName}'!A1:Z1000`
++  });
++  const rows = rowsRes.data.values;
++  if (!rows) throw new Error('Spreadsheet data is empty');
++  const headers = rows[0].map(h => h.trim().toLowerCase());
++
++  if (job.visual_status === 'pending') {
++    await dispatchVisualTasks(job, sheets, headers, sheetName);
++    return;
++  }
++
++  if (job.visual_status === 'processing') {
++    await pollVisualTasks(job, sheets, headers, sheetName);
++    return;
++  }
++
++  if (job.visual_status === 'completed' && job.ffmpeg_status === 'pending') {
++    await runFFmpegStage(job, sheets, headers, sheetName);
++    return;
++  }
++
++  if (job.ffmpeg_status === 'completed' && job.status === 'processing') {
++    await runUploadStage(job, sheets, headers, sheetName, drive);
++    return;
++  }
++}
++
++async function dispatchVisualTasks(job, sheets, headers, sheetName) {
++  const db = getDb();
++  const campaign = getSheetsCampaign(job.campaign_id);
++  if (!campaign) throw new Error(`Campaign ${job.campaign_id} not found`);
++
++  const batchId = job.batch_id;
++  const jobId = job.id;
++  const urlOrTopic = job.url_or_topic;
++
++  const sheetNameForValues = campaign.campaign_type === 'RE' ? 'CAMPAIGN_RE' : (campaign.campaign_type === 'OPC' ? 'CAMPAIGN_OPC' : 'CAMPAIGN_IFC');
++  const rowsRes = await sheets.spreadsheets.values.get({
++    spreadsheetId: campaign.spreadsheet_id,
++    range: `'${sheetNameForValues}'!A1:Z1000`
++  });
++  const rows = rowsRes.data.values;
++  if (!rows || rows.length <= job.row_index - 1) {
++    throw new Error('Spreadsheet data row not found');
++  }
++  const row = rows[job.row_index - 1];
++
++  const getVal = (idx) => {
++    if (idx !== -1 && row[idx] !== undefined) return row[idx].trim();
++    return '';
++  };
++
++  const getHeaderIndex = (aliases) => {
++    for (const alias of aliases) {
++      const idx = headers.indexOf(alias.toLowerCase().trim());
++      if (idx !== -1) return idx;
++    }
++    return -1;
++  };
++
++  const linkProductIdx = getHeaderIndex(['link product', 'link_product', 'link produk', 'url produk']);
++  const linkAffIdx = getHeaderIndex(['link aff', 'link_aff', 'link affiliate', 'affiliate link', 'linkaff']);
++  const pilarContentIdx = getHeaderIndex(['pilar_content', 'pilar content', 'topik', 'topic']);
++  const hookIdx = getHeaderIndex(['hook']);
++  const visualActionIdx = getHeaderIndex(['visual_action', 'visual action']);
++  const namaProdukIdx = getHeaderIndex(['nama produk', 'nama_produk', 'product name', 'product_name']);
++  const tautanGambarIdx = getHeaderIndex(['tautan_gambar_produk', 'tautan gambar produk', 'tautan gambar', 'product image url', 'product_image_url']);
++  const hookCustomIdx = getHeaderIndex(['hook_visual_action_custom_instruction', 'hook visual action custom instruction', 'custom instruction']);
++  const uspIdx = getHeaderIndex(['usp', 'unique selling point', 'unique_selling_point']);
++
++  let downloadedVideo = null;
++  try {
++    let storyboardRows = [];
++
++    // 1. Download referential video if it exists (RE campaign)
++    if (campaign.campaign_type === 'RE') {
++      if (urlOrTopic && urlOrTopic.startsWith('http')) {
++        logToAutopilot(`Mengunduh video referensi: ${urlOrTopic}`);
++        try {
++          downloadedVideo = await downloadFromUrl(urlOrTopic);
++          logToAutopilot(`Unduh video referensi berhasil: ${downloadedVideo.filePath}`);
++        } catch (dlErr) {
++          logToAutopilot(`[PERINGATAN] Gagal mengunduh video referensi (${dlErr.message}). Proses dilanjutkan tanpa video.`);
++        }
++      }
++    }
++
++    // 2. JIT Product Sourcing
++    let product = null;
++    const productUrl = getVal(linkProductIdx);
++    
++    if (campaign.is_bridging_active === 1 && productUrl && productUrl.startsWith('http')) {
++      logToAutopilot(`Product Bridging aktif. Mencari URL produk di database: ${productUrl}`);
++      product = db.prepare('SELECT * FROM product_extractions WHERE input_source = ? OR source_url = ?').get(productUrl, productUrl);
++      
++      if (product) {
++        logToAutopilot(`Aset produk ditemukan di database: "${product.product_name}".`);
++      } else {
++        logToAutopilot(`Aset produk tidak ditemukan. Memulai Playwright scraping JIT untuk URL: ${productUrl}`);
++        const scrapeResult = await scrapeUrl(productUrl);
++        logToAutopilot('Scraping HTML berhasil. Mengekstrak metadata menggunakan Gemini...');
++
++        const extractedData = await executeWithKeyPool(1, async (apiKey) => {
++          const prompt = `Lakukan ekstraksi terstruktur detail produk dari konten halaman toko berikut ke dalam JSON.
+ Halaman Konten:
+ ${scrapeResult.fullText}
+ 
+@@ -320,151 +467,217 @@ Hasilkan JSON dengan struktur:
+   "pain_point_solved": "Masalah utama yang diselesaikan produk"
+ }`;
+ 
+-                  const genAI = new GoogleGenerativeAI(apiKey);
+-                  const model = genAI.getGenerativeModel({
+-                    model: 'gemini-2.5-flash',
+-                    generationConfig: { temperature: 0.2, responseMimeType: 'application/json' }
+-                  });
+-                  const result = await model.generateContent(prompt);
+-                  return parseGeminiJSON(result.response.text());
+-                });
+-
+-                if (!extractedData.product_name) {
+-                  throw new Error('Gemini gagal mengekstrak nama produk.');
+-                }
+-
+-                logToAutopilot(`Metadata produk berhasil diekstrak: "${extractedData.product_name}"`);
+-
+-                let localImagePath = null;
+-                if (extractedData.scraped_image_url && extractedData.scraped_image_url.startsWith('http')) {
+-                  const safeFilename = `autopilot_jit_${Date.now()}.png`;
+-                  localImagePath = `/uploads/products/${safeFilename}`;
+-                  const absoluteLocalPath = path.join(process.cwd(), 'public', 'uploads', 'products', safeFilename);
+-                  
+-                  const uploadsDir = path.dirname(absoluteLocalPath);
+-                  if (!fs.existsSync(uploadsDir)) {
+-                    fs.mkdirSync(uploadsDir, { recursive: true });
+-                  }
+-                  
+-                  logToAutopilot(`Mengunduh gambar produk dari ${extractedData.scraped_image_url}...`);
+-                  await downloadECommerceImage(extractedData.scraped_image_url, absoluteLocalPath);
+-                  logToAutopilot(`Gambar berhasil disimpan secara fisik ke ${localImagePath}`);
+-                }
+-
+-                // Save to product_extractions table
+-                const dbProductData = {
+-                  id: `pe_jit_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+-                  input_source: productUrl,
+-                  is_url: 1,
+-                  product_name: extractedData.product_name,
+-                  product_description: extractedData.product_description || '',
+-                  unique_selling_point: extractedData.unique_selling_point || '',
+-                  target_audience: extractedData.target_audience || '',
+-                  pain_point_solved: extractedData.pain_point_solved || '',
+-                  key_visuals_extracted: JSON.stringify(extractedData.key_visuals_extracted || []),
+-                  raw_response: JSON.stringify(extractedData),
+-                  category: 'Autopilot JIT Sourcing',
+-                  tags: 'autopilot, JIT',
+-                  photo_url: localImagePath,
+-                  source_url: productUrl,
+-                  affiliate_link: getVal(linkAffIdx) || '',
+-                  raw_description: extractedData.product_description || ''
+-                };
+-                
+-                const { createProductExtraction } = await import('./db');
+-                createProductExtraction(dbProductData);
+-                product = dbProductData;
+-                logToAutopilot('Aset produk baru berhasil disimpan ke database SQLite.');
+-              }
+-            }
++          const genAI = new GoogleGenerativeAI(apiKey);
++          const model = genAI.getGenerativeModel({
++            model: 'gemini-2.5-flash',
++            generationConfig: { temperature: 0.2, responseMimeType: 'application/json' }
++          });
++          const result = await model.generateContent(prompt);
++          return parseGeminiJSON(result.response.text());
++        });
+ 
+-            // Standardize product details if IFC campaign
+-            if (campaign.campaign_type === 'IFC') {
+-              const directImgUrl = getVal(tautanGambarIdx);
+-              let localImagePath = null;
+-              if (directImgUrl && directImgUrl.startsWith('http')) {
+-                const safeFilename = `autopilot_ifc_${Date.now()}.png`;
+-                localImagePath = `/uploads/products/${safeFilename}`;
+-                const absoluteLocalPath = path.join(process.cwd(), 'public', 'uploads', 'products', safeFilename);
+-                const uploadsDir = path.dirname(absoluteLocalPath);
+-                if (!fs.existsSync(uploadsDir)) {
+-                  fs.mkdirSync(uploadsDir, { recursive: true });
+-                }
+-                logToAutopilot(`Mengunduh gambar produk IFC dari ${directImgUrl}...`);
+-                await downloadECommerceImage(directImgUrl, absoluteLocalPath);
+-                logToAutopilot(`Gambar produk IFC berhasil diunduh ke ${localImagePath}`);
+-              }
++        if (!extractedData.product_name) {
++          throw new Error('Gemini gagal mengekstrak nama produk.');
++        }
+ 
+-              product = {
+-                product_name: getVal(namaProdukIdx),
+-                product_description: getVal(namaProdukIdx),
+-                unique_selling_point: getVal(uspIdx),
+-                photo_url: localImagePath || directImgUrl
+-              };
+-            }
++        logToAutopilot(`Metadata produk berhasil diekstrak: "${extractedData.product_name}"`);
+ 
+-            // 3. Script / Storyboard Generation
+-            logToAutopilot('Memulai generasi naskah storyboard via Gemini...');
+-            let brandProfile = null;
+-            if (campaign.brand_profile_id) {
+-              const { getBrandProfile } = await import('./db');
+-              brandProfile = getBrandProfile(campaign.brand_profile_id);
+-            }
++        let localImagePath = null;
++        if (extractedData.scraped_image_url && extractedData.scraped_image_url.startsWith('http')) {
++          const safeFilename = `autopilot_jit_${Date.now()}.png`;
++          localImagePath = `/uploads/products/${safeFilename}`;
++          const absoluteLocalPath = path.join(process.cwd(), 'public', 'uploads', 'products', safeFilename);
++          
++          const uploadsDir = path.dirname(absoluteLocalPath);
++          if (!fs.existsSync(uploadsDir)) {
++            fs.mkdirSync(uploadsDir, { recursive: true });
++          }
++          
++          logToAutopilot(`Mengunduh gambar produk dari ${extractedData.scraped_image_url}...`);
++          await downloadECommerceImage(extractedData.scraped_image_url, absoluteLocalPath);
++          logToAutopilot(`Gambar berhasil disimpan secara fisik ke ${localImagePath}`);
++        }
+ 
+-            const { getAllKnowledgeBasesWithContent } = await import('./db');
+-            const kbs = getAllKnowledgeBasesWithContent();
+-
+-            let storyboardResult = null;
+-            const isBridgingActive = Number(campaign.is_bridging_active) === 1;
+-            const effectiveVisualMode = isBridgingActive ? (campaign.visual_mode || 'hybrid_lock') : 'pure_t2v';
+-            const effectiveProduct = isBridgingActive ? (product || {}) : {};
+-
+-            if (campaign.campaign_type === 'RE') {
+-              const config = {
+-                ...campaign,
+-                visual_mode: effectiveVisualMode,
+-                brand_profile: brandProfile,
+-                product_data: effectiveProduct,
+-                visual_overrides: campaign.visual_overrides_json ? JSON.parse(campaign.visual_overrides_json) : null
+-              };
+-
+-              const prompt = buildReverseEngineeringBridgePrompt(kbs, config);
+-              const rawResponse = await executeWithKeyPool(1, async (apiKey) => {
+-                const genAI = new GoogleGenerativeAI(apiKey);
+-                const model = genAI.getGenerativeModel({
+-                  model: 'gemini-2.5-flash',
+-                  generationConfig: { temperature: 0.85, responseMimeType: 'application/json' }
+-                });
+-                const result = await model.generateContent([{ text: prompt }]);
+-                return result.response.text();
+-              });
++        const dbProductData = {
++          id: `pe_jit_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
++          input_source: productUrl,
++          is_url: 1,
++          product_name: extractedData.product_name,
++          product_description: extractedData.product_description || '',
++          unique_selling_point: extractedData.unique_selling_point || '',
++          target_audience: extractedData.target_audience || '',
++          pain_point_solved: extractedData.pain_point_solved || '',
++          key_visuals_extracted: JSON.stringify(extractedData.key_visuals_extracted || []),
++          raw_response: JSON.stringify(extractedData),
++          category: 'Autopilot JIT Sourcing',
++          tags: 'autopilot, JIT',
++          photo_url: localImagePath,
++          source_url: productUrl,
++          affiliate_link: getVal(linkAffIdx) || '',
++          raw_description: extractedData.product_description || ''
++        };
++        
++        const { createProductExtraction } = await import('./db');
++        createProductExtraction(dbProductData);
++        product = dbProductData;
++        logToAutopilot('Aset produk baru berhasil disimpan ke database SQLite.');
++      }
++    }
+ 
+-              storyboardResult = parseGeminiJSON(rawResponse);
+-            } else if (campaign.campaign_type === 'OPC') {
+-              const campaignData = {
+-                ...campaign,
+-                visual_mode: effectiveVisualMode,
+-                content_pillar: getVal(pilarContentIdx),
+-                custom_hook: getVal(hookIdx),
+-                visual_action_guideline: getVal(visualActionIdx)
+-              };
+-              const vsoData = campaign.visual_overrides_json ? JSON.parse(campaign.visual_overrides_json) : null;
+-              const prompt = buildOrganicPillarPrompt(kbs, campaignData, effectiveProduct, brandProfile, vsoData);
+-
+-              const rawResponse = await executeWithKeyPool(1, async (apiKey) => {
+-                const genAI = new GoogleGenerativeAI(apiKey);
+-                const model = genAI.getGenerativeModel({
+-                  model: 'gemini-2.5-flash',
+-                  generationConfig: { temperature: 0.85, responseMimeType: 'application/json' }
+-                });
+-                const result = await model.generateContent([{ text: prompt }]);
+-                return result.response.text();
+-              });
++    if (campaign.campaign_type === 'IFC') {
++      const directImgUrl = getVal(tautanGambarIdx);
++      let localImagePath = null;
++      if (directImgUrl && directImgUrl.startsWith('http')) {
++        const safeFilename = `autopilot_ifc_${Date.now()}.png`;
++        localImagePath = `/uploads/products/${safeFilename}`;
++        const absoluteLocalPath = path.join(process.cwd(), 'public', 'uploads', 'products', safeFilename);
++        const uploadsDir = path.dirname(absoluteLocalPath);
++        if (!fs.existsSync(uploadsDir)) {
++          fs.mkdirSync(uploadsDir, { recursive: true });
++        }
++        logToAutopilot(`Mengunduh gambar produk IFC dari ${directImgUrl}...`);
++        await downloadECommerceImage(directImgUrl, absoluteLocalPath);
++        logToAutopilot(`Gambar produk IFC berhasil diunduh ke ${localImagePath}`);
++      }
++
++      product = {
++        product_name: getVal(namaProdukIdx),
++        product_description: getVal(namaProdukIdx),
++        unique_selling_point: getVal(uspIdx),
++        photo_url: localImagePath || directImgUrl
++      };
++    }
++
++    logToAutopilot('Memulai generasi naskah storyboard via Gemini...');
++    let brandProfile = null;
++    if (campaign.brand_profile_id) {
++      const { getBrandProfile } = await import('./db');
++      brandProfile = getBrandProfile(campaign.brand_profile_id);
++    }
++
++    const { getAllKnowledgeBasesWithContent } = await import('./db');
++    const kbs = getAllKnowledgeBasesWithContent();
++
++    let storyboardResult = null;
++    const isBridgingActive = Number(campaign.is_bridging_active) === 1;
++    const isProductActive = (campaign.campaign_type === 'IFC') || isBridgingActive;
++    const effectiveVisualMode = isProductActive ? (campaign.visual_mode || 'hybrid_lock') : 'pure_t2v';
++    const effectiveProduct = isProductActive ? (product || {}) : {};
++
++    if (campaign.campaign_type === 'RE') {
++      let prompt;
++      if (isBridgingActive) {
++        const config = {
++          ...campaign,
++          visual_mode: effectiveVisualMode,
++          brand_profile: brandProfile,
++          product_data: effectiveProduct,
++          visual_overrides: campaign.visual_overrides_json ? JSON.parse(campaign.visual_overrides_json) : null
++        };
++        prompt = buildReverseEngineeringBridgePrompt(kbs, config);
++      } else {
++        const config = {
++          aspect_ratio: campaign.aspect_ratio || '9:16',
++          target_ai: campaign.target_ai || 'Google Veo (8s)',
++          custom_instruction: campaign.custom_instruction || '',
++          prompt_output_format: 'plain_text',
++          brand_profile: brandProfile,
++          words_per_clip: campaign.words_per_clip || '17-19 kata',
++          face_visibility: campaign.face_visibility || 'Faceless',
++          visual_overrides: campaign.visual_overrides_json ? JSON.parse(campaign.visual_overrides_json) : null,
++          target_clips_count: campaign.target_clips_count || 5,
++          target_language: campaign.target_language || 'id-ID',
++          tts_model_quality: campaign.tts_model_quality || 'speech-2.8-turbo'
++        };
++        prompt = buildReverseEngineeringPrompt(kbs, config);
++      }
+ 
+-              storyboardResult = parseGeminiJSON(rawResponse);
+-            } else if (campaign.campaign_type === 'IFC') {
+-              // Custom Instant Factory Campaign prompt directly
+-              const prompt = `Tugas Anda adalah merancang naskah iklan Instant Factory Campaign (IFC) sebanyak tepat ${campaign.target_clips_count || 4} klip.
++      const rawResponse = await executeWithKeyPool(1, async (apiKey) => {
++        let videoPayload = null;
++        if (downloadedVideo) {
++          logToAutopilot('Mengunggah video referensi ke Gemini API...');
++          try {
++            const upload = await uploadVideoToGemini(downloadedVideo.filePath, downloadedVideo.mimeType, apiKey);
++            videoPayload = {
++              fileUri: upload.fileUri,
++              mimeType: upload.mimeType
++            };
++            logToAutopilot('Video referensi berhasil diunggah ke Gemini server.');
++          } catch (uploadErr) {
++            logToAutopilot(`[PERINGATAN] Gagal mengunduh video ke Gemini (${uploadErr.message}). Menganalisis sebagai teks saja.`);
++          }
++        }
++
++        return await generateContentFlexible({
++          prompt,
++          videoPayload,
++          apiKey
++        });
++      });
++
++      if (downloadedVideo) {
++        cleanupTempFile(downloadedVideo.filePath);
++        downloadedVideo = null;
++      }
++
++      storyboardResult = parseGeminiJSON(rawResponse);
++    } else if (campaign.campaign_type === 'OPC') {
++      const campaignData = {
++        ...campaign,
++        is_bridging_active: isBridgingActive ? 1 : 0,
++        visual_mode: effectiveVisualMode,
++        content_pillar: getVal(pilarContentIdx),
++        custom_hook: getVal(hookIdx),
++        visual_action_guideline: getVal(visualActionIdx)
++      };
++      const vsoData = campaign.visual_overrides_json ? JSON.parse(campaign.visual_overrides_json) : null;
++      const prompt = buildOrganicPillarPrompt(kbs, campaignData, effectiveProduct, brandProfile, vsoData);
++
++      const rawResponse = await executeWithKeyPool(1, async (apiKey) => {
++        const genAI = new GoogleGenerativeAI(apiKey);
++        const model = genAI.getGenerativeModel({
++          model: 'gemini-2.5-flash',
++          generationConfig: { temperature: 0.85, responseMimeType: 'application/json' }
++        });
++        const result = await model.generateContent([{ text: prompt }]);
++        return result.response.text();
++      });
++
++      storyboardResult = parseGeminiJSON(rawResponse);
++    } else if (campaign.campaign_type === 'IFC') {
++      let vsoSection = '';
++      const vsoData = campaign.visual_overrides_json ? JSON.parse(campaign.visual_overrides_json) : null;
++      if (vsoData) {
++        const targetConcept = vsoData.character_concept || "faceless";
++        const targetCharacter = vsoData.subject_demographic === "custom"
++          ? vsoData.subject_demographic_custom
++          : (DEMOGRAPHIC_PRESETS[vsoData.subject_demographic] || "a graceful Muslimah");
++        const targetWardrobe = vsoData.wardrobe_style === "custom"
++          ? vsoData.wardrobe_style_custom
++          : (WARDROBE_PRESETS[vsoData.wardrobe_style] || "modest clothing");
++        const targetLighting = vsoData.lighting_style === "custom"
++          ? vsoData.lighting_style_custom
++          : (LIGHTING_PRESETS[vsoData.lighting_style] || "soft natural light");
++
++        vsoSection = `
++========================================================================
++🚨 VISUAL SWAP OVERRIDES (VSO PRESET) MANDATE
++========================================================================
++Anda WAJIB menyesuaikan seluruh detail estetika visual video dengan spesifikasi visual di bawah ini di seluruh klip storyboard maupun prompt visual T2V/T2I/I2V:
++1. Konsep Karakter  : ${targetConcept} (Wajib patuhi Mandate 67: Potong frame tepat di bawah dagu/rahang, wajah tidak boleh terlihat sama sekali!)
++2. Demografi Subjek : ${targetCharacter}
++3. Warna Hijab (Wardrobe): ${targetWardrobe}
++4. Pencahayaan/Light: ${targetLighting}
++
++Terapkan aturan visibilitas wajah dan konsep karakter secara konsisten di deskripsi visual storyboard maupun prompt T2V/T2I (tulis dalam Bahasa Inggris).
++========================================================================
++`;
++      }
++
++      const targetLanguage = campaign.target_language || 'id-ID';
++      const languageLabel = targetLanguage === 'en-US' ? 'English (US)' : 'Bahasa Indonesia';
++
++      const prompt = `Tugas Anda adalah merancang naskah iklan Instant Factory Campaign (IFC) sebanyak tepat ${campaign.target_clips_count || 4} klip.
+ Produk:
+ - Nama: ${effectiveProduct?.product_name || ''}
+ - Deskripsi: ${effectiveProduct?.product_description || ''}
+@@ -475,9 +688,33 @@ Konfigurasi:
+ - Visual Mode: ${effectiveVisualMode}
+ - Aspect Ratio: ${campaign.aspect_ratio || '9:16'}
+ - Batas kata per klip: ${campaign.words_per_clip || '17-19 kata'}
+-- Visibilitas wajah: ${campaign.face_visibility || 'Faceless'}
++- Visibilitas wajah: ${vsoData ? 'Faceless' : (campaign.face_visibility || 'Faceless')}
+ - Custom Instructions: ${campaign.custom_instruction || getVal(hookCustomIdx) || ''}
+ 
++${brandProfile ? `========================================================================
++🚨 BRAND IDENTITY TRANSFORMATION MANDATE
++========================================================================
++Anda WAJIB menyelaraskan naskah dan estetika dengan identitas brand berikut:
++- Nama Brand: ${brandProfile.brand_name}
++- Tone of Voice: ${brandProfile.tone_of_voice}
++- Gaya Estetika Visual: ${brandProfile.visual_signature}
++- Palet Warna Kamera: ${brandProfile.color_palette}
++- Elemen Terlarang: ${brandProfile.forbidden_elements}
++- Slogan Kampanye/CTA Penutup: ${brandProfile.brand_slogan_or_cta}
++
++Aturan Adaptasi Brand:
++1. Naskah WAJIB bergaya "${brandProfile.tone_of_voice}".
++2. Deskripsi visual & Prompt T2V/T2I wajib diselaraskan dengan visual signature "${brandProfile.visual_signature}".
++3. Akhiri adegan/narasi terakhir dengan slogan brand: "${brandProfile.brand_slogan_or_cta}".
++========================================================================` : ''}
++
++${vsoSection}
++
++---
++## ATURAN BAHASA (LANGUAGE MANDATE)
++Naskah voiceover ("narration") dan metadata media sosial (captions, title, description) WAJIB ditulis sepenuhnya dalam bahasa: **${languageLabel}**.
++Semua prompt visual (t2v_prompts, i2v_prompts, dan t2i_prompts) tetap WAJIB ditulis dalam Bahasa Inggris.
++
+ Output harus berupa JSON valid sesuai skema:
+ {
+   "analysis_summary": {
+@@ -497,363 +734,62 @@ Output harus berupa JSON valid sesuai skema:
+   "voiceover": [
+     {
+       "scene": 1,
+-      "narration": "Naskah voiceover dalam Bahasa Indonesia"
++      "narration": "Naskah voiceover dalam ${languageLabel}"
+     }
+   ],
+   "t2v_prompts": [
+     {
+       "clip": 1,
+-      "prompt": "T2V prompt dalam Bahasa Inggris lengkap --ar 9:16"
++      "prompt": "T2V prompt dalam Bahasa Inggris lengkap --ar ${campaign.aspect_ratio || '9:16'}"
+     }
+   ],
+   "t2i_prompts": [
+     {
+       "clip": 1,
+-      "prompt": "T2I start frame prompt dalam Bahasa Inggris lengkap --ar 9:16"
++      "prompt": "T2I start frame prompt dalam Bahasa Inggris lengkap --ar ${campaign.aspect_ratio || '9:16'}"
+     }
+   ],
+   "i2v_prompts": [
+     {
+       "clip": 1,
+-      "prompt": "I2V motion prompt dalam Bahasa Inggris lengkap --ar 9:16"
++      "prompt": "I2V motion prompt dalam Bahasa Inggris lengkap --ar ${campaign.aspect_ratio || '9:16'}"
+     }
+-  ]
++  ],
++  "tiktok_caption": "Caption TikTok. In ${languageLabel}.",
++  "ig_caption": "Caption Instagram. In ${languageLabel}.",
++  "yt_title": "Judul YouTube Shorts. In ${languageLabel}.",
++  "yt_desc": "Deskripsi YouTube Shorts. In ${languageLabel}."
+ }`;
+ 
+-              const rawResponse = await executeWithKeyPool(1, async (apiKey) => {
+-                const genAI = new GoogleGenerativeAI(apiKey);
+-                const model = genAI.getGenerativeModel({
+-                  model: 'gemini-2.5-flash',
+-                  generationConfig: { temperature: 0.85, responseMimeType: 'application/json' }
+-                });
+-                const result = await model.generateContent([{ text: prompt }]);
+-                return result.response.text();
+-              });
+-
+-              storyboardResult = parseGeminiJSON(rawResponse);
+-            }
+-
+-            logToAutopilot('Generasi naskah storyboard berhasil.');
+-            updateSheetsJobStatus(jobId, {
+-              storyboard: JSON.stringify(storyboardResult.storyboard || []),
+-              voiceover: JSON.stringify(storyboardResult.voiceover || [])
+-            });
+-
+-            // Extract storyboard scenes
+-            const storyboard = storyboardResult.storyboard || storyboardResult.production_storyboard || [];
+-            storyboardRows = storyboard.map((s, idx) => {
+-              const sceneNum = s.scene || s.scene_number || (idx + 1);
+-              const sceneId = `${batchId}_S${String(sceneNum).padStart(2, '0')}`;
+-              
+-              const visualDesc = s.visual_description || (s.visual_segment?.visual_action) || '';
+-              const cameraMov = s.camera_movement || (s.visual_segment?.camera_movement) || '';
+-              const sfxMood = s.audio_mood || (s.audio_segment?.audio_mood) || '';
+-              
+-              return [
+-                batchId,
+-                sceneId,
+-                sceneNum,
+-                s.duration || '8s',
+-                visualDesc,
+-                cameraMov,
+-                sfxMood
+-              ];
+-            });
+-
+-            // Local directories preparation
+-            const tempDir = path.join(process.cwd(), 'public', 'temp');
+-            if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+-
+-            // 4. TTS (Voiceover Rendering)
+-            let finalAudioPath = null;
+-            if (campaign.enable_tts === 1) {
+-              logToAutopilot('TTS aktif. Memulai rendering voiceover...');
+-              const voiceover = storyboardResult.voiceover || [];
+-              const provider = campaign.voice_provider || 'minimax';
+-              const persona = campaign.voice_persona || 'Professional Anchor';
+-
+-              const clipsAudioPaths = [];
+-              for (let c = 0; c < voiceover.length; c++) {
+-                const text = voiceover[c].narration || '';
+-                const ext = provider === 'minimax' ? 'mp3' : 'wav';
+-                const outputClipName = `tts_autopilot_${batchId}_clip_${c}.${ext}`;
+-                const localClipPath = path.join(tempDir, outputClipName);
+-
+-                logToAutopilot(`Rendering audio klip ${c + 1} via ${provider} (${persona})...`);
+-                if (provider === 'minimax') {
+-                  await generateMinimaxVO(text, persona, localClipPath, {
+-                    speed: campaign.voice_speed || 1.0,
+-                    volume: campaign.voice_volume || 1.0,
+-                    model: campaign.tts_model_quality,
+-                    language: campaign.target_language || 'id-ID'
+-                  });
+-                } else {
+-                  const { generateGeminiExact8sAudio } = await import('./gemini-8s-tts');
+-                  await generateGeminiExact8sAudio(text, persona, localClipPath);
+-                }
+-                clipsAudioPaths.push(localClipPath);
+-              }
+-
+-              // Combine audio files
+-              const combinedAudioName = `tts_combined_${batchId}.mp3`;
+-              const absoluteCombinedPath = path.join(tempDir, combinedAudioName);
+-              
+-              const { execSync } = await import('child_process');
+-              const filterString = clipsAudioPaths.map((_, index) => `[${index}:a]`).join('') + `concat=n=${clipsAudioPaths.length}:v=0:a=1[a]`;
+-              
+-              let cmd = `ffmpeg -y `;
+-              clipsAudioPaths.forEach(p => {
+-                cmd += `-i "${p}" `;
+-              });
+-              cmd += `-filter_complex "${filterString}" -map "[a]" "${absoluteCombinedPath}"`;
+-              
+-              logToAutopilot('Menggabungkan audio clips menjadi satu naskah voiceover utuh...');
+-              execSync(cmd);
+-              finalAudioPath = `/temp/${combinedAudioName}`;
+-              logToAutopilot(`Voiceover utuh selesai digabungkan: ${finalAudioPath}`);
+-              
+-              updateSheetsJobStatus(jobId, { local_audio_path: finalAudioPath });
+-            }
+-
+-            // 5. Visual Generation
+-            const videoClips = [];
+-            if (campaign.enable_glabs === 1) {
+-              logToAutopilot('G-Labs Visual Generator aktif. Memulai penjadwalan klip video...');
+-              const storyboard = storyboardResult.storyboard || [];
+-              const totalClips = storyboard.length;
+-              
+-              let productBase64 = null;
+-              const isBridgingActive = Number(campaign.is_bridging_active) === 1;
+-              const effectiveVisualMode = isBridgingActive ? (campaign.visual_mode || 'hybrid_lock') : 'pure_t2v';
+-              const effectiveProduct = isBridgingActive ? (product || {}) : {};
+-
+-              if (effectiveVisualMode === 'hybrid_lock' && effectiveProduct?.photo_url) {
+-                productBase64 = fileToBase64(effectiveProduct.photo_url);
+-              }
+-
+-              const bridgeAtClip = campaign.bridge_at_clip || 2;
+-              const bridgeDuration = campaign.bridge_duration_clips || 1;
+-              const bridgeEndClip = bridgeAtClip + bridgeDuration - 1;
+-
+-              for (let c = 1; c <= totalClips; c++) {
+-                logToAutopilot(`\n[G-Labs] Memproses klip visual ${c}/${totalClips}...`);
+-                const isBridgeScene = effectiveVisualMode === 'hybrid_lock' && (c >= bridgeAtClip && c <= bridgeEndClip);
+-                
+-                let clipVideoPath = null;
+-                
+-                if (isBridgeScene && productBase64) {
+-                  logToAutopilot(`[Double-Pass] Menghasilkan start frame T2I untuk klip ${c}...`);
+-                  const t2iObj = (storyboardResult.t2i_prompts || []).find(p => Number(p.clip) === c);
+-                  const t2iPromptText = t2iObj ? t2iObj.prompt : `product photograph of ${effectiveProduct.product_name}, professional studio lighting, 9:16 vertical --ar 9:16`;
+-
+-                  const t2iResult = await generateImage({
+-                    prompt: t2iPromptText,
+-                    model: 'imagen4',
+-                    aspect_ratio: campaign.aspect_ratio || '9:16',
+-                    reference_images: [
+-                      { data: productBase64, category: 'subject' }
+-                    ]
+-                  });
+-
+-                  if (!t2iResult?.task_id) throw new Error(`Gagal menjadwalkan T2I untuk klip ${c}`);
+-
+-                  let t2iCompleted = false;
+-                  let t2iImageUrl = null;
+-                  for (let pol = 0; pol < 30; pol++) {
+-                    await new Promise(r => setTimeout(r, 2000));
+-                    const statusRes = await getTaskStatus(t2iResult.task_id);
+-                    if (statusRes?.status === 'completed') {
+-                      const files = statusRes.results || statusRes.files || [];
+-                      let imageFile = files.find(f => f.endsWith('.png') || f.endsWith('.jpg') || f.endsWith('.jpeg')) || files[0];
+-                      if (imageFile && (imageFile.startsWith('http://') || imageFile.startsWith('https://'))) {
+-                        imageFile = imageFile.split('/').pop();
+-                      }
+-                      t2iImageUrl = getFileUrl(imageFile);
+-                      t2iCompleted = true;
+-                      break;
+-                    } else if (statusRes?.status === 'failed') {
+-                      throw new Error(`T2I task ${t2iResult.task_id} gagal.`);
+-                    }
+-                  }
+-
+-                  if (!t2iCompleted || !t2iImageUrl) throw new Error(`T2I task ${t2iResult.task_id} timed out.`);
+-                  logToAutopilot(`Start frame T2I selesai di-render.`);
+-
+-                  const imgResponse = await fetch(t2iImageUrl);
+-                  const startFrameBuffer = Buffer.from(await imgResponse.arrayBuffer());
+-                  const t2iBase64 = startFrameBuffer.toString('base64');
+-
+-                  logToAutopilot(`[Double-Pass] Menghasilkan gerakan I2V dari start frame...`);
+-                  const i2vObj = (storyboardResult.i2v_prompts || []).find(p => Number(p.clip) === c);
+-                  const i2vPromptText = i2vObj ? i2vObj.prompt : `cinematic camera zoom, slowly panning, product showcase vertical 9:16 --ar 9:16`;
+-
+-                  const videoResult = await generateVideo({
+-                    prompt: i2vPromptText,
+-                    model: 'veo_31_lite',
+-                    aspect_ratio: campaign.aspect_ratio || '9:16',
+-                    mode: 'start_image',
+-                    reference_images: [t2iBase64]
+-                  });
+-
+-                  if (!videoResult?.task_id) throw new Error(`Gagal menjadwalkan I2V untuk klip ${c}`);
+-
+-                  let videoCompleted = false;
+-                  let videoUrl = null;
+-                  for (let pol = 0; pol < 45; pol++) {
+-                    await new Promise(r => setTimeout(r, 2000));
+-                    const statusRes = await getTaskStatus(videoResult.task_id);
+-                    if (statusRes?.status === 'completed') {
+-                      const files = statusRes.results || statusRes.files || [];
+-                      let videoFile = files.find(f => f.endsWith('.mp4')) || files[0];
+-                      if (videoFile && (videoFile.startsWith('http://') || videoFile.startsWith('https://'))) {
+-                        videoFile = videoFile.split('/').pop();
+-                      }
+-                      videoUrl = getFileUrl(videoFile);
+-                      videoCompleted = true;
+-                      break;
+-                    } else if (statusRes?.status === 'failed') {
+-                      throw new Error(`I2V task ${videoResult.task_id} gagal.`);
+-                    }
+-                  }
+-
+-                  if (!videoCompleted || !videoUrl) throw new Error(`I2V video task ${videoResult.task_id} timed out.`);
+-                  clipVideoPath = videoUrl;
+-                } else {
+-                  logToAutopilot(`[T2V] Menghasilkan klip video dari text...`);
+-                  const t2vObj = (storyboardResult.t2v_prompts || []).find(p => Number(p.clip) === c);
+-                  const t2vPromptText = t2vObj ? t2vObj.prompt : `cinematic video, vertical 9:16 --ar 9:16`;
+-
+-                  const videoResult = await generateVideo({
+-                    prompt: t2vPromptText,
+-                    model: campaign.video_model || 'veo_31_lite',
+-                    aspect_ratio: campaign.aspect_ratio || '9:16',
+-                    mode: 'text_to_video'
+-                  });
+-
+-                  if (!videoResult?.task_id) throw new Error(`Gagal menjadwalkan T2V untuk klip ${c}`);
+-
+-                  let videoCompleted = false;
+-                  let videoUrl = null;
+-                  for (let pol = 0; pol < 45; pol++) {
+-                    await new Promise(r => setTimeout(r, 2000));
+-                    const statusRes = await getTaskStatus(videoResult.task_id);
+-                    if (statusRes?.status === 'completed') {
+-                      const files = statusRes.results || statusRes.files || [];
+-                      let videoFile = files.find(f => f.endsWith('.mp4')) || files[0];
+-                      if (videoFile && (videoFile.startsWith('http://') || videoFile.startsWith('https://'))) {
+-                        videoFile = videoFile.split('/').pop();
+-                      }
+-                      videoUrl = getFileUrl(videoFile);
+-                      videoCompleted = true;
+-                      break;
+-                    } else if (statusRes?.status === 'failed') {
+-                      throw new Error(`T2V task ${videoResult.task_id} gagal.`);
+-                    }
+-                  }
+-
+-                  if (!videoCompleted || !videoUrl) throw new Error(`T2V video task ${videoResult.task_id} timed out.`);
+-                  clipVideoPath = videoUrl;
+-                }
+-
+-                logToAutopilot(`Klip ${c} berhasil di-render di G-Labs.`);
+-                
+-                const tempClipName = `temp_clip_${batchId}_${c}.mp4`;
+-                const absoluteClipPath = path.join(tempDir, tempClipName);
+-                
+-                logToAutopilot(`Mengunduh file klip ke ${absoluteClipPath}...`);
+-                const downloadResponse = await fetch(clipVideoPath);
+-                const clipBuffer = Buffer.from(await downloadResponse.arrayBuffer());
+-                fs.writeFileSync(absoluteClipPath, clipBuffer);
+-                
+-                videoClips.push(absoluteClipPath);
+-              }
+-            }
+-
+-            // 6. FFmpeg Muxing
+-            let finalVideoPath = null;
+-            if (campaign.enable_ffmpeg === 1 && videoClips.length > 0 && finalAudioPath) {
+-              logToAutopilot('FFmpeg Muxing aktif. Menggabungkan klip video dan voiceover...');
+-              const outputVideoName = `final_video_${batchId}.mp4`;
+-              const absoluteOutputPath = path.join(tempDir, outputVideoName);
+-
+-              const muxConfig = {
+-                videoPath: JSON.stringify(videoClips),
+-                audioPath: finalAudioPath,
+-                syncOption: campaign.ffmpeg_sync_option || 'smart_sync',
+-                bgmPath: null,
+-                bgmVolume: campaign.ffmpeg_bgm_volume !== undefined ? campaign.ffmpeg_bgm_volume : 0.15,
+-                sfxVolume: campaign.ffmpeg_sfx_volume !== undefined ? campaign.ffmpeg_sfx_volume : 0.0,
+-                videoScale: campaign.ffmpeg_video_scale !== undefined ? campaign.ffmpeg_video_scale : 1.0,
+-                outputPath: absoluteOutputPath
+-              };
+-
+-              logToAutopilot(`Mengeksekusi muxing FFmpeg ke ${absoluteOutputPath}...`);
+-              await processVideoMuxing(muxConfig);
+-              
+-              finalVideoPath = `/temp/${outputVideoName}`;
+-              logToAutopilot(`Muxing video berhasil: ${finalVideoPath}`);
+-              
+-              updateSheetsJobStatus(jobId, { local_video_path: finalVideoPath });
+-            }
+-
+-            // 7. Google Drive Upload
+-            logToAutopilot('Memulai sinkronisasi Google Drive...');
+-            let parentFolderId = campaign.gdrive_folder_id;
+-            if (!parentFolderId) {
+-              logToAutopilot('Drive Folder ID tidak dispesifikasikan. Membuat folder kampanye di root...');
+-              parentFolderId = await getOrCreateCampaignFolder(campaign.campaign_name, `${campaign.campaign_type}_Campaign_`);
+-            }
+-
+-            logToAutopilot(`Membuat subfolder batch "${batchId}" di Drive...`);
+-            const batchFolderId = await getOrCreateFolderInFolder(batchId, parentFolderId);
+-            const assetUrl = `https://drive.google.com/drive/folders/${batchFolderId}`;
+-            logToAutopilot(`Folder batch berhasil dibuat: ${assetUrl}`);
+-
+-            logToAutopilot('Mengunggah naskah.md ke Drive...');
+-            const markdownContent = buildMarkdownContent(storyboardResult, batchId);
+-            const uploadedMarkdown = await uploadMarkdownToCampaignFolder(markdownContent, 'naskah.md', batchFolderId);
+-            const markdownUrl = uploadedMarkdown.driveUrl;
+-            logToAutopilot(`Naskah diunggah: ${markdownUrl}`);
+-
+-            if (Number(campaign.is_bridging_active) === 1 && product?.photo_url) {
+-              const absProdImgPath = product.photo_url.startsWith('/') ? path.join(process.cwd(), 'public', product.photo_url) : product.photo_url;
+-              if (fs.existsSync(absProdImgPath)) {
+-                logToAutopilot('Mengunggah gambar produk ke Drive...');
+-                await uploadLocalFileToFolder(absProdImgPath, `${batchId}_product_image.png`, batchFolderId, 'image/png');
+-              }
+-            }
+-
+-            if (finalAudioPath) {
+-              const absAudioPath = path.join(process.cwd(), 'public', finalAudioPath);
+-              if (fs.existsSync(absAudioPath)) {
+-                logToAutopilot('Mengunggah audio voiceover ke Drive...');
+-                await uploadLocalFileToFolder(absAudioPath, `${batchId}_audio.mp3`, batchFolderId, 'audio/mpeg');
+-              }
+-            }
++      const rawResponse = await executeWithKeyPool(1, async (apiKey) => {
++        const genAI = new GoogleGenerativeAI(apiKey);
++        const model = genAI.getGenerativeModel({
++          model: 'gemini-2.5-flash',
++          generationConfig: { temperature: 0.85, responseMimeType: 'application/json' }
++        });
++        const result = await model.generateContent([{ text: prompt }]);
++        return result.response.text();
++      });
+ 
+-            if (finalVideoPath) {
+-              const absVideoPath = path.join(process.cwd(), 'public', finalVideoPath);
+-              if (fs.existsSync(absVideoPath)) {
+-                logToAutopilot('Mengunggah video final ke Drive...');
+-                await uploadLocalFileToFolder(absVideoPath, `${batchId}_video.mp4`, batchFolderId, 'video/mp4');
+-              }
+-            }
++      storyboardResult = parseGeminiJSON(rawResponse);
++    }
+ 
+-            updateSheetsJobStatus(jobId, {
+-              status: 'completed',
+-              gdrive_folder_url: assetUrl,
+-              prompts_json: JSON.stringify({
+-                t2v_prompts: storyboardResult.t2v_prompts || [],
+-                t2i_prompts: storyboardResult.t2i_prompts || [],
+-                i2v_prompts: storyboardResult.i2v_prompts || []
+-              }),
+-              captions_json: JSON.stringify({
+-                tiktok_caption: storyboardResult.tiktok_caption || storyboardResult.analysis_summary?.tiktok_caption || '',
+-                ig_caption: storyboardResult.ig_caption || storyboardResult.analysis_summary?.ig_caption || '',
+-                yt_title: storyboardResult.yt_title || storyboardResult.analysis_summary?.yt_title || '',
+-                yt_desc: storyboardResult.yt_desc || storyboardResult.analysis_summary?.yt_desc || ''
+-              })
+-            });
++    logToAutopilot('Generasi naskah storyboard berhasil.');
++    updateSheetsJobStatus(jobId, {
++      storyboard: JSON.stringify(storyboardResult.storyboard || []),
++      voiceover: JSON.stringify(storyboardResult.voiceover || []),
++      prompts_json: JSON.stringify({
++        t2v_prompts: storyboardResult.t2v_prompts || [],
++        t2i_prompts: storyboardResult.t2i_prompts || [],
++        i2v_prompts: storyboardResult.i2v_prompts || []
++      }),
++      captions_json: JSON.stringify({
++        tiktok_caption: storyboardResult.tiktok_caption || storyboardResult.analysis_summary?.tiktok_caption || '',
++        ig_caption: storyboardResult.ig_caption || storyboardResult.analysis_summary?.ig_caption || '',
++        yt_title: storyboardResult.yt_title || storyboardResult.analysis_summary?.yt_title || '',
++        yt_desc: storyboardResult.yt_desc || storyboardResult.analysis_summary?.yt_desc || ''
++      })
++    });
+ 
+ 
+             // 8. Write to tabs in Google Sheets (V10.5.2 Multi-Tab Output Engine)
+@@ -950,6 +886,15 @@ Output harus berupa JSON valid sesuai skema:
+             } catch (sheetErr) {
+               logToAutopilot(`[ERROR] Gagal memperbarui status 'Failed' ke Google Sheets: ${sheetErr.message}`);
+             }
++          } finally {
++            if (downloadedVideo) {
++              try {
++                cleanupTempFile(downloadedVideo.filePath);
++                logToAutopilot(`Membersihkan file video referensi sementara: ${downloadedVideo.filePath}`);
++              } catch (cleanupErr) {
++                console.warn('Gagal membersihkan video referensi:', cleanupErr.message);
++              }
++            }
+           }
+         }
+       }
+@@ -970,18 +915,81 @@ export function buildMarkdownContent(parsed, batchId) {
+     md += `- **Weakness Identified**: ${parsed.analysis_summary.weakness_identified || ''}\n`;
+     md += `- **Upgrade Strategy**: ${parsed.analysis_summary.the_upgrade_strategy || ''}\n\n`;
+   }
+-  md += `## Storyboard & Voiceover\n\n`;
++
+   const storyboard = parsed.storyboard || parsed.production_storyboard || [];
+   const voiceover = parsed.voiceover || [];
+   
++  // 1. Storyboard Section
++  md += `## Storyboard :\n`;
+   for (let idx = 0; idx < storyboard.length; idx++) {
+     const scene = storyboard[idx];
+-    const vo = voiceover.find(v => Number(v.scene || v.clip) === Number(scene.scene || scene.clip || scene.scene_number)) || {};
+-    md += `### Klip ${scene.scene || scene.clip || scene.scene_number || (idx + 1)}\n`;
++    const clipNum = scene.scene || scene.clip || scene.scene_number || (idx + 1);
++    md += `### Klip ${clipNum} :\n`;
+     md += `- **Visual**: ${scene.visual_description || scene.visual_segment?.visual_action || ''}\n`;
+     md += `- **Kamera**: ${scene.camera_movement || scene.visual_segment?.camera_movement || ''}\n`;
+-    md += `- **Audio Mood**: ${scene.audio_mood || scene.audio_segment?.audio_mood || ''}\n`;
+-    md += `- **Narasi Voiceover**: *"${vo.narration || vo.voiceover_text || ''}"*\n\n`;
++    md += `- **Audio Mood**: ${scene.audio_mood || scene.audio_segment?.audio_mood || ''}\n\n`;
++  }
++
++  // 2. Voiceover Section
++  md += `## Voiceover\n`;
++  for (let idx = 0; idx < storyboard.length; idx++) {
++    const scene = storyboard[idx];
++    const clipNum = scene.scene || scene.clip || scene.scene_number || (idx + 1);
++    const vo = voiceover.find(v => Number(v.scene || v.clip) === Number(clipNum)) || {};
++    md += `### Klip ${clipNum} :\n`;
++    md += `*"${vo.narration || vo.voiceover_text || ''}"*\n\n`;
++  }
++
++  // 3. Prompts Section
++  md += `## Prompts\n`;
++  for (let idx = 0; idx < storyboard.length; idx++) {
++    const scene = storyboard[idx];
++    const clipNum = scene.scene || scene.clip || scene.scene_number || (idx + 1);
++    const t2v = (parsed.t2v_prompts || []).find(p => Number(p.clip) === Number(clipNum))?.prompt;
++    const t2i = (parsed.t2i_prompts || []).find(p => Number(p.clip) === Number(clipNum))?.prompt;
++    const i2v = (parsed.i2v_prompts || []).find(p => Number(p.clip) === Number(clipNum))?.prompt;
++
++    if (t2v || t2i || i2v) {
++      md += `### Klip ${clipNum} :\n`;
++      if (t2v) {
++        md += `- **Prompt T2V**: \`${t2v}\`\n`;
++      }
++      if (t2i) {
++        md += `- **Prompt T2I**: \`${t2i}\`\n`;
++      }
++      if (i2v) {
++        md += `- **Prompt I2V**: \`${i2v}\`\n`;
++      }
++      md += `\n`;
++    }
+   }
++
++  // Social Media Metadata & Captions section
++  const tiktok = parsed.tiktok_caption || parsed.analysis_summary?.tiktok_caption || '';
++  const ig = parsed.ig_caption || parsed.analysis_summary?.ig_caption || '';
++  const ytTitle = parsed.yt_title || parsed.analysis_summary?.yt_title || '';
++  const ytDesc = parsed.yt_desc || parsed.analysis_summary?.yt_desc || '';
++
++  if (tiktok || ig || ytTitle || ytDesc) {
++    md += `## Media Sosial Metadata & Caption\n\n`;
++    if (tiktok) {
++      md += `### TikTok Caption\n\`\`\`text\n${tiktok}\n\`\`\`\n\n`;
++    }
++    if (ig) {
++      md += `### Instagram Caption\n\`\`\`text\n${ig}\n\`\`\`\n\n`;
++    }
++    if (ytTitle || ytDesc) {
++      md += `### YouTube Shorts\n`;
++      if (ytTitle) {
++        md += `- **Title**: ${ytTitle}\n`;
++      }
++      if (ytDesc) {
++        md += `- **Description**: ${ytDesc}\n`;
++      }
++      md += `\n`;
++    }
++  }
++
+   return md;
+ }
++
