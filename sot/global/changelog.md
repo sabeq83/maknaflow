@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.126 — Fix Port UI dari 3000 ke 5000 (31/07/2026)
+- Memperbaiki deploy-production.js untuk menggunakan Port 5000 bagi UI maknaflow untuk menghindari konflik dengan maknagrid
+
 ## V2.2.125 — Penyelarasan Skema Database dan UI (31/07/2026)
 - Melakukan renaming tabel fisik database PostgreSQL (product_extractions->products, bridge_injector->product_bridging, ffmpeg_studio->video_studio, dll)
 - Membuat Updatable Views untuk kompatibilitas ke belakang
