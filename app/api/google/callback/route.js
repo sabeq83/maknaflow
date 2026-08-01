@@ -3,7 +3,11 @@ import { handleCallback } from '@/lib/google-auth';
 
 export async function GET(request) {
   try {
-    const { origin, searchParams } = new URL(request.url);
+    const host = request.headers.get('host') || 'localhost:3000';
+    const proto = request.headers.get('x-forwarded-proto') || 'http';
+    const origin = `${proto}://${host}`;
+    
+    const { searchParams } = new URL(request.url);
     const code = searchParams.get('code');
     const error = searchParams.get('error');
 
@@ -26,7 +30,9 @@ export async function GET(request) {
       `${origin}/settings?google_connected=true&google_email=${encodeURIComponent(result.email || '')}`
     );
   } catch (error) {
-    const { origin } = new URL(request.url || 'http://localhost:3000');
+    const host = request.headers.get('host') || 'localhost:3000';
+    const proto = request.headers.get('x-forwarded-proto') || 'http';
+    const origin = `${proto}://${host}`;
     console.error('Google callback error:', error);
     return NextResponse.redirect(
       `${origin}/settings?google_error=${encodeURIComponent(error.message)}`

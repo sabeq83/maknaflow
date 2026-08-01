@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createRecipeCampaign, createRecipeItem, getRecipeCampaigns } from '@/lib/db';
 import crypto from 'crypto';
+import { generateCampaignId } from '@/lib/id-generator';
 
 export async function GET() {
   try {

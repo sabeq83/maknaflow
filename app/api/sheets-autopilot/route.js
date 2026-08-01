@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSheetsCampaigns, createSheetsCampaign, deleteSheetsCampaign, getSetting } from '@/lib/db';
 import { getAuthorizedClient } from '@/lib/google-auth';
 import { google } from 'googleapis';
+import { generateCampaignId } from '@/lib/id-generator';
 
 export async function GET(request) {
   try {

@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.2.128 — Surgical backport from maknagrid (01/08/2026)
+- Fix ReferenceErrors in sheets-autopilot and recipe-labs
+- Implement dynamic Google OAuth redirect URI
+- Align Subject tag to Biometric Anchor for Syari compliance
+- Fix regex nested parentheses in prompts
+
 ## V2.2.127 — Fix Port API dari 4000 ke 6000 (31/07/2026)
 - Memperbaiki deploy-production.js untuk menggunakan Port 6000 bagi API maknaflow untuk menghindari konflik dengan API maknagrid
 

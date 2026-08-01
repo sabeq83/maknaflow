@@ -51,7 +51,7 @@ export async function GET(request) {
       }
       if (q && q.trim()) {
         params.push(`%${q.trim()}%`);
-        baseSql += ` AND (video_id ILIKE $${params.length} OR hook ILIKE $${params.length} OR nama_produk ILIKE $${params.length} OR caption ILIKE $${params.length})`;
+        baseSql += ` AND (video_id ILIKE $${params.length} OR hook ILIKE $${params.length} OR nama_produk ILIKE $${params.length} OR campaign_title ILIKE $${params.length} OR caption ILIKE $${params.length})`;
       }
 
       const countSql = `SELECT count(*) ${baseSql}`;
