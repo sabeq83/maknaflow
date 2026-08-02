@@ -102,6 +102,17 @@ export default function ImportPlannerModal({
     } catch (_) {}
   }
 
+  useEffect(() => {
+    if (!planner || brandProfiles.length === 0) return;
+    const match = planner.brand_id
+      ? brandProfiles.find(profile => profile.id === planner.brand_id)
+      : brandProfiles.find(profile => profile.brand_name?.trim().toLowerCase() === planner.account_name?.trim().toLowerCase());
+    if (match) {
+      setSelectedBrandId(match.id);
+      setAccountName(match.brand_name);
+    }
+  }, [planner, brandProfiles]);
+
   async function loadPlannerDetail(id) {
     if (!id) return;
     try {
@@ -194,6 +205,7 @@ export default function ImportPlannerModal({
         global_settings: {
           status: targetStatus,
           brand_profile_id: selectedBrandId || null,
+          account_name: accountName || null,
           custom_instruction: customInstruction,
           narrative_mode: narrativeMode,
           visual_style: visualStyle,
@@ -401,9 +413,11 @@ export default function ImportPlannerModal({
                       <span style={{ fontSize: '11px', color: '#818cf8', fontWeight: 600 }}>💡 Terisi Otomatis dari Planner</span>
                     </label>
                     <select
-                      value={accountName}
+                      value={selectedBrandId}
                       onChange={e => {
-                        const newAcc = e.target.value;
+                        const profile = brandProfiles.find(item => item.id === e.target.value);
+                        const newAcc = profile?.brand_name || '';
+                        setSelectedBrandId(profile?.id || '');
                         setAccountName(newAcc);
                         const now = new Date();
                         const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
@@ -416,12 +430,10 @@ export default function ImportPlannerModal({
                     >
                       <option value="">-- Pilih Nama Akun Brand --</option>
                       {brandProfiles.map(bp => (
-                        <option key={bp.id} value={bp.account_name || bp.brand_name}>
-                          {bp.brand_name} ({bp.account_name || bp.brand_name})
+                        <option key={bp.id} value={bp.id}>
+                          {bp.brand_name}
                         </option>
                       ))}
-                      <option value="nutribake">nutribake</option>
-                      <option value="siasatsehat">siasatsehat</option>
                     </select>
                   </div>
 
@@ -569,7 +581,11 @@ export default function ImportPlannerModal({
                       <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>🧬 Brand Profile (Opsional):</label>
                       <select
                         value={selectedBrandId}
-                        onChange={e => setSelectedBrandId(e.target.value)}
+                        onChange={e => {
+                          const profile = brandProfiles.find(item => item.id === e.target.value);
+                          setSelectedBrandId(profile?.id || '');
+                          setAccountName(profile?.brand_name || '');
+                        }}
                         style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
                       >
                         <option value="">-- Tanpa Brand (Generik) --</option>

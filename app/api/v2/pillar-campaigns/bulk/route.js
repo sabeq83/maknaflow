@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { v4 as uuidv4 } from 'uuid';
-import { createPillarCampaign, createPillarCampaignItem, getDb } from '@/lib/db';
+import { createPillarCampaignBundle, getDb } from '@/lib/db';
 import { generateCampaignId } from '@/lib/id-generator';
 
 function extractSpreadsheetId(input) {
@@ -22,17 +21,26 @@ export async function POST(request) {
 
     const campaignId = generateCampaignId('opc');
     const db = getDb();
+    let accountName = global_settings.account_name || null;
+    if (global_settings.brand_profile_id) {
+      const brand = await db.prepare('SELECT id, brand_name FROM brand_profiles WHERE id = ?').get(global_settings.brand_profile_id);
+      if (!brand) return NextResponse.json({ error: 'Brand Account tidak ditemukan pada tenant aktif' }, { status: 400 });
+      accountName = brand.brand_name || accountName;
+    }
 
     // 1. Create the global campaign row
-    await createPillarCampaign({
+    const campaignData = {
       id: campaignId,
       campaign_name: campaign_name.trim(),
+      account_name: accountName,
       status: global_settings.status || 'running',
       content_pillar: 'Mass Production Content Pillar', // Placeholder for global table, actual values are row-specific
       custom_hook: 'Mass Production Hook',
       visual_action_guideline: 'Mass Production Visual Action',
       custom_instruction: global_settings.custom_instruction || '',
       brand_profile_id: global_settings.brand_profile_id || null,
+      target_demographic: global_settings.target_demographic || null,
+      target_demographic_custom: global_settings.target_demographic_custom || null,
       narrative_mode: global_settings.narrative_mode || 'Storytelling',
       visual_style: global_settings.visual_style || 'Cinematic',
       face_visibility: global_settings.face_visibility || 'Faceless',
@@ -76,13 +84,9 @@ export async function POST(request) {
       enable_vo_audit: global_settings.enable_vo_audit !== undefined ? Number(global_settings.enable_vo_audit) : 0,
       enable_audio_segment: global_settings.enable_audio_segment ? 1 : 0,
       voice_cast_json: global_settings.voice_cast_json || null
-    });
+    };
 
-    // 2. Insert items sequentially using SQLite transaction
-    await db.transaction(async () => {
-      for (let i = 0; i < rows_data.length; i++) {
-        const row = rows_data[i];
-        
+    const items = rows_data.map((row, i) => {
         // Determine JIT status: if it has a product URL (or direct image URL) but no product reference image -> pending_sourcing
         const hasUrl = (row.source_product_url && row.source_product_url.trim() !== '') || (row.product_image_url && row.product_image_url.trim() !== '');
         const hasImage = row.product_ref_image_path && row.product_ref_image_path.trim() !== '';
@@ -103,18 +107,21 @@ export async function POST(request) {
           custom_instruction: row.custom_instruction || ''
         };
 
-        await createPillarCampaignItem({
+        return {
           campaign_id: campaignId,
           row_creative_payload: JSON.stringify(payload),
           generation_status
-        });
-      }
-    })();
+        };
+    });
+
+    await createPillarCampaignBundle({ campaign: campaignData, items });
 
     return NextResponse.json({
       success: true,
       campaign_id: campaignId,
-      total_items: rows_data.length
+      total_items: rows_data.length,
+      expected_items: rows_data.length,
+      created_items: items.length
     }, { status: 201 });
 
   } catch (err) {

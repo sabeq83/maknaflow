@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.134 — Perbaikan OPC Planner dan Scheduler Staging (02/08/2026)
+- Pembuatan campaign dan item OPC kini atomik dengan sequence PostgreSQL yang valid
+- Brand account target demografi dan Visual Swap tampil konsisten dari planner ke detail campaign
+- Scheduler staging menampilkan status efektif dan kampanye pilot berhasil masuk ready for review
+
 ## V2.2.133 — Aman Bootstrap Superadmin (02/08/2026)
 - Pisahkan target production dan local staging pada CLI bootstrap superadmin
 

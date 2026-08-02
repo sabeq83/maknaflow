@@ -1,605 +1,544 @@
-# Implementation Plan — Tenant, Gemini Key Pool, dan Plugin MAKNA Content Operator
+# Implementation Plan — Perbaikan OPC Configuration, Item Integrity, dan Scheduler
 
-## 1. Tujuan dan Ruang Lingkup
+## 1. Tujuan
 
-Implementasi ini akan:
+Memperbaiki alur pembuatan Organic Pillar Campaign (OPC) agar:
 
-1. Memperbaiki penyimpanan Gemini API Key Pool agar setiap key benar-benar tersimpan, terisolasi per tenant, dan hasil impor tidak memberikan status sukses palsu.
-2. Menambahkan provisioning dan pengelolaan tenant oleh `superadmin`, termasuk pembuatan admin pertama tenant.
-3. Memastikan user, settings, Gemini key, brand, planner, campaign, dan Operator API selalu berjalan dalam tenant aktif.
-4. Membuat plugin Codex `makna-content-operator` sebagai antarmuka aman di atas Operator API/CLI MAKNA yang sudah tersedia.
+1. Pilihan akun/Brand Profile, target demografi audiens, dan Visual Swap Overrides tersimpan serta tampil kembali secara benar.
+2. Campaign dan seluruh item dibuat secara atomik; tidak ada lagi campaign `running` tanpa item.
+3. PostgreSQL memberikan ID otomatis untuk `pillar_campaign_items`.
+4. UI menampilkan status scheduler berdasarkan kondisi runtime sebenarnya, bukan hanya setting tenant.
+5. Kampanye `opc_260802_zr0a5x` dapat dipulihkan dari planner sumber tanpa kehilangan konfigurasi yang benar.
 
-Tidak termasuk dalam scope:
+## 2. Bukti Kondisi Saat Ini
 
-- Social publishing ke Facebook, Instagram, atau TikTok.
-- Penyimpanan kredensial sosial media.
-- Browser automation untuk platform sosial.
+Kampanye `opc_260802_zr0a5x` memiliki:
 
-## 2. Keputusan Arsitektur
+```text
+status                    = running
+brand_profile_id          = null
+target_demographic        = null
+target_demographic_custom = null
+visual_overrides_json.subject_demographic = syari_classic
+jumlah pillar_campaign_items = 0
+```
 
-### 2.1 Model akses
+Schema item saat ini:
 
-| Peran | Kewenangan |
+```text
+pillar_campaign_items.id = BIGINT NOT NULL
+column_default           = null
+is_identity              = NO
+```
+
+Planner sumber dan Brand Profile yang ditemukan:
+
+```text
+planner_id       = pln_aa53bbc4
+planner_row_id   = row_368ae232
+brand_profile_id = 940e766b-76d0-49b7-b6d5-01dfb0041d40
+brand_name       = nutribake
+```
+
+Staging juga memiliki:
+
+```env
+ENABLE_CAMPAIGN_SCHEDULER=false
+ENABLE_SCHEDULER_WORKER=false
+```
+
+## 3. Keputusan Arsitektur
+
+### 3.1 Identitas brand
+
+- Dropdown utama menyimpan `brand_profile_id`, bukan string nama akun.
+- `account_name` tetap disimpan sebagai snapshot agar nama kampanye, folder, export, dan data lama tetap dapat dibaca.
+- Opsi hard-coded `nutribake`/`siasatsehat` dihapus setelah Brand Profile tersedia; alias harus berasal dari data tenant.
+- API memvalidasi bahwa Brand Profile berada pada tenant aktif.
+
+### 3.2 Demografi audiens dan demografi visual
+
+Keduanya adalah konsep berbeda:
+
+| Field | Fungsi |
 |---|---|
-| `superadmin` | Membuat, melihat, mengubah status tenant, dan membuat admin awal tenant. Tidak otomatis membaca data operasional tenant. |
-| `admin` | Mengelola user, brand, settings, dan key pool hanya dalam tenant sendiri. |
-| `user` | Menggunakan menu dan brand sesuai permission dalam tenant sendiri. |
-| `operator` | Service identity bertoken dan terikat pada tepat satu tenant serta scope tertentu. |
+| `target_demographic` | Audiens dan tone bahasa naskah, misalnya `ibu_rumah_tangga`. |
+| `visual_overrides_json.subject_demographic` | Subjek/model visual, misalnya `syari_classic`. |
 
-Tenant bukan akun. Satu tenant adalah batas organisasi/data dan dapat memiliki banyak akun admin/user.
+UI detail tidak boleh memakai satu field untuk keduanya.
 
-### 2.2 Bootstrap superadmin
+### 3.3 Transaksi campaign bundle
 
-- Akun superadmin pertama dibuat melalui CLI satu kali, bukan melalui UI publik dan bukan melalui seed password default.
-- CLI menerima username/email dan membaca password secara interaktif atau dari secret environment khusus proses; password tidak boleh muncul dalam argumen, log, atau shell history.
-- Superadmin merupakan identitas control-plane dan tidak terikat ke tenant operasional.
-- Pembuatan superadmin berikutnya hanya dapat dilakukan oleh superadmin aktif dan seluruh perubahan dicatat dalam audit log.
-- Tenant admin tidak dapat membuat, mengubah, atau menaikkan role user menjadi `superadmin`.
-- Sistem mencegah penonaktifan superadmin aktif terakhir.
+Pembuatan campaign dan item dilakukan dalam satu transaksi PostgreSQL:
 
-### 2.3 Provisioning tenant atomik
+```text
+BEGIN
+  INSERT pillar_campaigns
+  INSERT pillar_campaign_items × N
+  ASSERT inserted_items = expected_items
+COMMIT
+```
 
-`POST /api/admin/tenants` menjalankan satu transaksi:
+Jika satu insert gagal, seluruh campaign di-rollback dan API mengembalikan error.
 
-1. Membuat tenant dengan ID/slug stabil, nama, timezone, dan status.
-2. Membuat default `tenant_settings` tanpa menyalin secret tenant lain.
-3. Membuat akun admin awal dengan `tenant_id` baru.
-4. Memberikan semua menu tenant-admin kepada admin awal.
-5. Menulis audit event tanpa menyimpan password/API key.
+### 3.4 Status scheduler efektif
 
-Jika satu tahap gagal, seluruh transaksi dibatalkan.
+Status efektif merupakan gabungan empat gate:
 
-### 2.4 Gemini key pool
+```text
+process_enabled
+  AND worker_enabled
+  AND tenant_enabled
+  AND runtime_running
+```
 
-- `gemini_api_keys.id` memakai PostgreSQL identity/sequence.
-- Keunikan API key diberlakukan per tenant melalui `(tenant_id, api_key)`.
-- Bulk insert selalu membawa `tenant_id` dari konteks autentikasi, bukan dari request body.
-- Hasil impor dipisahkan menjadi `added`, `duplicate`, `rejected`, dan `failed`.
-- API tidak boleh mengembalikan sukses jika seluruh insert mengalami kegagalan database.
-- Nilai key tetap dimasking di response dan log.
+Toggle UI hanya mengendalikan `tenant_enabled`. Environment gate harus ditampilkan sebagai informasi read-only dan perubahan environment memerlukan restart.
 
-### 2.5 Plugin `makna-content-operator`
+## 4. Tahapan Implementasi
 
-- Business logic tetap di MAKNA Operator API; plugin tidak mengakses database langsung.
-- Plugin berisi skill operasional dan script client tipis untuk `create`, `status`, `wait`, dan `approve`.
-- Plugin memakai base URL dan bearer token tenant-scoped.
-- Social post tidak menjadi command atau permission plugin.
-- Scaffold mengikuti format plugin Codex dengan `.codex-plugin/plugin.json`, `skills/`, dan `scripts/`; marketplace lokal dibuat hanya pada tahap instalasi setelah persetujuan lokasi pengguna.
+### Tahap A — Schema dan integritas data
 
-## 3. Tahapan Implementasi
+- Tambahkan sequence/default untuk `pillar_campaign_items.id` secara idempotent.
+- Tambahkan `account_name` dan `source_planner_id` pada `pillar_campaigns`.
+- Tambahkan index tenant/campaign yang diperlukan.
+- Verifikasi migrasi dapat dijalankan dua kali dan tidak mengubah ID existing.
 
-### Tahap A — Fondasi schema dan isolasi tenant
+### Tahap B — Transaksi campaign + items
 
-- Tambahkan metadata tenant: `slug`, `timezone`, `status`, dan timestamps.
-- Tambahkan audit table untuk aksi superadmin.
-- Perbaiki sequence/default ID Gemini key pool.
-- Ubah unique constraint Gemini key menjadi tenant-scoped.
-- Tambahkan constraint/index tenant pada user dan resource terkait.
-- Migrasi harus idempotent serta mempertahankan data `default_tenant`.
+- Tambahkan repository `createPillarCampaignBundle()` menggunakan `withPgTransaction()`.
+- Jalur single, bulk CSV, Import Planner, dan Operator API memakai repository yang sama.
+- Response API harus memuat `expected_items` dan `created_items`.
+- Hapus penggunaan pseudo-transaction `db.transaction(async () => ...)` pada OPC.
 
-### Tahap B — Gemini Key Pool
+### Tahap C — Propagasi konfigurasi
 
-- Satukan single dan bulk insert melalui repository tenant-aware.
-- Jangan lagi mengubah exception database menjadi “duplikat”.
-- Perbaiki kontrak response dan tampilan ringkasan impor.
-- Tambahkan masking dan refresh pool setelah impor.
-- Uji insert single, 21 key bulk, duplicate, invalid key, dan isolasi dua tenant.
+- Sinkronkan pilihan account dengan Brand Profile ID.
+- Teruskan `account_name`, `brand_profile_id`, `target_demographic`, dan custom value pada seluruh jalur.
+- Simpan `source_planner_id` ketika campaign berasal dari Content Planner.
+- Validasi preset audiens dan VSO sebelum insert.
 
-### Tahap C — Bootstrap dan pengamanan superadmin
+### Tahap D — UI detail
 
-- Tambahkan CLI `npm run admin -- create-superadmin` untuk bootstrap awal.
-- Validasi password, hash dengan mekanisme autentikasi yang sama, dan cegah duplikasi username/email.
-- Tambahkan service control-plane untuk membuat, menonaktifkan, dan reset password superadmin secara teraudit.
-- Pastikan superadmin tidak memperoleh tenant context operasional secara implisit.
-- Cegah tenant admin mengirim atau mengubah role menjadi `superadmin`.
-- Cegah sistem kehilangan seluruh superadmin aktif.
+- Buat label map bersama untuk demografi audiens dan VSO.
+- Parse `visual_overrides_json` secara aman.
+- Basic Creative Strategy membaca brand snapshot/profile dan target audiens.
+- Visual Swap Overrides membaca `subject_demographic`, wardrobe, lighting, dan character concept dari JSON.
 
-### Tahap D — Tenant Management
+### Tahap E — Scheduler observability
 
-- Buat service provisioning transaksional.
-- Buat API list/create/update tenant khusus superadmin.
-- Buat halaman Tenant Management.
-- Batasi User Management admin ke tenant aktif.
-- Sediakan aktivasi/nonaktif tenant; penghapusan permanen tidak disediakan pada versi awal.
+- Expose status environment, worker gate, tenant toggle, dan runtime state.
+- Tampilkan alasan ketika scheduler tidak efektif.
+- Toggle tenant tidak boleh mengklaim “aktif” bila environment/worker mati.
+- Setelah kode lolos test, aktifkan campaign scheduler pada local staging pilot dan restart server.
 
-### Tahap E — Operator tenant-scoped
+### Tahap F — Pemulihan kampanye terdampak
 
-- Ganti konfigurasi satu token global menjadi registry token hash dengan `tenant_id` dan scopes.
-- Operator API mendapatkan tenant hanya dari identitas token.
-- Worker memproses job berdasarkan tenant job, bukan satu env tenant global.
-- Tambahkan command CLI `whoami` dan pemeriksaan capability.
+- Dry-run terhadap `opc_260802_zr0a5x`.
+- Gunakan planner `pln_aa53bbc4`, row `row_368ae232`, dan Brand Profile Nutribake yang sudah ditemukan.
+- Terapkan `target_demographic=ibu_rumah_tangga` dan pertahankan VSO `syari_classic`.
+- Karena campaign saat ini tidak memiliki item, rekonstruksi item dalam transaksi; jangan membuat campaign duplikat.
+- Verifikasi minimal satu item `pending`, lalu scheduler memulai generation.
 
-### Tahap F — Plugin Codex
+## 5. Perubahan File dan Before/After Code
 
-- Scaffold `makna-content-operator` menggunakan helper `plugin-creator`.
-- Tambahkan skill workflow, script wrapper, contoh payload, dan guardrail approval.
-- Validasi manifest dan skill.
-- Uji plugin terhadap staging dengan job idempotent dan tanpa akses social publishing.
-
-## 4. Perubahan File dan Before/After Code
-
-### 4.1 `lib/db-pg.js`
+### 5.1 `lib/db-pg.js`
 
 **Code Sebelum (Current/Before)**
 
 ```js
-CREATE TABLE IF NOT EXISTS operator_jobs (...);
-// Belum ada migrasi identity gemini_api_keys dan metadata tenant lengkap.
+// pillar_campaign_items.id tidak memiliki sequence/default.
+// pillar_campaigns tidak memiliki account_name/source_planner_id.
 ```
 
 **Code Sesudah (Proposed/After)**
 
 ```js
-await migrateTenantManagement(pool);
-await migrateGeminiKeyPoolIdentity(pool);
-
-// idempotent migration:
-// tenants.slug, timezone, status, updated_at
-// gemini_api_keys.id sequence/default
-// UNIQUE (tenant_id, api_key)
-// tenant_audit_events
-// operator_credentials (token_hash, tenant_id, scopes, status)
+await pool.query(`CREATE SEQUENCE IF NOT EXISTS pillar_campaign_items_id_seq`);
+await pool.query(`
+  ALTER TABLE pillar_campaign_items
+  ALTER COLUMN id SET DEFAULT nextval('pillar_campaign_items_id_seq')
+`);
+await pool.query(`
+  ALTER TABLE pillar_campaigns
+    ADD COLUMN IF NOT EXISTS account_name TEXT,
+    ADD COLUMN IF NOT EXISTS source_planner_id TEXT
+`);
 ```
 
-### 4.2 `lib/db.js`
+Sequence di-set ke `MAX(id) + 1` dan migrasi dilindungi advisory lock.
+
+### 5.2 `lib/db.js`
 
 **Code Sebelum (Current/Before)**
 
 ```js
-try {
-  await pgQuery(
-    'INSERT INTO gemini_api_keys (key_name, api_key, tier, daily_limit) VALUES ($1,$2,$3,$4)',
-    values
-  );
-} catch (e) {
-  skippedCount++;
+await createPillarCampaign(campaign);
+await db.transaction(async () => {
+  for (const item of items) await createPillarCampaignItem(item);
+})();
+```
+
+`db.transaction` saat ini hanya mengembalikan callback dan bukan transaksi PostgreSQL nyata.
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function createPillarCampaignBundle({ campaign, items }) {
+  const tenantId = getActiveTenantId();
+  return withPgTransaction(async client => {
+    await insertPillarCampaign(client, tenantId, campaign);
+    const createdItems = await insertPillarCampaignItems(client, campaign.id, items);
+    if (createdItems !== items.length) throw new Error('OPC_ITEM_COUNT_MISMATCH');
+    return { campaignId: campaign.id, expectedItems: items.length, createdItems };
+  });
+}
+```
+
+`createPillarCampaign()` juga menerima `account_name` dan `source_planner_id` untuk kompatibilitas jalur lain.
+
+### 5.3 `lib/pillar-campaign-ingest.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+await createPillarCampaign({
+  brand_profile_id: globalSettings.brand_profile_id || planner.brand_id || null,
+  // target_demographic tidak diteruskan
+});
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+await createPillarCampaignBundle({
+  campaign: {
+    account_name: globalSettings.account_name || planner.account_name,
+    brand_profile_id: validatedBrandProfile.id,
+    source_planner_id: planner.id,
+    target_demographic: globalSettings.target_demographic,
+    target_demographic_custom: globalSettings.target_demographic_custom,
+    visual_overrides_json: normalizedVisualOverrides
+  },
+  items
+});
+```
+
+Jalur idempotent hanya dianggap `reused` jika campaign existing mempunyai item sesuai jumlah yang diharapkan. Campaign kosong menghasilkan kode `OPC_INCOMPLETE_CAMPAIGN`, bukan sukses palsu.
+
+### 5.4 `app/components/ImportPlannerModal.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+onChange={e => {
+  setAccountName(e.target.value);
+  // selectedBrandId tidak berubah
+}}
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+onChange={e => {
+  const profile = brandProfiles.find(bp => bp.id === e.target.value);
+  setSelectedBrandId(profile?.id || '');
+  setAccountName(profile?.account_name || profile?.brand_name || '');
+}}
+```
+
+Payload mengirim kedua nilai:
+
+```js
+global_settings: {
+  account_name: accountName,
+  brand_profile_id: selectedBrandId,
+  target_demographic: targetDemographic,
+  target_demographic_custom: targetDemographicCustom
+}
+```
+
+### 5.5 `app/pillar-campaigns/page.js`
+
+**Code Sebelum (Current/Before)**
+
+```jsx
+<option value="nutribake">nutribake</option>
+<option value="siasatsehat">siasatsehat</option>
+```
+
+Mass production `global_settings` juga belum mengirim account dan target demografi.
+
+**Code Sesudah (Proposed/After)**
+
+```jsx
+{brandProfiles.map(profile => (
+  <option key={profile.id} value={profile.id}>{profile.brand_name}</option>
+))}
+```
+
+```js
+global_settings: {
+  account_name: selectedBrand?.brand_name,
+  brand_profile_id: selectedBrand?.id,
+  target_demographic: targetDemographic,
+  target_demographic_custom: targetDemographicCustom
+}
+```
+
+Scheduler panel menampilkan status efektif dan alasan jika worker mati.
+
+### 5.6 `app/api/v2/pillar-campaigns/route.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+parsedBody = {
+  campaign_name: formData.get('campaign_name'),
+  brand_profile_id: formData.get('brand_profile_id') || null
+  // account_name diabaikan
+};
+await createPillarCampaign(...);
+await createPillarCampaignItem(...);
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const accountName = formData.get('account_name');
+const brand = await requireTenantBrandProfile(brandProfileId, accountName);
+const result = await createPillarCampaignBundle({
+  campaign: { ...normalizedCampaign, account_name: brand.accountName, brand_profile_id: brand.id },
+  items: [normalizedItem]
+});
+return NextResponse.json({ campaign_id: result.campaignId, expected_items: 1, created_items: 1 }, { status: 201 });
+```
+
+### 5.7 `app/api/v2/pillar-campaigns/bulk/route.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+await createPillarCampaign(globalCampaign);
+await db.transaction(async () => {
+  for (const row of rows_data) await createPillarCampaignItem(row);
+})();
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const result = await createPillarCampaignBundle({
+  campaign: normalizeGlobalSettings(global_settings),
+  items: rows_data.map(normalizeBulkItem)
+});
+return NextResponse.json({
+  success: true,
+  campaign_id: result.campaignId,
+  expected_items: rows_data.length,
+  created_items: result.createdItems
+}, { status: 201 });
+```
+
+### 5.8 `lib/campaign-config-labels.js` — file baru
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Label tersebar dan preset baru tidak dikenali halaman detail.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export const AUDIENCE_DEMOGRAPHIC_LABELS = {
+  ibu_rumah_tangga: 'Ibu Rumah Tangga & Keluarga',
+  genz_casual: 'Gen-Z & Milenial Muda',
+  professional_executive: 'Profesional & Worker',
+  hijab_syari_family: 'Keluarga Hijrah & Syari',
+  fitness_health_enthusiast: 'Penggiat Olahraga & Kesehatan'
+};
+
+export const SUBJECT_DEMOGRAPHIC_LABELS = {
+  syari_classic: "Wanita Gamis Syar'i (Hanya Tangan)",
+  caucasian_male: 'Pria Kaukasia (Hanya Tangan)'
+};
+```
+
+### 5.9 `app/pillar-campaigns/[id]/page.js`
+
+**Code Sebelum (Current/Before)**
+
+```jsx
+{getDemographicLabel(campaign.target_demographic, campaign.target_demographic_custom)}
+// Dipakai juga pada Demografi Subjek / Model.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const visualOverrides = safeParseVisualOverrides(campaign.visual_overrides_json);
+```
+
+```jsx
+<span>{getAudienceDemographicLabel(campaign.target_demographic, campaign.target_demographic_custom)}</span>
+<span>{getSubjectDemographicLabel(visualOverrides.subject_demographic, visualOverrides.subject_demographic_custom)}</span>
+```
+
+Brand ditampilkan dengan fallback:
+
+```jsx
+{campaign.account_name || campaign.brand_name || 'Tidak Ditentukan'}
+```
+
+### 5.10 `lib/campaign-scheduler.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+export function isCampaignSchedulerRunning() {
+  return state.isRunning;
 }
 ```
 
 **Code Sesudah (Proposed/After)**
 
 ```js
-const tenantId = getActiveTenantId();
-const result = await insertTenantGeminiKeys({ tenantId, keys });
-return {
-  added: result.added,
-  duplicates: result.duplicates,
-  failures: result.failures
-};
+export function getCampaignSchedulerRuntimeStatus() {
+  return {
+    running: state.isRunning,
+    active_tasks: state.activeTasks.size,
+    last_tick_at: state.lastTickAt,
+    last_error: state.lastError
+  };
+}
 ```
 
-Tambahkan repository/query tenant provisioning, tenant listing, status update, audit event, serta operator credential lookup. Semua query operasional wajib menyertakan `tenant_id` eksplisit.
+Tick mencatat waktu dan error terakhir tanpa mengekspos secret.
 
-### 4.3 `app/api/keys/route.js`
+### 5.11 `app/api/v2/pillar-campaigns/scheduler-control/route.js`
 
 **Code Sebelum (Current/Before)**
+
+```js
+return NextResponse.json({ success: true, isSchedulerActive });
+```
+
+**Code Sesudah (Proposed/After)**
 
 ```js
 return NextResponse.json({
   success: true,
-  message: `Berhasil mengimpor ${result.addedCount} API Key baru ke pool.`
+  scheduler: {
+    process_enabled: process.env.ENABLE_CAMPAIGN_SCHEDULER !== 'false',
+    worker_enabled: isWorkerEnabled(),
+    tenant_enabled: await getSetting('opc_campaigns_scheduler_active') !== 'false',
+    runtime_running: getCampaignSchedulerRuntimeStatus().running,
+    effective_active: processEnabled && workerEnabled && tenantEnabled && runtimeRunning,
+    restart_required: !processEnabled || !workerEnabled
+  }
 });
 ```
 
-**Code Sesudah (Proposed/After)**
+POST hanya mengubah tenant toggle dan mengembalikan status efektif terbaru.
 
-```js
-const success = result.added > 0 || result.duplicates > 0;
-return NextResponse.json({
-  success,
-  summary: {
-    added: result.added,
-    duplicates: result.duplicates,
-    rejected: rejectedKeys.length,
-    failed: result.failures.length
-  },
-  errors: maskImportFailures(result.failures)
-}, { status: success ? 200 : 500 });
+### 5.12 `.env.staging.local.example` dan `.env.staging.local`
+
+**Code Sebelum (Current/Before)**
+
+```env
+ENABLE_CAMPAIGN_SCHEDULER=false
+ENABLE_SCHEDULER_WORKER=false
 ```
 
-### 4.4 `app/settings/page.js`
+**Code Sesudah (Proposed/After)**
+
+```env
+ENABLE_CAMPAIGN_SCHEDULER=true
+ENABLE_SCHEDULER_WORKER=true
+```
+
+Perubahan `.env.staging.local` dilakukan hanya setelah schema/item test lulus. Production mengikuti node topology dan tidak otomatis mengaktifkan worker di semua node.
+
+### 5.13 `scripts/repair-opc-campaign.mjs` — file baru
 
 **Code Sebelum (Current/Before)**
 
 ```js
-if (data.success) {
-  showToast(data.message);
-  fetchPool();
-}
+// Tidak ada alat pemulihan campaign yatim.
 ```
 
 **Code Sesudah (Proposed/After)**
 
 ```js
-setImportSummary(data.summary);
-await fetchPool();
-showToast(formatImportResult(data.summary), data.success ? 'success' : 'error');
+// Default dry-run:
+npm run repair:opc -- --campaign opc_260802_zr0a5x
+
+// Apply eksplisit setelah preview disetujui:
+npm run repair:opc -- --campaign opc_260802_zr0a5x --apply
 ```
 
-UI menampilkan empat angka terpisah dan tidak pernah menampilkan nilai API key utuh.
+Script memverifikasi tenant, campaign kosong, planner/row sumber, Brand Profile, konfigurasi demografi/VSO, lalu membuat item menggunakan transaksi bundle. Script idempotent dan menolak apply jika item sudah tersedia.
 
-### 4.5 `scripts/admin.mjs` dan `package.json`
-
-**Code Sebelum (Current/Before)**
-
-```json
-{
-  "scripts": {
-    "operator": "node scripts/makna-operator.mjs"
-  }
-}
-```
-
-Belum ada jalur aman untuk membuat akun superadmin pertama.
-
-**Code Sesudah (Proposed/After)**
-
-```json
-{
-  "scripts": {
-    "admin": "node scripts/admin.mjs",
-    "operator": "node scripts/makna-operator.mjs"
-  }
-}
-```
-
-```js
-// npm run admin -- create-superadmin --username <name> --email <email>
-// Password dibaca dari prompt tersembunyi atau MAKNA_ADMIN_BOOTSTRAP_PASSWORD,
-// tidak diterima sebagai argumen CLI dan tidak pernah dicetak.
-await createSuperadmin({ username, email, password, actor: 'bootstrap-cli' });
-```
-
-Command bootstrap ditolak jika superadmin sudah ada, kecuali dijalankan melalui jalur otorisasi superadmin aktif yang terpisah.
-
-### 4.6 `lib/superadmin-service.js` — file baru
+### 5.14 `scripts/test-opc-integrity.mjs` — file baru
 
 **Code Sebelum (Current/Before)**
 
 ```js
-// Belum ada service lifecycle superadmin.
+// Belum ada regression test integritas OPC multi-tenant.
 ```
 
 **Code Sesudah (Proposed/After)**
 
 ```js
-export async function createSuperadmin(input, actor) {
-  validateStrongPassword(input.password);
-  return withTransaction(async tx => {
-    const user = await insertControlPlaneUser(tx, {
-      ...input,
-      tenantId: null,
-      role: 'superadmin'
-    });
-    await recordTenantAudit(tx, actor, null, 'superadmin.created');
-    return sanitizeUser(user);
-  });
-}
-
-export async function deactivateSuperadmin(id, actor) {
-  await assertAnotherActiveSuperadminExists(id);
-  // update status dan audit secara transaksional
-}
+await testItemIdentitySequence();
+await testCampaignRollbackWhenItemFails();
+await testBrandAndAudiencePropagation();
+await testVisualSubjectLabel();
+await testSchedulerEffectiveStatus();
+await testCrossTenantBrandRejected();
 ```
 
-### 4.7 `lib/tenant-admin.js` — file baru
-
-**Code Sebelum (Current/Before)**
-
-```js
-// Belum ada service provisioning tenant.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-export async function provisionTenant(input, actor) {
-  return withTransaction(async tx => {
-    const tenant = await createTenant(tx, normalizeTenant(input));
-    const admin = await createTenantAdmin(tx, tenant.id, input.admin);
-    await seedTenantSettings(tx, tenant.id, input.defaults);
-    await grantTenantAdminMenus(tx, admin.id);
-    await recordTenantAudit(tx, actor, tenant.id, 'tenant.created');
-    return { tenant, admin: sanitizeUser(admin) };
-  });
-}
-```
-
-### 4.8 `app/api/admin/tenants/route.js` — file baru
-
-**Code Sebelum (Current/Before)**
-
-```js
-// Tidak ada endpoint tenant management.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-export async function GET(req) {
-  requireSuperadmin(req);
-  return NextResponse.json({ tenants: await listTenantsWithCounts() });
-}
-
-export async function POST(req) {
-  const actor = requireSuperadmin(req);
-  const result = await provisionTenant(await req.json(), actor);
-  return NextResponse.json({ success: true, ...result }, { status: 201 });
-}
-```
-
-### 4.9 `app/api/admin/tenants/[tenantId]/route.js` — file baru
-
-**Code Sebelum (Current/Before)**
-
-```js
-// Tidak ada endpoint status tenant.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-export async function PATCH(req, { params }) {
-  const actor = requireSuperadmin(req);
-  return updateTenantStatus((await params).tenantId, await req.json(), actor);
-}
-```
-
-Endpoint hanya mendukung update metadata/status; tidak menyediakan hard delete.
-
-### 4.10 `app/settings/tenants/page.js` — file baru
-
-**Code Sebelum (Current/Before)**
-
-```jsx
-// Belum ada halaman Tenant Management.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```jsx
-<TenantTable tenants={tenants} />
-<CreateTenantDialog
-  fields={['name', 'slug', 'timezone', 'admin_username', 'admin_email', 'admin_password']}
-/>
-```
-
-Halaman menampilkan jumlah user/brand/key per tenant, status, timezone, dan aksi aktivasi/nonaktif.
-
-### 4.11 `app/components/Sidebar.js`
-
-**Code Sebelum (Current/Before)**
-
-```js
-{ label: 'User Management', href: '/settings/users', adminOnly: true }
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-{ label: 'Tenant Management', href: '/settings/tenants', superadminOnly: true },
-{ label: 'User Management', href: '/settings/users', adminOnly: true }
-```
-
-### 4.12 `app/api/admin/users/route.js`
-
-**Code Sebelum (Current/Before)**
-
-```js
-const { username, email, password, role = 'user' } = body;
-await db.prepare('INSERT INTO users (...) VALUES (...)').run(...);
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-const admin = requireTenantAdmin(req);
-await createUser({
-  tenantId: admin.tenantId,
-  username,
-  email,
-  password,
-  role: normalizeTenantRole(role)
-});
-```
-
-Admin tenant tidak boleh membuat `superadmin` dan tidak boleh mengirim `tenant_id` sendiri.
-
-### 4.13 `lib/auth.js`
-
-**Code Sebelum (Current/Before)**
-
-```js
-if (currentUser.role === 'superadmin') {
-  return { tenantId: '__none__' };
-}
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-export function requireSuperadmin(req) { /* platform control plane only */ }
-export function requireTenantAdmin(req) { /* current tenant only */ }
-export function assertTenantActive(user) { /* reject suspended tenant */ }
-```
-
-Superadmin tetap tidak memperoleh akses implisit ke data planner/campaign tenant.
-
-### 4.14 `lib/operator-auth.js`
-
-**Code Sebelum (Current/Before)**
-
-```js
-return {
-  tenantId: process.env.MAKNA_OPERATOR_TENANT_ID || 'default_tenant',
-  actor: 'operator-api'
-};
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-const credential = await findOperatorCredential(hashToken(suppliedToken));
-assertActiveCredential(credential);
-return {
-  tenantId: credential.tenant_id,
-  actor: credential.id,
-  scopes: credential.scopes
-};
-```
-
-### 4.15 `lib/operator-content-worker.js`
-
-**Code Sebelum (Current/Before)**
-
-```js
-const tenantId = process.env.MAKNA_OPERATOR_TENANT_ID || 'default_tenant';
-await tenantContext.run(tenantId, processNextJob);
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-for (const tenantId of await listTenantsWithQueuedOperatorJobs()) {
-  await tenantContext.run(tenantId, () => processNextTenantJob(tenantId));
-}
-```
-
-### 4.16 `scripts/makna-operator.mjs`
-
-**Code Sebelum (Current/Before)**
-
-```js
-npm run operator -- create|status|approve
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-npm run operator -- whoami
-npm run operator -- create --file request.json --wait
-npm run operator -- status <job-id> --watch
-npm run operator -- approve <job-id> --all
-```
-
-CLI menampilkan identitas tenant/scope tanpa mencetak token.
-
-### 4.17 `plugins/makna-content-operator/.codex-plugin/plugin.json` — file baru
-
-**Code Sebelum (Current/Before)**
-
-```json
-// Plugin belum ada.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```json
-{
-  "name": "makna-content-operator",
-  "version": "0.1.0",
-  "description": "Create and operate tenant-scoped MAKNA content jobs through the official Operator API."
-}
-```
-
-Manifest final akan dihasilkan dan divalidasi dengan helper resmi `plugin-creator`, bukan diasumsikan manual.
-
-### 4.18 `plugins/makna-content-operator/skills/content-operator/SKILL.md` — file baru
-
-**Code Sebelum (Current/Before)**
-
-```md
-<!-- Skill belum ada. -->
-```
-
-**Code Sesudah (Proposed/After)**
-
-```md
-# MAKNA Content Operator
-
-Use the Operator API for create, status, wait, and approval workflows.
-Never request or enable social publishing.
-Require explicit approval before approving generated storyboards.
-```
-
-### 4.19 `plugins/makna-content-operator/scripts/makna-content-operator.mjs` — file baru
-
-**Code Sebelum (Current/Before)**
-
-```js
-// Belum ada wrapper plugin.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-// Thin wrapper over the supported Operator HTTP contract.
-// Commands: whoami, create, status, wait, approve.
-// Secrets are read from environment and never printed.
-```
-
-### 4.20 `scripts/test-tenant-key-pool.mjs` dan `scripts/test-operator-content.mjs`
-
-**Code Sebelum (Current/Before)**
-
-```js
-// Belum ada coverage tenant/key pool lengkap;
-// operator test masih menggunakan konfigurasi tenant tunggal.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-await testTenantProvisioningRollback();
-await testInitialSuperadminBootstrap();
-await testTenantAdminCannotCreateSuperadmin();
-await testLastSuperadminCannotBeDisabled();
-await testBulkImport21Keys();
-await testCrossTenantIsolation();
-await testOperatorTokenTenantBinding();
-await testOperatorIdempotency();
-```
-
-## 5. Strategi Verifikasi
-
-1. Migrasi dijalankan dua kali dan tetap idempotent.
-2. Bootstrap superadmin pertama tanpa password di argumen/log, lalu verifikasi login.
-3. Pastikan bootstrap kedua ditolak, tenant admin tidak dapat membuat superadmin, dan superadmin aktif terakhir tidak dapat dinonaktifkan.
-4. Buat Tenant A dan Tenant B beserta admin awal.
-5. Admin A tidak dapat melihat user, brand, key, planner, atau job Tenant B.
-6. Impor 21 Gemini key ke Tenant A; UI dan database harus menunjukkan hasil yang sama.
-7. Ulangi key yang sama dan pastikan dihitung sebagai duplicate, bukan failure.
-8. Simulasikan error database dan pastikan UI tidak mengatakan sukses.
-9. Buat operator credential berbeda untuk Tenant A/B dan pastikan job terikat benar.
-10. Jalankan CLI dan plugin: `whoami`, create idempotent, status/wait, approval.
-11. Pastikan payload `enable_social_post=true` tetap ditolak.
-12. Jalankan lint, test terkait, build produksi, dan smoke test staging.
-
-## 6. Strategi Rilis
-
-- Satu patch release setelah seluruh checklist dan verifikasi berhasil.
-- Jalankan SOP `release-non-interactive` dengan changelog tenant provisioning, Gemini Key Pool, dan plugin operator.
-- Pastikan branch `main` dan tag rilis terunggah ke remote.
-- Deploy Node 1 hanya melalui `npm run deploy:node1` jika pengguna meminta deployment produksi/staging Node 1.
+## 6. Strategi Verifikasi
+
+1. Jalankan migrasi dua kali dan pastikan sequence tetap valid.
+2. Buat campaign single dan pastikan tepat satu item tersimpan.
+3. Buat campaign bulk 3 baris dan pastikan tepat tiga item tersimpan.
+4. Paksa kegagalan item kedua dan pastikan campaign serta item pertama ikut rollback.
+5. Import planner dengan Nutribake, `ibu_rumah_tangga`, dan `syari_classic`.
+6. Pastikan API detail mengembalikan Brand Profile, target audiens, dan VSO yang berbeda.
+7. Pastikan UI menampilkan:
+   - `nutribake`
+   - `Ibu Rumah Tangga & Keluarga`
+   - `Wanita Gamis Syar'i (Hanya Tangan)`
+8. Pastikan scheduler API tidak mengklaim aktif ketika environment gate mati.
+9. Aktifkan scheduler staging, restart, dan pastikan `effective_active=true` serta `last_tick_at` berubah.
+10. Dry-run lalu repair `opc_260802_zr0a5x`; pastikan item terbentuk dan generation bergerak dari `pending`.
+11. Jalankan regression Content Planner, Operator API, build, dan staging smoke check.
+
+## 7. Strategi Rilis
+
+- Patch release setelah seluruh test dan repair staging berhasil.
+- Changelog mencatat schema item identity, OPC atomic bundle, configuration propagation, VSO display, dan scheduler observability.
+- Verifikasi `origin/main`, tag rilis, dan staging version setelah restart.
 
 ## Execution Task List
 
-- [x] Audit schema, constraint, dan seluruh query tenant-sensitive.
-- [x] Tambahkan migrasi tenant metadata, audit, Gemini key ID, dan unique tenant-scoped.
-- [x] Refaktor repository Gemini Key Pool menjadi tenant-aware dan error-transparent.
-- [x] Perbaiki API serta UI hasil impor Gemini key.
-- [x] Tambahkan test Gemini single/bulk/duplicate/failure dan isolasi tenant.
-- [x] Implementasikan CLI bootstrap superadmin tanpa password pada argumen atau log.
-- [x] Implementasikan lifecycle, audit, dan perlindungan superadmin aktif terakhir.
-- [x] Tambahkan test bootstrap/login serta larangan eskalasi role oleh tenant admin.
-- [x] Implementasikan service provisioning tenant transaksional.
-- [x] Implementasikan API Tenant Management khusus superadmin.
-- [x] Implementasikan UI Tenant Management dan navigasi berbasis role.
-- [x] Kunci User Management serta status login ke tenant aktif.
-- [x] Migrasikan autentikasi Operator API ke credential tenant-scoped dan scopes.
-- [x] Perbarui worker dan CLI untuk multi-tenant serta command `whoami`.
-- [x] Scaffold plugin `makna-content-operator` dengan skill dan script wrapper.
-- [x] Validasi manifest/plugin dan lakukan smoke test terhadap staging.
-- [x] Jalankan lint, test, build, dan regression test Content Planner/OPC.
-- [x] Perbarui seluruh checkbox secara real-time selama eksekusi.
-- [x] Jalankan patch release, verifikasi tag dan sinkronisasi `main` sesuai SOP.
+- [x] Tambahkan migrasi identity sequence item OPC dan metadata campaign.
+- [x] Implementasikan repository transaksi nyata campaign + items.
+- [x] Migrasikan jalur OPC single ke campaign bundle atomik.
+- [x] Migrasikan jalur OPC bulk ke campaign bundle atomik.
+- [x] Migrasikan Import Planner/Operator ingest ke campaign bundle atomik.
+- [x] Perbaiki sinkronisasi dropdown account dengan Brand Profile ID.
+- [x] Propagasikan account dan target demografi pada seluruh jalur OPC.
+- [x] Tambahkan shared label map audiens dan subjek visual.
+- [x] Perbaiki halaman detail agar membaca VSO dari JSON yang benar.
+- [x] Tambahkan scheduler runtime observability dan effective status API.
+- [x] Perbaiki panel/toggle scheduler agar menampilkan alasan yang jujur.
+- [x] Tambahkan regression test OPC identity, rollback, konfigurasi, tenant, dan scheduler.
+- [x] Jalankan test, build, dan smoke test staging.
+- [x] Aktifkan campaign scheduler pada local staging pilot dan restart.
+- [x] Jalankan dry-run pemulihan `opc_260802_zr0a5x`.
+- [x] Terapkan pemulihan setelah hasil dry-run diverifikasi.
+- [x] Verifikasi campaign memiliki item dan pipeline mulai berjalan.
+- [x] Perbarui checkbox secara real-time selama eksekusi.
+- [ ] Jalankan patch release serta sinkronisasi `main` dan tag sesuai SOP.

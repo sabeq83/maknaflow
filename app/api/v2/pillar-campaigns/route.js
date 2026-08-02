@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server';
-import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
 import { 
-  createPillarCampaign, 
-  createPillarCampaignItem, 
+  createPillarCampaignBundle,
   listPillarCampaigns,
   getDb,
   getSetting
@@ -58,6 +56,7 @@ export async function POST(request) {
       const formData = await request.formData();
       parsedBody = {
         campaign_name: formData.get('campaign_name'),
+        account_name: formData.get('account_name') || null,
         status: formData.get('status') || 'running',
         content_pillar: formData.get('content_pillar'),
         custom_hook: formData.get('custom_hook'),
@@ -232,9 +231,17 @@ export async function POST(request) {
       return NextResponse.json({ error: 'visual_action_guideline is required' }, { status: 400 });
     }
 
-    await createPillarCampaign({
+    let accountName = parsedBody.account_name || null;
+    if (brand_profile_id) {
+      const brand = await getDb().prepare('SELECT id, brand_name FROM brand_profiles WHERE id = ?').get(brand_profile_id);
+      if (!brand) return NextResponse.json({ error: 'Brand Account tidak ditemukan pada tenant aktif' }, { status: 400 });
+      accountName = brand.brand_name || accountName;
+    }
+
+    const campaignData = {
       id,
       campaign_name: campaign_name.trim(),
+      account_name: accountName,
       status: status || 'running',
       content_pillar: content_pillar.trim(),
       custom_hook: custom_hook.trim(),
@@ -289,11 +296,14 @@ export async function POST(request) {
       enable_audio_segment: enable_audio_segment || 0,
       target_demographic: target_demographic || null,
       target_demographic_custom: target_demographic_custom || null
+    };
+
+    await createPillarCampaignBundle({
+      campaign: campaignData,
+      items: [{ campaign_id: id }]
     });
 
-    await createPillarCampaignItem({ campaign_id: id });
-
-    return NextResponse.json({ campaign: { id, campaign_name, status: 'running' } }, { status: 201 });
+    return NextResponse.json({ campaign: { id, campaign_name, status: campaignData.status }, expected_items: 1, created_items: 1 }, { status: 201 });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

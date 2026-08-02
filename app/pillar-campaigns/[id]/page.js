@@ -4,6 +4,7 @@ import Sidebar from '../../components/Sidebar';
 import Link from 'next/link';
 import { useEffect, useState, Fragment } from 'react';
 import { useParams } from 'next/navigation';
+import { getDemographicLabel, getVisualOverrideLabel, parseVisualOverrides } from '../../../lib/campaign-config-labels';
 
 const writeToClipboard = (text) => {
   if (typeof window !== 'undefined') {
@@ -61,15 +62,6 @@ const getFormattedPrompt = (val) => {
   }
   return val;
 };
-
-const getDemographicLabel = (demographic, custom) => {
-  if (demographic === 'custom') return custom || 'Custom';
-  if (demographic === 'genz_casual') return 'Gen Z (Casual / Slang)';
-  if (demographic === 'millennial_professional') return 'Millennial (Professional / Formal)';
-  if (demographic === 'parent_warm') return 'Parents / Warm & Caring';
-  return demographic || 'Generik / Kasual';
-};
-
 
 const GEMINI_VOICES = [
   { id: 'Kore', name: 'Kore (Female)', avatar: '👩', desc: 'Standard Female (Skincare/Cosmetic)' },
@@ -2847,7 +2839,8 @@ export default function PillarCampaignDetailPage() {
     );
   }
 
-  const isVsoActive = !!campaign.visual_overrides_json;
+  const visualOverrides = parseVisualOverrides(campaign.visual_overrides_json);
+  const isVsoActive = visualOverrides.is_vso_active !== false && Object.keys(visualOverrides).length > 0;
 
   return (
     <div className="app-layout">
@@ -2880,7 +2873,7 @@ export default function PillarCampaignDetailPage() {
               <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 12, fontSize: '0.9rem', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)', paddingBottom: 16, marginBottom: 20 }}>
                 <span>🔑 ID: <code style={{ background: 'rgba(255,255,255,0.05)', padding: '3px 8px', borderRadius: '4px', color: 'var(--accent-light)', fontFamily: 'monospace', fontSize: '0.85rem' }}>{campaign.id}</code></span>
                 <span style={{ opacity: 0.3 }}>|</span>
-                <span>🏷️ Brand: <strong>{campaign.brand_name || 'Tidak Ditentukan'}</strong></span>
+                <span>🏷️ Brand: <strong>{campaign.account_name || campaign.brand_name || 'Tidak Ditentukan'}</strong></span>
                 <span style={{ opacity: 0.3 }}>|</span>
                 <span>📅 Dibuat: <strong>{new Date(campaign.created_at).toLocaleString('id-ID')}</strong></span>
               </div>
@@ -2950,7 +2943,7 @@ export default function PillarCampaignDetailPage() {
               <div style={{ padding: '20px', borderTop: '1px solid var(--border)', background: 'rgba(0,0,0,0.2)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>🏷️ Nama Akun (Brand Account)</span>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{campaign.brand_name || 'Tidak Ditentukan'}</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{campaign.account_name || campaign.brand_name || 'Tidak Ditentukan'}</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>Parent Folder Nextcloud</span>
@@ -3071,15 +3064,15 @@ export default function PillarCampaignDetailPage() {
               <div style={{ padding: '20px', borderTop: '1px solid var(--border)', background: 'rgba(0,0,0,0.2)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>Konsep Karakter (Framing)</span>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{campaign.face_visibility || 'Faceless Close-Up Shot'}</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{getVisualOverrideLabel('character', visualOverrides.character_concept)}</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>Demografi Subjek / Model</span>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{getDemographicLabel(campaign.target_demographic, campaign.target_demographic_custom)}</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{getVisualOverrideLabel('subject', visualOverrides.subject_demographic)}</span>
                 </div>
                 <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>Pencahayaan & Gaya Sinematik (Lighting Ambiance)</span>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{campaign.visual_style || 'Cinematic Warm Moody Accent'}</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{getVisualOverrideLabel('lighting', visualOverrides.lighting_style)}</span>
                 </div>
               </div>
             </details>

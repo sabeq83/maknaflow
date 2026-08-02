@@ -60,6 +60,7 @@ export default function OrganicPillarPage() {
 
   // Scheduler & Logger States
   const [isSchedulerActive, setIsSchedulerActive] = useState(true);
+  const [schedulerDetail, setSchedulerDetail] = useState(null);
   const [terminalLogs, setTerminalLogs] = useState('Menginisialisasi log OPC...');
   const [expandedCampaignId, setExpandedCampaignId] = useState(null);
   const logIntervalRef = useRef(null);
@@ -233,7 +234,10 @@ export default function OrganicPillarPage() {
     try {
       const res = await fetch('/api/v2/pillar-campaigns/scheduler-control');
       const data = await res.json();
-      if (data.success) setIsSchedulerActive(data.isSchedulerActive);
+      if (data.success) {
+        setIsSchedulerActive(data.isSchedulerActive);
+        setSchedulerDetail(data.scheduler || null);
+      }
     } catch (e) {}
   }
 
@@ -254,12 +258,13 @@ export default function OrganicPillarPage() {
       const res = await fetch('/api/v2/pillar-campaigns/scheduler-control', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ schedulerStatus: !isSchedulerActive })
+        body: JSON.stringify({ schedulerStatus: !(schedulerDetail?.configured ?? isSchedulerActive) })
       });
       const json = await res.json();
       if (json.success) {
-        setIsSchedulerActive(!isSchedulerActive);
-        showToast(`Skeduler berhasil ${!isSchedulerActive ? 'diaktifkan' : 'dimatikan'}`);
+        setIsSchedulerActive(json.isSchedulerActive);
+        setSchedulerDetail(json.scheduler || null);
+        showToast(json.isSchedulerActive ? 'Skeduler aktif dan worker berjalan' : `Skeduler belum efektif: ${json.scheduler?.process_enabled === false ? 'proses server dinonaktifkan' : json.scheduler?.worker_enabled === false ? 'worker dinonaktifkan' : 'konfigurasi nonaktif'}`, json.isSchedulerActive ? 'success' : 'error');
         pollLogs();
       } else {
         showToast('Gagal mengubah status skeduler: ' + json.error, 'error');
@@ -478,6 +483,9 @@ export default function OrganicPillarPage() {
           status: submitStatus,
           custom_instruction: customInstruction,
           brand_profile_id: selectedBrandId || null,
+          account_name: accountName || null,
+          target_demographic: targetDemographic,
+          target_demographic_custom: targetDemographicCustom,
           narrative_mode: narrativeMode,
           visual_style: visualStyle,
           face_visibility: faceVisibility,
@@ -1054,16 +1062,12 @@ export default function OrganicPillarPage() {
                         <label className="form-label">🏷️ Nama Akun (Brand Account)</label>
                         <select
                           className="form-input"
-                          value={accountName}
+                          value={selectedBrandId}
                           onChange={e => {
-                            const newAcc = e.target.value;
+                            const matchingProfile = brandProfiles.find(bp => bp.id === e.target.value);
+                            const newAcc = matchingProfile?.brand_name || '';
+                            setSelectedBrandId(matchingProfile?.id || '');
                             setAccountName(newAcc);
-                            const matchingProfile = brandProfiles.find(bp => (bp.account_name || bp.brand_name) === newAcc);
-                            if (matchingProfile) {
-                              setSelectedBrandId(matchingProfile.id);
-                            } else {
-                              setSelectedBrandId('');
-                            }
                             const now = new Date();
                             const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
                             setCampaignName(`[ OPC ${dateStr} ] - ${newAcc ? newAcc + ' - ' : ''}`);
@@ -1071,12 +1075,10 @@ export default function OrganicPillarPage() {
                         >
                           <option value="">-- Pilih Nama Akun Brand --</option>
                           {brandProfiles.map(bp => (
-                            <option key={bp.id} value={bp.account_name || bp.brand_name}>
-                              {bp.brand_name} ({bp.account_name || bp.brand_name})
+                            <option key={bp.id} value={bp.id}>
+                              {bp.brand_name}
                             </option>
                           ))}
-                          <option value="nutribake">nutribake</option>
-                          <option value="siasatsehat">siasatsehat</option>
                         </select>
                       </div>
                       <div className="form-group" style={{ marginBottom: 0 }}>
@@ -1896,7 +1898,7 @@ export default function OrganicPillarPage() {
                 ⚙️ Status Skeduler Organic Pillar Campaign
               </h3>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '4px 0 0' }}>
-                Mengontrol jalannya antrean pembuatan video OPC secara otomatis.
+                Mengontrol antrean video OPC otomatis. {schedulerDetail ? `Node: ${schedulerDetail.node_role} · Worker: ${schedulerDetail.worker_enabled ? 'siap' : 'mati'} · Tick: ${schedulerDetail.last_tick_at ? new Date(schedulerDetail.last_tick_at).toLocaleTimeString('id-ID') : 'belum ada'}` : ''}
               </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -1912,14 +1914,14 @@ export default function OrganicPillarPage() {
               <button
                 type="button"
                 onClick={toggleGlobalScheduler}
-                className={`btn ${isSchedulerActive ? 'btn-danger' : 'btn-success'}`}
+                className={`btn ${(schedulerDetail?.configured ?? isSchedulerActive) ? 'btn-danger' : 'btn-success'}`}
                 style={{
                   fontSize: '0.8rem', padding: '6px 16px', fontWeight: 600,
                   boxShadow: isSchedulerActive ? '0 0 15px rgba(235, 77, 75, 0.4)' : '0 0 15px rgba(46, 204, 113, 0.4)',
                   border: isSchedulerActive ? '1px solid rgba(235, 77, 75, 0.6)' : '1px solid rgba(46, 204, 113, 0.6)'
                 }}
               >
-                {isSchedulerActive ? '🛑 STOP SKEDULER' : '▶️ START SKEDULER'}
+                {(schedulerDetail?.configured ?? isSchedulerActive) ? '🛑 STOP SKEDULER' : '▶️ START SKEDULER'}
               </button>
             </div>
           </div>
