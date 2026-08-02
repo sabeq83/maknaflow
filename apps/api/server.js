@@ -3,11 +3,19 @@ import cors from 'cors';
 import { getPgPool, pgQuery } from '../../lib/db-pg.js';
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = Number(process.env.API_PORT || 7010);
+const HOST = process.env.API_HOST || '127.0.0.1';
+const allowedOrigins = new Set([
+  process.env.STAGING_WEB_ORIGIN || 'http://127.0.0.1:5010',
+  'http://localhost:5010'
+]);
 
 // Enable CORS & JSON Parsing
 app.use(cors({
-  origin: '*',
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.has(origin)) return callback(null, true);
+    return callback(new Error('Origin not allowed'));
+  },
   methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -24,7 +32,7 @@ app.get('/health', async (req, res) => {
       status: 'healthy',
       engine: 'MAKNA Flow Headless Core API V2.0',
       port: PORT,
-      database: 'PostgreSQL 18.4 (Node 3 100.78.186.123:5432)',
+      database: `${process.env.PGHOST || '127.0.0.1'}:${process.env.PGPORT || '5432'}/${process.env.PGDATABASE || 'maknaflow_staging'}`,
       pgVersion: dbRes.rows[0].version
     });
   } catch (err) {
@@ -173,6 +181,6 @@ app.get('/api/v2/auth/me', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 MAKNA Flow Headless Core API V2.0 listening on http://0.0.0.0:${PORT}`);
+app.listen(PORT, HOST, () => {
+  console.log(`🚀 MAKNA Flow Headless Core API V2.0 listening on http://${HOST}:${PORT}`);
 });

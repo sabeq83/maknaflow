@@ -123,7 +123,13 @@ export default function ImportPlannerModal({
         setProductDesc(p.product_description || '');
         setProductUsp(p.product_usp || '');
         setProductRefImage(p.product_ref_image || p.product_photo_url || '');
-        setCustomInstruction(p.custom_instruction || 'akhiran skrip/voiceover : produk ori ada di keranjang ya!');
+        if (p.planner_focus === 'brand_editorial') {
+          setIsBridgingActive(false);
+          setCustomInstruction(p.brand_context || 'Konten editorial non-promosi; jangan mengarang produk.');
+        } else {
+          setIsBridgingActive(true);
+          setCustomInstruction(p.custom_instruction || 'akhiran skrip/voiceover : produk ori ada di keranjang ya!');
+        }
         if (p.target_audience) {
           setTargetDemographic(p.target_audience);
         }
@@ -306,7 +312,7 @@ export default function ImportPlannerModal({
                       >
                         <option value="">-- Pilih Content Planner --</option>
                         {planners.map(p => (
-                          <option key={p.id} value={p.id}>{p.title || p.planner_name} ({p.product_name})</option>
+                          <option key={p.id} value={p.id}>{p.title || p.planner_name} ({p.planner_focus === 'brand_editorial' ? 'Brand Editorial' : p.product_name})</option>
                         ))}
                       </select>
                     </div>
@@ -349,7 +355,7 @@ export default function ImportPlannerModal({
                             </span>
                           </div>
                           <div style={{ fontSize: '14px', fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {productName || planner.product_name || 'Tanpa Nama Produk'}
+                            {planner.planner_focus === 'brand_editorial' ? 'Brand Editorial — produk tidak wajib' : (productName || planner.product_name || 'Tanpa Nama Produk')}
                           </div>
                           <div style={{ fontSize: '11px', color: '#cbd5e1', marginTop: '2px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                             {productUsp || productDesc || planner.product_description || 'Visual produk terverifikasi untuk proses pembuatan kampanye.'}

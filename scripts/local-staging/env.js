@@ -1,0 +1,44 @@
+import fs from 'fs';
+import path from 'path';
+
+const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '::1']);
+const REQUIRED = ['HOSTNAME', 'PORT', 'API_HOST', 'API_PORT', 'PGHOST', 'PGPORT', 'PGUSER', 'PGPASSWORD', 'PGDATABASE'];
+
+export function loadStagingEnv() {
+  const envPath = path.join(process.cwd(), '.env.staging.local');
+  if (!fs.existsSync(envPath)) {
+    throw new Error('Missing .env.staging.local. Copy .env.staging.local.example first.');
+  }
+
+  const env = { ...process.env };
+  for (const rawLine of fs.readFileSync(envPath, 'utf8').split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith('#')) continue;
+    const separator = line.indexOf('=');
+    if (separator < 1) continue;
+    const key = line.slice(0, separator).trim();
+    let value = line.slice(separator + 1).trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    env[key] = value;
+  }
+
+  for (const key of REQUIRED) {
+    if (!env[key]) throw new Error(`Missing required staging variable: ${key}`);
+  }
+  if (env.APP_ENV !== 'staging') throw new Error('APP_ENV must be staging');
+  if (!LOOPBACK_HOSTS.has(env.HOSTNAME)) throw new Error('HOSTNAME must be loopback-only');
+  if (!LOOPBACK_HOSTS.has(env.API_HOST)) throw new Error('API_HOST must be loopback-only');
+  if (!LOOPBACK_HOSTS.has(env.PGHOST)) throw new Error('PGHOST must be loopback-only');
+  if (env.PORT !== '5010' || env.API_PORT !== '7010') throw new Error('Staging ports must be PORT=5010 and API_PORT=7010');
+  if (env.PGDATABASE !== 'maknaflow_staging') throw new Error('PGDATABASE must be maknaflow_staging');
+
+  const forbiddenPattern = /(tail[0-9a-z.-]*\.ts\.net|100\.\d+\.\d+\.\d+)/i;
+  for (const [key, value] of Object.entries(env)) {
+    if (typeof value === 'string' && forbiddenPattern.test(value)) {
+      throw new Error(`Remote cluster address detected in ${key}`);
+    }
+  }
+  return env;
+}

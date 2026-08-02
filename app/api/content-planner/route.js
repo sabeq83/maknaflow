@@ -24,9 +24,10 @@ export async function POST(request) {
   try {
     const body = await request.json();
     const result = await createDraftContentPlanner(body);
-    return NextResponse.json({ success: true, ...result });
+    return NextResponse.json({ success: true, ...result }, { status: 201 });
   } catch (error) {
     console.error('[API /content-planner POST Error]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    const status = error.code === 'CONTENT_PLANNER_VALIDATION' ? 400 : 500;
+    return NextResponse.json({ success: false, error: error.message }, { status });
   }
 }

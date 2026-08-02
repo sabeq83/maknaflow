@@ -48,14 +48,30 @@ export async function register() {
       console.log('ℹ️  MAKNA Scheduler V4 available. Start manually from Settings or set MAKNA_SCHEDULER=1.');
     }
 
-    // Always start campaign scheduler in background
-    try {
-      const { startCampaignScheduler } = await import('./lib/campaign-scheduler.js');
-      startCampaignScheduler();
-      console.log('⚡ MAKNA Campaign Local Scheduler V7.3 auto-started.');
-    } catch (err) {
-      console.error('❌ Failed to start MAKNA Campaign Local Scheduler:', err.message);
+    const backgroundServicesEnabled = process.env.ENABLE_BACKGROUND_SERVICES !== 'false';
+    const campaignSchedulerEnabled = process.env.ENABLE_CAMPAIGN_SCHEDULER !== 'false';
+
+    if (backgroundServicesEnabled && campaignSchedulerEnabled) {
+      try {
+        const { startCampaignScheduler } = await import('./lib/campaign-scheduler.js');
+        startCampaignScheduler();
+        console.log('⚡ MAKNA Campaign Local Scheduler V7.3 auto-started.');
+      } catch (err) {
+        console.error('❌ Failed to start MAKNA Campaign Local Scheduler:', err.message);
+      }
+    } else {
+      console.log('ℹ️  MAKNA Campaign Local Scheduler disabled by environment.');
+    }
+
+    if (backgroundServicesEnabled && process.env.ENABLE_OPERATOR_WORKER !== 'false') {
+      try {
+        const { startOperatorContentWorker } = await import('./lib/operator-content-worker.js');
+        startOperatorContentWorker();
+      } catch (err) {
+        console.error('❌ Failed to start MAKNA Operator Content Worker:', err.message);
+      }
+    } else {
+      console.log('ℹ️  MAKNA Operator Content Worker disabled by environment.');
     }
   }
 }
-

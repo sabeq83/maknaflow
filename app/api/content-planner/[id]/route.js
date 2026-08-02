@@ -17,6 +17,7 @@ export async function GET(request, { params }) {
       success: true,
       planner: {
         ...planner,
+        pillars: (() => { try { return JSON.parse(planner.pillars_json || '[]'); } catch (_) { return []; } })(),
         rows
       }
     });

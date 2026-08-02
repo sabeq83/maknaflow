@@ -17,6 +17,7 @@ data/chrome_debug/
 .env
 .env.local
 .env.production.local
+.env.staging.local
 
 # Temp files
 migrate.js
@@ -73,3 +74,8 @@ deploy.sh
 # Playwright profiles and local chrome data
 data/playwright-profile/
 
+# Local staging runtime data
+data/staging/
+logs/staging/
+public/staging-uploads/
+public/staging-rendered/

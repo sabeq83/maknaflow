@@ -193,10 +193,21 @@ Example:
 
 Required inputs:
 
-- `brand_id`
+- `planner_focus`: `product_campaign` atau `brand_editorial`
+- `brand_id` / `account_name`
 - `platform`
 - `planner_count` (Opsi dropdown: 6, 12, 18, 24, 30 — disesuaikan dengan kelipatan 6 CEP Categories)
+
+Required khusus `product_campaign`:
+
 - `product_ids` / `product_name` (Mendukung Pencarian/Filtering Produk Database Interaktif)
+- `product_description`
+
+Required khusus `brand_editorial`:
+
+- `brand_context`
+- Minimal satu item pada `pillars_json`
+- Produk bersifat opsional dan tidak boleh disimpulkan dari topik konten
 
 Optional inputs:
 
@@ -211,6 +222,16 @@ Optional inputs:
 - Pillar distribution
 - CEP distribution
 - VFO distribution
+
+## 4.0 Dual-Mode Planner Contract
+
+### Product Campaign
+
+Mode legacy yang berpusat pada satu produk. Historical Anti-Repetition Memory, prompt visual, CTA, Google Sheets, Content Flow, dan Product Bridging tetap menggunakan produk target.
+
+### Brand Editorial
+
+Mode editorial yang berpusat pada brand, audiens, tujuan konten, dan pilar. Setiap baris menyimpan `content_subject`, `commercial_intent`, `cta_type`, dan `product_reference` opsional. Sistem dilarang mengarang atau mencocokkan produk secara implisit. CTA default adalah save, share, follow, atau comment. Saat diimpor ke OPC, Product Bridging default nonaktif dan hanya dapat diaktifkan setelah produk dipilih eksplisit.
 
 ---
 

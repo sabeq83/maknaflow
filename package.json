@@ -1,6 +1,6 @@
 {
   "name": "maknaflow",
-  "version": "2.2.129",
+  "version": "2.2.130",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack -p 3005",
@@ -11,6 +11,14 @@
     "deploy:staging": "node scripts/deploy-staging.js",
     "build": "next build --webpack",
     "start": "next start",
+    "staging:setup": "node scripts/local-staging/setup.js",
+    "staging:build": "node scripts/local-staging/run.js build",
+    "staging:start": "node scripts/local-staging/run.js start",
+    "staging:api": "node scripts/local-staging/run.js api",
+    "staging:check": "node scripts/local-staging/check.js",
+    "test:content-planner": "node scripts/test-content-planner-modes.mjs",
+    "test:operator-content": "node scripts/test-operator-content.mjs",
+    "operator": "node scripts/makna-operator.mjs",
     "release": "node scripts/release.js",
     "release-non-interactive": "node scripts/release.js --non-interactive"
   },

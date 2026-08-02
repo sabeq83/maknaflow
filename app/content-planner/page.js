@@ -13,6 +13,12 @@ export default function ContentPlannerDashboard() {
   const [toast, setToast] = useState(null);
 
   // Form State
+  const [plannerFocus, setPlannerFocus] = useState('product_campaign');
+  const [brandContext, setBrandContext] = useState('');
+  const [contentGoal, setContentGoal] = useState('');
+  const [pillars, setPillars] = useState([]);
+  const [pillarDraft, setPillarDraft] = useState('');
+  const [pillarDistributionMode, setPillarDistributionMode] = useState('balanced');
   const [inputMode, setInputMode] = useState('manual'); // 'manual' or 'existing'
   const [accountName, setAccountName] = useState('');
   const [googleSheetId, setGoogleSheetId] = useState('');
@@ -130,8 +136,12 @@ export default function ContentPlannerDashboard() {
 
   async function handleGenerate(e) {
     e.preventDefault();
-    if (!productName || !productDesc) {
+    if (plannerFocus === 'product_campaign' && (!productName || !productDesc)) {
       showToast('Nama Produk dan Deskripsi Wajib Diisi', 'error');
+      return;
+    }
+    if (plannerFocus === 'brand_editorial' && (!brandContext.trim() || pillars.length === 0)) {
+      showToast('Konteks Brand dan minimal satu Pilar Konten wajib diisi', 'error');
       return;
     }
 
@@ -139,7 +149,7 @@ export default function ContentPlannerDashboard() {
     const effectiveAccountName = (
       selectedBrand?.brand_name ||
       accountName ||
-      productName
+      (plannerFocus === 'brand_editorial' ? 'Editorial' : productName)
     ).trim();
 
     const effectiveTargetAudience = targetAudience === 'custom'
@@ -152,18 +162,23 @@ export default function ContentPlannerDashboard() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: title || `Planner - ${productName}`,
+          title: title || `Planner - ${plannerFocus === 'brand_editorial' ? effectiveAccountName : productName}`,
           account_name: effectiveAccountName,
           google_sheet_id: (googleSheetId || '').trim(),
           input_mode: inputMode,
+          planner_focus: plannerFocus,
+          brand_context: brandContext.trim(),
+          content_goal: contentGoal.trim(),
+          pillars,
+          pillar_distribution_mode: pillarDistributionMode,
           brand_id: selectedBrandId || null,
           product_id: selectedProductId || null,
-          product_name: productName,
-          product_description: productDesc,
-          product_usp: productUsp,
-          product_url: productUrl.trim(),
-          affiliate_url: affiliateUrl.trim(),
-          product_photo_url: productPhotoUrl.trim(),
+          product_name: plannerFocus === 'product_campaign' ? productName : null,
+          product_description: plannerFocus === 'product_campaign' ? productDesc : null,
+          product_usp: plannerFocus === 'product_campaign' ? productUsp : null,
+          product_url: plannerFocus === 'product_campaign' ? productUrl.trim() : null,
+          affiliate_url: plannerFocus === 'product_campaign' ? affiliateUrl.trim() : null,
+          product_photo_url: plannerFocus === 'product_campaign' ? productPhotoUrl.trim() : null,
           platform,
           objective,
           planner_count: plannerCount,
@@ -339,7 +354,7 @@ export default function ContentPlannerDashboard() {
                       </span>
                     </div>
                     <p style={{ fontSize: '13px', color: '#9ca3af', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      📦 {p.product_name}
+                      {p.planner_focus === 'brand_editorial' ? '🧩 Brand Editorial' : `📦 ${p.product_name}`}
                     </p>
                   </div>
 
@@ -408,8 +423,29 @@ export default function ContentPlannerDashboard() {
               </div>
 
               <form onSubmit={handleGenerate}>
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '8px', fontWeight: 600 }}>
+                    🧭 Fokus Planner:
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    {[
+                      ['brand_editorial', '🧩 Brand Editorial', 'Berbasis brand, audiens, dan pilar. Produk tidak wajib.'],
+                      ['product_campaign', '📦 Product Campaign', 'Berpusat pada satu produk tertentu.']
+                    ].map(([value, label, desc]) => (
+                      <button key={value} type="button" onClick={() => setPlannerFocus(value)} style={{
+                        padding: '12px', textAlign: 'left', borderRadius: '10px', cursor: 'pointer',
+                        border: plannerFocus === value ? '1px solid #6366f1' : '1px solid #27272a',
+                        background: plannerFocus === value ? '#312e81' : '#18181b', color: '#fff'
+                      }}>
+                        <div style={{ fontWeight: 700, marginBottom: '4px' }}>{label}</div>
+                        <div style={{ fontSize: '11px', color: '#a1a1aa', lineHeight: 1.4 }}>{desc}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Input Mode Selector */}
-                <div style={{ marginBottom: '20px', background: '#18181b', padding: '4px', borderRadius: '10px', display: 'flex' }}>
+                {plannerFocus === 'product_campaign' && <div style={{ marginBottom: '20px', background: '#18181b', padding: '4px', borderRadius: '10px', display: 'flex' }}>
                   <button
                     type="button"
                     onClick={() => setInputMode('manual')}
@@ -432,9 +468,9 @@ export default function ContentPlannerDashboard() {
                   >
                     📦 Pilih dari Database Produk
                   </button>
-                </div>
+                </div>}
 
-                {inputMode === 'existing' && (
+                {plannerFocus === 'product_campaign' && inputMode === 'existing' && (
                   <div style={{ marginBottom: '16px', background: '#18181b', padding: '14px', borderRadius: '10px', border: '1px solid #27272a' }}>
                     <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '8px', fontWeight: 600 }}>
                       🔍 Cari & Pilih Produk dari Database:
@@ -507,7 +543,7 @@ export default function ContentPlannerDashboard() {
                 )}
 
                 {/* Product Visual Verification Card */}
-                {selectedProductId && (
+                {plannerFocus === 'product_campaign' && selectedProductId && (
                   <div style={{
                     marginBottom: '16px', padding: '12px 14px', borderRadius: '10px',
                     background: 'rgba(6, 78, 59, 0.25)', border: '1px solid rgba(16, 185, 129, 0.4)',
@@ -551,6 +587,49 @@ export default function ContentPlannerDashboard() {
                 )}
 
                 {/* Brand Profile Dropdown (Taruh di atas Judul Planner) */}
+                {plannerFocus === 'brand_editorial' && <>
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px', fontWeight: 600 }}>Konteks Brand *:</label>
+                    <textarea required rows={3} placeholder="Jelaskan niche, positioning, dan nilai akun..." value={brandContext} onChange={e => setBrandContext(e.target.value)} style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }} />
+                  </div>
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px', fontWeight: 600 }}>Tujuan Konten:</label>
+                    <textarea rows={2} placeholder="misal: Bangun authority, save, share, dan follow" value={contentGoal} onChange={e => setContentGoal(e.target.value)} style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }} />
+                  </div>
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px', fontWeight: 600 }}>Pilar Konten *:</label>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                      <input value={pillarDraft} onChange={e => setPillarDraft(e.target.value)} onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const value = pillarDraft.trim();
+                          if (value && !pillars.some(p => p.toLowerCase() === value.toLowerCase())) setPillars([...pillars, value]);
+                          setPillarDraft('');
+                        }
+                      }} placeholder="misal: Healthy Breakfast" style={{ flex: 1, padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }} />
+                      <button type="button" onClick={() => {
+                        const value = pillarDraft.trim();
+                        if (value && !pillars.some(p => p.toLowerCase() === value.toLowerCase())) setPillars([...pillars, value]);
+                        setPillarDraft('');
+                      }} style={{ padding: '10px 14px', border: 0, borderRadius: '8px', background: '#4f46e5', color: '#fff', cursor: 'pointer' }}>+ Tambah</button>
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px' }}>
+                      {pillars.map((pillar, index) => <span key={pillar} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 9px', borderRadius: '999px', background: '#27272a', color: '#e4e4e7', fontSize: '12px' }}>
+                        {pillar}<button type="button" aria-label={`Hapus ${pillar}`} onClick={() => setPillars(pillars.filter((_, i) => i !== index))} style={{ border: 0, background: 'none', color: '#a1a1aa', cursor: 'pointer', padding: 0 }}>✕</button>
+                      </span>)}
+                      {pillars.length === 0 && <span style={{ color: '#71717a', fontSize: '12px' }}>Belum ada pilar.</span>}
+                    </div>
+                    <select value={pillarDistributionMode} onChange={e => setPillarDistributionMode(e.target.value)} style={{ width: '100%', marginTop: '10px', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}>
+                      <option value="balanced">Balanced — dibagi merata</option>
+                      <option value="custom">Custom Weight (fase lanjutan)</option>
+                      <option value="growth">Growth Priority</option>
+                    </select>
+                  </div>
+                  <div style={{ marginBottom: '16px', padding: '10px 12px', border: '1px solid #164e63', borderRadius: '8px', background: '#083344', color: '#bae6fd', fontSize: '12px' }}>
+                    🛡️ Produk tidak akan dikarang. CTA default diarahkan ke save, share, follow, atau comment.
+                  </div>
+                </>}
+
                 <div style={{ marginBottom: '16px' }}>
                   <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px', fontWeight: 600 }}>
                     🧬 Brand Profile (Akun Brand):
@@ -615,6 +694,7 @@ export default function ContentPlannerDashboard() {
                   />
                 </div>
 
+                {plannerFocus === 'product_campaign' && <>
                 <div style={{ marginBottom: '16px' }}>
                   <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px' }}>Nama Produk *:</label>
                   <input
@@ -714,6 +794,7 @@ export default function ContentPlannerDashboard() {
                     </div>
                   </div>
                 )}
+                </>}
 
                 {/* Target Demografi Audiens (Preset Prompt Builder) */}
                 <div style={{ marginBottom: '16px' }}>

@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.2.130 — Headless Content Operator (02/08/2026)
+- Menambahkan Operator API dan CLI untuk orkestrasi Content Planner ke OPC
+- Menambahkan auth token, idempotency, tenant isolation, audit event, retry dan restart-safe worker
+- Memisahkan service ingest dan approval OPC untuk UI serta headless workflow
+- Mendokumentasikan operasi dan pengujian Content Planner editorial Nutribake
+
 ## V2.2.129 — Unifikasi Caption & 5 Tab Konsol RE-OPC (02/08/2026)
 - Integrasi caption universal pada worker autopilot dan ekspor
 - Unifikasi antarmuka 5 tab konsol RE Campaigns dan OPC Campaigns

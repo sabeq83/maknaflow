@@ -203,7 +203,7 @@ export default function ContentPlannerWorkbench() {
             </div>
             <p style={{ color: '#9ca3af', fontSize: '13px', marginTop: '4px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
               <span>👤 Akun: <strong style={{ color: '#818cf8' }}>@{planner?.account_name || 'Umum'}</strong></span>
-              <span>📦 Produk: <strong>{planner?.product_name}</strong></span>
+              <span>{planner?.planner_focus === 'brand_editorial' ? '🧩 Brand Editorial' : <>📦 Produk: <strong>{planner?.product_name}</strong></>}</span>
               <span>Platform: <strong>{planner?.platform?.toUpperCase()}</strong></span>
               {planner?.google_sheet_id && (
                 <span>📊 Sheet ID: <strong style={{ color: '#34d399' }}>{planner.google_sheet_id}</strong></span>
@@ -300,7 +300,7 @@ export default function ContentPlannerWorkbench() {
                   <th style={{ padding: '14px 12px', width: '160px' }}>6. Strategic Angle</th>
                   <th style={{ padding: '14px 12px', width: '260px', background: '#1e1b4b', color: '#c7d2fe' }}>7. Hook (Kalimat 3 Detik)</th>
                   <th style={{ padding: '14px 12px', width: '280px', background: '#1e1b4b', color: '#c7d2fe' }}>8. Visual Action</th>
-                  <th style={{ padding: '14px 12px', width: '140px' }}>9. Product</th>
+                  <th style={{ padding: '14px 12px', width: '160px' }}>9. {planner?.planner_focus === 'brand_editorial' ? 'Content Subject' : 'Product'}</th>
                   <th style={{ padding: '14px 12px', width: '120px', textAlign: 'center' }}>Aksi</th>
                 </tr>
               </thead>
@@ -437,8 +437,11 @@ export default function ContentPlannerWorkbench() {
                       )}
                     </td>
 
-                    {/* Column 9: Product */}
-                    <td style={{ padding: '12px', fontWeight: 600, color: '#f3f4f6' }}>{row.product}</td>
+                    {/* Column 9: Product / Content Subject */}
+                    <td style={{ padding: '12px', fontWeight: 600, color: '#f3f4f6' }}>
+                      {planner?.planner_focus === 'brand_editorial' ? (row.content_subject || row.context) : (row.product_reference || row.product)}
+                      {planner?.planner_focus === 'brand_editorial' && <div style={{ marginTop: '4px', fontSize: '10px', color: '#a1a1aa' }}>{row.cta_type || 'save'} · {row.commercial_intent || 'none'}</div>}
+                    </td>
 
                     {/* Actions Column */}
                     <td style={{ padding: '12px', textAlign: 'center' }}>
