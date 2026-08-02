@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.135 — Perbaikan FFmpeg OPC dan Urutan Upload Nextcloud (02/08/2026)
+- Muxing OPC menunggu dan membaca batch TTS asynchronous dengan benar
+- Validasi jumlah video dan audio mencegah hasil final parsial
+- Sinkronisasi Nextcloud OPC hanya dilakukan setelah FFmpeg selesai
+
 ## V2.2.134 — Perbaikan OPC Planner dan Scheduler Staging (02/08/2026)
 - Pembuatan campaign dan item OPC kini atomik dengan sequence PostgreSQL yang valid
 - Brand account target demografi dan Visual Swap tampil konsisten dari planner ke detail campaign
