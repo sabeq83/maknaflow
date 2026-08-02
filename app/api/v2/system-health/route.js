@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDb, listSystemAuditLogs } from '@/lib/db';
 import { getGoogleStatus } from '@/lib/google-auth';
+import { getContentAutomationRuntime } from '@/lib/content-automation-worker';
 
 export async function GET() {
   try {
@@ -65,6 +66,7 @@ export async function GET() {
           pendingOpc,
           pendingRe
         },
+        contentAutomation: getContentAutomationRuntime(),
         logs
       }
     });

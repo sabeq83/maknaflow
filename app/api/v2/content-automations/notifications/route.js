@@ -1,0 +1,3 @@
+import { NextResponse } from 'next/server'; import { getCurrentUser } from '@/lib/auth'; import { listNotifications,markNotificationsRead } from '@/lib/content-automation-repository';
+export async function GET(request){if(!getCurrentUser(request))return NextResponse.json({success:false,error:'Unauthorized'},{status:401});return NextResponse.json({success:true,notifications:await listNotifications()});}
+export async function PATCH(request){if(!getCurrentUser(request))return NextResponse.json({success:false,error:'Unauthorized'},{status:401});await markNotificationsRead();return NextResponse.json({success:true});}

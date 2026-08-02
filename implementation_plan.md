@@ -1,541 +1,567 @@
-# Implementation Plan — Operator OPC Terstruktur, Wardrobe Sequence, Review Markdown, dan Preset
+# Implementation Plan — MAKNA Native Content Automation Scheduler
 
-## 1. Tujuan
+## 1. Sasaran
 
-Menyelaraskan MAKNA Content Operator dengan empat accordion konfigurasi OPC di UI, memperbaiki perilaku wardrobe `sequential`, dan menyediakan review storyboard berbasis artefak Markdown agar Codex tidak perlu menyalin storyboard lengkap ke percakapan sebelum approval.
+Membuat scheduler native di MAKNA Flow yang dapat berjalan 24/7 pada server Windows tanpa bergantung pada Codex untuk mengeksekusi jadwal.
 
-Hasil yang dituju:
+Alur target:
 
-1. Request Operator memakai schema OPC yang eksplisit, tervalidasi, dan identik dengan field UI.
-2. `wardrobe_style=sequential` benar-benar merotasi preset pakaian secara deterministik antar-item planner.
-3. Saat job mencapai `awaiting_approval`, web app otomatis membuat snapshot Markdown khusus review tanpa memulai produksi atau sinkronisasi aset final.
-4. Status Operator hanya mengembalikan ringkasan singkat, URL review, checksum/revisi, dan status approval.
-5. Codex memberikan tautan `.md` kepada pengguna; isi lengkap hanya ditampilkan bila pengguna memintanya.
-6. Preset tenant, misalnya `Nutribake Editorial`, ditambahkan setelah schema dan sequence tervalidasi.
+```text
+Schedule jatuh tempo
+→ MAKNA membuat Operator Content Job secara idempotent
+→ Content Planner → OPC Storyboard
+→ job berhenti di awaiting_approval
+→ review.md + revision/checksum tersedia
+→ notifikasi dashboard
+→ pengguna approve melalui UI MAKNA atau Codex
+→ TTS → G-Labs → FFmpeg → upload final
+```
 
-## 2. Hasil Analisis
+Implementasi dibagi menjadi tiga fase. Setiap fase dirilis dan diuji sebelum fase berikutnya dimulai.
 
-### 2.1 Empat accordion OPC yang sebenarnya
+## 2. Keputusan Arsitektur
 
-Konfigurasi di `ImportPlannerModal` terdiri dari:
+### 2.1 Scheduler database-backed
 
-1. **Basic Creative Strategy & Planner Master**
-2. **Aesthetics & Visual Engine Settings**
-3. **Product Bridging Settings**
-4. **Visual Swap Overrides**
+- PostgreSQL menjadi sumber kebenaran schedule dan run.
+- Timer proses hanya membangunkan worker; state tidak bergantung pada memory.
+- Worker mengklaim schedule dengan `FOR UPDATE SKIP LOCKED`.
+- Slot eksekusi mempunyai unique key `(tenant_id, schedule_id, scheduled_for)`.
+- Restart server, retry, atau dua node aktif tidak menghasilkan job ganda.
 
-Operator API sekarang memakai satu object `production` yang diteruskan secara longgar ke ingest OPC. Hanya beberapa field umum yang divalidasi. Enum, kombinasi model/durasi, bentuk VSO, serta nilai empat accordion belum mempunyai kontrak formal.
+### 2.2 Memakai Operator workflow yang sudah ada
 
-### 2.2 Wardrobe `sequential`
+Scheduler tidak membuat planner/campaign secara langsung. Ia memanggil service internal yang sama dengan `/api/operator/v1/content-jobs`, sehingga tetap memakai:
 
-UI sudah menyediakan:
+- kontrak OPC v2;
+- preset `nutribake_editorial_v1`;
+- tenant isolation;
+- idempotency;
+- pause `awaiting_approval`;
+- review Markdown serta approval revision/checksum.
+
+### 2.3 Approval dan social publishing
+
+- Fase 1 selalu memakai `approval_mode=storyboard`.
+- `enable_social_post` wajib `false`.
+- Worker schedule hanya bertugas sampai job terdaftar; lifecycle berikutnya ditangani Operator worker dan Campaign Scheduler.
+- Approval otomatis tidak disediakan pada pilot.
+
+### 2.4 Waktu dan missed run
+
+- Schedule menyimpan timezone IANA, misalnya `Asia/Jakarta`.
+- Database menyimpan `next_run_at` dan `scheduled_for` dalam UTC.
+- Perhitungan kalender dilakukan dari timezone schedule agar DST-safe.
+- Fase 1 memakai kebijakan `skip`: slot yang terlewat jauh saat server mati tidak di-backfill massal; hanya slot terbaru dalam grace window yang boleh dijalankan.
+
+## 3. Pembagian Fase
+
+## Fase 1 — Pilot Scheduler, Review, dan Dashboard
+
+### Scope
+
+1. Schedule harian, mingguan, dan bulanan.
+2. Satu schedule menghasilkan satu Operator content job.
+3. Preset OPC + pilar + planner count + instruksi khusus.
+4. Wajib pause pada storyboard.
+5. Review Markdown dari Operator API.
+6. Riwayat run dan notifikasi dashboard.
+7. Create, edit, enable/disable, run-now, dan retry manual.
+8. Pilot satu schedule Nutribake.
+
+### Di luar scope
+
+- Email, WhatsApp, Telegram, atau Slack.
+- Auto-approval.
+- Social publishing.
+- Holiday calendar.
+- Advanced budgeting dan analytics.
+
+### Model data
+
+```sql
+content_automation_schedules
+  id, tenant_id, name, status
+  timezone, frequency, schedule_config_json
+  operator_request_json
+  missed_run_policy, grace_minutes
+  next_run_at, last_run_at
+  created_by, created_at, updated_at
+
+content_automation_runs
+  id, tenant_id, schedule_id
+  scheduled_for, idempotency_key
+  operator_job_id, status
+  attempt_count, error_code, error_message
+  started_at, completed_at, created_at
+
+content_automation_notifications
+  id, tenant_id, run_id, type, title, message
+  action_url, read_at, created_at
+```
+
+### Status schedule/run
+
+```text
+schedule: active | paused | archived
+run: queued | dispatching | job_created | awaiting_approval | producing | completed | failed | skipped
+```
+
+### Kriteria penerimaan Fase 1
+
+- Windows restart tidak menggandakan run.
+- Dua worker tidak dapat mengklaim slot yang sama.
+- Schedule Nutribake membuat tujuh planner rows dan berhenti sebelum TTS.
+- Dashboard menampilkan badge `awaiting_approval` dan link review.
+- `Run Now` memakai idempotency key khusus dan tidak mengubah jadwal berikutnya.
+- Retry manual menggunakan run yang sama atau attempt baru yang terhubung, bukan campaign duplikat.
+- Social posting tetap nonaktif.
+
+## Fase 2 — Notifikasi Eksternal dan Operasional
+
+### Scope
+
+1. Notification outbox database-backed.
+2. Provider pertama: email atau Telegram; dipilih saat fase dimulai.
+3. Retry exponential backoff dan dead-letter status.
+4. Quiet hours dan notification preference per schedule.
+5. Missed-run policy: `skip`, `run_latest`, atau bounded catch-up.
+6. Calendar view, run health, filter tenant/brand/status.
+7. Pause otomatis bila kegagalan berturut-turut melewati batas.
+
+### Kriteria penerimaan Fase 2
+
+- Kegagalan provider notifikasi tidak menggagalkan content job.
+- Notifikasi yang sama tidak terkirim dua kali.
+- Pesan hanya berisi ringkasan, revision, dan tautan; bukan storyboard penuh.
+- Credential provider tersimpan sebagai tenant setting terenkripsi/secret, bukan dalam schedule JSON.
+
+## Fase 3 — Multi-node, Governance, dan Optimasi
+
+### Scope
+
+1. Worker lease/heartbeat multi-node.
+2. Concurrency dan rate limit per tenant.
+3. Budget/quota guard untuk Gemini, TTS, dan G-Labs.
+4. Blackout date dan holiday calendar.
+5. Approval bertingkat.
+6. Analytics performa pilar dan rekomendasi jadwal.
+7. Round-robin/weighted pillar selection.
+8. Audit dan retention policy.
+
+### Kriteria penerimaan Fase 3
+
+- Node failover tidak menggandakan run.
+- Tenant yang mencapai quota berhenti sebelum memanggil provider berbayar.
+- Approval dan perubahan schedule memiliki audit trail lengkap.
+- Rekomendasi tidak mengubah schedule tanpa persetujuan pengguna.
+
+## 4. Rencana Perubahan File — Fase 1
+
+### 4.1 `lib/db-pg.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Hanya operator_jobs/operator_job_events.
+// Belum ada tabel content automation schedule, run, dan notification.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+await migrateContentAutomations(pool); // idempotent + advisory lock
+```
+
+Migrasi membuat tiga tabel, index due schedule, unique run slot, foreign key, dan check constraint status.
+
+### 4.2 `lib/content-automation-contract.js` — baru
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Belum ada validasi schedule native.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export function normalizeContentAutomation(input) {
+  return {
+    name: requireName(input.name),
+    timezone: validateIanaTimezone(input.timezone),
+    schedule: normalizeCalendarSchedule(input.schedule),
+    operator_request: normalizeOperatorContentRequest(input.operator_request),
+    missed_run_policy: 'skip',
+    grace_minutes: normalizeGrace(input.grace_minutes)
+  };
+}
+```
+
+Validator memaksa `approval_mode=storyboard` dan `enable_social_post=false` pada pilot.
+
+### 4.3 `lib/content-automation-schedule.js` — baru
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Belum ada kalkulasi jadwal timezone-aware.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export function calculateNextRun({ frequency, config, timezone, after }) {
+  // daily | weekly | monthly → UTC timestamp
+}
+```
+
+Gunakan library/runtime timezone yang sudah tersedia; tambahkan dependency hanya jika native `Intl` tidak cukup dan setelah evaluasi.
+
+### 4.4 `lib/content-automation-repository.js` — baru
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Query schedule belum tersedia.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function claimDueAutomation(workerId, now) {
+  return withPgTransaction(client => client.query(`
+    SELECT * FROM content_automation_schedules
+    WHERE status = 'active' AND next_run_at <= $1
+    FOR UPDATE SKIP LOCKED LIMIT 1
+  `, [now]));
+}
+```
+
+Repository juga menyediakan CRUD, run history, retry, notification, dan tenant-scoped query.
+
+### 4.5 `lib/operator-job-service.js` — baru/refactor
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Route Operator menangani normalize, hash, dan create job secara langsung.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function createOperatorJobFromRequest({ request, idempotencyKey, actor }) {
+  const payload = normalizeOperatorContentRequest(request);
+  const requestHash = hashOperatorRequest(payload);
+  return createOperatorJob({ idempotencyKey, requestHash, requestJson: JSON.stringify(payload) });
+}
+```
+
+API Operator dan automation worker memakai service yang sama.
+
+### 4.6 `lib/content-automation-worker.js` — baru
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Belum ada due-schedule worker.
+```
+
+### 4.11 `lib/content-planner-engine.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const skeletons = Array.isArray(skeletonResult) ? skeletonResult : skeletonResult.rows;
+const finalRows = Array.isArray(creativeResult) ? creativeResult : creativeResult.rows;
+```
+
+Jumlah baris sepenuhnya mengikuti respons AI sehingga dapat kurang dari `planner_count`.
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const skeletons = normalizeGeneratedPlannerRows(skeletonResult, distributionPlan, count);
+const finalRows = normalizeGeneratedPlannerRows(creativeResult, skeletons, count);
+```
+
+Engine menambah fallback deterministik dari distribution plan bila Gemini mengembalikan baris kurang, dan memangkas bila respons berlebih. Dengan demikian pilot tujuh pilar selalu menghasilkan tepat tujuh planner rows.
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function runContentAutomationTick() {
+  const schedule = await claimDueAutomation(workerId, new Date());
+  if (!schedule) return;
+  const run = await createRunForSlot(schedule);
+  const job = await tenantContext.run(schedule.tenant_id, () =>
+    createOperatorJobFromRequest({
+      request: schedule.operator_request_json,
+      idempotencyKey: run.idempotency_key,
+      actor: `automation:${schedule.id}`
+    })
+  );
+  await linkRunToOperatorJob(run.id, job.id);
+}
+```
+
+Tick pendek, tidak menunggu storyboard selesai. Reconciler terpisah menyinkronkan status run dengan Operator job dan membuat dashboard notification.
+
+### 4.7 `instrumentation.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+if (backgroundServicesEnabled && process.env.ENABLE_OPERATOR_WORKER !== 'false') {
+  startOperatorContentWorker();
+}
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+if (backgroundServicesEnabled && process.env.ENABLE_CONTENT_AUTOMATION_WORKER !== 'false') {
+  startContentAutomationWorker();
+}
+```
+
+Worker dapat dinonaktifkan per node. Node Windows utama mengaktifkannya; node UI tambahan dapat mematikannya.
+
+### 4.8 `app/api/operator/v1/content-jobs/route.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const payload = normalizeOperatorContentRequest(await request.json());
+const requestHash = hashOperatorRequest(payload);
+const job = await createOperatorJob(...);
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const job = await createOperatorJobFromRequest({
+  request: await request.json(),
+  idempotencyKey,
+  actor: identity.actor
+});
+```
+
+### 4.9 `app/api/v2/content-automations/route.js` — baru
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Belum ada CRUD API automation.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function GET() { /* list tenant schedules */ }
+export async function POST(request) { /* validate + create */ }
+```
+
+### 4.10 `app/api/v2/content-automations/[id]/route.js` — baru
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Belum ada detail/update/archive schedule.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function GET() {}
+export async function PATCH() {}
+export async function DELETE() {} // soft archive
+```
+
+### 4.11 Action API — baru
+
+File:
+
+- `app/api/v2/content-automations/[id]/run-now/route.js`
+- `app/api/v2/content-automations/[id]/toggle/route.js`
+- `app/api/v2/content-automations/runs/[runId]/retry/route.js`
+- `app/api/v2/content-automations/notifications/route.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Belum ada action endpoint.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+await requireTenantPermission(request, 'content_automation');
+return performIdempotentAction(...);
+```
+
+### 4.12 `app/content-automations/page.js` — baru
+
+**Code Sebelum (Current/Before)**
 
 ```jsx
-<option value="random">🎲 Random (Acak)</option>
-<option value="sequential">🔄 Sequential (Urut per baris)</option>
+// Belum ada UI automation.
 ```
 
-Namun worker saat ini hanya menangani:
+**Code Sesudah (Proposed/After)**
 
-```js
-if (rowWardrobeColor) {
-  // override eksplisit dari baris
-} else if (rowVsoData.wardrobe_style === 'random') {
-  const selectedPresetKey = keys[job.row_index % keys.length];
-  // ubah menjadi custom wardrobe
-}
+```jsx
+<AutomationList />
+<AutomationEditor />
+<RunHistory />
+<AwaitingApprovalBadge />
 ```
 
-Tidak ada cabang `sequential`. Bahkan implementasi bernama `random` sekarang memakai modulo indeks sehingga hasilnya deterministik/berurutan, bukan acak. Jika nilai `sequential` dibiarkan, lookup preset tidak menemukannya dan dapat jatuh ke fallback generik `modest clothing`.
+Editor Fase 1 berisi:
 
-Keputusan:
+- nama dan status;
+- brand/preset;
+- timezone;
+- daily/weekly/monthly schedule;
+- pilar dan jumlah planner;
+- instruksi khusus;
+- konfigurasi workflow read-only: approval storyboard, social post off;
+- review konfigurasi efektif sebelum simpan.
 
-- `sequential`: rotasi deterministik berdasarkan urutan item campaign, bukan ID database dan bukan urutan klip.
-- `random`: pilih preset secara pseudo-random yang stabil menggunakan hash `campaign_id:item_id`; retry item tidak mengganti pakaian.
-- Override warna pada baris planner tetap memiliki prioritas tertinggi.
-- Rotasi dibatasi pada katalog wardrobe yang kompatibel dengan `subject_demographic` agar preset pria, wanita syar'i, 3D, dan duo tidak tercampur.
-- Satu item/video memakai satu wardrobe yang konsisten untuk semua klipnya. Warna berbeda diterapkan antar-item/content plan, bukan antar-klip, untuk menjaga kontinuitas karakter.
-- Preset terpilih disimpan pada item/result sebagai `resolved_visual_overrides`, sehingga storyboard, T2I, I2V, retry, dan audit memakai nilai yang sama.
-
-Urutan prioritas:
-
-```text
-row wardrobe override
-  > resolved_visual_overrides existing (retry)
-  > sequential/random resolver
-  > wardrobe preset eksplisit
-  > fallback demografi
-```
-
-### 2.3 Review Markdown dan pemakaian token Codex
-
-Menampilkan storyboard lengkap di chat memang memakai token input/output dan memperbesar konteks percakapan. Mengunggah `.md` lalu meminta Codex membaca dan menyalin seluruh isinya juga tetap boros; perpindahan format tidak menghilangkan token jika kontennya tetap dimasukkan ke chat/model.
-
-Desain hemat token:
-
-1. Web app membangun Markdown saat seluruh item mencapai `ready_for_review`.
-2. Markdown disimpan sebagai **review artifact**, terpisah dari upload aset final.
-3. Operator API mengembalikan metadata kecil:
-   - `review_url`
-   - `review_revision`
-   - `review_sha256`
-   - jumlah item/klip
-   - judul/hook singkat per item
-   - warning validasi
-4. Codex hanya menampilkan ringkasan dan tautan, bukan isi lengkap.
-5. Pengguna membaca `.md` di browser/Nextcloud, lalu menyetujui revisi tersebut.
-6. Approval harus menyertakan `review_revision` atau checksum. Jika storyboard berubah, API menolak approval lama dengan `409 REVIEW_REVISION_MISMATCH`.
-
-Catatan: endpoint export Markdown OPC saat ini tidak cocok untuk review otomatis karena selain membuat Markdown, endpoint tersebut juga memanggil sinkronisasi aset dan dapat membuat/mengisi spreadsheet. Generator Markdown-nya dapat dipakai ulang, tetapi alur review harus menjadi fungsi/endpoint terpisah tanpa side effect produksi.
-
-### 2.4 Preset
-
-Preset baru ditambahkan setelah schema Operator stabil. Preset menyimpan konfigurasi empat accordion, bukan pilar atau instruksi kampanye. Pilar, jumlah planner, dan instruksi khusus tetap berada di request agar setiap kampanye fleksibel.
-
-Preset harus tenant-scoped, versioned, dan dapat dioverride per request:
-
-```text
-defaults global
-  < tenant preset
-  < request override
-```
-
-Preset awal `nutribake_editorial_v1`:
-
-- brand editorial, tanpa product bridging
-- Brand Profile Nutribake direferensikan dengan ID/slug tenant, bukan nama bebas
-- target demographic `ibu_rumah_tangga`
-- VSO aktif, `subject_demographic=syari_classic`
-- `wardrobe_style=sequential`
-- field lain memakai nilai yang memang tersedia di UI/kontrak OPC
-
-## 3. Desain Kontrak Operator
-
-Request tetap kompatibel dengan struktur `planner`, `selection`, dan `production`, tetapi `production` dinormalisasi menjadi empat group eksplisit:
-
-```json
-{
-  "planner": {
-    "planner_focus": "brand_editorial",
-    "planner_count": 7,
-    "pillars": [],
-    "platform": "tiktok"
-  },
-  "selection": { "mode": "all" },
-  "opc": {
-    "preset": "nutribake_editorial_v1",
-    "basic_strategy": {},
-    "visual_engine": {},
-    "product_bridging": {},
-    "visual_swap": {},
-    "workflow": {}
-  }
-}
-```
-
-Untuk kompatibilitas, payload lama `production` diterima selama masa transisi dan dinormalisasi ke `opc`. Response mencantumkan `contract_version` dan warning deprecation.
-
-Validasi utama:
-
-- enum narrative, demographic, provider, bahasa, visual style/mode, model, face visibility, words-per-clip, aspect ratio, dan VSO;
-- `clip_duration=10` hanya valid untuk `omni_flash`;
-- bridging editorial tanpa produk eksplisit ditolak;
-- VSO wardrobe harus kompatibel dengan demografi;
-- `enable_social_post=true` tetap ditolak;
-- approval mode hanya `storyboard` atau `none` sesuai guardrail API v1.
-
-## 4. Alur Review dan Approval
-
-```text
-Create job
-  → Content Planner
-  → OPC storyboard ready
-  → resolve wardrobe per item
-  → build immutable review Markdown snapshot
-  → awaiting_approval + review URL/revision/checksum
-  → pengguna membaca file
-  → approve(job, revision/checksum)
-  → TTS → G-Labs → FFmpeg → upload final
-```
-
-Review Markdown memuat:
-
-- identitas campaign dan konfigurasi efektif empat accordion;
-- pilar, hook, content subject, dan narrative mode per item;
-- storyboard, VO, T2V/T2I/I2V prompt;
-- resolved wardrobe dan VSO per item;
-- caption/CTA/hashtag;
-- warning validator;
-- revision, waktu pembuatan, dan SHA-256.
-
-Tidak ada secret, API key, path internal sensitif, atau raw log di artefak.
-
-## 5. Perubahan File dan Before/After Code
-
-### 5.1 `lib/operator-content-contract.js`
+### 4.13 `app/components/Sidebar.js`
 
 **Code Sebelum (Current/Before)**
 
 ```js
-return {
-  planner: normalizePlanner(input.planner || {}),
-  selection: normalizeSelection(input.selection || {}),
-  production: normalizeProduction(input.production || {})
-};
+const navItems = [
+  { label: 'Content Planner', href: '/content-planner' }
+];
 ```
 
 **Code Sesudah (Proposed/After)**
 
 ```js
-const opc = normalizeOpcConfig(input.opc || migrateLegacyProduction(input.production));
-return {
-  contract_version: '2',
-  planner: normalizePlanner(input.planner || {}),
-  selection: normalizeSelection(input.selection || {}),
-  opc,
-  production: flattenOpcForIngest(opc)
-};
+{ label: 'Content Automations', href: '/content-automations', icon: '⏱️' }
 ```
 
-Tambahkan validator per accordion dan validator lintas-field.
+Tambahkan permission key `content_automation`; admin mendapat akses sesuai kebijakan tenant.
 
-### 5.2 `lib/operator-presets.js` (baru)
+### 4.14 `.env.example` dan `.env.staging.local.example`
 
 **Code Sebelum (Current/Before)**
 
-```js
-// Belum ada registry/resolver preset Operator OPC.
+```env
+# Belum ada gate worker automation.
 ```
 
 **Code Sesudah (Proposed/After)**
 
-```js
-export async function resolveOperatorPreset(tenantId, presetKey, overrides) {
-  const preset = await getTenantPreset(tenantId, presetKey);
-  return deepMerge(defaultOpcConfig(), preset.config, overrides);
-}
+```env
+ENABLE_CONTENT_AUTOMATION_WORKER=true
+CONTENT_AUTOMATION_INTERVAL_MS=15000
+CONTENT_AUTOMATION_LEASE_MS=60000
 ```
 
-Resolver memvalidasi versi schema, kepemilikan tenant, Brand Profile, dan tidak mengizinkan preset mengaktifkan social posting.
-
-### 5.3 `lib/visual-override-resolver.js` (baru)
-
-**Code Sebelum (Current/Before)**
-
-```js
-// Resolusi random berada inline dan sequential belum diimplementasikan.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-export function resolveWardrobe({ mode, subjectDemographic, itemIndex, stableSeed, rowOverride }) {
-  const catalog = getCompatibleWardrobes(subjectDemographic);
-  if (rowOverride) return resolveExplicitWardrobe(rowOverride, catalog);
-  if (mode === 'sequential') return catalog[itemIndex % catalog.length];
-  if (mode === 'random') return catalog[stableHash(stableSeed) % catalog.length];
-  return resolveExplicitWardrobe(mode, catalog);
-}
-```
-
-Tambahkan unit test untuk rotasi, kestabilan retry, kompatibilitas demografi, dan prioritas row override.
-
-### 5.4 `lib/sheets-autopilot-worker.js`
-
-**Code Sebelum (Current/Before)**
-
-```js
-} else if (rowVsoData && rowVsoData.wardrobe_style === 'random') {
-  const selectedPresetKey = keys[job.row_index % keys.length];
-  rowVsoData.wardrobe_style = 'custom';
-  rowVsoData.wardrobe_style_custom = WARDROBE_PRESETS[selectedPresetKey];
-}
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-const resolvedVso = resolveVisualOverrides({
-  campaign,
-  item: job,
-  itemIndex: job.row_index - 2,
-  rowWardrobeColor
-});
-await persistResolvedVisualOverrides(job.id, resolvedVso);
-```
-
-Gunakan resolver yang sama pada storyboard generation dan G-Labs agar tidak terjadi perbedaan pakaian antar-tahap.
-
-### 5.5 `lib/export-builder.js`
-
-**Code Sebelum (Current/Before)**
-
-```js
-export function buildPillarBatchMarkdownContent(campaign, items) {
-  // export campaign untuk storage/sync
-}
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-export function buildPillarReviewMarkdown({ campaign, items, revision, checksum }) {
-  // Snapshot review lengkap, deterministic, tanpa side effect.
-}
-```
-
-Builder export lama dipertahankan. Builder review baru mempunyai urutan field stabil agar checksum konsisten.
-
-### 5.6 `lib/operator-review-artifact.js` (baru)
-
-**Code Sebelum (Current/Before)**
-
-```js
-// Belum ada lifecycle artefak review Operator.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-export async function ensureOperatorReviewArtifact(job, campaign, items) {
-  const sourceHash = hashReviewSource(campaign, items);
-  const markdown = buildPillarReviewMarkdown({ campaign, items, revision, sourceHash });
-  return saveImmutableReviewArtifact({ job, markdown, sourceHash });
-}
-```
-
-Artefak dapat disimpan ke Nextcloud review folder atau endpoint download terautentikasi. Kegagalan upload tidak boleh memulai produksi; job tetap review-pending dengan error yang jelas dan dapat di-retry.
-
-### 5.7 `lib/operator-content-worker.js`
-
-**Code Sebelum (Current/Before)**
-
-```js
-if (items.some(item => item.workflow_status === 'ready_for_review')) return 'approval';
-```
-
-```js
-return {
-  id: item.id,
-  workflow_status: item.workflow_status,
-  caption: result.tiktok_caption || result.ig_caption || result.caption || null
-};
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-if (readyItems.length) {
-  const review = await ensureOperatorReviewArtifact(job, campaign, items);
-  await updateOperatorJob(job.id, {
-    status: 'awaiting_approval',
-    review_url: review.url,
-    review_revision: review.revision,
-    review_sha256: review.sha256
-  });
-}
-```
-
-Status item hanya membawa ringkasan pendek; `result_json` lengkap tidak dikirim pada endpoint status.
-
-### 5.8 `app/api/operator/v1/content-jobs/[jobId]/route.js`
-
-**Code Sebelum (Current/Before)**
-
-```js
-return NextResponse.json({ success: true, job: publicJob });
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-return NextResponse.json({
-  success: true,
-  job: {
-    ...publicJob,
-    review: sanitizeReviewMetadata(publicJob.review),
-    items: publicJob.items.map(toCompactReviewSummary)
-  }
-});
-```
-
-Tambahkan `detail=full` hanya bila benar-benar diperlukan dan tetap terlindungi scope `content:read`.
-
-### 5.9 `app/api/operator/v1/content-jobs/[jobId]/review/route.js` (baru)
-
-**Code Sebelum (Current/Before)**
-
-```js
-// Belum ada endpoint review artifact khusus Operator.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-export async function GET(request, { params }) {
-  const identity = await authenticateOperator(request, 'content:read');
-  return runAsOperatorTenant(identity, () => streamReviewMarkdown(params.jobId));
-}
-```
-
-Endpoint memakai `Content-Type: text/markdown`, `Content-Disposition: inline`, `Cache-Control: no-store`, tenant isolation, dan tidak mengandung token pada URL.
-
-### 5.10 `app/api/operator/v1/content-jobs/[jobId]/approve/route.js`
-
-**Code Sebelum (Current/Before)**
-
-```js
-const approval = normalizeOperatorApproval(await request.json());
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-const approval = normalizeOperatorApproval(await request.json());
-assertReviewRevision(job, approval.review_revision, approval.review_sha256);
-```
-
-Approval tanpa revisi hanya diizinkan sementara untuk client v1 dengan warning; setelah masa transisi menjadi wajib.
-
-### 5.11 `plugins/makna-content-operator/scripts/makna-content-operator.mjs`
-
-**Code Sebelum (Current/Before)**
-
-```js
-console.log(`${job.id} | ${job.status} | ${job.current_stage}`);
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-printCompactJob(job);
-if (job.review) console.log(`Review: ${job.review.url} | revision=${job.review.revision}`);
-```
-
-Tambahkan:
-
-```bash
-makna-content-operator review <job-id> [--save <file>]
-makna-content-operator approve <job-id> --revision <revision> --all
-makna-content-operator presets
-```
-
-Perintah `review` secara default hanya mencetak URL/metadata. `--save` mengunduh file lokal tanpa mencetak isi ke terminal/chat.
-
-### 5.12 `plugins/makna-content-operator/skills/content-operator/SKILL.md`
-
-**Code Sebelum (Current/Before)**
-
-```md
-If status is awaiting_approval, summarize the storyboard/result.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```md
-If status is awaiting_approval, show the compact summary and review Markdown link.
-Do not reproduce the full storyboard unless the user explicitly requests it.
-Approve only the exact review revision explicitly approved by the user.
-```
-
-### 5.13 Database migration (`lib/db-pg.js` / schema Operator)
-
-**Code Sebelum (Current/Before)**
-
-```sql
--- operator_jobs belum menyimpan review revision/checksum/url.
--- belum ada tenant-scoped OPC presets.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```sql
-ALTER TABLE operator_jobs
-  ADD COLUMN IF NOT EXISTS contract_version TEXT DEFAULT '1',
-  ADD COLUMN IF NOT EXISTS review_revision INTEGER,
-  ADD COLUMN IF NOT EXISTS review_sha256 TEXT,
-  ADD COLUMN IF NOT EXISTS review_url TEXT,
-  ADD COLUMN IF NOT EXISTS review_source_hash TEXT;
-
-CREATE TABLE IF NOT EXISTS operator_opc_presets (
-  tenant_id TEXT NOT NULL,
-  preset_key TEXT NOT NULL,
-  schema_version TEXT NOT NULL,
-  config_json JSONB NOT NULL,
-  is_active BOOLEAN NOT NULL DEFAULT TRUE,
-  PRIMARY KEY (tenant_id, preset_key)
-);
-```
-
-Resolved VSO disimpan pada item menggunakan kolom JSON yang sesuai; jika kolom khusus diperlukan, migrasi dibuat idempotent.
-
-## 6. Strategi Kompatibilitas
-
-- Request lama `production` tetap berjalan dan diberi warning deprecation.
-- Preset opsional; request tanpa preset memakai default saat ini.
-- UI tetap mengirim field existing selama adaptor kontrak belum dipakai UI.
-- Export Markdown existing tidak diubah perilakunya; review artifact memakai jalur baru.
-- Job existing tanpa review revision tetap dapat dibaca.
-- Approval lama diberi masa transisi, tetapi plugin baru selalu mengirim revision/checksum.
-
-## 7. Pengujian dan Kriteria Penerimaan
-
-### Unit
-
-- seluruh enum accordion diterima/ditolak sesuai pilihan UI;
-- `omni_flash + 10s` valid, model lain + 10s ditolak;
-- sequence menghasilkan warna berbeda dan berulang setelah katalog habis;
-- retry menghasilkan wardrobe identik;
-- random stabil namun tidak mengikuti pola sequence;
-- katalog wardrobe sesuai demografi;
-- checksum Markdown stabil untuk data sama dan berubah jika storyboard berubah;
-- preset merge tidak mengaktifkan social posting.
-
-### Integrasi
-
-- buat job Nutribake 7 pilar dengan preset editorial;
-- semua item memiliki resolved wardrobe berbeda sesuai sequence;
-- job berhenti di `awaiting_approval` sebelum TTS;
-- endpoint status berukuran ringkas dan tidak membawa prompt/storyboard penuh;
-- review URL membuka Markdown lengkap;
-- tidak ada video/aset final yang disinkronkan saat review dibuat;
-- approval revisi benar melanjutkan produksi;
-- approval revisi lama ditolak `409`;
-- TTS, G-Labs, FFmpeg, dan upload final tetap berjalan setelah approval.
-
-### Target efisiensi token
-
-- respons status review maksimal berisi metadata dan ringkasan satu baris per item;
-- Codex tidak membaca isi `.md` kecuali diminta;
-- prompt operasional berikutnya cukup menyebut preset, pilar, jumlah ide, dan instruksi khusus;
-- ukur perbandingan ukuran payload status sebelum/sesudah dan tetapkan batas regresi.
+## 5. Verifikasi Fase 1
+
+### Unit test
+
+- validasi timezone dan kalender daily/weekly/monthly;
+- next-run melewati pergantian bulan/tahun;
+- invalid day-of-month policy;
+- contract memaksa approval dan social off;
+- idempotency key stabil untuk slot sama;
+- slot berbeda menghasilkan key berbeda.
+
+### Integration test PostgreSQL
+
+- create/update/pause/archive tenant-scoped;
+- dua claim paralel hanya menghasilkan satu run;
+- retry tidak membuat campaign ganda;
+- restart simulation mengambil schedule due yang belum selesai;
+- cross-tenant access ditolak.
+
+### Staging pilot
+
+1. Buat schedule Nutribake weekly.
+2. Gunakan `nutribake_editorial_v1`, tujuh pilar, `wardrobe=sequential`.
+3. Jalankan `Run Now`.
+4. Pastikan Operator job mencapai `awaiting_approval`.
+5. Pastikan TTS/G-Labs/FFmpeg belum berjalan.
+6. Unduh review Markdown dan cocokkan revision/checksum.
+7. Approve satu pilot setelah persetujuan eksplisit pengguna.
+8. Pastikan produksi dan upload final selesai.
+
+## 6. Deployment Windows 24/7
+
+- Jalankan MAKNA sebagai Windows Service menggunakan service wrapper yang dipilih saat deployment.
+- Jalankan satu node dengan `ENABLE_CONTENT_AUTOMATION_WORKER=true` pada Fase 1.
+- Gunakan PostgreSQL server, bukan database lokal file.
+- Service memakai auto-restart dan delayed start setelah network siap.
+- Health endpoint melaporkan:
+  - worker enabled/running;
+  - last tick;
+  - last claimed schedule;
+  - due schedule count;
+  - stale run count;
+  - last error.
+- Codex tidak perlu terpasang pada PC Windows.
+
+## 7. Rollout dan Rollback
+
+### Rollout
+
+1. Rilis Fase 1 dengan worker default off pada production.
+2. Jalankan migrasi dan test CRUD.
+3. Aktifkan worker hanya pada staging.
+4. Jalankan pilot Nutribake.
+5. Aktifkan pada Windows production untuk satu schedule.
+6. Observasi minimal dua siklus sebelum menambah schedule.
+
+### Rollback
+
+- Set `ENABLE_CONTENT_AUTOMATION_WORKER=false` dan restart service.
+- Schedule/run tetap tersimpan; tidak dihapus.
+- Operator job yang sudah dibuat tetap dapat direview/diteruskan.
+- Tidak ada rollback schema destruktif pada Fase 1.
 
 ## 8. Execution Task List
 
-- [x] Dokumentasikan schema empat accordion dan matriks enum/kompatibilitas dari UI OPC.
-- [x] Gunakan review revision/checksum dinamis dan resolved VSO di result agar tidak membutuhkan migrasi state review baru.
-- [x] Implementasikan resolver wardrobe kompatibel untuk explicit, sequential, dan stable-random.
-- [x] Ganti logika wardrobe inline pada generator OPC dan G-Labs dengan resolver bersama.
-- [x] Tambahkan unit test resolver wardrobe dan verifikasi konsistensi retry.
-- [x] Implementasikan kontrak Operator v2 serta adaptor payload `production` lama.
-- [x] Tambahkan validasi lintas-field dan error code yang dapat ditindaklanjuti.
-- [x] Implementasikan builder Markdown review deterministic tanpa side effect.
-- [x] Implementasikan streaming artefak review tenant-scoped melalui endpoint terautentikasi.
-- [x] Integrasikan metadata review ke status worker saat `awaiting_approval`.
-- [x] Ringkaskan response status Operator dan tambahkan metadata review.
-- [x] Ikat approval ke revision/checksum artefak review.
-- [x] Tambahkan perintah CLI `review`, approval revision, dan daftar preset.
-- [x] Perbarui skill plugin agar default-nya link-first dan hemat token.
-- [x] Tambahkan preset built-in `nutribake_editorial_v1` setelah seluruh validator lulus.
-- [x] Jalankan unit, integration contract, build, dan smoke review job staging existing.
-- [x] Verifikasi job tetap `awaiting_approval` dan review tidak memulai produksi.
-- [x] Jalankan SOP release patch, push `main`, push tag, dan verifikasi remote.
+### Fase 1 — Pilot
 
-## 9. Keputusan Produk yang Direkomendasikan
+- [x] Finalisasi schema dan state machine automation.
+- [x] Tambahkan migrasi PostgreSQL idempotent.
+- [x] Implementasikan contract dan kalkulasi timezone schedule.
+- [x] Implementasikan repository tenant-scoped dan atomic claim.
+- [x] Refactor pembuatan Operator job menjadi shared service.
+- [x] Implementasikan dispatcher dan status reconciler worker.
+- [x] Tambahkan worker boot gate dan health metadata.
+- [x] Implementasikan CRUD/action/notification API.
+- [x] Implementasikan halaman Content Automations dan permission menu.
+- [x] Tambahkan unit dan integration test.
+- [x] Build, restart, dan smoke test staging.
+- [x] Buat pilot schedule Nutribake dan verifikasi pause review.
+- [x] Perbarui checkbox progress secara real-time.
+- [x] Jalankan release patch serta verifikasi remote main/tag.
 
-1. Gunakan `sequential` untuk Nutribake agar warna pakaian berbeda secara terprediksi antar-konten.
-2. Pertahankan wardrobe konsisten di seluruh klip dalam satu video.
-3. Gunakan review Markdown sebagai default; chat hanya menampilkan ringkasan dan tautan.
-4. Jangan memakai endpoint export/sync final untuk membuat review.
-5. Wajibkan approval revision/checksum untuk mencegah race condition atau approval terhadap storyboard lama.
-6. Tambahkan preset hanya sesudah kontrak v2 dan resolver sequence selesai, agar preset tidak membakukan bug yang ada.
+### Fase 2 — Notifikasi Eksternal
+
+- [ ] Pilih provider pilot dan desain credential handling.
+- [ ] Implementasikan notification outbox + backoff.
+- [ ] Implementasikan quiet hours dan preference.
+- [ ] Tambahkan missed-run policy lanjutan.
+- [ ] Tambahkan calendar/run-health UI.
+- [ ] Test, staging pilot, dan release terpisah.
+
+### Fase 3 — Multi-node dan Governance
+
+- [ ] Implementasikan worker lease/heartbeat multi-node.
+- [ ] Implementasikan concurrency, rate limit, dan quota guard tenant.
+- [ ] Tambahkan blackout/holiday dan approval bertingkat.
+- [ ] Tambahkan analytics pilar dan rekomendasi jadwal.
+- [ ] Security/load/failover test dan release terpisah.
+
+## 9. Rekomendasi Eksekusi
+
+Mulai hanya dari Fase 1. Untuk pilot pertama, gunakan satu schedule Nutribake dengan `Run Now`, lalu satu jadwal mingguan. Jangan memulai Fase 2 sebelum minimal dua siklus mingguan berhasil tanpa duplikasi dan tanpa produksi sebelum approval.

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.138 — Native Content Automation Scheduler Fase 1 (02/08/2026)
+- Tambah scheduler PostgreSQL daily weekly monthly dengan worker idempotent
+- Tambah dashboard schedule run history notifikasi retry dan pause approval
+- Jamin tujuh planner row serta pilot Nutribake berhenti di awaiting approval
+
 ## V2.2.137 — Operator OPC Review dan Wardrobe Sequence (02/08/2026)
 - Tambahkan kontrak OPC v2 dan preset Nutribake Editorial
 - Perbaiki wardrobe sequential dan stable random lintas pipeline

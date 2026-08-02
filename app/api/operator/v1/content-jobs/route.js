@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { authenticateOperator, runAsOperatorTenant } from '@/lib/operator-auth';
-import { hashOperatorRequest, normalizeOperatorContentRequest } from '@/lib/operator-content-contract';
-import { appendOperatorJobEvent, createOperatorJob } from '@/lib/db';
+import { createOperatorJobFromRequest } from '@/lib/operator-job-service';
 
 export const runtime = 'nodejs';
 
@@ -25,24 +24,7 @@ export async function POST(request) {
       }, { status: 400 });
     }
     return await runAsOperatorTenant(identity, async () => {
-      const payload = normalizeOperatorContentRequest(await request.json());
-      const requestHash = hashOperatorRequest(payload);
-      const job = await createOperatorJob({
-        idempotencyKey,
-        requestHash,
-        requestJson: JSON.stringify(payload)
-      });
-      if (!job) throw new Error('Gagal membaca job setelah idempotent insert.');
-      if (!job.created && job.request_hash !== requestHash) {
-        return NextResponse.json({
-          success: false,
-          code: 'OPERATOR_IDEMPOTENCY_CONFLICT',
-          error: 'Idempotency-Key sudah dipakai untuk payload yang berbeda.'
-        }, { status: 409 });
-      }
-      if (job.created) {
-        await appendOperatorJobEvent(job.id, 'job_created', { actor: identity.actor });
-      }
+      const job = await createOperatorJobFromRequest({ request: await request.json(), idempotencyKey, actor: identity.actor });
       return NextResponse.json({
         success: true,
         job_id: job.id,

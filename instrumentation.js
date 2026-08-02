@@ -73,5 +73,16 @@ export async function register() {
     } else {
       console.log('ℹ️  MAKNA Operator Content Worker disabled by environment.');
     }
+
+    if (backgroundServicesEnabled && process.env.ENABLE_CONTENT_AUTOMATION_WORKER !== 'false') {
+      try {
+        const { startContentAutomationWorker } = await import('./lib/content-automation-worker.js');
+        startContentAutomationWorker();
+      } catch (err) {
+        console.error('❌ Failed to start Content Automation Worker:', err.message);
+      }
+    } else {
+      console.log('ℹ️  Content Automation Worker disabled by environment.');
+    }
   }
 }
