@@ -41,10 +41,10 @@ async function readHidden(prompt) {
 async function main() {
   const [, , command, ...args] = process.argv;
   if (command !== 'create-superadmin') {
-    console.log('Usage: npm run admin -- create-superadmin --username <name> --email <email>');
+    console.log('Usage: npm run admin -- create-superadmin --username <name> --email <email> [--staging]');
     return;
   }
-  Object.assign(process.env, loadStagingEnv());
+  if (args.includes('--staging')) Object.assign(process.env, loadStagingEnv());
   const username = option(args, '--username');
   const email = option(args, '--email');
   if (!username) throw new Error('--username wajib diisi.');

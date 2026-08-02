@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.133 — Aman Bootstrap Superadmin (02/08/2026)
+- Pisahkan target production dan local staging pada CLI bootstrap superadmin
+
 ## V2.2.132 — Tenant Control Plane dan Content Operator (02/08/2026)
 - Tambah bootstrap superadmin dan Tenant Management
 - Perbaiki Gemini API Key Pool tenant-aware serta hasil impor
