@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.2.131 — Fix Gemini API Key PostgreSQL (02/08/2026)
+- Menunggu async API key lookup sebelum memanggil Gemini
+- Memperbaiki tenant query spacing sebelum ORDER BY
+- Menambahkan migrasi kolom demographic OPC PostgreSQL
+- Memverifikasi Gemini planner dan Content Flow sync dengan key tersimpan
+
 ## V2.2.130 — Headless Content Operator (02/08/2026)
 - Menambahkan Operator API dan CLI untuk orkestrasi Content Planner ke OPC
 - Menambahkan auth token, idempotency, tenant isolation, audit event, retry dan restart-safe worker
