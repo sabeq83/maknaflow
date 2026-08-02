@@ -602,4 +602,4 @@ await testOperatorIdempotency();
 - [x] Validasi manifest/plugin dan lakukan smoke test terhadap staging.
 - [x] Jalankan lint, test, build, dan regression test Content Planner/OPC.
 - [x] Perbarui seluruh checkbox secara real-time selama eksekusi.
-- [ ] Jalankan patch release, verifikasi tag dan sinkronisasi `main` sesuai SOP.
+- [x] Jalankan patch release, verifikasi tag dan sinkronisasi `main` sesuai SOP.
