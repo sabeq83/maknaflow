@@ -513,18 +513,16 @@ export default function PipelinePage() {
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '12px' }}>
                     <button className="btn btn-sm" style={{ background: 'var(--accent-glow)', color: 'var(--accent-light)', border: '1px solid var(--accent)' }} onClick={() => handleRegenerate('prompts')} disabled={loading}>🔄 Regenerate Captions</button>
                   </div>
-                  {[
-                    { label: 'TikTok Caption', value: pipelineResult.tiktok_caption, icon: '🎵' },
-                    { label: 'Instagram Caption', value: pipelineResult.ig_caption, icon: '📸' },
-                    { label: 'YouTube Title', value: pipelineResult.yt_title, icon: '🎬' },
-                    { label: 'YouTube Description', value: pipelineResult.yt_desc, icon: '📺' },
-                  ].map((cap, i) => (
-                    <div key={i} className="caption-block">
-                      <button className="copy-btn" onClick={() => copyToClipboard(cap.value, cap.label)}>Copy</button>
-                      <div className="caption-label">{cap.icon} {cap.label}</div>
-                      <div className="caption-text">{cap.value || '—'}</div>
-                    </div>
-                  ))}
+                  {(() => {
+                    const universalCaption = pipelineResult.caption || pipelineResult.universal_caption || (typeof pipelineResult.social_media_package === 'object' ? pipelineResult.social_media_package?.caption : '') || pipelineResult.tiktok_caption || pipelineResult.ig_caption || '';
+                    return (
+                      <div className="caption-block">
+                        <button className="copy-btn" onClick={() => copyToClipboard(universalCaption, 'Social Media Caption')}>Copy</button>
+                        <div className="caption-label">📲 Universal Social Media Package & Caption</div>
+                        <div className="caption-text" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>{universalCaption || '—'}</div>
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
             </div>

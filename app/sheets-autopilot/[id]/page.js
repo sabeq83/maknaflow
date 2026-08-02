@@ -430,30 +430,18 @@ export default function CampaignDetailPage({ params }) {
       }
     } catch (_) {}
 
+    const universalCaption = captions.caption || captions.universal_caption || (typeof captions.social_media_package === 'object' ? captions.social_media_package?.caption : '') || captions.tiktok_caption || captions.ig_caption || '';
+
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        {captions.yt_title && (
+        {universalCaption ? (
           <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border)', borderRadius: 8, padding: 16 }}>
-            <div style={{ fontSize: '0.85rem' }}>
-              <div style={{ fontWeight: 600, color: 'var(--accent)' }}>🔴 YouTube Shorts Draft Title</div>
-              <div style={{ marginTop: 6, color: '#fff', fontSize: '0.85rem' }}>{captions.yt_title}</div>
-              <div style={{ marginTop: 12, fontWeight: 600, color: 'var(--accent)' }}>Description</div>
-              <div style={{ marginTop: 6, color: 'var(--text-muted)', whiteSpace: 'pre-wrap', fontSize: '0.8rem' }}>{captions.yt_desc}</div>
-            </div>
+            <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--accent)', display: 'block', marginBottom: 8 }}>📲 Social Media Package & Caption</span>
+            <p style={{ fontSize: '0.85rem', margin: 0, whiteSpace: 'pre-wrap', color: '#fff', lineHeight: 1.5 }}>{universalCaption}</p>
           </div>
-        )}
-
-        {captions.tiktok_caption && (
-          <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border)', borderRadius: 8, padding: 16 }}>
-            <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--accent)', display: 'block', marginBottom: 8 }}>🎵 TikTok Caption</span>
-            <p style={{ fontSize: '0.85rem', margin: 0, whiteSpace: 'pre-wrap', color: '#fff' }}>{captions.tiktok_caption}</p>
-          </div>
-        )}
-
-        {captions.ig_caption && (
-          <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border)', borderRadius: 8, padding: 16 }}>
-            <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--accent)', display: 'block', marginBottom: 8 }}>📸 Instagram Reels Caption</span>
-            <p style={{ fontSize: '0.85rem', margin: 0, whiteSpace: 'pre-wrap', color: '#fff' }}>{captions.ig_caption}</p>
+        ) : (
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontStyle: 'italic' }}>
+            Belum ada caption yang dihasilkan untuk pekerjaan ini.
           </div>
         )}
       </div>

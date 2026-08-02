@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.129 — Unifikasi Caption & 5 Tab Konsol RE-OPC (02/08/2026)
+- Integrasi caption universal pada worker autopilot dan ekspor
+- Unifikasi antarmuka 5 tab konsol RE Campaigns dan OPC Campaigns
+- Menyisipkan caption editor di Tab 2 Storyboard RE
+
 ## V2.2.128 — Surgical backport from maknagrid (01/08/2026)
 - Fix ReferenceErrors in sheets-autopilot and recipe-labs
 - Implement dynamic Google OAuth redirect URI

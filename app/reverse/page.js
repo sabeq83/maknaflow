@@ -639,18 +639,16 @@ export default function ReversePage() {
               {/* Captions */}
               {tab === 'captions' && (
                 <div>
-                  {[
-                    { label: 'TikTok Caption', value: activeResult.tiktok_caption, icon: '🎵' },
-                    { label: 'Instagram Caption', value: activeResult.ig_caption, icon: '📸' },
-                    { label: 'YouTube Title (High CTR)', value: activeResult.yt_title, icon: '🎬' },
-                    { label: 'YouTube Description', value: activeResult.yt_desc, icon: '📺' },
-                  ].map((cap, i) => (
-                    <div key={i} className="caption-block">
-                      <button className="copy-btn" onClick={() => copyToClipboard(cap.value, cap.label)}>Copy</button>
-                      <div className="caption-label">{cap.icon} {cap.label}</div>
-                      <div className="caption-text">{cap.value || '—'}</div>
-                    </div>
-                  ))}
+                  {(() => {
+                    const universalCaption = activeResult.caption || activeResult.universal_caption || (typeof activeResult.social_media_package === 'object' ? activeResult.social_media_package?.caption : '') || activeResult.tiktok_caption || activeResult.ig_caption || '';
+                    return (
+                      <div className="caption-block">
+                        <button className="copy-btn" onClick={() => copyToClipboard(universalCaption, 'Social Media Caption')}>Copy</button>
+                        <div className="caption-label">📲 Universal Social Media Package & Caption</div>
+                        <div className="caption-text" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>{universalCaption || '—'}</div>
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
 

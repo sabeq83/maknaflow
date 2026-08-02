@@ -21,7 +21,8 @@ export async function POST(req, { params }) {
       ffmpeg_sync_option,
       sync_mode,
       only_save,
-      selected_vo_version
+      selected_vo_version,
+      caption
     } = await req.json();
 
     if (!itemId) {
@@ -82,7 +83,10 @@ export async function POST(req, { params }) {
       voiceover,
       t2v_prompts,
       t2i_prompts,
-      i2v_prompts
+      i2v_prompts,
+      social_media_package: {
+        caption: caption || oldParsed.social_media_package?.caption || oldParsed.caption || oldParsed.universal_caption || ""
+      }
     });
 
     if (only_save) {

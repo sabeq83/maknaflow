@@ -1002,6 +1002,14 @@ export default function RECampaignDetailPage() {
   const [regeneratingItemSF, setRegeneratingItemSF] = useState({});
   const [workflowSettings, setWorkflowSettings] = useState({}); // { [itemId]: { enable_tts, enable_glabs, enable_ffmpeg } }
   const [activeRowTabs, setActiveRowTabs] = useState({}); // { [itemId]: 'decon' | 'storyboard' | 'dna' | 'assets' }
+  const [socialCaptions, setSocialCaptions] = useState({}); // { [itemId]: string }
+
+  const updateSocialField = (itemId, field, value) => {
+    setSocialCaptions(prev => ({
+      ...prev,
+      [itemId]: value
+    }));
+  };
   const [syncingAssets, setSyncingAssets] = useState({});
   const [retryingI2V, setRetryingI2V] = useState({});
   const [selectedVoVersions, setSelectedVoVersions] = useState({}); // { [itemId]: 'original' | 'safe' }
@@ -2585,10 +2593,10 @@ export default function RECampaignDetailPage() {
                         </button>
                       </div>
                       <textarea
+                        readOnly={true}
                         className="form-textarea"
                         style={{ width: '100%', minHeight: '120px', fontSize: '0.82rem', background: '#09090b', color: '#fff', borderRadius: '6px', padding: '10px', lineHeight: 1.4 }}
                         value={universalCap}
-                        onChange={(e) => updateSocialField(item.id, 'caption', e.target.value)}
                         placeholder="Naskah caption universal media sosial (TikTok, Instagram, Facebook, Shorts)..."
                       />
                     </div>
@@ -2602,6 +2610,18 @@ export default function RECampaignDetailPage() {
     };
 
     const renderV2Workbench = (item) => {
+      if (!socialCaptions.hasOwnProperty(item.id)) {
+        let capVal = '';
+        try {
+          const parsed = JSON.parse(item.result_json || '{}');
+          capVal = parsed.caption || parsed.universal_caption || (typeof parsed.social_media_package === 'object' ? parsed.social_media_package?.caption : '') || parsed.tiktok_caption || parsed.ig_caption || '';
+        } catch {}
+        setTimeout(() => {
+          setSocialCaptions(prev => ({ ...prev, [item.id]: capVal }));
+        }, 0);
+        return <div style={{ padding: '20px', color: 'var(--text-muted)' }}>Memuat Caption...</div>;
+      }
+
       if (!editedVideoPlans.hasOwnProperty(item.id)) {
         let plan = [];
         try { plan = JSON.parse(item.new_video_plan_json || '[]'); } catch {}
@@ -2866,6 +2886,7 @@ export default function RECampaignDetailPage() {
             body: JSON.stringify({
               new_video_plan: plan,
               video_dna: dna,
+              caption: socialCaptions[item.id] || '',
               enable_tts: settings.enable_tts,
               enable_glabs: settings.enable_glabs,
               enable_ffmpeg: settings.enable_ffmpeg,
@@ -2912,6 +2933,7 @@ export default function RECampaignDetailPage() {
             body: JSON.stringify({
               new_video_plan: plan,
               video_dna: dna,
+              caption: socialCaptions[item.id] || '',
               enable_tts: settings.enable_tts,
               enable_glabs: settings.enable_glabs,
               enable_ffmpeg: settings.enable_ffmpeg,
@@ -3231,23 +3253,6 @@ export default function RECampaignDetailPage() {
             </button>
             <button
               type="button"
-              onClick={() => setSubTab('dna')}
-              style={{
-                background: subTab === 'dna' ? 'rgba(108, 92, 231, 0.15)' : 'transparent',
-                border: subTab === 'dna' ? '1px solid var(--accent)' : '1px solid transparent',
-                color: subTab === 'dna' ? 'var(--accent-light)' : 'var(--text-muted)',
-                padding: '8px 16px',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                transition: 'all 0.2s ease'
-              }}
-            >
-              🧬 Tab 3: Metadata DNA
-            </button>
-            <button
-              type="button"
               onClick={() => setSubTab('assets')}
               style={{
                 background: subTab === 'assets' ? 'rgba(108, 92, 231, 0.15)' : 'transparent',
@@ -3261,7 +3266,24 @@ export default function RECampaignDetailPage() {
                 transition: 'all 0.2s ease'
               }}
             >
-              ☁️ Tab 4: Aset & Recovery
+              ☁️ Tab 3: Aset & Recovery
+            </button>
+            <button
+              type="button"
+              onClick={() => setSubTab('dna')}
+              style={{
+                background: subTab === 'dna' ? 'rgba(108, 92, 231, 0.15)' : 'transparent',
+                border: subTab === 'dna' ? '1px solid var(--accent)' : '1px solid transparent',
+                color: subTab === 'dna' ? 'var(--accent-light)' : 'var(--text-muted)',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                transition: 'all 0.2s ease'
+              }}
+            >
+              🧬 Tab 4: Metadata DNA
             </button>
             <button
               type="button"
@@ -3655,55 +3677,37 @@ export default function RECampaignDetailPage() {
                   </div>
                 );
               })}
-            </div>
-          )}
 
-          {subTab === 'dna' && (
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.02)',
-              padding: '20px',
-              borderRadius: '8px',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
-              marginBottom: '20px'
-            }}>
-              <h4 style={{ margin: '0 0 16px 0', color: '#fff', fontSize: '0.9rem', fontWeight: 700 }}>🧬 Metadata Video DNA</h4>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-                {[
-                  { field: 'pilar_konten', label: 'Pilar Konten' },
-                  { field: 'hook_type', label: 'Hook Type' },
-                  { field: 'visual_style', label: 'Visual Style' },
-                  { field: 'signature_moment', label: 'Signature Moment' },
-                  { field: 'camera_pace', label: 'Camera Pace' },
-                  { field: 'primary_emotion', label: 'Primary Emotion' },
-                  { field: 'affiliate_integration', label: 'Affiliate Integration' },
-                  { field: 'affiliate_mention', label: 'Affiliate Mention' },
-                  { field: 'scene_count', label: 'Scene Count', isNumber: true },
-                  { field: 'cta_type', label: 'CTA Type' }
-                ].map(({ field, label, isNumber }) => (
-                  <div key={field}>
-                    <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: '6px', fontWeight: 600 }}>{label}</label>
-                    <input
-                      type={isNumber ? 'number' : 'text'}
-                      className="form-control"
+              {/* Universal Caption Editor & Preview di akhir Tab 2 Storyboard */}
+              {(() => {
+                const capKey = `cap_${item.id}`;
+                const universalCap = socialCaptions[item.id] || '';
+                const isCopied = copySuccess[capKey];
+                return (
+                  <div style={{ background: 'rgba(255, 255, 255, 0.02)', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.05)', padding: '20px', marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '8px' }}>
+                      <span style={{ fontWeight: '700', fontSize: '0.85rem', color: 'var(--accent-light)' }}>📲 Social Media Package & Caption</span>
+                      <button
+                        type="button"
+                        disabled={!universalCap}
+                        onClick={() => handleCopy(universalCap, capKey)}
+                        className="btn btn-secondary btn-sm"
+                        style={{ fontSize: '0.7rem', padding: '4px 10px', background: isCopied ? '#2ed573' : 'rgba(255,255,255,0.08)', color: '#fff', border: 'none' }}
+                      >
+                        {isCopied ? '✅ Terkopi!' : '📋 Salin Caption'}
+                      </button>
+                    </div>
+                    <textarea
                       disabled={isReadOnly}
-                      style={{
-                        fontSize: '0.8rem',
-                        padding: '8px 12px',
-                        background: 'rgba(255,255,255,0.01)',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        borderRadius: '4px',
-                        color: '#fff',
-                        width: '100%'
-                      }}
-                      value={dna[field] ?? ''}
-                      onChange={(e) => {
-                        const val = isNumber ? (parseInt(e.target.value) || 0) : e.target.value;
-                        updateDnaField(field, val);
-                      }}
+                      className="form-textarea"
+                      style={{ width: '100%', minHeight: '140px', fontSize: '0.82rem', background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '6px', padding: '12px', color: '#fff', lineHeight: 1.5, resize: 'vertical' }}
+                      value={universalCap}
+                      onChange={(e) => updateSocialField(item.id, 'caption', e.target.value)}
+                      placeholder="Naskah caption media sosial lengkap..."
                     />
                   </div>
-                ))}
-              </div>
+                );
+              })()}
             </div>
           )}
 
@@ -3821,6 +3825,55 @@ export default function RECampaignDetailPage() {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {subTab === 'dna' && (
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.02)',
+              padding: '20px',
+              borderRadius: '8px',
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+              marginBottom: '20px'
+            }}>
+              <h4 style={{ margin: '0 0 16px 0', color: '#fff', fontSize: '0.9rem', fontWeight: 700 }}>🧬 Metadata Video DNA</h4>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                {[
+                  { field: 'pilar_konten', label: 'Pilar Konten' },
+                  { field: 'hook_type', label: 'Hook Type' },
+                  { field: 'visual_style', label: 'Visual Style' },
+                  { field: 'signature_moment', label: 'Signature Moment' },
+                  { field: 'camera_pace', label: 'Camera Pace' },
+                  { field: 'primary_emotion', label: 'Primary Emotion' },
+                  { field: 'affiliate_integration', label: 'Affiliate Integration' },
+                  { field: 'affiliate_mention', label: 'Affiliate Mention' },
+                  { field: 'scene_count', label: 'Scene Count', isNumber: true },
+                  { field: 'cta_type', label: 'CTA Type' }
+                ].map(({ field, label, isNumber }) => (
+                  <div key={field}>
+                    <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: '6px', fontWeight: 600 }}>{label}</label>
+                    <input
+                      type={isNumber ? 'number' : 'text'}
+                      className="form-control"
+                      disabled={isReadOnly}
+                      style={{
+                        fontSize: '0.8rem',
+                        padding: '8px 12px',
+                        background: 'rgba(255,255,255,0.01)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        borderRadius: '4px',
+                        color: '#fff',
+                        width: '100%'
+                      }}
+                      value={dna[field] ?? ''}
+                      onChange={(e) => {
+                        const val = isNumber ? (parseInt(e.target.value) || 0) : e.target.value;
+                        updateDnaField(field, val);
+                      }}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           )}

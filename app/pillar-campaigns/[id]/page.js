@@ -2082,8 +2082,8 @@ export default function PillarCampaignDetailPage() {
           {[
             { id: 'concept', label: '💡 Tab 1: Konsep Awal & Produk' },
             { id: 'storyboard', label: '📖 Tab 2: Storyboard & Rencana Visual' },
-            { id: 'dna', label: '🧬 Tab 3: Video DNA' },
-            { id: 'assets', label: '☁️ Tab 4: Aset & Recovery' },
+            { id: 'assets', label: '☁️ Tab 3: Aset & Recovery' },
+            { id: 'dna', label: '🧬 Tab 4: Video DNA' },
             { id: 'logs', label: '🖥 Tab 5: System Log' }
           ].map(t => (
             <button
@@ -2421,38 +2421,6 @@ export default function PillarCampaignDetailPage() {
           </div>
         )}
 
-        {activeTab === 'dna' && (
-          <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '20px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.05)', marginBottom: '20px' }}>
-            <h4 style={{ margin: '0 0 20px 0', fontWeight: '700', fontSize: '0.9rem', color: '#fff' }}>🧬 Video DNA & Narasi Metrik (OPC Campaign)</h4>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-              {[
-                { field: 'pilar_konten', label: '1. Kategori Pilar Konten', type: 'text' },
-                { field: 'hook_type', label: '2. Tipe Hook Pembuka', type: 'text' },
-                { field: 'visual_style', label: '3. Gaya Visual Presentasi', type: 'text' },
-                { field: 'signature_moment', label: '4. Signature Moment (ASMR)', type: 'text' },
-                { field: 'camera_pace', label: '5. Camera Pacing', type: 'text' },
-                { field: 'primary_emotion', label: '6. Emosi Utama', type: 'text' },
-                { field: 'affiliate_integration', label: '7. Integrasi Penempatan Produk', type: 'text' },
-                { field: 'affiliate_mention', label: '8. Metode Penyebutan Produk', type: 'text' },
-                { field: 'scene_count', label: '9. Jumlah Klip', type: 'number' },
-                { field: 'cta_type', label: '10. Jenis CTA Penutup', type: 'text' }
-              ].map(d => (
-                <div key={d.field} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>{d.label}</label>
-                  <input
-                    type={d.type}
-                    disabled={isReadOnly}
-                    value={dna[d.field] ?? ''}
-                    onChange={(e) => updateDnaField(d.field, d.type === 'number' ? (parseInt(e.target.value) || 0) : e.target.value)}
-                    style={{ width: '100%', padding: '8px', background: '#1c1c1e', border: '1px solid rgba(255,255,255,0.08)', color: '#fff', borderRadius: '4px', fontSize: '0.8rem' }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {activeTab === 'assets' && (
           <div style={{
             background: 'rgba(255, 255, 255, 0.02)',
@@ -2550,6 +2518,38 @@ export default function PillarCampaignDetailPage() {
                   </tbody>
                 </table>
               </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'dna' && (
+          <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '20px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.05)', marginBottom: '20px' }}>
+            <h4 style={{ margin: '0 0 20px 0', fontWeight: '700', fontSize: '0.9rem', color: '#fff' }}>🧬 Video DNA & Narasi Metrik (OPC Campaign)</h4>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+              {[
+                { field: 'pilar_konten', label: '1. Kategori Pilar Konten', type: 'text' },
+                { field: 'hook_type', label: '2. Tipe Hook Pembuka', type: 'text' },
+                { field: 'visual_style', label: '3. Gaya Visual Presentasi', type: 'text' },
+                { field: 'signature_moment', label: '4. Signature Moment (ASMR)', type: 'text' },
+                { field: 'camera_pace', label: '5. Camera Pacing', type: 'text' },
+                { field: 'primary_emotion', label: '6. Emosi Utama', type: 'text' },
+                { field: 'affiliate_integration', label: '7. Integrasi Penempatan Produk', type: 'text' },
+                { field: 'affiliate_mention', label: '8. Metode Penyebutan Produk', type: 'text' },
+                { field: 'scene_count', label: '9. Jumlah Klip', type: 'number' },
+                { field: 'cta_type', label: '10. Jenis CTA Penutup', type: 'text' }
+              ].map(d => (
+                <div key={d.field} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>{d.label}</label>
+                  <input
+                    type={d.type}
+                    disabled={isReadOnly}
+                    value={dna[d.field] ?? ''}
+                    onChange={(e) => updateDnaField(d.field, d.type === 'number' ? (parseInt(e.target.value) || 0) : e.target.value)}
+                    style={{ width: '100%', padding: '8px', background: '#1c1c1e', border: '1px solid rgba(255,255,255,0.08)', color: '#fff', borderRadius: '4px', fontSize: '0.8rem' }}
+                  />
+                </div>
+              ))}
             </div>
           </div>
         )}
