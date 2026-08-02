@@ -4,9 +4,9 @@ import { getDb, updatePillarCampaignItem, updatePillarCampaign } from '@/lib/db'
 export async function POST(request, { params }) {
   try {
     const { itemId } = await params;
-    const { step } = await request.json(); // 'generate', 'tts', 'visuals', 'ffmpeg', 'social'
+    const { step } = await request.json(); // 'generate', 'tts', 'tts_remux', 'visuals', 'ffmpeg', 'social'
 
-    if (!['generate', 'tts', 'visuals', 'ffmpeg', 'social'].includes(step)) {
+    if (!['generate', 'tts', 'tts_remux', 'visuals', 'ffmpeg', 'social'].includes(step)) {
       return NextResponse.json({ success: false, error: 'Step tidak valid' }, { status: 400 });
     }
 
@@ -36,6 +36,25 @@ export async function POST(request, { params }) {
       updateFields.visual_status = 'pending';
       updateFields.visual_tasks_json = '[]';
       updateFields.visual_clip_paths = null;
+      updateFields.ffmpeg_status = 'pending';
+      updateFields.ffmpeg_output_path = null;
+      updateFields.upload_status = 'pending';
+      updateFields.drive_link = null;
+      updateFields.social_post_status = 'pending';
+      updateFields.social_links_json = null;
+    } else if (step === 'tts_remux') {
+      let visualPaths = [];
+      try { visualPaths = JSON.parse(item.visual_clip_paths || '[]'); } catch (_) {}
+      if (item.visual_status !== 'completed' || !Array.isArray(visualPaths) || visualPaths.length === 0) {
+        return NextResponse.json({
+          success: false,
+          error: 'Video G-Labs belum lengkap. TTS & Re-mux hanya dapat dijalankan jika visual berstatus completed.'
+        }, { status: 409 });
+      }
+      updateFields.workflow_status = 'production_processing';
+      updateFields.tts_status = 'pending';
+      updateFields.tts_batch_id = null;
+      // visual_status, visual_tasks_json, dan visual_clip_paths sengaja dipertahankan.
       updateFields.ffmpeg_status = 'pending';
       updateFields.ffmpeg_output_path = null;
       updateFields.upload_status = 'pending';
@@ -82,7 +101,9 @@ export async function POST(request, { params }) {
 
     return NextResponse.json({
       success: true,
-      message: `Berhasil memicu kembali langkah ${step.toUpperCase()} untuk item #${itemId}. Scheduler akan segera memproses.`
+      message: step === 'tts_remux'
+        ? `TTS baru dan re-mux dijadwalkan untuk item #${itemId}. Video G-Labs tetap dipertahankan.`
+        : `Berhasil memicu kembali langkah ${step.toUpperCase()} untuk item #${itemId}. Scheduler akan segera memproses.`
     });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

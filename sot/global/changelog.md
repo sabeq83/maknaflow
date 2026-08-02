@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.136 — Tombol Regenerate TTS dan Re-mux OPC (02/08/2026)
+- Tambahkan aksi khusus regenerate TTS dan re-mux pada hasil OPC
+- Pertahankan task dan video G-Labs saat audio dibuat ulang
+- Validasi visual completed sebelum menjadwalkan re-mux
+
 ## V2.2.135 — Perbaikan FFmpeg OPC dan Urutan Upload Nextcloud (02/08/2026)
 - Muxing OPC menunggu dan membaca batch TTS asynchronous dengan benar
 - Validasi jumlah video dan audio mencegah hasil final parsial

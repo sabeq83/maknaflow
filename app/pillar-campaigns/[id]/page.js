@@ -328,7 +328,10 @@ export default function PillarCampaignDetailPage() {
     showToast('Voice Cast berhasil disimpan!');
   };
   async function triggerManualStep(itemId, step) {
-    if (!confirm(`Apakah Anda yakin ingin memicu proses ${step.toUpperCase()} secara manual?`)) return;
+    const confirmation = step === 'tts_remux'
+      ? 'Buat ulang audio TTS dengan persona campaign saat ini, render ulang FFmpeg, dan upload ulang hasil final? Video G-Labs tidak akan dibuat ulang.'
+      : `Apakah Anda yakin ingin memicu proses ${step.toUpperCase()} secara manual?`;
+    if (!confirm(confirmation)) return;
     setTriggering(prev => ({ ...prev, [`${itemId}-${step}`]: true }));
     try {
       const res = await fetch(`/api/v2/pillar-campaigns/items/${itemId}/trigger`, {
@@ -2788,6 +2791,19 @@ export default function PillarCampaignDetailPage() {
                   >
                     {recompressingItems[item.id] ? '⏳ Merender...' : '🔄 Re-FFMPEG'}
                   </button>
+
+                  {item.visual_status === 'completed' && item.visual_clip_paths && (
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      disabled={triggering[`${item.id}-tts_remux`]}
+                      onClick={() => triggerManualStep(item.id, 'tts_remux')}
+                      title={`Gunakan persona campaign: ${campaign.voice_persona || 'default'}`}
+                      style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      {triggering[`${item.id}-tts_remux`] ? '⏳ Menjadwalkan...' : '🎙️ Regenerate TTS & Re-mux'}
+                    </button>
+                  )}
 
                   {item.ffmpeg_output_path && (
                     <button
