@@ -3,6 +3,7 @@ import { authenticateOperator, runAsOperatorTenant } from '@/lib/operator-auth';
 import { normalizeOperatorApproval } from '@/lib/operator-content-contract';
 import { appendOperatorJobEvent, getDb, getOperatorJob } from '@/lib/db';
 import { approvePillarCampaignItemUnchanged } from '@/lib/pillar-campaign-approval';
+import { buildOperatorReviewArtifact } from '@/lib/operator-review-artifact';
 
 export const runtime = 'nodejs';
 
@@ -15,6 +16,15 @@ export async function POST(request, { params }) {
       const job = await getOperatorJob(jobId);
       if (!job) return NextResponse.json({ success: false, code: 'OPERATOR_JOB_NOT_FOUND', error: 'Job tidak ditemukan.' }, { status: 404 });
       if (!job.campaign_id) return NextResponse.json({ success: false, code: 'OPERATOR_CAMPAIGN_NOT_READY', error: 'Campaign belum tersedia.' }, { status: 409 });
+      const review = await buildOperatorReviewArtifact(job);
+      if (!review || !command.review_revision || command.review_revision !== review.revision || (command.review_sha256 && command.review_sha256 !== review.sha256)) {
+        return NextResponse.json({
+          success: false,
+          code: 'REVIEW_REVISION_MISMATCH',
+          error: 'Revision review tidak cocok atau belum diberikan. Baca ulang artefak review terbaru sebelum approval.',
+          review: review ? { revision: review.revision, sha256: review.sha256, url: review.url } : null
+        }, { status: 409 });
+      }
       const db = getDb();
       const campaignItems = await db.prepare('SELECT id, workflow_status FROM pillar_campaign_items WHERE campaign_id = ? ORDER BY id').all(job.campaign_id);
       const requested = command.item_ids.length ? new Set(command.item_ids) : null;
@@ -27,6 +37,8 @@ export async function POST(request, { params }) {
       for (const item of targets) await approvePillarCampaignItemUnchanged(item.id);
       await appendOperatorJobEvent(job.id, 'items_approved', {
         actor: identity.actor,
+        review_revision: review.revision,
+        review_sha256: review.sha256,
         item_ids: targets.map(item => item.id)
       });
       return NextResponse.json({ success: true, approved_count: targets.length, item_ids: targets.map(item => item.id) });

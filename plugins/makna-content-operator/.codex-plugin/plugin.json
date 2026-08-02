@@ -1,6 +1,6 @@
 {
   "name": "makna-content-operator",
-  "version": "0.1.0",
+  "version": "0.1.0+codex.20260802133656",
   "description": "Create, monitor, and approve tenant-scoped MAKNA content jobs through the official Operator API.",
   "author": {
     "name": "Local developer"
@@ -12,7 +12,11 @@
     "longDescription": "Creates content planner and OPC production jobs, monitors progress, and supports explicit storyboard approval through MAKNA Operator API. Social publishing is intentionally excluded.",
     "developerName": "Local developer",
     "category": "Productivity",
-    "capabilities": ["Content planning", "Campaign automation", "Approval workflow"],
+    "capabilities": [
+      "Content planning",
+      "Campaign automation",
+      "Approval workflow"
+    ],
     "defaultPrompt": "Use MAKNA Content Operator to create or monitor a content production job."
   }
 }

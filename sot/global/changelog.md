@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.137 — Operator OPC Review dan Wardrobe Sequence (02/08/2026)
+- Tambahkan kontrak OPC v2 dan preset Nutribake Editorial
+- Perbaiki wardrobe sequential dan stable random lintas pipeline
+- Tambahkan review Markdown hemat token serta approval terikat revision
+
 ## V2.2.136 — Tombol Regenerate TTS dan Re-mux OPC (02/08/2026)
 - Tambahkan aksi khusus regenerate TTS dan re-mux pada hasil OPC
 - Pertahankan task dan video G-Labs saat audio dibuat ulang

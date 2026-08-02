@@ -1,426 +1,349 @@
-# Implementation Plan — Perbaikan OPC Configuration, Item Integrity, dan Scheduler
+# Implementation Plan — Operator OPC Terstruktur, Wardrobe Sequence, Review Markdown, dan Preset
 
 ## 1. Tujuan
 
-Memperbaiki alur pembuatan Organic Pillar Campaign (OPC) agar:
+Menyelaraskan MAKNA Content Operator dengan empat accordion konfigurasi OPC di UI, memperbaiki perilaku wardrobe `sequential`, dan menyediakan review storyboard berbasis artefak Markdown agar Codex tidak perlu menyalin storyboard lengkap ke percakapan sebelum approval.
 
-1. Pilihan akun/Brand Profile, target demografi audiens, dan Visual Swap Overrides tersimpan serta tampil kembali secara benar.
-2. Campaign dan seluruh item dibuat secara atomik; tidak ada lagi campaign `running` tanpa item.
-3. PostgreSQL memberikan ID otomatis untuk `pillar_campaign_items`.
-4. UI menampilkan status scheduler berdasarkan kondisi runtime sebenarnya, bukan hanya setting tenant.
-5. Kampanye `opc_260802_zr0a5x` dapat dipulihkan dari planner sumber tanpa kehilangan konfigurasi yang benar.
+Hasil yang dituju:
 
-## 2. Bukti Kondisi Saat Ini
+1. Request Operator memakai schema OPC yang eksplisit, tervalidasi, dan identik dengan field UI.
+2. `wardrobe_style=sequential` benar-benar merotasi preset pakaian secara deterministik antar-item planner.
+3. Saat job mencapai `awaiting_approval`, web app otomatis membuat snapshot Markdown khusus review tanpa memulai produksi atau sinkronisasi aset final.
+4. Status Operator hanya mengembalikan ringkasan singkat, URL review, checksum/revisi, dan status approval.
+5. Codex memberikan tautan `.md` kepada pengguna; isi lengkap hanya ditampilkan bila pengguna memintanya.
+6. Preset tenant, misalnya `Nutribake Editorial`, ditambahkan setelah schema dan sequence tervalidasi.
 
-Kampanye `opc_260802_zr0a5x` memiliki:
+## 2. Hasil Analisis
+
+### 2.1 Empat accordion OPC yang sebenarnya
+
+Konfigurasi di `ImportPlannerModal` terdiri dari:
+
+1. **Basic Creative Strategy & Planner Master**
+2. **Aesthetics & Visual Engine Settings**
+3. **Product Bridging Settings**
+4. **Visual Swap Overrides**
+
+Operator API sekarang memakai satu object `production` yang diteruskan secara longgar ke ingest OPC. Hanya beberapa field umum yang divalidasi. Enum, kombinasi model/durasi, bentuk VSO, serta nilai empat accordion belum mempunyai kontrak formal.
+
+### 2.2 Wardrobe `sequential`
+
+UI sudah menyediakan:
+
+```jsx
+<option value="random">🎲 Random (Acak)</option>
+<option value="sequential">🔄 Sequential (Urut per baris)</option>
+```
+
+Namun worker saat ini hanya menangani:
+
+```js
+if (rowWardrobeColor) {
+  // override eksplisit dari baris
+} else if (rowVsoData.wardrobe_style === 'random') {
+  const selectedPresetKey = keys[job.row_index % keys.length];
+  // ubah menjadi custom wardrobe
+}
+```
+
+Tidak ada cabang `sequential`. Bahkan implementasi bernama `random` sekarang memakai modulo indeks sehingga hasilnya deterministik/berurutan, bukan acak. Jika nilai `sequential` dibiarkan, lookup preset tidak menemukannya dan dapat jatuh ke fallback generik `modest clothing`.
+
+Keputusan:
+
+- `sequential`: rotasi deterministik berdasarkan urutan item campaign, bukan ID database dan bukan urutan klip.
+- `random`: pilih preset secara pseudo-random yang stabil menggunakan hash `campaign_id:item_id`; retry item tidak mengganti pakaian.
+- Override warna pada baris planner tetap memiliki prioritas tertinggi.
+- Rotasi dibatasi pada katalog wardrobe yang kompatibel dengan `subject_demographic` agar preset pria, wanita syar'i, 3D, dan duo tidak tercampur.
+- Satu item/video memakai satu wardrobe yang konsisten untuk semua klipnya. Warna berbeda diterapkan antar-item/content plan, bukan antar-klip, untuk menjaga kontinuitas karakter.
+- Preset terpilih disimpan pada item/result sebagai `resolved_visual_overrides`, sehingga storyboard, T2I, I2V, retry, dan audit memakai nilai yang sama.
+
+Urutan prioritas:
 
 ```text
-status                    = running
-brand_profile_id          = null
-target_demographic        = null
-target_demographic_custom = null
-visual_overrides_json.subject_demographic = syari_classic
-jumlah pillar_campaign_items = 0
+row wardrobe override
+  > resolved_visual_overrides existing (retry)
+  > sequential/random resolver
+  > wardrobe preset eksplisit
+  > fallback demografi
 ```
 
-Schema item saat ini:
+### 2.3 Review Markdown dan pemakaian token Codex
+
+Menampilkan storyboard lengkap di chat memang memakai token input/output dan memperbesar konteks percakapan. Mengunggah `.md` lalu meminta Codex membaca dan menyalin seluruh isinya juga tetap boros; perpindahan format tidak menghilangkan token jika kontennya tetap dimasukkan ke chat/model.
+
+Desain hemat token:
+
+1. Web app membangun Markdown saat seluruh item mencapai `ready_for_review`.
+2. Markdown disimpan sebagai **review artifact**, terpisah dari upload aset final.
+3. Operator API mengembalikan metadata kecil:
+   - `review_url`
+   - `review_revision`
+   - `review_sha256`
+   - jumlah item/klip
+   - judul/hook singkat per item
+   - warning validasi
+4. Codex hanya menampilkan ringkasan dan tautan, bukan isi lengkap.
+5. Pengguna membaca `.md` di browser/Nextcloud, lalu menyetujui revisi tersebut.
+6. Approval harus menyertakan `review_revision` atau checksum. Jika storyboard berubah, API menolak approval lama dengan `409 REVIEW_REVISION_MISMATCH`.
+
+Catatan: endpoint export Markdown OPC saat ini tidak cocok untuk review otomatis karena selain membuat Markdown, endpoint tersebut juga memanggil sinkronisasi aset dan dapat membuat/mengisi spreadsheet. Generator Markdown-nya dapat dipakai ulang, tetapi alur review harus menjadi fungsi/endpoint terpisah tanpa side effect produksi.
+
+### 2.4 Preset
+
+Preset baru ditambahkan setelah schema Operator stabil. Preset menyimpan konfigurasi empat accordion, bukan pilar atau instruksi kampanye. Pilar, jumlah planner, dan instruksi khusus tetap berada di request agar setiap kampanye fleksibel.
+
+Preset harus tenant-scoped, versioned, dan dapat dioverride per request:
 
 ```text
-pillar_campaign_items.id = BIGINT NOT NULL
-column_default           = null
-is_identity              = NO
+defaults global
+  < tenant preset
+  < request override
 ```
 
-Planner sumber dan Brand Profile yang ditemukan:
+Preset awal `nutribake_editorial_v1`:
+
+- brand editorial, tanpa product bridging
+- Brand Profile Nutribake direferensikan dengan ID/slug tenant, bukan nama bebas
+- target demographic `ibu_rumah_tangga`
+- VSO aktif, `subject_demographic=syari_classic`
+- `wardrobe_style=sequential`
+- field lain memakai nilai yang memang tersedia di UI/kontrak OPC
+
+## 3. Desain Kontrak Operator
+
+Request tetap kompatibel dengan struktur `planner`, `selection`, dan `production`, tetapi `production` dinormalisasi menjadi empat group eksplisit:
+
+```json
+{
+  "planner": {
+    "planner_focus": "brand_editorial",
+    "planner_count": 7,
+    "pillars": [],
+    "platform": "tiktok"
+  },
+  "selection": { "mode": "all" },
+  "opc": {
+    "preset": "nutribake_editorial_v1",
+    "basic_strategy": {},
+    "visual_engine": {},
+    "product_bridging": {},
+    "visual_swap": {},
+    "workflow": {}
+  }
+}
+```
+
+Untuk kompatibilitas, payload lama `production` diterima selama masa transisi dan dinormalisasi ke `opc`. Response mencantumkan `contract_version` dan warning deprecation.
+
+Validasi utama:
+
+- enum narrative, demographic, provider, bahasa, visual style/mode, model, face visibility, words-per-clip, aspect ratio, dan VSO;
+- `clip_duration=10` hanya valid untuk `omni_flash`;
+- bridging editorial tanpa produk eksplisit ditolak;
+- VSO wardrobe harus kompatibel dengan demografi;
+- `enable_social_post=true` tetap ditolak;
+- approval mode hanya `storyboard` atau `none` sesuai guardrail API v1.
+
+## 4. Alur Review dan Approval
 
 ```text
-planner_id       = pln_aa53bbc4
-planner_row_id   = row_368ae232
-brand_profile_id = 940e766b-76d0-49b7-b6d5-01dfb0041d40
-brand_name       = nutribake
+Create job
+  → Content Planner
+  → OPC storyboard ready
+  → resolve wardrobe per item
+  → build immutable review Markdown snapshot
+  → awaiting_approval + review URL/revision/checksum
+  → pengguna membaca file
+  → approve(job, revision/checksum)
+  → TTS → G-Labs → FFmpeg → upload final
 ```
 
-Staging juga memiliki:
+Review Markdown memuat:
 
-```env
-ENABLE_CAMPAIGN_SCHEDULER=false
-ENABLE_SCHEDULER_WORKER=false
-```
+- identitas campaign dan konfigurasi efektif empat accordion;
+- pilar, hook, content subject, dan narrative mode per item;
+- storyboard, VO, T2V/T2I/I2V prompt;
+- resolved wardrobe dan VSO per item;
+- caption/CTA/hashtag;
+- warning validator;
+- revision, waktu pembuatan, dan SHA-256.
 
-## 3. Keputusan Arsitektur
-
-### 3.1 Identitas brand
-
-- Dropdown utama menyimpan `brand_profile_id`, bukan string nama akun.
-- `account_name` tetap disimpan sebagai snapshot agar nama kampanye, folder, export, dan data lama tetap dapat dibaca.
-- Opsi hard-coded `nutribake`/`siasatsehat` dihapus setelah Brand Profile tersedia; alias harus berasal dari data tenant.
-- API memvalidasi bahwa Brand Profile berada pada tenant aktif.
-
-### 3.2 Demografi audiens dan demografi visual
-
-Keduanya adalah konsep berbeda:
-
-| Field | Fungsi |
-|---|---|
-| `target_demographic` | Audiens dan tone bahasa naskah, misalnya `ibu_rumah_tangga`. |
-| `visual_overrides_json.subject_demographic` | Subjek/model visual, misalnya `syari_classic`. |
-
-UI detail tidak boleh memakai satu field untuk keduanya.
-
-### 3.3 Transaksi campaign bundle
-
-Pembuatan campaign dan item dilakukan dalam satu transaksi PostgreSQL:
-
-```text
-BEGIN
-  INSERT pillar_campaigns
-  INSERT pillar_campaign_items × N
-  ASSERT inserted_items = expected_items
-COMMIT
-```
-
-Jika satu insert gagal, seluruh campaign di-rollback dan API mengembalikan error.
-
-### 3.4 Status scheduler efektif
-
-Status efektif merupakan gabungan empat gate:
-
-```text
-process_enabled
-  AND worker_enabled
-  AND tenant_enabled
-  AND runtime_running
-```
-
-Toggle UI hanya mengendalikan `tenant_enabled`. Environment gate harus ditampilkan sebagai informasi read-only dan perubahan environment memerlukan restart.
-
-## 4. Tahapan Implementasi
-
-### Tahap A — Schema dan integritas data
-
-- Tambahkan sequence/default untuk `pillar_campaign_items.id` secara idempotent.
-- Tambahkan `account_name` dan `source_planner_id` pada `pillar_campaigns`.
-- Tambahkan index tenant/campaign yang diperlukan.
-- Verifikasi migrasi dapat dijalankan dua kali dan tidak mengubah ID existing.
-
-### Tahap B — Transaksi campaign + items
-
-- Tambahkan repository `createPillarCampaignBundle()` menggunakan `withPgTransaction()`.
-- Jalur single, bulk CSV, Import Planner, dan Operator API memakai repository yang sama.
-- Response API harus memuat `expected_items` dan `created_items`.
-- Hapus penggunaan pseudo-transaction `db.transaction(async () => ...)` pada OPC.
-
-### Tahap C — Propagasi konfigurasi
-
-- Sinkronkan pilihan account dengan Brand Profile ID.
-- Teruskan `account_name`, `brand_profile_id`, `target_demographic`, dan custom value pada seluruh jalur.
-- Simpan `source_planner_id` ketika campaign berasal dari Content Planner.
-- Validasi preset audiens dan VSO sebelum insert.
-
-### Tahap D — UI detail
-
-- Buat label map bersama untuk demografi audiens dan VSO.
-- Parse `visual_overrides_json` secara aman.
-- Basic Creative Strategy membaca brand snapshot/profile dan target audiens.
-- Visual Swap Overrides membaca `subject_demographic`, wardrobe, lighting, dan character concept dari JSON.
-
-### Tahap E — Scheduler observability
-
-- Expose status environment, worker gate, tenant toggle, dan runtime state.
-- Tampilkan alasan ketika scheduler tidak efektif.
-- Toggle tenant tidak boleh mengklaim “aktif” bila environment/worker mati.
-- Setelah kode lolos test, aktifkan campaign scheduler pada local staging pilot dan restart server.
-
-### Tahap F — Pemulihan kampanye terdampak
-
-- Dry-run terhadap `opc_260802_zr0a5x`.
-- Gunakan planner `pln_aa53bbc4`, row `row_368ae232`, dan Brand Profile Nutribake yang sudah ditemukan.
-- Terapkan `target_demographic=ibu_rumah_tangga` dan pertahankan VSO `syari_classic`.
-- Karena campaign saat ini tidak memiliki item, rekonstruksi item dalam transaksi; jangan membuat campaign duplikat.
-- Verifikasi minimal satu item `pending`, lalu scheduler memulai generation.
+Tidak ada secret, API key, path internal sensitif, atau raw log di artefak.
 
 ## 5. Perubahan File dan Before/After Code
 
-### 5.1 `lib/db-pg.js`
+### 5.1 `lib/operator-content-contract.js`
 
 **Code Sebelum (Current/Before)**
 
 ```js
-// pillar_campaign_items.id tidak memiliki sequence/default.
-// pillar_campaigns tidak memiliki account_name/source_planner_id.
+return {
+  planner: normalizePlanner(input.planner || {}),
+  selection: normalizeSelection(input.selection || {}),
+  production: normalizeProduction(input.production || {})
+};
 ```
 
 **Code Sesudah (Proposed/After)**
 
 ```js
-await pool.query(`CREATE SEQUENCE IF NOT EXISTS pillar_campaign_items_id_seq`);
-await pool.query(`
-  ALTER TABLE pillar_campaign_items
-  ALTER COLUMN id SET DEFAULT nextval('pillar_campaign_items_id_seq')
-`);
-await pool.query(`
-  ALTER TABLE pillar_campaigns
-    ADD COLUMN IF NOT EXISTS account_name TEXT,
-    ADD COLUMN IF NOT EXISTS source_planner_id TEXT
-`);
+const opc = normalizeOpcConfig(input.opc || migrateLegacyProduction(input.production));
+return {
+  contract_version: '2',
+  planner: normalizePlanner(input.planner || {}),
+  selection: normalizeSelection(input.selection || {}),
+  opc,
+  production: flattenOpcForIngest(opc)
+};
 ```
 
-Sequence di-set ke `MAX(id) + 1` dan migrasi dilindungi advisory lock.
+Tambahkan validator per accordion dan validator lintas-field.
 
-### 5.2 `lib/db.js`
+### 5.2 `lib/operator-presets.js` (baru)
 
 **Code Sebelum (Current/Before)**
 
 ```js
-await createPillarCampaign(campaign);
-await db.transaction(async () => {
-  for (const item of items) await createPillarCampaignItem(item);
-})();
+// Belum ada registry/resolver preset Operator OPC.
 ```
-
-`db.transaction` saat ini hanya mengembalikan callback dan bukan transaksi PostgreSQL nyata.
 
 **Code Sesudah (Proposed/After)**
 
 ```js
-export async function createPillarCampaignBundle({ campaign, items }) {
-  const tenantId = getActiveTenantId();
-  return withPgTransaction(async client => {
-    await insertPillarCampaign(client, tenantId, campaign);
-    const createdItems = await insertPillarCampaignItems(client, campaign.id, items);
-    if (createdItems !== items.length) throw new Error('OPC_ITEM_COUNT_MISMATCH');
-    return { campaignId: campaign.id, expectedItems: items.length, createdItems };
+export async function resolveOperatorPreset(tenantId, presetKey, overrides) {
+  const preset = await getTenantPreset(tenantId, presetKey);
+  return deepMerge(defaultOpcConfig(), preset.config, overrides);
+}
+```
+
+Resolver memvalidasi versi schema, kepemilikan tenant, Brand Profile, dan tidak mengizinkan preset mengaktifkan social posting.
+
+### 5.3 `lib/visual-override-resolver.js` (baru)
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Resolusi random berada inline dan sequential belum diimplementasikan.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export function resolveWardrobe({ mode, subjectDemographic, itemIndex, stableSeed, rowOverride }) {
+  const catalog = getCompatibleWardrobes(subjectDemographic);
+  if (rowOverride) return resolveExplicitWardrobe(rowOverride, catalog);
+  if (mode === 'sequential') return catalog[itemIndex % catalog.length];
+  if (mode === 'random') return catalog[stableHash(stableSeed) % catalog.length];
+  return resolveExplicitWardrobe(mode, catalog);
+}
+```
+
+Tambahkan unit test untuk rotasi, kestabilan retry, kompatibilitas demografi, dan prioritas row override.
+
+### 5.4 `lib/sheets-autopilot-worker.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+} else if (rowVsoData && rowVsoData.wardrobe_style === 'random') {
+  const selectedPresetKey = keys[job.row_index % keys.length];
+  rowVsoData.wardrobe_style = 'custom';
+  rowVsoData.wardrobe_style_custom = WARDROBE_PRESETS[selectedPresetKey];
+}
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const resolvedVso = resolveVisualOverrides({
+  campaign,
+  item: job,
+  itemIndex: job.row_index - 2,
+  rowWardrobeColor
+});
+await persistResolvedVisualOverrides(job.id, resolvedVso);
+```
+
+Gunakan resolver yang sama pada storyboard generation dan G-Labs agar tidak terjadi perbedaan pakaian antar-tahap.
+
+### 5.5 `lib/export-builder.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+export function buildPillarBatchMarkdownContent(campaign, items) {
+  // export campaign untuk storage/sync
+}
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export function buildPillarReviewMarkdown({ campaign, items, revision, checksum }) {
+  // Snapshot review lengkap, deterministic, tanpa side effect.
+}
+```
+
+Builder export lama dipertahankan. Builder review baru mempunyai urutan field stabil agar checksum konsisten.
+
+### 5.6 `lib/operator-review-artifact.js` (baru)
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Belum ada lifecycle artefak review Operator.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function ensureOperatorReviewArtifact(job, campaign, items) {
+  const sourceHash = hashReviewSource(campaign, items);
+  const markdown = buildPillarReviewMarkdown({ campaign, items, revision, sourceHash });
+  return saveImmutableReviewArtifact({ job, markdown, sourceHash });
+}
+```
+
+Artefak dapat disimpan ke Nextcloud review folder atau endpoint download terautentikasi. Kegagalan upload tidak boleh memulai produksi; job tetap review-pending dengan error yang jelas dan dapat di-retry.
+
+### 5.7 `lib/operator-content-worker.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+if (items.some(item => item.workflow_status === 'ready_for_review')) return 'approval';
+```
+
+```js
+return {
+  id: item.id,
+  workflow_status: item.workflow_status,
+  caption: result.tiktok_caption || result.ig_caption || result.caption || null
+};
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+if (readyItems.length) {
+  const review = await ensureOperatorReviewArtifact(job, campaign, items);
+  await updateOperatorJob(job.id, {
+    status: 'awaiting_approval',
+    review_url: review.url,
+    review_revision: review.revision,
+    review_sha256: review.sha256
   });
 }
 ```
 
-`createPillarCampaign()` juga menerima `account_name` dan `source_planner_id` untuk kompatibilitas jalur lain.
+Status item hanya membawa ringkasan pendek; `result_json` lengkap tidak dikirim pada endpoint status.
 
-### 5.3 `lib/pillar-campaign-ingest.js`
-
-**Code Sebelum (Current/Before)**
-
-```js
-await createPillarCampaign({
-  brand_profile_id: globalSettings.brand_profile_id || planner.brand_id || null,
-  // target_demographic tidak diteruskan
-});
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-await createPillarCampaignBundle({
-  campaign: {
-    account_name: globalSettings.account_name || planner.account_name,
-    brand_profile_id: validatedBrandProfile.id,
-    source_planner_id: planner.id,
-    target_demographic: globalSettings.target_demographic,
-    target_demographic_custom: globalSettings.target_demographic_custom,
-    visual_overrides_json: normalizedVisualOverrides
-  },
-  items
-});
-```
-
-Jalur idempotent hanya dianggap `reused` jika campaign existing mempunyai item sesuai jumlah yang diharapkan. Campaign kosong menghasilkan kode `OPC_INCOMPLETE_CAMPAIGN`, bukan sukses palsu.
-
-### 5.4 `app/components/ImportPlannerModal.js`
+### 5.8 `app/api/operator/v1/content-jobs/[jobId]/route.js`
 
 **Code Sebelum (Current/Before)**
 
 ```js
-onChange={e => {
-  setAccountName(e.target.value);
-  // selectedBrandId tidak berubah
-}}
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-onChange={e => {
-  const profile = brandProfiles.find(bp => bp.id === e.target.value);
-  setSelectedBrandId(profile?.id || '');
-  setAccountName(profile?.account_name || profile?.brand_name || '');
-}}
-```
-
-Payload mengirim kedua nilai:
-
-```js
-global_settings: {
-  account_name: accountName,
-  brand_profile_id: selectedBrandId,
-  target_demographic: targetDemographic,
-  target_demographic_custom: targetDemographicCustom
-}
-```
-
-### 5.5 `app/pillar-campaigns/page.js`
-
-**Code Sebelum (Current/Before)**
-
-```jsx
-<option value="nutribake">nutribake</option>
-<option value="siasatsehat">siasatsehat</option>
-```
-
-Mass production `global_settings` juga belum mengirim account dan target demografi.
-
-**Code Sesudah (Proposed/After)**
-
-```jsx
-{brandProfiles.map(profile => (
-  <option key={profile.id} value={profile.id}>{profile.brand_name}</option>
-))}
-```
-
-```js
-global_settings: {
-  account_name: selectedBrand?.brand_name,
-  brand_profile_id: selectedBrand?.id,
-  target_demographic: targetDemographic,
-  target_demographic_custom: targetDemographicCustom
-}
-```
-
-Scheduler panel menampilkan status efektif dan alasan jika worker mati.
-
-### 5.6 `app/api/v2/pillar-campaigns/route.js`
-
-**Code Sebelum (Current/Before)**
-
-```js
-parsedBody = {
-  campaign_name: formData.get('campaign_name'),
-  brand_profile_id: formData.get('brand_profile_id') || null
-  // account_name diabaikan
-};
-await createPillarCampaign(...);
-await createPillarCampaignItem(...);
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-const accountName = formData.get('account_name');
-const brand = await requireTenantBrandProfile(brandProfileId, accountName);
-const result = await createPillarCampaignBundle({
-  campaign: { ...normalizedCampaign, account_name: brand.accountName, brand_profile_id: brand.id },
-  items: [normalizedItem]
-});
-return NextResponse.json({ campaign_id: result.campaignId, expected_items: 1, created_items: 1 }, { status: 201 });
-```
-
-### 5.7 `app/api/v2/pillar-campaigns/bulk/route.js`
-
-**Code Sebelum (Current/Before)**
-
-```js
-await createPillarCampaign(globalCampaign);
-await db.transaction(async () => {
-  for (const row of rows_data) await createPillarCampaignItem(row);
-})();
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-const result = await createPillarCampaignBundle({
-  campaign: normalizeGlobalSettings(global_settings),
-  items: rows_data.map(normalizeBulkItem)
-});
-return NextResponse.json({
-  success: true,
-  campaign_id: result.campaignId,
-  expected_items: rows_data.length,
-  created_items: result.createdItems
-}, { status: 201 });
-```
-
-### 5.8 `lib/campaign-config-labels.js` — file baru
-
-**Code Sebelum (Current/Before)**
-
-```js
-// Label tersebar dan preset baru tidak dikenali halaman detail.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-export const AUDIENCE_DEMOGRAPHIC_LABELS = {
-  ibu_rumah_tangga: 'Ibu Rumah Tangga & Keluarga',
-  genz_casual: 'Gen-Z & Milenial Muda',
-  professional_executive: 'Profesional & Worker',
-  hijab_syari_family: 'Keluarga Hijrah & Syari',
-  fitness_health_enthusiast: 'Penggiat Olahraga & Kesehatan'
-};
-
-export const SUBJECT_DEMOGRAPHIC_LABELS = {
-  syari_classic: "Wanita Gamis Syar'i (Hanya Tangan)",
-  caucasian_male: 'Pria Kaukasia (Hanya Tangan)'
-};
-```
-
-### 5.9 `app/pillar-campaigns/[id]/page.js`
-
-**Code Sebelum (Current/Before)**
-
-```jsx
-{getDemographicLabel(campaign.target_demographic, campaign.target_demographic_custom)}
-// Dipakai juga pada Demografi Subjek / Model.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-const visualOverrides = safeParseVisualOverrides(campaign.visual_overrides_json);
-```
-
-```jsx
-<span>{getAudienceDemographicLabel(campaign.target_demographic, campaign.target_demographic_custom)}</span>
-<span>{getSubjectDemographicLabel(visualOverrides.subject_demographic, visualOverrides.subject_demographic_custom)}</span>
-```
-
-Brand ditampilkan dengan fallback:
-
-```jsx
-{campaign.account_name || campaign.brand_name || 'Tidak Ditentukan'}
-```
-
-### 5.10 `lib/campaign-scheduler.js`
-
-**Code Sebelum (Current/Before)**
-
-```js
-export function isCampaignSchedulerRunning() {
-  return state.isRunning;
-}
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-export function getCampaignSchedulerRuntimeStatus() {
-  return {
-    running: state.isRunning,
-    active_tasks: state.activeTasks.size,
-    last_tick_at: state.lastTickAt,
-    last_error: state.lastError
-  };
-}
-```
-
-Tick mencatat waktu dan error terakhir tanpa mengekspos secret.
-
-### 5.11 `app/api/v2/pillar-campaigns/scheduler-control/route.js`
-
-**Code Sebelum (Current/Before)**
-
-```js
-return NextResponse.json({ success: true, isSchedulerActive });
+return NextResponse.json({ success: true, job: publicJob });
 ```
 
 **Code Sesudah (Proposed/After)**
@@ -428,117 +351,191 @@ return NextResponse.json({ success: true, isSchedulerActive });
 ```js
 return NextResponse.json({
   success: true,
-  scheduler: {
-    process_enabled: process.env.ENABLE_CAMPAIGN_SCHEDULER !== 'false',
-    worker_enabled: isWorkerEnabled(),
-    tenant_enabled: await getSetting('opc_campaigns_scheduler_active') !== 'false',
-    runtime_running: getCampaignSchedulerRuntimeStatus().running,
-    effective_active: processEnabled && workerEnabled && tenantEnabled && runtimeRunning,
-    restart_required: !processEnabled || !workerEnabled
+  job: {
+    ...publicJob,
+    review: sanitizeReviewMetadata(publicJob.review),
+    items: publicJob.items.map(toCompactReviewSummary)
   }
 });
 ```
 
-POST hanya mengubah tenant toggle dan mengembalikan status efektif terbaru.
+Tambahkan `detail=full` hanya bila benar-benar diperlukan dan tetap terlindungi scope `content:read`.
 
-### 5.12 `.env.staging.local.example` dan `.env.staging.local`
-
-**Code Sebelum (Current/Before)**
-
-```env
-ENABLE_CAMPAIGN_SCHEDULER=false
-ENABLE_SCHEDULER_WORKER=false
-```
-
-**Code Sesudah (Proposed/After)**
-
-```env
-ENABLE_CAMPAIGN_SCHEDULER=true
-ENABLE_SCHEDULER_WORKER=true
-```
-
-Perubahan `.env.staging.local` dilakukan hanya setelah schema/item test lulus. Production mengikuti node topology dan tidak otomatis mengaktifkan worker di semua node.
-
-### 5.13 `scripts/repair-opc-campaign.mjs` — file baru
+### 5.9 `app/api/operator/v1/content-jobs/[jobId]/review/route.js` (baru)
 
 **Code Sebelum (Current/Before)**
 
 ```js
-// Tidak ada alat pemulihan campaign yatim.
+// Belum ada endpoint review artifact khusus Operator.
 ```
 
 **Code Sesudah (Proposed/After)**
 
 ```js
-// Default dry-run:
-npm run repair:opc -- --campaign opc_260802_zr0a5x
-
-// Apply eksplisit setelah preview disetujui:
-npm run repair:opc -- --campaign opc_260802_zr0a5x --apply
+export async function GET(request, { params }) {
+  const identity = await authenticateOperator(request, 'content:read');
+  return runAsOperatorTenant(identity, () => streamReviewMarkdown(params.jobId));
+}
 ```
 
-Script memverifikasi tenant, campaign kosong, planner/row sumber, Brand Profile, konfigurasi demografi/VSO, lalu membuat item menggunakan transaksi bundle. Script idempotent dan menolak apply jika item sudah tersedia.
+Endpoint memakai `Content-Type: text/markdown`, `Content-Disposition: inline`, `Cache-Control: no-store`, tenant isolation, dan tidak mengandung token pada URL.
 
-### 5.14 `scripts/test-opc-integrity.mjs` — file baru
+### 5.10 `app/api/operator/v1/content-jobs/[jobId]/approve/route.js`
 
 **Code Sebelum (Current/Before)**
 
 ```js
-// Belum ada regression test integritas OPC multi-tenant.
+const approval = normalizeOperatorApproval(await request.json());
 ```
 
 **Code Sesudah (Proposed/After)**
 
 ```js
-await testItemIdentitySequence();
-await testCampaignRollbackWhenItemFails();
-await testBrandAndAudiencePropagation();
-await testVisualSubjectLabel();
-await testSchedulerEffectiveStatus();
-await testCrossTenantBrandRejected();
+const approval = normalizeOperatorApproval(await request.json());
+assertReviewRevision(job, approval.review_revision, approval.review_sha256);
 ```
 
-## 6. Strategi Verifikasi
+Approval tanpa revisi hanya diizinkan sementara untuk client v1 dengan warning; setelah masa transisi menjadi wajib.
 
-1. Jalankan migrasi dua kali dan pastikan sequence tetap valid.
-2. Buat campaign single dan pastikan tepat satu item tersimpan.
-3. Buat campaign bulk 3 baris dan pastikan tepat tiga item tersimpan.
-4. Paksa kegagalan item kedua dan pastikan campaign serta item pertama ikut rollback.
-5. Import planner dengan Nutribake, `ibu_rumah_tangga`, dan `syari_classic`.
-6. Pastikan API detail mengembalikan Brand Profile, target audiens, dan VSO yang berbeda.
-7. Pastikan UI menampilkan:
-   - `nutribake`
-   - `Ibu Rumah Tangga & Keluarga`
-   - `Wanita Gamis Syar'i (Hanya Tangan)`
-8. Pastikan scheduler API tidak mengklaim aktif ketika environment gate mati.
-9. Aktifkan scheduler staging, restart, dan pastikan `effective_active=true` serta `last_tick_at` berubah.
-10. Dry-run lalu repair `opc_260802_zr0a5x`; pastikan item terbentuk dan generation bergerak dari `pending`.
-11. Jalankan regression Content Planner, Operator API, build, dan staging smoke check.
+### 5.11 `plugins/makna-content-operator/scripts/makna-content-operator.mjs`
 
-## 7. Strategi Rilis
+**Code Sebelum (Current/Before)**
 
-- Patch release setelah seluruh test dan repair staging berhasil.
-- Changelog mencatat schema item identity, OPC atomic bundle, configuration propagation, VSO display, dan scheduler observability.
-- Verifikasi `origin/main`, tag rilis, dan staging version setelah restart.
+```js
+console.log(`${job.id} | ${job.status} | ${job.current_stage}`);
+```
 
-## Execution Task List
+**Code Sesudah (Proposed/After)**
 
-- [x] Tambahkan migrasi identity sequence item OPC dan metadata campaign.
-- [x] Implementasikan repository transaksi nyata campaign + items.
-- [x] Migrasikan jalur OPC single ke campaign bundle atomik.
-- [x] Migrasikan jalur OPC bulk ke campaign bundle atomik.
-- [x] Migrasikan Import Planner/Operator ingest ke campaign bundle atomik.
-- [x] Perbaiki sinkronisasi dropdown account dengan Brand Profile ID.
-- [x] Propagasikan account dan target demografi pada seluruh jalur OPC.
-- [x] Tambahkan shared label map audiens dan subjek visual.
-- [x] Perbaiki halaman detail agar membaca VSO dari JSON yang benar.
-- [x] Tambahkan scheduler runtime observability dan effective status API.
-- [x] Perbaiki panel/toggle scheduler agar menampilkan alasan yang jujur.
-- [x] Tambahkan regression test OPC identity, rollback, konfigurasi, tenant, dan scheduler.
-- [x] Jalankan test, build, dan smoke test staging.
-- [x] Aktifkan campaign scheduler pada local staging pilot dan restart.
-- [x] Jalankan dry-run pemulihan `opc_260802_zr0a5x`.
-- [x] Terapkan pemulihan setelah hasil dry-run diverifikasi.
-- [x] Verifikasi campaign memiliki item dan pipeline mulai berjalan.
-- [x] Perbarui checkbox secara real-time selama eksekusi.
-- [x] Jalankan patch release serta sinkronisasi `main` dan tag sesuai SOP.
+```js
+printCompactJob(job);
+if (job.review) console.log(`Review: ${job.review.url} | revision=${job.review.revision}`);
+```
+
+Tambahkan:
+
+```bash
+makna-content-operator review <job-id> [--save <file>]
+makna-content-operator approve <job-id> --revision <revision> --all
+makna-content-operator presets
+```
+
+Perintah `review` secara default hanya mencetak URL/metadata. `--save` mengunduh file lokal tanpa mencetak isi ke terminal/chat.
+
+### 5.12 `plugins/makna-content-operator/skills/content-operator/SKILL.md`
+
+**Code Sebelum (Current/Before)**
+
+```md
+If status is awaiting_approval, summarize the storyboard/result.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```md
+If status is awaiting_approval, show the compact summary and review Markdown link.
+Do not reproduce the full storyboard unless the user explicitly requests it.
+Approve only the exact review revision explicitly approved by the user.
+```
+
+### 5.13 Database migration (`lib/db-pg.js` / schema Operator)
+
+**Code Sebelum (Current/Before)**
+
+```sql
+-- operator_jobs belum menyimpan review revision/checksum/url.
+-- belum ada tenant-scoped OPC presets.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```sql
+ALTER TABLE operator_jobs
+  ADD COLUMN IF NOT EXISTS contract_version TEXT DEFAULT '1',
+  ADD COLUMN IF NOT EXISTS review_revision INTEGER,
+  ADD COLUMN IF NOT EXISTS review_sha256 TEXT,
+  ADD COLUMN IF NOT EXISTS review_url TEXT,
+  ADD COLUMN IF NOT EXISTS review_source_hash TEXT;
+
+CREATE TABLE IF NOT EXISTS operator_opc_presets (
+  tenant_id TEXT NOT NULL,
+  preset_key TEXT NOT NULL,
+  schema_version TEXT NOT NULL,
+  config_json JSONB NOT NULL,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  PRIMARY KEY (tenant_id, preset_key)
+);
+```
+
+Resolved VSO disimpan pada item menggunakan kolom JSON yang sesuai; jika kolom khusus diperlukan, migrasi dibuat idempotent.
+
+## 6. Strategi Kompatibilitas
+
+- Request lama `production` tetap berjalan dan diberi warning deprecation.
+- Preset opsional; request tanpa preset memakai default saat ini.
+- UI tetap mengirim field existing selama adaptor kontrak belum dipakai UI.
+- Export Markdown existing tidak diubah perilakunya; review artifact memakai jalur baru.
+- Job existing tanpa review revision tetap dapat dibaca.
+- Approval lama diberi masa transisi, tetapi plugin baru selalu mengirim revision/checksum.
+
+## 7. Pengujian dan Kriteria Penerimaan
+
+### Unit
+
+- seluruh enum accordion diterima/ditolak sesuai pilihan UI;
+- `omni_flash + 10s` valid, model lain + 10s ditolak;
+- sequence menghasilkan warna berbeda dan berulang setelah katalog habis;
+- retry menghasilkan wardrobe identik;
+- random stabil namun tidak mengikuti pola sequence;
+- katalog wardrobe sesuai demografi;
+- checksum Markdown stabil untuk data sama dan berubah jika storyboard berubah;
+- preset merge tidak mengaktifkan social posting.
+
+### Integrasi
+
+- buat job Nutribake 7 pilar dengan preset editorial;
+- semua item memiliki resolved wardrobe berbeda sesuai sequence;
+- job berhenti di `awaiting_approval` sebelum TTS;
+- endpoint status berukuran ringkas dan tidak membawa prompt/storyboard penuh;
+- review URL membuka Markdown lengkap;
+- tidak ada video/aset final yang disinkronkan saat review dibuat;
+- approval revisi benar melanjutkan produksi;
+- approval revisi lama ditolak `409`;
+- TTS, G-Labs, FFmpeg, dan upload final tetap berjalan setelah approval.
+
+### Target efisiensi token
+
+- respons status review maksimal berisi metadata dan ringkasan satu baris per item;
+- Codex tidak membaca isi `.md` kecuali diminta;
+- prompt operasional berikutnya cukup menyebut preset, pilar, jumlah ide, dan instruksi khusus;
+- ukur perbandingan ukuran payload status sebelum/sesudah dan tetapkan batas regresi.
+
+## 8. Execution Task List
+
+- [x] Dokumentasikan schema empat accordion dan matriks enum/kompatibilitas dari UI OPC.
+- [x] Gunakan review revision/checksum dinamis dan resolved VSO di result agar tidak membutuhkan migrasi state review baru.
+- [x] Implementasikan resolver wardrobe kompatibel untuk explicit, sequential, dan stable-random.
+- [x] Ganti logika wardrobe inline pada generator OPC dan G-Labs dengan resolver bersama.
+- [x] Tambahkan unit test resolver wardrobe dan verifikasi konsistensi retry.
+- [x] Implementasikan kontrak Operator v2 serta adaptor payload `production` lama.
+- [x] Tambahkan validasi lintas-field dan error code yang dapat ditindaklanjuti.
+- [x] Implementasikan builder Markdown review deterministic tanpa side effect.
+- [x] Implementasikan streaming artefak review tenant-scoped melalui endpoint terautentikasi.
+- [x] Integrasikan metadata review ke status worker saat `awaiting_approval`.
+- [x] Ringkaskan response status Operator dan tambahkan metadata review.
+- [x] Ikat approval ke revision/checksum artefak review.
+- [x] Tambahkan perintah CLI `review`, approval revision, dan daftar preset.
+- [x] Perbarui skill plugin agar default-nya link-first dan hemat token.
+- [x] Tambahkan preset built-in `nutribake_editorial_v1` setelah seluruh validator lulus.
+- [x] Jalankan unit, integration contract, build, dan smoke review job staging existing.
+- [x] Verifikasi job tetap `awaiting_approval` dan review tidak memulai produksi.
+- [x] Jalankan SOP release patch, push `main`, push tag, dan verifikasi remote.
+
+## 9. Keputusan Produk yang Direkomendasikan
+
+1. Gunakan `sequential` untuk Nutribake agar warna pakaian berbeda secara terprediksi antar-konten.
+2. Pertahankan wardrobe konsisten di seluruh klip dalam satu video.
+3. Gunakan review Markdown sebagai default; chat hanya menampilkan ringkasan dan tautan.
+4. Jangan memakai endpoint export/sync final untuk membuat review.
+5. Wajibkan approval revision/checksum untuk mencegah race condition atau approval terhadap storyboard lama.
+6. Tambahkan preset hanya sesudah kontrak v2 dan resolver sequence selesai, agar preset tidak membakukan bug yang ada.

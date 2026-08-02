@@ -27,6 +27,7 @@ function printJob(payload) {
   const job = payload.job;
   const progress = job.progress || {};
   console.log(`${job.id} | ${job.status} | ${job.current_stage} | ${progress.completed_items || 0}/${progress.total_items || 0}`);
+  if (job.review) console.log(`review=${job.review.url} | revision=${job.review.revision} | sha256=${job.review.sha256}`);
 }
 
 async function main() {
@@ -58,11 +59,36 @@ async function main() {
   if (command === 'approve') {
     const jobId = args[0];
     if (!jobId || !args.includes('--all')) throw new Error('Gunakan approve <job-id> --all setelah approval eksplisit pengguna.');
-    const result = await api(`/api/operator/v1/content-jobs/${jobId}/approve`, { method: 'POST', body: { mode: 'approve_unchanged', item_ids: [] } });
+    const revision = option('--revision');
+    if (!revision) throw new Error('--revision wajib diisi sesuai artefak review yang disetujui.');
+    const result = await api(`/api/operator/v1/content-jobs/${jobId}/approve`, { method: 'POST', body: { mode: 'approve_unchanged', item_ids: [], review_revision: revision } });
     console.log(`${result.approved_count} item disetujui.`);
     return;
   }
-  console.log('Commands: whoami | create --file <json> [--key <key>] | status <job> | wait <job> | approve <job> --all');
+  if (command === 'review') {
+    const jobId = args[0];
+    if (!jobId) throw new Error('job-id wajib diisi.');
+    const response = await fetch(`${baseUrl}/api/operator/v1/content-jobs/${jobId}/review`, { headers: { authorization: `Bearer ${token}` } });
+    if (!response.ok) {
+      const payload = await response.json().catch(() => ({}));
+      throw new Error(`${payload.code || response.status}: ${payload.error || 'Review gagal diunduh'}`);
+    }
+    const markdown = await response.text();
+    const savePath = option('--save');
+    if (savePath) {
+      await fs.writeFile(savePath, markdown, 'utf8');
+      console.log(`${savePath} | revision=${response.headers.get('x-review-revision')} | sha256=${response.headers.get('x-review-sha256')}`);
+    } else {
+      console.log(`review endpoint siap | revision=${response.headers.get('x-review-revision')} | sha256=${response.headers.get('x-review-sha256')} | gunakan --save <file>`);
+    }
+    return;
+  }
+  if (command === 'presets') {
+    const result = await api('/api/operator/v1/presets');
+    result.presets.forEach(preset => console.log(`${preset.key} | ${preset.label} | schema=${preset.schema_version}`));
+    return;
+  }
+  console.log('Commands: whoami | presets | create --file <json> [--key <key>] | status <job> | wait <job> | review <job> [--save <file>] | approve <job> --revision <revision> --all');
 }
 
 main().catch(error => { console.error(error.message); process.exitCode = 1; });

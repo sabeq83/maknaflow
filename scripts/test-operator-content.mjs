@@ -6,6 +6,7 @@ import {
   normalizeOperatorApproval,
   normalizeOperatorContentRequest
 } from '../lib/operator-content-contract.js';
+import { resolveWardrobe } from '../lib/visual-override-resolver.js';
 import { loadStagingEnv } from './local-staging/env.js';
 
 const nutribakeRequest = {
@@ -58,8 +59,35 @@ assert.throws(
 );
 assert.deepEqual(normalizeOperatorApproval({ item_ids: [2, 2, 3] }), {
   mode: 'approve_unchanged',
-  item_ids: [2, 3]
+  item_ids: [2, 3],
+  review_revision: null,
+  review_sha256: null
 });
+
+const v2 = normalizeOperatorContentRequest({
+  planner: nutribakeRequest.planner,
+  selection: { mode: 'all' },
+  opc: {
+    preset: 'nutribake_editorial_v1',
+    visual_engine: { target_clips_count: 3 },
+    workflow: { approval_mode: 'storyboard' }
+  }
+});
+assert.equal(v2.contract_version, '2');
+assert.equal(v2.production.target_demographic, 'ibu_rumah_tangga');
+assert.equal(v2.production.target_clips_count, 3);
+assert.equal(JSON.parse(v2.production.visual_overrides_json).wardrobe_style, 'sequential');
+assert.throws(() => normalizeOperatorContentRequest({
+  planner: nutribakeRequest.planner,
+  opc: { visual_engine: { video_model: 'veo_31_lite', clip_duration: 10 } }
+}), /hanya tersedia untuk omni_flash/);
+
+const sequenceA = resolveWardrobe({ mode: 'sequential', subjectDemographic: 'syari_classic', itemIndex: 0 });
+const sequenceB = resolveWardrobe({ mode: 'sequential', subjectDemographic: 'syari_classic', itemIndex: 1 });
+assert.notEqual(sequenceA.key, sequenceB.key);
+const randomA = resolveWardrobe({ mode: 'random', subjectDemographic: 'syari_classic', stableSeed: 'campaign:item' });
+const randomRetry = resolveWardrobe({ mode: 'random', subjectDemographic: 'syari_classic', stableSeed: 'campaign:item' });
+assert.deepEqual(randomA, randomRetry);
 
 const oldToken = process.env.MAKNA_OPERATOR_API_TOKEN;
 const oldTenant = process.env.MAKNA_OPERATOR_TENANT_ID;
