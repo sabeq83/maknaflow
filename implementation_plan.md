@@ -565,3 +565,146 @@ CONTENT_AUTOMATION_LEASE_MS=60000
 ## 9. Rekomendasi Eksekusi
 
 Mulai hanya dari Fase 1. Untuk pilot pertama, gunakan satu schedule Nutribake dengan `Run Now`, lalu satu jadwal mingguan. Jangan memulai Fase 2 sebelum minimal dua siklus mingguan berhasil tanpa duplikasi dan tanpa produksi sebelum approval.
+
+## 10. Patch Fase 1.1 — Directive, Preset Manager, dan UI Automation
+
+### Sasaran
+
+1. Pisahkan arahan internal AI dari kalimat outro yang benar-benar diucapkan.
+2. Cegah kebocoran directive ke VO, CTA, caption, dan prompt visual.
+3. Reparasi kampanye `opc_37ca39_e74aff` tanpa menjalankan produksi.
+4. Jadikan preset OPC tenant-scoped dan dapat dikelola Admin.
+5. Rapikan Content Automations: sidebar, satu kolom, modal New Schedule, tombol konsisten, dan approval kampanye terpisah.
+
+### File dan Code Sebelum/Sesudah
+
+#### `lib/prompts.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+CUSTOM INSTRUCTIONS FROM USER: custom_instruction
+MANDATORY: klip terakhir wajib mengucapkan custom_instruction
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+AI DIRECTIVE: ai_directive // internal, never quote
+MANDATORY OUTRO: mandatory_outro_line // spoken only when explicitly set
+```
+
+#### `lib/pillar-campaign-ingest.js` dan `lib/db.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+custom_instruction: planner.brand_context
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+ai_directive: globalSettings.ai_directive || planner.brand_context
+mandatory_outro_line: globalSettings.mandatory_outro_line || ''
+```
+
+#### `lib/db-pg.js`
+
+**Code Sebelum (Current/Before)**
+
+```sql
+-- pillar_campaigns belum memiliki ai_directive dan mandatory_outro_line
+```
+
+**Code Sesudah (Proposed/After)**
+
+```sql
+ALTER TABLE pillar_campaigns ADD COLUMN IF NOT EXISTS ai_directive TEXT;
+ALTER TABLE pillar_campaigns ADD COLUMN IF NOT EXISTS mandatory_outro_line TEXT;
+```
+
+#### `lib/ai-directive.js` dan `lib/scheduler-processors.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const parsed = parseGeminiJSON(result);
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const parsed = sanitizeAiDirectiveLeak(parseGeminiJSON(result), aiDirective);
+```
+
+#### `scripts/repair-ai-directive-leak.mjs`
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Belum ada reparasi campaign awaiting_approval yang sudah terdampak.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+await repairCampaignVoiceover(campaignId); // result, original/safe VO, dan video plan
+```
+
+#### `lib/operator-presets.js` dan `app/api/v2/operator-presets/*`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const PRESETS = { nutribake_editorial_v1: {...} };
+// read-only, global, hard-coded
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+// Built-in immutable + custom tenant presets from tenant setting cache.
+listOperatorPresets();
+saveOperatorPreset();
+deleteOperatorPreset();
+```
+
+#### `app/content-automations/page.js`
+
+**Code Sebelum (Current/Before)**
+
+```jsx
+<main><TwoColumnGrid><AlwaysVisibleForm/><Schedules/></TwoColumnGrid></main>
+```
+
+**Code Sesudah (Proposed/After)**
+
+```jsx
+<><Sidebar/><main><Header actions/><OneColumnSections/><ScheduleModal/><PresetModal/></main></>
+```
+
+#### `app/api/v2/content-automations/runs/[runId]/approve/route.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Approval seluruh campaign hanya tersedia melalui Operator bearer API.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+// UI-session Admin approval dengan revision/checksum terbaru dan audit event.
+```
+
+### Execution Task List Fase 1.1
+
+- [x] Tambahkan migration dan mapping `ai_directive`/`mandatory_outro_line`.
+- [x] Perbaiki prompt dan tambahkan sanitizer beserta unit test.
+- [x] Reparasi campaign pilot serta verifikasi revision berubah.
+- [x] Implementasikan tenant preset storage dan Admin CRUD API.
+- [x] Refactor UI Automation menjadi sidebar + satu kolom + modal.
+- [x] Tambahkan aksi review dan approve entire campaign yang terpisah dari Run Now/Aktifkan.
+- [x] Jalankan test, build, restart, dan smoke test staging.
+- [x] Jalankan release patch dan verifikasi remote main/tag.

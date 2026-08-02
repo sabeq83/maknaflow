@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.139 — AI Directive Guardrail dan Automation Preset Manager (02/08/2026)
+- Pisahkan AI Directive dari Mandatory Outro Line dan cegah kebocoran voiceover
+- Reparasi storyboard pilot tanpa menjalankan produksi
+- Rapikan UI Content Automations dan tambah Admin Preset Manager serta bulk approval aman
+
 ## V2.2.138 — Native Content Automation Scheduler Fase 1 (02/08/2026)
 - Tambah scheduler PostgreSQL daily weekly monthly dengan worker idempotent
 - Tambah dashboard schedule run history notifikasi retry dan pause approval
