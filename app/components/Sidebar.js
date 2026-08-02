@@ -21,6 +21,7 @@ const menuKeyMap = {
   '/scraper': 'video_library',
   '/settings/brand-profiles': 'brand_profiles',
   '/settings/users': 'admin_only',
+  '/settings/tenants': 'superadmin_only',
   '/settings': 'system_settings',
   '/system-health': 'system_settings'
 };
@@ -46,6 +47,7 @@ const navItems = [
   { section: 'SYSTEM' },
   { label: 'Brand Profile Manager', href: '/settings/brand-profiles', icon: '🧬' },
   { label: 'User Management', href: '/settings/users', icon: '👥', adminOnly: true },
+  { label: 'Tenant Management', href: '/settings/tenants', icon: '🏢', superadminOnly: true },
   { label: 'System Health', href: '/system-health', icon: '🩺' },
   { label: 'Settings', href: '/settings', icon: '⚙' },
 ];
@@ -81,7 +83,9 @@ function SidebarContent() {
   const isMenuAllowed = (item) => {
     if (item.href === '/' || item.href === '/content-flow') return true;
     if (!user) return true;
+    if (item.superadminOnly) return user.role === 'superadmin';
     if (user.role === 'admin') return true;
+    if (user.role === 'superadmin') return false;
     if (item.adminOnly) return false;
 
     const requiredKey = menuKeyMap[item.href];

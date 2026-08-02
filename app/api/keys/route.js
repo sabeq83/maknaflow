@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getAllApiKeys, addApiKey, addApiKeysBulk, updateApiKey, deleteApiKey, deleteInvalidApiKeys, markApiKeyStatus, getPoolSummary } from '@/lib/db';
 import { testGeminiConnection } from '@/lib/gemini';
+import { requireTenantAdmin } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(request) {
   try {
+    requireTenantAdmin(request);
     const keys = await getAllApiKeys();
     const pool = await getPoolSummary();
 
@@ -21,6 +23,7 @@ export async function GET() {
 
 export async function POST(request) {
   try {
+    requireTenantAdmin(request);
     const body = await request.json();
 
     // Action: Health Check All Keys in Pool
@@ -71,7 +74,7 @@ export async function POST(request) {
           if (check.success) {
             validated.push(item);
           } else {
-            rejectedKeys.push({ name: item.key_name, key: item.api_key, reason: check.message });
+            rejectedKeys.push({ name: item.key_name, reason: check.message });
           }
         }
         keysToInsert = validated;
@@ -81,21 +84,25 @@ export async function POST(request) {
       const keys = await getAllApiKeys();
       const pool = await getPoolSummary();
       
-      let msg = `Berhasil mengimpor ${result.addedCount} API Key baru ke pool.`;
+      const summary = {
+        added: result.added,
+        duplicates: result.duplicates,
+        rejected: rejectedKeys.length,
+        failed: result.failures.length
+      };
+      const success = summary.added > 0 || summary.duplicates > 0;
+      let msg = `${summary.added} key ditambahkan, ${summary.duplicates} duplikat, ${summary.rejected} ditolak Google, ${summary.failed} gagal disimpan.`;
       if (rejectedKeys.length > 0) {
         msg += ` ⚠️ ${rejectedKeys.length} Key ditolak oleh Google API (Key Mati/Revoked).`;
       }
-      if (result.skippedCount > 0) {
-        msg += ` (${result.skippedCount} duplikat dilewati).`;
-      }
-
       return NextResponse.json({
-        success: true,
+        success,
         message: msg,
-        summary: { ...result, rejectedCount: rejectedKeys.length },
+        summary,
+        errors: result.failures,
         rejectedKeys,
         data: { keys, pool }
-      });
+      }, { status: success ? 200 : 500 });
     }
 
     // Single Key Import
@@ -114,7 +121,10 @@ export async function POST(request) {
       }
     }
 
-    await addApiKey(key_name, api_key, tier || 'FREE', daily_limit || 20);
+    const inserted = await addApiKey(key_name, api_key, tier || 'FREE', daily_limit || 20);
+    if (!inserted.changes) {
+      return NextResponse.json({ success: false, error: 'API Key ini sudah ada di pool tenant.' }, { status: 409 });
+    }
     const keys = await getAllApiKeys();
     const pool = await getPoolSummary();
     return NextResponse.json({ success: true, data: { keys, pool } });
@@ -128,6 +138,7 @@ export async function POST(request) {
 
 export async function PUT(request) {
   try {
+    requireTenantAdmin(request);
     const { id, ...updates } = await request.json();
     if (!id) {
       return NextResponse.json({ success: false, error: 'id wajib diisi' }, { status: 400 });
@@ -143,6 +154,7 @@ export async function PUT(request) {
 
 export async function DELETE(request) {
   try {
+    requireTenantAdmin(request);
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
 

@@ -513,11 +513,14 @@ export default function SettingsPage() {
 
       const data = await res.json();
       if (data.success) {
-        showToast(data.message || 'API Keys successfully imported to pool!');
+        const s = data.summary || {};
+        showToast(`${s.added || 0} ditambahkan · ${s.duplicates || 0} duplikat · ${s.rejected || 0} ditolak · ${s.failed || 0} gagal`);
         setBulkKeysText('');
-        fetchPool();
+        await fetchPool();
       } else {
-        showToast(data.error || 'Failed to import bulk API Keys', 'error');
+        const s = data.summary || {};
+        showToast(data.error || `${s.failed || 0} key gagal disimpan. Tidak ada key baru yang masuk.`, 'error');
+        await fetchPool();
       }
     } catch (e) {
       showToast(e.message, 'error');

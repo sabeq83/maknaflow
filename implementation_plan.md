@@ -1,788 +1,605 @@
-# Implementation Plan — MAKNA Headless Content Operator
+# Implementation Plan — Tenant, Gemini Key Pool, dan Plugin MAKNA Content Operator
 
-## 1. Tujuan
+## 1. Tujuan dan Ruang Lingkup
 
-Menyediakan jalur resmi untuk membuat konten di MAKNA tanpa mengoperasikan halaman web satu per satu. Codex, automation, atau operator terminal mengirim satu job melalui API/CLI; MAKNA tetap memakai engine Content Planner, Organic Pillar Campaign (OPC), campaign scheduler, TTS, visual generator, FFmpeg, dan sinkronisasi Nextcloud yang sudah ada.
+Implementasi ini akan:
 
-Browser tetap tersedia untuk review visual dan fallback, tetapi bukan lagi satu-satunya pintu masuk.
+1. Memperbaiki penyimpanan Gemini API Key Pool agar setiap key benar-benar tersimpan, terisolasi per tenant, dan hasil impor tidak memberikan status sukses palsu.
+2. Menambahkan provisioning dan pengelolaan tenant oleh `superadmin`, termasuk pembuatan admin pertama tenant.
+3. Memastikan user, settings, Gemini key, brand, planner, campaign, dan Operator API selalu berjalan dalam tenant aktif.
+4. Membuat plugin Codex `makna-content-operator` sebagai antarmuka aman di atas Operator API/CLI MAKNA yang sudah tersedia.
+
+Tidak termasuk dalam scope:
+
+- Social publishing ke Facebook, Instagram, atau TikTok.
+- Penyimpanan kredensial sosial media.
+- Browser automation untuk platform sosial.
 
 ## 2. Keputusan Arsitektur
 
-### 2.1 Bentuk solusi
+### 2.1 Model akses
 
-- Tambahkan **Operator API v1** di dalam aplikasi Next.js.
-- Tambahkan **CLI `makna-operator`** sebagai client HTTP untuk Codex/operator; CLI tidak mengakses database secara langsung.
-- API bersifat asynchronous: `POST` membuat job dan segera mengembalikan HTTP `202`.
-- Worker operator hanya mengorkestrasi tahap planner dan ingest OPC. Produksi video tetap dikerjakan campaign scheduler yang sudah ada.
-- Satu `Idempotency-Key` mewakili satu permintaan, sehingga retry tidak membuat planner/kampanye ganda.
-- Autentikasi memakai bearer token khusus operator dan tenant dikunci dari konfigurasi server, bukan dipercaya dari body request.
-- Posting sosial media tidak termasuk scope versi pertama. Default `enable_social_post=false`.
-
-### 2.2 Alur runtime
-
-```text
-Codex / Terminal / Automation
-          |
-          | POST /api/operator/v1/content-jobs
-          v
-Auth + Validation + Idempotency
-          |
-          v
-operator_jobs (queued)
-          |
-          v
-Operator Worker
-  1. createDraftContentPlanner()
-  2. executeContentPlanner()
-  3. ingestPlannerToPillarCampaign()
-          |
-          v
-Existing OPC Campaign Scheduler
-  Storyboard -> Approval Gate -> TTS -> Visual -> FFmpeg -> Nextcloud
-          |
-          v
-GET /api/operator/v1/content-jobs/:id
-  progress + video_final.mp4 + naskah.md + Nextcloud URL
-```
-
-### 2.3 Status job
-
-| Status | Arti |
+| Peran | Kewenangan |
 |---|---|
-| `queued` | Permintaan diterima dan menunggu worker operator. |
-| `planning` | Draft dan baris Content Planner sedang dibuat. |
-| `campaign_queued` | Planner sudah di-ingest ke OPC dan scheduler berjalan. |
-| `awaiting_approval` | Storyboard/VO siap direview dan menunggu approval. |
-| `producing` | TTS, visual, FFmpeg, atau upload sedang berjalan. |
-| `completed` | Seluruh item selesai dan aset final tersedia. |
-| `failed` | Salah satu tahap gagal setelah mekanisme retry yang ada selesai. |
+| `superadmin` | Membuat, melihat, mengubah status tenant, dan membuat admin awal tenant. Tidak otomatis membaca data operasional tenant. |
+| `admin` | Mengelola user, brand, settings, dan key pool hanya dalam tenant sendiri. |
+| `user` | Menggunakan menu dan brand sesuai permission dalam tenant sendiri. |
+| `operator` | Service identity bertoken dan terikat pada tepat satu tenant serta scope tertentu. |
 
-## 3. Kontrak API v1
+Tenant bukan akun. Satu tenant adalah batas organisasi/data dan dapat memiliki banyak akun admin/user.
 
-### 3.1 Membuat job
+### 2.2 Bootstrap superadmin
 
-`POST /api/operator/v1/content-jobs`
+- Akun superadmin pertama dibuat melalui CLI satu kali, bukan melalui UI publik dan bukan melalui seed password default.
+- CLI menerima username/email dan membaca password secara interaktif atau dari secret environment khusus proses; password tidak boleh muncul dalam argumen, log, atau shell history.
+- Superadmin merupakan identitas control-plane dan tidak terikat ke tenant operasional.
+- Pembuatan superadmin berikutnya hanya dapat dilakukan oleh superadmin aktif dan seluruh perubahan dicatat dalam audit log.
+- Tenant admin tidak dapat membuat, mengubah, atau menaikkan role user menjadi `superadmin`.
+- Sistem mencegah penonaktifan superadmin aktif terakhir.
 
-Headers:
+### 2.3 Provisioning tenant atomik
 
-```http
-Authorization: Bearer <MAKNA_OPERATOR_API_TOKEN>
-Idempotency-Key: nutribake-20260803-batch-001
-Content-Type: application/json
-```
+`POST /api/admin/tenants` menjalankan satu transaksi:
 
-Contoh payload editorial Nutribake:
+1. Membuat tenant dengan ID/slug stabil, nama, timezone, dan status.
+2. Membuat default `tenant_settings` tanpa menyalin secret tenant lain.
+3. Membuat akun admin awal dengan `tenant_id` baru.
+4. Memberikan semua menu tenant-admin kepada admin awal.
+5. Menulis audit event tanpa menyimpan password/API key.
 
-```json
-{
-  "planner": {
-    "planner_focus": "brand_editorial",
-    "title": "Nutribake Editorial Agustus 2026",
-    "account_name": "Nutribake",
-    "brand_id": "<brand-profile-id>",
-    "brand_context": "Akun edukasi healthy food, baking, dan sistem makan praktis.",
-    "content_goal": "Membangun authority, saves, shares, dan kebiasaan mengikuti akun.",
-    "target_audience": "Perempuan dan keluarga muda urban usia 25-44 tahun yang ingin makan lebih sehat tanpa proses rumit.",
-    "pillars": [
-      "Healthy Breakfast",
-      "Meal Prep System",
-      "Healthy Baking",
-      "Healthy Ingredients",
-      "Smart Kitchen",
-      "Healthy Snacks",
-      "Healthy Lifestyle Hacks"
-    ],
-    "pillar_distribution_mode": "balanced",
-    "planner_count": 7,
-    "platform": "tiktok"
-  },
-  "selection": {
-    "mode": "all"
-  },
-  "production": {
-    "campaign_name": "Nutribake Organic Batch 001",
-    "approval_mode": "storyboard",
-    "visual_style": "Cinematic",
-    "face_visibility": "Faceless",
-    "aspect_ratio": "9:16",
-    "target_clips_count": 4,
-    "enable_tts": true,
-    "enable_glabs": true,
-    "enable_ffmpeg": true,
-    "enable_social_post": false,
-    "upload_markdown": true,
-    "nextcloud_parent_folder": "/MAKNA_Assets/Nutribake"
-  }
-}
-```
+Jika satu tahap gagal, seluruh transaksi dibatalkan.
 
-Response baru:
+### 2.4 Gemini key pool
 
-```json
-{
-  "success": true,
-  "job_id": "opj_...",
-  "status": "queued",
-  "status_url": "/api/operator/v1/content-jobs/opj_..."
-}
-```
+- `gemini_api_keys.id` memakai PostgreSQL identity/sequence.
+- Keunikan API key diberlakukan per tenant melalui `(tenant_id, api_key)`.
+- Bulk insert selalu membawa `tenant_id` dari konteks autentikasi, bukan dari request body.
+- Hasil impor dipisahkan menjadi `added`, `duplicate`, `rejected`, dan `failed`.
+- API tidak boleh mengembalikan sukses jika seluruh insert mengalami kegagalan database.
+- Nilai key tetap dimasking di response dan log.
 
-- Request pertama: HTTP `202`.
-- Retry dengan key dan payload sama: mengembalikan job lama, tidak membuat duplikat.
-- Key sama dengan payload berbeda: HTTP `409`.
+### 2.5 Plugin `makna-content-operator`
 
-### 3.2 Melihat status
+- Business logic tetap di MAKNA Operator API; plugin tidak mengakses database langsung.
+- Plugin berisi skill operasional dan script client tipis untuk `create`, `status`, `wait`, dan `approve`.
+- Plugin memakai base URL dan bearer token tenant-scoped.
+- Social post tidak menjadi command atau permission plugin.
+- Scaffold mengikuti format plugin Codex dengan `.codex-plugin/plugin.json`, `skills/`, dan `scripts/`; marketplace lokal dibuat hanya pada tahap instalasi setelah persetujuan lokasi pengguna.
 
-`GET /api/operator/v1/content-jobs/:jobId`
+## 3. Tahapan Implementasi
 
-```json
-{
-  "success": true,
-  "job": {
-    "id": "opj_...",
-    "status": "producing",
-    "current_stage": "visuals",
-    "planner_id": "cp_...",
-    "campaign_id": "opc_...",
-    "progress": { "completed_items": 2, "total_items": 7 },
-    "items": [
-      {
-        "id": 101,
-        "status": "completed",
-        "video_final_path": "/outputs/.../video_final.mp4",
-        "nextcloud_url": "http://.../index.php/s/..."
-      }
-    ]
-  }
-}
-```
+### Tahap A — Fondasi schema dan isolasi tenant
 
-GET ini wajib dinamis (`runtime='nodejs'`, `dynamic='force-dynamic'`, `Cache-Control: no-store`) agar status worker tidak tertahan cache.
+- Tambahkan metadata tenant: `slug`, `timezone`, `status`, dan timestamps.
+- Tambahkan audit table untuk aksi superadmin.
+- Perbaiki sequence/default ID Gemini key pool.
+- Ubah unique constraint Gemini key menjadi tenant-scoped.
+- Tambahkan constraint/index tenant pada user dan resource terkait.
+- Migrasi harus idempotent serta mempertahankan data `default_tenant`.
 
-### 3.3 Approval tanpa browser
+### Tahap B — Gemini Key Pool
 
-`POST /api/operator/v1/content-jobs/:jobId/approve`
+- Satukan single dan bulk insert melalui repository tenant-aware.
+- Jangan lagi mengubah exception database menjadi “duplikat”.
+- Perbaiki kontrak response dan tampilan ringkasan impor.
+- Tambahkan masking dan refresh pool setelah impor.
+- Uji insert single, 21 key bulk, duplicate, invalid key, dan isolasi dua tenant.
 
-```json
-{
-  "item_ids": [101, 102],
-  "mode": "approve_unchanged"
-}
-```
+### Tahap C — Bootstrap dan pengamanan superadmin
 
-Endpoint memakai service approval OPC yang sama dengan UI. Versi pertama hanya mendukung `approve_unchanged`; revisi storyboard kompleks tetap bisa dilakukan lewat UI yang sudah ada.
+- Tambahkan CLI `npm run admin -- create-superadmin` untuk bootstrap awal.
+- Validasi password, hash dengan mekanisme autentikasi yang sama, dan cegah duplikasi username/email.
+- Tambahkan service control-plane untuk membuat, menonaktifkan, dan reset password superadmin secara teraudit.
+- Pastikan superadmin tidak memperoleh tenant context operasional secara implisit.
+- Cegah tenant admin mengirim atau mengubah role menjadi `superadmin`.
+- Cegah sistem kehilangan seluruh superadmin aktif.
 
-## 4. Validasi dan Guardrail
+### Tahap D — Tenant Management
 
-- `planner` divalidasi memakai contract Content Planner yang sudah ada; aturan product/editorial tidak dibuat ulang.
-- `planner_count` dibatasi, awalnya maksimum 30 per job.
-- `selection.mode` hanya `all` atau `row_ids`; `row_ids` wajib berasal dari planner yang dibuat job tersebut.
-- `approval_mode` hanya `storyboard` atau `none`.
-- `enable_social_post` harus `false` pada Operator API v1 untuk memisahkan pembuatan aset dari distribusi sosial.
-- Bearer token dibandingkan secara constant-time; token tidak pernah dicatat ke log.
-- Tenant berasal dari `MAKNA_OPERATOR_TENANT_ID`, lalu request dijalankan di `tenantContext` yang sesuai.
-- API hanya dibuka melalui Tailnet/reverse proxy internal pada fase pilot.
-- Semua error eksternal disanitasi di response; detail lengkap tetap masuk server log dan `operator_job_events`.
-- Worker mengambil job secara atomik agar dua instance server tidak memproses job yang sama.
+- Buat service provisioning transaksional.
+- Buat API list/create/update tenant khusus superadmin.
+- Buat halaman Tenant Management.
+- Batasi User Management admin ke tenant aktif.
+- Sediakan aktivasi/nonaktif tenant; penghapusan permanen tidak disediakan pada versi awal.
 
-## 5. Perubahan File dan Before/After Code
+### Tahap E — Operator tenant-scoped
 
-### 5.1 `lib/operator-content-contract.js` — baru
+- Ganti konfigurasi satu token global menjadi registry token hash dengan `tenant_id` dan scopes.
+- Operator API mendapatkan tenant hanya dari identitas token.
+- Worker memproses job berdasarkan tenant job, bukan satu env tenant global.
+- Tambahkan command CLI `whoami` dan pemeriksaan capability.
+
+### Tahap F — Plugin Codex
+
+- Scaffold `makna-content-operator` menggunakan helper `plugin-creator`.
+- Tambahkan skill workflow, script wrapper, contoh payload, dan guardrail approval.
+- Validasi manifest dan skill.
+- Uji plugin terhadap staging dengan job idempotent dan tanpa akses social publishing.
+
+## 4. Perubahan File dan Before/After Code
+
+### 4.1 `lib/db-pg.js`
 
 **Code Sebelum (Current/Before)**
 
 ```js
-// File belum ada. Route harus memahami payload sendiri.
+CREATE TABLE IF NOT EXISTS operator_jobs (...);
+// Belum ada migrasi identity gemini_api_keys dan metadata tenant lengkap.
 ```
 
 **Code Sesudah (Proposed/After)**
 
 ```js
-export function normalizeOperatorContentRequest(input) {
-  const planner = normalizeContentPlannerInput(input?.planner || {});
-  const selection = normalizeSelection(input?.selection);
-  const production = normalizeProduction(input?.production);
-  return { planner, selection, production };
-}
+await migrateTenantManagement(pool);
+await migrateGeminiKeyPoolIdentity(pool);
 
-export function hashOperatorRequest(payload) {
-  return createHash('sha256').update(stableStringify(payload)).digest('hex');
-}
+// idempotent migration:
+// tenants.slug, timezone, status, updated_at
+// gemini_api_keys.id sequence/default
+// UNIQUE (tenant_id, api_key)
+// tenant_audit_events
+// operator_credentials (token_hash, tenant_id, scopes, status)
 ```
 
-Contract ini menjadi satu sumber validasi payload, batas batch, approval mode, dan larangan social posting pada v1.
-
-### 5.2 `lib/operator-auth.js` — baru
+### 4.2 `lib/db.js`
 
 **Code Sebelum (Current/Before)**
 
 ```js
-// Belum ada autentikasi service-to-service khusus operator.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-export function authenticateOperator(request) {
-  const supplied = readBearerToken(request);
-  assertConstantTimeMatch(supplied, process.env.MAKNA_OPERATOR_API_TOKEN);
-  return { tenantId: process.env.MAKNA_OPERATOR_TENANT_ID || 'default_tenant' };
-}
-
-export function runAsOperatorTenant(identity, callback) {
-  return tenantContext.run(identity.tenantId, callback);
-}
-```
-
-### 5.3 `lib/db-pg.js` — migrasi PostgreSQL
-
-**Code Sebelum (Current/Before)**
-
-```js
-const migrateContentPlannerDualMode = async () => {
-  // migrasi Content Planner yang ada
-};
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-const migrateOperatorJobs = async () => {
-  await pool.query(`CREATE TABLE IF NOT EXISTS operator_jobs (...);`);
-  await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS
-    operator_jobs_tenant_idempotency_uq
-    ON operator_jobs (tenant_id, idempotency_key);`);
-  await pool.query(`CREATE TABLE IF NOT EXISTS operator_job_events (...);`);
-};
-```
-
-Kolom utama `operator_jobs`: `id`, `tenant_id`, `idempotency_key`, `request_hash`, `request_json`, `status`, `current_stage`, `planner_id`, `campaign_id`, `result_json`, `error_code`, `error_message`, `locked_at`, `locked_by`, `attempt_count`, `created_at`, dan `updated_at`.
-
-### 5.4 `lib/db.sqlite-backup.js` — parity skema backup
-
-**Code Sebelum (Current/Before)**
-
-```js
-// Tidak ada tabel operator_jobs/operator_job_events.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-db.exec(`
-  CREATE TABLE IF NOT EXISTS operator_jobs (...);
-  CREATE UNIQUE INDEX IF NOT EXISTS operator_jobs_tenant_idempotency_uq
-    ON operator_jobs (tenant_id, idempotency_key);
-  CREATE TABLE IF NOT EXISTS operator_job_events (...);
-`);
-```
-
-Walaupun staging utama memakai PostgreSQL, skema backup dijaga agar kontrak database tidak bercabang.
-
-### 5.5 `lib/db.js` — repository job dan tenant isolation
-
-**Code Sebelum (Current/Before)**
-
-```js
-const isolatedTables = [
-  'users', 'brand_profiles', 'content_planners', 'pillar_campaigns'
-];
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-const isolatedTables = [
-  'users', 'brand_profiles', 'content_planners', 'pillar_campaigns',
-  'operator_jobs', 'operator_job_events'
-];
-
-export async function createOperatorJob(data) { /* idempotent insert */ }
-export async function claimNextOperatorJob(workerId) { /* atomic claim */ }
-export async function updateOperatorJob(id, updates) { /* allowlist */ }
-export async function getOperatorJob(id) { /* tenant scoped */ }
-export async function appendOperatorJobEvent(jobId, event) { /* audit */ }
-```
-
-Claim PostgreSQL memakai transaksi/row lock (`FOR UPDATE SKIP LOCKED`) melalui helper khusus, bukan pola select-then-update yang race-prone.
-
-### 5.6 `lib/pillar-campaign-ingest.js` — ekstraksi logic OPC
-
-**Code Sebelum (Current/Before)**
-
-```js
-// Seluruh fetch planner, mapping campaign, insert item, dan start scheduler
-// berada langsung di POST route ingest-planner.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-export async function ingestPlannerToPillarCampaign({
-  plannerId,
-  selectedRowIds = [],
-  campaignName,
-  globalSettings = {}
-}) {
-  // memakai createPillarCampaign/createPillarCampaignItem yang sudah ada
-  return { campaignId, campaignName: finalName, ingestedCount, status };
-}
-```
-
-Refactor ini tidak mengubah rules editorial, product bridging, narasi, atau scheduler; hanya memindahkan business logic agar UI route dan Operator API memakai fungsi yang sama.
-
-### 5.7 `app/api/v2/pillar-campaigns/ingest-planner/route.js` — adapter route lama
-
-**Code Sebelum (Current/Before)**
-
-```js
-export async function POST(request) {
-  // sekitar 200 baris business logic ingest
-}
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-export async function POST(request) {
-  try {
-    const body = await request.json();
-    const result = await ingestPlannerToPillarCampaign(mapHttpBody(body));
-    return NextResponse.json({ success: true, ...toHttpResult(result) });
-  } catch (error) {
-    return toIngestErrorResponse(error);
-  }
-}
-```
-
-Kontrak response route lama dipertahankan untuk mencegah regresi UI.
-
-### 5.8 `lib/pillar-campaign-approval.js` — ekstraksi approval OPC
-
-**Code Sebelum (Current/Before)**
-
-```js
-// Mapping storyboard, VO, campaign settings, dan status produksi berada
-// langsung di route items/[itemId]/approve.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-export async function approvePillarCampaignItem(itemId, changes) {
-  const normalized = normalizeApprovalPayload(changes);
-  // simpan plan/DNA, update campaign, lanjutkan workflow_status
-  return { itemId, workflowStatus: 'production_processing' };
-}
-
-export async function approvePillarCampaignItemUnchanged(itemId) {
-  const draft = await loadGeneratedDraft(itemId);
-  return approvePillarCampaignItem(itemId, draft);
-}
-```
-
-### 5.9 `app/api/v2/pillar-campaigns/items/[itemId]/approve/route.js` — adapter approval lama
-
-**Code Sebelum (Current/Before)**
-
-```js
-export async function POST(req, { params }) {
-  // business logic approval lengkap berada di route
-}
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-export async function POST(req, { params }) {
-  const { itemId } = await params;
-  const result = await approvePillarCampaignItem(itemId, await req.json());
-  return NextResponse.json({ success: true, ...result });
-}
-```
-
-### 5.10 `lib/operator-content-worker.js` — worker orkestrasi baru
-
-**Code Sebelum (Current/Before)**
-
-```js
-// Belum ada worker yang menghubungkan planner -> OPC sebagai satu job.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-export function startOperatorContentWorker() {
-  return startSingletonInterval('operator-content', async () => {
-    const job = await claimNextOperatorJob(workerId);
-    if (job) await processOperatorContentJob(job);
-    await reconcileActiveOperatorJobs();
-  });
-}
-
-async function processOperatorContentJob(job) {
-  const draft = await createDraftContentPlanner(job.request.planner);
-  await executeContentPlanner(draft.planner_id);
-  const campaign = await ingestPlannerToPillarCampaign(toIngestInput(job));
-  await attachPlannerAndCampaign(job.id, draft.planner_id, campaign.campaignId);
-}
-```
-
-Worker memiliki lock, timeout lock, retry terbatas hanya untuk tahap orkestrasi, dan resume berdasarkan `planner_id`/`campaign_id` agar restart server tidak membuat data ganda.
-
-### 5.11 `instrumentation.js` — boot worker
-
-**Code Sebelum (Current/Before)**
-
-```js
-if (backgroundServicesEnabled && campaignSchedulerEnabled) {
-  startCampaignScheduler();
-}
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-if (backgroundServicesEnabled && process.env.ENABLE_OPERATOR_WORKER !== 'false') {
-  const { startOperatorContentWorker } = await import('./lib/operator-content-worker.js');
-  startOperatorContentWorker();
-}
-```
-
-Worker hanya berjalan di runtime Node.js dan mengikuti master switch background service yang sudah ada.
-
-### 5.12 `app/api/operator/v1/content-jobs/route.js` — create endpoint baru
-
-**Code Sebelum (Current/Before)**
-
-```js
-// Endpoint belum ada.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-export const runtime = 'nodejs';
-
-export async function POST(request) {
-  const identity = authenticateOperator(request);
-  return runAsOperatorTenant(identity, async () => {
-    const payload = normalizeOperatorContentRequest(await request.json());
-    const job = await createIdempotentOperatorJob({
-      key: requireIdempotencyKey(request),
-      payload
-    });
-    return NextResponse.json(toAcceptedResponse(job), { status: job.created ? 202 : 200 });
-  });
-}
-```
-
-### 5.13 `app/api/operator/v1/content-jobs/[jobId]/route.js` — status endpoint baru
-
-**Code Sebelum (Current/Before)**
-
-```js
-// Endpoint belum ada.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
-
-export async function GET(request, { params }) {
-  const identity = authenticateOperator(request);
-  const { jobId } = await params;
-  return runAsOperatorTenant(identity, async () =>
-    noStoreJson(await getOperatorJobStatus(jobId))
+try {
+  await pgQuery(
+    'INSERT INTO gemini_api_keys (key_name, api_key, tier, daily_limit) VALUES ($1,$2,$3,$4)',
+    values
   );
+} catch (e) {
+  skippedCount++;
 }
-```
-
-Status aggregator membaca status item OPC yang sudah ada dan mengembalikan stage, progress, error ringkas, `ffmpeg_output_path`, `drive_link`/Nextcloud URL, dan caption dari `result_json`.
-
-### 5.14 `app/api/operator/v1/content-jobs/[jobId]/approve/route.js` — approval endpoint baru
-
-**Code Sebelum (Current/Before)**
-
-```js
-// Endpoint belum ada.
 ```
 
 **Code Sesudah (Proposed/After)**
 
 ```js
-export async function POST(request, { params }) {
-  const identity = authenticateOperator(request);
-  const { jobId } = await params;
-  const command = normalizeOperatorApproval(await request.json());
-  return runAsOperatorTenant(identity, async () => {
-    const result = await approveOperatorJobItems(jobId, command);
-    return NextResponse.json({ success: true, ...result });
-  });
-}
+const tenantId = getActiveTenantId();
+const result = await insertTenantGeminiKeys({ tenantId, keys });
+return {
+  added: result.added,
+  duplicates: result.duplicates,
+  failures: result.failures
+};
 ```
 
-### 5.15 `scripts/makna-operator.mjs` — CLI baru
+Tambahkan repository/query tenant provisioning, tenant listing, status update, audit event, serta operator credential lookup. Semua query operasional wajib menyertakan `tenant_id` eksplisit.
+
+### 4.3 `app/api/keys/route.js`
 
 **Code Sebelum (Current/Before)**
 
 ```js
-// Belum ada client headless untuk MAKNA content production.
-```
-
-**Code Sesudah (Proposed/After)**
-
-```js
-// create --file request.json [--wait]
-// status <job-id> [--watch]
-// approve <job-id> [--all|--items 101,102]
-
-const client = new MaknaOperatorClient({
-  baseUrl: process.env.MAKNA_OPERATOR_BASE_URL,
-  token: process.env.MAKNA_OPERATOR_API_TOKEN
+return NextResponse.json({
+  success: true,
+  message: `Berhasil mengimpor ${result.addedCount} API Key baru ke pool.`
 });
 ```
 
-CLI menampilkan ringkasan progress, memakai exponential backoff untuk `--watch`, tidak mencetak token, dan keluar dengan exit code non-zero jika job gagal.
+**Code Sesudah (Proposed/After)**
 
-### 5.16 `scripts/test-operator-content.mjs` — test contract dan orchestration baru
+```js
+const success = result.added > 0 || result.duplicates > 0;
+return NextResponse.json({
+  success,
+  summary: {
+    added: result.added,
+    duplicates: result.duplicates,
+    rejected: rejectedKeys.length,
+    failed: result.failures.length
+  },
+  errors: maskImportFailures(result.failures)
+}, { status: success ? 200 : 500 });
+```
+
+### 4.4 `app/settings/page.js`
 
 **Code Sebelum (Current/Before)**
 
 ```js
-// Belum ada regression test Operator API.
+if (data.success) {
+  showToast(data.message);
+  fetchPool();
+}
 ```
 
 **Code Sesudah (Proposed/After)**
 
 ```js
-await testUnauthorizedRequest();
-await testInvalidEditorialPayload();
-await testIdempotentCreate();
-await testIdempotencyConflict();
-await testTenantIsolation();
-await testPlannerToOpcOrchestration();
-await testApprovalUnchanged();
-await testStatusAggregation();
-await testRestartResumeWithoutDuplication();
+setImportSummary(data.summary);
+await fetchPool();
+showToast(formatImportResult(data.summary), data.success ? 'success' : 'error');
 ```
 
-Test AI/visual berat menggunakan stubs/fixtures; smoke test staging terpisah memakai satu item nyata.
+UI menampilkan empat angka terpisah dan tidak pernah menampilkan nilai API key utuh.
 
-### 5.17 `package.json` — command operator dan test
+### 4.5 `scripts/admin.mjs` dan `package.json`
 
 **Code Sebelum (Current/Before)**
 
 ```json
 {
   "scripts": {
-    "test:content-planner": "node scripts/test-content-planner-modes.mjs"
+    "operator": "node scripts/makna-operator.mjs"
   }
 }
 ```
+
+Belum ada jalur aman untuk membuat akun superadmin pertama.
 
 **Code Sesudah (Proposed/After)**
 
 ```json
 {
   "scripts": {
-    "operator": "node scripts/makna-operator.mjs",
-    "test:operator-content": "node scripts/test-operator-content.mjs"
+    "admin": "node scripts/admin.mjs",
+    "operator": "node scripts/makna-operator.mjs"
   }
 }
 ```
 
-Script yang sudah ada tetap dipertahankan; snippet hanya menunjukkan penambahan.
+```js
+// npm run admin -- create-superadmin --username <name> --email <email>
+// Password dibaca dari prompt tersembunyi atau MAKNA_ADMIN_BOOTSTRAP_PASSWORD,
+// tidak diterima sebagai argumen CLI dan tidak pernah dicetak.
+await createSuperadmin({ username, email, password, actor: 'bootstrap-cli' });
+```
 
-### 5.18 `.env.staging.local.example` — konfigurasi contoh
+Command bootstrap ditolak jika superadmin sudah ada, kecuali dijalankan melalui jalur otorisasi superadmin aktif yang terpisah.
+
+### 4.6 `lib/superadmin-service.js` — file baru
 
 **Code Sebelum (Current/Before)**
 
-```dotenv
-# Belum ada konfigurasi Operator API.
+```js
+// Belum ada service lifecycle superadmin.
 ```
 
 **Code Sesudah (Proposed/After)**
 
-```dotenv
-MAKNA_OPERATOR_API_TOKEN=replace-with-long-random-secret
-MAKNA_OPERATOR_TENANT_ID=default_tenant
-MAKNA_OPERATOR_BASE_URL=http://127.0.0.1:5010
-ENABLE_OPERATOR_WORKER=true
-OPERATOR_WORKER_INTERVAL_MS=3000
-OPERATOR_JOB_LOCK_TIMEOUT_MS=300000
+```js
+export async function createSuperadmin(input, actor) {
+  validateStrongPassword(input.password);
+  return withTransaction(async tx => {
+    const user = await insertControlPlaneUser(tx, {
+      ...input,
+      tenantId: null,
+      role: 'superadmin'
+    });
+    await recordTenantAudit(tx, actor, null, 'superadmin.created');
+    return sanitizeUser(user);
+  });
+}
+
+export async function deactivateSuperadmin(id, actor) {
+  await assertAnotherActiveSuperadminExists(id);
+  // update status dan audit secara transaksional
+}
 ```
 
-Token nyata hanya berada di `.env.staging.local`/secret manager dan tidak masuk Git.
+### 4.7 `lib/tenant-admin.js` — file baru
 
-### 5.19 `sot/global/operator-api.md` — dokumentasi operasional baru
+**Code Sebelum (Current/Before)**
+
+```js
+// Belum ada service provisioning tenant.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function provisionTenant(input, actor) {
+  return withTransaction(async tx => {
+    const tenant = await createTenant(tx, normalizeTenant(input));
+    const admin = await createTenantAdmin(tx, tenant.id, input.admin);
+    await seedTenantSettings(tx, tenant.id, input.defaults);
+    await grantTenantAdminMenus(tx, admin.id);
+    await recordTenantAudit(tx, actor, tenant.id, 'tenant.created');
+    return { tenant, admin: sanitizeUser(admin) };
+  });
+}
+```
+
+### 4.8 `app/api/admin/tenants/route.js` — file baru
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Tidak ada endpoint tenant management.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function GET(req) {
+  requireSuperadmin(req);
+  return NextResponse.json({ tenants: await listTenantsWithCounts() });
+}
+
+export async function POST(req) {
+  const actor = requireSuperadmin(req);
+  const result = await provisionTenant(await req.json(), actor);
+  return NextResponse.json({ success: true, ...result }, { status: 201 });
+}
+```
+
+### 4.9 `app/api/admin/tenants/[tenantId]/route.js` — file baru
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Tidak ada endpoint status tenant.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function PATCH(req, { params }) {
+  const actor = requireSuperadmin(req);
+  return updateTenantStatus((await params).tenantId, await req.json(), actor);
+}
+```
+
+Endpoint hanya mendukung update metadata/status; tidak menyediakan hard delete.
+
+### 4.10 `app/settings/tenants/page.js` — file baru
+
+**Code Sebelum (Current/Before)**
+
+```jsx
+// Belum ada halaman Tenant Management.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```jsx
+<TenantTable tenants={tenants} />
+<CreateTenantDialog
+  fields={['name', 'slug', 'timezone', 'admin_username', 'admin_email', 'admin_password']}
+/>
+```
+
+Halaman menampilkan jumlah user/brand/key per tenant, status, timezone, dan aksi aktivasi/nonaktif.
+
+### 4.11 `app/components/Sidebar.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+{ label: 'User Management', href: '/settings/users', adminOnly: true }
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+{ label: 'Tenant Management', href: '/settings/tenants', superadminOnly: true },
+{ label: 'User Management', href: '/settings/users', adminOnly: true }
+```
+
+### 4.12 `app/api/admin/users/route.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const { username, email, password, role = 'user' } = body;
+await db.prepare('INSERT INTO users (...) VALUES (...)').run(...);
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const admin = requireTenantAdmin(req);
+await createUser({
+  tenantId: admin.tenantId,
+  username,
+  email,
+  password,
+  role: normalizeTenantRole(role)
+});
+```
+
+Admin tenant tidak boleh membuat `superadmin` dan tidak boleh mengirim `tenant_id` sendiri.
+
+### 4.13 `lib/auth.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+if (currentUser.role === 'superadmin') {
+  return { tenantId: '__none__' };
+}
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export function requireSuperadmin(req) { /* platform control plane only */ }
+export function requireTenantAdmin(req) { /* current tenant only */ }
+export function assertTenantActive(user) { /* reject suspended tenant */ }
+```
+
+Superadmin tetap tidak memperoleh akses implisit ke data planner/campaign tenant.
+
+### 4.14 `lib/operator-auth.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+return {
+  tenantId: process.env.MAKNA_OPERATOR_TENANT_ID || 'default_tenant',
+  actor: 'operator-api'
+};
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const credential = await findOperatorCredential(hashToken(suppliedToken));
+assertActiveCredential(credential);
+return {
+  tenantId: credential.tenant_id,
+  actor: credential.id,
+  scopes: credential.scopes
+};
+```
+
+### 4.15 `lib/operator-content-worker.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const tenantId = process.env.MAKNA_OPERATOR_TENANT_ID || 'default_tenant';
+await tenantContext.run(tenantId, processNextJob);
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+for (const tenantId of await listTenantsWithQueuedOperatorJobs()) {
+  await tenantContext.run(tenantId, () => processNextTenantJob(tenantId));
+}
+```
+
+### 4.16 `scripts/makna-operator.mjs`
+
+**Code Sebelum (Current/Before)**
+
+```js
+npm run operator -- create|status|approve
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+npm run operator -- whoami
+npm run operator -- create --file request.json --wait
+npm run operator -- status <job-id> --watch
+npm run operator -- approve <job-id> --all
+```
+
+CLI menampilkan identitas tenant/scope tanpa mencetak token.
+
+### 4.17 `plugins/makna-content-operator/.codex-plugin/plugin.json` — file baru
+
+**Code Sebelum (Current/Before)**
+
+```json
+// Plugin belum ada.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```json
+{
+  "name": "makna-content-operator",
+  "version": "0.1.0",
+  "description": "Create and operate tenant-scoped MAKNA content jobs through the official Operator API."
+}
+```
+
+Manifest final akan dihasilkan dan divalidasi dengan helper resmi `plugin-creator`, bukan diasumsikan manual.
+
+### 4.18 `plugins/makna-content-operator/skills/content-operator/SKILL.md` — file baru
 
 **Code Sebelum (Current/Before)**
 
 ```md
-Dokumentasi Operator API belum ada.
+<!-- Skill belum ada. -->
 ```
 
 **Code Sesudah (Proposed/After)**
 
 ```md
-# MAKNA Operator API v1
+# MAKNA Content Operator
 
-## Authentication
-## Create Content Job
-## Inspect Progress
-## Approve Storyboard
-## CLI Usage
-## Error Codes and Recovery
-## Security and Token Rotation
+Use the Operator API for create, status, wait, and approval workflows.
+Never request or enable social publishing.
+Require explicit approval before approving generated storyboards.
 ```
 
-### 5.20 `middleware.js` — delegasi auth Operator API
+### 4.19 `plugins/makna-content-operator/scripts/makna-content-operator.mjs` — file baru
 
 **Code Sebelum (Current/Before)**
 
 ```js
-if (!sessionToken && pathname.startsWith('/api/')) {
-  return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-}
+// Belum ada wrapper plugin.
 ```
 
 **Code Sesudah (Proposed/After)**
 
 ```js
-if (pathname.startsWith('/api/operator/v1/')) {
-  return NextResponse.next(); // route memvalidasi bearer token operator
-}
+// Thin wrapper over the supported Operator HTTP contract.
+// Commands: whoami, create, status, wait, approve.
+// Secrets are read from environment and never printed.
 ```
 
-Pengecualian hanya melewati session-cookie middleware. Semua route Operator v1 tetap menolak request tanpa bearer token melalui `operator-auth.js`.
-
-### 5.21 `lib/db.js` — perbaikan helper tanggal API key pool
+### 4.20 `scripts/test-tenant-key-pool.mjs` dan `scripts/test-operator-content.mjs`
 
 **Code Sebelum (Current/Before)**
 
 ```js
-export async function getAllApiKeys() {
-  const today = getTodayStr(); // helper tidak tersedia pada adapter PostgreSQL
-}
+// Belum ada coverage tenant/key pool lengkap;
+// operator test masih menggunakan konfigurasi tenant tunggal.
 ```
 
 **Code Sesudah (Proposed/After)**
 
 ```js
-function getTodayStr() {
-  return new Date().toISOString().slice(0, 10);
-}
+await testTenantProvisioningRollback();
+await testInitialSuperadminBootstrap();
+await testTenantAdminCannotCreateSuperadmin();
+await testLastSuperadminCannotBeDisabled();
+await testBulkImport21Keys();
+await testCrossTenantIsolation();
+await testOperatorTokenTenantBinding();
+await testOperatorIdempotency();
 ```
 
-Smoke test Operator menemukan helper yang hanya ada pada SQLite backup. Penambahan parity ini mencegah `ReferenceError` saat Content Planner mengakses Gemini key pool pada PostgreSQL.
+## 5. Strategi Verifikasi
 
-## 6. Tahapan Rilis
+1. Migrasi dijalankan dua kali dan tetap idempotent.
+2. Bootstrap superadmin pertama tanpa password di argumen/log, lalu verifikasi login.
+3. Pastikan bootstrap kedua ditolak, tenant admin tidak dapat membuat superadmin, dan superadmin aktif terakhir tidak dapat dinonaktifkan.
+4. Buat Tenant A dan Tenant B beserta admin awal.
+5. Admin A tidak dapat melihat user, brand, key, planner, atau job Tenant B.
+6. Impor 21 Gemini key ke Tenant A; UI dan database harus menunjukkan hasil yang sama.
+7. Ulangi key yang sama dan pastikan dihitung sebagai duplicate, bukan failure.
+8. Simulasikan error database dan pastikan UI tidak mengatakan sukses.
+9. Buat operator credential berbeda untuk Tenant A/B dan pastikan job terikat benar.
+10. Jalankan CLI dan plugin: `whoami`, create idempotent, status/wait, approval.
+11. Pastikan payload `enable_social_post=true` tetap ditolak.
+12. Jalankan lint, test terkait, build produksi, dan smoke test staging.
 
-### Phase 1 — MVP internal
+## 6. Strategi Rilis
 
-- Operator API create/status.
-- Idempotency dan tenant isolation.
-- Worker planner -> OPC.
-- CLI create/status/watch.
-- Approval mode `none` untuk smoke test dan `storyboard` untuk pilot aman.
+- Satu patch release setelah seluruh checklist dan verifikasi berhasil.
+- Jalankan SOP `release-non-interactive` dengan changelog tenant provisioning, Gemini Key Pool, dan plugin operator.
+- Pastikan branch `main` dan tag rilis terunggah ke remote.
+- Deploy Node 1 hanya melalui `npm run deploy:node1` jika pengguna meminta deployment produksi/staging Node 1.
 
-### Phase 2 — Headless approval
+## Execution Task List
 
-- Ekstraksi service approval.
-- Endpoint/CLI `approve_unchanged`.
-- Audit event approval.
-
-### Phase 3 — Hardening
-
-- Token rotation/multiple service identities bila diperlukan.
-- Rate limiting di reverse proxy.
-- Dashboard read-only untuk job operator bila volume penggunaan meningkat.
-- Webhook completion opsional agar automation tidak perlu polling.
-
-## 7. Strategi Pengujian
-
-1. **Contract tests**: payload valid/invalid, batas batch, mode editorial/product.
-2. **Security tests**: tanpa token, token salah, tenant berbeda, token tidak bocor di log.
-3. **Idempotency tests**: retry identik, conflict payload, concurrent duplicate request.
-4. **Repository tests**: atomic claim, stale lock recovery, event ordering.
-5. **Regression tests**: UI Content Planner dan route ingest/approval lama menghasilkan kontrak response yang sama.
-6. **Worker tests**: restart setelah planner dibuat dan setelah campaign dibuat tidak menduplikasi data.
-7. **Status tests**: setiap kombinasi status OPC dipetakan benar ke status job.
-8. **Build verification**: test Content Planner lama, test operator, dan `npm run build`.
-9. **Staging smoke test**: satu planner editorial Nutribake berisi satu item sampai `video_final.mp4` dan `naskah.md` tersinkron ke Nextcloud; social posting tetap mati.
-
-## 8. Acceptance Criteria
-
-- Satu perintah CLI dapat membuat job content production tanpa membuka browser.
-- Request langsung menerima `job_id`; proses panjang tidak menahan koneksi HTTP.
-- Retry request tidak membuat planner, campaign, atau item ganda.
-- Job dapat dilanjutkan dengan aman setelah restart server.
-- Status menunjukkan tahap dan progress per item serta error yang actionable.
-- Pilot dengan approval mode berhenti setelah storyboard siap dan hanya lanjut setelah approval.
-- Output selesai memperlihatkan path/link aset final dan caption/naskah.
-- Route UI Content Planner, ingest OPC, dan approval lama tetap berfungsi.
-- API tidak dapat diakses tanpa token dan tidak dapat melintasi tenant.
-- Operator API v1 tidak memposting ke sosial media.
-
-## 9. Execution Task List
-
-Checklist ini wajib diperbarui real-time saat eksekusi dimulai.
-
-- [x] Bekukan kontrak request/response/error Operator API v1 dan fixture Nutribake.
-- [x] Tambahkan contract normalizer, stable request hash, dan unit test validasi.
-- [x] Tambahkan bearer auth constant-time, tenant binding, dan security tests.
-- [x] Tambahkan skema `operator_jobs`/`operator_job_events` pada PostgreSQL dan SQLite backup.
-- [x] Tambahkan repository job, atomic claim, idempotency, audit event, dan stale-lock recovery.
-- [x] Ekstrak business logic ingest planner ke `lib/pillar-campaign-ingest.js` tanpa mengubah kontrak route lama.
-- [x] Implementasikan worker planner -> execute -> OPC beserta restart-safe checkpoints.
-- [x] Boot worker melalui `instrumentation.js` dengan environment guard.
-- [x] Implementasikan `POST /api/operator/v1/content-jobs`.
-- [x] Implementasikan `GET /api/operator/v1/content-jobs/[jobId]` dan status aggregator no-store.
-- [x] Delegasikan `/api/operator/v1/*` dari session middleware ke bearer auth Operator API.
-- [x] Perbaiki parity helper tanggal Gemini key pool pada adapter PostgreSQL.
-- [x] Implementasikan CLI `create`, `status`, dan `--watch`.
-- [x] Jalankan regression test route Content Planner/ingest lama.
-- [x] Ekstrak business logic approval OPC tanpa mengubah kontrak UI lama.
-- [x] Implementasikan approval endpoint dan CLI `approve`.
-- [x] Tambahkan dokumentasi SOT dan contoh environment tanpa secret nyata.
-- [x] Jalankan `npm run test:content-planner` dan `npm run test:operator-content`.
-- [x] Jalankan `npm run build` dan perbaiki seluruh error build yang terkait perubahan.
-- [ ] Jalankan smoke test staging satu item Nutribake hingga output Nextcloud, tanpa social posting.
-- [x] Perbarui seluruh checkbox sesuai hasil eksekusi dan catat bukti verifikasi.
-- [x] Jalankan rilis patch non-interaktif, verifikasi changelog, tag, branch `main`, dan remote GitHub.
-
-## 10. Verification Evidence
-
-- `npm run test:content-planner`: lulus.
-- `npm run test:operator-content`: lulus.
-- `npm run build`: lulus; warning lama repository tetap tercatat dan tidak berasal dari Operator API.
-- Staging migration: tabel `operator_jobs` dan `operator_job_events` berhasil dibuat pada PostgreSQL lokal.
-- HTTP auth smoke: tanpa token menghasilkan `401 OPERATOR_UNAUTHORIZED`.
-- HTTP validation smoke: payload tidak valid menghasilkan `400 CONTENT_PLANNER_VALIDATION`.
-- HTTP idempotency smoke: retry payload identik mengembalikan job yang sama dengan `reused=true`.
-- HTTP conflict smoke: key sama dan payload berbeda menghasilkan `409 OPERATOR_IDEMPOTENCY_CONFLICT`.
-- Job smoke Nutribake: job `opj_eefda0b99f234a01` diterima dan diklaim worker, lalu gagal di tahap AI karena API key staging tidak valid/kuota tidak tersedia.
-- Output `video_final.mp4`/Nextcloud belum dapat diverifikasi karena staging belum memiliki Brand Profile Nutribake, konfigurasi Nextcloud/G-Labs, dan Gemini key valid.
-
-## 11. Risiko dan Mitigasi
-
-| Risiko | Mitigasi |
-|---|---|
-| Dua instance mengklaim job yang sama | Atomic claim dengan `FOR UPDATE SKIP LOCKED`, lock owner, dan unique idempotency index. |
-| Server restart di tengah orkestrasi | Simpan checkpoint `planner_id` dan `campaign_id`; worker selalu resume, bukan mengulang tahap selesai. |
-| Perubahan refactor merusak UI lama | Route lama menjadi adapter tipis dengan response contract tetap dan regression test. |
-| API internal terekspos | Bearer token, tenant binding, Tailnet/reverse-proxy allowlist, token rotation, tanpa CORS publik. |
-| Approval tanpa browser melewatkan review | Default pilot `approval_mode=storyboard`; `approve_unchanged` eksplisit dan tercatat di audit event. |
-| Job status tidak sinkron dengan worker video | Status aggregator membaca tabel OPC sebagai source of truth, bukan menyimpan salinan semua status. |
-| Pembuatan dan posting sosial tercampur | `enable_social_post=false` dipaksa pada v1; distribusi sosial tetap workflow terpisah. |
-
-## 12. Estimasi Implementasi
-
-- Phase 1 MVP internal: 2–3 hari kerja efektif.
-- Phase 2 headless approval: 1 hari kerja.
-- Phase 3 hardening dan smoke test produksi: 1–2 hari kerja.
-
-Estimasi dapat berubah terutama karena durasi smoke test AI/video dan kondisi worker eksternal, bukan karena endpoint API-nya.
+- [x] Audit schema, constraint, dan seluruh query tenant-sensitive.
+- [x] Tambahkan migrasi tenant metadata, audit, Gemini key ID, dan unique tenant-scoped.
+- [x] Refaktor repository Gemini Key Pool menjadi tenant-aware dan error-transparent.
+- [x] Perbaiki API serta UI hasil impor Gemini key.
+- [x] Tambahkan test Gemini single/bulk/duplicate/failure dan isolasi tenant.
+- [x] Implementasikan CLI bootstrap superadmin tanpa password pada argumen atau log.
+- [x] Implementasikan lifecycle, audit, dan perlindungan superadmin aktif terakhir.
+- [x] Tambahkan test bootstrap/login serta larangan eskalasi role oleh tenant admin.
+- [x] Implementasikan service provisioning tenant transaksional.
+- [x] Implementasikan API Tenant Management khusus superadmin.
+- [x] Implementasikan UI Tenant Management dan navigasi berbasis role.
+- [x] Kunci User Management serta status login ke tenant aktif.
+- [x] Migrasikan autentikasi Operator API ke credential tenant-scoped dan scopes.
+- [x] Perbarui worker dan CLI untuk multi-tenant serta command `whoami`.
+- [x] Scaffold plugin `makna-content-operator` dengan skill dan script wrapper.
+- [x] Validasi manifest/plugin dan lakukan smoke test terhadap staging.
+- [x] Jalankan lint, test, build, dan regression test Content Planner/OPC.
+- [x] Perbarui seluruh checkbox secara real-time selama eksekusi.
+- [ ] Jalankan patch release, verifikasi tag dan sinkronisasi `main` sesuai SOP.

@@ -25,9 +25,9 @@ export async function GET(req) {
       const brands = await db.prepare(`
         SELECT ub.brand_id, bp.brand_name
         FROM user_brands ub
-        JOIN brand_profiles bp ON ub.brand_id = bp.id
+        JOIN brand_profiles bp ON ub.brand_id = bp.id AND bp.tenant_id = ?
         WHERE ub.user_id = ?
-      `).all(u.id);
+      `).all(currentUser.tenantId, u.id);
 
       return {
         ...u,
@@ -55,6 +55,9 @@ export async function POST(req) {
 
     if (!username || !password) {
       return NextResponse.json({ success: false, error: 'Username dan password wajib diisi' }, { status: 400 });
+    }
+    if (!['user', 'admin'].includes(role)) {
+      return NextResponse.json({ success: false, error: 'Role hanya boleh user atau admin.' }, { status: 400 });
     }
 
     const db = getDb();
@@ -91,6 +94,8 @@ export async function POST(req) {
       VALUES (?, ?, ?)
     `);
     for (const brandId of assignedBrandIds) {
+      const tenantBrand = await db.prepare('SELECT id FROM brand_profiles WHERE id = ?').get(brandId);
+      if (!tenantBrand) continue;
       insertBrand.run(`ub_${userId}_${brandId}`, userId, brandId);
     }
 

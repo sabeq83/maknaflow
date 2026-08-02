@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.132 — Tenant Control Plane dan Content Operator (02/08/2026)
+- Tambah bootstrap superadmin dan Tenant Management
+- Perbaiki Gemini API Key Pool tenant-aware serta hasil impor
+- Tambah Operator API multi-tenant dan plugin makna-content-operator
+
 ## V2.2.131 — Fix Gemini API Key PostgreSQL (02/08/2026)
 - Menunggu async API key lookup sebelum memanggil Gemini
 - Memperbaiki tenant query spacing sebelum ORDER BY

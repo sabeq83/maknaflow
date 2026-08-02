@@ -8,7 +8,7 @@ export const runtime = 'nodejs';
 
 export async function POST(request, { params }) {
   try {
-    const identity = authenticateOperator(request);
+    const identity = await authenticateOperator(request, 'content:approve');
     const { jobId } = await params;
     const command = normalizeOperatorApproval(await request.json());
     return await runAsOperatorTenant(identity, async () => {

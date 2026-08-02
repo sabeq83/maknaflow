@@ -19,6 +19,9 @@ export async function PUT(req, { params }) {
 
     const body = await req.json();
     const { email, password, role, status, allowedMenuKeys = [], assignedBrandIds = [] } = body;
+    if (role && !['user', 'admin'].includes(role)) {
+      return NextResponse.json({ success: false, error: 'Role hanya boleh user atau admin.' }, { status: 400 });
+    }
 
     const db = getDb();
     const user = await db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
@@ -60,6 +63,8 @@ export async function PUT(req, { params }) {
       VALUES (?, ?, ?)
     `);
     for (const brandId of assignedBrandIds) {
+      const tenantBrand = await db.prepare('SELECT id FROM brand_profiles WHERE id = ?').get(brandId);
+      if (!tenantBrand) continue;
       insertBrand.run(`ub_${userId}_${brandId}`, userId, brandId);
     }
 

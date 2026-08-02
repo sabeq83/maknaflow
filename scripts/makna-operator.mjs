@@ -6,6 +6,7 @@ function usage() {
   console.log(`MAKNA Operator CLI
 
 Usage:
+  npm run operator -- whoami
   npm run operator -- create --file request.json [--key idempotency-key] [--wait]
   npm run operator -- status <job-id> [--watch]
   npm run operator -- approve <job-id> [--all | --items 101,102]
@@ -91,6 +92,11 @@ async function main() {
     });
     console.log(`Job ${payload.job_id} diterima (${payload.status})${payload.reused ? ' [reused]' : ''}.`);
     if (args.includes('--wait')) await watch(payload.job_id);
+    return;
+  }
+  if (command === 'whoami') {
+    const payload = await request('/api/operator/v1/whoami');
+    console.log(`${payload.operator.name} | tenant=${payload.operator.tenant_id} | scopes=${payload.operator.scopes.join(',')}`);
     return;
   }
   if (command === 'status') {

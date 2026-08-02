@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request, { params }) {
   try {
-    const identity = authenticateOperator(request);
+    const identity = await authenticateOperator(request, 'content:read');
     const { jobId } = await params;
     return await runAsOperatorTenant(identity, async () => {
       const job = await buildOperatorJobStatus(jobId);

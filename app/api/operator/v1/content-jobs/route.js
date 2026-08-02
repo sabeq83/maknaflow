@@ -15,7 +15,7 @@ function errorResponse(error) {
 
 export async function POST(request) {
   try {
-    const identity = authenticateOperator(request);
+    const identity = await authenticateOperator(request, 'content:create');
     const idempotencyKey = request.headers.get('idempotency-key')?.trim();
     if (!idempotencyKey || idempotencyKey.length > 128) {
       return NextResponse.json({

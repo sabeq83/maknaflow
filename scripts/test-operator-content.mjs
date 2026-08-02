@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
+import pg from 'pg';
 import {
   hashOperatorRequest,
   normalizeOperatorApproval,
   normalizeOperatorContentRequest
 } from '../lib/operator-content-contract.js';
-import { authenticateOperator } from '../lib/operator-auth.js';
+import { loadStagingEnv } from './local-staging/env.js';
 
 const nutribakeRequest = {
   planner: {
@@ -61,19 +63,41 @@ assert.deepEqual(normalizeOperatorApproval({ item_ids: [2, 2, 3] }), {
 
 const oldToken = process.env.MAKNA_OPERATOR_API_TOKEN;
 const oldTenant = process.env.MAKNA_OPERATOR_TENANT_ID;
+Object.assign(process.env, loadStagingEnv());
+const { authenticateOperator } = await import('../lib/operator-auth.js');
 process.env.MAKNA_OPERATOR_API_TOKEN = 'operator-test-secret';
 process.env.MAKNA_OPERATOR_TENANT_ID = 'tenant_test';
 const validRequest = new Request('http://localhost/api/operator/v1/content-jobs', {
   headers: { authorization: 'Bearer operator-test-secret' }
 });
-assert.deepEqual(authenticateOperator(validRequest), {
+assert.deepEqual(await authenticateOperator(validRequest), {
   tenantId: 'tenant_test',
-  actor: 'operator-api'
+  actor: 'operator-api-legacy',
+  name: 'Legacy Environment Credential',
+  scopes: ['content:create', 'content:read', 'content:approve']
 });
-assert.throws(
+await assert.rejects(
   () => authenticateOperator(new Request('http://localhost')),
   error => error.code === 'OPERATOR_UNAUTHORIZED'
 );
+
+const credentialToken = `credential-${crypto.randomUUID()}`;
+const credentialTenant = `test_operator_${Date.now().toString(36)}`;
+const credentialId = `opc_test_${Date.now().toString(36)}`;
+const client = new pg.Client({ host: process.env.PGHOST, port: Number(process.env.PGPORT), user: process.env.PGUSER, password: process.env.PGPASSWORD, database: process.env.PGDATABASE });
+await client.connect();
+try {
+  await client.query("INSERT INTO tenants (id, name, slug) VALUES ($1, 'Operator Test', $1)", [credentialTenant]);
+  await client.query(`INSERT INTO operator_credentials (id, tenant_id, name, token_hash, scopes) VALUES ($1, $2, 'Test Credential', $3, 'content:read')`, [credentialId, credentialTenant, crypto.createHash('sha256').update(credentialToken).digest('hex')]);
+  const databaseIdentity = await authenticateOperator(new Request('http://localhost', { headers: { authorization: `Bearer ${credentialToken}` } }), 'content:read');
+  assert.equal(databaseIdentity.tenantId, credentialTenant);
+  assert.deepEqual(databaseIdentity.scopes, ['content:read']);
+  await assert.rejects(() => authenticateOperator(new Request('http://localhost', { headers: { authorization: `Bearer ${credentialToken}` } }), 'content:create'), error => error.code === 'OPERATOR_SCOPE_FORBIDDEN');
+} finally {
+  await client.query('DELETE FROM operator_credentials WHERE id = $1', [credentialId]);
+  await client.query('DELETE FROM tenants WHERE id = $1', [credentialTenant]);
+  await client.end();
+}
 if (oldToken === undefined) delete process.env.MAKNA_OPERATOR_API_TOKEN;
 else process.env.MAKNA_OPERATOR_API_TOKEN = oldToken;
 if (oldTenant === undefined) delete process.env.MAKNA_OPERATOR_TENANT_ID;
