@@ -752,7 +752,7 @@ Checklist ini wajib diperbarui real-time saat eksekusi dimulai.
 - [x] Jalankan `npm run build` dan perbaiki seluruh error build yang terkait perubahan.
 - [ ] Jalankan smoke test staging satu item Nutribake hingga output Nextcloud, tanpa social posting.
 - [x] Perbarui seluruh checkbox sesuai hasil eksekusi dan catat bukti verifikasi.
-- [ ] Jalankan rilis patch non-interaktif, verifikasi changelog, tag, branch `main`, dan remote GitHub.
+- [x] Jalankan rilis patch non-interaktif, verifikasi changelog, tag, branch `main`, dan remote GitHub.
 
 ## 10. Verification Evidence
 
