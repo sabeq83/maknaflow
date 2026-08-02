@@ -541,4 +541,4 @@ await testCrossTenantBrandRejected();
 - [x] Terapkan pemulihan setelah hasil dry-run diverifikasi.
 - [x] Verifikasi campaign memiliki item dan pipeline mulai berjalan.
 - [x] Perbarui checkbox secara real-time selama eksekusi.
-- [ ] Jalankan patch release serta sinkronisasi `main` dan tag sesuai SOP.
+- [x] Jalankan patch release serta sinkronisasi `main` dan tag sesuai SOP.
