@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.149 — Windows Pilot Content Automation (03/08/2026)
+- Aktifkan worker automation dan notification secara aman di Windows WSL
+- Tambah health gate port 5020 dan public base URL tanpa secret
+- Tambah simulasi restart retry dedupe dan outbox recovery serta runbook rollback
+
 ## V2.2.148 — Calendar dan Run Health Automation (03/08/2026)
 - Tambah calendar month/week dengan occurrence virtual dan overlay run aktual
 - Tambah filter schedule brand status timezone dan detail event

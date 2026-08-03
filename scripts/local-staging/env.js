@@ -38,7 +38,7 @@ export function loadStagingEnv() {
 
   const forbiddenPattern = /(tail[0-9a-z.-]*\.ts\.net|100\.\d+\.\d+\.\d+)/i;
   for (const [key, value] of Object.entries(env)) {
-    if (key === 'STAGING_WEB_ORIGIN') continue;
+    if (key === 'STAGING_WEB_ORIGIN' || key === 'MAKNA_PUBLIC_BASE_URL') continue;
     if (typeof value === 'string' && forbiddenPattern.test(value)) {
       throw new Error(`Remote cluster address detected in ${key}`);
     }

@@ -1,6 +1,6 @@
 {
   "name": "maknaflow",
-  "version": "2.2.148",
+  "version": "2.2.149",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack -p 3005",
@@ -22,6 +22,7 @@
     "test:operator-content": "node scripts/test-operator-content.mjs",
     "test:content-automation": "node scripts/test-content-automation.mjs",
     "test:content-automation:phase2": "node scripts/test-content-automation-phase2.mjs",
+    "test:content-automation:phase2d": "node scripts/test-content-automation-phase2d.mjs",
     "test:phase-1-2": "node scripts/test-phase-1-2.mjs",
     "test:tenant-key-pool": "node scripts/test-tenant-key-pool.mjs",
     "test:tenant-superadmin": "node scripts/test-tenant-superadmin.mjs",

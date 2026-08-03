@@ -1156,7 +1156,7 @@ Response calendar membedakan `source: schedule | run`, membawa `scheduled_for`, 
 
 - [ ] Pastikan port staging `5020` listen dan health endpoint dapat diakses dari node Windows.
 - [ ] Konfigurasikan base URL dan worker flags tanpa menaruh bot token di file repository.
-- [ ] Jalankan simulasi service mati, missed run, restart, retry, dan outbox recovery.
+- [x] Jalankan simulasi service mati, missed run, restart, retry, dan outbox recovery.
 - [ ] Jalankan pilot satu schedule Nutribake dalam mode `run_latest` dan approval storyboard.
 - [ ] Observasi minimal dua occurrence tanpa duplikasi atau produksi sebelum approval.
 - [ ] Dokumentasikan rollback flags, lakukan release final Fase 2, dan verifikasi main/tag remote.

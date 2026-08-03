@@ -84,6 +84,28 @@ git fetch origin ${GITHUB_BRANCH} 2>&1 | tail -5
 git reset --hard origin/${GITHUB_BRANCH}
 echo "  ✓ Git reset ke origin/${GITHUB_BRANCH}: $(git log -1 --format='%h %s')"
 
+# Terapkan flag operasional non-secret secara idempotent. Credential provider
+# tetap dikelola sebagai encrypted tenant setting melalui UI.
+upsert_env() {
+  KEY="$1"
+  VALUE="$2"
+  if grep -q "^\${KEY}=" .env.staging.local; then
+    sed -i "s|^\${KEY}=.*|\${KEY}=\${VALUE}|" .env.staging.local
+  else
+    echo "\${KEY}=\${VALUE}" >> .env.staging.local
+  fi
+}
+upsert_env ENABLE_BACKGROUND_SERVICES true
+upsert_env ENABLE_CAMPAIGN_SCHEDULER false
+upsert_env ENABLE_OPERATOR_WORKER true
+upsert_env ENABLE_CONTENT_AUTOMATION_WORKER true
+upsert_env CONTENT_AUTOMATION_INTERVAL_MS 15000
+upsert_env ENABLE_CONTENT_AUTOMATION_NOTIFICATIONS true
+upsert_env CONTENT_AUTOMATION_NOTIFICATION_INTERVAL_MS 10000
+upsert_env STAGING_WEB_ORIGIN http://100.117.59.92:${WEB_PORT}
+upsert_env MAKNA_PUBLIC_BASE_URL http://100.117.59.92:${WEB_PORT}
+echo "  ✓ Content automation worker flags and public base URL configured"
+
 # Install/update dependencies (hanya jika package.json berubah)
 echo "[3/5] Installing/updating npm dependencies..."
 npm install --no-audit --no-fund --prefer-offline 2>&1 | tail -5
@@ -121,8 +143,19 @@ echo ""
 echo "🩺 Verifying services..."
 WEB_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 http://127.0.0.1:${WEB_PORT} 2>/dev/null || echo "TIMEOUT")
 API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 http://127.0.0.1:${API_PORT}/health 2>/dev/null || echo "TIMEOUT")
+HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 http://127.0.0.1:${WEB_PORT}/api/v2/system-health 2>/dev/null || echo "TIMEOUT")
 echo "  Web UI  (${WEB_PORT}) → HTTP \${WEB_STATUS}"
 echo "  API     (${API_PORT}) → HTTP \${API_STATUS}"
+echo "  Health  (${WEB_PORT}/api/v2/system-health) → HTTP \${HEALTH_STATUS}"
+
+if ! ss -ltn | grep -q ':${WEB_PORT} '; then
+  echo "  ✗ Port ${WEB_PORT} is not listening"
+  exit 1
+fi
+if [ "\${WEB_STATUS}" = "TIMEOUT" ] || [ "\${HEALTH_STATUS}" = "TIMEOUT" ]; then
+  echo "  ✗ Staging health verification failed"
+  exit 1
+fi
 
 echo ""
 echo "================================================================"
