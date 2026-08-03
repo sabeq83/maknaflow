@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.146 — Fix: protect API Key fields from masking overwrites (03/08/2026)
+- Menambahkan filter startsWith('••••••••') pada setting handler dan brand profile db helper untuk mencegah key tertimpa sensor bullet
+
 ## V2.2.145 — Fix: Auto trim system_audit_logs TypeError on db.exec (03/08/2026)
 - Menambahkan mock method exec pada pg db helper di lib/db.js agar auto-trim system_audit_logs berjalan lancar tanpa melempar TypeError
 

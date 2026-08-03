@@ -94,7 +94,7 @@ export async function POST(request) {
     if (google_client_secret) {
       await setSetting('google_client_secret', google_client_secret);
     }
-    if (webhook_api_key) await setSetting('webhook_api_key', webhook_api_key);
+    if (webhook_api_key && !webhook_api_key.startsWith('••••••••')) await setSetting('webhook_api_key', webhook_api_key);
     if (webhook_host !== undefined) await setSetting('webhook_host', webhook_host);
     if (webhook_port !== undefined) await setSetting('webhook_port', webhook_port);
     if (webhook_image_model !== undefined) await setSetting('webhook_image_model', webhook_image_model);
