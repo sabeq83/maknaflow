@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.150 — Stabilkan Worker Windows Pilot (03/08/2026)
+- Matikan scheduler legacy pada Node 2 dan pertahankan worker automation khusus
+- Perbaiki health gate agar koneksi HTTP 000 ditolak dan respons auth diterima
+
 ## V2.2.149 — Windows Pilot Content Automation (03/08/2026)
 - Aktifkan worker automation dan notification secara aman di Windows WSL
 - Tambah health gate port 5020 dan public base URL tanpa secret

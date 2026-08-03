@@ -97,6 +97,8 @@ upsert_env() {
 }
 upsert_env ENABLE_BACKGROUND_SERVICES true
 upsert_env ENABLE_CAMPAIGN_SCHEDULER false
+upsert_env ENABLE_SCHEDULER_WORKER false
+upsert_env MAKNA_SCHEDULER 0
 upsert_env ENABLE_OPERATOR_WORKER true
 upsert_env ENABLE_CONTENT_AUTOMATION_WORKER true
 upsert_env CONTENT_AUTOMATION_INTERVAL_MS 15000
@@ -136,14 +138,14 @@ pm2 start ${APP_DIR}/ecosystem.staging.config.cjs --env staging
 pm2 save
 
 # Beri waktu proses naik
-sleep 3
+sleep 8
 
 # Verifikasi
 echo ""
 echo "🩺 Verifying services..."
-WEB_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 http://127.0.0.1:${WEB_PORT} 2>/dev/null || echo "TIMEOUT")
-API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 http://127.0.0.1:${API_PORT}/health 2>/dev/null || echo "TIMEOUT")
-HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 http://127.0.0.1:${WEB_PORT}/api/v2/system-health 2>/dev/null || echo "TIMEOUT")
+WEB_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 http://127.0.0.1:${WEB_PORT} 2>/dev/null || true)
+API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 http://127.0.0.1:${API_PORT}/health 2>/dev/null || true)
+HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 http://127.0.0.1:${WEB_PORT}/api/v2/system-health 2>/dev/null || true)
 echo "  Web UI  (${WEB_PORT}) → HTTP \${WEB_STATUS}"
 echo "  API     (${API_PORT}) → HTTP \${API_STATUS}"
 echo "  Health  (${WEB_PORT}/api/v2/system-health) → HTTP \${HEALTH_STATUS}"
@@ -152,7 +154,7 @@ if ! ss -ltn | grep -q ':${WEB_PORT} '; then
   echo "  ✗ Port ${WEB_PORT} is not listening"
   exit 1
 fi
-if [ "\${WEB_STATUS}" = "TIMEOUT" ] || [ "\${HEALTH_STATUS}" = "TIMEOUT" ]; then
+if [ "\${WEB_STATUS}" = "000" ] || [ "\${HEALTH_STATUS}" = "000" ]; then
   echo "  ✗ Staging health verification failed"
   exit 1
 fi
