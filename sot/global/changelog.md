@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.2.147 — Security and regression hardening (03/08/2026)
+- Lindungi tenant Settings dan masked credentials
+- Pisahkan AI directive dari mandatory outro secara konsisten
+- Amankan sinkronisasi database dan audit log cleanup
+- Tambahkan regression test Fase 1.2
+
 ## V2.2.146 — Fix: protect API Key fields from masking overwrites (03/08/2026)
 - Menambahkan filter startsWith('••••••••') pada setting handler dan brand profile db helper untuk mencegah key tertimpa sensor bullet
 

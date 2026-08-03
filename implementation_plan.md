@@ -1229,3 +1229,189 @@ deleteOperatorPreset();
 - [x] Tambahkan aksi review dan approve entire campaign yang terpisah dari Run Now/Aktifkan.
 - [x] Jalankan test, build, restart, dan smoke test staging.
 - [x] Jalankan release patch dan verifikasi remote main/tag.
+
+## 12. Patch Fase 1.2 — Security dan Regression Hardening
+
+### Sasaran
+
+1. Hilangkan credential database dari source dan beri pagar pengaman pada sinkronisasi database.
+2. Pastikan semua secret Settings tidak tertimpa nilai masked dan hanya dapat dikelola Admin tenant.
+3. Selesaikan pemisahan `ai_directive`, legacy `custom_instruction`, dan `mandatory_outro_line` tanpa duplikasi prompt.
+4. Pastikan kegagalan auto-trim PostgreSQL benar-benar tertangkap.
+
+### File dan Before/After
+
+#### `app/api/settings/route.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+webhook_api_key: await getSetting('webhook_api_key')
+  ? '••••••••' + await getSetting('webhook_api_key').slice(-6) : '';
+if (gemini_api_key) await setSetting('gemini_api_key', gemini_api_key);
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const user = requireSettingsAdmin(request);
+const settings = await loadSettingsOnce();
+webhook_api_key: maskSecret(settings.webhook_api_key);
+if (isNewSecret(gemini_api_key)) await setSetting('gemini_api_key', gemini_api_key);
+```
+
+#### `lib/db.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+db.exec(`DELETE FROM system_audit_logs ...`);
+ai_directive: campaign.ai_directive || campaign.custom_instruction || '';
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+await db.exec(`DELETE FROM system_audit_logs ...`);
+ai_directive: campaign.ai_directive || '';
+```
+
+#### `lib/secret-values.js` (baru)
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Masking secret tersebar di route dan tidak konsisten.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export function maskSecret(value) { ... }
+export function isNewSecret(value) { ... }
+```
+
+#### `lib/prompt-instructions.js` (baru)
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Legacy custom instruction dan outro belum dinormalisasi terpusat.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export function resolvePromptInstructions(input) {
+  return { aiDirective, mandatoryOutroLine };
+}
+```
+
+#### `lib/prompts.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const aiDirective = config.ai_directive || config.custom_instruction || '';
+// custom_instruction dapat muncul lagi pada blok prompt berikutnya.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const { aiDirective, mandatoryOutroLine } = resolvePromptInstructions(config);
+// Tepat satu blok directive dan satu aturan outro eksplisit.
+```
+
+#### `app/components/ImportPlannerModal.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+setAiDirective('');
+setMandatoryOutroLine('');
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const instructions = resolvePlannerInstructions(planner);
+setAiDirective(instructions.aiDirective);
+setMandatoryOutroLine(instructions.mandatoryOutroLine);
+```
+
+#### `app/api/settings/test-nextcloud/route.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const { password } = await request.json();
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+requireAdmin(request);
+const password = isNewSecret(input) ? input : await getSetting('nextcloud_app_password');
+```
+
+#### `scripts/sync-local-db-to-server.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const REMOTE_DB = { user: '...', pass: 'hardcoded', name: '...' };
+pg_dump --clean --if-exists ...;
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const config = loadRequiredEnvironment();
+requireExplicitConfirmationFlags(config);
+// Dump default non-destructive; destructive restore requires an explicit flag and backup.
+```
+
+#### `scripts/test-phase-1-2.mjs` (baru)
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Belum ada regression test khusus masked secrets dan instruction resolution.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+assertMaskedSecretsAreIgnored();
+assertLegacyOutroIsExtractedOnce();
+assertDirectiveNeverBecomesOutro();
+```
+
+#### `package.json`
+
+**Code Sebelum (Current/Before)**
+
+```json
+"test:content-automation": "node scripts/test-content-automation.mjs"
+```
+
+**Code Sesudah (Proposed/After)**
+
+```json
+"test:phase-1-2": "node scripts/test-phase-1-2.mjs"
+```
+
+### Execution Task List Fase 1.2
+
+- [x] Lindungi endpoint Settings dengan role Admin dan masking helper yang konsisten.
+- [x] Perbaiki pembacaan webhook key serta seluruh masked secret overwrite.
+- [x] Perbaiki `await db.exec()` pada auto-trim audit log.
+- [x] Pisahkan penyimpanan directive dari legacy custom instruction.
+- [x] Normalisasi directive/outro untuk OPC dan seluruh RE prompt builder.
+- [x] Pertahankan directive/outro saat mengimpor Content Planner.
+- [x] Hilangkan credential hardcoded dan tambahkan safety gate sinkronisasi database.
+- [x] Tambahkan serta jalankan regression test Fase 1.2.
+- [x] Jalankan build dan staging verification.
+- [x] Jalankan release patch dan verifikasi branch/tag remote.
+- [ ] Jangan mengerjakan Fase 2A sampai ada perintah pengguna.

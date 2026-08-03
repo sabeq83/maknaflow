@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { resolvePlannerInstructions } from '@/lib/prompt-instructions';
 
 export default function ImportPlannerModal({
   isOpen,
@@ -143,8 +144,9 @@ export default function ImportPlannerModal({
           setIsBridgingActive(true);
           setCustomInstruction(p.custom_instruction || 'akhiran skrip/voiceover : produk ori ada di keranjang ya!');
         }
-        setAiDirective('');
-        setMandatoryOutroLine('');
+        const instructions = resolvePlannerInstructions(p);
+        setAiDirective(instructions.aiDirective);
+        setMandatoryOutroLine(instructions.mandatoryOutroLine);
         if (p.target_audience) {
           setTargetDemographic(p.target_audience);
         }
