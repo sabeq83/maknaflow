@@ -16,7 +16,7 @@ module.exports = {
     {
       name: 'maknaflow-staging-ui',
       script: 'node_modules/next/dist/bin/next',
-      args: 'start -H 127.0.0.1 -p 5010',
+      args: 'start -H 0.0.0.0 -p 5010',
       cwd: APP_DIR,
       interpreter: 'node',
       instances: 1,
@@ -29,7 +29,7 @@ module.exports = {
         APP_ENV: 'staging',
         NODE_ROLE: 'standalone',
         PORT: 5010,
-        HOSTNAME: '127.0.0.1',
+        HOSTNAME: '0.0.0.0',
         TZ: 'Asia/Jakarta',
         // Var lainnya dibaca dari .env.staging.local via source sebelum pm2 start
       },
@@ -56,7 +56,7 @@ module.exports = {
         APP_ENV: 'staging',
         NODE_ROLE: 'standalone',
         API_PORT: 7010,
-        API_HOST: '127.0.0.1',
+        API_HOST: '0.0.0.0',
         TZ: 'Asia/Jakarta',
       },
       // Log output
