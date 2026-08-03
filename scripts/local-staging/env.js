@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '::1']);
+const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '::1', '0.0.0.0']);
 const REQUIRED = ['HOSTNAME', 'PORT', 'API_HOST', 'API_PORT', 'PGHOST', 'PGPORT', 'PGUSER', 'PGPASSWORD', 'PGDATABASE'];
 
 export function loadStagingEnv() {
