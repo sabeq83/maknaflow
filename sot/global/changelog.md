@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.145 — Fix: Auto trim system_audit_logs TypeError on db.exec (03/08/2026)
+- Menambahkan mock method exec pada pg db helper di lib/db.js agar auto-trim system_audit_logs berjalan lancar tanpa melempar TypeError
+
 ## V2.2.144 — Sematkan AI Directive dan Outro Line di Import Content Planner (03/08/2026)
 - Menambahkan input form AI Directive dan Mandatory Outro Line pada modal dialog ImportPlannerModal untuk OPC
 
