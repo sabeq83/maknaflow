@@ -19,8 +19,8 @@ const WSL_DISTRO = '';                   // Kosong = pakai default distro WSL
 const LINUX_USER = 'sabeq83';           // Username Linux di dalam WSL (hasil: whoami = sabeq83)
 const APP_DIR = '/mnt/d/server/maknaflow-staging'; // Drive D:\\server\\maknaflow-staging
 const GITHUB_BRANCH = 'main';
-const WEB_PORT = 5010;
-const API_PORT = 7010;
+const WEB_PORT = 5020;
+const API_PORT = 7020;
 
 // Estimasi waktu build di Windows/WSL: 3-8 menit
 const SSH_TIMEOUT_MS = 600_000; // 10 menit

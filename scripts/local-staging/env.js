@@ -31,7 +31,9 @@ export function loadStagingEnv() {
   if (!LOOPBACK_HOSTS.has(env.HOSTNAME)) throw new Error('HOSTNAME must be loopback-only');
   if (!LOOPBACK_HOSTS.has(env.API_HOST)) throw new Error('API_HOST must be loopback-only');
   if (!LOOPBACK_HOSTS.has(env.PGHOST)) throw new Error('PGHOST must be loopback-only');
-  if (env.PORT !== '5010' || env.API_PORT !== '7010') throw new Error('Staging ports must be PORT=5010 and API_PORT=7010');
+  if ((env.PORT !== '5010' && env.PORT !== '5020') || (env.API_PORT !== '7010' && env.API_PORT !== '7020')) {
+    throw new Error('Staging ports must be PORT=5010/5020 and API_PORT=7010/7020');
+  }
   if (env.PGDATABASE !== 'maknaflow_staging') throw new Error('PGDATABASE must be maknaflow_staging');
 
   const forbiddenPattern = /(tail[0-9a-z.-]*\.ts\.net|100\.\d+\.\d+\.\d+)/i;
