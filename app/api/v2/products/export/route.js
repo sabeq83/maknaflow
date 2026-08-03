@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { getCurrentUser } from '@/lib/auth';
+import { listProductsForExport } from '@/lib/product-repository';
 import { ZipArchive } from 'archiver';
 import fs from 'fs';
 import path from 'path';
@@ -8,23 +9,14 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req) {
   try {
+    const user = getCurrentUser(req);
+    if (!user || user.tenantId === '__none__') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: user ? 403 : 401 });
+    }
     const url = new URL(req.url);
     const idsParam = url.searchParams.get('ids');
-
-    const db = getDb();
-    let products = [];
-
-    if (idsParam) {
-      const ids = idsParam.split(',').map(id => id.trim()).filter(Boolean);
-      if (ids.length > 0) {
-        const placeholders = ids.map(() => '?').join(',');
-        products = await db.prepare(`SELECT * FROM product_extractions WHERE id IN (${placeholders}) ORDER BY created_at DESC`).all(...ids);
-      } else {
-        products = await db.prepare('SELECT * FROM product_extractions ORDER BY created_at DESC').all();
-      }
-    } else {
-      products = await db.prepare('SELECT * FROM product_extractions ORDER BY created_at DESC').all();
-    }
+    const ids = idsParam ? idsParam.split(',').map(id => id.trim()).filter(Boolean) : [];
+    const products = await listProductsForExport(ids);
 
     // 1. Prepare ZipArchive
     const archive = new ZipArchive({ zlib: { level: 9 } });
@@ -71,6 +63,6 @@ export async function GET(req) {
 
   } catch (error) {
     console.error('[Products Export Error]:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: error.status || 500 });
   }
 }

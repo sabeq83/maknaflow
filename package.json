@@ -1,6 +1,6 @@
 {
   "name": "maknaflow",
-  "version": "2.2.150",
+  "version": "2.2.151",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack -p 3005",
@@ -27,6 +27,7 @@
     "test:tenant-key-pool": "node scripts/test-tenant-key-pool.mjs",
     "test:tenant-superadmin": "node scripts/test-tenant-superadmin.mjs",
     "test:tenant-api-smoke": "node scripts/test-tenant-api-smoke.mjs",
+    "test:product-import": "node scripts/test-product-import.mjs",
     "admin": "node scripts/admin.mjs",
     "operator": "node scripts/makna-operator.mjs",
     "release": "node scripts/release.js",

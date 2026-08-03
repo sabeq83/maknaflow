@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.151 — Perbaiki Impor ZIP Produk PostgreSQL (04/08/2026)
+- Hilangkan sukses palsu dan gunakan transaksi PostgreSQL nyata
+- Terapkan repository produk tenant-scoped untuk CRUD impor dan ekspor
+- Amankan validasi ZIP serta tambah regression test impor produk
+
 ## V2.2.150 — Stabilkan Worker Windows Pilot (03/08/2026)
 - Matikan scheduler legacy pada Node 2 dan pertahankan worker automation khusus
 - Perbaiki health gate agar koneksi HTTP 000 ditolak dan respons auth diterima

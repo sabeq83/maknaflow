@@ -1,12 +1,23 @@
 import { NextResponse } from 'next/server';
-import { getProductExtraction, updateProductExtraction, deleteProductExtraction } from '@/lib/db';
+import { getCurrentUser } from '@/lib/auth';
+import { deleteProduct, getProductById, updateProduct } from '@/lib/product-repository';
 
 export const dynamic = 'force-dynamic';
 
+function requireOperationalUser(request) {
+  const user = getCurrentUser(request);
+  if (!user || user.tenantId === '__none__') {
+    const error = new Error('Unauthorized');
+    error.status = user ? 403 : 401;
+    throw error;
+  }
+}
+
 export async function GET(req, { params }) {
   try {
+    requireOperationalUser(req);
     const { id } = await params;
-    const product = await getProductExtraction(id);
+    const product = await getProductById(id);
     if (!product) {
       return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
     }
@@ -18,12 +29,13 @@ export async function GET(req, { params }) {
     }
     return NextResponse.json({ success: true, data: product });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: error.status || 500 });
   }
 }
 
 export async function PUT(req, { params }) {
   try {
+    requireOperationalUser(req);
     const { id } = await params;
     const body = await req.json();
     
@@ -61,19 +73,22 @@ export async function PUT(req, { params }) {
       }
     }
     
-    await updateProductExtraction(id, updateData);
+    const updated = await updateProduct(id, updateData);
+    if (!updated) return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
     return NextResponse.json({ success: true, message: 'Product updated' });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: error.status || 500 });
   }
 }
 
 export async function DELETE(req, { params }) {
   try {
+    requireOperationalUser(req);
     const { id } = await params;
-    await deleteProductExtraction(id);
+    const deleted = await deleteProduct(id);
+    if (!deleted) return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
     return NextResponse.json({ success: true, message: 'Product deleted' });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: error.status || 500 });
   }
 }

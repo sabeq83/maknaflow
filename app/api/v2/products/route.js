@@ -1,17 +1,29 @@
 import { NextResponse } from 'next/server';
-import { getAllProductExtractions, createProductExtraction, getDb } from '@/lib/db';
-import { v4 as uuidv4 } from 'uuid';
+import { getDb } from '@/lib/db';
+import { getCurrentUser } from '@/lib/auth';
+import { createProduct, listProducts } from '@/lib/product-repository';
 
 export const dynamic = 'force-dynamic';
 
+function requireOperationalUser(request) {
+  const user = getCurrentUser(request);
+  if (!user || user.tenantId === '__none__') {
+    const error = new Error('Unauthorized');
+    error.status = user ? 403 : 401;
+    throw error;
+  }
+  return user;
+}
+
 export async function GET(request) {
   try {
+    requireOperationalUser(request);
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search') || '';
     const category = searchParams.get('category') || '';
 
     // Fetch all products
-    let products = await getAllProductExtractions();
+    let products = await listProducts({ search, category });
 
     // Rewrite photo_urls to serve dynamically via API route to bypass Next.js static caching
     products = products.map(p => {
@@ -24,22 +36,6 @@ export async function GET(request) {
       }
       return updated;
     });
-
-    // Filter by search query (name, USP, or tags)
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      products = products.filter(p => 
-        (p.product_name && p.product_name.toLowerCase().includes(q)) ||
-        (p.unique_selling_point && p.unique_selling_point.toLowerCase().includes(q)) ||
-        (p.tags && p.tags.toLowerCase().includes(q))
-      );
-    }
-
-    // Filter by category
-    if (category.trim()) {
-      const cat = category.toLowerCase();
-      products = products.filter(p => p.category && p.category.toLowerCase() === cat);
-    }
 
     // Get active scraping jobs count
     let scrapingCount = 0;
@@ -62,21 +58,20 @@ export async function GET(request) {
     });
   } catch (error) {
     console.error('Products GET Error:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: error.status || 500 });
   }
 }
 
 export async function POST(req) {
   try {
+    requireOperationalUser(req);
     const body = await req.json();
-    const id = uuidv4();
 
     if (!body.product_name) {
       return NextResponse.json({ success: false, error: 'Product Name wajib diisi.' }, { status: 400 });
     }
 
     const data = {
-      id,
       input_source: body.source_url || 'Manual',
       is_url: body.source_url ? 1 : 0,
       product_name: body.product_name,
@@ -103,11 +98,11 @@ export async function POST(req) {
       t2i_prompt: body.t2i_prompt || null
     };
 
-    await createProductExtraction(data);
+    const product = await createProduct(data);
 
-    return NextResponse.json({ success: true, id, data });
+    return NextResponse.json({ success: true, id: product.id, data: product }, { status: 201 });
   } catch (error) {
     console.error('Products POST Error:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: error.status || 500 });
   }
 }
