@@ -16,8 +16,8 @@ import { execSync } from 'child_process';
 const SSH_HOST = 'vibe-server';          // ssh alias dari ~/.ssh/config
 const SSH_PORT = 2222;                   // Port SSH Windows/WSL
 const WSL_DISTRO = '';                   // Kosong = pakai default distro WSL
-const LINUX_USER = 'sabeqmursyid';      // Username Linux di dalam WSL
-const APP_DIR = `/home/${LINUX_USER}/maknaflow-staging`;
+const LINUX_USER = 'sabeq83';           // Username Linux di dalam WSL (hasil: whoami = sabeq83)
+const APP_DIR = '/mnt/d/server/maknaflow-staging'; // Drive D:\\server\\maknaflow-staging
 const GITHUB_BRANCH = 'main';
 const WEB_PORT = 5010;
 const API_PORT = 7010;

@@ -11,7 +11,7 @@ set -e
 
 # ── Config ───────────────────────────────────────────────────────────────────
 LINUX_USER="${1:-$(whoami)}"
-APP_DIR="/home/${LINUX_USER}/maknaflow-staging"
+APP_DIR="/mnt/d/server/maknaflow-staging"   # Drive D:\server\maknaflow-staging
 GITHUB_REPO="https://github.com/sabeq83/maknaflow.git"
 GITHUB_BRANCH="main"
 NODE_VERSION="20"
@@ -232,8 +232,8 @@ cat > "/home/${LINUX_USER}/start-makna-staging.sh" << 'STARTUP_EOF'
 sudo service postgresql start
 export NVM_DIR="${HOME}/.nvm"
 [ -s "${NVM_DIR}/nvm.sh" ] && \. "${NVM_DIR}/nvm.sh"
-cd ~/maknaflow-staging
-pm2 resurrect || pm2 start ecosystem.staging.config.cjs --env staging
+cd /mnt/d/server/maknaflow-staging
+pm2 resurrect || pm2 start /mnt/d/server/maknaflow-staging/ecosystem.staging.config.cjs --env staging
 pm2 logs --nostream
 STARTUP_EOF
 chmod +x "/home/${LINUX_USER}/start-makna-staging.sh"
@@ -247,7 +247,11 @@ echo ""
 echo "  📡 Akses Staging:"
 echo "    - Web UI  : http://127.0.0.1:${WEB_PORT} (dari dalam WSL)"
 echo "    - API     : http://127.0.0.1:${API_PORT}/health"
-echo "    - Windows : http://100.117.59.92:${WEB_PORT} (port forwarding diatur terpisah)"
+echo "    - Tailscale: http://100.117.59.92:${WEB_PORT} (langsung via Tailscale)"
+echo ""
+echo "  📁 Lokasi File:"
+echo "    - App     : /mnt/d/server/maknaflow-staging (= D:\\server\\maknaflow-staging)"
+echo "    - Logs    : /mnt/d/server/maknaflow-staging/logs/"
 echo ""
 echo "  🔧 Perintah Berguna:"
 echo "    pm2 status                   → lihat status proses"

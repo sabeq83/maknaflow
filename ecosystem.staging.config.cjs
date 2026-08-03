@@ -8,8 +8,7 @@
  * Start: pm2 start ecosystem.staging.config.cjs --env staging
  */
 
-const LINUX_USER = process.env.USER || 'sabeqmursyid';
-const APP_DIR = `/home/${LINUX_USER}/maknaflow-staging`;
+const APP_DIR = '/mnt/d/server/maknaflow-staging'; // Drive D:\\server\\maknaflow-staging
 
 module.exports = {
   apps: [
