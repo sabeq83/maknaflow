@@ -401,7 +401,7 @@ Count tenant aktif harus bertambah tepat `N`; tenant lain tidak berubah.
 - [x] Jalankan `npm run test:product-import`.
 - [x] Jalankan `npm run staging:check` dan `npm run build`.
 - [x] Audit query produk dengan `rg` untuk referensi tabel legacy dan query tanpa tenant scope.
-- [ ] Jalankan rilis patch non-interaktif sesuai SOP repository.
-- [ ] Pastikan branch `main` dan tag rilis berhasil terunggah ke remote.
-- [ ] Deploy Node 2 menggunakan `npm run deploy:node2-wsl` satu kali.
+- [x] Jalankan rilis patch non-interaktif sesuai SOP repository.
+- [x] Pastikan branch `main` dan tag rilis berhasil terunggah ke remote.
+- [x] Deploy Node 2 menggunakan `npm run deploy:node2-wsl` satu kali.
 - [ ] Verifikasi impor pertama, impor duplikat, count PostgreSQL, dan visibilitas UI Node 2.
