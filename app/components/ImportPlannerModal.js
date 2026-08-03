@@ -25,6 +25,8 @@ export default function ImportPlannerModal({
   const [selectedBrandId, setSelectedBrandId] = useState('');
   const [nextcloudParentFolder, setNextcloudParentFolder] = useState('/MAKNA_Assets');
   const [customInstruction, setCustomInstruction] = useState('akhiran skrip/voiceover : produk ori ada di keranjang ya!');
+  const [aiDirective, setAiDirective] = useState('');
+  const [mandatoryOutroLine, setMandatoryOutroLine] = useState('');
 
   // Accordion 1: Strategy & Compliance
   const [narrativeMode, setNarrativeMode] = useState('auto'); // 'auto' | 'Storytelling' | 'Promo Hard Sell' | 'Educational Review'
@@ -141,6 +143,8 @@ export default function ImportPlannerModal({
           setIsBridgingActive(true);
           setCustomInstruction(p.custom_instruction || 'akhiran skrip/voiceover : produk ori ada di keranjang ya!');
         }
+        setAiDirective('');
+        setMandatoryOutroLine('');
         if (p.target_audience) {
           setTargetDemographic(p.target_audience);
         }
@@ -167,6 +171,8 @@ export default function ImportPlannerModal({
       setProductUsp('');
       setProductRefImage('');
       setCustomInstruction('');
+      setAiDirective('');
+      setMandatoryOutroLine('');
     }
   }
 
@@ -207,6 +213,8 @@ export default function ImportPlannerModal({
           brand_profile_id: selectedBrandId || null,
           account_name: accountName || null,
           custom_instruction: customInstruction,
+          ai_directive: aiDirective,
+          mandatory_outro_line: mandatoryOutroLine,
           narrative_mode: narrativeMode,
           visual_style: visualStyle,
           target_ai: videoModel === 'omni_flash' ? 'Google Veo Omni Flash' : targetAi,
@@ -461,6 +469,28 @@ export default function ImportPlannerModal({
                       <option value="Promo Hard Sell">Promo Hard Sell (Langsung Penawaran)</option>
                       <option value="Educational Review">Educational Review (Edukasi & Ulasan)</option>
                     </select>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>AI Directive / Guardrail (Staging Override):</label>
+                    <textarea
+                      value={aiDirective}
+                      onChange={e => setAiDirective(e.target.value)}
+                      rows={2}
+                      placeholder="Instruksi kontrol AI internal..."
+                      style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px', fontSize: '12px', resize: 'vertical' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Mandatory Outro Line (Staging Override):</label>
+                    <input
+                      type="text"
+                      value={mandatoryOutroLine}
+                      onChange={e => setMandatoryOutroLine(e.target.value)}
+                      placeholder="Kalimat wajib di akhir klip voiceover..."
+                      style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px', fontSize: '12px' }}
+                    />
                   </div>
 
                   <div>

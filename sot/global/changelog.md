@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.144 — Sematkan AI Directive dan Outro Line di Import Content Planner (03/08/2026)
+- Menambahkan input form AI Directive dan Mandatory Outro Line pada modal dialog ImportPlannerModal untuk OPC
+
 ## V2.2.143 — Fix: bypass env validation for STAGING_WEB_ORIGIN (03/08/2026)
 - Bypass STAGING_WEB_ORIGIN dari deteksi forbiddenPattern Tailscale IP agar build di remote server staging berhasil
 
