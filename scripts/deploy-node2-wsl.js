@@ -18,7 +18,7 @@ const SSH_PORT = 2222;                   // Port SSH Windows/WSL
 const WSL_DISTRO = '';                   // Kosong = pakai default distro WSL
 const LINUX_USER = 'sabeq83';           // Username Linux di dalam WSL (hasil: whoami = sabeq83)
 const APP_DIR = '/mnt/d/server/maknaflow-staging'; // Drive D:\\server\\maknaflow-staging
-const GITHUB_BRANCH = 'main';
+const GITHUB_BRANCH = 'local-staging';
 const WEB_PORT = 5020;
 const API_PORT = 7020;
 

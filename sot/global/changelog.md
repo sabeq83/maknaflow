@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.142 — Sematkan AI Directive dan Outro Line di OPC dan RE (03/08/2026)
+- Menambahkan input form AI Directive dan Mandatory Outro Line di UI OPC dan RE
+- Update Postgres database migration untuk RE campaigns
+- Update prompts engine RE dan POST API routes
+
 ## V2.2.141 — Deploy Node 2 WSL Staging Infrastructure (03/08/2026)
 - Tambah script setup-node2-wsl.sh untuk bootstrap WSL 2 Ubuntu di server Windows
 - Tambah script deploy-node2-wsl.js untuk single-pass deployment dari Mac ke Node 2 via SSH

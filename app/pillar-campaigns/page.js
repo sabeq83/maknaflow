@@ -82,6 +82,8 @@ export default function OrganicPillarPage() {
   const [customHook, setCustomHook] = useState('');
   const [visualActionGuideline, setVisualActionGuideline] = useState('');
   const [customInstruction, setCustomInstruction] = useState('akhiran skrip/voiceover : produk ori ada di keranjang ya!');
+  const [aiDirective, setAiDirective] = useState('');
+  const [mandatoryOutroLine, setMandatoryOutroLine] = useState('');
   const [brandProfiles, setBrandProfiles] = useState([]);
   const [selectedBrandId, setSelectedBrandId] = useState('');
   const [filterBrandId, setFilterBrandId] = useState('all');
@@ -482,6 +484,8 @@ export default function OrganicPillarPage() {
         const global_settings = {
           status: submitStatus,
           custom_instruction: customInstruction,
+          ai_directive: aiDirective,
+          mandatory_outro_line: mandatoryOutroLine,
           brand_profile_id: selectedBrandId || null,
           account_name: accountName || null,
           target_demographic: targetDemographic,
@@ -657,6 +661,8 @@ export default function OrganicPillarPage() {
       formData.append('enable_vo_audit', enableVoAudit ? '1' : '0');
 
       formData.append('status', submitStatus);
+      formData.append('ai_directive', aiDirective);
+      formData.append('mandatory_outro_line', mandatoryOutroLine);
 
       if (isVsoActive) {
         const isMascot = subjectDemographic.startsWith('mascot_universe_');
@@ -699,6 +705,8 @@ export default function OrganicPillarPage() {
       setCustomHook('');
       setVisualActionGuideline('');
       setCustomInstruction('');
+      setAiDirective('');
+      setMandatoryOutroLine('');
       setSelectedBrandId('');
       
       setIsBridgingActive(false);
@@ -776,6 +784,8 @@ export default function OrganicPillarPage() {
       setEnableAudioSegment(c.enable_audio_segment || false);
       try { setVoiceCast(c.voice_cast_json ? JSON.parse(c.voice_cast_json)?.characters || [] : []); } catch(e) { setVoiceCast([]); }
       setCustomInstruction(c.custom_instruction || '');
+      setAiDirective(c.ai_directive || '');
+      setMandatoryOutroLine(c.mandatory_outro_line || '');
       setSelectedBrandId(c.brand_profile_id || '');
       setNarrativeMode(c.narrative_mode || 'Storytelling');
       setVisualStyle(c.visual_style || 'Cinematic');
@@ -1176,6 +1186,26 @@ export default function OrganicPillarPage() {
                           <option value={0}>❌ No (Tanpa Audit Kepatuhan)</option>
                           <option value={1}>✅ Yes (Audit Kepatuhan & Tampilkan Dua Versi VO)</option>
                         </select>
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 12 }}>
+                        <label className="form-label">AI Directive / Guardrail (Staging Override)</label>
+                        <textarea
+                          className="form-textarea"
+                          style={{ minHeight: 60 }}
+                          placeholder="Instruksi kontrol AI internal (misal: Bahas brand sebagai ahli kuliner; jangan bahas kompetitor...)"
+                          value={aiDirective}
+                          onChange={e => setAiDirective(e.target.value)}
+                        />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 12 }}>
+                        <label className="form-label">Mandatory Outro Line (Staging Override)</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          placeholder="Kalimat wajib di akhir klip voiceover (misal: Produk ada di keranjang kuning ya!)"
+                          value={mandatoryOutroLine}
+                          onChange={e => setMandatoryOutroLine(e.target.value)}
+                        />
                       </div>
                       <div className="form-group" style={{ marginBottom: 0 }}>
                         <label className="form-label">Custom Instruction (Opsional)</label>

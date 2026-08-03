@@ -149,7 +149,7 @@ async function main() {
     execSync(`git commit -m "${commitMsg}"`);
     
     console.log('Melakukan Git Push ke remote server...');
-    execSync('git push origin main');
+    execSync('git push origin HEAD');
     
     console.log(`Membuat dan mengunggah Git Tag v${newVersion}...`);
     try {

@@ -57,6 +57,8 @@ export default function RECampaignsPage() {
   const [targetAi, setTargetAi] = useState('Google Veo (8s)');
   const [videoModel, setVideoModel] = useState('veo_31_lite');
   const [customInstruction, setCustomInstruction] = useState('akhiran skrip/voiceover : produk ori ada di keranjang ya!');
+  const [aiDirective, setAiDirective] = useState('');
+  const [mandatoryOutroLine, setMandatoryOutroLine] = useState('');
   const [toast, setToast] = useState(null);
   const [processingId, setProcessingId] = useState(null);
   const [brandProfiles, setBrandProfiles] = useState([]);
@@ -215,6 +217,8 @@ export default function RECampaignsPage() {
         aspect_ratio: aspectRatio,
         target_ai: targetAi,
         custom_instruction: customInstruction,
+        ai_directive: aiDirective,
+        mandatory_outro_line: mandatoryOutroLine,
         brand_profile_id: selectedBrandId || null,
         is_bridging_active: isBridgingActive ? 1 : 0,
         target_clips_count: targetClipsCount,
@@ -517,6 +521,8 @@ export default function RECampaignsPage() {
       formData.append('target_spreadsheet_id', '');
       formData.append('sfx_setting', sfxSetting);
       formData.append('enable_audio_segment', enableAudioSegment);
+      formData.append('ai_directive', aiDirective);
+      formData.append('mandatory_outro_line', mandatoryOutroLine);
       if (voiceCast.length > 0) formData.append('voice_cast_json', JSON.stringify({ characters: voiceCast }));
       
       if (isVsoActive) {
@@ -559,6 +565,8 @@ export default function RECampaignsPage() {
       setTargetAi('Google Veo (8s)');
       setVideoModel('veo_31_lite');
       setCustomInstruction('');
+      setAiDirective('');
+      setMandatoryOutroLine('');
       setSelectedBrandId('');
       setWordsPerClip('17-19 kata');
       setFaceVisibility('Faceless');
@@ -678,6 +686,8 @@ export default function RECampaignsPage() {
       setTargetAi(c.target_ai || 'Google Veo (8s)');
       setVideoModel(c.video_model || 'veo_31_lite');
       setCustomInstruction(c.custom_instruction || '');
+      setAiDirective(c.ai_directive || '');
+      setMandatoryOutroLine(c.mandatory_outro_line || '');
       setSelectedBrandId(c.brand_profile_id || '');
       setTargetLanguage(c.target_language || 'id-ID');
       setIsBridgingActive(c.is_bridging_active === 1);
@@ -1119,6 +1129,26 @@ export default function RECampaignsPage() {
                         )}
                       </div>
                     )}
+                    <div className="form-group" style={{ marginBottom: 12 }}>
+                      <label className="form-label">AI Directive / Guardrail (Staging Override)</label>
+                      <textarea
+                        className="form-textarea"
+                        style={{ minHeight: 60 }}
+                        placeholder="Instruksi kontrol AI internal (misal: Bahas brand sebagai ahli kuliner; jangan bahas kompetitor...)"
+                        value={aiDirective}
+                        onChange={e => setAiDirective(e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 12 }}>
+                      <label className="form-label">Mandatory Outro Line (Staging Override)</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        placeholder="Kalimat wajib di akhir klip voiceover (misal: Produk ada di keranjang kuning ya!)"
+                        value={mandatoryOutroLine}
+                        onChange={e => setMandatoryOutroLine(e.target.value)}
+                      />
+                    </div>
                     <div className="form-group">
                       <label className="form-label">Custom Instruction (Opsional)</label>
                       <textarea

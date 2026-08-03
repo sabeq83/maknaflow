@@ -104,7 +104,9 @@ export async function POST(request) {
         enable_vo_audit: Number(formData.get('enable_vo_audit') || 0),
         enable_audio_segment: Number(formData.get('enable_audio_segment') || 0),
         target_demographic: formData.get('target_demographic') || null,
-        target_demographic_custom: formData.get('target_demographic_custom') || null
+        target_demographic_custom: formData.get('target_demographic_custom') || null,
+        ai_directive: formData.get('ai_directive') || null,
+        mandatory_outro_line: formData.get('mandatory_outro_line') || null
       };
 
       // Handle file upload
@@ -153,6 +155,8 @@ export async function POST(request) {
       parsedBody.sfx_setting = parsedBody.sfx_setting || 'without_sfx';
       parsedBody.enable_vo_audit = parsedBody.enable_vo_audit !== undefined ? Number(parsedBody.enable_vo_audit) : 0;
       parsedBody.enable_audio_segment = parsedBody.enable_audio_segment !== undefined ? Number(parsedBody.enable_audio_segment) : 0;
+      parsedBody.ai_directive = parsedBody.ai_directive || null;
+      parsedBody.mandatory_outro_line = parsedBody.mandatory_outro_line || null;
     }
 
     if (parsedBody.visual_overrides_json) {
@@ -215,7 +219,9 @@ export async function POST(request) {
       enable_vo_audit,
       enable_audio_segment,
       target_demographic,
-      target_demographic_custom
+      target_demographic_custom,
+      ai_directive,
+      mandatory_outro_line
     } = parsedBody;
 
     if (!campaign_name?.trim()) {
@@ -295,7 +301,9 @@ export async function POST(request) {
       enable_vo_audit: enable_vo_audit || 0,
       enable_audio_segment: enable_audio_segment || 0,
       target_demographic: target_demographic || null,
-      target_demographic_custom: target_demographic_custom || null
+      target_demographic_custom: target_demographic_custom || null,
+      ai_directive: ai_directive || null,
+      mandatory_outro_line: mandatory_outro_line || null
     };
 
     await createPillarCampaignBundle({

@@ -547,12 +547,10 @@ CONTENT_AUTOMATION_LEASE_MS=60000
 
 ### Fase 2 — Notifikasi Eksternal
 
-- [ ] Pilih provider pilot dan desain credential handling.
-- [ ] Implementasikan notification outbox + backoff.
-- [ ] Implementasikan quiet hours dan preference.
-- [ ] Tambahkan missed-run policy lanjutan.
-- [ ] Tambahkan calendar/run-health UI.
-- [ ] Test, staging pilot, dan release terpisah.
+- [ ] Fase 2A: implementasikan missed-run policy dan retry/backoff content run.
+- [ ] Fase 2B: implementasikan notification outbox dan provider Telegram pilot.
+- [ ] Fase 2C: implementasikan calendar view dan run-health UI.
+- [ ] Fase 2D: hardening, test, observability, serta pilot Windows.
 
 ### Fase 3 — Multi-node dan Governance
 
@@ -565,6 +563,529 @@ CONTENT_AUTOMATION_LEASE_MS=60000
 ## 9. Rekomendasi Eksekusi
 
 Mulai hanya dari Fase 1. Untuk pilot pertama, gunakan satu schedule Nutribake dengan `Run Now`, lalu satu jadwal mingguan. Jangan memulai Fase 2 sebelum minimal dua siklus mingguan berhasil tanpa duplikasi dan tanpa produksi sebelum approval.
+
+## 9A. Implementation Plan Fase 2 — Reliability, Notification, dan Calendar
+
+### 9A.1 Sasaran dan keputusan desain
+
+Fase 2 dilaksanakan sebagai empat patch terpisah supaya setiap perubahan dapat diuji dan di-rollback sendiri:
+
+1. **Fase 2A — Reliability Core:** missed-run policy dan retry/backoff otomatis untuk dispatch content job.
+2. **Fase 2B — External Notification:** database outbox, preference/quiet hours, dan Telegram sebagai provider pilot.
+3. **Fase 2C — Calendar View:** kalender month/week, detail occurrence, filter schedule/brand/status, dan ringkasan kesehatan run.
+4. **Fase 2D — Windows Pilot:** health telemetry, restart-safe test, simulasi downtime, dokumentasi konfigurasi, dan rollout satu tenant.
+
+Keputusan utama:
+
+- Telegram dipilih untuk pilot karena ringan di Windows dan cepat untuk notifikasi approval. Email hanya memakai kontrak adapter yang sama pada fase berikutnya.
+- Notifikasi internal yang ada tetap dipertahankan. Pengiriman eksternal menggunakan tabel outbox terpisah agar kegagalan Telegram tidak pernah menggagalkan content run.
+- Calendar tidak menyimpan seluruh occurrence masa depan. Server menghitung occurrence secara virtual, lalu menimpanya dengan run aktual agar database tidak membengkak.
+- Retry content job dan retry notifikasi dipisahkan. Keduanya mempunyai attempt dan dead-letter sendiri.
+- Tautan approval selalu membuka MAKNA dan tetap membutuhkan login Admin. Tidak ada approval token atau storyboard lengkap di Telegram.
+- Seluruh query baru wajib tenant-scoped; credential provider tidak boleh masuk ke schedule JSON atau response API.
+
+### 9A.2 State machine yang diusulkan
+
+```text
+Content run:
+queued -> dispatching -> job_created -> awaiting_approval -> producing -> completed
+                   |                         |
+                   +-> retry_wait ----------+
+                   +-> failed
+stale schedule slot -> skipped
+
+Notification outbox:
+queued -> sending -> sent
+            |-> retry_wait -> sending
+            +-> dead_letter
+```
+
+Klasifikasi kegagalan:
+
+- `transient`: timeout, koneksi putus, HTTP 429, dan HTTP 5xx; boleh retry otomatis.
+- `permanent`: konfigurasi/payload tidak valid, HTTP 400/401/403; langsung gagal atau dead-letter.
+- `unknown`: retry sekali, lalu dead-letter agar tidak membuat loop tanpa batas.
+
+Backoff memakai exponential backoff dengan full jitter:
+
+```text
+delay = random(0, min(max_backoff, base_backoff * 2^(attempt - 1)))
+```
+
+Default pilot: maksimal 3 attempt, base 60 detik, maksimum 15 menit, dan auto-pause setelah 5 kegagalan content run berturut-turut.
+
+### 9A.3 Missed-run policy
+
+Worker harus menghitung semua slot yang jatuh tempo dari `next_run_at` sampai waktu tick saat ini, lalu menerapkan salah satu kebijakan:
+
+- `skip`: slot yang melewati `grace_minutes` dicatat sebagai `skipped`, schedule langsung dimajukan ke occurrence masa depan terdekat.
+- `run_latest`: occurrence lama dilewati dan hanya slot terlewat paling baru yang dibuat sebagai run.
+- `catch_up`: menjalankan occurrence dari yang paling lama, maksimal `max_catch_up_runs` (default 3) per tick. Sisa occurrence diringkas sebagai skipped agar restart panjang tidak membanjiri Gemini.
+
+Semua policy harus menjamin `next_run_at > now` setelah resolusi, memakai unique key `(tenant_id, schedule_id, scheduled_for)`, dan aman terhadap dua worker melalui transaksi serta `FOR UPDATE SKIP LOCKED`.
+
+### 9A.4 Notification outbox dan preference
+
+Event eksternal pertama:
+
+- storyboard siap approval;
+- content run gagal permanen;
+- retry habis/dead-letter;
+- schedule otomatis pause;
+- missed run/skipped (ringkasan, bukan satu pesan per slot);
+- content selesai, opsional per schedule.
+
+Preference per schedule meliputi channel aktif, jenis event, quiet hours, timezone, dan target Telegram. Saat quiet hours, pesan tetap masuk outbox tetapi `next_attempt_at` dipindahkan ke akhir quiet hours. Deduplikasi memakai `(tenant_id, event_key, channel)`.
+
+Credential Telegram disimpan tenant-scoped sebagai secret/masked setting. Endpoint baca hanya mengembalikan `configured: true/false` dan chat label, tidak pernah bot token. Tombol **Send Test Notification** tersedia hanya untuk Admin.
+
+### 9A.5 Calendar view
+
+Halaman Content Automations mendapat pilihan tampilan **List | Calendar**. Calendar menyediakan:
+
+- mode month dan week;
+- timezone aktif yang selalu terlihat;
+- future occurrence dari schedule aktif;
+- actual run dengan status `awaiting_approval`, `retry_wait`, `failed`, `skipped`, atau `completed`;
+- filter schedule, brand account, dan status;
+- panel detail saat event dipilih, termasuk tautan review dan alasan skip/failure.
+
+Implementasi memakai `Intl.DateTimeFormat` dan grid React/CSS internal; tidak menambah library calendar besar pada pilot. API membatasi rentang maksimal 62 hari untuk mencegah ekspansi occurrence berlebihan.
+
+### 9A.6 Perubahan database
+
+```sql
+ALTER TABLE content_automation_schedules
+  ADD COLUMN max_catch_up_runs INTEGER NOT NULL DEFAULT 3,
+  ADD COLUMN retry_policy_json JSONB NOT NULL DEFAULT '{"max_attempts":3,"base_seconds":60,"max_seconds":900}',
+  ADD COLUMN consecutive_failure_count INTEGER NOT NULL DEFAULT 0,
+  ADD COLUMN auto_pause_threshold INTEGER NOT NULL DEFAULT 5;
+
+ALTER TABLE content_automation_runs
+  ADD COLUMN next_attempt_at TIMESTAMPTZ,
+  ADD COLUMN last_attempt_at TIMESTAMPTZ,
+  ADD COLUMN failure_class TEXT,
+  ADD COLUMN skip_reason TEXT;
+
+CREATE TABLE content_automation_notification_preferences (...);
+CREATE TABLE content_automation_notification_outbox (...);
+CREATE UNIQUE INDEX ... ON content_automation_notification_outbox(tenant_id,event_key,channel);
+CREATE INDEX ... ON content_automation_notification_outbox(status,next_attempt_at);
+```
+
+Migrasi harus additive dan idempotent. Rollback aplikasi cukup mematikan worker Fase 2; kolom/tabel tidak perlu dihapus.
+
+### 9A.7 File dan rancangan perubahan (Before/After)
+
+#### `lib/db-pg.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+CREATE TABLE IF NOT EXISTS content_automation_notifications (...);
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+ALTER TABLE content_automation_schedules ADD COLUMN IF NOT EXISTS max_catch_up_runs INTEGER DEFAULT 3;
+ALTER TABLE content_automation_runs ADD COLUMN IF NOT EXISTS next_attempt_at TIMESTAMPTZ;
+CREATE TABLE IF NOT EXISTS content_automation_notification_preferences (...);
+CREATE TABLE IF NOT EXISTS content_automation_notification_outbox (...);
+```
+
+#### `lib/content-automation-contract.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+missed_run_policy: 'skip',
+grace_minutes: Math.min(1440, Math.max(1, Number(merged.grace_minutes || 60)))
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+missed_run_policy: normalizeMissedRunPolicy(merged.missed_run_policy),
+grace_minutes: clamp(merged.grace_minutes, 1, 1440),
+max_catch_up_runs: clamp(merged.max_catch_up_runs, 1, 10),
+retry_policy: normalizeRetryPolicy(merged.retry_policy)
+```
+
+#### `lib/content-automation-schedule.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+export function calculateNextRun({ frequency, config, timezone, after = new Date() }) { ... }
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export function calculateOccurrences({ frequency, config, timezone, from, to, limit }) { ... }
+export function calculateNextRun(args) {
+  return calculateOccurrences({ ...args, limit: 1 })[0];
+}
+```
+
+#### `lib/content-automation-missed-runs.js` (baru)
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Belum ada; worker selalu mengambil satu next_run_at yang terlambat.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export function resolveMissedRuns({ occurrences, policy, graceMinutes, maxCatchUpRuns, now }) {
+  return { runnableSlots, skippedSlots, nextRunAt };
+}
+```
+
+#### `lib/content-automation-retry.js` (baru)
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Retry hanya tersedia manual melalui endpoint run.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export function classifyAutomationError(error) { ... }
+export function calculateBackoff({ attempt, baseSeconds, maxSeconds, random }) { ... }
+export function shouldRetry({ failureClass, attempt, maxAttempts }) { ... }
+```
+
+#### `lib/content-automation-repository.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+SELECT * FROM content_automation_schedules
+WHERE status='active' AND next_run_at<=CURRENT_TIMESTAMP
+ORDER BY next_run_at FOR UPDATE SKIP LOCKED LIMIT 1
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function claimDueAutomation(workerId, now) { /* resolve policy atomically */ }
+export async function claimRetryableRun(workerId, now) { /* status=retry_wait */ }
+export async function recordSkippedSlots(schedule, slots, reason) { ... }
+export async function recordRunOutcome(run, outcome) { /* counters + auto-pause */ }
+```
+
+#### `lib/content-automation-worker.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+catch(error) {
+  await updateRun(run.id,{status:'failed', ...});
+} finally {
+  await advanceSchedule(schedule, calculateNextRun(...));
+}
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+catch (error) {
+  const decision = decideRetry(error, run, schedule.retry_policy_json);
+  await recordRunOutcome(run, decision);
+}
+// Schedule advancement is committed by the missed-run resolver, not blindly in finally.
+```
+
+#### `lib/notification-outbox-repository.js` (baru)
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Hanya ada notifikasi internal content_automation_notifications.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function enqueueNotification(event) { ... }
+export async function claimNotification(workerId) { /* FOR UPDATE SKIP LOCKED */ }
+export async function markNotificationSent(id, providerMessageId) { ... }
+export async function rescheduleNotification(id, retryAt, error) { ... }
+export async function deadLetterNotification(id, error) { ... }
+```
+
+#### `lib/notification-providers/telegram.js` (baru)
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Provider eksternal belum ada.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function sendTelegramNotification({ botToken, chatId, message, actionUrl }) {
+  // Timeout, response classification, no secret logging.
+}
+```
+
+#### `lib/content-automation-notification-worker.js` (baru)
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Pengiriman eksternal belum memiliki worker.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function runNotificationTick() { /* claim -> adapter -> sent/retry/dead */ }
+export function startContentAutomationNotificationWorker() { ... }
+export function getNotificationRuntime() { ... }
+```
+
+#### `instrumentation.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+startContentAutomationWorker();
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+startContentAutomationWorker();
+if (process.env.ENABLE_CONTENT_AUTOMATION_NOTIFICATIONS !== 'false') {
+  startContentAutomationNotificationWorker();
+}
+```
+
+#### `app/api/v2/content-automations/calendar/route.js` (baru)
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Belum ada endpoint calendar.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function GET(request) {
+  // Validate auth, timezone, from/to <= 62 days; return virtual occurrences + actual runs.
+}
+```
+
+#### `app/api/v2/content-automations/notification-settings/route.js` (baru)
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Belum ada endpoint preference/provider.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function GET(request) { /* masked admin-safe settings */ }
+export async function PUT(request) { /* admin-only, tenant-scoped */ }
+```
+
+#### `app/api/v2/content-automations/notification-settings/test/route.js` (baru)
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Belum ada test notification.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function POST(request) {
+  // Admin-only; enqueue test event through the same outbox, never direct-send.
+}
+```
+
+#### `app/content-automations/page.js`
+
+**Code Sebelum (Current/Before)**
+
+```jsx
+<section className="card"><h3>Schedules</h3>...</section>
+<section className="card"><h3>Run History</h3>...</section>
+```
+
+**Code Sesudah (Proposed/After)**
+
+```jsx
+<ViewToggle value={view} options={['list', 'calendar']} />
+{view === 'calendar' ? <AutomationCalendar events={events} /> : <AutomationList />}
+<NotificationSettings adminOnly maskedCredentials />
+<RunHealthSummary />
+```
+
+#### `app/api/v2/system-health/route.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+contentAutomation: getContentAutomationRuntime()
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+contentAutomation: await getContentAutomationHealth(),
+notificationWorker: await getNotificationHealth()
+// due count, retry_wait, dead_letter, last tick/error, auto-paused schedules
+```
+
+#### `.env.staging.local.example`
+
+**Code Sebelum (Current/Before)**
+
+```dotenv
+ENABLE_CONTENT_AUTOMATION_WORKER=true
+```
+
+**Code Sesudah (Proposed/After)**
+
+```dotenv
+ENABLE_CONTENT_AUTOMATION_WORKER=true
+ENABLE_CONTENT_AUTOMATION_NOTIFICATIONS=true
+CONTENT_AUTOMATION_INTERVAL_MS=15000
+CONTENT_AUTOMATION_NOTIFICATION_INTERVAL_MS=10000
+MAKNA_PUBLIC_BASE_URL=http://100.117.59.92:5020
+```
+
+#### `scripts/test-content-automation.mjs`
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Fase 1: contract, schedule calculation, CRUD/claim, manual retry.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+// Tambah unit test policy skip/run_latest/catch_up, DST, error classification,
+// deterministic backoff, max attempts, auto-pause, and occurrence expansion.
+```
+
+#### `scripts/test-content-automation-phase2.mjs` (baru)
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Belum ada integration test Fase 2.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+// PostgreSQL integration: concurrent claims, downtime simulation, outbox dedupe,
+// quiet hours, dead-letter, tenant isolation, calendar overlay, restart recovery.
+```
+
+#### `package.json`
+
+**Code Sebelum (Current/Before)**
+
+```json
+"test:content-automation": "node scripts/test-content-automation.mjs"
+```
+
+**Code Sesudah (Proposed/After)**
+
+```json
+"test:content-automation": "node scripts/test-content-automation.mjs",
+"test:content-automation:phase2": "node scripts/test-content-automation-phase2.mjs"
+```
+
+### 9A.8 API contract ringkas
+
+```text
+GET  /api/v2/content-automations/calendar?from=&to=&timezone=&schedule_id=&status=
+GET  /api/v2/content-automations/notification-settings
+PUT  /api/v2/content-automations/notification-settings
+POST /api/v2/content-automations/notification-settings/test
+```
+
+Response calendar membedakan `source: schedule | run`, membawa `scheduled_for`, `status`, `schedule_id`, `brand_account`, dan action URL yang sudah tenant-scoped. Endpoint calendar dan settings tidak pernah mengembalikan operator request lengkap atau credential.
+
+### 9A.9 Acceptance criteria
+
+- Downtime 24 jam dengan policy `skip`, `run_latest`, dan `catch_up` menghasilkan outcome yang sesuai tanpa campaign duplikat.
+- Dua worker bersamaan tidak mengeksekusi slot maupun outbox item yang sama.
+- Error transient mengikuti backoff dan berhenti pada max attempt; error auth/validation tidak diulang tanpa guna.
+- Kegagalan Telegram tidak mengubah status content run.
+- Event yang sama maksimal terkirim satu kali secara logis; provider timeout ambigu tercatat untuk audit.
+- Quiet hours memakai timezone schedule/tenant dan menggeser pengiriman tanpa menghilangkan pesan.
+- Calendar menampilkan occurrence virtual serta run aktual secara konsisten pada rentang DST dan maksimal 62 hari.
+- Hanya Admin dapat mengubah/test credential; token tidak muncul di response, UI, maupun log.
+- Auto-pause menghasilkan audit event, notifikasi internal, dan notifikasi eksternal.
+- Worker restart pada Windows melanjutkan `retry_wait`/outbox tanpa reset manual.
+
+### 9A.10 Execution Task List Fase 2
+
+#### Fase 2A — Reliability Core
+
+- [ ] Tambahkan schema additive untuk retry, missed run, counters, dan indexes.
+- [ ] Perluas contract schedule untuk `skip`, `run_latest`, `catch_up`, grace, limit, dan retry policy.
+- [ ] Implementasikan occurrence expansion dan resolver missed-run yang timezone-safe.
+- [ ] Refactor atomic claim agar schedule advancement tidak lagi dilakukan membabi buta di `finally`.
+- [ ] Implementasikan klasifikasi error, exponential backoff, retry claim, dan max attempts.
+- [ ] Implementasikan consecutive failure counter dan auto-pause threshold.
+- [ ] Tambahkan unit/integration test Fase 2A dan rilis patch terpisah.
+
+#### Fase 2B — External Notification
+
+- [ ] Tambahkan preference dan notification outbox tenant-scoped.
+- [ ] Implementasikan outbox claim, dedupe, quiet hours, retry, dan dead-letter.
+- [ ] Implementasikan adapter Telegram tanpa mencatat token ke log.
+- [ ] Tambahkan API Admin untuk masked settings dan test notification via outbox.
+- [ ] Hubungkan event awaiting approval, failed, skipped summary, completed opsional, dan auto-pause.
+- [ ] Tambahkan runtime health notification worker dan boot gate.
+- [ ] Uji provider fake, timeout ambigu, 429/5xx, 401, tenant isolation, lalu rilis patch.
+
+#### Fase 2C — Calendar dan Run Health
+
+- [ ] Tambahkan calendar query service serta endpoint rentang maksimal 62 hari.
+- [ ] Implementasikan month/week grid tanpa dependency calendar baru.
+- [ ] Tambahkan filter schedule, brand, status, timezone, dan detail event.
+- [ ] Tambahkan run-health cards untuk due, retry wait, failed, dead-letter, dan auto-paused.
+- [ ] Uji responsive layout, akses role, timezone/DST, dan rilis patch.
+
+#### Fase 2D — Windows Pilot
+
+- [ ] Pastikan port staging `5020` listen dan health endpoint dapat diakses dari node Windows.
+- [ ] Konfigurasikan base URL dan worker flags tanpa menaruh bot token di file repository.
+- [ ] Jalankan simulasi service mati, missed run, restart, retry, dan outbox recovery.
+- [ ] Jalankan pilot satu schedule Nutribake dalam mode `run_latest` dan approval storyboard.
+- [ ] Observasi minimal dua occurrence tanpa duplikasi atau produksi sebelum approval.
+- [ ] Dokumentasikan rollback flags, lakukan release final Fase 2, dan verifikasi main/tag remote.
+
+### 9A.11 Rollout dan rollback
+
+Urutan rollout: migrasi additive dengan kedua worker off, aktifkan Fase 2A untuk satu schedule, aktifkan Telegram test outbox, aktifkan calendar read-only, kemudian jalankan simulasi downtime. Rollback dilakukan dengan:
+
+```dotenv
+ENABLE_CONTENT_AUTOMATION_NOTIFICATIONS=false
+ENABLE_CONTENT_AUTOMATION_WORKER=false
+```
+
+Menonaktifkan notification worker tidak menghapus outbox. Menonaktifkan content automation worker tidak membatalkan operator job yang sudah dibuat. Setelah perbaikan, worker dapat diaktifkan kembali dan melanjutkan item `retry_wait` yang belum melewati batas attempt.
 
 ## 10. Patch Fase 1.1 — Directive, Preset Manager, dan UI Automation
 

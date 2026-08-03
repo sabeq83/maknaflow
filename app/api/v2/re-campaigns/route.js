@@ -82,6 +82,8 @@ export async function POST(request) {
         enable_audio_segment: Number(formData.get('enable_audio_segment') || 0),
         target_demographic: formData.get('target_demographic') || null,
         target_demographic_custom: formData.get('target_demographic_custom') || null,
+        ai_directive: formData.get('ai_directive') || null,
+        mandatory_outro_line: formData.get('mandatory_outro_line') || null,
       };
 
       const urlsRaw = formData.get('urls');
@@ -136,6 +138,8 @@ export async function POST(request) {
       parsedBody.enable_vo_audit = parsedBody.enable_vo_audit !== undefined ? Number(parsedBody.enable_vo_audit) : 0;
       parsedBody.enable_audio_segment = parsedBody.enable_audio_segment !== undefined ? Number(parsedBody.enable_audio_segment) : 0;
       parsedBody.narrative_mode = parsedBody.narrative_mode || 'Storytelling';
+      parsedBody.ai_directive = parsedBody.ai_directive || null;
+      parsedBody.mandatory_outro_line = parsedBody.mandatory_outro_line || null;
     }
 
     const {
@@ -187,7 +191,9 @@ export async function POST(request) {
       enable_vo_audit,
       enable_audio_segment,
       target_demographic,
-      target_demographic_custom
+      target_demographic_custom,
+      ai_directive,
+      mandatory_outro_line
     } = parsedBody;
 
     if (!campaign_name?.trim()) {
@@ -246,10 +252,12 @@ export async function POST(request) {
       fb_draft_mode: fb_draft_mode || 'auto',
       target_spreadsheet_id: extractSpreadsheetId(target_spreadsheet_id),
       sfx_setting: sfx_setting || 'without_sfx',
-      enable_vo_audit: enable_vo_audit || 0,
-      enable_audio_segment: enable_audio_segment || 0,
+      enable_vo_audit: enable_vo_audit !== undefined ? Number(enable_vo_audit) : 0,
+      enable_audio_segment: enable_audio_segment !== undefined ? Number(enable_audio_segment) : 0,
       target_demographic: target_demographic || null,
-      target_demographic_custom: target_demographic_custom || null
+      target_demographic_custom: target_demographic_custom || null,
+      ai_directive: ai_directive || null,
+      mandatory_outro_line: mandatory_outro_line || null
     });
     await addReCampaignItems(id, urls);
 
