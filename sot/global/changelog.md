@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.2.140 — Deploy Node 2 WSL Staging Infrastructure (03/08/2026)
+- Tambah script setup-node2-wsl.sh untuk bootstrap WSL 2 Ubuntu di server Windows
+- Tambah script deploy-node2-wsl.js untuk single-pass deployment dari Mac ke Node 2 via SSH
+- Tambah ecosystem.staging.config.cjs untuk PM2 process management staging
+- Update package.json dengan script deploy:node2-wsl dan setup:node2-wsl
+
 ## V2.2.139 — AI Directive Guardrail dan Automation Preset Manager (02/08/2026)
 - Pisahkan AI Directive dari Mandatory Outro Line dan cegah kebocoran voiceover
 - Reparasi storyboard pilot tanpa menjalankan produksi

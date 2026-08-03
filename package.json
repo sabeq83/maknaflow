@@ -1,6 +1,6 @@
 {
   "name": "maknaflow",
-  "version": "2.2.139",
+  "version": "2.2.140",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack -p 3005",
@@ -9,6 +9,8 @@
     "deploy:node1": "node scripts/deploy-production.js",
     "deploy:production": "node scripts/deploy-production.js",
     "deploy:staging": "node scripts/deploy-staging.js",
+    "deploy:node2-wsl": "node scripts/deploy-node2-wsl.js",
+    "setup:node2-wsl": "ssh -p 2222 vibe-server 'wsl -- bash -lc \"cd ~ && bash <(cat) && echo DONE\"' < scripts/setup-node2-wsl.sh",
     "build": "next build --webpack",
     "start": "next start",
     "staging:setup": "node scripts/local-staging/setup.js",
