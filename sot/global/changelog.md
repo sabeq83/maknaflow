@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.143 — Fix: bypass env validation for STAGING_WEB_ORIGIN (03/08/2026)
+- Bypass STAGING_WEB_ORIGIN dari deteksi forbiddenPattern Tailscale IP agar build di remote server staging berhasil
+
 ## V2.2.142 — Sematkan AI Directive dan Outro Line di OPC dan RE (03/08/2026)
 - Menambahkan input form AI Directive dan Mandatory Outro Line di UI OPC dan RE
 - Update Postgres database migration untuk RE campaigns

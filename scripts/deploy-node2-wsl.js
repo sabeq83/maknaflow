@@ -10,7 +10,7 @@
  * ATURAN: Single-pass deployment (1x SSH call, no polling loop).
  */
 
-import { execSync } from 'child_process';
+import { execSync, spawnSync } from 'child_process';
 
 // ── Konfigurasi ────────────────────────────────────────────────────────────
 const SSH_HOST = 'vibe-server';          // ssh alias dari ~/.ssh/config
@@ -35,23 +35,16 @@ function log(msg) {
  * Bungkus bash script untuk dieksekusi di WSL 2 via SSH ke Windows.
  * Perintah Windows: ssh vibe-server -p 2222 "wsl -- bash -lc '...'"
  */
-function buildSshCommand(bashScript) {
-  // Escape single quotes dalam bash script untuk shell Windows
-  const escapedScript = bashScript.replace(/'/g, "'\\''");
-  const wslCmd = WSL_DISTRO
-    ? `wsl -d ${WSL_DISTRO} -- bash -lc '${escapedScript}'`
-    : `wsl -- bash -lc '${escapedScript}'`;
-
+function buildSshArgs() {
   return [
-    'ssh',
-    `-p ${SSH_PORT}`,
-    '-o ServerAliveInterval=30',
-    '-o ServerAliveCountMax=20',
-    '-o ConnectTimeout=30',
-    '-o StrictHostKeyChecking=accept-new',
+    '-p', String(SSH_PORT),
+    '-o', 'ServerAliveInterval=30',
+    '-o', 'ServerAliveCountMax=20',
+    '-o', 'ConnectTimeout=30',
+    '-o', 'StrictHostKeyChecking=accept-new',
     SSH_HOST,
-    `"${wslCmd}"`,
-  ].join(' ');
+    `wsl -u ${LINUX_USER} -- bash -l`,
+  ];
 }
 
 // ── Main Deploy ────────────────────────────────────────────────────────────
@@ -128,8 +121,8 @@ echo ""
 echo "🩺 Verifying services..."
 WEB_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 http://127.0.0.1:${WEB_PORT} 2>/dev/null || echo "TIMEOUT")
 API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 http://127.0.0.1:${API_PORT}/health 2>/dev/null || echo "TIMEOUT")
-echo "  Web UI  (${WEB_PORT}) → HTTP ${WEB_STATUS}"
-echo "  API     (${API_PORT}) → HTTP ${API_STATUS}"
+echo "  Web UI  (${WEB_PORT}) → HTTP \${WEB_STATUS}"
+echo "  API     (${API_PORT}) → HTTP \${API_STATUS}"
 
 echo ""
 echo "================================================================"
@@ -150,8 +143,15 @@ echo "================================================================"
   console.log('');
 
   try {
-    const cmd = buildSshCommand(remoteScript);
-    execSync(cmd, { stdio: 'inherit', timeout: SSH_TIMEOUT_MS });
+    const args = buildSshArgs();
+    const result = spawnSync('ssh', args, { 
+      input: remoteScript,
+      stdio: ['pipe', 'inherit', 'inherit'],
+      timeout: SSH_TIMEOUT_MS 
+    });
+    if (result.status !== 0) {
+      throw new Error(`Process exited with code ${result.status}`);
+    }
 
     console.log('');
     log('🎉 Deploy Node 2 WSL berhasil!');
