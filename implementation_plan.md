@@ -1154,12 +1154,12 @@ Response calendar membedakan `source: schedule | run`, membawa `scheduled_for`, 
 
 #### Fase 2D — Windows Pilot
 
-- [ ] Pastikan port staging `5020` listen dan health endpoint dapat diakses dari node Windows.
-- [ ] Konfigurasikan base URL dan worker flags tanpa menaruh bot token di file repository.
+- [x] Pastikan port staging `5020` listen dan health endpoint dapat diakses dari node Windows.
+- [x] Konfigurasikan base URL dan worker flags tanpa menaruh bot token di file repository.
 - [x] Jalankan simulasi service mati, missed run, restart, retry, dan outbox recovery.
-- [ ] Jalankan pilot satu schedule Nutribake dalam mode `run_latest` dan approval storyboard.
+- [x] Jalankan pilot satu schedule Nutribake dalam mode `run_latest` dan approval storyboard.
 - [ ] Observasi minimal dua occurrence tanpa duplikasi atau produksi sebelum approval.
-- [ ] Dokumentasikan rollback flags, lakukan release final Fase 2, dan verifikasi main/tag remote.
+- [x] Dokumentasikan rollback flags, lakukan release final Fase 2, dan verifikasi main/tag remote.
 
 ### 9A.11 Rollout dan rollback
 
