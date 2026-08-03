@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.148 — Calendar dan Run Health Automation (03/08/2026)
+- Tambah calendar month/week dengan occurrence virtual dan overlay run aktual
+- Tambah filter schedule brand status timezone dan detail event
+- Tambah run-health tenant-scoped serta test integrasi Fase 2C
+
 ## V2.2.147 — Security and regression hardening (03/08/2026)
 - Lindungi tenant Settings dan masked credentials
 - Pisahkan AI directive dari mandatory outro secara konsisten

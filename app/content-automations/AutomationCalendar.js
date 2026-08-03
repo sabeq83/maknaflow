@@ -1,0 +1,22 @@
+'use client';
+import { useMemo,useState } from 'react';
+
+const COLORS={scheduled:'#64748b',queued:'#0ea5e9',dispatching:'#8b5cf6',retry_wait:'#f59e0b',job_created:'#3b82f6',awaiting_approval:'#eab308',producing:'#a855f7',completed:'#22c55e',failed:'#ef4444',skipped:'#78716c'};
+const WEEKDAYS=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+const dateKey=(value,timezone)=>new Intl.DateTimeFormat('en-CA',{timeZone:timezone,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(value));
+const localTime=(value,timezone)=>new Intl.DateTimeFormat('id-ID',{timeZone:timezone,hour:'2-digit',minute:'2-digit'}).format(new Date(value));
+
+export function RunHealthCards({health={}}){
+  const cards=[['Due',health.due||0,'Jadwal jatuh tempo'],['Retry wait',health.retry_wait||0,'Menunggu retry'],['Failed',health.failed||0,'30 hari terakhir'],['Dead letter',health.dead_letter||0,'Notifikasi'],['Auto-paused',health.auto_paused||0,'Batas gagal tercapai']];
+  return <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(145px,1fr))',gap:10}}>{cards.map(([label,value,note])=><div className="card" style={{padding:14}} key={label}><div style={{fontSize:12,color:'var(--text-muted)'}}>{label}</div><div style={{fontSize:25,fontWeight:700}}>{value}</div><div style={{fontSize:11,color:'var(--text-muted)'}}>{note}</div></div>)}</div>;
+}
+
+export default function AutomationCalendar({events=[],timezone,mode,anchor}){
+  const [selected,setSelected]=useState(null);
+  const days=useMemo(()=>{const base=new Date(`${anchor}T12:00:00Z`),result=[];if(mode==='week')base.setUTCDate(base.getUTCDate()-base.getUTCDay());else base.setUTCDate(1-base.getUTCDay());for(let i=0;i<(mode==='week'?7:42);i++){const day=new Date(base);day.setUTCDate(base.getUTCDate()+i);result.push(day);}return result;},[anchor,mode]);
+  const grouped=useMemo(()=>events.reduce((map,event)=>{const key=dateKey(event.scheduled_for,timezone);(map[key]||=[]).push(event);return map;},{}),[events,timezone]);
+  return <><div style={{overflowX:'auto'}}><div style={{minWidth:mode==='week'?760:820,display:'grid',gridTemplateColumns:'repeat(7,minmax(0,1fr))',borderTop:'1px solid var(--border-color)',borderLeft:'1px solid var(--border-color)'}}>
+    {WEEKDAYS.map(day=><div key={day} style={{padding:8,textAlign:'center',fontSize:12,fontWeight:700,borderRight:'1px solid var(--border-color)',borderBottom:'1px solid var(--border-color)'}}>{day}</div>)}
+    {days.map(day=>{const key=day.toISOString().slice(0,10),items=grouped[key]||[],outside=mode==='month'&&day.getUTCMonth()!==new Date(`${anchor}T12:00:00Z`).getUTCMonth(),max=mode==='week'?20:3;return <div key={key} style={{minHeight:mode==='week'?330:108,padding:7,opacity:outside ? .55 : 1,borderRight:'1px solid var(--border-color)',borderBottom:'1px solid var(--border-color)'}}><div style={{fontSize:12,fontWeight:700,marginBottom:5}}>{day.getUTCDate()}</div>{items.slice(0,max).map(event=><button key={event.id} type="button" onClick={()=>setSelected(event)} title={`${event.schedule_name} · ${event.status}`} style={{display:'block',width:'100%',border:0,borderLeft:`4px solid ${COLORS[event.status]||'#64748b'}`,borderRadius:4,padding:'4px 5px',marginBottom:4,textAlign:'left',fontSize:11,cursor:'pointer',background:'rgba(100,116,139,.12)',color:'inherit',overflow:'hidden',whiteSpace:'nowrap',textOverflow:'ellipsis'}}>{localTime(event.scheduled_for,timezone)} {event.schedule_name}</button>)}{items.length>max&&<div style={{fontSize:10,color:'var(--text-muted)'}}>+{items.length-max} event</div>}</div>})}
+  </div></div>{selected&&<aside className="card" style={{padding:16,marginTop:12,borderLeft:`4px solid ${COLORS[selected.status]||'#64748b'}`}}><div style={{display:'flex',justifyContent:'space-between',gap:10}}><div><b>{selected.schedule_name}</b><div style={{fontSize:12,color:'var(--text-muted)'}}>{selected.status} · {selected.source==='run'?'actual run':'future occurrence'}</div></div><button className="btn btn-secondary btn-sm" onClick={()=>setSelected(null)}>Close</button></div><div style={{marginTop:10,fontSize:13,lineHeight:1.6}}>{new Date(selected.scheduled_for).toLocaleString('id-ID',{timeZone:timezone})} ({timezone})<br/>Brand: {selected.brand_account||'—'}{selected.attempt_count!=null&&<><br/>Attempt: {selected.attempt_count}</>}{(selected.error_message||selected.skip_reason)&&<><br/>Alasan: {selected.error_message||selected.skip_reason}</>}{selected.action_url&&<><br/><a href={selected.action_url}>Open Storyboard</a></>}</div></aside>}</>;
+}

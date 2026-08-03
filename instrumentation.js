@@ -84,5 +84,16 @@ export async function register() {
     } else {
       console.log('ℹ️  Content Automation Worker disabled by environment.');
     }
+
+    if (backgroundServicesEnabled && process.env.ENABLE_CONTENT_AUTOMATION_NOTIFICATIONS !== 'false') {
+      try {
+        const { startContentAutomationNotificationWorker } = await import('./lib/content-automation-notification-worker.js');
+        startContentAutomationNotificationWorker();
+      } catch (err) {
+        console.error('❌ Failed to start Content Automation Notification Worker:', err.message);
+      }
+    } else {
+      console.log('ℹ️  Content Automation Notification Worker disabled by environment.');
+    }
   }
 }

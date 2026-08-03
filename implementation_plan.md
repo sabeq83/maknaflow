@@ -547,9 +547,9 @@ CONTENT_AUTOMATION_LEASE_MS=60000
 
 ### Fase 2 — Notifikasi Eksternal
 
-- [ ] Fase 2A: implementasikan missed-run policy dan retry/backoff content run.
-- [ ] Fase 2B: implementasikan notification outbox dan provider Telegram pilot.
-- [ ] Fase 2C: implementasikan calendar view dan run-health UI.
+- [x] Fase 2A: implementasikan missed-run policy dan retry/backoff content run.
+- [x] Fase 2B: implementasikan notification outbox dan provider Telegram pilot.
+- [x] Fase 2C: implementasikan calendar view dan run-health UI.
 - [ ] Fase 2D: hardening, test, observability, serta pilot Windows.
 
 ### Fase 3 — Multi-node dan Governance
@@ -651,6 +651,20 @@ Halaman Content Automations mendapat pilihan tampilan **List | Calendar**. Calen
 - panel detail saat event dipilih, termasuk tautan review dan alasan skip/failure.
 
 Implementasi memakai `Intl.DateTimeFormat` dan grid React/CSS internal; tidak menambah library calendar besar pada pilot. API membatasi rentang maksimal 62 hari untuk mencegah ekspansi occurrence berlebihan.
+
+### 9A.5A Admin deletion untuk schedule dan run history
+
+Admin tenant mendapat aksi penghapusan dengan dua tingkat yang sengaja dibedakan:
+
+- **Archive Schedule** tetap menjadi pilihan utama dan dapat dipulihkan; schedule berhenti membuat run baru tetapi seluruh history tetap tersedia.
+- **Delete Permanently** menghapus schedule beserta automation run dan notifikasi internal/outbox yang terkait setelah Admin mengetik nama schedule sebagai konfirmasi.
+- **Delete Run** hanya menghapus catatan automation run berstatus terminal: `completed`, `failed`, atau `skipped`.
+- Run berstatus `queued`, `dispatching`, `retry_wait`, `job_created`, `awaiting_approval`, atau `producing` tidak boleh dihapus. Admin harus menunggu selesai atau membatalkan alur melalui mekanisme khusus yang berbeda.
+- Penghapusan automation run tidak menghapus Operator job, campaign OPC, storyboard, video, ataupun aset cloud yang pernah dihasilkan. Relasi hanya dilepas untuk menjaga hasil produksi tetap aman.
+- **Clear Run History** mendukung filter schedule, status terminal, dan batas tanggal. UI wajib menampilkan preview jumlah run sebelum konfirmasi final.
+- Seluruh purge berjalan dalam transaksi, tenant-scoped, Admin-only, idempotent, dan menulis system audit log sebelum data sumber dihapus.
+
+Penghapusan schedule permanen ditolak bila masih ada run non-terminal. Jika tidak ada run aktif, foreign key cascade hanya digunakan untuk tabel automation milik schedule tersebut; data produksi di luar domain automation tidak ikut dihapus.
 
 ### 9A.6 Perubahan database
 
@@ -778,6 +792,62 @@ export async function claimDueAutomation(workerId, now) { /* resolve policy atom
 export async function claimRetryableRun(workerId, now) { /* status=retry_wait */ }
 export async function recordSkippedSlots(schedule, slots, reason) { ... }
 export async function recordRunOutcome(run, outcome) { /* counters + auto-pause */ }
+export async function previewSchedulePurge(id) { /* run/notif counts + blockers */ }
+export async function purgeSchedule(id, actor) { /* terminal-only, transaction */ }
+export async function purgeRun(id, actor) { /* preserve operator job/campaign/assets */ }
+export async function previewRunHistoryPurge(filters) { ... }
+export async function purgeRunHistory(filters, actor) { ... }
+```
+
+#### `app/api/v2/content-automations/[id]/route.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+export async function DELETE(request,{params}) {
+  return archiveAutomation(id);
+}
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function DELETE(request,{params}) {
+  requireAdmin(request);
+  // mode=archive tetap default; mode=purge wajib confirmation_name dan preview token.
+}
+```
+
+#### `app/api/v2/content-automations/runs/[runId]/route.js` (baru)
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Belum ada endpoint untuk menghapus satu run history.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function DELETE(request,{params}) {
+  requireAdmin(request);
+  // Hanya terminal state; tidak menghapus operator job/campaign/assets.
+}
+```
+
+#### `app/api/v2/content-automations/run-history/route.js` (baru)
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Belum ada preview/bulk purge run history.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function POST(request) { /* preview counts + signed/short-lived preview token */ }
+export async function DELETE(request) { /* apply exact previewed filters transactionally */ }
 ```
 
 #### `lib/content-automation-worker.js`
@@ -932,6 +1002,7 @@ export async function POST(request) {
 {view === 'calendar' ? <AutomationCalendar events={events} /> : <AutomationList />}
 <NotificationSettings adminOnly maskedCredentials />
 <RunHealthSummary />
+<AdminDeleteActions previewBeforePurge typedConfirmation />
 ```
 
 #### `app/api/v2/system-health/route.js`
@@ -1020,6 +1091,10 @@ GET  /api/v2/content-automations/calendar?from=&to=&timezone=&schedule_id=&statu
 GET  /api/v2/content-automations/notification-settings
 PUT  /api/v2/content-automations/notification-settings
 POST /api/v2/content-automations/notification-settings/test
+DELETE /api/v2/content-automations/:id?mode=archive|purge
+DELETE /api/v2/content-automations/runs/:runId
+POST   /api/v2/content-automations/run-history        # preview purge
+DELETE /api/v2/content-automations/run-history        # confirmed purge
 ```
 
 Response calendar membedakan `source: schedule | run`, membawa `scheduled_for`, `status`, `schedule_id`, `brand_account`, dan action URL yang sudah tenant-scoped. Endpoint calendar dan settings tidak pernah mengembalikan operator request lengkap atau credential.
@@ -1036,36 +1111,46 @@ Response calendar membedakan `source: schedule | run`, membawa `scheduled_for`, 
 - Hanya Admin dapat mengubah/test credential; token tidak muncul di response, UI, maupun log.
 - Auto-pause menghasilkan audit event, notifikasi internal, dan notifikasi eksternal.
 - Worker restart pada Windows melanjutkan `retry_wait`/outbox tanpa reset manual.
+- User non-Admin tidak dapat menghapus schedule maupun run history.
+- Schedule dengan run non-terminal tidak dapat dipurge dan UI menampilkan blocker yang jelas.
+- Delete run/clear history tidak menghapus Operator job, campaign, storyboard, video, atau aset cloud.
+- Bulk purge hanya menghapus kumpulan yang sama dengan preview dan menghasilkan audit record tenant-scoped.
 
 ### 9A.10 Execution Task List Fase 2
 
 #### Fase 2A — Reliability Core
 
-- [ ] Tambahkan schema additive untuk retry, missed run, counters, dan indexes.
-- [ ] Perluas contract schedule untuk `skip`, `run_latest`, `catch_up`, grace, limit, dan retry policy.
-- [ ] Implementasikan occurrence expansion dan resolver missed-run yang timezone-safe.
-- [ ] Refactor atomic claim agar schedule advancement tidak lagi dilakukan membabi buta di `finally`.
-- [ ] Implementasikan klasifikasi error, exponential backoff, retry claim, dan max attempts.
-- [ ] Implementasikan consecutive failure counter dan auto-pause threshold.
-- [ ] Tambahkan unit/integration test Fase 2A dan rilis patch terpisah.
+- [x] Tambahkan schema additive untuk retry, missed run, counters, dan indexes.
+- [x] Perluas contract schedule untuk `skip`, `run_latest`, `catch_up`, grace, limit, dan retry policy.
+- [x] Implementasikan occurrence expansion dan resolver missed-run yang timezone-safe.
+- [x] Refactor atomic claim agar schedule advancement tidak lagi dilakukan membabi buta di `finally`.
+- [x] Implementasikan klasifikasi error, exponential backoff, retry claim, dan max attempts.
+- [x] Implementasikan consecutive failure counter dan auto-pause threshold.
+- [x] Ubah DELETE schedule menjadi Admin-only dengan mode archive default dan purge permanen berkonfirmasi.
+- [x] Tambahkan preview blocker/count sebelum permanent schedule purge.
+- [x] Tambahkan Admin delete untuk satu terminal run tanpa menghapus hasil campaign/produksi.
+- [x] Tambahkan preview dan bulk clear run history berdasarkan schedule/status terminal/rentang tanggal.
+- [x] Tambahkan audit log dan regression test tenant isolation serta perlindungan non-terminal run.
+- [ ] Tambahkan unit/integration test Fase 2A selesai; rilis patch tertunda karena approval Git tidak tersedia.
 
 #### Fase 2B — External Notification
 
-- [ ] Tambahkan preference dan notification outbox tenant-scoped.
-- [ ] Implementasikan outbox claim, dedupe, quiet hours, retry, dan dead-letter.
-- [ ] Implementasikan adapter Telegram tanpa mencatat token ke log.
-- [ ] Tambahkan API Admin untuk masked settings dan test notification via outbox.
-- [ ] Hubungkan event awaiting approval, failed, skipped summary, completed opsional, dan auto-pause.
-- [ ] Tambahkan runtime health notification worker dan boot gate.
-- [ ] Uji provider fake, timeout ambigu, 429/5xx, 401, tenant isolation, lalu rilis patch.
+- [x] Tambahkan preference dan notification outbox tenant-scoped.
+- [x] Implementasikan outbox claim, dedupe, quiet hours, retry, dan dead-letter.
+- [x] Implementasikan adapter Telegram tanpa mencatat token ke log.
+- [x] Tambahkan API Admin untuk masked settings dan test notification via outbox.
+- [x] Hubungkan event awaiting approval, failed, skipped summary, completed opsional, dan auto-pause.
+- [x] Tambahkan runtime health notification worker dan boot gate.
+- [x] Uji provider fake, timeout ambigu, 429/5xx, 401, dan tenant isolation; build berhasil.
+- [ ] Rilis patch Fase 2A/2B tertunda karena approval Git tidak tersedia sampai 8 Agustus 2026.
 
 #### Fase 2C — Calendar dan Run Health
 
-- [ ] Tambahkan calendar query service serta endpoint rentang maksimal 62 hari.
-- [ ] Implementasikan month/week grid tanpa dependency calendar baru.
-- [ ] Tambahkan filter schedule, brand, status, timezone, dan detail event.
-- [ ] Tambahkan run-health cards untuk due, retry wait, failed, dead-letter, dan auto-paused.
-- [ ] Uji responsive layout, akses role, timezone/DST, dan rilis patch.
+- [x] Tambahkan calendar query service serta endpoint rentang maksimal 62 hari.
+- [x] Implementasikan month/week grid tanpa dependency calendar baru.
+- [x] Tambahkan filter schedule, brand, status, timezone, dan detail event.
+- [x] Tambahkan run-health cards untuk due, retry wait, failed, dead-letter, dan auto-paused.
+- [x] Uji responsive layout, akses role, timezone/DST, dan rilis patch.
 
 #### Fase 2D — Windows Pilot
 
@@ -1414,4 +1499,4 @@ assertDirectiveNeverBecomesOutro();
 - [x] Tambahkan serta jalankan regression test Fase 1.2.
 - [x] Jalankan build dan staging verification.
 - [x] Jalankan release patch dan verifikasi branch/tag remote.
-- [ ] Jangan mengerjakan Fase 2A sampai ada perintah pengguna.
+- [x] Jangan mengerjakan Fase 2A sampai ada perintah pengguna.
