@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.173 — Fix RE campaign sync endpoint and add filter in contentflow-ingest (04/08/2026)
+- Implementasi POST /api/v2/re-campaigns/[id]/sync-contentflow API route
+- Filter re_campaign_items scan by targetCampaignId
+
 ## V2.2.172 — Add stable ORDER BY sorting to ContentFlow ingest queries (04/08/2026)
 - Tambahkan ORDER BY pci.id ASC pada pemindaian OPC di contentflow-ingest
 - Tambahkan ORDER BY sci.sequence ASC, sci.id ASC pada Strategic
