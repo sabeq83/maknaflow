@@ -4,14 +4,21 @@ async function main() {
   await loadDbCaches();
   const db = getDb();
   try {
-    console.log('=== Checking campaign items account_name ===');
-    const rows = await db.prepare(`
-      SELECT id, account_name, video_id, pipeline_status
-      FROM content_flow_items
-      WHERE source_campaign_id = 'opc_260804_opb4zk'
-      -- tenant_id
+    console.log('=== Schema of content_planners ===');
+    const colsPlanners = await db.prepare(`
+      SELECT column_name, data_type
+      FROM information_schema.columns
+      WHERE table_name = 'content_planners'
     `).all();
-    console.log(rows);
+    console.log(colsPlanners);
+
+    console.log('=== Schema of content_planner_rows ===');
+    const colsRows = await db.prepare(`
+      SELECT column_name, data_type
+      FROM information_schema.columns
+      WHERE table_name = 'content_planner_rows'
+    `).all();
+    console.log(colsRows);
   } catch (err) {
     console.error('Error:', err);
   }

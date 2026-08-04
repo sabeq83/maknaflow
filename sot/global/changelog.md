@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.174 — Fix pgQuery tenant parameter alignment when LIMIT exists (04/08/2026)
+- Hitung suffixPlaceholderCount untuk splice tenantId pada posisi yang tepat
+
 ## V2.2.173 — Fix RE campaign sync endpoint and add filter in contentflow-ingest (04/08/2026)
 - Implementasi POST /api/v2/re-campaigns/[id]/sync-contentflow API route
 - Filter re_campaign_items scan by targetCampaignId
