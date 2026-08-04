@@ -1178,7 +1178,7 @@ export default function PillarCampaignDetailPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {scenes.map((scene, index) => {
             const vo = voiceover.find(v => v.scene === scene.scene) || {};
-            const isBridge = campaign?.is_bridging_active && scene.scene === campaign.bridge_at_clip;
+            const isBridge = campaign?.visual_mode === 'hybrid_lock' && campaign?.is_bridging_active && scene.scene === campaign.bridge_at_clip;
 
             return (
               <div 
@@ -1256,7 +1256,7 @@ export default function PillarCampaignDetailPage() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {clipsList.map(cNum => {
-          const isBridge = campaign?.is_bridging_active && cNum === campaign.bridge_at_clip;
+          const isBridge = campaign?.visual_mode === 'hybrid_lock' && campaign?.is_bridging_active && cNum === campaign.bridge_at_clip;
           
           let displayPrompts = [];
           if (isHybrid) {
@@ -2223,7 +2223,7 @@ export default function PillarCampaignDetailPage() {
 
             {/* Creative Clip Plans list */}
             {plan.map((p, idx) => {
-              const isBridge = campaign?.is_bridging_active && Number(p.clip_index) === Number(campaign.bridge_at_clip);
+              const isBridge = campaign?.visual_mode === 'hybrid_lock' && campaign?.is_bridging_active && Number(p.clip_index) === Number(campaign.bridge_at_clip);
               const isExpanded = (activeClipIndex[item.id] !== undefined ? activeClipIndex[item.id] : 0) === idx;
 
               return (

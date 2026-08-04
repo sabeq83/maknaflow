@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.167 — Fix isBridge visual_mode check (04/08/2026)
+- Batasi status isBridge hanya pada visual_mode hybrid_lock di detail pilar
+
 ## V2.2.166 — Fix T2I conditional view on pure_t2v (04/08/2026)
 - Sembunyikan grid preview T2I pada kampanye mode pure_t2v
 - Kondisikan form input prompt T2I dan I2V sesuai dengan mode visual
