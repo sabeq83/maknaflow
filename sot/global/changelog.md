@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.184 — Fix RE campaigns T2V prompt structured layer formatting (04/08/2026)
+- Update buildReverseEngineeringPrompt and buildReverseEngineeringBridgePrompt to output structured, layered T2V prompts matching the OPC style
+
 ## V2.2.183 — Fix missing awaits on campaign query promises (04/08/2026)
 - Add missing awaits to getReCampaign, getPillarCampaign, getInstantCampaign, and getRecipeCampaignById inside scheduler-processors.js
 
