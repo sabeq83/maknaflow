@@ -402,7 +402,7 @@ Test tabel utama:
 - [x] Pastikan validasi execute berjalan sebelum status `generating`.
 - [x] Tambahkan instruksi distribusi pilar pada prompt Gemini.
 - [x] Jalankan test count, regression Brand Editorial, dan build.
-- [ ] Rilis patch dan sinkronkan `local-staging`, `main`, serta tag.
-- [ ] Deploy Node 2 dengan single-pass deployment.
+- [x] Rilis patch dan sinkronkan `local-staging`, `main`, serta tag.
+- [x] Deploy Node 2 dengan single-pass deployment.
 - [ ] Smoke test UI beberapa variasi jumlah pilar.
 - [ ] Jalankan satu planner kecil untuk verifikasi integrasi Gemini setelah persetujuan biaya eksekusi.
