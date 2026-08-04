@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.160 — Fix Settings API syntax wrapper (04/08/2026)
+- Perbaiki penutup bracket GET dan POST handler di app/api/settings
+
 ## V2.2.159 — Global Tenant Data Isolation (04/08/2026)
 - Implementasi withTenantContext wrapper global
 - Isolasi Settings API kredensial

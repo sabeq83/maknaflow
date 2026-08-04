@@ -78,7 +78,7 @@ export const GET = withTenantContext(async (request, user) => {
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: error.status || 500 });
   }
-}
+});
 
 export const POST = withTenantContext(async (request, user) => {
   try {
@@ -156,4 +156,4 @@ export const POST = withTenantContext(async (request, user) => {
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: error.status || 500 });
   }
-}
+});
