@@ -25,7 +25,7 @@ export default function ImportPlannerModal({
   const [brandProfiles, setBrandProfiles] = useState([]);
   const [selectedBrandId, setSelectedBrandId] = useState('');
   const [nextcloudParentFolder, setNextcloudParentFolder] = useState('/MAKNA_Assets');
-  const [customInstruction, setCustomInstruction] = useState('akhiran skrip/voiceover : produk ori ada di keranjang ya!');
+  const [customInstruction, setCustomInstruction] = useState('');
   const [aiDirective, setAiDirective] = useState('Konten edukasi brand; jangan mengarang atau membahas produk tertentu.');
   const [mandatoryOutroLine, setMandatoryOutroLine] = useState('jangan lupa follow dan komen mau ya!');
 
@@ -142,10 +142,10 @@ export default function ImportPlannerModal({
         setProductRefImage(p.product_ref_image || p.product_photo_url || '');
         if (p.planner_focus === 'brand_editorial') {
           setIsBridgingActive(false);
-          setCustomInstruction(p.brand_context || 'Konten editorial non-promosi; jangan mengarang produk.');
+          setCustomInstruction(p.brand_context || '');
         } else {
           setIsBridgingActive(true);
-          setCustomInstruction(p.custom_instruction || 'akhiran skrip/voiceover : produk ori ada di keranjang ya!');
+          setCustomInstruction(p.custom_instruction || '');
         }
         const instructions = resolvePlannerInstructions(p);
         setAiDirective(instructions.aiDirective || 'Konten edukasi brand; jangan mengarang atau membahas produk tertentu.');

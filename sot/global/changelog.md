@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.176 — Set ImportPlannerModal customInstruction to empty by default (04/08/2026)
+- Empty Custom Instruction (Instruksi Tambahan AI) by default on load and state
+
 ## V2.2.175 — Configure ImportPlannerModal defaults and fix brand profiles fetch (04/08/2026)
 - Set default ai_directive, mandatory_outro_line, nextcloud_parent_folder from profile
 - Default targetClipsCount to 3
