@@ -2016,14 +2016,14 @@ export default function RECampaignDetailPage() {
                       <div style={{ flex: '1 1 120px' }}>
                         <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                           <span>BGM Volume:</span>
-                          <span>{Math.round((campaign.ffmpeg_bgm_volume || 0.15) * 100)}%</span>
+                          <span>{Math.round((campaign.ffmpeg_bgm_volume !== undefined && campaign.ffmpeg_bgm_volume !== null ? campaign.ffmpeg_bgm_volume : 0.0) * 100)}%</span>
                         </label>
                         <input 
                           type="range" 
                           min="0.0" 
                           max="1.0" 
                           step="0.05" 
-                          value={campaign.ffmpeg_bgm_volume || 0.15} 
+                          value={campaign.ffmpeg_bgm_volume !== undefined && campaign.ffmpeg_bgm_volume !== null ? campaign.ffmpeg_bgm_volume : 0.0} 
                           onChange={(e) => updateCampaignSettings({ ffmpeg_bgm_volume: Number(e.target.value) })}
                           style={{ width: '100%', accentColor: 'var(--accent)' }} 
                         />
@@ -2648,13 +2648,13 @@ export default function RECampaignDetailPage() {
               enable_tts: campaign.enable_tts !== 0,
               enable_glabs: campaign.enable_glabs !== 0,
               enable_ffmpeg: campaign.enable_ffmpeg !== 0,
-              voice_provider: campaign.voice_provider || 'gemini',
+              voice_provider: campaign.voice_provider || 'minimax',
               voice_persona: campaign.voice_persona || 'Kore',
               voice_speed: campaign.voice_speed !== undefined ? Number(campaign.voice_speed) : 1.0,
               voice_volume: campaign.voice_volume !== undefined ? Number(campaign.voice_volume) : 1.0,
               ffmpeg_video_scale: campaign.ffmpeg_video_scale !== undefined ? Number(campaign.ffmpeg_video_scale) : 1.0,
               ffmpeg_sfx_volume: campaign.ffmpeg_sfx_volume !== undefined ? Number(campaign.ffmpeg_sfx_volume) : 0.0,
-              ffmpeg_bgm_volume: campaign.ffmpeg_bgm_volume !== undefined ? Number(campaign.ffmpeg_bgm_volume) : 0.15,
+              ffmpeg_bgm_volume: campaign.ffmpeg_bgm_volume !== undefined && campaign.ffmpeg_bgm_volume !== null ? Number(campaign.ffmpeg_bgm_volume) : 0.0,
               ffmpeg_sync_option: campaign.ffmpeg_sync_option || 'smart_sync',
               sync_mode: campaign.sync_mode || 'auto'
             }
@@ -4167,14 +4167,14 @@ export default function RECampaignDetailPage() {
                         />
                       </div>
                       <div style={{ flex: 1 }}>
-                        <label style={{ display: 'block', fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '2px', fontWeight: 600 }}>BGM Vol ({settings.ffmpeg_bgm_volume || 0.15}x)</label>
+                        <label style={{ display: 'block', fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '2px', fontWeight: 600 }}>BGM Vol ({settings.ffmpeg_bgm_volume !== undefined && settings.ffmpeg_bgm_volume !== null ? settings.ffmpeg_bgm_volume : 0.0}x)</label>
                         <input
                           type="range"
                           min="0.0"
                           max="1.0"
                           step="0.05"
                           disabled={isReadOnly}
-                          value={settings.ffmpeg_bgm_volume || 0.15}
+                          value={settings.ffmpeg_bgm_volume !== undefined && settings.ffmpeg_bgm_volume !== null ? settings.ffmpeg_bgm_volume : 0.0}
                           onChange={(e) => updateSettingField('ffmpeg_bgm_volume', Number(e.target.value))}
                           style={{ width: '100%' }}
                         />

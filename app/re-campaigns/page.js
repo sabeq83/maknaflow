@@ -87,7 +87,7 @@ export default function RECampaignsPage() {
   const [narrativeMode, setNarrativeMode] = useState('Storytelling');
 
   // Audio & Social Settings States (v6.5)
-  const [voiceProvider, setVoiceProvider] = useState('gemini');
+  const [voiceProvider, setVoiceProvider] = useState('minimax');
   const [voicePersona, setVoicePersona] = useState('Kore');
   const [voiceSpeed, setVoiceSpeed] = useState(1.0);
   const [voiceVolume, setVoiceVolume] = useState(1.0);
@@ -104,7 +104,7 @@ export default function RECampaignsPage() {
   const [syncMode, setSyncMode] = useState('auto'); // 'auto' or 'manual'
   const [ffmpegVideoScale, setFfmpegVideoScale] = useState(1.0);
   const [ffmpegSfxVolume, setFfmpegSfxVolume] = useState(0.0);
-  const [ffmpegBgmVolume, setFfmpegBgmVolume] = useState(0.15);
+  const [ffmpegBgmVolume, setFfmpegBgmVolume] = useState(0.0);
 
   // Custom configuration states (v7.5)
   const [wordsPerClip, setWordsPerClip] = useState('17-19 kata');
@@ -629,7 +629,7 @@ export default function RECampaignsPage() {
       setFfmpegSyncOption('smart_sync');
       setFfmpegVideoScale(1.0);
       setFfmpegSfxVolume(0.0);
-      setFfmpegBgmVolume(0.15);
+      setFfmpegBgmVolume(0.0);
 
       setShowForm(false);
       fetchCampaigns();
@@ -704,14 +704,14 @@ export default function RECampaignsPage() {
       setEnableSocialPost(c.enable_social_post === 1 || c.post_facebook_draft === 1);
       setFacebookPageId(c.facebook_page_id || (facebookPages.length > 0 ? facebookPages[0].id : ''));
       setFacebookServerUrl(c.facebook_server_url || '');
-      setVoiceProvider(c.voice_provider || 'gemini');
+      setVoiceProvider(c.voice_provider || 'minimax');
       setVoicePersona(c.voice_persona || 'Kore');
       setVoiceSpeed(c.voice_speed !== undefined ? c.voice_speed : 1.0);
       setVoiceVolume(c.voice_volume !== undefined ? c.voice_volume : 1.0);
       setFfmpegSyncOption(c.ffmpeg_sync_option || 'smart_sync');
       setFfmpegVideoScale(c.ffmpeg_video_scale !== undefined ? c.ffmpeg_video_scale : 1.0);
       setFfmpegSfxVolume(c.ffmpeg_sfx_volume !== undefined ? c.ffmpeg_sfx_volume : 0.0);
-      setFfmpegBgmVolume(c.ffmpeg_bgm_volume !== undefined ? c.ffmpeg_bgm_volume : 0.15);
+      setFfmpegBgmVolume(c.ffmpeg_bgm_volume !== undefined ? c.ffmpeg_bgm_volume : 0.0);
       setWordsPerClip(c.words_per_clip || '17-19 kata');
       setFaceVisibility(c.face_visibility || 'Faceless');
       setVisualStyle(c.visual_style || 'Cinematic');

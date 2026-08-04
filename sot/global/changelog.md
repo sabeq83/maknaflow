@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.2.186 — Default Minimax, 0.0 Mux Vol, ContentFlow & Gemini Imports Fixes (05/08/2026)
+- Default voice_provider to minimax and ffmpeg_bgm_volume to 0.0 for RE campaigns
+- Fix logical OR bug resetting 0.0 volume to 0.15
+- Use scanAndSyncExistingCampaigns from contentflow-ingest inside scheduler-processors
+- Statically import getGeminiModel and helper functions in campaign-scheduler to resolve Next.js code-splitting chunks error
+
 ## V2.2.185 — Fix RE campaign Nextcloud sync timing and pure T2V mode handling (05/08/2026)
 - Remove redundant cloud sync from processReTts
 - Make isHybridLockClip dynamic based on visualMode
