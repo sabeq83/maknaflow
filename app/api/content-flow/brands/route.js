@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { deleteContentFlowAccount } from '@/lib/contentflow-repository';
 import { withTenantContext } from '@/lib/auth';
 
-export const DELETE = withTenantContext(async (request, currentUser) => {
+export const DELETE = withTenantContext(async (request, _context, currentUser) => {
   try {
     if (currentUser.role !== 'admin') {
       return NextResponse.json({ success: false, error: 'Akses ditolak: Hanya Admin yang dapat menghapus brand' }, { status: 403 });

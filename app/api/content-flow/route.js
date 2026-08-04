@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { withTenantContext } from '@/lib/auth';
 import { listContentFlowItems } from '@/lib/contentflow-repository';
 
-export const GET = withTenantContext(async (request, user) => {
+export const GET = withTenantContext(async (request, _context, user) => {
   try {
     const { searchParams } = new URL(request.url);
     const sourceType = searchParams.get('source_type') || 'all';

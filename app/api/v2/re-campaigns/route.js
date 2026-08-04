@@ -12,7 +12,7 @@ function extractSpreadsheetId(input) {
   return match ? match[1] : input.trim();
 }
 
-export const GET = withTenantContext(async (request, user) => {
+export const GET = withTenantContext(async (request, _context, user) => {
   try {
     const campaigns = await listReCampaigns();
     const withStats = await Promise.all(campaigns.map(async c => ({ ...c, stats: await getReCampaignStats(c.id) })));
@@ -23,7 +23,7 @@ export const GET = withTenantContext(async (request, user) => {
   }
 });
 
-export const POST = withTenantContext(async (request, user) => {
+export const POST = withTenantContext(async (request, _context, user) => {
   try {
     const contentType = request.headers.get('content-type') || '';
     let parsedBody = {};

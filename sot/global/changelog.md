@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.162 — Fix handler parameter mapping for non-dynamic routes (04/08/2026)
+- Fix Next.js context shift that caused role check bypass/denial
+- Wrap settings nextcloud test route in withTenantContext
+
 ## V2.2.161 — Fix query isolation whitespace and join bugs (04/08/2026)
 - Fix query interceptor leading whitespace bypass
 - Qualify tenant_id in join queries to avoid ambiguous columns

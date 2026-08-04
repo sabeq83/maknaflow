@@ -15,7 +15,7 @@ function requireSettingsAdmin(request) {
   return user;
 }
 
-export const GET = withTenantContext(async (request, user) => {
+export const GET = withTenantContext(async (request, _context, user) => {
   try {
     if (user.role !== 'admin') {
       return NextResponse.json({ success: false, error: 'Hanya Admin tenant yang dapat mengelola credential.' }, { status: 403 });
@@ -80,7 +80,7 @@ export const GET = withTenantContext(async (request, user) => {
   }
 });
 
-export const POST = withTenantContext(async (request, user) => {
+export const POST = withTenantContext(async (request, _context, user) => {
   try {
     if (user.role !== 'admin') {
       return NextResponse.json({ success: false, error: 'Hanya Admin tenant yang dapat mengelola credential.' }, { status: 403 });

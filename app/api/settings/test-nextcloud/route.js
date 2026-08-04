@@ -1,14 +1,11 @@
-import { NextResponse } from 'next/server';
-import { testNextcloudConnection } from '@/lib/nextcloud-helper';
-import { getCurrentUser } from '@/lib/auth';
+import { withTenantContext } from '@/lib/auth';
 import { getSetting } from '@/lib/db';
 import { isNewSecret } from '@/lib/secret-values';
 
-export async function POST(request) {
+export const POST = withTenantContext(async (request, _context, user) => {
   try {
-    const user = getCurrentUser(request);
-    if (!user || user.role !== 'admin') {
-      return NextResponse.json({ success: false, message: 'Hanya Admin tenant yang dapat menguji credential.' }, { status: user ? 403 : 401 });
+    if (user.role !== 'admin') {
+      return NextResponse.json({ success: false, message: 'Hanya Admin tenant yang dapat menguji credential.' }, { status: 403 });
     }
     const { url, username, password } = await request.json();
     const resolvedPassword = isNewSecret(password) ? password : await getSetting('nextcloud_app_password');

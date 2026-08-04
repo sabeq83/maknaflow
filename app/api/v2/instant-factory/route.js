@@ -20,7 +20,7 @@ import { withTenantContext } from '@/lib/auth';
 export const maxDuration = 300; // Allow 5 minutes maximum for Vercel/Next.js Route if deployed
 export const dynamic = 'force-dynamic';
 
-export const POST = withTenantContext(async (req, user) => {
+export const POST = withTenantContext(async (req, _context, user) => {
   try {
     const formData = await req.formData();
     const id = uuidv4();

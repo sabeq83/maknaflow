@@ -16,7 +16,7 @@ function extractSpreadsheetId(input) {
   return match ? match[1] : input.trim();
 }
 
-export const GET = withTenantContext(async (request, user) => {
+export const GET = withTenantContext(async (request, _context, user) => {
   try {
     // Auto-start campaign scheduler if stopped (HMR recovery)
     const { startCampaignScheduler } = await import('../../../../lib/campaign-scheduler.js');
@@ -44,7 +44,7 @@ export const GET = withTenantContext(async (request, user) => {
   }
 });
 
-export const POST = withTenantContext(async (request, user) => {
+export const POST = withTenantContext(async (request, _context, user) => {
   try {
     const contentType = request.headers.get('content-type') || '';
     let parsedBody = {};

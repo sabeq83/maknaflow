@@ -5,7 +5,7 @@ import { createAutomation, listAutomations, listNotifications, listRuns } from '
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withTenantContext(async (request, user) => {
+export const GET = withTenantContext(async (request, _context, user) => {
   try {
     return NextResponse.json({
       success: true,
@@ -18,7 +18,7 @@ export const GET = withTenantContext(async (request, user) => {
   }
 });
 
-export const POST = withTenantContext(async (request, user) => {
+export const POST = withTenantContext(async (request, _context, user) => {
   try {
     const data = normalizeContentAutomation(await request.json());
     return NextResponse.json({ success: true, schedule: await createAutomation(data, user.id) }, { status: 201 });
