@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.190 — Fix RE brand profile mapping and API synchronization for ContentFlow (05/08/2026)
+- Add brand_profiles table join for RE campaign items
+- Update RE and OPC sync routes to invoke syncCampaignToContentFlow
+- Call syncCampaignToContentFlow at the end of RE and OPC FFmpeg pipeline stages
+
 ## V2.2.189 — Use custom env parser in query script (05/08/2026)
 - Remove dotenv dependency in query script
 
