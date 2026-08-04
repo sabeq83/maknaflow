@@ -2111,113 +2111,115 @@ export default function PillarCampaignDetailPage() {
             <h4 style={{ margin: 0, fontWeight: '700', fontSize: '0.9rem', color: '#fff' }}>📖 Storyboard & Rencana Visual Baru</h4>
 
             {/* Start Frame Grid */}
-            <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '8px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '6px' }}>
-                <span style={{ fontWeight: '600', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  🖼️ Grid Preview Start Frame Gambar (T2I)
-                </span>
-                <button
-                  type="button"
-                  onClick={handleRegenerateAllSF}
-                  disabled={item.regenerate_start_frames_status === 'running' || !!batchRegeneratingSF[item.id]}
-                  className="btn btn-secondary btn-sm"
-                  style={{
-                    fontSize: '0.72rem',
-                    padding: '4px 10px',
-                    background: item.regenerate_start_frames_status === 'running' ? 'rgba(155, 89, 182, 0.4)' : 'rgba(155, 89, 182, 0.15)',
-                    borderColor: 'rgba(155, 89, 182, 0.3)',
-                    color: '#fff',
-                    cursor: item.regenerate_start_frames_status === 'running' ? 'not-allowed' : 'pointer'
-                  }}
-                >
-                  {item.regenerate_start_frames_status === 'running'
-                    ? `⏳ Regenerating (${item.regenerate_start_frames_progress || '0%'})`
-                    : '🎨 Generate T2I Start Frames'
-                  }
-                </button>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '16px', marginTop: '10px' }}>
-                {plan.map((p, idx) => {
-                  const clipImgPath = t2iImages[idx];
-                  const taskKey = `${item.id}_${p.clip_index || (idx + 1)}`;
-                  const isRegenerating = regeneratingT2I[taskKey];
-                  const hasT2iPrompt = !!p.t2i_prompt;
+            {campaign?.visual_mode === 'hybrid_lock' && (
+              <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '8px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '6px' }}>
+                  <span style={{ fontWeight: '600', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    🖼️ Grid Preview Start Frame Gambar (T2I)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleRegenerateAllSF}
+                    disabled={item.regenerate_start_frames_status === 'running' || !!batchRegeneratingSF[item.id]}
+                    className="btn btn-secondary btn-sm"
+                    style={{
+                      fontSize: '0.72rem',
+                      padding: '4px 10px',
+                      background: item.regenerate_start_frames_status === 'running' ? 'rgba(155, 89, 182, 0.4)' : 'rgba(155, 89, 182, 0.15)',
+                      borderColor: 'rgba(155, 89, 182, 0.3)',
+                      color: '#fff',
+                      cursor: item.regenerate_start_frames_status === 'running' ? 'not-allowed' : 'pointer'
+                    }}
+                  >
+                    {item.regenerate_start_frames_status === 'running'
+                      ? `⏳ Regenerating (${item.regenerate_start_frames_progress || '0%'})`
+                      : '🎨 Generate T2I Start Frames'
+                    }
+                  </button>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '16px', marginTop: '10px' }}>
+                  {plan.map((p, idx) => {
+                    const clipImgPath = t2iImages[idx];
+                    const taskKey = `${item.id}_${p.clip_index || (idx + 1)}`;
+                    const isRegenerating = regeneratingT2I[taskKey];
+                    const hasT2iPrompt = !!p.t2i_prompt;
 
-                  return (
-                    <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center', background: 'rgba(0,0,0,0.1)', padding: '10px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.03)' }}>
-                      <div style={{ fontWeight: '700', fontSize: '0.72rem', color: 'var(--accent-light)' }}>
-                        Klip #{p.clip_index || (idx + 1)}
-                      </div>
-                      <div style={{ width: '100%', height: '180px', position: 'relative', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)' }}>
-                        {clipImgPath ? (
-                          <img src={clipImgPath.includes('?') ? `${clipImgPath}&t=${cacheBuster}` : `${clipImgPath}?t=${cacheBuster}`} alt={`Klip ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        ) : (
-                          <div style={{ width: '100%', height: '100%', background: 'rgba(255,255,255,0.01)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.62rem', padding: '5px', textAlign: 'center' }}>
-                            <span>{hasT2iPrompt ? '🖼️ Belum Ada Start Frame' : '🎬 T2V (No Start Frame)'}</span>
-                          </div>
+                    return (
+                      <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center', background: 'rgba(0,0,0,0.1)', padding: '10px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.03)' }}>
+                        <div style={{ fontWeight: '700', fontSize: '0.72rem', color: 'var(--accent-light)' }}>
+                          Klip #{p.clip_index || (idx + 1)}
+                        </div>
+                        <div style={{ width: '100%', height: '180px', position: 'relative', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)' }}>
+                          {clipImgPath ? (
+                            <img src={clipImgPath.includes('?') ? `${clipImgPath}&t=${cacheBuster}` : `${clipImgPath}?t=${cacheBuster}`} alt={`Klip ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ) : (
+                            <div style={{ width: '100%', height: '100%', background: 'rgba(255,255,255,0.01)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.62rem', padding: '5px', textAlign: 'center' }}>
+                              <span>{hasT2iPrompt ? '🖼️ Belum Ada Start Frame' : '🎬 T2V (No Start Frame)'}</span>
+                            </div>
+                          )}
+                        </div>
+                        {hasT2iPrompt && (
+                          <>
+                            <input 
+                              type="file" 
+                              accept="image/*" 
+                              style={{ display: 'none' }} 
+                              id={`replace-sf-${item.id}-${p.clip_index || (idx + 1)}`}
+                              onChange={(e) => {
+                                handleUploadStartFrame(p.clip_index || (idx + 1), e.target.files[0]);
+                                e.target.value = '';
+                              }}
+                            />
+                            <div style={{ display: 'flex', gap: '6px', width: '100%' }}>
+                              <button
+                                type="button"
+                                className="btn btn-secondary btn-sm"
+                                disabled={isReadOnly || isRegenerating || replacingSF[taskKey]}
+                                onClick={() => handleRegenerateT2I(p.clip_index || (idx + 1), p.t2i_prompt)}
+                                style={{
+                                  flex: 1,
+                                  fontSize: '0.62rem',
+                                  padding: '4px 2px',
+                                  background: 'rgba(255,255,255,0.05)',
+                                  border: '1px solid rgba(255,255,255,0.1)',
+                                  color: '#fff',
+                                  borderRadius: '4px',
+                                  cursor: 'pointer',
+                                  textAlign: 'center',
+                                  whiteSpace: 'nowrap'
+                                }}
+                              >
+                                {isRegenerating ? '⏳...' : '🔄 Regen'}
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn-secondary btn-sm"
+                                disabled={isReadOnly || isRegenerating || replacingSF[taskKey]}
+                                onClick={() => document.getElementById(`replace-sf-${item.id}-${p.clip_index || (idx + 1)}`).click()}
+                                style={{
+                                  flex: 1,
+                                  fontSize: '0.62rem',
+                                  padding: '4px 2px',
+                                  background: 'rgba(255,255,255,0.05)',
+                                  border: '1px solid rgba(255,255,255,0.1)',
+                                  color: '#fff',
+                                  borderRadius: '4px',
+                                  cursor: 'pointer',
+                                  textAlign: 'center',
+                                  whiteSpace: 'nowrap'
+                                }}
+                              >
+                                {replacingSF[taskKey] ? '⏳...' : '📤 Replace'}
+                              </button>
+                            </div>
+                          </>
                         )}
                       </div>
-                      {hasT2iPrompt && (
-                        <>
-                          <input 
-                            type="file" 
-                            accept="image/*" 
-                            style={{ display: 'none' }} 
-                            id={`replace-sf-${item.id}-${p.clip_index || (idx + 1)}`}
-                            onChange={(e) => {
-                              handleUploadStartFrame(p.clip_index || (idx + 1), e.target.files[0]);
-                              e.target.value = '';
-                            }}
-                          />
-                          <div style={{ display: 'flex', gap: '6px', width: '100%' }}>
-                            <button
-                              type="button"
-                              className="btn btn-secondary btn-sm"
-                              disabled={isReadOnly || isRegenerating || replacingSF[taskKey]}
-                              onClick={() => handleRegenerateT2I(p.clip_index || (idx + 1), p.t2i_prompt)}
-                              style={{
-                                flex: 1,
-                                fontSize: '0.62rem',
-                                padding: '4px 2px',
-                                background: 'rgba(255,255,255,0.05)',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                color: '#fff',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                textAlign: 'center',
-                                whiteSpace: 'nowrap'
-                              }}
-                            >
-                              {isRegenerating ? '⏳...' : '🔄 Regen'}
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-secondary btn-sm"
-                              disabled={isReadOnly || isRegenerating || replacingSF[taskKey]}
-                              onClick={() => document.getElementById(`replace-sf-${item.id}-${p.clip_index || (idx + 1)}`).click()}
-                              style={{
-                                flex: 1,
-                                fontSize: '0.62rem',
-                                padding: '4px 2px',
-                                background: 'rgba(255,255,255,0.05)',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                color: '#fff',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                textAlign: 'center',
-                                whiteSpace: 'nowrap'
-                              }}
-                            >
-                              {replacingSF[taskKey] ? '⏳...' : '📤 Replace'}
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Creative Clip Plans list */}
             {plan.map((p, idx) => {
@@ -2303,7 +2305,7 @@ export default function PillarCampaignDetailPage() {
                     </div>
 
                     {/* T2I Prompt (If exists) */}
-                    {p.t2i_prompt !== undefined && (
+                    {campaign?.visual_mode === 'hybrid_lock' && p.t2i_prompt !== undefined && (
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                           <label style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, margin: 0 }}>Prompt T2I Start Frame (Pixel Lock)</label>
@@ -2330,7 +2332,7 @@ export default function PillarCampaignDetailPage() {
                     )}
 
                     {/* Prompt T2V */}
-                    {p.t2v_prompt !== undefined && (
+                    {campaign?.visual_mode !== 'hybrid_lock' && p.t2v_prompt !== undefined && (
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                           <label style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, margin: 0 }}>Prompt T2V (Text-to-Video)</label>
@@ -2357,7 +2359,7 @@ export default function PillarCampaignDetailPage() {
                     )}
 
                     {/* Prompt I2V */}
-                    {p.i2v_prompt !== undefined && (
+                    {campaign?.visual_mode === 'hybrid_lock' && p.i2v_prompt !== undefined && (
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                           <label style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, margin: 0 }}>Prompt I2V (Motion Prompt)</label>

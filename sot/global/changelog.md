@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.166 — Fix T2I conditional view on pure_t2v (04/08/2026)
+- Sembunyikan grid preview T2I pada kampanye mode pure_t2v
+- Kondisikan form input prompt T2I dan I2V sesuai dengan mode visual
+
 ## V2.2.165 — Fix admin brand mapping and remove sidebar default brand fallback (04/08/2026)
 - Allow admin role to access all brand profiles of active tenant in buildUserObject
 - Remove hardcoded default brand fallback list in Sidebar
