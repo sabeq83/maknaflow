@@ -17,6 +17,7 @@ assert.deepEqual(normalizePillars([' Healthy Breakfast ', 'healthy breakfast', '
 
 assert.equal(validatePlannerDraft({
   planner_focus: 'product_campaign',
+  planner_count: 12,
   product_name: 'Oat Flour',
   product_description: 'Tepung oat serbaguna'
 }), 'product_campaign');
@@ -24,6 +25,7 @@ assert.throws(() => validatePlannerDraft({ planner_focus: 'product_campaign' }),
 
 assert.equal(validatePlannerDraft({
   planner_focus: 'brand_editorial',
+  planner_count: 14,
   account_name: 'Nutribake',
   brand_context: 'Healthy food education',
   pillars: nutribakePillars

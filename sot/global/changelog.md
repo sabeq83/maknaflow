@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.155 — Dynamic Row Count Brand Editorial (04/08/2026)
+- Jumlah baris Brand Editorial mengikuti kelipatan pilar hingga maksimal 30
+- Validasi count konsisten pada draft dan eksekusi
+- Prompt Gemini mengunci pemerataan ide per pilar
+
 ## V2.2.154 — Default Brand Editorial Profile (04/08/2026)
 - Brand Profile menyimpan konteks tujuan dan pilar editorial
 - Modal Brand Editorial memuat default dengan perlindungan overwrite

@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getBrandEditorialDefaults, shouldHydrateBrandEditorial } from '@/lib/brand-editorial-defaults';
+import { DEFAULT_EDITORIAL_ROWS_PER_PILLAR, getBrandEditorialCountOptions } from '@/lib/content-planner-contract';
 
 export default function ContentPlannerDashboard() {
   const router = useRouter();
@@ -32,7 +33,9 @@ export default function ContentPlannerDashboard() {
   const [productPhotoUrl, setProductPhotoUrl] = useState('');
   const [platform, setPlatform] = useState('tiktok');
   const [objective, setObjective] = useState('soft_sell');
-  const [plannerCount, setPlannerCount] = useState(12);
+  const [productPlannerCount, setProductPlannerCount] = useState(12);
+  const [editorialRowsPerPillar, setEditorialRowsPerPillar] = useState(DEFAULT_EDITORIAL_ROWS_PER_PILLAR);
+  const [editorialCountNotice, setEditorialCountNotice] = useState('');
   const [targetAudience, setTargetAudience] = useState('genz_casual');
   const [customTargetAudience, setCustomTargetAudience] = useState('');
   const [isTitleManuallyEdited, setIsTitleManuallyEdited] = useState(false);
@@ -69,12 +72,28 @@ export default function ContentPlannerDashboard() {
   const [selectedBrandId, setSelectedBrandId] = useState('');
   const [executingIds, setExecutingIds] = useState({});
   const [syncingIds, setSyncingIds] = useState({});
+  const editorialCountOptions = getBrandEditorialCountOptions(pillars.length);
+  const maxEditorialRowsPerPillar = editorialCountOptions.length;
+  const effectiveEditorialRowsPerPillar = maxEditorialRowsPerPillar > 0
+    ? Math.min(editorialRowsPerPillar, maxEditorialRowsPerPillar)
+    : 0;
+  const effectivePlannerCount = plannerFocus === 'brand_editorial'
+    ? pillars.length * effectiveEditorialRowsPerPillar
+    : Number(productPlannerCount);
 
   useEffect(() => {
     fetchPlanners();
     fetch('/api/product-agent').then(r => r.json()).then(d => { if (d.success) setExistingProducts(d.data || []); }).catch(() => {});
     fetch('/api/v2/brand-profiles').then(r => r.json()).then(d => { if (d.success) setBrandProfiles(d.data || []); }).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (maxEditorialRowsPerPillar > 0 && editorialRowsPerPillar > maxEditorialRowsPerPillar) {
+      setEditorialRowsPerPillar(maxEditorialRowsPerPillar);
+      setEditorialCountNotice(`Jumlah ide disesuaikan menjadi ${maxEditorialRowsPerPillar} per pilar agar total tidak melebihi 30 baris.`);
+      return;
+    }
+  }, [editorialRowsPerPillar, maxEditorialRowsPerPillar]);
 
   async function fetchPlanners() {
     try {
@@ -214,7 +233,7 @@ export default function ContentPlannerDashboard() {
           product_photo_url: plannerFocus === 'product_campaign' ? productPhotoUrl.trim() : null,
           platform,
           objective,
-          planner_count: plannerCount,
+          planner_count: effectivePlannerCount,
           target_audience: effectiveTargetAudience
         })
       });
@@ -673,8 +692,8 @@ export default function ContentPlannerDashboard() {
                     </div>
                     <select value={pillarDistributionMode} onChange={e => setPillarDistributionMode(e.target.value)} style={{ width: '100%', marginTop: '10px', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}>
                       <option value="balanced">Balanced — dibagi merata</option>
-                      <option value="custom">Custom Weight (fase lanjutan)</option>
-                      <option value="growth">Growth Priority</option>
+                      <option value="custom" disabled>Custom Weight — Segera Hadir</option>
+                      <option value="growth" disabled>Growth Priority — Segera Hadir</option>
                     </select>
                   </div>
                   <div style={{ marginBottom: '16px', padding: '10px 12px', border: '1px solid #164e63', borderRadius: '8px', background: '#083344', color: '#bae6fd', fontSize: '12px' }}>
@@ -881,16 +900,39 @@ export default function ContentPlannerDashboard() {
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px' }}>Jumlah Baris Planner:</label>
                     <select
-                      value={plannerCount}
-                      onChange={e => setPlannerCount(e.target.value)}
+                      disabled={plannerFocus === 'brand_editorial' && pillars.length === 0}
+                      value={plannerFocus === 'brand_editorial' ? effectiveEditorialRowsPerPillar : productPlannerCount}
+                      onChange={e => {
+                        if (plannerFocus === 'brand_editorial') {
+                          setEditorialRowsPerPillar(Number(e.target.value));
+                          setEditorialCountNotice('');
+                        } else {
+                          setProductPlannerCount(Number(e.target.value));
+                        }
+                      }}
                       style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
                     >
-                      <option value="6">6 Baris Plan (1x CEP)</option>
-                      <option value="12">12 Baris Plan (2x CEP - Standar)</option>
-                      <option value="18">18 Baris Plan (3x CEP)</option>
-                      <option value="24">24 Baris Plan (4x CEP - Massal)</option>
-                      <option value="30">30 Baris Plan (5x CEP - Maksimal)</option>
+                      {plannerFocus === 'brand_editorial' ? (
+                        pillars.length === 0
+                          ? <option value={0}>Masukkan Pilar Konten terlebih dahulu</option>
+                          : editorialCountOptions.map(option => (
+                            <option key={option.rowsPerPillar} value={option.rowsPerPillar}>
+                              {option.label}{option.rowsPerPillar === DEFAULT_EDITORIAL_ROWS_PER_PILLAR ? ' (Direkomendasikan)' : ''}
+                            </option>
+                          ))
+                      ) : <>
+                        <option value="6">6 Baris Plan (1x CEP)</option>
+                        <option value="12">12 Baris Plan (2x CEP - Standar)</option>
+                        <option value="18">18 Baris Plan (3x CEP)</option>
+                        <option value="24">24 Baris Plan (4x CEP - Massal)</option>
+                        <option value="30">30 Baris Plan (5x CEP - Maksimal)</option>
+                      </>}
                     </select>
+                    {plannerFocus === 'brand_editorial' && editorialCountNotice && (
+                      <div style={{ marginTop: '6px', color: '#fcd34d', fontSize: '11px', lineHeight: 1.4 }}>
+                        {editorialCountNotice}
+                      </div>
+                    )}
                   </div>
                 </div>
 
