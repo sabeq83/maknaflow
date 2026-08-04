@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.159 — Global Tenant Data Isolation (04/08/2026)
+- Implementasi withTenantContext wrapper global
+- Isolasi Settings API kredensial
+- Isolasi Pillar Campaigns, RE Campaigns, Instant Campaigns, dan Automations
+
 ## V2.2.158 — Hook User Init to Startup (04/08/2026)
 - Menambahkan eksekusi inisialisasi dan migrasi hak akses pengguna otomatis pada saat server memuat database cache
 

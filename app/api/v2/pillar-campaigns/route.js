@@ -8,6 +8,7 @@ import {
   getSetting
 } from '../../../../lib/db';
 import { generateCampaignId } from '../../../../lib/id-generator';
+import { withTenantContext } from '../../../../lib/auth';
 
 function extractSpreadsheetId(input) {
   if (!input) return null;
@@ -15,7 +16,7 @@ function extractSpreadsheetId(input) {
   return match ? match[1] : input.trim();
 }
 
-export async function GET() {
+export const GET = withTenantContext(async (request, user) => {
   try {
     // Auto-start campaign scheduler if stopped (HMR recovery)
     const { startCampaignScheduler } = await import('../../../../lib/campaign-scheduler.js');
@@ -41,9 +42,9 @@ export async function GET() {
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
-}
+});
 
-export async function POST(request) {
+export const POST = withTenantContext(async (request, user) => {
   try {
     const contentType = request.headers.get('content-type') || '';
     let parsedBody = {};
@@ -98,8 +99,15 @@ export async function POST(request) {
         ffmpeg_sync_option: formData.get('ffmpeg_sync_option') || 'smart_sync',
         ffmpeg_video_scale: formData.get('ffmpeg_video_scale') !== null ? Number(formData.get('ffmpeg_video_scale')) : 1.0,
         ffmpeg_sfx_volume: formData.get('ffmpeg_sfx_volume') !== null ? Number(formData.get('ffmpeg_sfx_volume')) : 0.0,
-        ffmpeg_bgm_volume: formData.get('ffmpeg_bgm_volume') !== null ? Number(formData.get('ffmpeg_bgm_volume')) : 0.15,
-        target_spreadsheet_id: formData.get('target_spreadsheet_id') || null,
+        ffmpeg_music_volume: formData.get('ffmpeg_music_volume') !== null ? Number(formData.get('ffmpeg_music_volume')) : 0.4,
+        ffmpeg_subtitles_mode: formData.get('ffmpeg_subtitles_mode') || 'dynamic',
+        font_name: formData.get('font_name') || 'Arial Black',
+        font_color: formData.get('font_color') || '&H00FFFFFF',
+        font_size: formData.get('font_size') !== null ? Number(formData.get('font_size')) : 24,
+        voiceover_type: formData.get('voiceover_type') || 'normal',
+        compliance_check_enabled: Number(formData.get('compliance_check_enabled') || 0),
+        target_audience: formData.get('target_audience') || 'General',
+        brand_editorial_guide: formData.get('brand_editorial_guide') || '',
         sfx_setting: formData.get('sfx_setting') || 'without_sfx',
         enable_vo_audit: Number(formData.get('enable_vo_audit') || 0),
         enable_audio_segment: Number(formData.get('enable_audio_segment') || 0),
@@ -109,26 +117,21 @@ export async function POST(request) {
         mandatory_outro_line: formData.get('mandatory_outro_line') || null
       };
 
-      // Handle file upload
-      const file = formData.get('product_media');
-      if (file && typeof file !== 'string' && file.name) {
+      const file = formData.get('product_ref_image');
+      if (file && typeof file === 'object' && file.name) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
-
         const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'products');
         if (!fs.existsSync(uploadsDir)) {
           fs.mkdirSync(uploadsDir, { recursive: true });
         }
-
-        const ext = path.extname(file.name) || '.png';
-        const filename = `product_ref_${id}${ext}`;
-        const filePath = path.join(uploadsDir, filename);
-        fs.writeFileSync(filePath, buffer);
+        const ext = path.extname(file.name) || '.jpg';
+        const filename = `${id}${ext}`;
+        const finalPath = path.join(uploadsDir, filename);
+        fs.writeFileSync(finalPath, buffer);
         productRefImagePath = `/uploads/products/${filename}`;
-      } else {
-        productRefImagePath = formData.get('product_ref_image_path') || null;
+        productFilenameDeclare = file.name;
       }
-      productFilenameDeclare = parsedBody.product_filename_declare;
     } else {
       parsedBody = await request.json();
       parsedBody.is_bridging_active = parsedBody.is_bridging_active ? 1 : 0;
@@ -315,4 +318,4 @@ export async function POST(request) {
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
-}
+});

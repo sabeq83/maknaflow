@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getInstantCampaign, listInstantCampaignItems, getDb, updateInstantCampaign, deleteInstantCampaign } from '@/lib/db';
 import path from 'path';
+import { withTenantContext } from '@/lib/auth';
 
-export async function GET(request, { params }) {
+export const GET = withTenantContext(async (request, { params }, user) => {
   try {
     // Auto-start campaign scheduler if stopped (HMR recovery)
     const { startCampaignScheduler } = await import('@/lib/campaign-scheduler.js');
@@ -40,9 +41,9 @@ export async function GET(request, { params }) {
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
-}
+});
 
-export async function PATCH(request, { params }) {
+export const PATCH = withTenantContext(async (request, { params }, user) => {
   try {
     const { id } = await params;
     const body = await request.json();
@@ -69,23 +70,35 @@ export async function PATCH(request, { params }) {
     if (body.enable_social_post !== undefined) {
       updates.enable_social_post = body.enable_social_post ? 1 : 0;
     }
-    if (body.is_bridging_active !== undefined) {
-      updates.is_bridging_active = body.is_bridging_active ? 1 : 0;
-    }
-    if (body.bridge_at_clip !== undefined) {
-      updates.bridge_at_clip = parseInt(body.bridge_at_clip, 10) || 2;
-    }
-    if (body.visual_mode !== undefined) {
-      updates.visual_mode = body.visual_mode || 'hybrid_lock';
-    }
-    if (body.post_youtube_draft !== undefined) {
-      updates.post_youtube_draft = body.post_youtube_draft ? 1 : 0;
-    }
-    if (body.post_tiktok_draft !== undefined) {
-      updates.post_tiktok_draft = body.post_tiktok_draft ? 1 : 0;
-    }
     if (body.post_facebook_draft !== undefined) {
       updates.post_facebook_draft = body.post_facebook_draft ? 1 : 0;
+    }
+    if (body.facebook_page_id !== undefined) {
+      updates.facebook_page_id = body.facebook_page_id || null;
+    }
+    if (body.nextcloud_parent_folder !== undefined) {
+      updates.nextcloud_parent_folder = body.nextcloud_parent_folder ? body.nextcloud_parent_folder.trim() : 'MAKNA_Production_Final';
+    }
+    if (body.fb_draft_mode !== undefined) {
+      updates.fb_draft_mode = body.fb_draft_mode || 'auto';
+    }
+    if (body.voice_provider !== undefined) {
+      updates.voice_provider = body.voice_provider;
+    }
+    if (body.voice_persona !== undefined) {
+      updates.voice_persona = body.voice_persona;
+    }
+    if (body.voice_speed !== undefined) {
+      updates.voice_speed = Number(body.voice_speed);
+    }
+    if (body.voice_volume !== undefined) {
+      updates.voice_volume = Number(body.voice_volume);
+    }
+    if (body.enable_audio_segment !== undefined) {
+      updates.enable_audio_segment = body.enable_audio_segment ? 1 : 0;
+    }
+    if (body.voice_cast_json !== undefined) {
+      updates.voice_cast_json = body.voice_cast_json || null;
     }
     
     if (Object.keys(updates).length === 0) {
@@ -96,7 +109,7 @@ export async function PATCH(request, { params }) {
     await updateInstantCampaign(id, updates);
     
     try {
-      const campaignName = campaign ? campaign.product_name : id;
+      const campaignName = campaign ? campaign.campaign_name : id;
       const changeSummary = Object.entries(updates)
         .map(([k, v]) => `${k}: ${v}`)
         .join(', ');
@@ -111,9 +124,9 @@ export async function PATCH(request, { params }) {
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
-}
+});
 
-export async function DELETE(request, { params }) {
+export const DELETE = withTenantContext(async (request, { params }, user) => {
   try {
     const { id } = await params;
     await deleteInstantCampaign(id);
@@ -121,4 +134,4 @@ export async function DELETE(request, { params }) {
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
-}
+});

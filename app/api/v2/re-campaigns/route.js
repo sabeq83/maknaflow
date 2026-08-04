@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { createReCampaign, addReCampaignItems, listReCampaigns, getReCampaignStats, getSetting } from '../../../../lib/db';
 import { generateCampaignId } from '../../../../lib/id-generator';
+import { withTenantContext } from '../../../../lib/auth';
 
 function extractSpreadsheetId(input) {
   if (!input) return null;
@@ -11,7 +12,7 @@ function extractSpreadsheetId(input) {
   return match ? match[1] : input.trim();
 }
 
-export async function GET() {
+export const GET = withTenantContext(async (request, user) => {
   try {
     const campaigns = await listReCampaigns();
     const withStats = await Promise.all(campaigns.map(async c => ({ ...c, stats: await getReCampaignStats(c.id) })));
@@ -20,9 +21,9 @@ export async function GET() {
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
-}
+});
 
-export async function POST(request) {
+export const POST = withTenantContext(async (request, user) => {
   try {
     const contentType = request.headers.get('content-type') || '';
     let parsedBody = {};
@@ -235,25 +236,29 @@ export async function POST(request) {
       ffmpeg_bgm_volume: ffmpeg_bgm_volume !== undefined ? Number(ffmpeg_bgm_volume) : 0.15,
       video_model: video_model || 'veo_31_lite',
       words_per_clip: words_per_clip || '17-19 kata',
-      face_visibility: face_visibility || 'Faceless',
-      enable_tts: enable_tts !== undefined ? Number(enable_tts) : 1,
-      enable_glabs: enable_glabs !== undefined ? Number(enable_glabs) : 0,
-      enable_ffmpeg: enable_ffmpeg !== undefined ? Number(enable_ffmpeg) : 1,
-      enable_social_post: enable_social_post !== undefined ? Number(enable_social_post) : 1,
-      visual_mode: visual_mode || 'hybrid_lock',
-      product_ref_image_path: productRefImagePath,
-      product_filename_declare: productFilenameDeclare,
-      angle_multiplier: angle_multiplier || 0,
-      visual_overrides_json: visual_overrides_json || null,
       tts_model_quality: tts_model_quality || 'speech-2.8-turbo',
+      voice_speed: voice_speed !== null && voice_speed !== undefined ? voice_speed : 1.0,
+      voice_volume: voice_volume !== null && voice_volume !== undefined ? voice_volume : 1.0,
       target_language: target_language || 'id-ID',
+      ffmpeg_sync_option: ffmpeg_sync_option || 'smart_sync',
+      ffmpeg_video_scale: ffmpeg_video_scale !== null && ffmpeg_video_scale !== undefined ? ffmpeg_video_scale : 1.0,
+      ffmpeg_sfx_volume: ffmpeg_sfx_volume !== null && ffmpeg_sfx_volume !== undefined ? ffmpeg_sfx_volume : 0.0,
+      ffmpeg_music_volume: ffmpeg_music_volume !== null && ffmpeg_music_volume !== undefined ? ffmpeg_music_volume : 0.4,
+      ffmpeg_subtitles_mode: ffmpeg_subtitles_mode || 'dynamic',
+      font_name: font_name || 'Arial Black',
+      font_color: font_color || '&H00FFFFFF',
+      font_size: font_size !== null && font_size !== undefined ? font_size : 24,
+      voiceover_type: voiceover_type || 'normal',
+      compliance_check_enabled: compliance_check_enabled || 0,
+      target_audience: target_audience || 'General',
+      brand_editorial_guide: brand_editorial_guide || '',
       visual_style: visual_style || 'Cinematic',
       nextcloud_parent_folder: nextcloud_parent_folder || 'MAKNA_Production_Final',
       fb_draft_mode: fb_draft_mode || 'auto',
       target_spreadsheet_id: extractSpreadsheetId(target_spreadsheet_id),
       sfx_setting: sfx_setting || 'without_sfx',
-      enable_vo_audit: enable_vo_audit !== undefined ? Number(enable_vo_audit) : 0,
-      enable_audio_segment: enable_audio_segment !== undefined ? Number(enable_audio_segment) : 0,
+      enable_vo_audit: enable_vo_audit || 0,
+      enable_audio_segment: enable_audio_segment || 0,
       target_demographic: target_demographic || null,
       target_demographic_custom: target_demographic_custom || null,
       ai_directive: ai_directive || null,
@@ -265,4 +270,4 @@ export async function POST(request) {
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
-}
+});

@@ -1,13 +1,9 @@
 import { NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/auth';
+import { withTenantContext } from '@/lib/auth';
 import { listContentFlowItems } from '@/lib/contentflow-repository';
 
-export async function GET(request) {
+export const GET = withTenantContext(async (request, user) => {
   try {
-    const currentUser = getCurrentUser(request);
-    if (!currentUser || currentUser.tenantId === '__none__') {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: currentUser ? 403 : 401 });
-    }
     const { searchParams } = new URL(request.url);
     const sourceType = searchParams.get('source_type') || 'all';
     const accountName = searchParams.get('account') || 'all';
@@ -20,11 +16,11 @@ export async function GET(request) {
     const page = searchParams.get('page') || '1';
     const limit = searchParams.get('limit') || '50';
 
-    const allowedAccounts = currentUser.role === 'admin' ? undefined : currentUser.assignedBrandNames;
+    const allowedAccounts = user.role === 'admin' ? undefined : user.assignedBrandNames;
     const result = await listContentFlowItems({ sourceType, accountName, productName, pipelineStatus, tiktokStatus, facebookStatus, instagramStatus, q, page, limit, allowedAccounts });
     return NextResponse.json({ success: true, ...result });
   } catch (err) {
     console.error('[API /api/content-flow Error]', err);
     return NextResponse.json({ success: false, error: err.message }, { status: err.status || 500 });
   }
-}
+});

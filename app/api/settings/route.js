@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSetting, setSetting } from '@/lib/db';
 import { testGeminiConnection } from '@/lib/gemini';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, withTenantContext } from '@/lib/auth';
 import { isNewSecret, maskSecret } from '@/lib/secret-values';
 
 function requireSettingsAdmin(request) {
@@ -15,9 +15,11 @@ function requireSettingsAdmin(request) {
   return user;
 }
 
-export async function GET(request) {
+export const GET = withTenantContext(async (request, user) => {
   try {
-    requireSettingsAdmin(request);
+    if (user.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'Hanya Admin tenant yang dapat mengelola credential.' }, { status: 403 });
+    }
     const apiKey = await getSetting('gemini_api_key');
     const minimaxKey = await getSetting('minimax_api_key');
     const webhookKey = await getSetting('webhook_api_key');
@@ -78,9 +80,11 @@ export async function GET(request) {
   }
 }
 
-export async function POST(request) {
+export const POST = withTenantContext(async (request, user) => {
   try {
-    requireSettingsAdmin(request);
+    if (user.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'Hanya Admin tenant yang dapat mengelola credential.' }, { status: 403 });
+    }
     const body = await request.json();
     const { gemini_api_key, gemini_api_tier, gemini_context_caching, google_client_id, google_client_secret,
       webhook_api_key, webhook_host, webhook_port, webhook_image_model, webhook_video_model,

@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
 import { deleteContentFlowAccount } from '@/lib/contentflow-repository';
-import { getCurrentUser } from '@/lib/auth';
+import { withTenantContext } from '@/lib/auth';
 
-export async function DELETE(request) {
+export const DELETE = withTenantContext(async (request, currentUser) => {
   try {
-    const currentUser = getCurrentUser(request);
-    if (!currentUser || currentUser.role !== 'admin') {
+    if (currentUser.role !== 'admin') {
       return NextResponse.json({ success: false, error: 'Akses ditolak: Hanya Admin yang dapat menghapus brand' }, { status: 403 });
     }
 
@@ -22,4 +21,4 @@ export async function DELETE(request) {
     console.error('[API /api/content-flow/brands DELETE Error]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

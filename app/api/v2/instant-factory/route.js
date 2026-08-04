@@ -15,11 +15,12 @@ import fs from 'fs';
 import { scrapeUrl } from '@/lib/url-scraper';
 import { buildProductAgentPrompt } from '@/lib/prompts';
 import { parseGeminiJSON } from '@/lib/json-parser';
+import { withTenantContext } from '@/lib/auth';
 
 export const maxDuration = 300; // Allow 5 minutes maximum for Vercel/Next.js Route if deployed
 export const dynamic = 'force-dynamic';
 
-export async function POST(req) {
+export const POST = withTenantContext(async (req, user) => {
   try {
     const formData = await req.formData();
     const id = uuidv4();
@@ -368,7 +369,7 @@ Kamu WAJIB berpikir secara berurutan saat menyusun JSON:
     console.error('Instant Factory Error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
 function extToMime(ext) {
   ext = ext.toLowerCase();

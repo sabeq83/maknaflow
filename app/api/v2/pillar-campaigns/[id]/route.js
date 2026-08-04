@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getPillarCampaign, listPillarCampaignItems, getDb, updatePillarCampaign, deletePillarCampaign } from '../../../../../lib/db';
 import path from 'path';
+import { withTenantContext } from '../../../../../lib/auth';
 
-export async function GET(request, { params }) {
+export const GET = withTenantContext(async (request, { params }, user) => {
   try {
     // Auto-start campaign scheduler if stopped (HMR recovery)
     const { startCampaignScheduler } = await import('../../../../../lib/campaign-scheduler.js');
@@ -71,9 +72,9 @@ export async function GET(request, { params }) {
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
-}
+});
 
-export async function PATCH(request, { params }) {
+export const PATCH = withTenantContext(async (request, { params }, user) => {
   try {
     const { id } = await params;
     const body = await request.json();
@@ -154,9 +155,9 @@ export async function PATCH(request, { params }) {
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
-}
+});
 
-export async function DELETE(request, { params }) {
+export const DELETE = withTenantContext(async (request, { params }, user) => {
   try {
     const { id } = await params;
     await deletePillarCampaign(id);
@@ -164,4 +165,4 @@ export async function DELETE(request, { params }) {
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
-}
+});
