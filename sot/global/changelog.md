@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.181 — Fix not-null constraint violation on campaign items id (04/08/2026)
+- Add id sequences for re_campaign_items and bridge_injector_items to prevent null value violations
+
 ## V2.2.180 — Delete .next build folder automatically during deploy (04/08/2026)
 - Add rm -rf .next to deploy-node2-wsl.js to ensure clean builds
 
