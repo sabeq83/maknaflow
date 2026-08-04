@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.179 — Clean rebuild to fix stale compiled chunks (04/08/2026)
+- Clean rebuild Next.js on Node 2 WSL to clear .next/cache
+- Purge old compilation of RE campaigns route
+
 ## V2.2.178 — Fix ReferenceError ffmpeg_music_volume in RE campaigns (04/08/2026)
 - Remove redundant duplicate parameters in createReCampaign call
 - Remove reference to undefined ffmpeg_music_volume
