@@ -1,6 +1,6 @@
 {
   "name": "maknaflow",
-  "version": "2.2.153",
+  "version": "2.2.154",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack -p 3005",
@@ -29,6 +29,7 @@
     "test:tenant-api-smoke": "node scripts/test-tenant-api-smoke.mjs",
     "test:product-import": "node scripts/test-product-import.mjs",
     "test:contentflow-migration": "node scripts/test-contentflow-legacy-migration.mjs",
+    "test:brand-editorial-defaults": "node scripts/test-brand-editorial-defaults.mjs",
     "contentflow:migration:export": "node scripts/export-legacy-contentflow.mjs",
     "contentflow:migration:import": "node scripts/import-legacy-contentflow.mjs",
     "contentflow:migration:assets": "node scripts/migrate-legacy-contentflow-assets.mjs",

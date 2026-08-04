@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.154 — Default Brand Editorial Profile (04/08/2026)
+- Brand Profile menyimpan konteks tujuan dan pilar editorial
+- Modal Brand Editorial memuat default dengan perlindungan overwrite
+- Planner mempertahankan snapshot dan API diperketat per tenant
+
 ## V2.2.153 — Approval Skip Konflik ContentFlow (04/08/2026)
 - Commit migrasi mendukung skip konflik yang disetujui eksplisit
 - Dry-run hash tetap wajib dan data target tetap dipertahankan

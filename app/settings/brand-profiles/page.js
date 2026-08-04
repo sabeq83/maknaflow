@@ -14,6 +14,9 @@ const emptyForm = {
   brand_name: '',
   tone_of_voice: 'Kasual/Gaul',
   visual_signature: '',
+  editorial_brand_context: '',
+  editorial_content_goal: '',
+  editorial_content_pillars: [],
   raw_guideline_text: '',
   guideline_filename: '',
   storage_provider: '',
@@ -35,6 +38,7 @@ export default function BrandProfilesPage() {
   const [isExtracting, setIsExtracting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [toast, setToast] = useState(null);
+  const [editorialPillarDraft, setEditorialPillarDraft] = useState('');
 
   useEffect(() => { fetchProfiles(); }, []);
 
@@ -55,6 +59,15 @@ export default function BrandProfilesPage() {
   function handleChange(e) {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  }
+
+  function addEditorialPillar() {
+    const value = editorialPillarDraft.trim().slice(0, 120);
+    if (!value || formData.editorial_content_pillars.length >= 12) return;
+    if (!formData.editorial_content_pillars.some(item => item.toLowerCase() === value.toLowerCase())) {
+      setFormData(prev => ({ ...prev, editorial_content_pillars: [...prev.editorial_content_pillars, value] }));
+    }
+    setEditorialPillarDraft('');
   }
 
   async function handleFileExtract(e) {
@@ -88,8 +101,8 @@ export default function BrandProfilesPage() {
 
   async function handleSave(e) {
     e.preventDefault();
-    if (!formData.brand_name.trim() || !formData.visual_signature.trim()) {
-      showToast('Brand Name dan Visual Signature wajib diisi.', 'error');
+    if (!formData.brand_name.trim() || !formData.visual_signature.trim() || !formData.editorial_brand_context.trim() || formData.editorial_content_pillars.length === 0) {
+      showToast('Brand Name, Visual Signature, Konteks Brand, dan minimal satu Pilar Konten wajib diisi.', 'error');
       return;
     }
     setIsSaving(true);
@@ -132,6 +145,9 @@ export default function BrandProfilesPage() {
           brand_name: data.data.brand_name || '',
           tone_of_voice: data.data.tone_of_voice || 'Kasual/Gaul',
           visual_signature: data.data.visual_signature || '',
+          editorial_brand_context: data.data.editorial_brand_context || '',
+          editorial_content_goal: data.data.editorial_content_goal || '',
+          editorial_content_pillars: (() => { try { const value = JSON.parse(data.data.editorial_content_pillars_json || '[]'); return Array.isArray(value) ? value : []; } catch { return []; } })(),
           raw_guideline_text: data.data.raw_guideline_text || '',
           guideline_filename: data.data.guideline_filename || '',
           storage_provider: data.data.storage_provider || '',
@@ -240,6 +256,35 @@ export default function BrandProfilesPage() {
                 <div className="form-group">
                   <label className="form-label">Visual Signature *</label>
                   <textarea className="form-textarea" name="visual_signature" value={formData.visual_signature} onChange={handleChange} required placeholder='Contoh: pencahayaan golden hour, macro shots, clean aesthetic minimalis' style={{ minHeight: '80px' }} />
+                </div>
+
+                <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px', marginTop: '8px' }}>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--accent-light)', marginBottom: '6px' }}>🧩 Default Brand Editorial</h3>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '16px' }}>Nilai ini akan dimuat otomatis saat Brand Profile dipilih pada Content Planner. Planner tetap menyimpan salinannya sendiri.</p>
+                  <div className="form-group" style={{ marginBottom: '14px' }}>
+                    <label className="form-label">Konteks Brand *</label>
+                    <textarea className="form-textarea" name="editorial_brand_context" value={formData.editorial_brand_context} onChange={handleChange} required maxLength={4000} placeholder="Jelaskan niche, positioning, audiens, dan nilai utama brand..." style={{ minHeight: '100px' }} />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: '14px' }}>
+                    <label className="form-label">Tujuan Konten</label>
+                    <textarea className="form-textarea" name="editorial_content_goal" value={formData.editorial_content_goal} onChange={handleChange} maxLength={2000} placeholder="Contoh: membangun authority, save, share, dan follow" style={{ minHeight: '72px' }} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Pilar Konten * <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>({formData.editorial_content_pillars.length}/12)</span></label>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                      <input className="form-input" value={editorialPillarDraft} maxLength={120} onChange={e => setEditorialPillarDraft(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addEditorialPillar(); } }} placeholder="Contoh: Edukasi Nutrisi" />
+                      <button className="btn btn-secondary" type="button" onClick={addEditorialPillar} disabled={formData.editorial_content_pillars.length >= 12}>+ Tambah</button>
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px' }}>
+                      {formData.editorial_content_pillars.map((pillar, index) => (
+                        <span key={`${pillar}-${index}`} style={{ display: 'inline-flex', gap: '6px', alignItems: 'center', padding: '6px 9px', borderRadius: '999px', background: 'var(--bg-glass)', border: '1px solid var(--border)', fontSize: '0.78rem' }}>
+                          {pillar}
+                          <button type="button" aria-label={`Hapus ${pillar}`} onClick={() => setFormData(prev => ({ ...prev, editorial_content_pillars: prev.editorial_content_pillars.filter((_, itemIndex) => itemIndex !== index) }))} style={{ border: 0, background: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0 }}>✕</button>
+                        </span>
+                      ))}
+                      {formData.editorial_content_pillars.length === 0 && <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>Belum ada pilar konten.</span>}
+                    </div>
+                  </div>
                 </div>
 
                 {/* AI WEBHOOK & STORAGE DESTINATIONS SECTION */}

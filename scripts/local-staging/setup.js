@@ -107,6 +107,10 @@ async function applyStagingMigrations(client) {
   }
   await client.query(`ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS nextcloud_parent_folder TEXT`);
   await client.query(`ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS drive_parent_folder TEXT`);
+  await client.query(`ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS editorial_brand_context TEXT`);
+  await client.query(`ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS editorial_content_goal TEXT`);
+  await client.query(`ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS editorial_content_pillars_json TEXT DEFAULT '[]'`);
+  await client.query(`UPDATE brand_profiles SET editorial_content_pillars_json='[]' WHERE editorial_content_pillars_json IS NULL`);
   await client.query(`ALTER TABLE content_flow_items ADD COLUMN IF NOT EXISTS catatan TEXT`);
   await client.query(`ALTER TABLE content_flow_items ADD COLUMN IF NOT EXISTS migration_source TEXT`);
   await client.query(`ALTER TABLE content_flow_items ADD COLUMN IF NOT EXISTS migration_batch_id TEXT`);

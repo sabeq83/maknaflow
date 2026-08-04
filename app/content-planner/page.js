@@ -3,6 +3,7 @@
 import Sidebar from '../components/Sidebar';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { getBrandEditorialDefaults, shouldHydrateBrandEditorial } from '@/lib/brand-editorial-defaults';
 
 export default function ContentPlannerDashboard() {
   const router = useRouter();
@@ -35,6 +36,9 @@ export default function ContentPlannerDashboard() {
   const [targetAudience, setTargetAudience] = useState('genz_casual');
   const [customTargetAudience, setCustomTargetAudience] = useState('');
   const [isTitleManuallyEdited, setIsTitleManuallyEdited] = useState(false);
+  const [editorialDirty, setEditorialDirty] = useState(false);
+  const [editorialSource, setEditorialSource] = useState('empty');
+  const [pendingEditorialBrandId, setPendingEditorialBrandId] = useState('');
 
   function generateAutofillTitle(accName, prodName) {
     const now = new Date();
@@ -127,6 +131,35 @@ export default function ContentPlannerDashboard() {
         }
       }
     }
+  }
+
+  function applyBrandEditorialDefaults(profile) {
+    if (!profile) return;
+    const defaults = getBrandEditorialDefaults(profile);
+    setBrandContext(defaults.brandContext);
+    setContentGoal(defaults.contentGoal);
+    setPillars(defaults.pillars);
+    setPillarDraft('');
+    setEditorialDirty(false);
+    setEditorialSource('profile');
+    setPendingEditorialBrandId('');
+  }
+
+  function handleBrandSelection(brandId) {
+    setSelectedBrandId(brandId);
+    const brand = brandProfiles.find(item => item.id === brandId);
+    const nextAccount = brand?.brand_name || accountName;
+    if (brand) setAccountName(brand.brand_name || '');
+    if (!isTitleManuallyEdited || !title) {
+      const autoTitle = generateAutofillTitle(nextAccount, productName);
+      if (autoTitle) setTitle(autoTitle);
+    }
+    if (plannerFocus !== 'brand_editorial' || !brand) return;
+    if (!shouldHydrateBrandEditorial({ dirty: editorialDirty, brandContext, contentGoal, pillars })) {
+      setPendingEditorialBrandId(brandId);
+      return;
+    }
+    applyBrandEditorialDefaults(brand);
   }
 
   function showToast(msg, type = 'success') {
@@ -589,33 +622,52 @@ export default function ContentPlannerDashboard() {
                 {/* Brand Profile Dropdown (Taruh di atas Judul Planner) */}
                 {plannerFocus === 'brand_editorial' && <>
                   <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px', fontWeight: 600 }}>🧬 Brand Profile (Akun Brand) *:</label>
+                    <select value={selectedBrandId} required onChange={e => handleBrandSelection(e.target.value)} style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}>
+                      <option value="">-- Pilih Brand Profile --</option>
+                      {brandProfiles.map(b => <option key={b.id} value={b.id}>{b.brand_name} {b.niche ? `(${b.niche})` : ''}</option>)}
+                    </select>
+                  </div>
+                  {pendingEditorialBrandId && (
+                    <div style={{ marginBottom: '16px', padding: '10px 12px', borderRadius: '8px', border: '1px solid #92400e', background: '#451a03', color: '#fde68a', fontSize: '12px' }}>
+                      Isian editorial sudah Anda ubah. Nilai tidak ditimpa otomatis.
+                      <button type="button" onClick={() => applyBrandEditorialDefaults(brandProfiles.find(item => item.id === pendingEditorialBrandId))} style={{ marginLeft: '8px', padding: '5px 8px', borderRadius: '6px', border: '1px solid #f59e0b', background: 'transparent', color: '#fcd34d', cursor: 'pointer' }}>Muat default brand terpilih</button>
+                    </div>
+                  )}
+                  {selectedBrandId && !pendingEditorialBrandId && (
+                    <div style={{ marginBottom: '12px', color: editorialSource === 'profile' && !editorialDirty ? '#86efac' : '#c4b5fd', fontSize: '12px' }}>
+                      {editorialSource === 'profile' && !editorialDirty ? '✓ Default dari Brand Profile' : '✎ Disesuaikan untuk planner ini'}
+                      {editorialDirty && <button type="button" onClick={() => applyBrandEditorialDefaults(brandProfiles.find(item => item.id === selectedBrandId))} style={{ marginLeft: '8px', border: 0, background: 'none', color: '#a5b4fc', textDecoration: 'underline', cursor: 'pointer' }}>Muat ulang default</button>}
+                    </div>
+                  )}
+                  <div style={{ marginBottom: '16px' }}>
                     <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px', fontWeight: 600 }}>Konteks Brand *:</label>
-                    <textarea required rows={3} placeholder="Jelaskan niche, positioning, dan nilai akun..." value={brandContext} onChange={e => setBrandContext(e.target.value)} style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }} />
+                    <textarea required rows={3} maxLength={4000} placeholder="Jelaskan niche, positioning, dan nilai akun..." value={brandContext} onChange={e => { setBrandContext(e.target.value); setEditorialDirty(true); setEditorialSource('custom'); }} style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }} />
                   </div>
                   <div style={{ marginBottom: '16px' }}>
                     <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px', fontWeight: 600 }}>Tujuan Konten:</label>
-                    <textarea rows={2} placeholder="misal: Bangun authority, save, share, dan follow" value={contentGoal} onChange={e => setContentGoal(e.target.value)} style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }} />
+                    <textarea rows={2} maxLength={2000} placeholder="misal: Bangun authority, save, share, dan follow" value={contentGoal} onChange={e => { setContentGoal(e.target.value); setEditorialDirty(true); setEditorialSource('custom'); }} style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }} />
                   </div>
                   <div style={{ marginBottom: '16px' }}>
                     <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px', fontWeight: 600 }}>Pilar Konten *:</label>
                     <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-                      <input value={pillarDraft} onChange={e => setPillarDraft(e.target.value)} onKeyDown={e => {
+                      <input value={pillarDraft} maxLength={120} onChange={e => setPillarDraft(e.target.value)} onKeyDown={e => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
                           const value = pillarDraft.trim();
-                          if (value && !pillars.some(p => p.toLowerCase() === value.toLowerCase())) setPillars([...pillars, value]);
+                          if (value && pillars.length < 12 && !pillars.some(p => p.toLowerCase() === value.toLowerCase())) { setPillars([...pillars, value]); setEditorialDirty(true); setEditorialSource('custom'); }
                           setPillarDraft('');
                         }
                       }} placeholder="misal: Healthy Breakfast" style={{ flex: 1, padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }} />
                       <button type="button" onClick={() => {
                         const value = pillarDraft.trim();
-                        if (value && !pillars.some(p => p.toLowerCase() === value.toLowerCase())) setPillars([...pillars, value]);
+                        if (value && pillars.length < 12 && !pillars.some(p => p.toLowerCase() === value.toLowerCase())) { setPillars([...pillars, value]); setEditorialDirty(true); setEditorialSource('custom'); }
                         setPillarDraft('');
                       }} style={{ padding: '10px 14px', border: 0, borderRadius: '8px', background: '#4f46e5', color: '#fff', cursor: 'pointer' }}>+ Tambah</button>
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px' }}>
                       {pillars.map((pillar, index) => <span key={pillar} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 9px', borderRadius: '999px', background: '#27272a', color: '#e4e4e7', fontSize: '12px' }}>
-                        {pillar}<button type="button" aria-label={`Hapus ${pillar}`} onClick={() => setPillars(pillars.filter((_, i) => i !== index))} style={{ border: 0, background: 'none', color: '#a1a1aa', cursor: 'pointer', padding: 0 }}>✕</button>
+                        {pillar}<button type="button" aria-label={`Hapus ${pillar}`} onClick={() => { setPillars(pillars.filter((_, i) => i !== index)); setEditorialDirty(true); setEditorialSource('custom'); }} style={{ border: 0, background: 'none', color: '#a1a1aa', cursor: 'pointer', padding: 0 }}>✕</button>
                       </span>)}
                       {pillars.length === 0 && <span style={{ color: '#71717a', fontSize: '12px' }}>Belum ada pilar.</span>}
                     </div>
@@ -630,25 +682,13 @@ export default function ContentPlannerDashboard() {
                   </div>
                 </>}
 
-                <div style={{ marginBottom: '16px' }}>
+                {plannerFocus === 'product_campaign' && <div style={{ marginBottom: '16px' }}>
                   <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px', fontWeight: 600 }}>
                     🧬 Brand Profile (Akun Brand):
                   </label>
                   <select
                     value={selectedBrandId}
-                    onChange={e => {
-                      const bId = e.target.value;
-                      setSelectedBrandId(bId);
-                      const b = brandProfiles.find(item => item.id === bId);
-                      const acc = b ? (b.brand_name || '') : accountName;
-                      if (b) {
-                        setAccountName(b.brand_name || '');
-                      }
-                      if (!isTitleManuallyEdited || !title) {
-                        const autoTitle = generateAutofillTitle(acc, productName);
-                        if (autoTitle) setTitle(autoTitle);
-                      }
-                    }}
+                    onChange={e => handleBrandSelection(e.target.value)}
                     style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
                   >
                     <option value="">-- Pilih Brand Profile (Opsional) --</option>
@@ -658,7 +698,7 @@ export default function ContentPlannerDashboard() {
                       </option>
                     ))}
                   </select>
-                </div>
+                </div>}
 
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
