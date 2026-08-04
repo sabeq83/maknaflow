@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.169 — Fix Nextcloud checkAndCreateFolder guard and awaited batch IDs (04/08/2026)
+- Tambahkan defensive guard pada checkAndCreateFolder di nextcloud-helper
+- Tambahkan await pada getReBatchId dan getIfcBatchId di scheduler-processors
+
 ## V2.2.168 — Fix query ambiguity in ContentFlow Sync (04/08/2026)
 - Spesifikasikan filter tenant_id secara eksplisit pada query JOIN di contentflow-ingest
 - Sematkan -- tenant_id pada query shared tables untuk mem-bypass interseptor otomatis
