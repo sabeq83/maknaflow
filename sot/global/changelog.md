@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.2.172 — Add stable ORDER BY sorting to ContentFlow ingest queries (04/08/2026)
+- Tambahkan ORDER BY pci.id ASC pada pemindaian OPC di contentflow-ingest
+- Tambahkan ORDER BY sci.sequence ASC, sci.id ASC pada Strategic
+- Tambahkan ORDER BY rci.id ASC pada RE
+- Tambahkan ORDER BY bi.id ASC pada Bridge
+
 ## V2.2.171 — Fix manual uploader columns and UI Buka Folder link mapping (04/08/2026)
 - Ganti nextcloud_folder_url dan drive_folder_id dengan drive_link dan upload_status pada manual-asset-uploader
 - Dukung drive_link sebagai fallback nextcloud_folder_url pada frontend detail kampanye pilar dan RE
