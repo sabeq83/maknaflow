@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.171 — Fix manual uploader columns and UI Buka Folder link mapping (04/08/2026)
+- Ganti nextcloud_folder_url dan drive_folder_id dengan drive_link dan upload_status pada manual-asset-uploader
+- Dukung drive_link sebagai fallback nextcloud_folder_url pada frontend detail kampanye pilar dan RE
+
 ## V2.2.170 — Fix Nextcloud exists-bug in checkAndCreateFolder (04/08/2026)
 - Bypass client.exists di nextcloud-helper dengan try/catch pada client.createDirectory
 

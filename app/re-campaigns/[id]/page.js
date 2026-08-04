@@ -3736,9 +3736,9 @@ export default function RECampaignDetailPage() {
                   </span>
                 </div>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  {item.nextcloud_folder_url && (
+                  {(item.drive_link || item.nextcloud_folder_url) && (
                     <a
-                      href={item.nextcloud_folder_url}
+                      href={item.drive_link || item.nextcloud_folder_url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn btn-secondary btn-sm"
