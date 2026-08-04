@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.185 — Fix RE campaign Nextcloud sync timing and pure T2V mode handling (05/08/2026)
+- Remove redundant cloud sync from processReTts
+- Make isHybridLockClip dynamic based on visualMode
+- Add aspect_ratio to T2V generation calls
+
 ## V2.2.184 — Fix RE campaigns T2V prompt structured layer formatting (04/08/2026)
 - Update buildReverseEngineeringPrompt and buildReverseEngineeringBridgePrompt to output structured, layered T2V prompts matching the OPC style
 
