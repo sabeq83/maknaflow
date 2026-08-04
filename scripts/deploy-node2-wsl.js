@@ -96,8 +96,8 @@ upsert_env() {
   fi
 }
 upsert_env ENABLE_BACKGROUND_SERVICES true
-upsert_env ENABLE_CAMPAIGN_SCHEDULER false
-upsert_env ENABLE_SCHEDULER_WORKER false
+upsert_env ENABLE_CAMPAIGN_SCHEDULER true
+upsert_env ENABLE_SCHEDULER_WORKER true
 upsert_env MAKNA_SCHEDULER 0
 upsert_env ENABLE_OPERATOR_WORKER true
 upsert_env ENABLE_CONTENT_AUTOMATION_WORKER true

@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.156 — Fix Staging Node 2 Campaign Scheduler (04/08/2026)
+- Mengaktifkan campaign scheduler secara default pada deployment Node 2 Staging
+- Memperbaiki kendala kampanye opc_260804_opb4zk yang tertahan di status pending
+
 ## V2.2.155 — Dynamic Row Count Brand Editorial (04/08/2026)
 - Jumlah baris Brand Editorial mengikuti kelipatan pilar hingga maksimal 30
 - Validasi count konsisten pada draft dan eksekusi
