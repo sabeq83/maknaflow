@@ -525,6 +525,6 @@ Kontrak planner dan Brand Profile memakai batas yang sama sehingga UI tidak dapa
 - [x] Pastikan planner tetap menyimpan snapshot, bukan live reference.
 - [x] Tambahkan regression test normalisasi, tenant, hydration, dan snapshot.
 - [x] Jalankan automated verification dan build.
-- [ ] Rilis patch dan sinkronkan `local-staging`, `main`, serta tag.
-- [ ] Deploy Node 2 dengan single-pass deployment.
-- [ ] Smoke test create/edit Brand Profile dan create Brand Editorial planner.
+- [x] Rilis patch dan sinkronkan `local-staging`, `main`, serta tag.
+- [x] Deploy Node 2 dengan single-pass deployment.
+- [ ] Smoke test UI create/edit Brand Profile dan create Brand Editorial planner (regression backend Node 2 lulus; sesi browser belum login dan kredensial staging environment ditolak).
