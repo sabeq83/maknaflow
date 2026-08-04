@@ -142,13 +142,12 @@ export default function ImportPlannerModal({
         setProductRefImage(p.product_ref_image || p.product_photo_url || '');
         if (p.planner_focus === 'brand_editorial') {
           setIsBridgingActive(false);
-          setCustomInstruction(p.brand_context || '');
         } else {
           setIsBridgingActive(true);
-          setCustomInstruction(p.custom_instruction || '');
         }
+        setCustomInstruction('');
+        setAiDirective('Konten edukasi brand; jangan mengarang atau membahas produk tertentu.');
         const instructions = resolvePlannerInstructions(p);
-        setAiDirective(instructions.aiDirective || 'Konten edukasi brand; jangan mengarang atau membahas produk tertentu.');
         setMandatoryOutroLine(instructions.mandatoryOutroLine || 'jangan lupa follow dan komen mau ya!');
         if (p.target_audience) {
           setTargetDemographic(p.target_audience);

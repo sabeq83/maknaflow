@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.177 — Enforce blank Custom Instruction and fixed AI Directive overrides (04/08/2026)
+- Always set customInstruction to empty string
+- Enforce AI Directive staging override for brand editorial focus
+
 ## V2.2.176 — Set ImportPlannerModal customInstruction to empty by default (04/08/2026)
 - Empty Custom Instruction (Instruksi Tambahan AI) by default on load and state
 
