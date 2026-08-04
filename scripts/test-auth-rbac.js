@@ -16,7 +16,7 @@ try {
 
   // Test 1: Verify Default Admin Account
   console.log('\n[Test 1] Testing Default Admin Credentials...');
-  const adminLogin = loginUser('admin', 'admin123');
+  const adminLogin = await loginUser('admin', 'admin123');
   if (adminLogin.success) {
     console.log(` ✅ Default Admin Login PASSED! User ID: ${adminLogin.user.id}, Role: ${adminLogin.user.role}`);
     const adminSession = getSessionUser(adminLogin.token);
@@ -30,30 +30,31 @@ try {
   const testUserId = `usr_test_${Date.now()}`;
   const testUserPassword = hashPassword('password123');
   
+  await db.prepare('DELETE FROM users WHERE username = ?').run('staff_user_a');
   await db.prepare(`
-    INSERT OR REPLACE INTO users (id, username, email, password_hash, role, status)
+    INSERT INTO users (id, username, email, password_hash, role, status)
     VALUES (?, ?, ?, ?, 'user', 'active')
   `).run(testUserId, 'staff_user_a', 'staffa@makna.grid', testUserPassword);
 
-  // Grant specific menu permissions: strategic_campaign & content_planner ONLY
+  // Grant specific menu permissions: re_campaign & content_planner ONLY
   await db.prepare('DELETE FROM user_menu_permissions WHERE user_id = ?').run(testUserId);
   await db.prepare(`
     INSERT INTO user_menu_permissions (id, user_id, menu_key, can_read, can_write)
-    VALUES (?, ?, 'strategic_campaign', 1, 1), (?, ?, 'content_planner', 1, 1)
-  `).run(`perm_${testUserId}_sc`, testUserId, `perm_${testUserId}_cp`, testUserId);
+    VALUES (?, ?, 're_campaign', 1, 1), (?, ?, 'content_planner', 1, 1)
+  `).run(`perm_${testUserId}_rc`, testUserId, `perm_${testUserId}_cp`, testUserId);
 
-  console.log(' ✅ User "staff_user_a" created with 2 granted menus (strategic_campaign, content_planner)');
+  console.log(' ✅ User "staff_user_a" created with 2 granted menus (re_campaign, content_planner)');
 
   // Test 3: Authenticate Regular User & Check Restricted Permissions
   console.log('\n[Test 3] Testing User Authentication & Restricted Permissions...');
-  const userLogin = loginUser('staff_user_a', 'password123');
+  const userLogin = await loginUser('staff_user_a', 'password123');
   if (userLogin.success) {
     console.log(` ✅ User Login PASSED! Role: ${userLogin.user.role}`);
     const userSession = getSessionUser(userLogin.token);
     console.log(` ✅ User Permitted Menus:`, userSession.menuPermissions);
     
-    if (userSession.menuPermissions.includes('strategic_campaign') && !userSession.menuPermissions.includes('system_settings')) {
-      console.log(' ✅ Menu Access Guard PASSED! (strategic_campaign ALLOWED, system_settings RESTRICTED)');
+    if (userSession.menuPermissions.includes('re_campaign') && !userSession.menuPermissions.includes('system_settings')) {
+      console.log(' ✅ Menu Access Guard PASSED! (re_campaign ALLOWED, system_settings RESTRICTED)');
     } else {
       console.error(' ❌ Menu Access Guard FAILED!');
     }

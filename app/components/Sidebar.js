@@ -5,17 +5,17 @@ import Link from 'next/link';
 import { useState, useEffect, Suspense } from 'react';
 
 const menuKeyMap = {
-  '/content-flow': 'content_planner',
+  '/content-flow': 'content_flow',
   '/instant-factory': 'instant_campaign',
-  '/re-campaigns': 'opc_mass_bridging',
+  '/re-campaigns': 're_campaign',
   '/pillar-campaigns': 'pillar_campaign',
   '/content-planner': 'content_planner',
-  '/content-automations': 'content_planner',
+  '/content-automations': 'content_automations',
   '/products': 'product_database',
-  '/deconstruct': 'opc_mass_bridging',
-  '/multiplier-lab': 'bridge_injector',
+  '/deconstruct': 'deconstruct_lab',
+  '/multiplier-lab': 'multiplier_lab',
   '/recipe-labs': 'recipe_labs',
-  '/product-bridge-inject': 'bridge_injector',
+  '/product-bridge-inject': 'product_bridging',
   '/sheets-autopilot': 'sheets_autopilot',
   '/video-studio': 'ffmpeg_studio',
   '/tts-studio': 'tts_studio',
@@ -24,7 +24,7 @@ const menuKeyMap = {
   '/settings/users': 'admin_only',
   '/settings/tenants': 'superadmin_only',
   '/settings': 'system_settings',
-  '/system-health': 'system_settings'
+  '/system-health': 'system_health'
 };
 
 const navItems = [

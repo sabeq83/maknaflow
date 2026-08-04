@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.157 — Realignment Access Permission RBAC (04/08/2026)
+- Menyelaraskan kunci hak akses menu (Access Permissions) dengan menu navigasi sidebar aktif
+- Memisahkan hak akses menu yang sebelumnya digabungkan untuk presisi kontrol akses
+- Menambahkan migrasi otomatis schema perizinan menu lama saat server booting
+
 ## V2.2.156 — Fix Staging Node 2 Campaign Scheduler (04/08/2026)
 - Mengaktifkan campaign scheduler secara default pada deployment Node 2 Staging
 - Memperbaiki kendala kampanye opc_260804_opb4zk yang tertahan di status pending
