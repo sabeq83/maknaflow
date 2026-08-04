@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.178 — Fix ReferenceError ffmpeg_music_volume in RE campaigns (04/08/2026)
+- Remove redundant duplicate parameters in createReCampaign call
+- Remove reference to undefined ffmpeg_music_volume
+
 ## V2.2.177 — Enforce blank Custom Instruction and fixed AI Directive overrides (04/08/2026)
 - Always set customInstruction to empty string
 - Enforce AI Directive staging override for brand editorial focus
