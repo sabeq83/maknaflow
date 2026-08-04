@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.170 — Fix Nextcloud exists-bug in checkAndCreateFolder (04/08/2026)
+- Bypass client.exists di nextcloud-helper dengan try/catch pada client.createDirectory
+
 ## V2.2.169 — Fix Nextcloud checkAndCreateFolder guard and awaited batch IDs (04/08/2026)
 - Tambahkan defensive guard pada checkAndCreateFolder di nextcloud-helper
 - Tambahkan await pada getReBatchId dan getIfcBatchId di scheduler-processors

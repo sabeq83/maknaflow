@@ -1,24 +1,23 @@
-import { getDb } from '../lib/db.js';
+import { getDb, loadDbCaches } from '../lib/db.js';
+import { syncItemAssetsToCloud } from '../lib/manual-asset-uploader.js';
 
 async function main() {
+  // Explicitly initialize caches first to bypass the 500ms deferred startup delay
+  await loadDbCaches();
+
   const db = getDb();
   try {
-    const campaignId = 'opc_260804_opb4zk';
-    console.log(`=== Inspecting Campaign ${campaignId} ===`);
-    const campaign = await db.prepare('SELECT * FROM pillar_campaigns WHERE id = ? -- tenant_id').get(campaignId);
-    console.log('Campaign details:', campaign);
+    const itemId = 46;
+    console.log(`=== Starting manual upload sync for Item #${itemId} ===`);
+    const result = await syncItemAssetsToCloud('opc', itemId);
+    console.log('Upload sync result:', result);
 
-    console.log('\n=== Campaign Items ===');
-    const items = await db.prepare('SELECT id, campaign_id, tts_batch_id, ffmpeg_status, upload_status, drive_link, result_json FROM pillar_campaign_items WHERE campaign_id = ? -- tenant_id').all(campaignId);
-    for (const item of items) {
-      console.log(`Item ID: ${item.id}`);
-      console.log(`  ffmpeg_status: ${item.ffmpeg_status}`);
-      console.log(`  upload_status: ${item.upload_status}`);
-      console.log(`  drive_link   : ${item.drive_link}`);
-      console.log(`  result_json length: ${item.result_json ? item.result_json.length : 0}`);
-    }
+    console.log('\n=== Checking updated database row status ===');
+    const item = await db.prepare('SELECT id, upload_status, drive_link FROM pillar_campaign_items WHERE id = ? -- tenant_id').get(itemId);
+    console.log(item);
   } catch (err) {
-    console.error('Error during inspection:', err);
+    console.error('Error during manual sync:', err);
+    console.error('Error stack:', err.stack);
   }
   process.exit(0);
 }
