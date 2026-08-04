@@ -545,8 +545,8 @@ Setelah database rollback, hapus hanya aset yang tercantum pada manifest batch d
 - [x] Jalankan dry-run collision terhadap 50 row target existing.
 - [x] Review dan setujui report collision sebelum commit (skip `opc_32`–`opc_36`, target wins).
 - [x] Transfer serta verifikasi aset kandidat secara resumable.
-- [ ] Ambil backup target final sebelum data commit.
-- [ ] Commit metadata import menggunakan approved dry-run hash.
-- [ ] Verifikasi count, tenant, status, permalink, dan asset status.
-- [ ] Jalankan smoke test UI filter/search/edit dan pemutaran aset.
-- [ ] Simpan manifest final, report, backup reference, dan rollback token.
+- [x] Ambil backup target final sebelum data commit.
+- [x] Commit metadata import menggunakan approved dry-run hash.
+- [x] Verifikasi count, tenant, status, permalink, dan asset status.
+- [ ] Jalankan smoke test UI filter/search/edit dan pemutaran aset (browser tersedia masih di halaman login; verifikasi server/API data selesai).
+- [x] Simpan manifest final, report, backup reference, dan rollback token.
