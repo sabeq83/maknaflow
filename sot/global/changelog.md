@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.168 — Fix query ambiguity in ContentFlow Sync (04/08/2026)
+- Spesifikasikan filter tenant_id secara eksplisit pada query JOIN di contentflow-ingest
+- Sematkan -- tenant_id pada query shared tables untuk mem-bypass interseptor otomatis
+
 ## V2.2.167 — Fix isBridge visual_mode check (04/08/2026)
 - Batasi status isBridge hanya pada visual_mode hybrid_lock di detail pilar
 
