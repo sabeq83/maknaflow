@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.161 — Fix query isolation whitespace and join bugs (04/08/2026)
+- Fix query interceptor leading whitespace bypass
+- Qualify tenant_id in join queries to avoid ambiguous columns
+
 ## V2.2.160 — Fix Settings API syntax wrapper (04/08/2026)
 - Perbaiki penutup bracket GET dan POST handler di app/api/settings
 
