@@ -98,7 +98,7 @@ async function applyStagingMigrations(client) {
   await client.query(`CREATE TABLE IF NOT EXISTS tenant_settings (tenant_id TEXT NOT NULL, setting_key TEXT NOT NULL, setting_value TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (tenant_id, setting_key))`);
   await client.query(`INSERT INTO tenants (id, name) VALUES ('default_tenant', 'Local Staging') ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name`);
 
-  const tenantTables = ['users', 'brand_profiles', 'gemini_api_keys', 'content_planners', 'strategic_campaigns', 'pillar_campaigns', 're_campaigns', 'instant_campaigns', 'product_extractions', 'ideas', 'knowledge_bases'];
+  const tenantTables = ['users', 'brand_profiles', 'gemini_api_keys', 'content_planners', 'strategic_campaigns', 'pillar_campaigns', 're_campaigns', 'instant_campaigns', 'product_extractions', 'content_flow_items', 'ideas', 'knowledge_bases'];
   for (const table of tenantTables) {
     const exists = await client.query('SELECT to_regclass($1) AS table_name', [`public.${table}`]);
     if (exists.rows[0].table_name) {
@@ -108,6 +108,17 @@ async function applyStagingMigrations(client) {
   await client.query(`ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS nextcloud_parent_folder TEXT`);
   await client.query(`ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS drive_parent_folder TEXT`);
   await client.query(`ALTER TABLE content_flow_items ADD COLUMN IF NOT EXISTS catatan TEXT`);
+  await client.query(`ALTER TABLE content_flow_items ADD COLUMN IF NOT EXISTS migration_source TEXT`);
+  await client.query(`ALTER TABLE content_flow_items ADD COLUMN IF NOT EXISTS migration_batch_id TEXT`);
+  await client.query(`ALTER TABLE content_flow_items ADD COLUMN IF NOT EXISTS legacy_id TEXT`);
+  await client.query(`ALTER TABLE content_flow_items ADD COLUMN IF NOT EXISTS legacy_url_asset TEXT`);
+  await client.query(`ALTER TABLE content_flow_items ADD COLUMN IF NOT EXISTS asset_migration_status TEXT`);
+  await client.query(`UPDATE content_flow_items SET tenant_id='default_tenant' WHERE tenant_id IS NULL`);
+  await client.query(`ALTER TABLE content_flow_items ALTER COLUMN tenant_id SET DEFAULT 'default_tenant'`);
+  await client.query(`ALTER TABLE content_flow_items ALTER COLUMN tenant_id SET NOT NULL`);
+  await client.query(`CREATE INDEX IF NOT EXISTS content_flow_items_tenant_created_idx ON content_flow_items(tenant_id,created_at DESC)`);
+  await client.query(`CREATE INDEX IF NOT EXISTS content_flow_items_tenant_source_idx ON content_flow_items(tenant_id,source_type,source_campaign_id,source_item_id)`);
+  await client.query(`CREATE UNIQUE INDEX IF NOT EXISTS content_flow_items_tenant_video_uq ON content_flow_items(tenant_id,video_id)`);
   await client.query(`ALTER TABLE content_planners ADD COLUMN IF NOT EXISTS planner_focus TEXT DEFAULT 'product_campaign'`);
   await client.query(`ALTER TABLE content_planners ADD COLUMN IF NOT EXISTS brand_context TEXT`);
   await client.query(`ALTER TABLE content_planners ADD COLUMN IF NOT EXISTS content_goal TEXT`);

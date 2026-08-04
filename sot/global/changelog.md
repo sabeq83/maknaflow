@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.152 — Hardening dan Migrasi ContentFlow Legacy (04/08/2026)
+- Tenant isolation PostgreSQL untuk seluruh operasi ContentFlow
+- Migrasi legacy dengan dry-run collision gate dan rollback batch
+- Transfer aset resumable dengan verifikasi SHA-256
+
 ## V2.2.151 — Perbaiki Impor ZIP Produk PostgreSQL (04/08/2026)
 - Hilangkan sukses palsu dan gunakan transaksi PostgreSQL nyata
 - Terapkan repository produk tenant-scoped untuk CRUD impor dan ekspor

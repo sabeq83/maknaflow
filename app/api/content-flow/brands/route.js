@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { deleteContentFlowBrandItems } from '@/lib/db';
-import { pgQuery } from '@/lib/db-pg';
+import { deleteContentFlowAccount } from '@/lib/contentflow-repository';
 import { getCurrentUser } from '@/lib/auth';
 
 export async function DELETE(request) {
@@ -16,15 +15,7 @@ export async function DELETE(request) {
       return NextResponse.json({ success: false, error: 'Nama brand tidak valid' }, { status: 400 });
     }
 
-    // 1. Delete brand items from PostgreSQL Node 3 Storage DB
-    try {
-      await pgQuery('DELETE FROM content_flow_items WHERE account_name = $1;', [accountName]);
-    } catch (pgErr) {
-      console.warn('[API DELETE Brand PG Error]', pgErr.message);
-    }
-
-    // 2. Delete brand items from SQLite Node 1 local DB
-    const deletedCount = await deleteContentFlowBrandItems(accountName);
+    const deletedCount = await deleteContentFlowAccount(accountName);
 
     return NextResponse.json({ success: true, message: `Seluruh konten brand ${accountName} berhasil dihapus (${deletedCount} items)` });
   } catch (error) {
