@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.183 — Fix missing awaits on campaign query promises (04/08/2026)
+- Add missing awaits to getReCampaign, getPillarCampaign, getInstantCampaign, and getRecipeCampaignById inside scheduler-processors.js
+
 ## V2.2.182 — Fix unawaited async database calls in scheduler (04/08/2026)
 - Add missing awaits to getAllKnowledgeBasesWithContent and getBrandProfile in scheduler-processors.js and sheets-autopilot-worker.js
 
