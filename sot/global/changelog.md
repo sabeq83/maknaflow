@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.189 — Use custom env parser in query script (05/08/2026)
+- Remove dotenv dependency in query script
+
 ## V2.2.188 — Add database check script for RE campaigns (05/08/2026)
 - Add scripts/query-campaign.js for inspection
 
