@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.165 — Fix admin brand mapping and remove sidebar default brand fallback (04/08/2026)
+- Allow admin role to access all brand profiles of active tenant in buildUserObject
+- Remove hardcoded default brand fallback list in Sidebar
+
 ## V2.2.164 — Isolate Content Planner and Brand Schedules routes by tenant (04/08/2026)
 - Wrap all Content Planner endpoints in withTenantContext
 - Wrap brand schedules endpoint and add brand profile tenant ownership validation

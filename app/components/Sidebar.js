@@ -179,9 +179,9 @@ function SidebarContent() {
           const isContentFlow = item.href === '/content-flow';
 
           // Get assigned brand accounts from user
-          const userBrandAccounts = (user && Array.isArray(user.assignedBrandNames) && user.assignedBrandNames.length > 0)
+          const userBrandAccounts = (user && Array.isArray(user.assignedBrandNames))
             ? user.assignedBrandNames
-            : ['nutribake', 'siasatsehat', 'nutriblend', 'dapurbotani'];
+            : [];
 
           return (
             <div key={item.href}>
