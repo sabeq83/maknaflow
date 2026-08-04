@@ -1,3 +1,5 @@
+import { NextResponse } from 'next/server';
+import { testNextcloudConnection } from '@/lib/nextcloud-helper';
 import { withTenantContext } from '@/lib/auth';
 import { getSetting } from '@/lib/db';
 import { isNewSecret } from '@/lib/secret-values';
@@ -24,4 +26,4 @@ export const POST = withTenantContext(async (request, _context, user) => {
   } catch (error) {
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
-}
+});

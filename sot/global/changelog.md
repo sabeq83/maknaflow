@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.163 — Fix syntax error and restore imports in test-nextcloud route (04/08/2026)
+- Fix nextcloud test route closing parentheses syntax
+- Restore missing NextResponse and testNextcloudConnection imports
+
 ## V2.2.162 — Fix handler parameter mapping for non-dynamic routes (04/08/2026)
 - Fix Next.js context shift that caused role check bypass/denial
 - Wrap settings nextcloud test route in withTenantContext
