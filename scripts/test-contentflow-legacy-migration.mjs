@@ -68,6 +68,10 @@ try {
   const collisionReport = JSON.parse(runImporter(collisionArtifact, 'dry-run'));
   assert.equal(collisionReport.counts.conflict_divergent, 1);
   assert.throws(() => runImporter(collisionArtifact, 'commit', ['--approve-hash', collisionReport.report_hash]));
+  const skippedCollision = JSON.parse(runImporter(collisionArtifact, 'commit', ['--approve-hash', collisionReport.report_hash, '--allow-skip-conflicts', 'true']));
+  assert.equal(skippedCollision.inserted, 0);
+  assert.equal(skippedCollision.skipped_divergent, 1);
+  assert.equal((await client.query('SELECT campaign_title FROM content_flow_items WHERE id=$1', [collisionId])).rows[0].campaign_title, 'Target wins');
 
   const readyId = `cf_ready_${suffix}`;
   const readyBatch = `batch_ready_${suffix}`;

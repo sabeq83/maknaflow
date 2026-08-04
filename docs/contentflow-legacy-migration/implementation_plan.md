@@ -358,6 +358,7 @@ Exporter dijalankan di Node 1 dari snapshot database yang konsisten, bukan datab
 // --mode rollback : membutuhkan migration_batch_id dan confirmation token.
 
 // commit:
+// --allow-skip-conflicts true hanya setelah approval eksplisit target_wins.
 // BEGIN
 // CREATE TEMP TABLE legacy_contentflow_stage (...)
 // COPY/insert JSONL ke staging
@@ -534,16 +535,16 @@ Setelah database rollback, hapus hanya aset yang tercantum pada manifest batch d
 - [x] Migrasikan DELETE `/api/content-flow/brands` ke tenant-scoped repository.
 - [x] Tambahkan regression test tenant, collision, manifest, dan rollback.
 - [x] Jalankan seluruh automated verification Phase A.
-- [ ] Rilis patch dan sinkronkan branch `main` serta tag.
-- [ ] Deploy hardening ke Node 2 dengan single-pass deployment.
-- [ ] Smoke test ContentFlow target sebelum migrasi data.
-- [ ] Buat snapshot read-only SQLite MAKNA Grid Node 1.
-- [ ] Export JSONL: 542 kandidat include dan 56 row exclude.
-- [ ] Buat manifest metadata/aset beserta SHA-256.
-- [ ] Verifikasi brand profile target termasuk `umum`.
-- [ ] Jalankan dry-run collision terhadap 50 row target existing.
-- [ ] Review dan setujui report collision sebelum commit.
-- [ ] Transfer serta verifikasi aset kandidat secara resumable.
+- [x] Rilis patch dan sinkronkan branch `main` serta tag.
+- [x] Deploy hardening ke Node 2 dengan single-pass deployment.
+- [x] Smoke test ContentFlow target sebelum migrasi data.
+- [x] Buat snapshot read-only SQLite MAKNA Grid Node 1.
+- [x] Export JSONL: 542 kandidat include dan 56 row exclude.
+- [x] Buat manifest metadata/aset beserta SHA-256.
+- [x] Verifikasi brand profile target termasuk `umum`.
+- [x] Jalankan dry-run collision terhadap 50 row target existing.
+- [x] Review dan setujui report collision sebelum commit (skip `opc_32`–`opc_36`, target wins).
+- [x] Transfer serta verifikasi aset kandidat secara resumable.
 - [ ] Ambil backup target final sebelum data commit.
 - [ ] Commit metadata import menggunakan approved dry-run hash.
 - [ ] Verifikasi count, tenant, status, permalink, dan asset status.

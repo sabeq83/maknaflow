@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.153 — Approval Skip Konflik ContentFlow (04/08/2026)
+- Commit migrasi mendukung skip konflik yang disetujui eksplisit
+- Dry-run hash tetap wajib dan data target tetap dipertahankan
+- Regression test memastikan collision tidak tertimpa
+
 ## V2.2.152 — Hardening dan Migrasi ContentFlow Legacy (04/08/2026)
 - Tenant isolation PostgreSQL untuk seluruh operasi ContentFlow
 - Migrasi legacy dengan dry-run collision gate dan rollback batch

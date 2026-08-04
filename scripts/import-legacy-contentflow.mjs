@@ -53,7 +53,8 @@ async function buildDryRun() {
 
 async function commit(report) {
   if (!parsed['approve-hash'] || parsed['approve-hash'] !== report.report_hash) throw new Error('--approve-hash must match dry-run report_hash.');
-  if (report.conflicts.length) throw new Error(`${report.conflicts.length} divergent collision(s) require review.`);
+  const allowSkipConflicts = parsed['allow-skip-conflicts'] === 'true';
+  if (report.conflicts.length && !allowSkipConflicts) throw new Error(`${report.conflicts.length} divergent collision(s) require review; pass --allow-skip-conflicts true only after explicit approval.`);
   const ready = new Set(report.ready_ids.map(String));
   const fields = ['id', ...canonicalFields, 'created_at', 'updated_at'];
   await client.query('BEGIN');
@@ -75,7 +76,7 @@ async function commit(report) {
     }
     if (inserted !== report.counts.ready) throw new Error(`Inserted ${inserted}; expected ${report.counts.ready}.`);
     await client.query('COMMIT');
-    return { inserted };
+    return { inserted, skipped_divergent: report.conflicts.length };
   } catch (error) {
     await client.query('ROLLBACK');
     throw error;
