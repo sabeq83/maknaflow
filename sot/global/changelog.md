@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.182 — Fix unawaited async database calls in scheduler (04/08/2026)
+- Add missing awaits to getAllKnowledgeBasesWithContent and getBrandProfile in scheduler-processors.js and sheets-autopilot-worker.js
+
 ## V2.2.181 — Fix not-null constraint violation on campaign items id (04/08/2026)
 - Add id sequences for re_campaign_items and bridge_injector_items to prevent null value violations
 
