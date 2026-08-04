@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.188 — Add database check script for RE campaigns (05/08/2026)
+- Add scripts/query-campaign.js for inspection
+
 ## V2.2.187 — Fix dynamic require of db in campaign-scheduler (05/08/2026)
 - Remove redundant require('db') from campaign loop in campaign-scheduler.js to fix TypeError: g is not a function in Next.js bundle
 
