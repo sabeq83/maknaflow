@@ -26,8 +26,8 @@ export default function ImportPlannerModal({
   const [selectedBrandId, setSelectedBrandId] = useState('');
   const [nextcloudParentFolder, setNextcloudParentFolder] = useState('/MAKNA_Assets');
   const [customInstruction, setCustomInstruction] = useState('akhiran skrip/voiceover : produk ori ada di keranjang ya!');
-  const [aiDirective, setAiDirective] = useState('');
-  const [mandatoryOutroLine, setMandatoryOutroLine] = useState('');
+  const [aiDirective, setAiDirective] = useState('Konten edukasi brand; jangan mengarang atau membahas produk tertentu.');
+  const [mandatoryOutroLine, setMandatoryOutroLine] = useState('jangan lupa follow dan komen mau ya!');
 
   // Accordion 1: Strategy & Compliance
   const [narrativeMode, setNarrativeMode] = useState('auto'); // 'auto' | 'Storytelling' | 'Promo Hard Sell' | 'Educational Review'
@@ -52,7 +52,7 @@ export default function ImportPlannerModal({
   const [targetDemographic, setTargetDemographic] = useState('genz_casual');
   const [targetDemographicCustom, setTargetDemographicCustom] = useState('');
   const [faceVisibility, setFaceVisibility] = useState('Faceless'); // 'Faceless' | 'POV' | 'Silhouette' | 'cartoon_face'
-  const [targetClipsCount, setTargetClipsCount] = useState(4); // Isian bebas number
+  const [targetClipsCount, setTargetClipsCount] = useState(3); // Isian bebas number
   const [wordsPerClip, setWordsPerClip] = useState('20-22 kata');
   const [visualMode, setVisualMode] = useState('hybrid_lock'); // 'hybrid_lock' | 'pure_t2v'
 
@@ -97,10 +97,10 @@ export default function ImportPlannerModal({
 
   async function fetchBrandProfiles() {
     try {
-      const res = await fetch('/api/settings/brand-profiles');
+      const res = await fetch('/api/v2/brand-profiles');
       if (res.ok) {
         const data = await res.json();
-        setBrandProfiles(data.profiles || []);
+        setBrandProfiles(data.data || []);
       }
     } catch (_) {}
   }
@@ -113,6 +113,9 @@ export default function ImportPlannerModal({
     if (match) {
       setSelectedBrandId(match.id);
       setAccountName(match.brand_name);
+      if (match.nextcloud_target_folder) {
+        setNextcloudParentFolder(match.nextcloud_target_folder);
+      }
     }
   }, [planner, brandProfiles]);
 
@@ -145,8 +148,8 @@ export default function ImportPlannerModal({
           setCustomInstruction(p.custom_instruction || 'akhiran skrip/voiceover : produk ori ada di keranjang ya!');
         }
         const instructions = resolvePlannerInstructions(p);
-        setAiDirective(instructions.aiDirective);
-        setMandatoryOutroLine(instructions.mandatoryOutroLine);
+        setAiDirective(instructions.aiDirective || 'Konten edukasi brand; jangan mengarang atau membahas produk tertentu.');
+        setMandatoryOutroLine(instructions.mandatoryOutroLine || 'jangan lupa follow dan komen mau ya!');
         if (p.target_audience) {
           setTargetDemographic(p.target_audience);
         }
@@ -617,6 +620,9 @@ export default function ImportPlannerModal({
                           const profile = brandProfiles.find(item => item.id === e.target.value);
                           setSelectedBrandId(profile?.id || '');
                           setAccountName(profile?.brand_name || '');
+                          if (profile?.nextcloud_target_folder) {
+                            setNextcloudParentFolder(profile.nextcloud_target_folder);
+                          }
                         }}
                         style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
                       >

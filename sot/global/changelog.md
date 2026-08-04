@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.175 — Configure ImportPlannerModal defaults and fix brand profiles fetch (04/08/2026)
+- Set default ai_directive, mandatory_outro_line, nextcloud_parent_folder from profile
+- Default targetClipsCount to 3
+- Correct brand profiles fetch endpoint
+
 ## V2.2.174 — Fix pgQuery tenant parameter alignment when LIMIT exists (04/08/2026)
 - Hitung suffixPlaceholderCount untuk splice tenantId pada posisi yang tepat
 
