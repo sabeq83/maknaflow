@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.158 — Hook User Init to Startup (04/08/2026)
+- Menambahkan eksekusi inisialisasi dan migrasi hak akses pengguna otomatis pada saat server memuat database cache
+
 ## V2.2.157 — Realignment Access Permission RBAC (04/08/2026)
 - Menyelaraskan kunci hak akses menu (Access Permissions) dengan menu navigasi sidebar aktif
 - Memisahkan hak akses menu yang sebelumnya digabungkan untuk presisi kontrol akses
