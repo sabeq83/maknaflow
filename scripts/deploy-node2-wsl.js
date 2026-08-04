@@ -125,6 +125,7 @@ echo "  ✓ Old processes stopped"
 # Build Next.js
 echo "[5/5] Building Next.js bundle (estimasi 3-8 menit)..."
 echo "  Started at: $(date '+%H:%M:%S')"
+rm -rf .next
 npm run staging:build
 echo "  ✓ Build selesai: $(date '+%H:%M:%S')"
 

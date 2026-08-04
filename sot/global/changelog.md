@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.180 — Delete .next build folder automatically during deploy (04/08/2026)
+- Add rm -rf .next to deploy-node2-wsl.js to ensure clean builds
+
 ## V2.2.179 — Clean rebuild to fix stale compiled chunks (04/08/2026)
 - Clean rebuild Next.js on Node 2 WSL to clear .next/cache
 - Purge old compilation of RE campaigns route
