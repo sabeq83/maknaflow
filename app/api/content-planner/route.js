@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import { createDraftContentPlanner } from '@/lib/content-planner-engine';
+import { withTenantContext } from '@/lib/auth';
 
-export async function GET(request) {
+export const GET = withTenantContext(async (request, _context, user) => {
   try {
     const db = getDb();
     const planners = await db.prepare(`
@@ -18,9 +19,9 @@ export async function GET(request) {
     console.error('[API /content-planner GET Error]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function POST(request) {
+export const POST = withTenantContext(async (request, _context, user) => {
   try {
     const body = await request.json();
     const result = await createDraftContentPlanner(body);
@@ -30,4 +31,4 @@ export async function POST(request) {
     const status = error.code === 'CONTENT_PLANNER_VALIDATION' ? 400 : 500;
     return NextResponse.json({ success: false, error: error.message }, { status });
   }
-}
+});

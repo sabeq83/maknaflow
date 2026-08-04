@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { withTenantContext } from '@/lib/auth';
 
-export async function GET(request, { params }) {
+export const GET = withTenantContext(async (request, { params }, user) => {
   try {
     const { id } = await params;
     const db = getDb();
@@ -25,9 +26,9 @@ export async function GET(request, { params }) {
     console.error('[API /content-planner/[id] GET Error]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function DELETE(request, { params }) {
+export const DELETE = withTenantContext(async (request, { params }, user) => {
   try {
     const { id } = await params;
     const db = getDb();
@@ -39,4 +40,4 @@ export async function DELETE(request, { params }) {
     console.error('[API /content-planner/[id] DELETE Error]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

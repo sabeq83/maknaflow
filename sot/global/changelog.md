@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.164 — Isolate Content Planner and Brand Schedules routes by tenant (04/08/2026)
+- Wrap all Content Planner endpoints in withTenantContext
+- Wrap brand schedules endpoint and add brand profile tenant ownership validation
+
 ## V2.2.163 — Fix syntax error and restore imports in test-nextcloud route (04/08/2026)
 - Fix nextcloud test route closing parentheses syntax
 - Restore missing NextResponse and testNextcloudConnection imports

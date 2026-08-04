@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { withTenantContext } from '@/lib/auth';
 
-export async function GET(request) {
+export const GET = withTenantContext(async (request, _context, user) => {
   try {
     const { searchParams } = new URL(request.url);
     const brandId = searchParams.get('brandId');
@@ -10,6 +11,11 @@ export async function GET(request) {
     }
 
     const db = getDb();
+    const brandProfile = await db.prepare('SELECT id FROM brand_profiles WHERE (id = ? OR brand_name = ?)').get(brandId, brandId);
+    if (!brandProfile) {
+      return NextResponse.json({ success: false, error: 'Brand profile tidak ditemukan atau akses ditolak.' }, { status: 403 });
+    }
+
     const rows = await db.prepare(`
       SELECT bs.*, 
              pe.cleaned_photo_url, pe.clean_photo_url, pe.generated_photo_url, pe.active_photo
@@ -70,9 +76,9 @@ export async function GET(request) {
     console.error('[API /v2/content-flow/schedules GET Error]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function POST(request) {
+export const POST = withTenantContext(async (request, _context, user) => {
   try {
     const body = await request.json();
     const { brandId, slots } = body; // slots = [{ slot_index, product_id, product_name, target_daily_posts }]
@@ -82,6 +88,11 @@ export async function POST(request) {
     }
 
     const db = getDb();
+    const brandProfile = await db.prepare('SELECT id FROM brand_profiles WHERE (id = ? OR brand_name = ?)').get(brandId, brandId);
+    if (!brandProfile) {
+      return NextResponse.json({ success: false, error: 'Brand profile tidak ditemukan atau akses ditolak.' }, { status: 403 });
+    }
+
     const stmt = await db.prepare(`
       INSERT INTO brand_schedules (brand_id, slot_index, product_id, product_name, target_daily_posts, updated_at)
       VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
@@ -107,4 +118,4 @@ export async function POST(request) {
     console.error('[API /v2/content-flow/schedules POST Error]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { withTenantContext } from '@/lib/auth';
 
-export async function GET(request, { params }) {
+export const GET = withTenantContext(async (request, { params }, user) => {
   try {
     const { id } = await params;
     const { searchParams } = new URL(request.url);
@@ -107,4 +108,4 @@ export async function GET(request, { params }) {
     console.error('[API /content-planner/[id]/export GET Error]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
