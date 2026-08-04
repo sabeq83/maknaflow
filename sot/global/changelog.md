@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.187 — Fix dynamic require of db in campaign-scheduler (05/08/2026)
+- Remove redundant require('db') from campaign loop in campaign-scheduler.js to fix TypeError: g is not a function in Next.js bundle
+
 ## V2.2.186 — Default Minimax, 0.0 Mux Vol, ContentFlow & Gemini Imports Fixes (05/08/2026)
 - Default voice_provider to minimax and ffmpeg_bgm_volume to 0.0 for RE campaigns
 - Fix logical OR bug resetting 0.0 volume to 0.15
