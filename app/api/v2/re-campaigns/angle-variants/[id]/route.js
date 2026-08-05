@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '../../../../../../lib/db';
+import { withTenantContext } from '../../../../../../lib/auth';
 
-export async function PATCH(req, { params }) {
+export const PATCH = withTenantContext(async (req, { params }) => {
   try {
     const { id } = await params;
     const { visual_tasks_json } = await req.json();
@@ -40,4 +41,4 @@ export async function PATCH(req, { params }) {
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

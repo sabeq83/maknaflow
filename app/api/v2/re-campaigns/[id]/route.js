@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { getReCampaign, listReCampaignItems, getReCampaignStats, getDb } from '../../../../../lib/db';
+import { withTenantContext } from '../../../../../lib/auth';
 
-export async function GET(request, { params }) {
+export const GET = withTenantContext(async (request, { params }) => {
   try {
     const { id } = await params;
     const campaign = await getReCampaign(id);
@@ -73,9 +74,9 @@ export async function GET(request, { params }) {
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
-}
+});
 
-export async function PATCH(request, { params }) {
+export const PATCH = withTenantContext(async (request, { params }) => {
   try {
     const { id } = await params;
     const body = await request.json();
@@ -196,9 +197,9 @@ export async function PATCH(request, { params }) {
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
-}
+});
 
-export async function DELETE(request, { params }) {
+export const DELETE = withTenantContext(async (request, { params }) => {
   try {
     const { id } = await params;
     const { deleteReCampaign } = await import('../../../../../lib/db');
@@ -207,4 +208,4 @@ export async function DELETE(request, { params }) {
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
-}
+});

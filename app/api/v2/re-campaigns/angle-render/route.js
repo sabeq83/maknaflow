@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '../../../../../lib/db';
+import { withTenantContext } from '../../../../../lib/auth';
 
-export async function POST(req) {
+export const POST = withTenantContext(async (req) => {
   try {
     const { angle_variant_id, enable_tts, enable_ffmpeg } = await req.json();
 
@@ -62,4 +63,4 @@ export async function POST(req) {
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

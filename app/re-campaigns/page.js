@@ -903,8 +903,6 @@ export default function RECampaignsPage() {
                             {bp.brand_name} ({bp.account_name || bp.brand_name})
                           </option>
                         ))}
-                        <option value="nutribake">nutribake</option>
-                        <option value="siasatsehat">siasatsehat</option>
                       </select>
                     </div>
                     <div className="form-group" style={{ marginBottom: 0 }}>

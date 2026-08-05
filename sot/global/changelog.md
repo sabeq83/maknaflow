@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.209 — Fix RE campaigns tenant context and brand profile dropdown leak (05/08/2026)
+- Wrap re-campaigns detail scheduler-control and angle-render routes in withTenantContext
+- Remove hardcoded brand profiles from frontend dropdown
+
 ## V2.2.208 — Fix background schedulers tenant isolation (05/08/2026)
 - Wrap tickCampaignScheduler in none tenant context
 - Wrap runStep and executeJob execution in campaign tenant context
