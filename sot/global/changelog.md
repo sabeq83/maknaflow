@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.202 — Fix OPC Ingest Tenant Context (05/08/2026)
+- Wrap ingest-planner route with withTenantContext
+- Support multi-tenant ingestion for content planner
+
 ## V2.2.201 — Simplify product database header and style import/export buttons to light blue (05/08/2026)
 - Update subtitle text to 'Manage single source of truth for products.'
 - Apply light blue style to Import CSV, Import ZIP, and Export ZIP buttons

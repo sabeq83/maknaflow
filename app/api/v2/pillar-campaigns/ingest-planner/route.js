@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { ingestPlannerToPillarCampaign } from '@/lib/pillar-campaign-ingest';
+import { withTenantContext } from '@/lib/auth';
 
-export async function POST(request) {
+export const POST = withTenantContext(async (request) => {
   try {
     const { planner_id, selected_row_ids = [], campaign_name, global_settings = {} } = await request.json();
     const result = await ingestPlannerToPillarCampaign({
@@ -24,4 +25,4 @@ export async function POST(request) {
       { status: error.status || 500 }
     );
   }
-}
+});
