@@ -3,8 +3,9 @@ import { getDb } from '@/lib/db';
 import { logToBridgeInjector } from '@/lib/bridge-injector-logger';
 import fs from 'fs';
 import path from 'path';
+import { withTenantContext } from '@/lib/auth';
 
-export async function GET(request, { params }) {
+export const GET = withTenantContext(async (request, { params }) => {
   try {
     const { id } = await params;
     const db = getDb();
@@ -51,9 +52,9 @@ export async function GET(request, { params }) {
     console.error('[Bridge Injector Item GET Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function PUT(request, { params }) {
+export const PUT = withTenantContext(async (request, { params }) => {
   try {
     const { id } = await params;
     const body = await request.json().catch(() => ({}));
@@ -117,9 +118,9 @@ ${injected_vo_4}
     logToBridgeInjector(`[${id}] [ERROR] Gagal menyimpan perubahan teks: ${error.message}`);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function DELETE(request, { params }) {
+export const DELETE = withTenantContext(async (request, { params }) => {
   try {
     const { id } = await params;
     const db = getDb();
@@ -141,9 +142,9 @@ export async function DELETE(request, { params }) {
     logToBridgeInjector(`[${id}] [ERROR] Gagal menghapus kampanye: ${error.message}`);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function PATCH(request, { params }) {
+export const PATCH = withTenantContext(async (request, { params }) => {
   try {
     const { id } = await params;
     const body = await request.json().catch(() => ({}));
@@ -214,4 +215,4 @@ export async function PATCH(request, { params }) {
     console.error('[Bridge Injector Item PATCH Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

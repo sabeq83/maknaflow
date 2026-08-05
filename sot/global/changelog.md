@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.211 — Fix Content Flow Sync PK Conflict & Bridge Tenant Isolation (05/08/2026)
+- Fix Content Flow sync pk conflicts with self-healing updates
+- Add tenant isolation for bridge injector campaigns
+
 ## V2.2.210 — Konsolidasi Tenant Context Rute API Multi-Menu (05/08/2026)
 - Menambahkan wrapper withTenantContext pada API User Management
 - Menambahkan wrapper dengan tenant context pada API Products
