@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.204 — Wrap Bridge Injector and RE Campaigns routes with withTenantContext (05/08/2026)
+- Wrap 9 Bridge Injector routes with withTenantContext
+- Wrap 13 RE Campaigns routes with withTenantContext
+- Ensure proper tenant context validation on all manual curation and trigger actions in Bridge Injector and RE Campaigns
+
 ## V2.2.203 — Wrap OPC routes with withTenantContext (05/08/2026)
 - Wrap 12 OPC Campaign routes with withTenantContext
 - Support tenant isolation for OPC bulk creation, approval, and generation manual triggers

@@ -5,7 +5,9 @@ import { getOrCreateCampaignFolder, uploadMarkdownToCampaignFolder, moveFileToFo
 import { getCampaignParentFolderName } from '@/lib/scheduler-processors';
 import { syncReCampaignAssetsToDrive } from '@/lib/drive-sync-helper';
 
-export async function POST(request, { params }) {
+import { withTenantContext } from '@/lib/auth';
+
+export const POST = withTenantContext(async (request, { params }) => {
   try {
     const { id } = await params;
     if (!id) {
@@ -78,4 +80,4 @@ export async function POST(request, { params }) {
     console.error('Export markdown API error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { syncBridgeCampaignToContentFlow } from '@/lib/contentflow-ingest';
 
-export async function POST(request, { params }) {
+import { withTenantContext } from '@/lib/auth';
+
+export const POST = withTenantContext(async (request, { params }) => {
   try {
     const { id } = await params;
     if (!id) {
@@ -18,4 +20,4 @@ export async function POST(request, { params }) {
     console.error('[Bridge Injector Sync ContentFlow POST Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

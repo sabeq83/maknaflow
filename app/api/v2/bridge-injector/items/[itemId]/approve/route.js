@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import { logToBridgeInjector } from '@/lib/bridge-injector-logger';
 
-export async function POST(request, { params }) {
+import { withTenantContext } from '@/lib/auth';
+
+export const POST = withTenantContext(async (request, { params }) => {
   try {
     const { itemId } = await params;
 
@@ -40,4 +42,4 @@ export async function POST(request, { params }) {
     console.error('[Bridge Injector Item Approve Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

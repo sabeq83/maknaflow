@@ -13,7 +13,9 @@ async function downloadFile(url, destPath) {
   fs.writeFileSync(destPath, buffer);
 }
 
-export async function GET(request) {
+import { withTenantContext } from '@/lib/auth';
+
+export const GET = withTenantContext(async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     const campaignId = searchParams.get('campaignId');
@@ -118,15 +120,14 @@ export async function GET(request) {
 
           newStatus = 'completed';
           updated = true;
-          logToBridgeInjector(`[${campaignId}] Berkas Video Clip sukses disimpan ke lokal: ${localRelPath}`);
-
-          // Auto Sync ke Content Flow untuk single mode
+          logToBridgeInjector(`[${campaignId}] Video Clip sukses diunduh ke lokal: ${localRelPath}`);
+          
+          // [INTEGRITY CHECK] Trigger downstream sync script to rebuild dynamic scheduler bindings if needed
           try {
-            const { syncBridgeCampaignToContentFlow } = await import('@/lib/contentflow-ingest');
-            await syncBridgeCampaignToContentFlow(campaignId);
-            logToBridgeInjector(`[${campaignId}] Auto-synced single campaign to ContentFlow.`);
-          } catch (cfErr) {
-            logToBridgeInjector(`[${campaignId}] [WARNING] Auto-sync to ContentFlow failed: ${cfErr.message}`);
+            const { startCampaignScheduler } = await import('@/lib/campaign-scheduler');
+            startCampaignScheduler();
+          } catch (schErr) {
+            logToBridgeInjector(`[${campaignId}] [WARNING] Gagal memicu startCampaignScheduler: ${schErr.message}`);
           }
         }
       } else if (taskStatus === 'failed') {
@@ -154,4 +155,4 @@ export async function GET(request) {
     console.error('[Bridge Injector Poll GET Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

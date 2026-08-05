@@ -43,7 +43,9 @@ const fileToBase64 = (filePath) => {
     return null;
   }
 };
-export async function POST(req, { params }) {
+import { withTenantContext } from '@/lib/auth';
+
+export const POST = withTenantContext(async (req, { params }) => {
   try {
     const resolvedParams = await params;
     const itemId = resolvedParams.itemId;
@@ -101,12 +103,12 @@ export async function POST(req, { params }) {
         completedImageName = files.find(f => f.endsWith('.png') || f.endsWith('.jpg') || f.endsWith('.webp')) || files[0];
         break;
       } else if (status === 'failed') {
-        throw new Error("G-Labs melaporkan tugas T2I gagal.");
+        throw new Error(`G-Labs T2I rendering failed: ${statusRes.error || 'Unknown error'}`);
       }
     }
 
     if (!completedImageName) {
-      throw new Error("G-Labs T2I task timed out or returned no image file.");
+      throw new Error("G-Labs T2I rendering timed out.");
     }
 
     // 5. Unduh file start frame kustom
@@ -139,7 +141,7 @@ export async function POST(req, { params }) {
 
   } catch (error) {
     console.error('[Bridge Injector Item Regenerate T2I Error]:', error);
-    logToBridgeInjector(`[BULK Item #${params.itemId}] [ERROR Regenerate T2I]: ${error.message}`);
+    logToBridgeInjector(`[BULK Item #${params?.itemId || itemId || 'unknown'}] [ERROR Regenerate T2I]: ${error.message}`);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

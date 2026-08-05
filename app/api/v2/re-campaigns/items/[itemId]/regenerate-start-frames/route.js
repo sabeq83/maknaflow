@@ -4,7 +4,9 @@ import { generateImage, getTaskStatus, getFileUrl } from '../../../../../../../l
 import fs from 'fs';
 import path from 'path';
 
-export async function POST(req, { params }) {
+import { withTenantContext } from '@/lib/auth';
+
+export const POST = withTenantContext(async (req, { params }) => {
   try {
     const resolvedParams = await params;
     const itemId = resolvedParams.itemId;
@@ -55,7 +57,7 @@ export async function POST(req, { params }) {
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
 const fileToBase64 = (filePath) => {
   const absolutePath = (!path.isAbsolute(filePath) || !fs.existsSync(filePath)) ? path.join(process.cwd(), 'public', filePath.startsWith('/') ? filePath.slice(1) : filePath) : filePath;

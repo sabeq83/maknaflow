@@ -9,7 +9,9 @@ import { logToBridgeInjector } from '@/lib/bridge-injector-logger';
 import fs from 'fs';
 import path from 'path';
 
-export async function GET() {
+import { withTenantContext } from '@/lib/auth';
+
+export const GET = withTenantContext(async () => {
   try {
     const db = getDb();
     const campaigns = await db.prepare(`
@@ -36,9 +38,9 @@ export async function GET() {
     logToBridgeInjector(`[ERROR] Gagal memuat daftar kampanye: ${error.message}`);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function PATCH(request) {
+export const PATCH = withTenantContext(async (request) => {
   try {
     const body = await request.json().catch(() => ({}));
     const { schedulerActive } = body;
@@ -53,9 +55,9 @@ export async function PATCH(request) {
     console.error('[Bridge Injector PATCH Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function POST(request) {
+export const POST = withTenantContext(async (request) => {
   try {
     const body = await request.json().catch(() => ({}));
     const {
@@ -251,4 +253,4 @@ ${injected_vo_4}
     console.error('[Bridge Injector POST Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

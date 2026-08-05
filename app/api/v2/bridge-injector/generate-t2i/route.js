@@ -31,10 +31,13 @@ function fileToBase64(filePath) {
   return `data:${mimeType};base64,${fileBuffer.toString('base64')}`;
 }
 
-export async function POST(request) {
+import { withTenantContext } from '@/lib/auth';
+
+export const POST = withTenantContext(async (request) => {
+  let campaignId = null;
   try {
     const body = await request.json().catch(() => ({}));
-    const { campaignId } = body;
+    campaignId = body.campaignId;
 
     if (!campaignId) {
       return NextResponse.json({ success: false, error: 'campaignId wajib disertakan.' }, { status: 400 });
@@ -111,7 +114,7 @@ export async function POST(request) {
 
   } catch (error) {
     console.error('[Bridge Injector T2I Error]:', error);
-    logToBridgeInjector(`[${campaignId}] [ERROR T2I Dispatch Failed]: ${error.message}`);
+    logToBridgeInjector(`[${campaignId || 'unknown'}] [ERROR T2I Dispatch Failed]: ${error.message}`);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

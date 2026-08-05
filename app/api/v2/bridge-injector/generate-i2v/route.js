@@ -20,10 +20,13 @@ const fileToBase64 = (relPath) => {
   return `data:${mimeType};base64,${buffer.toString('base64')}`;
 };
 
-export async function POST(request) {
+import { withTenantContext } from '@/lib/auth';
+
+export const POST = withTenantContext(async (request) => {
+  let campaignId = null;
   try {
     const body = await request.json().catch(() => ({}));
-    const { campaignId } = body;
+    campaignId = body.campaignId;
 
     if (!campaignId) {
       return NextResponse.json({ success: false, error: 'campaignId wajib disertakan.' }, { status: 400 });
@@ -80,7 +83,7 @@ export async function POST(request) {
 
   } catch (error) {
     console.error('[Bridge Injector I2V Error]:', error);
-    logToBridgeInjector(`[${campaignId}] [ERROR I2V Dispatch Failed]: ${error.message}`);
+    logToBridgeInjector(`[${campaignId || 'unknown'}] [ERROR I2V Dispatch Failed]: ${error.message}`);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

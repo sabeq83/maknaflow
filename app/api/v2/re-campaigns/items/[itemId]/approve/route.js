@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getDb, updateReCampaignItem } from '../../../../../../../lib/db';
+import { withTenantContext } from '@/lib/auth';
 
-export async function POST(req, { params }) {
+export const POST = withTenantContext(async (req, { params }) => {
   try {
     const resolvedParams = await params;
     const itemId = resolvedParams.itemId;
@@ -101,19 +102,19 @@ export async function POST(req, { params }) {
         enable_tts ? 1 : 0,
         enable_glabs ? 1 : 0,
         enable_ffmpeg ? 1 : 0,
-        voice_provider || campaign.voice_provider || 'minimax',
-        voice_persona || campaign.voice_persona || 'Kore',
-        voice_speed !== undefined ? Number(voice_speed) : (campaign.voice_speed !== undefined && campaign.voice_speed !== null ? Number(campaign.voice_speed) : 1.0),
-        voice_volume !== undefined ? Number(voice_volume) : (campaign.voice_volume !== undefined && campaign.voice_volume !== null ? Number(campaign.voice_volume) : 1.0),
-        ffmpeg_video_scale !== undefined ? Number(ffmpeg_video_scale) : (campaign.ffmpeg_video_scale !== undefined && campaign.ffmpeg_video_scale !== null ? Number(campaign.ffmpeg_video_scale) : 1.0),
-        ffmpeg_sfx_volume !== undefined ? Number(ffmpeg_sfx_volume) : (campaign.ffmpeg_sfx_volume !== undefined && campaign.ffmpeg_sfx_volume !== null ? Number(campaign.ffmpeg_sfx_volume) : 0.0),
-        ffmpeg_bgm_volume !== undefined ? Number(ffmpeg_bgm_volume) : (campaign.ffmpeg_bgm_volume !== undefined && campaign.ffmpeg_bgm_volume !== null ? Number(campaign.ffmpeg_bgm_volume) : 0.0),
-        ffmpeg_sync_option || campaign.ffmpeg_sync_option || 'smart_sync',
-        sync_mode || campaign.sync_mode || 'auto',
+        voice_provider || 'elevenlabs',
+        voice_persona || 'Jeroen',
+        voice_speed !== undefined ? Number(voice_speed) : 1.0,
+        voice_volume !== undefined ? Number(voice_volume) : 1.0,
+        ffmpeg_video_scale || '9:16',
+        ffmpeg_sfx_volume !== undefined ? Number(ffmpeg_sfx_volume) : 0.8,
+        ffmpeg_bgm_volume !== undefined ? Number(ffmpeg_bgm_volume) : 0.15,
+        ffmpeg_sync_option || 'expand_last_frame',
+        sync_mode || 'auto',
         campaign.id
       );
 
-      // Save plan and settings without changing workflow status
+      // Just update plans without changing workflow status
       await updateReCampaignItem(itemId, {
         new_video_plan_json: JSON.stringify(new_video_plan),
         video_dna_json: JSON.stringify(video_dna),
@@ -123,14 +124,15 @@ export async function POST(req, { params }) {
 
       return NextResponse.json({
         success: true,
-        message: "Storyboard draft berhasil disimpan!"
+        message: "Settings and plans updated successfully."
       });
     }
 
-    // 2. Update campaign production settings
+    // 2. Set campaign status to 'running' so the scheduler will process it
     await db.prepare(`
       UPDATE re_campaigns
-      SET enable_tts = ?, enable_glabs = ?, enable_ffmpeg = ?, status = 'running',
+      SET status = 'running',
+          enable_tts = ?, enable_glabs = ?, enable_ffmpeg = ?,
           voice_provider = ?, voice_persona = ?, voice_speed = ?, voice_volume = ?,
           ffmpeg_video_scale = ?, ffmpeg_sfx_volume = ?, ffmpeg_bgm_volume = ?, ffmpeg_sync_option = ?, sync_mode = ?
       WHERE id = ?
@@ -138,15 +140,15 @@ export async function POST(req, { params }) {
       enable_tts ? 1 : 0,
       enable_glabs ? 1 : 0,
       enable_ffmpeg ? 1 : 0,
-      voice_provider || campaign.voice_provider || 'minimax',
-      voice_persona || campaign.voice_persona || 'Kore',
-      voice_speed !== undefined ? Number(voice_speed) : (campaign.voice_speed !== undefined && campaign.voice_speed !== null ? Number(campaign.voice_speed) : 1.0),
-      voice_volume !== undefined ? Number(voice_volume) : (campaign.voice_volume !== undefined && campaign.voice_volume !== null ? Number(campaign.voice_volume) : 1.0),
-      ffmpeg_video_scale !== undefined ? Number(ffmpeg_video_scale) : (campaign.ffmpeg_video_scale !== undefined && campaign.ffmpeg_video_scale !== null ? Number(campaign.ffmpeg_video_scale) : 1.0),
-      ffmpeg_sfx_volume !== undefined ? Number(ffmpeg_sfx_volume) : (campaign.ffmpeg_sfx_volume !== undefined && campaign.ffmpeg_sfx_volume !== null ? Number(campaign.ffmpeg_sfx_volume) : 0.0),
-      ffmpeg_bgm_volume !== undefined ? Number(ffmpeg_bgm_volume) : (campaign.ffmpeg_bgm_volume !== undefined && campaign.ffmpeg_bgm_volume !== null ? Number(campaign.ffmpeg_bgm_volume) : 0.0),
-      ffmpeg_sync_option || campaign.ffmpeg_sync_option || 'smart_sync',
-      sync_mode || campaign.sync_mode || 'auto',
+      voice_provider || 'elevenlabs',
+      voice_persona || 'Jeroen',
+      voice_speed !== undefined ? Number(voice_speed) : 1.0,
+      voice_volume !== undefined ? Number(voice_volume) : 1.0,
+      ffmpeg_video_scale || '9:16',
+      ffmpeg_sfx_volume !== undefined ? Number(ffmpeg_sfx_volume) : 0.8,
+      ffmpeg_bgm_volume !== undefined ? Number(ffmpeg_bgm_volume) : 0.15,
+      ffmpeg_sync_option || 'expand_last_frame',
+      sync_mode || 'auto',
       campaign.id
     );
 
@@ -171,4 +173,4 @@ export async function POST(req, { params }) {
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

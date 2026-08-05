@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { retryReCampaignItem } from '../../../../../../../lib/db';
 
-export async function POST(req, { params }) {
+import { withTenantContext } from '@/lib/auth';
+
+export const POST = withTenantContext(async (req, { params }) => {
   try {
     const resolvedParams = await params;
     const itemId = resolvedParams.itemId;
@@ -18,4 +20,4 @@ export async function POST(req, { params }) {
   } catch (err) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
-}
+});

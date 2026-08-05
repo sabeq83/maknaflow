@@ -4,7 +4,9 @@ import { generateImage, getTaskStatus, getFileUrl } from '../../../../../../../l
 import fs from 'fs';
 import path from 'path';
 
-export async function POST(req, { params }) {
+import { withTenantContext } from '@/lib/auth';
+
+export const POST = withTenantContext(async (req, { params }) => {
   try {
     const resolvedParams = await params;
     const itemId = resolvedParams.itemId;
@@ -25,47 +27,8 @@ export async function POST(req, { params }) {
       return NextResponse.json({ success: false, error: "Campaign not found" }, { status: 404 });
     }
 
-    // 1. Update t2i_prompt inside new_video_plan_json
-    let newVideoPlan = [];
-    try {
-      newVideoPlan = JSON.parse(item.new_video_plan_json || '[]');
-    } catch {}
-
-    const clipObj = newVideoPlan.find(p => Number(p.clip_index) === Number(clipIndex));
-    if (clipObj) {
-      clipObj.t2i_prompt = t2i_prompt;
-    }
-
-    // 2. Also map to result_json (for backward compatibility)
-    let oldParsed = {};
-    try {
-      oldParsed = JSON.parse(item.result_json || '{}');
-    } catch {}
-    const t2i_prompts = (oldParsed.t2i_prompts || []).map(p => {
-      if (Number(p.clip) === Number(clipIndex)) {
-        return { ...p, prompt: t2i_prompt };
-      }
-      return p;
-    });
-    const updatedResultJson = JSON.stringify({ ...oldParsed, t2i_prompts });
-
     // 3. Generate Image on G-Labs
     const imageModel = await getSetting('webhook_image_model') || 'nano_banana_pro';
-
-    const fileToBase64 = (filePath) => {
-      const absolutePath = (!path.isAbsolute(filePath) || !fs.existsSync(filePath)) ? path.join(process.cwd(), 'public', filePath.startsWith('/') ? filePath.slice(1) : filePath) : filePath;
-      if (!fs.existsSync(absolutePath)) return null;
-      const buffer = fs.readFileSync(absolutePath);
-      let mimeType = 'image/png';
-      if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) {
-        mimeType = 'image/jpeg';
-      } else if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) {
-        mimeType = 'image/png';
-      } else if (buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46) {
-        mimeType = 'image/webp';
-      }
-      return `data:${mimeType};base64,${buffer.toString('base64')}`;
-    };
 
     let productData = null;
     if (campaign.target_product_id) {
@@ -81,7 +44,6 @@ export async function POST(req, { params }) {
 
     console.log(`[RE UI Regenerate] Submitting T2I task for clip ${clipIndex}...`);
 
-    // [Fix v2.2.87] Lookup brand profile via account_name untuk webhookOverride
     const brandProfile = campaign.account_name
       ? await db.prepare('SELECT * FROM brand_profiles WHERE LOWER(brand_name) = LOWER(?)').get(campaign.account_name)
       : null;
@@ -98,74 +60,71 @@ export async function POST(req, { params }) {
       webhookOverride: brandProfile
     });
 
-    if (!t2iResult?.task_id) {
-      return NextResponse.json({ success: false, error: "Failed to submit T2I task to G-Labs" }, { status: 500 });
+    if (!t2iResult || !t2iResult.task_id) {
+      return NextResponse.json({ success: false, error: "Failed to dispatch T2I job to G-Labs" }, { status: 500 });
     }
 
-    const t2iTaskId = t2iResult.task_id;
-    console.log(`[RE UI Regenerate] T2I task ${t2iTaskId} submitted. Polling...`);
+    const taskId = t2iResult.task_id;
+    console.log(`[RE UI Regenerate] Job dispatched. Task ID: ${taskId}. Waiting for completion...`);
 
-    let t2iCompleted = false;
-    let t2iImageUrl = null;
-    const maxT2iAttempts = 75; // 150s max
-    for (let attempt = 0; attempt < maxT2iAttempts; attempt++) {
+    let statusRes = null;
+    let maxRetries = 60; // 2 minutes maximum wait
+    while (maxRetries > 0) {
       await new Promise(resolve => setTimeout(resolve, 2000));
-      const t2iStatusResult = await getTaskStatus(t2iTaskId);
-      const t2iStatus = (t2iStatusResult?.status || '').toLowerCase();
-
-      if (t2iStatus === 'completed') {
-        const files = t2iStatusResult.results || t2iStatusResult.files || [];
-        let imageFile = files.find(f => f.endsWith('.png') || f.endsWith('.jpg') || f.endsWith('.jpeg')) || files[0];
-        if (imageFile && (imageFile.startsWith('http://') || imageFile.startsWith('https://'))) {
-          imageFile = imageFile.split('/').pop();
-        }
-        if (imageFile) {
-          t2iImageUrl = getFileUrl(imageFile);
-          t2iCompleted = true;
-          break;
-        }
-      } else if (t2iStatus === 'failed') {
-        return NextResponse.json({ success: false, error: `T2I task failed on G-Labs` }, { status: 500 });
+      statusRes = await getTaskStatus(taskId);
+      if (statusRes.status === 'completed' || statusRes.status === 'failed') {
+        break;
       }
+      maxRetries--;
     }
 
-    if (!t2iCompleted || !t2iImageUrl) {
-      return NextResponse.json({ success: false, error: "T2I generation timed out" }, { status: 504 });
+    if (!statusRes || statusRes.status !== 'completed') {
+      return NextResponse.json({ success: false, error: `Image generation failed or timed out: ${statusRes?.error || 'timeout'}` }, { status: 500 });
     }
 
-    // 4. Download new start frame and overwrite
-    console.log(`[RE UI Regenerate] Downloading start frame from ${t2iImageUrl}...`);
-    const imgResponse = await fetch(t2iImageUrl);
-    if (!imgResponse.ok) {
-      return NextResponse.json({ success: false, error: "Failed to download generated image" }, { status: 500 });
+    const results = statusRes.results || statusRes.files || [];
+    let completedImageName = results.find(f => f.endsWith('.png') || f.endsWith('.jpg') || f.endsWith('.webp')) || results[0];
+    if (!completedImageName) {
+      return NextResponse.json({ success: false, error: "G-Labs did not return any image file path." }, { status: 500 });
     }
-    const imgBuffer = Buffer.from(await imgResponse.arrayBuffer());
 
-    const startFrameFilename = `start_frame_${item.id}_clip_${clipIndex}.png`;
-    const startFrameLocalPath = path.join(process.cwd(), 'public', 'uploads', 'start_frames', startFrameFilename);
-    const startFrameDir = path.dirname(startFrameLocalPath);
-    if (!fs.existsSync(startFrameDir)) {
-      fs.mkdirSync(startFrameDir, { recursive: true });
+    // 4. Download file to local storage
+    if (completedImageName.startsWith('http://') || completedImageName.startsWith('https://')) {
+      completedImageName = completedImageName.split('/').pop();
     }
-    fs.writeFileSync(startFrameLocalPath, imgBuffer);
+    const downloadUrl = getFileUrl(completedImageName);
+    const ext = completedImageName.split('.').pop() || 'png';
+    const startFrameFilename = `start_frame_${itemId}_clip${clipIndex}_${Date.now()}.${ext}`;
 
-    // 5. Update database atomically using a transaction to avoid overwriting concurrent updates (e.g. from parallel T2I runs or user edits)
-    await db.transaction(async () => {
-      // Re-read item state from DB to get the latest JSON values
+    const destDir = path.join(process.cwd(), 'public', 'uploads', 'start_frames');
+    if (!fs.existsSync(destDir)) {
+      fs.mkdirSync(destDir, { recursive: true });
+    }
+
+    const destPath = path.join(destDir, startFrameFilename);
+    console.log(`[RE UI Regenerate] Downloading generated image from ${downloadUrl} to ${destPath}...`);
+
+    const dlRes = await fetch(downloadUrl);
+    if (!dlRes.ok) {
+      throw new Error(`Failed to download image: ${dlRes.statusText}`);
+    }
+    const arrayBuffer = await dlRes.arrayBuffer();
+    fs.writeFileSync(destPath, Buffer.from(arrayBuffer));
+
+    // 5. Update local JSON structures inside DB asynchronously (to prevent blocking)
+    (async () => {
       const currentItem = await db.prepare("SELECT t2i_images_json, new_video_plan_json, result_json FROM re_campaign_items WHERE id = ?").get(itemId);
-      if (!currentItem) throw new Error("Campaign item not found in transaction");
+      if (!currentItem) return;
 
-      // Update t2i_prompt inside new_video_plan_json
       let localNewVideoPlan = [];
       try {
         localNewVideoPlan = JSON.parse(currentItem.new_video_plan_json || '[]');
       } catch {}
-      const currentClipObj = localNewVideoPlan.find(p => Number(p.clip_index) === Number(clipIndex));
-      if (currentClipObj) {
-        currentClipObj.t2i_prompt = t2i_prompt;
+      const planClip = localNewVideoPlan.find(p => Number(p.clip_index) === Number(clipIndex));
+      if (planClip) {
+        planClip.t2i_prompt = t2i_prompt;
       }
 
-      // Update result_json (for backward compatibility)
       let localOldParsed = {};
       try {
         localOldParsed = JSON.parse(currentItem.result_json || '{}');
@@ -178,7 +137,6 @@ export async function POST(req, { params }) {
       });
       const localUpdatedResultJson = JSON.stringify({ ...localOldParsed, t2i_prompts: localT2iPrompts });
 
-      // Update t2i_images_json
       let localT2iImages = [];
       try {
         localT2iImages = JSON.parse(currentItem.t2i_images_json || '[]');
@@ -189,7 +147,6 @@ export async function POST(req, { params }) {
       }
       localT2iImages[targetIdx] = `/uploads/start_frames/${startFrameFilename}`;
 
-      // Perform updates
       await updateReCampaignItem(itemId, {
         new_video_plan_json: JSON.stringify(localNewVideoPlan),
         result_json: localUpdatedResultJson,
@@ -207,4 +164,4 @@ export async function POST(req, { params }) {
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

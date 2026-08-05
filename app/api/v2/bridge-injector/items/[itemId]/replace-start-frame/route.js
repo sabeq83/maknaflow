@@ -4,7 +4,9 @@ import { logToBridgeInjector } from '@/lib/bridge-injector-logger';
 import fs from 'fs';
 import path from 'path';
 
-export async function POST(req, { params }) {
+import { withTenantContext } from '@/lib/auth';
+
+export const POST = withTenantContext(async (req, { params }) => {
   try {
     const resolvedParams = await params;
     const itemId = resolvedParams.itemId;
@@ -67,7 +69,7 @@ export async function POST(req, { params }) {
 
   } catch (error) {
     console.error('[Replace Start Frame Error]', error);
-    logToBridgeInjector(`[BULK Item #${params.itemId}] [ERROR Replace Start Frame]: ${error.message}`);
+    logToBridgeInjector(`[BULK Item #${params?.itemId || itemId || 'unknown'}] [ERROR Replace Start Frame]: ${error.message}`);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

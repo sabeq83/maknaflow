@@ -3,7 +3,9 @@ import fs from 'fs';
 import path from 'path';
 import { getDb, updateReCampaign } from '../../../../../../lib/db';
 
-export async function POST(request, { params }) {
+import { withTenantContext } from '@/lib/auth';
+
+export const POST = withTenantContext(async (request, { params }) => {
   try {
     const { id } = await params;
     if (!id) {
@@ -96,4 +98,4 @@ export async function POST(request, { params }) {
     console.error('[Replace Image Error]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
