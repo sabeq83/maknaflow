@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.192 — Update query script to find duplicate video_id (05/08/2026)
+- Search content_flow_items for duplicate video_id
+
 ## V2.2.191 — Add test contentflow sync script (05/08/2026)
 - Add scripts/test-cf-sync.js
 
