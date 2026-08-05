@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { approvePillarCampaignItem } from '@/lib/pillar-campaign-approval';
 
-export async function POST(request, { params }) {
+import { withTenantContext } from '@/lib/auth';
+
+export const POST = withTenantContext(async (request, { params }) => {
   try {
     const { itemId } = await params;
     const result = await approvePillarCampaignItem(itemId, await request.json());
@@ -15,4 +17,4 @@ export async function POST(request, { params }) {
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message, code: error.code }, { status: error.status || 500 });
   }
-}
+});

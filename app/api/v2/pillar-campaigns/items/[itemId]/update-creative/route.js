@@ -3,7 +3,9 @@ import { getDb, updatePillarCampaignItem, updatePillarCampaign } from '@/lib/db'
 import fs from 'fs';
 import path from 'path';
 
-export async function PATCH(request, { params }) {
+import { withTenantContext } from '@/lib/auth';
+
+export const PATCH = withTenantContext(async (request, { params }) => {
   try {
     const { itemId } = await params;
     const db = getDb();
@@ -144,4 +146,4 @@ export async function PATCH(request, { params }) {
     console.error('[API Update Creative] Error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

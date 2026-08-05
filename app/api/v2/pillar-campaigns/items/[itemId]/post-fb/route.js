@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server';
 import { getDb, updatePillarCampaignItem, getSetting } from '../../../../../../../lib/db';
 import { postDraftToFacebookPage } from '../../../../../../../lib/facebook-helper';
 
-export async function POST(req, { params }) {
+import { withTenantContext } from '@/lib/auth';
+
+export const POST = withTenantContext(async (req, { params }) => {
   try {
     const resolvedParams = await params;
     const itemId = resolvedParams.itemId;
@@ -102,4 +104,4 @@ export async function POST(req, { params }) {
     console.error('[OPC Manual FB Post API Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.203 — Wrap OPC routes with withTenantContext (05/08/2026)
+- Wrap 12 OPC Campaign routes with withTenantContext
+- Support tenant isolation for OPC bulk creation, approval, and generation manual triggers
+
 ## V2.2.202 — Fix OPC Ingest Tenant Context (05/08/2026)
 - Wrap ingest-planner route with withTenantContext
 - Support multi-tenant ingestion for content planner

@@ -4,7 +4,9 @@ import { generateImage, getTaskStatus, getFileUrl } from '../../../../../../../l
 import fs from 'fs';
 import path from 'path';
 
-export async function POST(req, { params }) {
+import { withTenantContext } from '@/lib/auth';
+
+export const POST = withTenantContext(async (req, { params }) => {
   try {
     const resolvedParams = await params;
     const itemId = resolvedParams.itemId;
@@ -55,7 +57,7 @@ export async function POST(req, { params }) {
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
 const fileToBase64 = (filePath) => {
   // Strip leading slash from web-relative paths (e.g. /uploads/...) so they resolve under public/

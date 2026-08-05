@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getDb, updatePillarCampaignItem, updatePillarCampaign } from '../../../../../../../lib/db';
 
-export async function POST(req, { params }) {
+import { withTenantContext } from '@/lib/auth';
+
+export const POST = withTenantContext(async (req, { params }) => {
   try {
     const resolvedParams = await params;
     const itemId = resolvedParams.itemId;
@@ -29,4 +31,4 @@ export async function POST(req, { params }) {
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

@@ -4,7 +4,9 @@ import { generateImage, getTaskStatus, getFileUrl } from '../../../../../../../l
 import fs from 'fs';
 import path from 'path';
 
-export async function POST(req, { params }) {
+import { withTenantContext } from '@/lib/auth';
+
+export const POST = withTenantContext(async (req, { params }) => {
   try {
     const resolvedParams = await params;
     const itemId = resolvedParams.itemId;
@@ -72,6 +74,7 @@ export async function POST(req, { params }) {
       return `data:${mimeType};base64,${buffer.toString('base64')}`;
     };
 
+    const { resolveProductBase64 } = await import('../../../../../../../lib/scheduler-processors');
     let productData = null;
     if (campaign.target_product_id) {
       productData = await db.prepare("SELECT * FROM product_extractions WHERE id = ?").get(campaign.target_product_id);
@@ -85,19 +88,22 @@ export async function POST(req, { params }) {
       }
     }
 
-    const { resolveProductBase64 } = await import('../../../../../../../lib/scheduler-processors');
     const rowPayload = item.row_creative_payload ? JSON.parse(item.row_creative_payload) : {};
     const productBase64 = resolveProductBase64(campaign, productData, rowPayload);
 
+    // Call T2I webhook helper
+    const payload = {
+      imageModel: imageModel,
+      aspectRatio: campaign.aspect_ratio || '9:16',
+      faceVisibility: campaign.face_visibility || 'Faceless',
+      subjectDemographic: campaign.target_demographic || null,
+      subjectDemographicCustom: campaign.target_demographic_custom || null,
+      visualOverrides: campaign.visual_overrides_json ? JSON.parse(campaign.visual_overrides_json) : null
+    };
+
+    // If it's the bridge/product clip, we pass the product photo
     const bridgeAtClip = campaign.bridge_at_clip || 2;
     const bridgeDurationClips = campaign.bridge_duration_clips !== undefined ? Number(campaign.bridge_duration_clips) : 1;
-    const productEndClip = bridgeDurationClips > 0 ? (bridgeAtClip + bridgeDurationClips - 1) : bridgeAtClip;
-    const isBridge = (Number(clipIndex) >= bridgeAtClip && Number(clipIndex) <= productEndClip);
-
-    console.log(`[OPC Single SF Regen] productBase64: ${!!productBase64}, model: ${imageModel}, isBridge: ${isBridge}`);
-    console.log(`[OPC Single SF Regen] Submitting T2I task for clip ${clipIndex} (isBridge: ${isBridge})...`);
-
-    // [Fix v2.2.87] Lookup brand profile via brand_profile_id untuk webhookOverride
     const brandProfile = campaign.brand_profile_id
       ? await db.prepare('SELECT * FROM brand_profiles WHERE id = ?').get(campaign.brand_profile_id)
       : null;
@@ -193,4 +199,4 @@ export async function POST(req, { params }) {
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

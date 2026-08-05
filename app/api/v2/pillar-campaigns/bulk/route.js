@@ -8,7 +8,9 @@ function extractSpreadsheetId(input) {
   return match ? match[1] : input.trim();
 }
 
-export async function POST(request) {
+import { withTenantContext } from '@/lib/auth';
+
+export const POST = withTenantContext(async (request) => {
   try {
     const { campaign_name, global_settings, rows_data } = await request.json();
 
@@ -128,4 +130,4 @@ export async function POST(request) {
     console.error('[Bulk OPC Ingestion] Error:', err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
-}
+});
