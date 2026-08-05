@@ -17,21 +17,48 @@ export const GET = withTenantContext(async (request, _context, user) => {
     }
 
     const rows = await db.prepare(`
-      SELECT bs.*, 
-             pe.cleaned_photo_url, pe.clean_photo_url, pe.generated_photo_url, pe.active_photo
-      FROM brand_schedules bs
-      LEFT JOIN (
-        SELECT id, product_name, cleaned_photo_url, clean_photo_url, generated_photo_url, active_photo 
-        FROM product_extractions pe1
-        WHERE id = (
-          SELECT MAX(id) 
-          FROM product_extractions pe2 
-          WHERE pe2.product_name = pe1.product_name
-        )
-      ) pe ON (bs.product_id = pe.id OR bs.product_name = pe.product_name)
-      WHERE bs.brand_id = ? 
-      ORDER BY bs.slot_index ASC
+      SELECT * FROM brand_schedules 
+      WHERE brand_id = ? 
+      ORDER BY slot_index ASC
     `).all(brandId);
+
+    // Ambil seluruh data produk untuk dicocokkan fotonya di memori (database-agnostic & case-insensitive)
+    const products = await db.prepare(`
+      SELECT id, product_name, cleaned_photo_url, clean_photo_url, generated_photo_url, active_photo 
+      FROM product_extractions
+    `).all();
+
+    for (const row of rows) {
+      let matchedProd = null;
+      if (row.product_id) {
+        matchedProd = products.find(p => p.id === row.product_id);
+      }
+      if (!matchedProd && row.product_name) {
+        const lowerName = row.product_name.toLowerCase().trim();
+        // 1. Exact match (case insensitive)
+        matchedProd = products.find(p => p.product_name && p.product_name.toLowerCase().trim() === lowerName);
+        
+        // 2. Substring fallback match (e.g. matching "Matcha" with "Matcha Powder")
+        if (!matchedProd) {
+          matchedProd = products.find(p => p.product_name && (
+            p.product_name.toLowerCase().includes(lowerName) || 
+            lowerName.includes(p.product_name.toLowerCase())
+          ));
+        }
+      }
+
+      if (matchedProd) {
+        row.cleaned_photo_url = matchedProd.cleaned_photo_url;
+        row.clean_photo_url = matchedProd.clean_photo_url;
+        row.generated_photo_url = matchedProd.generated_photo_url;
+        row.active_photo = matchedProd.active_photo;
+      } else {
+        row.cleaned_photo_url = null;
+        row.clean_photo_url = null;
+        row.generated_photo_url = null;
+        row.active_photo = null;
+      }
+    }
 
     const { pgQuery } = await import('@/lib/db-pg');
     const todayStr = new Date().toLocaleDateString('sv-SE'); // 'YYYY-MM-DD'
@@ -98,8 +125,8 @@ export const POST = withTenantContext(async (request, _context, user) => {
     }
 
     const stmt = await db.prepare(`
-      INSERT INTO brand_schedules (brand_id, slot_index, product_id, product_name, target_daily_posts, updated_at)
-      VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      INSERT INTO brand_schedules (id, brand_id, slot_index, product_id, product_name, target_daily_posts, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
       ON CONFLICT(brand_id, slot_index) DO UPDATE SET
         product_id = EXCLUDED.product_id,
         product_name = EXCLUDED.product_name,
@@ -108,7 +135,10 @@ export const POST = withTenantContext(async (request, _context, user) => {
     `);
 
     for (const slot of slots) {
+      // Generate a numeric-like unique string that fits in both BIGINT and TEXT
+      const uniqueId = String(Date.now()) + Math.floor(Math.random() * 1000);
       stmt.run(
+        uniqueId,
         brandId,
         slot.slot_index,
         slot.product_id || '',

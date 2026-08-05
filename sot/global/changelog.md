@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.221 — Fix schedules product photo matching (06/08/2026)
+- Fix case-insensitive and substring product photo matching for brand schedules
+- Add unique ID generator to prevent PostgreSQL constraint errors on schedules insert
+
 ## V2.2.220 — Penyelarasan Final SOT dan SOP MAKNA Flow (05/08/2026)
 - Penyelarasan referensi skema dev, port staging 5010/7010, path repositori dev, dan endpoint dedicated webhook di SOT & SOP
 
