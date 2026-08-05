@@ -22,8 +22,12 @@ export const GET = withTenantContext(async (request, _context, user) => {
       FROM brand_schedules bs
       LEFT JOIN (
         SELECT id, product_name, cleaned_photo_url, clean_photo_url, generated_photo_url, active_photo 
-        FROM product_extractions 
-        GROUP BY product_name
+        FROM product_extractions pe1
+        WHERE id = (
+          SELECT MAX(id) 
+          FROM product_extractions pe2 
+          WHERE pe2.product_name = pe1.product_name
+        )
       ) pe ON (bs.product_id = pe.id OR bs.product_name = pe.product_name)
       WHERE bs.brand_id = ? 
       ORDER BY bs.slot_index ASC

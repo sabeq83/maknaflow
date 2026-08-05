@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.212 — Fix Schedules Group By Query Syntax (05/08/2026)
+- Fix PostgreSQL GROUP BY grouping syntax error in content-flow schedules API
+
 ## V2.2.211 — Fix Content Flow Sync PK Conflict & Bridge Tenant Isolation (05/08/2026)
 - Fix Content Flow sync pk conflicts with self-healing updates
 - Add tenant isolation for bridge injector campaigns
