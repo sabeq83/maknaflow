@@ -2,10 +2,11 @@ import { NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs';
 import { updateProductExtraction } from '@/lib/db';
+import { withTenantContext } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request) {
+export const GET = withTenantContext(async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     const relativePath = searchParams.get('path');
@@ -77,9 +78,9 @@ export async function GET(request) {
     console.error('[Products Image API Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function POST(request) {
+export const POST = withTenantContext(async (request) => {
   try {
     const formData = await request.formData();
     const file = formData.get('file');
@@ -143,5 +144,5 @@ export async function POST(request) {
     console.error('[Products Image API POST Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 

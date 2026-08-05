@@ -4,10 +4,11 @@ import { executeWithKeyPool } from '@/lib/gemini';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { buildBatchProductTruthsPrompt } from '@/lib/prompts';
 import { parseGeminiJSON } from '@/lib/json-parser';
+import { withTenantContext } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(req) {
+export const POST = withTenantContext(async (req) => {
   try {
     const body = await req.json();
     const { ids } = body;
@@ -94,4 +95,4 @@ export async function POST(req) {
     console.error('[Regenerate Truths API Error]:', err);
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
-}
+});

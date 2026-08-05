@@ -6,6 +6,7 @@ import { getOrCreateRootFolder, getOrCreateFolderInFolder } from '@/lib/drive-up
 import fs from 'fs';
 import path from 'path';
 import { Readable } from 'stream';
+import { withTenantContext } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +26,7 @@ async function findUploadedFile(drive, filename, folderId) {
   return null;
 }
 
-export async function POST(req) {
+export const POST = withTenantContext(async (req) => {
   try {
     const body = await req.json();
     const { ids } = body;
@@ -238,4 +239,4 @@ export async function POST(req) {
     console.error('[Export Sheets API Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

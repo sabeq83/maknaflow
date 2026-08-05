@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, withTenantContext } from '@/lib/auth';
 import { normalizeImportedProductImagePath, validateProductAssetEntryName } from '@/lib/product-import-archive';
 import { importProducts } from '@/lib/product-repository';
 import AdmZip from 'adm-zip';
@@ -95,11 +95,10 @@ function cleanupStagedAssets(stagedAssets) {
   if (stagedAssets?.root) fs.rmSync(stagedAssets.root, { recursive: true, force: true });
 }
 
-export async function POST(req) {
+export const POST = withTenantContext(async (req, _context, user) => {
   let stagedAssets;
   let promotedAssets = [];
   try {
-    const user = getCurrentUser(req);
     if (!user || user.tenantId === '__none__') {
       throw httpError('Unauthorized', user ? 403 : 401);
     }
@@ -151,4 +150,4 @@ export async function POST(req) {
   } finally {
     cleanupStagedAssets(stagedAssets);
   }
-}
+});

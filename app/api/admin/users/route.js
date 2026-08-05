@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, withTenantContext } from '@/lib/auth';
 import { hashPassword, ALL_MENU_KEYS } from '@/lib/schema/user-schema';
 
-export async function GET(req) {
+export const GET = withTenantContext(async (req, _context, currentUser) => {
   try {
-    const currentUser = getCurrentUser(req);
     if (!currentUser || currentUser.role !== 'admin') {
       return NextResponse.json({ success: false, error: 'Akses ditolak. Khusus Admin.' }, { status: 403 });
     }
@@ -41,11 +40,10 @@ export async function GET(req) {
     console.error('[API Admin Users GET Error]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function POST(req) {
+export const POST = withTenantContext(async (req, _context, currentUser) => {
   try {
-    const currentUser = getCurrentUser(req);
     if (!currentUser || currentUser.role !== 'admin') {
       return NextResponse.json({ success: false, error: 'Akses ditolak. Khusus Admin.' }, { status: 403 });
     }
@@ -108,4 +106,4 @@ export async function POST(req) {
     console.error('[API Admin Users POST Error]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

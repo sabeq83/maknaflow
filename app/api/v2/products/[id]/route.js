@@ -1,21 +1,11 @@
 import { NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, withTenantContext } from '@/lib/auth';
 import { deleteProduct, getProductById, updateProduct } from '@/lib/product-repository';
 
 export const dynamic = 'force-dynamic';
 
-function requireOperationalUser(request) {
-  const user = getCurrentUser(request);
-  if (!user || user.tenantId === '__none__') {
-    const error = new Error('Unauthorized');
-    error.status = user ? 403 : 401;
-    throw error;
-  }
-}
-
-export async function GET(req, { params }) {
+export const GET = withTenantContext(async (req, { params }) => {
   try {
-    requireOperationalUser(req);
     const { id } = await params;
     const product = await getProductById(id);
     if (!product) {
@@ -31,11 +21,10 @@ export async function GET(req, { params }) {
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: error.status || 500 });
   }
-}
+});
 
-export async function PUT(req, { params }) {
+export const PUT = withTenantContext(async (req, { params }) => {
   try {
-    requireOperationalUser(req);
     const { id } = await params;
     const body = await req.json();
     
@@ -79,11 +68,10 @@ export async function PUT(req, { params }) {
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: error.status || 500 });
   }
-}
+});
 
-export async function DELETE(req, { params }) {
+export const DELETE = withTenantContext(async (req, { params }) => {
   try {
-    requireOperationalUser(req);
     const { id } = await params;
     const deleted = await deleteProduct(id);
     if (!deleted) return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
@@ -91,4 +79,4 @@ export async function DELETE(req, { params }) {
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: error.status || 500 });
   }
-}
+});

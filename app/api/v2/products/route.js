@@ -1,23 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, withTenantContext } from '@/lib/auth';
 import { createProduct, listProducts } from '@/lib/product-repository';
 
 export const dynamic = 'force-dynamic';
 
-function requireOperationalUser(request) {
-  const user = getCurrentUser(request);
-  if (!user || user.tenantId === '__none__') {
-    const error = new Error('Unauthorized');
-    error.status = user ? 403 : 401;
-    throw error;
-  }
-  return user;
-}
-
-export async function GET(request) {
+export const GET = withTenantContext(async (request) => {
   try {
-    requireOperationalUser(request);
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search') || '';
     const category = searchParams.get('category') || '';
@@ -60,11 +49,10 @@ export async function GET(request) {
     console.error('Products GET Error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: error.status || 500 });
   }
-}
+});
 
-export async function POST(req) {
+export const POST = withTenantContext(async (req) => {
   try {
-    requireOperationalUser(req);
     const body = await req.json();
 
     if (!body.product_name) {
@@ -106,4 +94,4 @@ export async function POST(req) {
     console.error('Products POST Error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: error.status || 500 });
   }
-}
+});

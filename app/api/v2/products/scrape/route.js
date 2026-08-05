@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createJob, getDb } from '@/lib/db';
+import { withTenantContext } from '@/lib/auth';
 import fs from 'fs';
 import path from 'path';
 
@@ -24,7 +25,7 @@ function normalizeUrl(url) {
   }
 }
 
-export async function POST(req) {
+export const POST = withTenantContext(async (req) => {
   try {
     const body = await req.json();
     const { urls, csv_data, category, tags, repair_mode = true } = body;
@@ -203,5 +204,5 @@ export async function POST(req) {
     console.error('Scrape API Error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 

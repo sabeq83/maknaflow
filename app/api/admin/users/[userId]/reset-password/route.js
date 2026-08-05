@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, withTenantContext } from '@/lib/auth';
 import { hashPassword } from '@/lib/schema/user-schema';
 
-export async function POST(req, { params }) {
+export const POST = withTenantContext(async (req, { params }, currentUser) => {
   try {
-    const currentUser = getCurrentUser(req);
     if (!currentUser || currentUser.role !== 'admin') {
       return NextResponse.json({ success: false, error: 'Akses ditolak. Khusus Admin.' }, { status: 403 });
     }
@@ -45,4 +44,4 @@ export async function POST(req, { params }) {
     console.error('[API Admin Reset Password Error]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

@@ -5,10 +5,11 @@ import { generateImage } from '@/lib/webhook-client';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import fs from 'fs';
 import path from 'path';
+import { withTenantContext } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(req) {
+export const POST = withTenantContext(async (req) => {
   try {
     const body = await req.json();
     const { ids } = body;
@@ -123,4 +124,4 @@ export async function POST(req) {
     console.error('[Regenerate Photos API Error]:', err);
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
-}
+});

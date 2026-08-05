@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { testGeminiConnection } from '@/lib/gemini';
 import { getSetting } from '@/lib/db';
+import { withTenantContext } from '@/lib/auth';
 
-export async function POST(request) {
+export const POST = withTenantContext(async (request) => {
   try {
     const { api_key, use_stored } = await request.json();
 
@@ -20,4 +21,4 @@ export async function POST(request) {
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

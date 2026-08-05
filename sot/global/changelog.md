@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.210 — Konsolidasi Tenant Context Rute API Multi-Menu (05/08/2026)
+- Menambahkan wrapper withTenantContext pada API User Management
+- Menambahkan wrapper dengan tenant context pada API Products
+- Menyelaraskan context tenant di API Settings Test & Content Flow Sync
+
 ## V2.2.209 — Fix RE campaigns tenant context and brand profile dropdown leak (05/08/2026)
 - Wrap re-campaigns detail scheduler-control and angle-render routes in withTenantContext
 - Remove hardcoded brand profiles from frontend dropdown

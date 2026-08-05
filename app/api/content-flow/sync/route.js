@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { scanAndSyncExistingCampaigns } from '@/lib/contentflow-ingest';
+import { withTenantContext } from '@/lib/auth';
 
-export async function POST() {
+export const POST = withTenantContext(async () => {
   try {
     const totalSynced = await scanAndSyncExistingCampaigns();
     return NextResponse.json({
@@ -13,4 +14,4 @@ export async function POST() {
     console.error('[API /api/content-flow/sync POST Error]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

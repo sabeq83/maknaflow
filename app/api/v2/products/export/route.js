@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, withTenantContext } from '@/lib/auth';
 import { listProductsForExport } from '@/lib/product-repository';
 import { ZipArchive } from 'archiver';
 import fs from 'fs';
@@ -7,9 +7,8 @@ import path from 'path';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req) {
+export const GET = withTenantContext(async (req, _context, user) => {
   try {
-    const user = getCurrentUser(req);
     if (!user || user.tenantId === '__none__') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: user ? 403 : 401 });
     }
@@ -65,4 +64,4 @@ export async function GET(req) {
     console.error('[Products Export Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: error.status || 500 });
   }
-}
+});

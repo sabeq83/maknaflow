@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, withTenantContext } from '@/lib/auth';
 import { hashPassword, ALL_MENU_KEYS } from '@/lib/schema/user-schema';
 
-export async function PUT(req, { params }) {
+export const PUT = withTenantContext(async (req, { params }, currentUser) => {
   try {
-    const currentUser = getCurrentUser(req);
     if (!currentUser || currentUser.role !== 'admin') {
       return NextResponse.json({ success: false, error: 'Akses ditolak. Khusus Admin.' }, { status: 403 });
     }
@@ -76,11 +75,10 @@ export async function PUT(req, { params }) {
     console.error('[API Admin User PUT Error]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function DELETE(req, { params }) {
+export const DELETE = withTenantContext(async (req, { params }, currentUser) => {
   try {
-    const currentUser = getCurrentUser(req);
     if (!currentUser || currentUser.role !== 'admin') {
       return NextResponse.json({ success: false, error: 'Akses ditolak. Khusus Admin.' }, { status: 403 });
     }
@@ -105,4 +103,4 @@ export async function DELETE(req, { params }) {
     console.error('[API Admin User DELETE Error]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
