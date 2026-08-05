@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.218 — Pembaruan Alur Kerja Coding Macbook ke Produksi (05/08/2026)
+- Revisi alur kerja deploy agar diarahkan langsung ke port produksi demi kelancaran staging asisten
+
 ## V2.2.217 — Penyelarasan Port Server Dev 5000 dan 6000 (05/08/2026)
 - Konfigurasi port 5000/6000 untuk server developer pada SOT dan SOP
 - Pembaruan path environment Next.js di server developer
