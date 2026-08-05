@@ -25,7 +25,7 @@ MAKNA Flow adalah arsitektur terdistribusi (*Decoupled 3-Node Architecture*) dar
 | **Server UI & Worker (Staging)** | Ubuntu Desktop (NUC) | `100.65.62.63` | `:5010` (Web UI), `:7010` (API) | `/home/sabeqmursyid/maknaflow-staging` |
 | **Server Database Terpusat** | Linux Storage Server | `100.78.186.123` | `:3001` (ContentFlow), `:5432` (PostgreSQL) | `/var/www/contentflow` |
 | **Server Webhook G-Labs (Dedicated)** | Windows/Dedicated Host | `100.64.70.61` | `:8765` (G-Labs Webhook) | - |
-| **Server Developer (Testing/Sandbox)**| Development Host | `100.118.178.93` | `:5000` (Web UI), `:6000` (API) | `/home/sabeqmursyid/maknaflow` |
+| **Server Developer (Testing/Sandbox)**| Development Host | `100.118.178.93` | `:5000` (Web UI), `:6000` (API) | `/home/sabeq83/maknaflow` |
 
 ---
 
@@ -72,7 +72,8 @@ NODE_ROLE=standalone
 ENABLE_SCHEDULER_WORKER=true
 PORT=5000
 DATABASE_HOST=100.78.186.123
-PGDATABASE=maknaflow_dev
+PGDATABASE=maknaflow_db
+PG_SEARCH_PATH=dev
 WEBHOOK_HOST=100.64.70.61
 WEBHOOK_PORT=8765
 ```
@@ -88,7 +89,7 @@ sequenceDiagram
     participant N1 as Node 1: UI Gateway (100.65.62.63)
     participant N3_DB as Node 3: Central DB (100.78.186.123)
     participant N2 as Node 2: Worker GPU (100.117.59.92)
-    participant GLabs as G-Labs Webhook (Windows 127.0.0.1)
+    participant GLabs as G-Labs Webhook (Dedicated 100.64.70.61)
     participant N3_Storage as Node 3: Vault & ContentFlow DB
 
     Staff->>N1: 1. Akses UI WebApp & Input Produk
@@ -98,9 +99,9 @@ sequenceDiagram
 
     Note over N2,N3_DB: Background Queue Worker Polling
     N2->>N3_DB: 5. Polling Queue Item Berstatus 'approved' / 'pending'
-    N2->>GLabs: 6. Request T2I Start Frame (127.0.0.1:8765)
+    N2->>GLabs: 6. Request T2I Start Frame (100.64.70.61:8765)
     GLabs-->>N2: 7. Start Frame PNG Terbuat
-    N2->>GLabs: 8. Request I2V Video Veo (127.0.0.1:8765)
+    N2->>GLabs: 8. Request I2V Video Veo (100.64.70.61:8765)
     GLabs-->>N2: 9. Video Klip MP4 Terbuat
     N2->>N2: 10. Muxing Video + TTS via FFmpeg Smart Sync
     N2->>N3_Storage: 11. Stream & Upload Vault Aset (Video Final, Clips, PNG, MP3)

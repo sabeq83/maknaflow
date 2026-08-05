@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.220 — Penyelarasan Final SOT dan SOP MAKNA Flow (05/08/2026)
+- Penyelarasan referensi skema dev, port staging 5010/7010, path repositori dev, dan endpoint dedicated webhook di SOT & SOP
+
 ## V2.2.219 — Integrasi Skrip Deploy Dev 100.118.178.93 (05/08/2026)
 - Menambahkan npm run deploy:dev untuk deploy langsung ke server developer
 - Pembaruan dokumentasi alur kerja coding Macbook ke server developer

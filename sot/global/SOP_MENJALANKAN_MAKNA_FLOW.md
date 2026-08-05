@@ -24,7 +24,7 @@ Panduan ini mengatur tata cara standar untuk mengaktifkan, menguji, dan memeliha
 | **Node Staging** | Ubuntu Desktop (NUC) | `100.65.62.63` | `:5010` (Web UI), `:7010` (API) | `ssh makna-ui` | `/home/sabeqmursyid/maknaflow-staging` (branch: `staging`) |
 | **Node Webhook** | Windows / Dedicated | `100.64.70.61` | `:8765` (G-Labs Webhook) | - | - |
 | **Node DB** | Linux Storage | `100.78.186.123` | `:3001` (ContentFlow), `:5432` (PostgreSQL) | `ssh makna-db` | `/var/www/contentflow` (DB: `public` & `staging` schemas) |
-| **Node Developer**| Development Host | `100.118.178.93`| `:5000` (Web UI), `:6000` (API) | `ssh ...` | `/home/sabeqmursyid/maknaflow` |
+| **Node Developer**| Development Host | `100.118.178.93`| `:5000` (Web UI), `:6000` (API) | `ssh ...` | `/home/sabeq83/maknaflow` |
 
 ---
 
@@ -86,7 +86,7 @@ Ikuti urutan startup berantai berikut untuk memastikan ketergantungan database d
    ssh vibe-server -p 2222
    ```
 2. **Pastikan Aplikasi G-Labs Webhook Aktif**:
-   - Pastikan G-Labs local server telah berjalan di Windows pada `http://127.0.0.1:8765`.
+    - Pastikan G-Labs dedicated server telah berjalan di Windows pada `http://100.64.70.61:8765`.
 3. **Inisialisasi Environment Worker**:
    - Jalankan skrip bootstrap atau persiapkan file `.env.local`:
      ```cmd
@@ -136,13 +136,13 @@ node scripts/test-cluster-health.js
 
 ## 🛠️ 6. Troubleshooting & Isolasi Sistem Legacy
 
-1. **G-Labs Webhook Tidak Merespon di Node 2**:
-   - Pastikan software G-Labs berjalan di sesi UI Windows (`127.0.0.1:8765`).
-   - Uji koneksi lokal G-Labs: `curl http://127.0.0.1:8765/health`.
+1. **G-Labs Webhook Tidak Merespon**:
+   - Pastikan software G-Labs berjalan di dedicated Windows host (`100.64.70.61:8765`).
+   - Uji koneksi G-Labs: `curl http://100.64.70.61:8765/health`.
 2. **Isolasi Terhadap System Legacy (`maknagen`)**:
    - MAKNA Flow berjalan di folder terpisah (`_maknaflow` & `D:\server\maknaflow`).
    - Database MAKNA Flow terpisah (Central DB `maknaflow_db` di Node 3).
-   - G-Labs Webhook (`127.0.0.1:8765`) bersifat stateless dan melayani `maknaflow` secara independen.
+   - G-Labs Webhook (`100.64.70.61:8765`) bersifat stateless dan melayani `maknaflow` secara independen.
 
 ---
 
@@ -165,7 +165,7 @@ Untuk menjamin kualitas dan stabilitas sistem sebelum menyentuh server produksi,
 [Dev Lokal & Build Localhost] 
           │
           ▼
-[Push ke cabang 'staging'] ──► [Deploy ke Server Staging] (Port 3010)
+[Push ke cabang 'staging'] ──► [Deploy ke Server Staging] (Port 5010)
                                         │
                                         ▼
                                  [Uji di Staging]
@@ -199,10 +199,10 @@ Untuk menjamin kualitas dan stabilitas sistem sebelum menyentuh server produksi,
    ```bash
    npm run deploy:staging
    ```
-- *Catatan*: Skrip ini akan melakukan SSH ke Node 1, memperbarui kode di folder `/home/sabeqmursyid/maknaflow-staging` (cabang `staging`), melakukan build, dan me-restart servis staging di Port `3010` (UI) & `4010` (API).
+- *Catatan*: Skrip ini akan melakukan SSH ke Node 1, memperbarui kode di folder `/home/sabeqmursyid/maknaflow-staging` (cabang `staging`), melakukan build, dan me-restart servis staging di Port `5010` (UI) & `7010` (API).
 
 ### 3. Validasi & Pengujian di Server Staging
-- Uji fitur yang baru ditambahkan melalui browser di alamat: **`http://100.65.62.63:3010`**.
+- Uji fitur yang baru ditambahkan melalui browser di alamat: **`http://100.65.62.63:5010`**.
 - Lakukan integrasi fungsional dan pastikan data tersimpan dengan benar di schema `staging` PostgreSQL Node 3.
 
 ### 4. Penggabungan ke `main` & Rilis Produksi
