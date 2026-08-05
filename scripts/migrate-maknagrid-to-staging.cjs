@@ -101,6 +101,12 @@ async function runMigration() {
 
       // Normalize account_name
       let accountName = row.account_name || null;
+
+      // Filter out deleted accounts
+      if (accountName === 'contohbrand' || accountName === 'nutriblend') {
+        continue;
+      }
+
       if (accountName && accountName.includes('dapurbotani')) {
         accountName = 'dapurbotani';
       }

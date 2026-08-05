@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.215 — Penyaringan contohbrand dan nutriblend (05/08/2026)
+- Menambahkan filter pengabaian (ignore) untuk contohbrand dan nutriblend pada script migrasi
+- Melakukan penghapusan baris data contohbrand dan nutriblend di tenant default
+
 ## V2.2.214 — Normalisasi Akun Dapurbotani di Migrasi (05/08/2026)
 - Menambahkan otomatisasi normalisasi account_name dapurbotani pada script migrasi
 - Melakukan update data lama di target database
