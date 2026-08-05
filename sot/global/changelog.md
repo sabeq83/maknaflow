@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.223 — Fix production deploy script API environment variables (06/08/2026)
+- Add --env-file=.env.local and set API_PORT=6000 in deploy-production.js
+
 ## V2.2.222 — Fix dashboard stats PostgreSQL syntax error (06/08/2026)
 - Fix double quotes around string literals in stats SQL queries
 
