@@ -36,7 +36,7 @@ export const GET = withTenantContext(async (request, _context, user) => {
         minimax_group_id: await getSetting('minimax_group_id') || '',
         webhook_api_key: maskSecret(webhookKey),
         has_webhook_key: !!webhookKey,
-        webhook_host: await getSetting('webhook_host') || '100.117.59.92',
+        webhook_host: await getSetting('webhook_host') || '100.64.70.61',
         webhook_port: await getSetting('webhook_port') || '8765',
         webhook_image_model: await getSetting('webhook_image_model') || 'nano_banana_pro',
         webhook_video_model: await getSetting('webhook_video_model') || 'veo_31_lite_relaxed',

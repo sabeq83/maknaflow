@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.2.216 — Transisi Server Cluster Baru & Migrasi Database (05/08/2026)
+- Mengubah default host webhook G-Labs ke 100.64.70.61
+- Depresiasi auto SSH Tunnel karena G-Labs diakses langsung via Tailscale
+- Mengubah port staging ke UI 5010 dan API 7010
+- Migrasi penuh database lama ke skema staging terpusat
+
 ## V2.2.215 — Penyaringan contohbrand dan nutriblend (05/08/2026)
 - Menambahkan filter pengabaian (ignore) untuk contohbrand dan nutriblend pada script migrasi
 - Melakukan penghapusan baris data contohbrand dan nutriblend di tenant default

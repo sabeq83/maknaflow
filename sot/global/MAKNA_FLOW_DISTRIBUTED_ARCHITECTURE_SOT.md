@@ -18,13 +18,14 @@ MAKNA Flow adalah arsitektur terdistribusi (*Decoupled 3-Node Architecture*) dar
 
 ---
 
-## 📐 2. Topologi Jaringan & Alamat IP Produksi
+## 📐 2. Topologi Jaringan & Alamat IP Produksi (Staging & Dev)
 
-| Node | Peran Cluster | OS / Hardware | IP Address | Port Layanan Utama | Path Repository |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Node 1** | **Server UI (Gateway Node)** | Ubuntu Desktop (NUC) | `100.65.62.63` | `:3000` (Next.js Web UI) | `/home/sabeqmursyid/maknaflow` |
-| **Node 2** | **Server Worker (Compute GPU Node)** | Windows PC | `100.117.59.92` | `:3000` (Worker Engine), `:8765` (G-Labs Local) | `D:\server\maknaflow` |
-| **Node 3** | **Server DB & Media Vault Node** | Linux Storage Server | `100.78.186.123` | `:3001` (ContentFlow API), `:5432` (Central DB) | `/var/www/contentflow` |
+| Node / Peran | OS / Hardware | IP Address | Port Layanan Utama | Path Repository |
+| :--- | :--- | :--- | :--- | :--- |
+| **Server UI & Worker (Staging)** | Ubuntu Desktop (NUC) | `100.65.62.63` | `:5010` (Web UI), `:7010` (API) | `/home/sabeqmursyid/maknaflow-staging` |
+| **Server Database Terpusat** | Linux Storage Server | `100.78.186.123` | `:3001` (ContentFlow), `:5432` (PostgreSQL) | `/var/www/contentflow` |
+| **Server Webhook G-Labs (Dedicated)** | Windows/Dedicated Host | `100.64.70.61` | `:8765` (G-Labs Webhook) | - |
+| **Server Developer (Testing/Sandbox)**| Development Host | `100.118.178.93` | `:3000` (Web UI), `:4000` (API) | `/home/sabeqmursyid/maknaflow` |
 
 ---
 
@@ -33,40 +34,47 @@ MAKNA Flow adalah arsitektur terdistribusi (*Decoupled 3-Node Architecture*) dar
 Setiap node di-klasifikasikan menggunakan variabel lingkungan `NODE_ROLE` dan `ENABLE_SCHEDULER_WORKER`:
 
 ```mermaid
-graph LR
-    subgraph NODE1["🖥️ Node 1: Ubuntu Gateway (100.65.62.63)"]
-        N1_Role["NODE_ROLE=gateway<br/>ENABLE_SCHEDULER_WORKER=false"]
+graph TD
+    subgraph STAGING_NODE ["🖥️ Node Staging (100.65.62.63)"]
+        N1_Role["NODE_ROLE=gateway<br/>ENABLE_SCHEDULER_WORKER=true<br/>PORT=5010"]
     end
 
-    subgraph NODE2["💻 Node 2: Windows Worker GPU (100.117.59.92)"]
-        N2_Role["NODE_ROLE=worker<br/>ENABLE_SCHEDULER_WORKER=true"]
-    end
-
-    subgraph NODE3["🗄️ Node 3: Storage & Central DB (100.78.186.123)"]
+    subgraph DB_NODE ["🗄️ Node Database (100.78.186.123)"]
         N3_Role["NODE_ROLE=storage<br/>Central Database & Vault Storage"]
+    end
+
+    subgraph GLABS_NODE ["🤖 Node G-Labs Webhook (100.64.70.61)"]
+        GLabs["G-Labs Service (Port 8765)"]
+    end
+
+    subgraph DEV_NODE ["💻 Node Developer (100.118.178.93)"]
+        Dev_Role["NODE_ROLE=standalone<br/>ENABLE_SCHEDULER_WORKER=true"]
     end
 ```
 
-### `.env.local` Node 1 (Ubuntu Gateway):
+### `.env.local` Server Staging (`100.65.62.63`):
 ```env
 NODE_ENV=production
 NODE_ROLE=gateway
-ENABLE_SCHEDULER_WORKER=false
-PORT=3000
+ENABLE_SCHEDULER_WORKER=true
+PORT=5010
 DATABASE_HOST=100.78.186.123
 PGDATABASE=maknaflow_db
+PG_SEARCH_PATH=staging
+WEBHOOK_HOST=100.64.70.61
+WEBHOOK_PORT=8765
 ```
 
-### `.env.local` Node 2 (Windows Worker GPU):
+### `.env.local` Server Developer (`100.118.178.93`):
 ```env
-NODE_ENV=production
-NODE_ROLE=worker
+NODE_ENV=development
+NODE_ROLE=standalone
 ENABLE_SCHEDULER_WORKER=true
 PORT=3000
-WEBHOOK_PORT=8765
-WEBHOOK_HOST=127.0.0.1
 DATABASE_HOST=100.78.186.123
-PGDATABASE=maknaflow_db
+PGDATABASE=maknaflow_dev
+WEBHOOK_HOST=100.64.70.61
+WEBHOOK_PORT=8765
 ```
 
 ---

@@ -29,7 +29,7 @@ function getContentFlowApiUrl() {
 
 function getWebhookBaseUrl() {
   const port = process.env.WEBHOOK_PORT || '8765';
-  const host = process.env.WEBHOOK_HOST || '127.0.0.1';
+  const host = process.env.WEBHOOK_HOST || '100.64.70.61';
   return `http://${host}:${port}`;
 }
 
@@ -80,12 +80,12 @@ async function runClusterHealthCheck() {
 
   // Test Node 2 G-Labs Webhook Endpoint (if running on Worker)
   if (workerEnabled) {
-    console.log(`[Testing Node 2 G-Labs Webhook Endpoint...]`);
+    console.log(`[Testing G-Labs Webhook Endpoint...]`);
     const glabsHealth = await checkUrlHealth(webhookUrl);
     if (glabsHealth.ok || glabsHealth.status === 404 || glabsHealth.status === 405) {
-      console.log(` ✅ Node 2 G-Labs Webhook (127.0.0.1:8765) is RESPONDING (HTTP ${glabsHealth.status})`);
+      console.log(` ✅ G-Labs Webhook (${webhookUrl}) is RESPONDING (HTTP ${glabsHealth.status})`);
     } else {
-      console.log(` ℹ️ Node 2 G-Labs Webhook Check: ${glabsHealth.error || glabsHealth.status}`);
+      console.log(` ℹ️ G-Labs Webhook Check (${webhookUrl}): ${glabsHealth.error || glabsHealth.status}`);
     }
   }
 

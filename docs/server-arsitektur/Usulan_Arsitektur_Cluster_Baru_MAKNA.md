@@ -26,7 +26,7 @@ Sebagai gantinya, terdapat 4 server/IP yang dideklarasikan dalam topologi baru:
 
 ### 🟢 Topologi Baru (4-Node Terdekopel)
 * **Node Staging & App Worker**: `100.65.62.63` 
-  * Menjalankan Next.js Web App UI (Port `3010`) dan API Engine (Port `4010`).
+  * Menjalankan Next.js Web App UI (Port `5010`) dan API Engine (Port `7010`).
   * **BARU**: Juga mengaktifkan background queue worker (`ENABLE_SCHEDULER_WORKER=true`) untuk memproses campaign scheduler dan muxing audio/video menggunakan FFmpeg secara lokal (memanfaatkan memori 16GB NUC).
 * **Node Database Terpusat**: `100.78.186.123`
   * Berfungsi penuh sebagai server PostgreSQL terpusat (Port `5432`).
@@ -41,8 +41,8 @@ Sebagai gantinya, terdapat 4 server/IP yang dideklarasikan dalam topologi baru:
 ```mermaid
 flowchart TD
     subgraph STAGING_NODE ["🖥️ Node Staging (100.65.62.63)"]
-        UI["Next.js Web UI (Port 3010)"]
-        API["API Engine (Port 4010)"]
+        UI["Next.js Web UI (Port 5010)"]
+        API["API Engine (Port 7010)"]
         Worker["Queue Worker (glabs-worker)"]
         UI --- API
         API --- Worker
@@ -85,7 +85,7 @@ Pengaturan ini mengaktifkan fungsionalitas worker pada staging server untuk meng
 NODE_ENV=production
 NODE_ROLE=gateway
 ENABLE_SCHEDULER_WORKER=true
-PORT=3010
+PORT=5010
 DATABASE_HOST=100.78.186.123
 PGDATABASE=maknaflow_db
 PG_SEARCH_PATH=staging

@@ -3,9 +3,9 @@ import { getRedisConnection } from '../lib/redis.js';
 import { saveGlabsTaskRoute } from '../lib/db.js';
 
 // Since the worker runs on Node 2, it connects to local G-Labs app
-const GLABS_LOCAL_HOST = '127.0.0.1';
-const GLABS_LOCAL_PORT = '8765';
-const GLABS_URL = `http://${GLABS_LOCAL_HOST}:${GLABS_LOCAL_PORT}`;
+const GLABS_HOST = process.env.WEBHOOK_HOST || '100.64.70.61';
+const GLABS_PORT = process.env.WEBHOOK_PORT || '8765';
+const GLABS_URL = `http://${GLABS_HOST}:${GLABS_PORT}`;
 
 // Concurrency limit from environment or default to 2
 const CONCURRENCY = parseInt(process.env.GLABS_WORKER_CONCURRENCY || '2', 10);
@@ -45,10 +45,10 @@ const worker = new Worker('glabs-task-queue', async (job) => {
 
   // 2. Persist route to central DB so gateway can find files
   try {
-    const workerPublicIp = process.env.WEBHOOK_HOST || '100.117.59.92';
+    const workerPublicIp = process.env.WEBHOOK_HOST || '100.64.70.61';
     // Save route under the original BullMQ job ID too for transparent lookups
-    await saveGlabsTaskRoute(gLabsTaskId, workerPublicIp, GLABS_LOCAL_PORT, apiKey);
-    await saveGlabsTaskRoute(`bullmq_${job.id}`, workerPublicIp, GLABS_LOCAL_PORT, apiKey);
+    await saveGlabsTaskRoute(gLabsTaskId, workerPublicIp, GLABS_PORT, apiKey);
+    await saveGlabsTaskRoute(`bullmq_${job.id}`, workerPublicIp, GLABS_PORT, apiKey);
   } catch (err) {
     console.warn(`[Worker] Failed to save task routing: ${err.message}`);
   }

@@ -18,13 +18,13 @@ Panduan ini mengatur tata cara standar untuk mengaktifkan, menguji, dan memeliha
 
 ## 📐 2. Ringkasan Topologi Cluster & SSH Quick Access
 
-| Node | Peran Cluster | Operating System | IP Address | Port Utama | SSH Command | Path Repository / DB |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Node 1 (Prod)** | **UI Gateway (Production)** | Ubuntu Desktop (NUC) | `100.65.62.63` | `:3000` (Web UI), `:4000` (API) | `ssh makna-ui` | `/home/sabeqmursyid/maknaflow` (branch: `main`) |
-| **Node 1 (Staging)**| **Staging Gateway** | Ubuntu Desktop (NUC) | `100.65.62.63` | `:3010` (Web UI), `:4010` (API) | `ssh makna-ui` | `/home/sabeqmursyid/maknaflow-staging` (branch: `staging`) |
-| **Node 2** | **Worker GPU** | Windows PC | `100.117.59.92` | `:3000` (Worker Engine), `:8765` (G-Labs) | `ssh vibe-server -p 2222` | `D:\server\maknaflow` |
-| **Node 3 (Prod)** | **DB & Vault Master** | Linux Storage | `100.78.186.123` | `:3001` (ContentFlow), `:5432` (PostgreSQL) | `ssh makna-db` | `/var/www/contentflow` (DB: `public` schema) |
-| **Node 3 (Staging)**| **DB Staging** | Linux Storage | `100.78.186.123` | `:5432` (PostgreSQL) | `ssh makna-db` | DB: `staging` schema pada database `maknaflow_db` |
+| Node / Peran | Operating System | IP Address | Port Utama | SSH Command | Path Repository / DB |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Node UI/Prod** | Ubuntu Desktop (NUC) | `100.65.62.63` | `:5000` (Web UI), `:6000` (API) | `ssh makna-ui` | `/home/sabeqmursyid/maknaflow` (branch: `main`) |
+| **Node Staging** | Ubuntu Desktop (NUC) | `100.65.62.63` | `:5010` (Web UI), `:7010` (API) | `ssh makna-ui` | `/home/sabeqmursyid/maknaflow-staging` (branch: `staging`) |
+| **Node Webhook** | Windows / Dedicated | `100.64.70.61` | `:8765` (G-Labs Webhook) | - | - |
+| **Node DB** | Linux Storage | `100.78.186.123` | `:3001` (ContentFlow), `:5432` (PostgreSQL) | `ssh makna-db` | `/var/www/contentflow` (DB: `public` & `staging` schemas) |
+| **Node Developer**| Development Host | `100.118.178.93`| `:3000` (Web UI), `:4000` (API) | `ssh ...` | `/home/sabeqmursyid/maknaflow` |
 
 ---
 
@@ -48,28 +48,22 @@ PGDATABASE=maknaflow_db
 NODE_ENV=production
 NODE_ROLE=gateway
 ENABLE_SCHEDULER_WORKER=true
-PORT=3010
+PORT=5010
 DATABASE_HOST=100.78.186.123
 PGDATABASE=maknaflow_db
 PG_SEARCH_PATH=staging
 CONTENT_FLOW_API_URL=http://100.78.186.123:3001/api/v1/content/ingest
-WEBHOOK_HOST=100.117.59.92
+WEBHOOK_HOST=100.64.70.61
 WEBHOOK_PORT=8765
 ```
-> **Catatan Port Staging**: Staging berjalan pada Port **`3010`** (Web UI) dan Port **`4010`** (API Server) dengan schema database PostgreSQL bernama **`staging`** yang terisolasi dari data produksi utama (`public` schema) pada database `maknaflow_db`.
+> **Catatan Port Staging**: Staging berjalan pada Port **`5010`** (Web UI) dan Port **`7010`** (API Server) dengan schema database PostgreSQL bernama **`staging`** yang terisolasi dari data produksi utama (`public` schema) pada database `maknaflow_db`.
 
-### 💻 Node 2 (Windows Worker GPU — `100.117.59.92`)
+### 💻 Node Webhook (G-Labs Dedicated — `100.64.70.61`)
 ```env
-NODE_ENV=production
-NODE_ROLE=worker
-ENABLE_SCHEDULER_WORKER=true
-PORT=3000
-WEBHOOK_PORT=8765
-WEBHOOK_HOST=127.0.0.1
-DATABASE_HOST=100.78.186.123
-PGDATABASE=maknaflow_db
+PORT=8765
+# G-Labs visual compute services ( stateless API )
 ```
-> **Catatan**: Node 2 bertindak sebagai mesin komputasi GPU yang mengeksekusi T2I (Start Frame PNG), I2V (Video Veo MP4), TTS Studio, dan Muxing FFmpeg Smart Sync.
+> **Catatan**: Node Webhook bertindak sebagai mesin komputasi GPU dedicated yang mengeksekusi T2I (Start Frame PNG) dan I2V (Video Veo MP4) secara langsung melayani request dari Staging maupun Dev.
 
 ---
 
