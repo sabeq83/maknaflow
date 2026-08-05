@@ -674,15 +674,15 @@ export default function ProductDatabasePage() {
         <div className="page-container">
           <div className="page-header" style={{ marginBottom: '24px' }}>
             <h1 className="page-title">📦 Product Database</h1>
-            <p className="page-subtitle" style={{ marginBottom: '16px' }}>Manage single source of truth for products. Automatically scrape details and extract 3 bullet-point USPs via Gemini.</p>
+            <p className="page-subtitle" style={{ marginBottom: '16px' }}>Manage single source of truth for products.</p>
             
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
               <button 
                 className="btn" 
                 style={{ 
-                  background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.25) 100%)', 
-                  border: '1px solid rgba(59, 130, 246, 0.4)', 
-                  color: '#60a5fa',
+                  background: 'rgba(14, 165, 233, 0.15)', 
+                  border: '1px solid rgba(14, 165, 233, 0.4)', 
+                  color: '#38bdf8',
                   padding: '10px 16px',
                   borderRadius: '10px',
                   fontWeight: 600,
@@ -692,7 +692,7 @@ export default function ProductDatabasePage() {
                   alignItems: 'center',
                   gap: '6px',
                   transition: 'all 0.2s ease',
-                  boxShadow: '0 4px 12px rgba(37, 99, 235, 0.1)'
+                  boxShadow: '0 4px 12px rgba(14, 165, 233, 0.1)'
                 }}
                 onClick={() => setShowCsvImportModal(true)}
               >
@@ -702,9 +702,9 @@ export default function ProductDatabasePage() {
               <button 
                 className="btn" 
                 style={{ 
-                  background: 'rgba(255, 255, 255, 0.05)', 
-                  border: '1px solid #334155', 
-                  color: '#e2e8f0',
+                  background: 'rgba(14, 165, 233, 0.15)', 
+                  border: '1px solid rgba(14, 165, 233, 0.4)', 
+                  color: '#38bdf8',
                   padding: '10px 16px',
                   borderRadius: '10px',
                   fontWeight: 600,
@@ -724,9 +724,9 @@ export default function ProductDatabasePage() {
                 href={selectedIds.length > 0 ? `/api/v2/products/export?ids=${selectedIds.join(',')}` : `/api/v2/products/export`} 
                 className="btn" 
                 style={{ 
-                  background: selectedIds.length > 0 ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(109, 40, 217, 0.3) 100%)' : 'rgba(255, 255, 255, 0.03)', 
-                  border: selectedIds.length > 0 ? '1px solid #8b5cf6' : '1px solid #334155', 
-                  color: selectedIds.length > 0 ? '#a78bfa' : '#94a3b8', 
+                  background: selectedIds.length > 0 ? 'linear-gradient(135deg, rgba(14, 165, 233, 0.3) 0%, rgba(2, 132, 199, 0.4) 100%)' : 'rgba(14, 165, 233, 0.1)', 
+                  border: selectedIds.length > 0 ? '1px solid #0284c7' : '1px solid rgba(14, 165, 233, 0.3)', 
+                  color: selectedIds.length > 0 ? '#38bdf8' : '#7dd3fc', 
                   padding: '10px 16px',
                   borderRadius: '10px',
                   fontWeight: 600,

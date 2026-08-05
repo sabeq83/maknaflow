@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.201 — Simplify product database header and style import/export buttons to light blue (05/08/2026)
+- Update subtitle text to 'Manage single source of truth for products.'
+- Apply light blue style to Import CSV, Import ZIP, and Export ZIP buttons
+
 ## V2.2.200 — Improve Product Database UI and modal upload (05/08/2026)
 - Rearrange header buttons below subtitle
 - Lock Batch Scraper button and remove Export Sheets
