@@ -5,7 +5,10 @@ import { sanitizeLogContent } from '@/lib/log-sanitizer';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request) {
+import { withTenantContext } from '@/lib/auth';
+import { getActiveTenantId } from '@/lib/tenant-context';
+
+export const GET = withTenantContext(async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
@@ -32,7 +35,9 @@ export async function GET(request) {
       return NextResponse.json({ error: 'Type tidak valid' }, { status: 400 });
     }
 
-    const logPath = path.join(process.cwd(), 'public', filename);
+    const tenantId = getActiveTenantId();
+    const tenantFilename = filename.replace('.txt', `_${tenantId}.txt`);
+    const logPath = path.join(process.cwd(), 'public', tenantFilename);
 
     if (!fs.existsSync(logPath)) {
       return new NextResponse(`Belum ada log aktivitas untuk ${type}.`, {
@@ -49,4 +54,4 @@ export async function GET(request) {
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
-}
+});

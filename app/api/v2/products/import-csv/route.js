@@ -3,6 +3,8 @@ import { getDb } from '@/lib/db';
 import * as XLSX from 'xlsx';
 import fs from 'fs';
 import path from 'path';
+import { withTenantContext } from '@/lib/auth';
+import { getActiveTenantId } from '@/lib/tenant-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +28,8 @@ function appendToLog(message) {
     if (!fs.existsSync(logDir)) {
       fs.mkdirSync(logDir, { recursive: true });
     }
-    const logPath = path.join(logDir, 'product_bulk_logs.txt');
+    const tenantId = getActiveTenantId();
+    const logPath = path.join(logDir, `product_bulk_logs_${tenantId}.txt`);
     const timestamp = new Date().toLocaleString('id-ID');
     fs.appendFileSync(logPath, `[${timestamp}] ${message}\n`);
   } catch (err) {
@@ -34,7 +37,7 @@ function appendToLog(message) {
   }
 }
 
-export async function POST(req) {
+export const POST = withTenantContext(async (req) => {
   try {
     const formData = await req.formData();
     const file = formData.get('file'); 
@@ -127,4 +130,4 @@ export async function POST(req) {
     appendToLog(`[ERROR] Impor massal gagal: ${error.message}`);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

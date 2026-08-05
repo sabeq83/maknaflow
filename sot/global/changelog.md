@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.206 — Isolate poll loggers per tenant (05/08/2026)
+- Wrap system-logs and scheduler control routes with tenant context
+- Modify loggers to append tenantId suffix to filenames
+- Update background campaigns and db scheduler to write tenant-specific logs
+
 ## V2.2.205 — Wrap Deconstruct, Multiplier, Recipe, and Sheet Auto Pilot with withTenantContext (05/08/2026)
 - Wrap 3 Deconstruct Lab API routes
 - Wrap 2 Multiplier Lab API routes

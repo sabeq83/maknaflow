@@ -26,8 +26,10 @@ export const POST = withTenantContext(async (request) => {
     // Log change to Recipe logs
     try {
       const { writeLogToFile } = await import('@/lib/console-hook');
+      const { getActiveTenantId } = await import('@/lib/tenant-context');
       const path = await import('path');
-      const logFile = path.join(process.cwd(), 'public', 'recipe_logs.txt');
+      const tenantId = getActiveTenantId();
+      const logFile = path.join(process.cwd(), 'public', `recipe_logs_${tenantId}.txt`);
       writeLogToFile(logFile, `Recipe Scheduler status changed to: ${schedulerStatus ? 'ACTIVE' : 'INACTIVE'}`);
     } catch (_) {}
 

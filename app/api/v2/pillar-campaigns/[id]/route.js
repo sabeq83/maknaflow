@@ -145,7 +145,9 @@ export const PATCH = withTenantContext(async (request, { params }, user) => {
         .map(([k, v]) => `${k}: ${v}`)
         .join(', ');
       const { writeLogToFile } = await import('../../../../../lib/console-hook');
-      const logFile = path.join(process.cwd(), 'public', 'opc_logs.txt');
+      const { getActiveTenantId } = await import('../../../../../lib/tenant-context');
+      const tenantId = getActiveTenantId();
+      const logFile = path.join(process.cwd(), 'public', `opc_logs_${tenantId}.txt`);
       writeLogToFile(logFile, `Campaign "${campaignName}" updated: [${changeSummary}]`);
     } catch (logErr) {
       // Fail silently

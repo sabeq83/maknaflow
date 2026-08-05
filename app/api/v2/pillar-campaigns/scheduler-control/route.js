@@ -43,8 +43,10 @@ export async function POST(request) {
     // Log change to OPC logs
     try {
       const { writeLogToFile } = await import('@/lib/console-hook');
+      const { getActiveTenantId } = await import('@/lib/tenant-context');
       const path = await import('path');
-      const logFile = path.join(process.cwd(), 'public', 'opc_logs.txt');
+      const tenantId = getActiveTenantId();
+      const logFile = path.join(process.cwd(), 'public', `opc_logs_${tenantId}.txt`);
       writeLogToFile(logFile, `OPC Scheduler status changed to: ${schedulerStatus ? 'ACTIVE' : 'INACTIVE'}`);
     } catch (_) {}
 

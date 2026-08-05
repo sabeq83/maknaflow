@@ -184,7 +184,9 @@ export async function PATCH(request, { params }) {
         .map(([k, v]) => `${k}: ${v}`)
         .join(', ');
       const { writeLogToFile } = await import('../../../../../lib/console-hook');
-      const logFile = path.join(process.cwd(), 'public', 're_campaign_logs.txt');
+      const { getActiveTenantId } = await import('../../../../../lib/tenant-context');
+      const tenantId = getActiveTenantId();
+      const logFile = path.join(process.cwd(), 'public', `re_campaign_logs_${tenantId}.txt`);
       writeLogToFile(logFile, `Campaign "${campaignName}" updated: [${changeSummary}]`);
     } catch (logErr) {
       // Fail silently

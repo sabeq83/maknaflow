@@ -24,8 +24,10 @@ export async function POST(request) {
     // Log change to RE logs
     try {
       const { writeLogToFile } = await import('@/lib/console-hook');
+      const { getActiveTenantId } = await import('@/lib/tenant-context');
       const path = await import('path');
-      const logFile = path.join(process.cwd(), 'public', 're_campaign_logs.txt');
+      const tenantId = getActiveTenantId();
+      const logFile = path.join(process.cwd(), 'public', `re_campaign_logs_${tenantId}.txt`);
       writeLogToFile(logFile, `RE Scheduler status changed to: ${schedulerStatus ? 'ACTIVE' : 'INACTIVE'}`);
     } catch (_) {}
 

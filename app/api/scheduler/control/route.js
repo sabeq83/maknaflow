@@ -3,16 +3,19 @@ import { startScheduler, stopScheduler, isSchedulerRunning } from '@/lib/schedul
 import { createJob } from '@/lib/db';
 import { writeLogToFile } from '@/lib/console-hook';
 import path from 'path';
+import { withTenantContext } from '@/lib/auth';
+import { getActiveTenantId } from '@/lib/tenant-context';
 
 function logToAll(message) {
   try {
     const logDir = path.join(process.cwd(), 'public');
+    const tenantId = getActiveTenantId();
     const files = [
-      're_campaign_logs.txt',
-      'opc_logs.txt',
-      'instant_factory_logs.txt',
-      'autopilot_logs.txt',
-      'multiplier_logs.txt'
+      `re_campaign_logs_${tenantId}.txt`,
+      `opc_logs_${tenantId}.txt`,
+      `instant_factory_logs_${tenantId}.txt`,
+      `autopilot_logs_${tenantId}.txt`,
+      `multiplier_logs_${tenantId}.txt`
     ];
     for (const filename of files) {
       writeLogToFile(path.join(logDir, filename), message);
@@ -22,7 +25,7 @@ function logToAll(message) {
   }
 }
 
-export async function POST(request) {
+export const POST = withTenantContext(async (request) => {
   try {
     const { action, queue_name } = await request.json();
 
@@ -55,11 +58,11 @@ export async function POST(request) {
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function GET() {
+export const GET = withTenantContext(async () => {
   return NextResponse.json({
     success: true,
     data: { running: isSchedulerRunning() },
   });
-}
+});
