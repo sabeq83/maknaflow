@@ -1770,9 +1770,9 @@ function ContentFlowHubPageContent() {
                     <span style={{ fontSize: '13px', fontWeight: 800, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       📱 TIKTOK
                     </span>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '12px', alignItems: 'center' }}>
-                      <div style={{ gridColumn: 'span 4' }}>
-                        <label style={{ fontSize: '11px', color: '#9ca3af', display: 'block', marginBottom: '4px', fontWeight: 600 }}>Status</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div>
+                        <label style={{ fontSize: '11px', color: '#9ca3af', display: 'block', marginBottom: '4px', fontWeight: 600 }}>Status Posting</label>
                         <select
                           value={editStatusForm.tiktok_status}
                           onChange={(e) => setEditStatusForm({ ...editStatusForm, tiktok_status: e.target.value })}
@@ -1785,10 +1785,10 @@ function ContentFlowHubPageContent() {
                         </select>
                       </div>
 
-                      <div style={{ gridColumn: 'span 4' }}>
+                      <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                           <label style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600 }}>
-                            Publish Date {editStatusForm.tiktok_publish_date ? <span style={{ color: '#60a5fa', fontWeight: 700 }}>✓ Terisi</span> : null}
+                            Tanggal Rilis {editStatusForm.tiktok_publish_date ? <span style={{ color: '#60a5fa', fontWeight: 700 }}>✓ Terisi</span> : null}
                           </label>
                           <button
                             type="button"
@@ -1806,8 +1806,8 @@ function ContentFlowHubPageContent() {
                         />
                       </div>
 
-                      <div style={{ gridColumn: 'span 4' }}>
-                        <label style={{ fontSize: '11px', color: '#9ca3af', display: 'block', marginBottom: '4px', fontWeight: 600 }}>Permalink TikTok</label>
+                      <div>
+                        <label style={{ fontSize: '11px', color: '#9ca3af', display: 'block', marginBottom: '4px', fontWeight: 600 }}>Permalink</label>
                         <input
                           type="text"
                           value={editStatusForm.permalink_tiktok}
@@ -1824,9 +1824,9 @@ function ContentFlowHubPageContent() {
                     <span style={{ fontSize: '13px', fontWeight: 800, color: '#60a5fa', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       📘 FACEBOOK
                     </span>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '12px', alignItems: 'center' }}>
-                      <div style={{ gridColumn: 'span 4' }}>
-                        <label style={{ fontSize: '11px', color: '#9ca3af', display: 'block', marginBottom: '4px', fontWeight: 600 }}>Status</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div>
+                        <label style={{ fontSize: '11px', color: '#9ca3af', display: 'block', marginBottom: '4px', fontWeight: 600 }}>Status Posting</label>
                         <select
                           value={editStatusForm.facebook_status}
                           onChange={(e) => setEditStatusForm({ ...editStatusForm, facebook_status: e.target.value })}
@@ -1839,10 +1839,10 @@ function ContentFlowHubPageContent() {
                         </select>
                       </div>
 
-                      <div style={{ gridColumn: 'span 4' }}>
+                      <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                           <label style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600 }}>
-                            Publish Date {editStatusForm.facebook_publish_date ? <span style={{ color: '#60a5fa', fontWeight: 700 }}>✓ Terisi</span> : null}
+                            Tanggal Rilis {editStatusForm.facebook_publish_date ? <span style={{ color: '#60a5fa', fontWeight: 700 }}>✓ Terisi</span> : null}
                           </label>
                           <button
                             type="button"
@@ -1860,8 +1860,8 @@ function ContentFlowHubPageContent() {
                         />
                       </div>
 
-                      <div style={{ gridColumn: 'span 4' }}>
-                        <label style={{ fontSize: '11px', color: '#9ca3af', display: 'block', marginBottom: '4px', fontWeight: 600 }}>Permalink FB</label>
+                      <div>
+                        <label style={{ fontSize: '11px', color: '#9ca3af', display: 'block', marginBottom: '4px', fontWeight: 600 }}>Permalink</label>
                         <input
                           type="text"
                           value={editStatusForm.permalink_facebook}
@@ -1878,9 +1878,9 @@ function ContentFlowHubPageContent() {
                     <span style={{ fontSize: '13px', fontWeight: 800, color: '#f472b6', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       📷 INSTAGRAM
                     </span>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '12px', alignItems: 'center' }}>
-                      <div style={{ gridColumn: 'span 4' }}>
-                        <label style={{ fontSize: '11px', color: '#9ca3af', display: 'block', marginBottom: '4px', fontWeight: 600 }}>Status</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div>
+                        <label style={{ fontSize: '11px', color: '#9ca3af', display: 'block', marginBottom: '4px', fontWeight: 600 }}>Status Posting</label>
                         <select
                           value={editStatusForm.instagram_status}
                           onChange={(e) => setEditStatusForm({ ...editStatusForm, instagram_status: e.target.value })}
@@ -1893,10 +1893,10 @@ function ContentFlowHubPageContent() {
                         </select>
                       </div>
 
-                      <div style={{ gridColumn: 'span 4' }}>
+                      <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                           <label style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600 }}>
-                            Publish Date {editStatusForm.instagram_publish_date ? <span style={{ color: '#60a5fa', fontWeight: 700 }}>✓ Terisi</span> : null}
+                            Tanggal Rilis {editStatusForm.instagram_publish_date ? <span style={{ color: '#60a5fa', fontWeight: 700 }}>✓ Terisi</span> : null}
                           </label>
                           <button
                             type="button"
@@ -1914,8 +1914,8 @@ function ContentFlowHubPageContent() {
                         />
                       </div>
 
-                      <div style={{ gridColumn: 'span 4' }}>
-                        <label style={{ fontSize: '11px', color: '#9ca3af', display: 'block', marginBottom: '4px', fontWeight: 600 }}>Permalink Instagram</label>
+                      <div>
+                        <label style={{ fontSize: '11px', color: '#9ca3af', display: 'block', marginBottom: '4px', fontWeight: 600 }}>Permalink</label>
                         <input
                           type="text"
                           value={editStatusForm.permalink_instagram}

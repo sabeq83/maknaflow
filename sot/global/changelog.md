@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.199 — Stack publication inputs vertically in modal (05/08/2026)
+- Convert TikTok, Facebook, and Instagram inputs to vertical stacked layouts
+- Update label names to Status Posting, Tanggal Rilis, and Permalink
+
 ## V2.2.198 — Redesign ContentFlow detail modal to split layout (05/08/2026)
 - Redesign ContentFlow detail modal to a split two-column layout with fixed headers/footers
 - Style copy caption button with a violet gradient when active
