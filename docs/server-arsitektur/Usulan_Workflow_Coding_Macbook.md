@@ -36,9 +36,9 @@ WEBHOOK_PORT=8765
 
 ---
 
-## 🔄 Alur Kerja Coding, Build, dan Deployment Terintegrasi
+## 🔄 Alur Kerja Coding, Build, dan Deployment Terintegrasi (Terisolasi dari Node 1)
 
-Berikut adalah alur kerja yang kami usulkan agar **tidak mengganggu pekerjaan asisten** di staging server (`port 5010`):
+Berikut adalah alur kerja yang kami usulkan agar **tidak menyentuh maupun mengganggu server staging/produksi aktif di Node 1 (`100.65.62.63`)**:
 
 ```mermaid
 sequenceDiagram
@@ -47,16 +47,16 @@ sequenceDiagram
     Developer->>Macbook: Jalankan 'npm run build' (Cek Error Bundling)
     Note over Macbook: Jika build aman & bebas error...
     Developer->>GitHub: Git Push / Rilis Otomatis (Tag/Branch)
-    Developer->>Production Server: Jalankan 'npm run deploy:production'
-    Note over Production Server: Menarik kode dari GitHub ke port 5000/6000
-    Developer->>Production Server: Lakukan pengujian di http://100.65.62.63:5000
-    Note over Staging Server: Staging (Port 5010) asisten tetap online & tidak terganggu
+    Developer->>Dev Server: Jalankan 'npm run deploy:dev'
+    Note over Dev Server: Menarik kode dari GitHub ke server developer 100.118.178.93 (port 5000/6000)
+    Developer->>Dev Server: Lakukan pengujian di http://100.118.178.93:5000
+    Note over Node 1: Node 1 (100.65.62.63) tetap online & tidak terganggu sedikit pun
 ```
 
 ### Penjelasan Langkah Alur Kerja:
 1. **Coding di Macbook**: Anda menulis kode di Macbook dengan nyaman.
 2. **Verifikasi Sintaks**: Jalankan `npm run build` lokal untuk memastikan tidak ada error TypeScript, sintaks Next.js, atau import yang rusak.
 3. **Commit & Push**: Gunakan perintah rilis non-interaktif untuk membuat versi baru (tag) dan men-push-nya ke repositori GitHub.
-4. **Deploy ke Production**: Jalankan skrip deployment single-pass (misal `npm run deploy:production`) untuk memperbarui server produksi `100.65.62.63` pada port **`5000`** (UI) dan **`6000`** (API).
-5. **Testing**: Anda melakukan pengujian fitur langsung di server produksi (`http://100.65.62.63:5000`) secara nyata tanpa menyentuh server staging.
-6. **Staging Tetap Aman**: Staging port **`5010`** yang sedang diakses asisten tetap online tanpa adanya downtime build Next.js.
+4. **Deploy ke Developer Server**: Jalankan skrip deployment single-pass (misal `npm run deploy:dev`) untuk memperbarui server developer `100.118.178.93` pada port **`5000`** (UI) dan **`6000`** (API).
+5. **Testing di Dev Server**: Anda melakukan pengujian fitur langsung di server developer (`http://100.118.178.93:5000`) yang terisolasi tanpa menyentuh server Node 1.
+6. **Node 1 Tetap Aman**: Staging port **`5010`** yang sedang diakses asisten di Node 1 tetap online tanpa terganggu.

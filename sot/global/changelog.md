@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.219 — Integrasi Skrip Deploy Dev 100.118.178.93 (05/08/2026)
+- Menambahkan npm run deploy:dev untuk deploy langsung ke server developer
+- Pembaruan dokumentasi alur kerja coding Macbook ke server developer
+
 ## V2.2.218 — Pembaruan Alur Kerja Coding Macbook ke Produksi (05/08/2026)
 - Revisi alur kerja deploy agar diarahkan langsung ke port produksi demi kelancaran staging asisten
 
