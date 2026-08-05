@@ -19,10 +19,10 @@ export async function GET() {
     const brandsList = Array.from(accountSet);
     
     const stats = await Promise.all(brandsList.map(async accountName => {
-      const tiktokCount = (await db.prepare('SELECT COUNT(*) as count FROM content_flow_items WHERE account_name = ? AND tiktok_status = "Published"').get(accountName))?.count || 0;
-      const facebookCount = (await db.prepare('SELECT COUNT(*) as count FROM content_flow_items WHERE account_name = ? AND facebook_status = "Published"').get(accountName))?.count || 0;
-      const instagramCount = (await db.prepare('SELECT COUNT(*) as count FROM content_flow_items WHERE account_name = ? AND instagram_status = "Published"').get(accountName))?.count || 0;
-      const availableStock = (await db.prepare('SELECT COUNT(*) as count FROM content_flow_items WHERE account_name = ? AND pipeline_status = "Completed"').get(accountName))?.count || 0;
+      const tiktokCount = (await db.prepare("SELECT COUNT(*) as count FROM content_flow_items WHERE account_name = ? AND tiktok_status = 'Published'").get(accountName))?.count || 0;
+      const facebookCount = (await db.prepare("SELECT COUNT(*) as count FROM content_flow_items WHERE account_name = ? AND facebook_status = 'Published'").get(accountName))?.count || 0;
+      const instagramCount = (await db.prepare("SELECT COUNT(*) as count FROM content_flow_items WHERE account_name = ? AND instagram_status = 'Published'").get(accountName))?.count || 0;
+      const availableStock = (await db.prepare("SELECT COUNT(*) as count FROM content_flow_items WHERE account_name = ? AND pipeline_status = 'Completed'").get(accountName))?.count || 0;
       
       return {
         account_name: accountName,

@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.222 — Fix dashboard stats PostgreSQL syntax error (06/08/2026)
+- Fix double quotes around string literals in stats SQL queries
+
 ## V2.2.221 — Fix schedules product photo matching (06/08/2026)
 - Fix case-insensitive and substring product photo matching for brand schedules
 - Add unique ID generator to prevent PostgreSQL constraint errors on schedules insert
