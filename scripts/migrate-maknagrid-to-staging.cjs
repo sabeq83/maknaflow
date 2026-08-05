@@ -99,6 +99,12 @@ async function runMigration() {
       const updatedAt = parseDate(row.updated_at) || new Date();
       const videoId = row.video_id || '';
 
+      // Normalize account_name
+      let accountName = row.account_name || null;
+      if (accountName && accountName.includes('dapurbotani')) {
+        accountName = 'dapurbotani';
+      }
+
       if (isExecute) {
         try {
           // Check for existence by (tenant_id, video_id) or safeId
@@ -148,7 +154,7 @@ async function runMigration() {
               row.source_type || 'opc',
               row.source_campaign_id || null,
               row.source_item_id || null,
-              row.account_name || null,
+              accountName,
               videoId,
               row.campaign_title || null,
               row.hook || null,
@@ -204,7 +210,7 @@ async function runMigration() {
               row.source_type || 'opc',
               row.source_campaign_id || null,
               row.source_item_id || null,
-              row.account_name || null,
+              accountName,
               videoId,
               row.campaign_title || null,
               row.hook || null,

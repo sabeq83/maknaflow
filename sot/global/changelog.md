@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.214 — Normalisasi Akun Dapurbotani di Migrasi (05/08/2026)
+- Menambahkan otomatisasi normalisasi account_name dapurbotani pada script migrasi
+- Melakukan update data lama di target database
+
 ## V2.2.213 — Migrasi Data Maknagrid ke Staging (05/08/2026)
 - Menambahkan script migrate-maknagrid-to-staging.cjs
 - Migrasi data content_flow_items dari Node 3 ke Node 2 secara aman
