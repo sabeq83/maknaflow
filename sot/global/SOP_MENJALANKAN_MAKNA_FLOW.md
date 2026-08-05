@@ -24,7 +24,7 @@ Panduan ini mengatur tata cara standar untuk mengaktifkan, menguji, dan memeliha
 | **Node Staging** | Ubuntu Desktop (NUC) | `100.65.62.63` | `:5010` (Web UI), `:7010` (API) | `ssh makna-ui` | `/home/sabeqmursyid/maknaflow-staging` (branch: `staging`) |
 | **Node Webhook** | Windows / Dedicated | `100.64.70.61` | `:8765` (G-Labs Webhook) | - | - |
 | **Node DB** | Linux Storage | `100.78.186.123` | `:3001` (ContentFlow), `:5432` (PostgreSQL) | `ssh makna-db` | `/var/www/contentflow` (DB: `public` & `staging` schemas) |
-| **Node Developer**| Development Host | `100.118.178.93`| `:3000` (Web UI), `:4000` (API) | `ssh ...` | `/home/sabeqmursyid/maknaflow` |
+| **Node Developer**| Development Host | `100.118.178.93`| `:5000` (Web UI), `:6000` (API) | `ssh ...` | `/home/sabeqmursyid/maknaflow` |
 
 ---
 

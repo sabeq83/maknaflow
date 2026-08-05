@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.217 — Penyelarasan Port Server Dev 5000 dan 6000 (05/08/2026)
+- Konfigurasi port 5000/6000 untuk server developer pada SOT dan SOP
+- Pembaruan path environment Next.js di server developer
+
 ## V2.2.216 — Transisi Server Cluster Baru & Migrasi Database (05/08/2026)
 - Mengubah default host webhook G-Labs ke 100.64.70.61
 - Depresiasi auto SSH Tunnel karena G-Labs diakses langsung via Tailscale

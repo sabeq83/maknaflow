@@ -107,7 +107,7 @@ Menjalankan instance lokal/sandbox.
 NODE_ENV=development
 NODE_ROLE=standalone
 ENABLE_SCHEDULER_WORKER=true
-PORT=3000
+PORT=5000
 DATABASE_HOST=100.78.186.123  # Atau localhost jika DB lokal terinstal
 PGDATABASE=maknaflow_dev      # Skema/database terisolasi khusus dev
 WEBHOOK_HOST=100.64.70.61

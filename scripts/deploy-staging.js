@@ -2,16 +2,26 @@ import { execSync } from 'child_process';
 
 async function deployStaging() {
   console.log('================================================================');
-  console.log('🚀 DEPLOYMENT TO STAGING GATEWAY (Port 3010 & 4010)');
+  console.log('🚀 DEPLOYMENT TO STAGING GATEWAY (Port 5010 & 7010)');
   console.log('================================================================');
   console.log('📌 Specs: Intel Core i3 | RAM 16GB | Estimated Build Time: ~45-90s');
+
+  const currentBranch = execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
+  let currentTag = '';
+  try {
+    currentTag = execSync('git describe --tags --exact-match HEAD 2>/dev/null').toString().trim();
+  } catch (_) {}
+
+  const checkoutTarget = currentTag || currentBranch || 'main';
+  console.log(`📦 Active Local Target: ${checkoutTarget} (Tag: "${currentTag}", Branch: "${currentBranch}")`);
 
   const remoteScript = `
     export PATH=/home/sabeqmursyid/.local/bin:$PATH
     cd /home/sabeqmursyid/maknaflow-staging
-    echo "[1/4] Pulling latest main code from GitHub..."
-    git fetch origin main || true
-    git reset --hard origin/main || true
+    echo "[1/4] Pulling latest code (${checkoutTarget}) from GitHub..."
+    git fetch --all --tags || true
+    git checkout ${checkoutTarget} || git checkout -b ${checkoutTarget} origin/${checkoutTarget} || true
+    git pull origin ${checkoutTarget} || git reset --hard origin/${checkoutTarget} || git reset --hard ${checkoutTarget} || true
 
     echo "[2/4] Building Next.js staging bundle..."
     fuser -k -9 5010/tcp 2>/dev/null || true

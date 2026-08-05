@@ -25,7 +25,7 @@ MAKNA Flow adalah arsitektur terdistribusi (*Decoupled 3-Node Architecture*) dar
 | **Server UI & Worker (Staging)** | Ubuntu Desktop (NUC) | `100.65.62.63` | `:5010` (Web UI), `:7010` (API) | `/home/sabeqmursyid/maknaflow-staging` |
 | **Server Database Terpusat** | Linux Storage Server | `100.78.186.123` | `:3001` (ContentFlow), `:5432` (PostgreSQL) | `/var/www/contentflow` |
 | **Server Webhook G-Labs (Dedicated)** | Windows/Dedicated Host | `100.64.70.61` | `:8765` (G-Labs Webhook) | - |
-| **Server Developer (Testing/Sandbox)**| Development Host | `100.118.178.93` | `:3000` (Web UI), `:4000` (API) | `/home/sabeqmursyid/maknaflow` |
+| **Server Developer (Testing/Sandbox)**| Development Host | `100.118.178.93` | `:5000` (Web UI), `:6000` (API) | `/home/sabeqmursyid/maknaflow` |
 
 ---
 
@@ -70,7 +70,7 @@ WEBHOOK_PORT=8765
 NODE_ENV=development
 NODE_ROLE=standalone
 ENABLE_SCHEDULER_WORKER=true
-PORT=3000
+PORT=5000
 DATABASE_HOST=100.78.186.123
 PGDATABASE=maknaflow_dev
 WEBHOOK_HOST=100.64.70.61
