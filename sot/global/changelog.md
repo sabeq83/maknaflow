@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.194 — Select account_name in query script (05/08/2026)
+- Select account_name field in query script
+
 ## V2.2.193 — Avoid duplicate key inserts in ContentFlow Satu Atap mode (05/08/2026)
 - Check apiKey inside syncBridgeCampaignToContentFlow and return early if not set
 

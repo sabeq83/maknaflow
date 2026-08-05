@@ -26,7 +26,7 @@ const pool = getPgPool();
 async function run() {
   const campaignId = 're_260804_2k462r';
 
-  const res = await pool.query("SELECT id, source_type, source_campaign_id, source_item_id, video_id, tenant_id FROM content_flow_items WHERE video_id LIKE '%2k462r%'");
+  const res = await pool.query("SELECT id, source_type, source_campaign_id, source_item_id, video_id, account_name, tenant_id FROM content_flow_items WHERE source_campaign_id = $1", [campaignId]);
   console.log('=== DUPLICATE FINDER ===');
   console.log(res.rows);
 
