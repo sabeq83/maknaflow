@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.207 — Fix log context loss using globalThis (05/08/2026)
+- Fix AsyncLocalStorage context loss on multiple Webpack entry points
+- Share logContextStorage and tenantContext on globalThis
+
 ## V2.2.206 — Isolate poll loggers per tenant (05/08/2026)
 - Wrap system-logs and scheduler control routes with tenant context
 - Modify loggers to append tenantId suffix to filenames
