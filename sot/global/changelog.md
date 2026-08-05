@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.213 — Migrasi Data Maknagrid ke Staging (05/08/2026)
+- Menambahkan script migrate-maknagrid-to-staging.cjs
+- Migrasi data content_flow_items dari Node 3 ke Node 2 secara aman
+
 ## V2.2.212 — Fix Schedules Group By Query Syntax (05/08/2026)
 - Fix PostgreSQL GROUP BY grouping syntax error in content-flow schedules API
 
