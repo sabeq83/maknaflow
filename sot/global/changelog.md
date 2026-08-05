@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.200 — Improve Product Database UI and modal upload (05/08/2026)
+- Rearrange header buttons below subtitle
+- Lock Batch Scraper button and remove Export Sheets
+- Add photo upload form to Add Product Modal
+
 ## V2.2.199 — Stack publication inputs vertically in modal (05/08/2026)
 - Convert TikTok, Facebook, and Instagram inputs to vertical stacked layouts
 - Update label names to Status Posting, Tanggal Rilis, and Permalink

@@ -72,6 +72,7 @@ export async function POST(req) {
     }
 
     const data = {
+      id: body.id || undefined,
       input_source: body.source_url || 'Manual',
       is_url: body.source_url ? 1 : 0,
       product_name: body.product_name,

@@ -27,6 +27,7 @@ export default function ProductDatabasePage() {
   
   // Form fields for Add/Edit full product
   const [formData, setFormData] = useState({
+    id: '',
     product_name: '',
     category: '',
     tags: '',
@@ -42,6 +43,8 @@ export default function ProductDatabasePage() {
     product_truth: '',
     geometric_truth: '',
   });
+
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   // Scraper fields
   const [scraperUrls, setScraperUrls] = useState('');
@@ -567,10 +570,47 @@ export default function ProductDatabasePage() {
     }
   }
 
+  // Upload product photo during Add Product
+  async function handlePhotoUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+
+    const tempId = formData.id || `pe_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
+    const fileData = new FormData();
+    fileData.append('file', file);
+    fileData.append('productId', tempId);
+    fileData.append('type', 'raw');
+
+    try {
+      const res = await fetch('/api/v2/products/image', {
+        method: 'POST',
+        body: fileData
+      });
+      const data = await res.json();
+      if (data.success) {
+        setFormData(prev => ({
+          ...prev,
+          id: tempId,
+          photo_url: data.relativePath
+        }));
+        showToast('Foto produk berhasil diunggah!');
+      } else {
+        showToast(data.error || 'Gagal mengunggah foto produk', 'error');
+      }
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }
+
   // Edit action
   function handleEditProduct(product) {
     setEditingProduct(product);
     setFormData({
+      id: product.id || '',
       product_name: product.product_name || '',
       category: product.category || '',
       tags: product.tags || '',
@@ -609,6 +649,7 @@ export default function ProductDatabasePage() {
 
   function resetForm() {
     setFormData({
+      id: '',
       product_name: '',
       category: '',
       tags: '',
@@ -631,61 +672,117 @@ export default function ProductDatabasePage() {
       <Sidebar />
       <main className="main-content">
         <div className="page-container">
-          <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
-            <div>
-              <h1 className="page-title">📦 Product Database</h1>
-              <p className="page-subtitle">Manage single source of truth for products. Automatically scrape details and extract 3 bullet-point USPs via Gemini.</p>
-            </div>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <div className="page-header" style={{ marginBottom: '24px' }}>
+            <h1 className="page-title">📦 Product Database</h1>
+            <p className="page-subtitle" style={{ marginBottom: '16px' }}>Manage single source of truth for products. Automatically scrape details and extract 3 bullet-point USPs via Gemini.</p>
+            
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
               <button 
                 className="btn" 
-                style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
-                onClick={() => setShowImportModal(true)}
-              >
-                📥 Import ZIP
-              </button>
-              <button 
-                className="btn" 
-                style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+                style={{ 
+                  background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.25) 100%)', 
+                  border: '1px solid rgba(59, 130, 246, 0.4)', 
+                  color: '#60a5fa',
+                  padding: '10px 16px',
+                  borderRadius: '10px',
+                  fontWeight: 600,
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 4px 12px rgba(37, 99, 235, 0.1)'
+                }}
                 onClick={() => setShowCsvImportModal(true)}
               >
                 📥 Import CSV Raw
               </button>
+              
+              <button 
+                className="btn" 
+                style={{ 
+                  background: 'rgba(255, 255, 255, 0.05)', 
+                  border: '1px solid #334155', 
+                  color: '#e2e8f0',
+                  padding: '10px 16px',
+                  borderRadius: '10px',
+                  fontWeight: 600,
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.2s ease'
+                }}
+                onClick={() => setShowImportModal(true)}
+              >
+                📥 Import ZIP
+              </button>
+
               <a 
                 href={selectedIds.length > 0 ? `/api/v2/products/export?ids=${selectedIds.join(',')}` : `/api/v2/products/export`} 
                 className="btn" 
                 style={{ 
-                  background: selectedIds.length > 0 ? 'rgba(108, 92, 231, 0.2)' : 'rgba(255, 255, 255, 0.05)', 
-                  border: selectedIds.length > 0 ? '1px solid var(--accent)' : '1px solid var(--border)', 
-                  color: selectedIds.length > 0 ? 'var(--accent-light)' : 'var(--text-primary)', 
-                  display: 'inline-flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  textDecoration: 'none' 
+                  background: selectedIds.length > 0 ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(109, 40, 217, 0.3) 100%)' : 'rgba(255, 255, 255, 0.03)', 
+                  border: selectedIds.length > 0 ? '1px solid #8b5cf6' : '1px solid #334155', 
+                  color: selectedIds.length > 0 ? '#a78bfa' : '#94a3b8', 
+                  padding: '10px 16px',
+                  borderRadius: '10px',
+                  fontWeight: 600,
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  textDecoration: 'none',
+                  transition: 'all 0.2s ease'
                 }}
               >
                 📤 Export ZIP {selectedIds.length > 0 ? `(${selectedIds.length})` : ''}
               </a>
+
               <button 
                 className="btn" 
                 style={{ 
-                  background: 'rgba(0, 184, 148, 0.15)', 
-                  border: '1px solid var(--success)', 
-                  color: 'var(--success-light)',
-                  display: 'inline-flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center'
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
+                  border: 'none', 
+                  color: '#ffffff',
+                  padding: '10px 18px',
+                  borderRadius: '10px',
+                  fontWeight: 700,
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+                  transition: 'all 0.2s ease'
                 }}
-                onClick={handleExportSheets}
-                disabled={exportingSheets}
+                onClick={() => { resetForm(); setEditingProduct(null); setShowAddEditModal(true); }}
               >
-                📊 Export Sheets {selectedIds.length > 0 ? `(${selectedIds.length})` : ''}
+                ➕ Add Product
               </button>
-              <button className="btn btn-secondary" onClick={() => { resetForm(); setEditingProduct(null); setShowAddEditModal(true); }}>
-                + Add Product
-              </button>
-              <button className="btn btn-primary" onClick={() => { setScraperInputType('urls'); setScraperCsvFile(null); setShowScraperModal(true); }}>
-                ⚡ Batch Scraper
+
+              <button 
+                className="btn" 
+                disabled
+                style={{ 
+                  background: 'rgba(30, 41, 59, 0.5)', 
+                  border: '1px solid #334155', 
+                  color: '#64748b',
+                  padding: '10px 16px',
+                  borderRadius: '10px',
+                  fontWeight: 600,
+                  fontSize: '13px',
+                  cursor: 'not-allowed',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                🔒 Batch Scraper (Locked)
               </button>
             </div>
           </div>
@@ -1886,6 +1983,28 @@ export default function ProductDatabasePage() {
                     style={{ minHeight: '60px', fontSize: '0.82rem' }}
                   />
                 </div>
+
+                {!editingProduct && (
+                  <div className="form-group" style={{ marginTop: '12px' }}>
+                    <label className="form-label" style={{ fontWeight: 600, color: '#60a5fa' }}>📤 Upload Foto Produk</label>
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={handlePhotoUpload}
+                      style={{ 
+                        width: '100%', 
+                        padding: '8px', 
+                        background: '#0d1527', 
+                        border: '1px dashed #3b82f6', 
+                        borderRadius: '8px', 
+                        color: '#cbd5e1', 
+                        cursor: 'pointer',
+                        fontSize: '0.82rem'
+                      }}
+                    />
+                    {uploadingPhoto && <span style={{ fontSize: '0.75rem', color: '#60a5fa', marginTop: '4px', display: 'block' }}>⏳ Mengunggah foto...</span>}
+                  </div>
+                )}
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
