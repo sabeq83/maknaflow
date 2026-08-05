@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getMultiplierTaskById, deleteMultiplierTask, updateMultiplierTask } from '@/lib/db';
 
-export async function GET(request, { params }) {
+import { withTenantContext } from '@/lib/auth';
+
+export const GET = withTenantContext(async (request, { params }) => {
   try {
     const { id } = await params;
     const task = await getMultiplierTaskById(id);
@@ -15,9 +17,9 @@ export async function GET(request, { params }) {
     console.error('[Multiplier API] GET detail error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function DELETE(request, { params }) {
+export const DELETE = withTenantContext(async (request, { params }) => {
   try {
     const { id } = await params;
     await deleteMultiplierTask(id);
@@ -26,9 +28,9 @@ export async function DELETE(request, { params }) {
     console.error('[Multiplier API] DELETE error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function PATCH(request, { params }) {
+export const PATCH = withTenantContext(async (request, { params }) => {
   try {
     const { id } = await params;
     const body = await request.json();
@@ -49,4 +51,4 @@ export async function PATCH(request, { params }) {
     console.error('[Multiplier API] PATCH error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

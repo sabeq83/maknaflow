@@ -4,7 +4,9 @@ import { getAuthorizedClient } from '@/lib/google-auth';
 import { google } from 'googleapis';
 import { generateCampaignId } from '@/lib/id-generator';
 
-export async function GET(request) {
+import { withTenantContext } from '@/lib/auth';
+
+export const GET = withTenantContext(async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
@@ -25,9 +27,9 @@ export async function GET(request) {
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function POST(request) {
+export const POST = withTenantContext(async (request) => {
   try {
     const body = await request.json();
     const {
@@ -98,24 +100,26 @@ export async function POST(request) {
       voice_speed: voice_speed ? parseFloat(voice_speed) : 1.0,
       voice_volume: voice_volume ? parseFloat(voice_volume) : 1.0,
       ffmpeg_sync_option: ffmpeg_sync_option || 'smart_sync',
-      ffmpeg_video_scale: ffmpeg_video_scale ? parseFloat(ffmpeg_video_scale) : 1.0,
-      ffmpeg_sfx_volume: ffmpeg_sfx_volume ? parseFloat(ffmpeg_sfx_volume) : 0.0,
+      ffmpeg_video_scale: ffmpeg_video_scale || '9:16',
+      ffmpeg_sfx_volume: ffmpeg_sfx_volume ? parseFloat(ffmpeg_sfx_volume) : 0.8,
       ffmpeg_bgm_volume: ffmpeg_bgm_volume ? parseFloat(ffmpeg_bgm_volume) : 0.15,
-      tts_model_quality: tts_model_quality || 'speech-2.8-turbo',
-      visual_style: visual_style || 'Cinematic',
-      narrative_mode: body.narrative_mode || 'Storytelling',
-      status: body.status || 'active'
+      tts_model_quality: tts_model_quality || 'speed',
+      visual_style: visual_style || 'General'
     };
 
     await createSheetsCampaign(newCampaign);
 
-    return NextResponse.json({ success: true, message: 'Kampanye autopilot berhasil disimpan.', data: newCampaign });
+    return NextResponse.json({
+      success: true,
+      message: 'Kampanye Autopilot berhasil dibuat.',
+      data: { campaign_id: campaignId }
+    });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function DELETE(request) {
+export const DELETE = withTenantContext(async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
@@ -127,9 +131,9 @@ export async function DELETE(request) {
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function PATCH(request) {
+export const PATCH = withTenantContext(async (request) => {
   try {
     const body = await request.json();
     const { id, status, schedulerStatus } = body;
@@ -154,4 +158,4 @@ export async function PATCH(request) {
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

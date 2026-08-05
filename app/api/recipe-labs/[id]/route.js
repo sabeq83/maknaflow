@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getRecipeCampaignById, getRecipeItemsByCampaign, deleteRecipeCampaign } from '@/lib/db';
 
-export async function GET(request, { params }) {
+import { withTenantContext } from '@/lib/auth';
+
+export const GET = withTenantContext(async (request, { params }) => {
   try {
     const { id } = await params;
     const campaign = await getRecipeCampaignById(id);
@@ -22,9 +24,9 @@ export async function GET(request, { params }) {
     console.error('[API /api/recipe-labs/[id] GET Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function DELETE(request, { params }) {
+export const DELETE = withTenantContext(async (request, { params }) => {
   try {
     const { id } = await params;
     await deleteRecipeCampaign(id);
@@ -33,4 +35,4 @@ export async function DELETE(request, { params }) {
     console.error('[API /api/recipe-labs/[id] DELETE Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

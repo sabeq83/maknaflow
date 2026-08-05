@@ -1,16 +1,18 @@
 import { NextResponse } from 'next/server';
 import { getSetting, setSetting } from '@/lib/db';
 
-export async function GET() {
+import { withTenantContext } from '@/lib/auth';
+
+export const GET = withTenantContext(async () => {
   try {
     const isSchedulerActive = await getSetting('recipe_scheduler_active') === 'true';
     return NextResponse.json({ success: true, isSchedulerActive });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function POST(request) {
+export const POST = withTenantContext(async (request) => {
   try {
     const body = await request.json().catch(() => ({}));
     const { schedulerStatus } = body;
@@ -33,4 +35,4 @@ export async function POST(request) {
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

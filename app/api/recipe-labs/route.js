@@ -3,7 +3,9 @@ import { createRecipeCampaign, createRecipeItem, getRecipeCampaigns } from '@/li
 import crypto from 'crypto';
 import { generateCampaignId } from '@/lib/id-generator';
 
-export async function GET() {
+import { withTenantContext } from '@/lib/auth';
+
+export const GET = withTenantContext(async () => {
   try {
     const campaigns = await getRecipeCampaigns();
     return NextResponse.json({ success: true, data: campaigns });
@@ -11,9 +13,9 @@ export async function GET() {
     console.error('[API /api/recipe-labs GET Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function POST(request) {
+export const POST = withTenantContext(async (request) => {
   try {
     const body = await request.json();
     const { 
@@ -94,4 +96,4 @@ export async function POST(request) {
     console.error('[API /api/recipe-labs POST Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

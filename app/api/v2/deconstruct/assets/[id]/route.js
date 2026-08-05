@@ -3,7 +3,9 @@ import { updateDeconstructAsset } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-export async function PUT(req, { params }) {
+import { withTenantContext } from '@/lib/auth';
+
+export const PUT = withTenantContext(async (req, { params }) => {
   try {
     const { id } = await params;
     const body = await req.json();
@@ -20,4 +22,4 @@ export async function PUT(req, { params }) {
     console.error('[Deconstruct Asset API] PUT error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 
-export async function GET() {
+import { withTenantContext } from '@/lib/auth';
+
+export const GET = withTenantContext(async () => {
   try {
     const db = getDb();
     // Ambil aset yang sudah selesai didekonstruksi
@@ -50,4 +52,4 @@ export async function GET() {
     console.error('[API /api/recipe-labs/deconstructed-assets GET Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

@@ -9,7 +9,9 @@ import {
   setSetting
 } from '@/lib/db';
 
-export async function GET() {
+import { withTenantContext } from '@/lib/auth';
+
+export const GET = withTenantContext(async () => {
   try {
     const tasks = await getMultiplierTasks();
     const isSchedulerActive = await getSetting('multiplier_scheduler_active') !== 'false';
@@ -18,9 +20,9 @@ export async function GET() {
     console.error('[Multiplier API] GET error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function PATCH(request) {
+export const PATCH = withTenantContext(async (request) => {
   try {
     const body = await request.json();
     const { schedulerActive } = body;
@@ -35,9 +37,9 @@ export async function PATCH(request) {
     console.error('[Multiplier API] PATCH error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function POST(request) {
+export const POST = withTenantContext(async (request) => {
   try {
     const contentType = request.headers.get('content-type') || '';
     let parsedBody = {};
@@ -98,45 +100,62 @@ export async function POST(request) {
     }
 
     // Parse sub configs
-    const vsoConfig = typeof vso_config_json === 'string' ? JSON.parse(vso_config_json) : vso_config_json;
-    const bridgingConfig = typeof bridging_config_json === 'string' ? JSON.parse(bridging_config_json) : bridging_config_json;
-    const audioConfig = typeof audio_config_json === 'string' ? JSON.parse(audio_config_json) : audio_config_json;
+    let vsoConfig = {};
+    let bridgingConfig = {};
+    let audioConfig = {};
+    try { vsoConfig = typeof vso_config_json === 'string' ? JSON.parse(vso_config_json) : (vso_config_json || {}); } catch(_) {}
+    try { bridgingConfig = typeof bridging_config_json === 'string' ? JSON.parse(bridging_config_json) : (bridging_config_json || {}); } catch(_) {}
+    try { audioConfig = typeof audio_config_json === 'string' ? JSON.parse(audio_config_json) : (audio_config_json || {}); } catch(_) {}
 
-    // Inject resolved image path if uploaded
+    // Make sure we attach product image if uploaded
     if (productRefImagePath) {
-      bridgingConfig.productRefImagePath = productRefImagePath;
+      bridgingConfig.product_ref_image_path = productRefImagePath;
     }
 
     const tasksCreated = [];
 
     if (production_mode === 'mass' && csv_data_json) {
-      const rows = JSON.parse(csv_data_json); // [{ url, affiliate_url }]
-      
-      for (const row of rows) {
-        const rowTaskId = uuidv4();
-        const rowBridging = { ...bridgingConfig };
-        
-        // For mass mode, override product resolver to url_extract
-        rowBridging.bridgingMode = 'url_extract';
-        rowBridging.productUrl = row.url;
+      let rows = [];
+      try {
+        rows = typeof csv_data_json === 'string' ? JSON.parse(csv_data_json) : csv_data_json;
+      } catch(_) {}
 
-        await createMultiplierTask({
-          id: rowTaskId,
-          deconstruct_asset_id,
-          target_product_url: row.url,
-          affiliate_url: row.affiliate_url || '',
-          vso_config_json: JSON.stringify(vsoConfig),
-          bridging_config_json: JSON.stringify(rowBridging),
-          audio_config_json: JSON.stringify(audioConfig),
-          status: 'pending_resolution',
-          enable_vo_audit: Number(enable_vo_audit !== undefined ? enable_vo_audit : 1)
-        });
-        tasksCreated.push(rowTaskId);
+      if (Array.isArray(rows) && rows.length > 0) {
+        for (let i = 0; i < rows.length; i++) {
+          const row = rows[i];
+          const rowTaskId = `${batchTaskId}_row${i + 1}`;
+          
+          // Clone configs for this row
+          const rowVso = { ...vsoConfig };
+          const rowBridge = { ...bridgingConfig };
+          const rowAudio = { ...audioConfig };
+
+          // Override specific fields if present in CSV row
+          const rowAffiliate = row.affiliate_url || affiliate_url || '';
+          const rowProductUrl = row.target_product_url || row.product_url || target_product_url || bridgingConfig.productUrl || '';
+
+          await createMultiplierTask({
+            id: rowTaskId,
+            batch_id: batchTaskId,
+            deconstruct_asset_id,
+            target_product_url: rowProductUrl,
+            affiliate_url: rowAffiliate,
+            vso_config_json: JSON.stringify(rowVso),
+            bridging_config_json: JSON.stringify(rowBridge),
+            audio_config_json: JSON.stringify(rowAudio),
+            status: 'pending_resolution',
+            enable_vo_audit: Number(enable_vo_audit !== undefined ? enable_vo_audit : 1)
+          });
+          tasksCreated.push(rowTaskId);
+        }
       }
-    } else {
-      // Single task mode
+    }
+
+    // Fallback or single mode
+    if (tasksCreated.length === 0) {
       await createMultiplierTask({
         id: batchTaskId,
+        batch_id: batchTaskId,
         deconstruct_asset_id,
         target_product_url: target_product_url || bridgingConfig.productUrl || '',
         affiliate_url: affiliate_url || '',
@@ -159,4 +178,4 @@ export async function POST(request) {
     console.error('[Multiplier API] POST error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

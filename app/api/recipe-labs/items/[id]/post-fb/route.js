@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server';
 import { getRecipeItemById, getRecipeCampaignById, updateRecipeItem, getSetting } from '@/lib/db';
 import { postDraftToFacebookPage, formatFacebookRecipeCaption } from '@/lib/facebook-helper';
 
-export async function POST(request, { params }) {
+import { withTenantContext } from '@/lib/auth';
+
+export const POST = withTenantContext(async (request, { params }) => {
   try {
     const { id } = await params;
     const item = await getRecipeItemById(id);
@@ -57,4 +59,4 @@ export async function POST(request, { params }) {
     console.error('[Manual FB Post API Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

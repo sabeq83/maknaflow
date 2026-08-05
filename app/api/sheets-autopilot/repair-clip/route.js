@@ -75,7 +75,9 @@ function resolveProductImagePath(product) {
   return null;
 }
 
-export async function POST(request) {
+import { withTenantContext } from '@/lib/auth';
+
+export const POST = withTenantContext(async (request) => {
   const logs = [];
   const addLog = (msg) => { logs.push(log(msg)); };
 
@@ -407,4 +409,4 @@ export async function POST(request) {
     console.error('[repair-clip] ERROR:', err);
     return NextResponse.json({ error: err.message, logs }, { status: 500 });
   }
-}
+});

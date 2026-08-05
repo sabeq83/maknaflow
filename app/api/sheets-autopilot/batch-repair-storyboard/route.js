@@ -25,7 +25,9 @@ function log(msg) {
  * Proses tiap item secara berurutan (sequential) dengan jeda 2 detik
  * agar tidak membebani G-Labs Webhook dan Gemini API.
  */
-export async function POST(request) {
+import { withTenantContext } from '@/lib/auth';
+
+export const POST = withTenantContext(async (request) => {
   const masterLogs = [];
   const addLog = (msg) => { masterLogs.push(log(msg)); };
 
@@ -144,4 +146,4 @@ export async function POST(request) {
     console.error('[batch-repair-storyboard] ERROR:', err);
     return NextResponse.json({ error: err.message, logs: masterLogs }, { status: 500 });
   }
-}
+});

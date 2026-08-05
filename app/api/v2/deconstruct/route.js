@@ -12,7 +12,9 @@ import {
  * GET /api/v2/deconstruct
  * List all deconstruct batches or completed assets
  */
-export async function GET(request) {
+import { withTenantContext } from '@/lib/auth';
+
+export const GET = withTenantContext(async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     if (searchParams.get('assets') === 'true') {
@@ -26,7 +28,7 @@ export async function GET(request) {
     console.error('[Deconstruct API] GET error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
 /**
  * POST /api/v2/deconstruct
@@ -34,7 +36,7 @@ export async function GET(request) {
  * Body: { batch_name, urls: string (newline separated), captions?: string (newline separated), target_recommendation_count?: number }
  * OR: { batch_name, csv_data: [{ url, caption }], target_recommendation_count?: number }
  */
-export async function POST(request) {
+export const POST = withTenantContext(async (request) => {
   try {
     const body = await request.json();
     const { batch_name, target_recommendation_count = 3 } = body;
@@ -111,4 +113,4 @@ export async function POST(request) {
     console.error('[Deconstruct API] POST error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

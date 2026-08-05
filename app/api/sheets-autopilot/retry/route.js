@@ -4,7 +4,9 @@ import { getAuthorizedClient } from '@/lib/google-auth';
 import { google } from 'googleapis';
 import { updateCell } from '@/lib/sheets-autopilot-worker';
 
-export async function POST(request) {
+import { withTenantContext } from '@/lib/auth';
+
+export const POST = withTenantContext(async (request) => {
   try {
     const { campaignId, rowIndex, force } = await request.json();
 
@@ -61,4 +63,4 @@ export async function POST(request) {
     console.error('Error in Sheets Autopilot retry API:', err);
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
-}
+});

@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.2.205 — Wrap Deconstruct, Multiplier, Recipe, and Sheet Auto Pilot with withTenantContext (05/08/2026)
+- Wrap 3 Deconstruct Lab API routes
+- Wrap 2 Multiplier Lab API routes
+- Wrap 5 Recipe Lab API routes
+- Wrap 7 Sheet Auto Pilot API routes
+- Ensure full tenant context isolation across all remaining laboratory and autopilot features
+
 ## V2.2.204 — Wrap Bridge Injector and RE Campaigns routes with withTenantContext (05/08/2026)
 - Wrap 9 Bridge Injector routes with withTenantContext
 - Wrap 13 RE Campaigns routes with withTenantContext

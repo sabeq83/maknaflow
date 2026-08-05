@@ -3,12 +3,13 @@ import {
   getDeconstructBatchById,
   deleteDeconstructBatch,
 } from '@/lib/db';
+import { withTenantContext } from '@/lib/auth';
 
 /**
  * GET /api/v2/deconstruct/[id]
  * Get batch detail with all assets
  */
-export async function GET(request, { params }) {
+export const GET = withTenantContext(async (request, { params }) => {
   try {
     const { id } = await params;
     const batch = await getDeconstructBatchById(id);
@@ -48,13 +49,13 @@ export async function GET(request, { params }) {
     console.error('[Deconstruct API] GET detail error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
 /**
  * DELETE /api/v2/deconstruct/[id]
  * Delete a batch and all its assets
  */
-export async function DELETE(request, { params }) {
+export const DELETE = withTenantContext(async (request, { params }) => {
   try {
     const { id } = await params;
     await deleteDeconstructBatch(id);
@@ -63,4 +64,4 @@ export async function DELETE(request, { params }) {
     console.error('[Deconstruct API] DELETE error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

@@ -5,7 +5,9 @@ import { buildMarkdownContent } from '@/lib/sheets-autopilot-worker';
 import fs from 'fs';
 import path from 'path';
 
-export async function GET(request) {
+import { withTenantContext } from '@/lib/auth';
+
+export const GET = withTenantContext(async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     const batchId = searchParams.get('batchId');
@@ -56,36 +58,18 @@ export async function GET(request) {
     }
 
     // 3. Upload individual audio clips
-    // The individual audio clips are tts_autopilot_RE_... mp3
     const filesInTemp = fs.readdirSync(tempDir);
-    const audioClips = filesInTemp.filter(f => f.startsWith(`tts_autopilot_${batchId}_clip_`) && (f.endsWith('.mp3') || f.endsWith('.wav')));
+    const targetAudioPrefix = `tts_autopilot_${job.campaign_id.split('_')[0] || 'RE'}_${batchId}_clip_`;
     
-    for (const file of audioClips) {
-      const absPath = path.join(tempDir, file);
-      const ext = path.extname(file) || '.mp3';
-      const clipNum = file.match(/_clip_(\d+)/)?.[1];
-      const targetName = `${batchId}_audio_clip_${Number(clipNum) + 1}${ext}`;
-      const mimeType = ext === '.wav' ? 'audio/wav' : 'audio/mpeg';
-      
-      uploadLogs.push(`Mengunggah klip audio: ${targetName}`);
-      await uploadLocalFileToFolder(absPath, targetName, folderId, mimeType);
+    for (const f of filesInTemp) {
+      if (f.startsWith(targetAudioPrefix) && f.endsWith('.mp3')) {
+        const fullP = path.join(tempDir, f);
+        uploadLogs.push(`Mengunggah audio klip individual: ${f}`);
+        await uploadLocalFileToFolder(fullP, f, folderId, 'audio/mpeg');
+      }
     }
 
     // 4. Upload individual video clips
-    const videoClips = filesInTemp.filter(f => f.startsWith(`temp_clip_${batchId}_`) && f.endsWith('.mp4'));
-    for (const file of videoClips) {
-      const absPath = path.join(tempDir, file);
-      const clipNum = file.match(/_(\d+)\.mp4/)?.[1];
-      const targetName = `${batchId}_video_clip_${clipNum}.mp4`;
-      
-      uploadLogs.push(`Mengunggah klip video: ${targetName}`);
-      await uploadLocalFileToFolder(absPath, targetName, folderId, 'video/mp4');
-    }
-
-    // 5. Compile and upload naskah.md
-    const promptsObj = job.prompts_json ? JSON.parse(job.prompts_json) : {};
-    const captionsObj = job.captions_json ? JSON.parse(job.captions_json) : {};
-    
     const storyboardResult = {
       storyboard: JSON.parse(job.storyboard || '[]'),
       voiceover: JSON.parse(job.voiceover || '[]'),
@@ -111,4 +95,4 @@ export async function GET(request) {
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
