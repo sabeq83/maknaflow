@@ -106,6 +106,7 @@ upsert_env ENABLE_CONTENT_AUTOMATION_NOTIFICATIONS true
 upsert_env CONTENT_AUTOMATION_NOTIFICATION_INTERVAL_MS 10000
 upsert_env STAGING_WEB_ORIGIN http://100.117.59.92:${WEB_PORT}
 upsert_env MAKNA_PUBLIC_BASE_URL http://100.117.59.92:${WEB_PORT}
+upsert_env NEXT_PUBLIC_ENABLED_MENUS "/,/settings,/system-health,/settings/users,/settings/brand-profiles,/pillar-campaigns,/re-campaigns,/content-flow,/content-planner,/content-automations,/products"
 echo "  ✓ Content automation worker flags and public base URL configured"
 
 # Install/update dependencies (hanya jika package.json berubah)

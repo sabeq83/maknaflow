@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.196 — Restrict sidebar navigation menus via env variable (05/08/2026)
+- Add menu locking/disabling logic in Sidebar component based on NEXT_PUBLIC_ENABLED_MENUS
+- Inject env variable configuration during deployment in deploy-node2-wsl.js
+
 ## V2.2.195 — Clean up temporary test scripts (05/08/2026)
 - Remove scripts/test-cf-sync.js and scripts/query-campaign.js
 

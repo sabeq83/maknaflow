@@ -175,6 +175,37 @@ function SidebarContent() {
             return <div key={`sec_${i}`} className="nav-section">{item.section}</div>;
           }
 
+          const enabledMenusEnv = process.env.NEXT_PUBLIC_ENABLED_MENUS;
+          const enabledMenusSet = enabledMenusEnv
+            ? new Set(enabledMenusEnv.split(',').map(s => s.trim()))
+            : null;
+
+          const isMenuEnabled = !enabledMenusSet || enabledMenusSet.has(item.href);
+
+          if (!isMenuEnabled) {
+            return (
+              <div
+                key={item.href}
+                className="nav-link disabled"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  opacity: 0.35,
+                  cursor: 'not-allowed',
+                  pointerEvents: 'none',
+                  userSelect: 'none'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span className="nav-icon">{item.icon}</span>
+                  {item.label}
+                </div>
+                <span style={{ fontSize: '12px' }}>🔒</span>
+              </div>
+            );
+          }
+
           const isActive = pathname === item.href;
           const isContentFlow = item.href === '/content-flow';
 
