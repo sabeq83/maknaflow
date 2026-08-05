@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.197 — Rearrange Instant Campaign below Sheets Autopilot in sidebar (05/08/2026)
+- Move Instant Campaign navItem down to be directly below Sheets Autopilot
+
 ## V2.2.196 — Restrict sidebar navigation menus via env variable (05/08/2026)
 - Add menu locking/disabling logic in Sidebar component based on NEXT_PUBLIC_ENABLED_MENUS
 - Inject env variable configuration during deployment in deploy-node2-wsl.js
