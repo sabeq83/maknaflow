@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.224 — Fix staging deploy script API environment variables (06/08/2026)
+- Add --env-file=.env.local and set API_PORT=7010 in deploy-staging.js
+
 ## V2.2.223 — Fix production deploy script API environment variables (06/08/2026)
 - Add --env-file=.env.local and set API_PORT=6000 in deploy-production.js
 
