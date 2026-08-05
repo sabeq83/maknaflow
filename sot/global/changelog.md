@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.198 — Redesign ContentFlow detail modal to split layout (05/08/2026)
+- Redesign ContentFlow detail modal to a split two-column layout with fixed headers/footers
+- Style copy caption button with a violet gradient when active
+
 ## V2.2.197 — Rearrange Instant Campaign below Sheets Autopilot in sidebar (05/08/2026)
 - Move Instant Campaign navItem down to be directly below Sheets Autopilot
 

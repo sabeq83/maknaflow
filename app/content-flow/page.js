@@ -1365,11 +1365,11 @@ function ContentFlowHubPageContent() {
             }}>
               <div style={{
                 background: '#0d1322', border: '1px solid #1e293b', borderRadius: '16px',
-                width: '100%', maxWidth: '780px', maxHeight: '92vh', overflowY: 'auto', padding: '24px',
-                boxShadow: '0 20px 50px rgba(0,0,0,0.6)'
+                width: '100%', maxWidth: '820px', maxHeight: '92vh', display: 'flex', flexDirection: 'column',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.6)', overflow: 'hidden'
               }}>
                 {/* Modal Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid #1e293b', gap: '12px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
                     <span style={{
                       padding: '5px 12px', borderRadius: '8px', background: '#1e293b', border: '1px solid #3b82f6',
@@ -1405,342 +1405,365 @@ function ContentFlowHubPageContent() {
                   </div>
                 </div>
 
-                {/* 4 Action Buttons Row */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '10px', marginBottom: '20px' }}>
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard(activeItem.caption, 'Caption', `modal_caption_${activeItem.id}`)}
-                    disabled={!activeItem.caption}
-                    style={{
-                      padding: '10px 14px', borderRadius: '10px',
-                      background: copiedKeys[`modal_caption_${activeItem.id}`] ? 'linear-gradient(135deg, #059669 0%, #10b981 100%)' : activeItem.caption ? '#1e293b' : 'rgba(30, 41, 59, 0.5)',
-                      border: copiedKeys[`modal_caption_${activeItem.id}`] ? '1px solid #10b981' : '1px solid #334155',
-                      color: activeItem.caption ? '#f1f5f9' : '#64748b', fontWeight: 600, fontSize: '13px',
-                      cursor: activeItem.caption ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    {copiedKeys[`modal_caption_${activeItem.id}`] ? '✓ Copied!' : '📋 Copy Caption'}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard(activeItem.link_affiliate, 'Link Affiliate', `modal_affiliate_${activeItem.id}`)}
-                    disabled={!activeItem.link_affiliate}
-                    style={{
-                      padding: '10px 14px', borderRadius: '10px',
-                      background: copiedKeys[`modal_affiliate_${activeItem.id}`] ? 'linear-gradient(135deg, #059669 0%, #10b981 100%)' : activeItem.link_affiliate ? 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' : 'rgba(30, 41, 59, 0.5)',
-                      border: copiedKeys[`modal_affiliate_${activeItem.id}`] ? '1px solid #10b981' : activeItem.link_affiliate ? '1px solid #818cf8' : '1px solid #334155',
-                      color: activeItem.link_affiliate ? '#ffffff' : '#64748b', fontWeight: 700, fontSize: '13px',
-                      cursor: activeItem.link_affiliate ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                      boxShadow: activeItem.link_affiliate ? '0 4px 14px rgba(99, 102, 241, 0.35)' : 'none',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    {copiedKeys[`modal_affiliate_${activeItem.id}`] ? '✓ Copied!' : '📋 Copy Affiliate Link'}
-                  </button>
-
-                  {activeItem.link_produk ? (
-                    <a
-                      href={activeItem.link_produk}
-                      target="_blank"
-                      rel="noreferrer"
-                      style={{
-                        padding: '10px 14px', borderRadius: '10px',
-                        background: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)',
-                        border: '1px solid #38bdf8', color: '#ffffff', fontWeight: 700, fontSize: '13px',
-                        textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                        boxShadow: '0 4px 14px rgba(56, 189, 248, 0.3)'
-                      }}
-                    >
-                      🔗 Buka Link Produk
-                    </a>
-                  ) : (
-                    <button
-                      disabled
-                      style={{
-                        padding: '10px 14px', borderRadius: '10px', background: 'rgba(30, 41, 59, 0.5)',
-                        border: '1px solid #334155', color: '#64748b', fontWeight: 600, fontSize: '13px',
-                        cursor: 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
-                      }}
-                    >
-                      🔗 Tanpa Link Produk
-                    </button>
-                  )}
-
-                  {(() => {
-                    const allUrls = [activeItem.nextcloud_url, activeItem.drive_link, activeItem.url_asset].filter(Boolean);
-                    const ncUrl = allUrls.find(u => typeof u === 'string' && (u.includes('100.78.186.123') || u.includes('index.php/s/') || u.toLowerCase().includes('nextcloud')));
-                    const gdUrl = allUrls.find(u => typeof u === 'string' && (u.includes('drive.google.com') || u.includes('docs.google.com')));
-
-                    const targetUrl = ncUrl || activeItem.nextcloud_url || gdUrl || activeItem.drive_link || activeItem.url_asset;
-                    const isNextcloud = Boolean(ncUrl || (activeItem.nextcloud_url && !gdUrl) || (targetUrl && (targetUrl.includes('100.78.186.123') || targetUrl.includes('index.php/s/'))));
-
-                    if (!targetUrl) {
-                      return (
+                <form onSubmit={handleSaveStatus} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', margin: 0 }}>
+                  {/* Two-Column Scrollable Body */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1.15fr 0.85fr',
+                    gap: '20px',
+                    padding: '24px',
+                    overflow: 'hidden',
+                    flex: 1
+                  }}>
+                    {/* Left Column: Actions & Product Data */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto', paddingRight: '4px' }}>
+                      {/* 4 Action Buttons Row */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '10px' }}>
                         <button
-                          disabled
+                          type="button"
+                          onClick={() => copyToClipboard(activeItem.caption, 'Caption', `modal_caption_${activeItem.id}`)}
+                          disabled={!activeItem.caption}
                           style={{
-                            padding: '10px 14px', borderRadius: '10px', background: 'rgba(30, 41, 59, 0.5)',
-                            border: '1px solid #334155', color: '#64748b', fontWeight: 600, fontSize: '13px',
-                            cursor: 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
+                            padding: '10px 14px', borderRadius: '10px',
+                            background: copiedKeys[`modal_caption_${activeItem.id}`]
+                              ? 'linear-gradient(135deg, #059669 0%, #10b981 100%)'
+                              : activeItem.caption
+                                ? 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)'
+                                : 'rgba(30, 41, 59, 0.5)',
+                            border: copiedKeys[`modal_caption_${activeItem.id}`]
+                              ? '1px solid #10b981'
+                              : activeItem.caption
+                                ? '1px solid #8b5cf6'
+                                : '1px solid #334155',
+                            color: activeItem.caption ? '#ffffff' : '#64748b', fontWeight: 600, fontSize: '13px',
+                            cursor: activeItem.caption ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                            boxShadow: activeItem.caption && !copiedKeys[`modal_caption_${activeItem.id}`] ? '0 4px 12px rgba(139, 92, 246, 0.3)' : 'none',
+                            transition: 'all 0.2s ease'
                           }}
                         >
-                          📥 Asset Kosong
+                          {copiedKeys[`modal_caption_${activeItem.id}`] ? '✓ Copied!' : '📋 Copy Caption'}
                         </button>
-                      );
-                    }
 
-                    return (
-                      <a
-                        href={targetUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{
-                          padding: '10px 14px', borderRadius: '10px',
-                          background: isNextcloud ? 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)' : 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-                          border: isNextcloud ? '1px solid #38bdf8' : '1px solid #10b981', color: '#ffffff', fontWeight: 700, fontSize: '13px',
-                          textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                          boxShadow: isNextcloud ? '0 4px 14px rgba(56, 189, 248, 0.3)' : '0 4px 14px rgba(16, 185, 129, 0.3)'
-                        }}
-                      >
-                        {isNextcloud ? '☁️ Nextcloud Asset' : '📁 Drive Asset'}
-                      </a>
-                    );
-                  })()}
-                </div>
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(activeItem.link_affiliate, 'Link Affiliate', `modal_affiliate_${activeItem.id}`)}
+                          disabled={!activeItem.link_affiliate}
+                          style={{
+                            padding: '10px 14px', borderRadius: '10px',
+                            background: copiedKeys[`modal_affiliate_${activeItem.id}`] ? 'linear-gradient(135deg, #059669 0%, #10b981 100%)' : activeItem.link_affiliate ? 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' : 'rgba(30, 41, 59, 0.5)',
+                            border: copiedKeys[`modal_affiliate_${activeItem.id}`] ? '1px solid #10b981' : activeItem.link_affiliate ? '1px solid #818cf8' : '1px solid #334155',
+                            color: activeItem.link_affiliate ? '#ffffff' : '#64748b', fontWeight: 700, fontSize: '13px',
+                            cursor: activeItem.link_affiliate ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                            boxShadow: activeItem.link_affiliate ? '0 4px 14px rgba(99, 102, 241, 0.35)' : 'none',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          {copiedKeys[`modal_affiliate_${activeItem.id}`] ? '✓ Copied!' : '📋 Copy Affiliate Link'}
+                        </button>
 
-                {/* Field Catatan Konten (Paling Atas Sebelum Data Produk & Link) */}
-                <div style={{ background: '#090d16', padding: '16px', borderRadius: '14px', border: '1px solid #1e293b', marginBottom: '20px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '12px', fontWeight: 800, color: '#60a5fa', letterSpacing: '0.05em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      📝 CATATAN KONTEN
-                    </span>
-                    {activeItem.catatan && (
-                      <span style={{ fontSize: '10px', color: '#34d399', fontWeight: 700 }}>✓ Tersimpan</span>
-                    )}
-                  </div>
-                  <textarea
-                    value={editStatusForm.catatan || ''}
-                    onChange={(e) => setEditStatusForm({ ...editStatusForm, catatan: e.target.value })}
-                    placeholder="Tambahkan catatan khusus untuk item konten ini (misal: Revisi caption, Jadwal tayang, dsb)..."
-                    style={{
-                      width: '100%', padding: '10px 12px', background: '#05070d', border: '1px solid #334155',
-                      borderRadius: '8px', color: '#e2e8f0', fontSize: '12px', outline: 'none', resize: 'vertical', minHeight: '65px',
-                      lineHeight: '1.5', fontFamily: 'inherit'
-                    }}
-                  />
-                </div>
-
-                {/* Metadata & Product Data Panel with Collapsible Accordion & Pencil Inline Edit */}
-                <div style={{ background: '#090d16', padding: '18px', borderRadius: '14px', border: '1px solid #1e293b', marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  <div
-                    onClick={() => setIsProductSectionOpen(!isProductSectionOpen)}
-                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }}
-                  >
-                    <span style={{ fontSize: '13px', fontWeight: 800, color: '#c084fc', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      📦 DATA PRODUK & LINK
-                    </span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '11px', color: '#64748b' }}>
-                        {isProductSectionOpen ? 'Tutup Panel 🔼' : 'Buka Panel 🔽'}
-                      </span>
-                      <button
-                        type="button"
-                        style={{ padding: '2px 8px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#cbd5e1', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
-                      >
-                        {isProductSectionOpen ? '▲' : '▼'}
-                      </button>
-                    </div>
-                  </div>
-
-                  {isProductSectionOpen && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                      {/* 1. Nama Produk */}
-                      <div style={{ background: '#05070d', padding: '12px 14px', borderRadius: '10px', border: '1px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <span style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600, display: 'block', marginBottom: '2px' }}>Nama Produk:</span>
-                          {editingInlineField === 'nama_produk' ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                              <input
-                                type="text"
-                                value={inlineValue}
-                                onChange={(e) => setInlineValue(e.target.value)}
-                                autoFocus
-                                placeholder="Masukkan nama produk..."
-                                style={{ flex: 1, padding: '6px 10px', background: '#0f172a', border: '1px solid #38bdf8', borderRadius: '6px', color: '#fff', fontSize: '12px', outline: 'none' }}
-                              />
-                              <button
-                                type="button"
-                                onClick={() => handleSaveInlineField('nama_produk')}
-                                disabled={savingStatus}
-                                style={{ padding: '6px 12px', borderRadius: '6px', background: '#10b981', border: 'none', color: '#fff', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
-                              >
-                                ✔️ Simpan
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setEditingInlineField(null)}
-                                style={{ padding: '6px 10px', borderRadius: '6px', background: '#334155', border: 'none', color: '#cbd5e1', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
-                              >
-                                ❌
-                              </button>
-                            </div>
-                          ) : (
-                            <strong style={{ fontSize: '13px', color: activeItem.nama_produk ? '#ffffff' : '#64748b' }}>
-                              {activeItem.nama_produk || '(Belum diisi)'}
-                            </strong>
-                          )}
-                        </div>
-                        {editingInlineField !== 'nama_produk' && (
-                          canEditProductName ? (
-                            <button
-                              type="button"
-                              onClick={() => { setEditingInlineField('nama_produk'); setInlineValue(activeItem.nama_produk || ''); }}
-                              title="Edit Nama Produk"
-                              style={{ padding: '6px 10px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.4)', color: '#38bdf8', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-                            >
-                              ✏️ Edit
-                            </button>
-                          ) : (
-                            <span style={{ fontSize: '11px', color: '#ef4444', fontWeight: 600 }} title="Terkunci (Edit Nama Product Permission)">🔒 Terkunci</span>
-                          )
+                        {activeItem.link_produk ? (
+                          <a
+                            href={activeItem.link_produk}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{
+                              padding: '10px 14px', borderRadius: '10px',
+                              background: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)',
+                              border: '1px solid #38bdf8', color: '#ffffff', fontWeight: 700, fontSize: '13px',
+                              textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                              boxShadow: '0 4px 14px rgba(56, 189, 248, 0.3)'
+                            }}
+                          >
+                            🔗 Buka Link Produk
+                          </a>
+                        ) : (
+                          <button
+                            disabled
+                            style={{
+                              padding: '10px 14px', borderRadius: '10px', background: 'rgba(30, 41, 59, 0.5)',
+                              border: '1px solid #334155', color: '#64748b', fontWeight: 600, fontSize: '13px',
+                              cursor: 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
+                            }}
+                          >
+                            🔗 Tanpa Link Produk
+                          </button>
                         )}
-                      </div>
 
-                      {/* 2. Link Produk */}
-                      <div style={{ background: '#05070d', padding: '12px 14px', borderRadius: '10px', border: '1px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <span style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600, display: 'block', marginBottom: '2px' }}>Link Produk:</span>
-                          {editingInlineField === 'link_produk' ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                              <input
-                                type="text"
-                                value={inlineValue}
-                                onChange={(e) => setInlineValue(e.target.value)}
-                                autoFocus
-                                placeholder="https://..."
-                                style={{ flex: 1, padding: '6px 10px', background: '#0f172a', border: '1px solid #38bdf8', borderRadius: '6px', color: '#fff', fontSize: '12px', outline: 'none' }}
-                              />
+                        {(() => {
+                          const allUrls = [activeItem.nextcloud_url, activeItem.drive_link, activeItem.url_asset].filter(Boolean);
+                          const ncUrl = allUrls.find(u => typeof u === 'string' && (u.includes('100.78.186.123') || u.includes('index.php/s/') || u.toLowerCase().includes('nextcloud')));
+                          const gdUrl = allUrls.find(u => typeof u === 'string' && (u.includes('drive.google.com') || u.includes('docs.google.com')));
+
+                          const targetUrl = ncUrl || activeItem.nextcloud_url || gdUrl || activeItem.drive_link || activeItem.url_asset;
+                          const isNextcloud = Boolean(ncUrl || (activeItem.nextcloud_url && !gdUrl) || (targetUrl && (targetUrl.includes('100.78.186.123') || targetUrl.includes('index.php/s/'))));
+
+                          if (!targetUrl) {
+                            return (
                               <button
-                                type="button"
-                                onClick={() => handleSaveInlineField('link_produk')}
-                                disabled={savingStatus}
-                                style={{ padding: '6px 12px', borderRadius: '6px', background: '#10b981', border: 'none', color: '#fff', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
+                                disabled
+                                style={{
+                                  padding: '10px 14px', borderRadius: '10px', background: 'rgba(30, 41, 59, 0.5)',
+                                  border: '1px solid #334155', color: '#64748b', fontWeight: 600, fontSize: '13px',
+                                  cursor: 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
+                                }}
                               >
-                                ✔️ Simpan
+                                📥 Asset Kosong
                               </button>
-                              <button
-                                type="button"
-                                onClick={() => setEditingInlineField(null)}
-                                style={{ padding: '6px 10px', borderRadius: '6px', background: '#334155', border: 'none', color: '#cbd5e1', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
-                              >
-                                ❌
-                              </button>
-                            </div>
-                          ) : activeItem.link_produk ? (
-                            <a href={activeItem.link_produk} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#38bdf8', fontWeight: 600, textDecoration: 'none' }}>
-                              🔗 Buka Link Produk ↗
+                            );
+                          }
+
+                          return (
+                            <a
+                              href={targetUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{
+                                padding: '10px 14px', borderRadius: '10px',
+                                background: isNextcloud ? 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)' : 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+                                border: isNextcloud ? '1px solid #38bdf8' : '1px solid #10b981', color: '#ffffff', fontWeight: 700, fontSize: '13px',
+                                textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                boxShadow: isNextcloud ? '0 4px 14px rgba(56, 189, 248, 0.3)' : '0 4px 14px rgba(16, 185, 129, 0.3)'
+                              }}
+                            >
+                              {isNextcloud ? '☁️ Nextcloud Asset' : '📁 Drive Asset'}
                             </a>
-                          ) : (
-                            <span style={{ fontSize: '12px', color: '#64748b' }}>(Belum diisi)</span>
-                          )}
-                        </div>
-                        {editingInlineField !== 'link_produk' && (
-                          canEditProductLink ? (
-                            <button
-                              type="button"
-                              onClick={() => { setEditingInlineField('link_produk'); setInlineValue(activeItem.link_produk || ''); }}
-                              title="Edit Link Produk"
-                              style={{ padding: '6px 10px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.4)', color: '#38bdf8', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-                            >
-                              ✏️ Edit
-                            </button>
-                          ) : (
-                            <span style={{ fontSize: '11px', color: '#ef4444', fontWeight: 600 }} title="Terkunci (Edit Link Product Permission)">🔒 Terkunci</span>
-                          )
-                        )}
+                          );
+                        })()}
                       </div>
 
-                      {/* 3. Link Affiliate */}
-                      <div style={{ background: '#05070d', padding: '12px 14px', borderRadius: '10px', border: '1px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <span style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600, display: 'block', marginBottom: '2px' }}>Link Affiliate:</span>
-                          {editingInlineField === 'link_affiliate' ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                              <input
-                                type="text"
-                                value={inlineValue}
-                                onChange={(e) => setInlineValue(e.target.value)}
-                                autoFocus
-                                placeholder="https://..."
-                                style={{ flex: 1, padding: '6px 10px', background: '#0f172a', border: '1px solid #38bdf8', borderRadius: '6px', color: '#fff', fontSize: '12px', outline: 'none' }}
-                              />
-                              <button
-                                type="button"
-                                onClick={() => handleSaveInlineField('link_affiliate')}
-                                disabled={savingStatus}
-                                style={{ padding: '6px 12px', borderRadius: '6px', background: '#10b981', border: 'none', color: '#fff', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
-                              >
-                                ✔️ Simpan
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setEditingInlineField(null)}
-                                style={{ padding: '6px 10px', borderRadius: '6px', background: '#334155', border: 'none', color: '#cbd5e1', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
-                              >
-                                ❌
-                              </button>
+                      {/* Field Catatan Konten */}
+                      <div style={{ background: '#090d16', padding: '16px', borderRadius: '14px', border: '1px solid #1e293b' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                          <span style={{ fontSize: '12px', fontWeight: 800, color: '#60a5fa', letterSpacing: '0.05em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            📝 CATATAN KONTEN
+                          </span>
+                          {activeItem.catatan && (
+                            <span style={{ fontSize: '10px', color: '#34d399', fontWeight: 700 }}>✓ Tersimpan</span>
+                          )}
+                        </div>
+                        <textarea
+                          value={editStatusForm.catatan || ''}
+                          onChange={(e) => setEditStatusForm({ ...editStatusForm, catatan: e.target.value })}
+                          placeholder="Tambahkan catatan khusus untuk item konten ini (misal: Revisi caption, Jadwal tayang, dsb)..."
+                          style={{
+                            width: '100%', padding: '10px 12px', background: '#05070d', border: '1px solid #334155',
+                            borderRadius: '8px', color: '#e2e8f0', fontSize: '12px', outline: 'none', resize: 'vertical', minHeight: '65px',
+                            lineHeight: '1.5', fontFamily: 'inherit'
+                          }}
+                        />
+                      </div>
+
+                      {/* Accordion Product Data */}
+                      <div style={{ background: '#090d16', padding: '18px', borderRadius: '14px', border: '1px solid #1e293b', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                        <div
+                          onClick={() => setIsProductSectionOpen(!isProductSectionOpen)}
+                          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }}
+                        >
+                          <span style={{ fontSize: '13px', fontWeight: 800, color: '#c084fc', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            📦 DATA PRODUK & LINK
+                          </span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontSize: '11px', color: '#64748b' }}>
+                              {isProductSectionOpen ? 'Tutup Panel 🔼' : 'Buka Panel 🔽'}
+                            </span>
+                            <button
+                              type="button"
+                              style={{ padding: '2px 8px', borderRadius: '6px', background: '#1e293b', border: '1px solid #334155', color: '#cbd5e1', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                            >
+                              {isProductSectionOpen ? '▲' : '▼'}
+                            </button>
+                          </div>
+                        </div>
+
+                        {isProductSectionOpen && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            {/* 1. Nama Produk */}
+                            <div style={{ background: '#05070d', padding: '12px 14px', borderRadius: '10px', border: '1px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <span style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600, display: 'block', marginBottom: '2px' }}>Nama Produk:</span>
+                                {editingInlineField === 'nama_produk' ? (
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                                    <input
+                                      type="text"
+                                      value={inlineValue}
+                                      onChange={(e) => setInlineValue(e.target.value)}
+                                      autoFocus
+                                      placeholder="Masukkan nama produk..."
+                                      style={{ flex: 1, padding: '6px 10px', background: '#0f172a', border: '1px solid #38bdf8', borderRadius: '6px', color: '#fff', fontSize: '12px', outline: 'none' }}
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSaveInlineField('nama_produk')}
+                                      disabled={savingStatus}
+                                      style={{ padding: '6px 12px', borderRadius: '6px', background: '#10b981', border: 'none', color: '#fff', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
+                                    >
+                                      ✔️ Simpan
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => setEditingInlineField(null)}
+                                      style={{ padding: '6px 10px', borderRadius: '6px', background: '#334155', border: 'none', color: '#cbd5e1', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
+                                    >
+                                      ❌
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <strong style={{ fontSize: '13px', color: activeItem.nama_produk ? '#ffffff' : '#64748b' }}>
+                                    {activeItem.nama_produk || '(Belum diisi)'}
+                                  </strong>
+                                )}
+                              </div>
+                              {editingInlineField !== 'nama_produk' && (
+                                canEditProductName ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => { setEditingInlineField('nama_produk'); setInlineValue(activeItem.nama_produk || ''); }}
+                                    title="Edit Nama Produk"
+                                    style={{ padding: '6px 10px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.4)', color: '#38bdf8', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                  >
+                                    ✏️ Edit
+                                  </button>
+                                ) : (
+                                  <span style={{ fontSize: '11px', color: '#ef4444', fontWeight: 600 }} title="Terkunci (Edit Nama Product Permission)">🔒 Terkunci</span>
+                                )
+                              )}
                             </div>
-                          ) : activeItem.link_affiliate ? (
-                            <button
-                              type="button"
-                              onClick={() => copyToClipboard(activeItem.link_affiliate, 'Link Affiliate')}
-                              style={{ padding: '4px 10px', borderRadius: '6px', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.4)', color: '#fbbf24', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
-                            >
-                              🛒 Copy Affiliate Link 📋
-                            </button>
-                          ) : (
-                            <span style={{ fontSize: '12px', color: '#64748b' }}>(Belum diisi)</span>
-                          )}
-                        </div>
-                        {editingInlineField !== 'link_affiliate' && (
-                          canEditAffiliateLink ? (
-                            <button
-                              type="button"
-                              onClick={() => { setEditingInlineField('link_affiliate'); setInlineValue(activeItem.link_affiliate || ''); }}
-                              title="Edit Link Affiliate"
-                              style={{ padding: '6px 10px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.4)', color: '#38bdf8', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-                            >
-                              ✏️ Edit
-                            </button>
-                          ) : (
-                            <span style={{ fontSize: '11px', color: '#ef4444', fontWeight: 600 }} title="Terkunci (Edit Link Affiliate Permission)">🔒 Terkunci</span>
-                          )
-                        )}
-                      </div>
 
-                      {/* Caption Panel */}
-                      <div style={{ marginTop: '4px' }}>
-                        <span style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Caption:</span>
-                        <div style={{
-                          fontSize: '12px', fontFamily: 'monospace', color: '#cbd5e1', background: '#05070d',
-                          padding: '12px', borderRadius: '8px', border: '1px solid #1e293b', whiteSpace: 'pre-wrap',
-                          maxHeight: '140px', overflowY: 'auto', lineHeight: '1.6'
-                        }}>
-                          {activeItem.caption || '(Tidak ada caption)'}
-                        </div>
+                            {/* 2. Link Produk */}
+                            <div style={{ background: '#05070d', padding: '12px 14px', borderRadius: '10px', border: '1px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <span style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600, display: 'block', marginBottom: '2px' }}>Link Produk:</span>
+                                {editingInlineField === 'link_produk' ? (
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                                    <input
+                                      type="text"
+                                      value={inlineValue}
+                                      onChange={(e) => setInlineValue(e.target.value)}
+                                      autoFocus
+                                      placeholder="https://..."
+                                      style={{ flex: 1, padding: '6px 10px', background: '#0f172a', border: '1px solid #38bdf8', borderRadius: '6px', color: '#fff', fontSize: '12px', outline: 'none' }}
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSaveInlineField('link_produk')}
+                                      disabled={savingStatus}
+                                      style={{ padding: '6px 12px', borderRadius: '6px', background: '#10b981', border: 'none', color: '#fff', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
+                                    >
+                                      ✔️ Simpan
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => setEditingInlineField(null)}
+                                      style={{ padding: '6px 10px', borderRadius: '6px', background: '#334155', border: 'none', color: '#cbd5e1', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
+                                    >
+                                      ❌
+                                    </button>
+                                  </div>
+                                ) : activeItem.link_produk ? (
+                                  <a href={activeItem.link_produk} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#38bdf8', fontWeight: 600, textDecoration: 'none' }}>
+                                    🔗 Buka Link Produk ↗
+                                  </a>
+                                ) : (
+                                  <span style={{ fontSize: '12px', color: '#64748b' }}>(Belum diisi)</span>
+                                )}
+                              </div>
+                              {editingInlineField !== 'link_produk' && (
+                                canEditProductLink ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => { setEditingInlineField('link_produk'); setInlineValue(activeItem.link_produk || ''); }}
+                                    title="Edit Link Produk"
+                                    style={{ padding: '6px 10px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.4)', color: '#38bdf8', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                  >
+                                    ✏️ Edit
+                                  </button>
+                                ) : (
+                                  <span style={{ fontSize: '11px', color: '#ef4444', fontWeight: 600 }} title="Terkunci (Edit Link Product Permission)">🔒 Terkunci</span>
+                                )
+                              )}
+                            </div>
+
+                            {/* 3. Link Affiliate */}
+                            <div style={{ background: '#05070d', padding: '12px 14px', borderRadius: '10px', border: '1px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <span style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600, display: 'block', marginBottom: '2px' }}>Link Affiliate:</span>
+                                {editingInlineField === 'link_affiliate' ? (
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                                    <input
+                                      type="text"
+                                      value={inlineValue}
+                                      onChange={(e) => setInlineValue(e.target.value)}
+                                      autoFocus
+                                      placeholder="https://..."
+                                      style={{ flex: 1, padding: '6px 10px', background: '#0f172a', border: '1px solid #38bdf8', borderRadius: '6px', color: '#fff', fontSize: '12px', outline: 'none' }}
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSaveInlineField('link_affiliate')}
+                                      disabled={savingStatus}
+                                      style={{ padding: '6px 12px', borderRadius: '6px', background: '#10b981', border: 'none', color: '#fff', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
+                                    >
+                                      ✔️ Simpan
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => setEditingInlineField(null)}
+                                      style={{ padding: '6px 10px', borderRadius: '6px', background: '#334155', border: 'none', color: '#cbd5e1', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
+                                    >
+                                      ❌
+                                    </button>
+                                  </div>
+                                ) : activeItem.link_affiliate ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => copyToClipboard(activeItem.link_affiliate, 'Link Affiliate')}
+                                    style={{ padding: '4px 10px', borderRadius: '6px', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.4)', color: '#fbbf24', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
+                                  >
+                                    🛒 Copy Affiliate Link 📋
+                                  </button>
+                                ) : (
+                                  <span style={{ fontSize: '12px', color: '#64748b' }}>(Belum diisi)</span>
+                                )}
+                              </div>
+                              {editingInlineField !== 'link_affiliate' && (
+                                canEditAffiliateLink ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => { setEditingInlineField('link_affiliate'); setInlineValue(activeItem.link_affiliate || ''); }}
+                                    title="Edit Link Affiliate"
+                                    style={{ padding: '6px 10px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.4)', color: '#38bdf8', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                  >
+                                    ✏️ Edit
+                                  </button>
+                                ) : (
+                                  <span style={{ fontSize: '11px', color: '#ef4444', fontWeight: 600 }} title="Terkunci (Edit Link Affiliate Permission)">🔒 Terkunci</span>
+                                )
+                              )}
+                            </div>
+
+                            {/* Caption Panel */}
+                            <div style={{ marginTop: '4px' }}>
+                              <span style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Caption:</span>
+                              <div style={{
+                                fontSize: '12px', fontFamily: 'monospace', color: '#cbd5e1', background: '#05070d',
+                                padding: '12px', borderRadius: '8px', border: '1px solid #1e293b', whiteSpace: 'pre-wrap',
+                                maxHeight: '140px', overflowY: 'auto', lineHeight: '1.6'
+                              }}>
+                                {activeItem.caption || '(Tidak ada caption)'}
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  )}
-                </div>
 
-                {/* Sub-Header */}
-                <h3 style={{ fontSize: '12px', fontWeight: 800, color: '#9ca3af', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 16px' }}>
-                  STATUS PUBLIKASI PER PLATFORM
-                </h3>
+                    {/* Right Column: Platform Publication Status */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto', paddingRight: '4px' }}>
+                      <h3 style={{ fontSize: '11px', fontWeight: 800, color: '#9ca3af', letterSpacing: '0.08em', textTransform: 'uppercase', margin: 0 }}>
+                        STATUS PUBLIKASI PER PLATFORM
+                      </h3>
 
-                <form onSubmit={handleSaveStatus} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      {/* TikTok Controls */}
 
                   {/* TikTok Controls */}
                   <div style={{ background: '#090d16', padding: '16px', borderRadius: '12px', border: '1px solid #1e293b', display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -1903,9 +1926,11 @@ function ContentFlowHubPageContent() {
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
 
-                  {/* Modal Footer Submit Bar */}
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', paddingTop: '12px', borderTop: '1px solid #1e293b' }}>
+              {/* Modal Footer Submit Bar */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', padding: '16px 24px', borderTop: '1px solid #1e293b', background: '#0d1322' }}>
                     <button
                       type="button"
                       onClick={() => setActiveItem(null)}
