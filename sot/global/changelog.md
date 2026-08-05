@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.193 — Avoid duplicate key inserts in ContentFlow Satu Atap mode (05/08/2026)
+- Check apiKey inside syncBridgeCampaignToContentFlow and return early if not set
+
 ## V2.2.192 — Update query script to find duplicate video_id (05/08/2026)
 - Search content_flow_items for duplicate video_id
 
