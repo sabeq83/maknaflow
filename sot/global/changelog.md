@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.195 — Clean up temporary test scripts (05/08/2026)
+- Remove scripts/test-cf-sync.js and scripts/query-campaign.js
+
 ## V2.2.194 — Select account_name in query script (05/08/2026)
 - Select account_name field in query script
 
