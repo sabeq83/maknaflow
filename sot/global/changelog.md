@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.191 — Add test contentflow sync script (05/08/2026)
+- Add scripts/test-cf-sync.js
+
 ## V2.2.190 — Fix RE brand profile mapping and API synchronization for ContentFlow (05/08/2026)
 - Add brand_profiles table join for RE campaign items
 - Update RE and OPC sync routes to invoke syncCampaignToContentFlow
