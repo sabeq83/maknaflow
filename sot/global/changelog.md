@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.208 — Fix background schedulers tenant isolation (05/08/2026)
+- Wrap tickCampaignScheduler in none tenant context
+- Wrap runStep and executeJob execution in campaign tenant context
+
 ## V2.2.207 — Fix log context loss using globalThis (05/08/2026)
 - Fix AsyncLocalStorage context loss on multiple Webpack entry points
 - Share logContextStorage and tenantContext on globalThis
