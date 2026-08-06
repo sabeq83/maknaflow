@@ -72,10 +72,182 @@ export default function ImportPlannerModal({
   const [lightingStyleCustom, setLightingStyleCustom] = useState('');
   const [visualStylePreset, setVisualStylePreset] = useState('3d_claymation_cozy');
 
+  // Campaign Presets States
+  const [presets, setPresets] = useState([]);
+  const [selectedPresetKey, setSelectedPresetKey] = useState('');
+  const [showPresetSaveModal, setShowPresetSaveModal] = useState(false);
+  const [newPresetLabel, setNewPresetLabel] = useState('');
+  const [newPresetKey, setNewPresetKey] = useState('');
+  const [user, setUser] = useState(null);
+
+  const fetchPresets = () => {
+    fetch('/api/v2/operator-presets')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) setPresets(d.presets || []);
+      })
+      .catch(() => {});
+  };
+
+  const applyPresetToForm = (preset) => {
+    if (!preset || !preset.config) return;
+    const config = preset.config;
+
+    // Accordion 1: Strategy & Compliance
+    if (config.basic_strategy) {
+      setNarrativeMode(config.basic_strategy.narrative_mode || 'auto');
+      setVoiceProvider(config.basic_strategy.voice_provider || 'minimax');
+      setTargetLanguage(config.basic_strategy.target_language || 'id-ID');
+      setTargetDemographic(config.basic_strategy.target_demographic || 'genz_casual');
+      setTargetDemographicCustom(config.basic_strategy.target_demographic_custom || '');
+      setCustomInstruction(config.basic_strategy.custom_instruction || '');
+      setAiDirective(config.basic_strategy.ai_directive || '');
+      setMandatoryOutroLine(config.basic_strategy.mandatory_outro_line || '');
+      setSfxSetting(config.basic_strategy.sfx_setting || 'without_sfx');
+      setEnableAudioSegment(config.basic_strategy.enable_audio_segment || false);
+      setEnableVoAudit(config.basic_strategy.enable_vo_audit ?? 1);
+      setNextcloudParentFolder(config.basic_strategy.nextcloud_parent_folder || '/MAKNA_Assets');
+    }
+
+    // Accordion 2: Aesthetics & Veo Engine Settings
+    if (config.visual_engine) {
+      setVisualStyle(config.visual_engine.visual_style || 'Cinematic');
+      setVisualMode(config.visual_engine.visual_mode || 'hybrid_lock');
+      setVideoModel(config.visual_engine.video_model || 'veo_31_lite');
+      setFaceVisibility(config.visual_engine.face_visibility || 'Faceless');
+      setTargetClipsCount(Number(config.visual_engine.target_clips_count ?? 3));
+      setWordsPerClip(config.visual_engine.words_per_clip || '20-22 kata');
+      setAspectRatio(config.visual_engine.aspect_ratio || '9:16');
+      if (config.visual_engine.video_model === 'veo_31_lite') {
+        setTargetAi('Google Veo (8s)');
+      } else {
+        setTargetAi('Google Veo (5s)');
+      }
+    }
+
+    // Accordion 3: Product Bridging Settings
+    if (config.product_bridging) {
+      setIsBridgingActive(config.product_bridging.is_bridging_active || false);
+      setBridgeAtClip(config.product_bridging.bridge_at_clip || 2);
+      setBridgeDurationClips(config.product_bridging.bridge_duration_clips || 1);
+    }
+
+    // Accordion 4: Visual Swap Overrides (VSO)
+    if (config.visual_swap) {
+      setIsVsoActive(config.visual_swap.is_vso_active || false);
+      setCharacterConcept(config.visual_swap.character_concept || 'faceless');
+      setSubjectDemographic(config.visual_swap.subject_demographic || 'syari_classic');
+      setWardrobeStyle(config.visual_swap.wardrobe_style || 'amber_terracotta');
+      setWardrobeStyleCustom(config.visual_swap.wardrobe_style_custom || '');
+      setLightingStyle(config.visual_swap.lighting_style || 'window_daylight');
+      setLightingStyleCustom(config.visual_swap.lighting_style_custom || '');
+      setVisualStylePreset(config.visual_swap.visual_style_preset || '3d_claymation_cozy');
+    }
+  };
+
+  const handleSaveAsPreset = async (e) => {
+    e.preventDefault();
+    if (!newPresetLabel.trim() || !newPresetKey.trim()) {
+      alert('Label dan Key preset wajib diisi.');
+      return;
+    }
+
+    const presetConfig = {
+      basic_strategy: {
+        narrative_mode: narrativeMode,
+        voice_provider: voiceProvider,
+        voice_persona: 'Kore',
+        voice_speed: 1.0,
+        voice_volume: 1.0,
+        tts_model_quality: 'speech-2.8-turbo',
+        target_language: targetLanguage,
+        target_demographic: targetDemographic,
+        target_demographic_custom: targetDemographicCustom,
+        custom_instruction: customInstruction,
+        ai_directive: aiDirective,
+        mandatory_outro_line: mandatoryOutroLine,
+        sfx_setting: sfxSetting,
+        enable_audio_segment: enableAudioSegment,
+        enable_vo_audit: enableVoAudit,
+        nextcloud_parent_folder: nextcloudParentFolder,
+        promotion_style: 'Softselling'
+      },
+      visual_engine: {
+        visual_style: visualStyle,
+        visual_mode: visualMode,
+        video_model: videoModel,
+        face_visibility: faceVisibility,
+        target_clips_count: targetClipsCount,
+        words_per_clip: wordsPerClip,
+        aspect_ratio: aspectRatio
+      },
+      product_bridging: {
+        is_bridging_active: isBridgingActive,
+        bridge_at_clip: bridgeAtClip,
+        bridge_duration_clips: Number(bridgeDurationClips)
+      },
+      visual_swap: {
+        is_vso_active: isVsoActive,
+        character_concept: characterConcept,
+        subject_demographic: subjectDemographic,
+        wardrobe_style: wardrobeStyle,
+        wardrobe_style_custom: wardrobeStyleCustom,
+        lighting_style: lightingStyle,
+        lighting_style_custom: lightingStyleCustom,
+        visual_style_preset: visualStylePreset
+      },
+      workflow: {
+        enable_tts: true,
+        enable_glabs: true,
+        enable_ffmpeg: true,
+        enable_social_post: false,
+        upload_markdown: true,
+        upload_spreadsheet: true,
+        ffmpeg_sync_option: 'smart_sync',
+        ffmpeg_video_scale: 1.0,
+        ffmpeg_sfx_volume: 0.0,
+        ffmpeg_bgm_volume: 0.0,
+        facebook_page_id: '',
+        facebook_server_url: ''
+      }
+    };
+
+    try {
+      const res = await fetch('/api/v2/operator-presets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: newPresetKey.trim().toLowerCase(),
+          label: newPresetLabel.trim(),
+          config: presetConfig
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      alert(`Preset "${newPresetLabel}" berhasil disimpan.`);
+      setShowPresetSaveModal(false);
+      setNewPresetLabel('');
+      setNewPresetKey('');
+      fetchPresets();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   useEffect(() => {
     if (isOpen) {
       fetchPlanners();
       fetchBrandProfiles();
+      fetchPresets();
+
+      fetch('/api/auth/me')
+        .then(r => r.json())
+        .then(u => {
+          if (u.authenticated) setUser(u.user);
+        })
+        .catch(() => {});
+
       if (initialPlannerId) {
         setSelectedPlannerId(initialPlannerId);
         loadPlannerDetail(initialPlannerId);
@@ -303,6 +475,41 @@ export default function ImportPlannerModal({
             display: 'flex', alignItems: 'center', gap: '8px'
           }}>
             <span>📊 Mode Impor Content Planner Master ke Engine Produksi Autopilot OPC</span>
+          </div>
+
+          {/* PRESET SELECTOR */}
+          <div style={{ padding: '16px 24px', background: 'rgba(99, 102, 241, 0.05)', border: '1px solid rgba(99, 102, 241, 0.2)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: '20px' }}>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: '#818cf8' }}>📋 Gunakan Preset:</span>
+              <select 
+                value={selectedPresetKey} 
+                onChange={(e) => {
+                  const key = e.target.value;
+                  setSelectedPresetKey(key);
+                  const preset = presets.find(p => p.key === key);
+                  if (preset) applyPresetToForm(preset);
+                }}
+                style={{ maxWidth: 300, background: '#09090b', color: '#fff', border: '1px solid #27272a', borderRadius: 8, padding: '8px 12px', fontSize: '13px', outline: 'none', cursor: 'pointer' }}
+              >
+                <option value="">-- Buat dari Awal (Tanpa Preset) --</option>
+                {presets.map(p => (
+                  <option key={p.key} value={p.key}>{p.label}{p.is_system ? ' (System)' : ''}</option>
+                ))}
+              </select>
+            </div>
+            {user?.role === 'admin' && (
+              <button
+                type="button"
+                onClick={() => {
+                  setNewPresetLabel('');
+                  setNewPresetKey('');
+                  setShowPresetSaveModal(true);
+                }}
+                style={{ padding: '8px 12px', fontSize: '12px', background: 'rgba(255, 255, 255, 0.05)', color: '#fff', border: '1px solid #27272a', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
+              >
+                💾 Simpan Form sebagai Preset
+              </button>
+            )}
           </div>
 
           {/* Structured 4 Accordions Stack */}
@@ -1094,6 +1301,47 @@ export default function ImportPlannerModal({
             </button>
           </div>
         </form>
+
+        {showPresetSaveModal && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+            <form onSubmit={handleSaveAsPreset} style={{ background: '#18181b', border: '1px solid #27272a', borderRadius: '12px', width: '100%', maxWidth: '400px', padding: '24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#fff' }}>💾 Simpan sebagai Preset</h3>
+                <button type="button" onClick={() => setShowPresetSaveModal(false)} style={{ background: 'none', border: 'none', color: '#a1a1aa', cursor: 'pointer', fontSize: '1.2rem' }}>×</button>
+              </div>
+              <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 0 }}>
+                <label style={{ fontSize: '13px', color: '#a1a1aa' }}>Nama Preset (Label)</label>
+                <input 
+                  type="text" 
+                  value={newPresetLabel} 
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setNewPresetLabel(val);
+                    setNewPresetKey(val.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, ''));
+                  }} 
+                  placeholder="Contoh: Wardah Brightening v1"
+                  style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px', fontSize: '13px' }}
+                  required 
+                />
+              </div>
+              <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 0 }}>
+                <label style={{ fontSize: '13px', color: '#a1a1aa' }}>Key Preset (Unique ID)</label>
+                <input 
+                  type="text" 
+                  value={newPresetKey} 
+                  onChange={(e) => setNewPresetKey(e.target.value.toLowerCase().replace(/[^a-z0-9_-]+/g, ''))} 
+                  placeholder="Contoh: wardah_brightening_v1"
+                  style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px', fontSize: '13px' }}
+                  required 
+                />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 8 }}>
+                <button type="button" onClick={() => setShowPresetSaveModal(false)} style={{ background: '#27272a', color: '#9ca3af', border: '1px solid #3f3f46', borderRadius: '6px', padding: '8px 16px', fontWeight: 600, cursor: 'pointer' }}>Batal</button>
+                <button type="submit" style={{ background: '#4f46e5', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 16px', fontWeight: 600, cursor: 'pointer' }}>Simpan Preset</button>
+              </div>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );

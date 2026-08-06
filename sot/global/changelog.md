@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.235 — Integrasi Preset Kampanye Visual (06/08/2026)
+- Load & Save Presets di OPC
+- Load & Save Presets di RE
+- Load & Save Presets di ImportPlannerModal
+
 ## V2.2.234 — Exclude negative prompt from all visual prompts in OPC and RE (06/08/2026)
 - Remove hardcoded customNegativePrompt from OPC T2V, T2I, and I2V templates
 - Add rule requiring visual prompts to be free of negative tags to OPC and RE builders

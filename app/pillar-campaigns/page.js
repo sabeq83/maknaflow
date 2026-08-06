@@ -159,6 +159,191 @@ export default function OrganicPillarPage() {
   const [ffmpegSfxVolume, setFfmpegSfxVolume] = useState(0.0);
   const [ffmpegBgmVolume, setFfmpegBgmVolume] = useState(0.0);
 
+  // Campaign Presets States
+  const [presets, setPresets] = useState([]);
+  const [selectedPresetKey, setSelectedPresetKey] = useState('');
+  const [showPresetSaveModal, setShowPresetSaveModal] = useState(false);
+  const [newPresetLabel, setNewPresetLabel] = useState('');
+  const [newPresetKey, setNewPresetKey] = useState('');
+  const [user, setUser] = useState(null);
+
+  const fetchPresets = () => {
+    fetch('/api/v2/operator-presets')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) setPresets(d.presets || []);
+      })
+      .catch(() => {});
+  };
+
+  const applyPresetToForm = (preset) => {
+    if (!preset || !preset.config) return;
+    const config = preset.config;
+
+    // Accordion 1: Basic Creative Strategy
+    if (config.basic_strategy) {
+      setNarrativeMode(config.basic_strategy.narrative_mode || 'Storytelling');
+      setVoiceProvider(config.basic_strategy.voice_provider || 'minimax');
+      setVoicePersona(config.basic_strategy.voice_persona || 'Kore');
+      setVoiceSpeed(Number(config.basic_strategy.voice_speed ?? 1.0));
+      setVoiceVolume(Number(config.basic_strategy.voice_volume ?? 1.0));
+      setTtsModelQuality(config.basic_strategy.tts_model_quality || 'speech-2.8-turbo');
+      setTargetLanguage(config.basic_strategy.target_language || 'id-ID');
+      setTargetDemographic(config.basic_strategy.target_demographic || 'genz_casual');
+      setTargetDemographicCustom(config.basic_strategy.target_demographic_custom || '');
+      setCustomInstruction(config.basic_strategy.custom_instruction || '');
+      setAiDirective(config.basic_strategy.ai_directive || '');
+      setMandatoryOutroLine(config.basic_strategy.mandatory_outro_line || '');
+      setSfxSetting(config.basic_strategy.sfx_setting || 'without_sfx');
+      setEnableAudioSegment(config.basic_strategy.enable_audio_segment || false);
+      setEnableVoAudit(config.basic_strategy.enable_vo_audit ?? 1);
+      setNextcloudParentFolder(config.basic_strategy.nextcloud_parent_folder || '/MAKNA_Assets');
+      setPromotionStyle(config.basic_strategy.promotion_style || 'Softselling');
+    }
+
+    // Accordion 2: Aesthetics & Visual Settings
+    if (config.visual_engine) {
+      setVisualStyle(config.visual_engine.visual_style || 'Cinematic');
+      setVisualMode(config.visual_engine.visual_mode || 'hybrid_lock');
+      setVideoModel(config.visual_engine.video_model || 'veo_31_lite');
+      setFaceVisibility(config.visual_engine.face_visibility || 'Faceless');
+      setTargetClipsCount(config.visual_engine.target_clips_count || 4);
+      setWordsPerClip(config.visual_engine.words_per_clip || '17-19 kata');
+      setAspectRatio(config.visual_engine.aspect_ratio || '9:16');
+      if (config.visual_engine.video_model === 'veo_31_lite') {
+        setTargetAi('Google Veo (8s)');
+      } else {
+        setTargetAi('Google Veo (5s)');
+      }
+    }
+
+    // Accordion 3: Product Bridging Settings
+    if (config.product_bridging) {
+      setIsBridgingActive(config.product_bridging.is_bridging_active || false);
+      setBridgeAtClip(config.product_bridging.bridge_at_clip || 2);
+      setBridgeDurationClips(config.product_bridging.bridge_duration_clips || 1);
+    }
+
+    // Accordion 4: Visual Swap Overrides (VSO)
+    if (config.visual_swap) {
+      setIsVsoActive(config.visual_swap.is_vso_active || false);
+      setCharacterConcept(config.visual_swap.character_concept || 'faceless');
+      setSubjectDemographic(config.visual_swap.subject_demographic || 'syari_classic');
+      setWardrobeStyle(config.visual_swap.wardrobe_style || 'amber_terracotta');
+      setWardrobeStyleCustom(config.visual_swap.wardrobe_style_custom || '');
+      setLightingStyle(config.visual_swap.lighting_style || 'window_daylight');
+      setLightingStyleCustom(config.visual_swap.lighting_style_custom || '');
+      setVisualStylePreset(config.visual_swap.visual_style_preset || '3d_claymation_cozy');
+    }
+
+    // Workflow Settings
+    if (config.workflow) {
+      setEnableTts(config.workflow.enable_tts || false);
+      setEnableGlabs(config.workflow.enable_glabs || false);
+      setEnableFfmpeg(config.workflow.enable_ffmpeg || false);
+      setEnableSocialPost(config.workflow.enable_social_post || false);
+      setUploadMarkdown(config.workflow.upload_markdown ?? true);
+      setUploadSpreadsheet(config.workflow.upload_spreadsheet ?? true);
+      
+      setFfmpegSyncOption(config.workflow.ffmpeg_sync_option || 'smart_sync');
+      setFfmpegVideoScale(Number(config.workflow.ffmpeg_video_scale ?? 1.0));
+      setFfmpegSfxVolume(Number(config.workflow.ffmpeg_sfx_volume ?? 0.0));
+      setFfmpegBgmVolume(Number(config.workflow.ffmpeg_bgm_volume ?? 0.0));
+      setFacebookPageId(config.workflow.facebook_page_id || '');
+      setFacebookServerUrl(config.workflow.facebook_server_url || '');
+    }
+  };
+
+  const handleSaveAsPreset = async (e) => {
+    e.preventDefault();
+    if (!newPresetLabel.trim() || !newPresetKey.trim()) {
+      showToast('Label dan Key preset wajib diisi.', 'error');
+      return;
+    }
+
+    const presetConfig = {
+      basic_strategy: {
+        narrative_mode: narrativeMode,
+        voice_provider: voiceProvider,
+        voice_persona: voicePersona,
+        voice_speed: Number(voiceSpeed),
+        voice_volume: Number(voiceVolume),
+        tts_model_quality: ttsModelQuality,
+        target_language: targetLanguage,
+        target_demographic: targetDemographic,
+        target_demographic_custom: targetDemographicCustom,
+        custom_instruction: customInstruction,
+        ai_directive: aiDirective,
+        mandatory_outro_line: mandatoryOutroLine,
+        sfx_setting: sfxSetting,
+        enable_audio_segment: enableAudioSegment,
+        enable_vo_audit: enableVoAudit ? 1 : 0,
+        nextcloud_parent_folder: nextcloudParentFolder,
+        promotion_style: promotionStyle
+      },
+      visual_engine: {
+        visual_style: visualStyle,
+        visual_mode: visualMode,
+        video_model: videoModel,
+        face_visibility: faceVisibility,
+        target_clips_count: targetClipsCount,
+        words_per_clip: wordsPerClip,
+        aspect_ratio: aspectRatio
+      },
+      product_bridging: {
+        is_bridging_active: isBridgingActive,
+        bridge_at_clip: bridgeAtClip,
+        bridge_duration_clips: Number(bridgeDurationClips)
+      },
+      visual_swap: {
+        is_vso_active: isVsoActive,
+        character_concept: characterConcept,
+        subject_demographic: subjectDemographic,
+        wardrobe_style: wardrobeStyle,
+        wardrobe_style_custom: wardrobeStyleCustom,
+        lighting_style: lightingStyle,
+        lighting_style_custom: lightingStyleCustom,
+        visual_style_preset: visualStylePreset
+      },
+      workflow: {
+        enable_tts: enableTts,
+        enable_glabs: enableGlabs,
+        enable_ffmpeg: enableFfmpeg,
+        enable_social_post: enableSocialPost,
+        upload_markdown: uploadMarkdown,
+        upload_spreadsheet: uploadSpreadsheet,
+        ffmpeg_sync_option: ffmpegSyncOption,
+        ffmpeg_video_scale: Number(ffmpegVideoScale),
+        ffmpeg_sfx_volume: Number(ffmpegSfxVolume),
+        ffmpeg_bgm_volume: Number(ffmpegBgmVolume),
+        facebook_page_id: facebookPageId,
+        facebook_server_url: facebookServerUrl
+      }
+    };
+
+    try {
+      const res = await fetch('/api/v2/operator-presets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: newPresetKey.trim().toLowerCase(),
+          label: newPresetLabel.trim(),
+          config: presetConfig
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      showToast(`Preset "${newPresetLabel}" berhasil disimpan.`);
+      setShowPresetSaveModal(false);
+      setNewPresetLabel('');
+      setNewPresetKey('');
+      fetchPresets();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
   const router = useRouter();
 
   useEffect(() => {
@@ -196,6 +381,15 @@ export default function OrganicPillarPage() {
     fetch('/api/v2/brand-profiles').then(r => r.json()).then(d => { if (d.success) setBrandProfiles(d.data || []); }).catch(() => {});
     fetch('/api/product-agent').then(r => r.json()).then(d => { if (d.success) setProducts(d.data || []); }).catch(() => {});
     
+    // Fetch user details & presets
+    fetch('/api/auth/me')
+      .then(r => r.json())
+      .then(u => {
+        if (u.authenticated) setUser(u.user);
+      })
+      .catch(() => {});
+    fetchPresets();
+
     // Fetch Facebook Pages & Global Server URL
     fetch('/api/settings/facebook-pages')
       .then(r => r.json())
@@ -1057,6 +1251,43 @@ export default function OrganicPillarPage() {
                   </button>
                 </div>
 
+                {/* PRESET SELECTOR */}
+                <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-color)', background: 'rgba(59, 130, 246, 0.02)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent-color)' }}>📋 Gunakan Preset:</span>
+                    <select 
+                      value={selectedPresetKey} 
+                      onChange={(e) => {
+                        const key = e.target.value;
+                        setSelectedPresetKey(key);
+                        const preset = presets.find(p => p.key === key);
+                        if (preset) applyPresetToForm(preset);
+                      }}
+                      className="form-input"
+                      style={{ maxWidth: 300, background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: 6, padding: '6px 12px', outline: 'none' }}
+                    >
+                      <option value="">-- Buat dari Awal (Tanpa Preset) --</option>
+                      {presets.map(p => (
+                        <option key={p.key} value={p.key}>{p.label}{p.is_system ? ' (System)' : ''}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {user?.role === 'admin' && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNewPresetLabel('');
+                        setNewPresetKey('');
+                        setShowPresetSaveModal(true);
+                      }}
+                      className="btn btn-secondary btn-sm"
+                      style={{ padding: '6px 12px', fontSize: '13px', background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: '6px', cursor: 'pointer' }}
+                    >
+                      💾 Simpan Form sebagai Preset
+                    </button>
+                  )}
+                </div>
+
                 {/* ACCORDION SECTION 1: Basic Creative Strategy */}
                 <div style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <div 
@@ -1906,6 +2137,47 @@ export default function OrganicPillarPage() {
                   </button>
                 </div>
 
+              </form>
+            </div>
+          )}
+
+          {showPresetSaveModal && (
+            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+              <form onSubmit={handleSaveAsPreset} className="card" style={{ width: '100%', maxWidth: '400px', padding: '24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>💾 Simpan sebagai Preset</h3>
+                  <button type="button" onClick={() => setShowPresetSaveModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem' }}>×</button>
+                </div>
+                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 0 }}>
+                  <label style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Nama Preset (Label)</label>
+                  <input 
+                    type="text" 
+                    value={newPresetLabel} 
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setNewPresetLabel(val);
+                      setNewPresetKey(val.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, ''));
+                    }} 
+                    placeholder="Contoh: Wardah Brightening v1"
+                    className="form-input" 
+                    required 
+                  />
+                </div>
+                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 0 }}>
+                  <label style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Key Preset (Unique ID)</label>
+                  <input 
+                    type="text" 
+                    value={newPresetKey} 
+                    onChange={(e) => setNewPresetKey(e.target.value.toLowerCase().replace(/[^a-z0-9_-]+/g, ''))} 
+                    placeholder="Contoh: wardah_brightening_v1"
+                    className="form-input" 
+                    required 
+                  />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 8 }}>
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowPresetSaveModal(false)} style={{ background: '#27272a', color: '#9ca3af', border: '1px solid #3f3f46', borderRadius: '6px', padding: '8px 16px', fontWeight: 600, cursor: 'pointer' }}>Batal</button>
+                  <button type="submit" className="btn btn-primary" style={{ background: 'var(--accent-color)', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 16px', fontWeight: 600, cursor: 'pointer' }}>Simpan Preset</button>
+                </div>
               </form>
             </div>
           )}
