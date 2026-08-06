@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.231 — Detailed G-Labs error logging and selective prompt sanitization (06/08/2026)
+- Strip aspect ratio and layer brackets but preserve negative keywords in prompts
+- Capture and log detailed error message when a G-Labs task fails in the scheduler
+
 ## V2.2.230 — Refine prompt safety replacements for G-Labs compatibility (06/08/2026)
 - Revert formatting/length filters to preserve negative prompts and tags
 - Map safety-blocked keywords (crash -> rapid, muscle tension -> firm pressure) via synonym replacement
