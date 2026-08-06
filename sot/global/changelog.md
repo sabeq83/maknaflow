@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.225 — Add Cache-Control headers to schedules route (06/08/2026)
+- Add no-store Cache-Control header to schedules GET API route to prevent browser caching
+
 ## V2.2.224 — Fix staging deploy script API environment variables (06/08/2026)
 - Add --env-file=.env.local and set API_PORT=7010 in deploy-staging.js
 

@@ -102,7 +102,16 @@ export const GET = withTenantContext(async (request, _context, user) => {
       }
     }
 
-    return NextResponse.json({ success: true, schedules: rows });
+    return NextResponse.json(
+      { success: true, schedules: rows },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      }
+    );
   } catch (error) {
     console.error('[API /v2/content-flow/schedules GET Error]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
