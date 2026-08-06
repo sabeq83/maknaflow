@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.226 — Set up systemd auto-ON for developer server (06/08/2026)
+- Create maknaflow-dev-api.service and maknaflow-dev-ui.service
+- Update deploy-dev.js to manage processes via systemd user services
+
 ## V2.2.225 — Add Cache-Control headers to schedules route (06/08/2026)
 - Add no-store Cache-Control header to schedules GET API route to prevent browser caching
 

@@ -24,17 +24,11 @@ async function deployDev() {
     git pull origin ${checkoutTarget} || git reset --hard origin/${checkoutTarget} || git reset --hard ${checkoutTarget} || true
 
     echo "[2/4] Building Next.js developer bundle..."
-    fuser -k -9 5000/tcp 2>/dev/null || true
-    fuser -k -9 6000/tcp 2>/dev/null || true
     npm run build
 
-    echo "[3/4] Restarting Developer UI (5000) & API Server (6000)..."
-    fuser -k -9 5000/tcp 2>/dev/null || true
-    fuser -k -9 6000/tcp 2>/dev/null || true
-    sleep 1
-
-    HOSTNAME=0.0.0.0 API_PORT=6000 nohup /home/sabeq83/.local/bin/node --env-file=.env.local apps/api/server.js < /dev/null > backend-api.log 2>&1 &
-    HOSTNAME=0.0.0.0 PORT=5000 nohup /home/sabeq83/.local/bin/node node_modules/next/dist/bin/next start -H 0.0.0.0 -p 5000 < /dev/null > gateway.log 2>&1 &
+    echo "[3/4] Restarting Developer UI & API Server via systemd..."
+    systemctl --user daemon-reload
+    systemctl --user restart maknaflow-dev-api.service maknaflow-dev-ui.service
 
     echo "[4/4] Developer Server Services Deployment Complete!"
   `;
