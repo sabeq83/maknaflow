@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.228 — Compress and sanitize video prompts for Google Veo API (06/08/2026)
+- Strip negative prompts and tags from video prompts
+- Extract and reconstruct structured prompts to keep them under 500 characters
+
 ## V2.2.227 — Fix G-Labs fetch failed error (06/08/2026)
 - Introduce custom rawFetch helper using native http/https in lib/webhook-client.js
 - Bypass Next.js fetch monkeypatch and Undici Keep-Alive issues
