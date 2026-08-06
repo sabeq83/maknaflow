@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.227 — Fix G-Labs fetch failed error (06/08/2026)
+- Introduce custom rawFetch helper using native http/https in lib/webhook-client.js
+- Bypass Next.js fetch monkeypatch and Undici Keep-Alive issues
+
 ## V2.2.226 — Set up systemd auto-ON for developer server (06/08/2026)
 - Create maknaflow-dev-api.service and maknaflow-dev-ui.service
 - Update deploy-dev.js to manage processes via systemd user services
