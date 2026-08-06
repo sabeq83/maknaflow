@@ -79,3 +79,6 @@ data/staging/
 logs/staging/
 public/staging-uploads/
 public/staging-rendered/
+
+# AI Agent Local Rules (Contains sensitive staging credentials)
+AGENTS.md
