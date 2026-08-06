@@ -1,0 +1,1 @@
+[05.51.05] [WARN] [PostgreSQL Slow Query] 55297ms: SELECT * FROM re_campaign_items WHERE campaign_id = $1 ORDER BY id ASC

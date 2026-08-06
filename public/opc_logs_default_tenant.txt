@@ -6,3 +6,15 @@
 [16.51.51] [WARN] [PostgreSQL Slow Query] 1488ms: SELECT * FROM pillar_campaign_items WHERE campaign_id = $1 ORDER BY id ASC
 [16.51.52] [WARN] [PostgreSQL Slow Query] 1482ms: SELECT * FROM pillar_campaign_items WHERE campaign_id = $1 ORDER BY id ASC
 [16.53.35] [WARN] [PostgreSQL Slow Query] 1604ms: SELECT * FROM pillar_campaign_items WHERE campaign_id = $1 ORDER BY id ASC
+[21.54.30] 🚀 [Campaign Scheduler] Starting step [pillar_generator] for item #82...
+[21.54.30] [Gemini API] Menjalankan standard request menggunakan gemini-3.6-flash .
+[21.54.55] [WARN] [Pillar Generator] Failed to update Google Sheets: Google OAuth2 credentials belum dikonfigurasi. Set di Settings.
+[21.54.55] ✅ [Campaign Scheduler] Finished step [pillar_generator] for item #82: {"processed":true,"item_id":"82","campaign_id":"opc_260806_t4kso3"}
+[21.55.00] 🚀 [Campaign Scheduler] Starting step [pillar_generator] for item #83...
+[21.55.00] [Gemini API] Menjalankan standard request menggunakan gemini-3.6-flash .
+[21.55.26] [WARN] [Pillar Generator] Failed to update Google Sheets: Google OAuth2 credentials belum dikonfigurasi. Set di Settings.
+[21.55.26] ✅ [Campaign Scheduler] Finished step [pillar_generator] for item #83: {"processed":true,"item_id":"83","campaign_id":"opc_260806_t4kso3"}
+[21.55.30] 🚀 [Campaign Scheduler] Starting step [pillar_generator] for item #84...
+[21.55.30] [Gemini API] Menjalankan standard request menggunakan gemini-3.6-flash .
+[21.55.58] [WARN] [Pillar Generator] Failed to update Google Sheets: Google OAuth2 credentials belum dikonfigurasi. Set di Settings.
+[21.55.58] ✅ [Campaign Scheduler] Finished step [pillar_generator] for item #84: {"processed":true,"item_id":"84","campaign_id":"opc_260806_t4kso3"}

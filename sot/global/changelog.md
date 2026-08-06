@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.236 — Fix Resolusi Host Webhook G-Labs (07/08/2026)
+- Gunakan getGlabsTaskRouteSync sinkron untuk webhook
+- Bungkus loop scheduler dalam tenantContext.run
+
 ## V2.2.235 — Integrasi Preset Kampanye Visual (06/08/2026)
 - Load & Save Presets di OPC
 - Load & Save Presets di RE
