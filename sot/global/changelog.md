@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.233 — Force Asia/Jakarta timezone for log timestamps (06/08/2026)
+- Add timeZone: Asia/Jakarta option to Date formatting inside writeLogToFile and maybeTruncateLog in console-hook.js
+
 ## V2.2.232 — Migrate Node 1 Staging to systemd user services (06/08/2026)
 - Update deploy-staging.js remote commands to reload and restart systemd user services
 - Add maknaflow-staging-api.service and maknaflow-staging-ui.service files to Node 1 config
