@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.234 — Exclude negative prompt from all visual prompts in OPC and RE (06/08/2026)
+- Remove hardcoded customNegativePrompt from OPC T2V, T2I, and I2V templates
+- Add rule requiring visual prompts to be free of negative tags to OPC and RE builders
+
 ## V2.2.233 — Force Asia/Jakarta timezone for log timestamps (06/08/2026)
 - Add timeZone: Asia/Jakarta option to Date formatting inside writeLogToFile and maybeTruncateLog in console-hook.js
 
