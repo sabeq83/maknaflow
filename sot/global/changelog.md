@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.229 — Revert 500 character limit from video prompt sanitizer (06/08/2026)
+- Revert prompt truncation and rebuilding logic
+- Retain negative prompt and Midjourney tag stripping for API compatibility
+
 ## V2.2.228 — Compress and sanitize video prompts for Google Veo API (06/08/2026)
 - Strip negative prompts and tags from video prompts
 - Extract and reconstruct structured prompts to keep them under 500 characters
