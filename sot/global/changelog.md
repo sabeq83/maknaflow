@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.230 — Refine prompt safety replacements for G-Labs compatibility (06/08/2026)
+- Revert formatting/length filters to preserve negative prompts and tags
+- Map safety-blocked keywords (crash -> rapid, muscle tension -> firm pressure) via synonym replacement
+
 ## V2.2.229 — Revert 500 character limit from video prompt sanitizer (06/08/2026)
 - Revert prompt truncation and rebuilding logic
 - Retain negative prompt and Midjourney tag stripping for API compatibility
