@@ -24,17 +24,11 @@ async function deployStaging() {
     git pull origin ${checkoutTarget} || git reset --hard origin/${checkoutTarget} || git reset --hard ${checkoutTarget} || true
 
     echo "[2/4] Building Next.js staging bundle..."
-    fuser -k -9 5010/tcp 2>/dev/null || true
-    fuser -k -9 7010/tcp 2>/dev/null || true
     npm run build
 
-    echo "[3/4] Restarting Staging UI (5010) & API Server (7010)..."
-    fuser -k -9 5010/tcp 2>/dev/null || true
-    fuser -k -9 7010/tcp 2>/dev/null || true
-    sleep 1
-
-    HOSTNAME=0.0.0.0 API_PORT=7010 nohup /home/sabeqmursyid/.local/bin/node --env-file=.env.local apps/api/server.js < /dev/null > backend-api.log 2>&1 &
-    HOSTNAME=0.0.0.0 PORT=5010 nohup /home/sabeqmursyid/.local/bin/node node_modules/next/dist/bin/next start -H 0.0.0.0 -p 5010 < /dev/null > gateway.log 2>&1 &
+    echo "[3/4] Restarting Staging UI & API Server via systemd..."
+    systemctl --user daemon-reload
+    systemctl --user restart maknaflow-staging-api.service maknaflow-staging-ui.service
 
     echo "[4/4] Node 1 Staging Services Deployment Complete!"
   `;

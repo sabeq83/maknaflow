@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.232 — Migrate Node 1 Staging to systemd user services (06/08/2026)
+- Update deploy-staging.js remote commands to reload and restart systemd user services
+- Add maknaflow-staging-api.service and maknaflow-staging-ui.service files to Node 1 config
+
 ## V2.2.231 — Detailed G-Labs error logging and selective prompt sanitization (06/08/2026)
 - Strip aspect ratio and layer brackets but preserve negative keywords in prompts
 - Capture and log detailed error message when a G-Labs task fails in the scheduler
