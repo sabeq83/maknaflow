@@ -312,7 +312,7 @@ export default function ReportsPage() {
                             ) : '-'}
                           </td>
                           <td style={{ textAlign: 'center', fontWeight: 'bold' }}>
-                            {task.clip_index !== null ? `#${task.clip_index + 1}` : '-'}
+                            {task.clip_index !== null ? `#${Number(task.clip_index) + 1}` : '-'}
                           </td>
                           <td style={{ maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={task.prompt}>
                             {task.prompt}

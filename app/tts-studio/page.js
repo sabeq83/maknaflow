@@ -488,7 +488,7 @@ export default function TTSStudioPage() {
                         : 'failed'
                     }`}
                   >
-                    <div className="track-num">Klip {clip.clip_index + 1}</div>
+                    <div className="track-num">Klip {Number(clip.clip_index) + 1}</div>
                     <div className="track-text">"{clip.source_text}"</div>
                     
                     {clip.status === 'completed' && clip.audio_path && (

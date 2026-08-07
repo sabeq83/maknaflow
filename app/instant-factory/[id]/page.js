@@ -1245,7 +1245,7 @@ export default function InstantCampaignDetailPage() {
                 <div key={task.task_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.2)', padding: '8px 12px', borderRadius: 6, fontSize: '0.75rem' }}>
                   <div>
                     <div style={{ fontWeight: 600 }}>Task ID: {task.task_id}</div>
-                    <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Klip {task.clip_index + 1} | Prompt: {task.prompt.slice(0, 50)}...</div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Klip {Number(task.clip_index) + 1} | Prompt: {task.prompt.slice(0, 50)}...</div>
                   </div>
                   <span className={`badge ${getStageBadgeClass(task.status)}`}>{task.status}</span>
                 </div>
