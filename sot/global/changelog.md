@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.241 — Fix GLabs UI Clip Index Concatenation (07/08/2026)
+- Parse task.clip_index as Number in frontend pages to prevent 11, 21, 31 rendering bug
+
 ## V2.2.240 — Rename Staging Deploy Command (07/08/2026)
 - Rename deploy:macmini to deploy:macmini-staging in package.json
 
