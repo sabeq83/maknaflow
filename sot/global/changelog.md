@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.242 — Fix Rsync Excludes (07/08/2026)
+- Remove trailing slashes from rsync excludes in deploy scripts to prevent remote git deletion attempts
+
 ## V2.2.241 — Fix GLabs UI Clip Index Concatenation (07/08/2026)
 - Parse task.clip_index as Number in frontend pages to prevent 11, 21, 31 rendering bug
 
