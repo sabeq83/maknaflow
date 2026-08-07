@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.238 — Setup Mac Mini Production Deployment (07/08/2026)
+- Add deploy-macmini-prod script
+- Add ecosystem.macmini-prod.config.cjs configuration
+- Configure PGPOOL_MAX limits to staging and production
+
 ## V2.2.237 — Setup Mac Mini Staging Deployment (07/08/2026)
 - Add deploy-macmini script
 - Add ecosystem.macmini.config.cjs PM2 configuration
