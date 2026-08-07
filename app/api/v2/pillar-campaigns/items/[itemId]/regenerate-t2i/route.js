@@ -104,6 +104,10 @@ export const POST = withTenantContext(async (req, { params }) => {
     // If it's the bridge/product clip, we pass the product photo
     const bridgeAtClip = campaign.bridge_at_clip || 2;
     const bridgeDurationClips = campaign.bridge_duration_clips !== undefined ? Number(campaign.bridge_duration_clips) : 1;
+    const productEndClip = bridgeDurationClips > 0 ? (bridgeAtClip + bridgeDurationClips - 1) : bridgeAtClip;
+    const cNum = Number(clipIndex);
+    const isBridge = (cNum >= bridgeAtClip && cNum <= productEndClip);
+
     const brandProfile = campaign.brand_profile_id
       ? await db.prepare('SELECT * FROM brand_profiles WHERE id = ?').get(campaign.brand_profile_id)
       : null;

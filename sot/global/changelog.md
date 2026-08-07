@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.246 — Fix isBridge ReferenceError on Start Frame Regen (07/08/2026)
+- Declare isBridge dynamically in regenerate-t2i API route
+- Deploy fix to Mac Mini Dev
+
 ## V2.2.245 — Fix Webhook Cache Sync on Campaign Scheduler (07/08/2026)
 - Fix distributed cache desync between Next.js UI and Express API processes
 - Dynamically reload settings cache on each scheduler tick in campaign-scheduler.js
