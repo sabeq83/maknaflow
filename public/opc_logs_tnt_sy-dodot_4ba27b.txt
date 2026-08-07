@@ -1,0 +1,14 @@
+[07.37.06] [WARN] [PostgreSQL Slow Query] 1301ms: SELECT * FROM pillar_campaign_items WHERE campaign_id = $1 ORDER BY id ASC
+[07.37.07] [WARN] [PostgreSQL Slow Query] 1455ms: SELECT * FROM pillar_campaign_items WHERE campaign_id = $1 ORDER BY id ASC
+[07.37.15] [WARN] [PostgreSQL Slow Query] 1823ms: SELECT * FROM pillar_campaign_items WHERE campaign_id = $1 ORDER BY id ASC
+[07.37.39] [WARN] [PostgreSQL Slow Query] 1107ms: SELECT * FROM pillar_campaign_items WHERE campaign_id = $1 ORDER BY id ASC
+[07.44.15] [WARN] [PostgreSQL Slow Query] 1050ms: SELECT * FROM pillar_campaign_items WHERE campaign_id = $1 ORDER BY id ASC
+[07.45.32] [WARN] [PostgreSQL Slow Query] 1179ms: SELECT * FROM pillar_campaign_items WHERE campaign_id = $1 ORDER BY id ASC
+[07.45.35] [WARN] [PostgreSQL Slow Query] 1021ms: SELECT * FROM pillar_campaign_items WHERE campaign_id = $1 ORDER BY id ASC
+[07.45.37] [WARN] [PostgreSQL Slow Query] 1456ms: SELECT * FROM pillar_campaign_items WHERE campaign_id = $1 ORDER BY id ASC
+[07.46.28] [WARN] [PostgreSQL Slow Query] 1432ms: SELECT * FROM pillar_campaign_items WHERE campaign_id = $1 ORDER BY id ASC
+[07.46.40] [WARN] [PostgreSQL Slow Query] 1404ms: SELECT * FROM pillar_campaign_items WHERE campaign_id = $1 ORDER BY id ASC
+[07.47.15] [WARN] [PostgreSQL Slow Query] 2109ms: SELECT * FROM pillar_campaign_items WHERE campaign_id = $1 ORDER BY id ASC
+[07.47.50] [WARN] [PostgreSQL Slow Query] 1115ms: SELECT * FROM pillar_campaign_items WHERE campaign_id = $1 ORDER BY id ASC
+[07.48.55] [WARN] [PostgreSQL Slow Query] 1983ms: SELECT * FROM pillar_campaign_items WHERE campaign_id = $1 ORDER BY id ASC
+[08.57.07] [WARN] [PostgreSQL Slow Query] 1192ms: SELECT * FROM pillar_campaign_items WHERE campaign_id = $1 ORDER BY id ASC

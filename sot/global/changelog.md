@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.237 — Setup Mac Mini Staging Deployment (07/08/2026)
+- Add deploy-macmini script
+- Add ecosystem.macmini.config.cjs PM2 configuration
+- Add deploy:macmini to package.json
+
 ## V2.2.236 — Fix Resolusi Host Webhook G-Labs (07/08/2026)
 - Gunakan getGlabsTaskRouteSync sinkron untuk webhook
 - Bungkus loop scheduler dalam tenantContext.run
