@@ -12,10 +12,10 @@ async function deployMacMiniStaging() {
   // Step 2: Rsync files to Mac Mini (excl node_modules, git, env logs)
   console.log('\n📡 [2/3] Transferring build files to Mac Mini via Rsync...');
   const rsyncCmd = `rsync -avz --delete \
-    --exclude 'node_modules/' \
-    --exclude '.git/' \
+    --exclude 'node_modules' \
+    --exclude '.git' \
     --exclude '.env*' \
-    --exclude 'logs/' \
+    --exclude 'logs' \
     ./ masbenu@100.73.95.3:~/maknaflow-staging/`;
   execSync(rsyncCmd, { stdio: 'inherit' });
 
