@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.245 — Fix Webhook Cache Sync on Campaign Scheduler (07/08/2026)
+- Fix distributed cache desync between Next.js UI and Express API processes
+- Dynamically reload settings cache on each scheduler tick in campaign-scheduler.js
+
 ## V2.2.244 — Setup Dev Mode on Mac Mini (07/08/2026)
 - Add deploy:macmini-dev deployment script
 - Configure maknaflow-dev-ui and dev-api in PM2 config
