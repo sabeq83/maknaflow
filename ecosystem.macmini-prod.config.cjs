@@ -44,7 +44,7 @@ module.exports = {
       script: 'apps/api/server.js',
       cwd: APP_DIR,
       interpreter: 'node',
-      node_args: '--env-file=.env.local',
+      node_args: '--env-file=' + path.resolve(APP_DIR, '.env.local'),
       instances: 1,
       autorestart: true,
       watch: false,
