@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.244 — Setup Dev Mode on Mac Mini (07/08/2026)
+- Add deploy:macmini-dev deployment script
+- Configure maknaflow-dev-ui and dev-api in PM2 config
+
 ## V2.2.243 — Fix: trigger route status reset (07/08/2026)
 - Reset workflow_status when triggering manual retries on completed items
 

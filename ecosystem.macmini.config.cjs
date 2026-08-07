@@ -64,5 +64,59 @@ module.exports = {
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
       merge_logs: true,
     },
+
+    // ── Web UI Dev (Next.js) ───────────────────────────────────────────
+    {
+      name: 'maknaflow-dev-ui',
+      script: 'node_modules/next/dist/bin/next',
+      args: 'start -H 0.0.0.0 -p 5020',
+      cwd: APP_DIR,
+      interpreter: 'node',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '1G',
+      restart_delay: 3000,
+      env: {
+        NODE_ENV: 'production',
+        APP_ENV: 'development',
+        NODE_ROLE: 'standalone',
+        PORT: 5020,
+        HOSTNAME: '0.0.0.0',
+        TZ: 'Asia/Jakarta',
+      },
+      // Log output
+      out_file: `${APP_DIR}/logs/dev-ui.out.log`,
+      error_file: `${APP_DIR}/logs/dev-ui.err.log`,
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      merge_logs: true,
+    },
+
+    // ── API Server Dev (Express.js) ────────────────────────────────────
+    {
+      name: 'maknaflow-dev-api',
+      script: 'apps/api/server.js',
+      cwd: APP_DIR,
+      interpreter: 'node',
+      node_args: '--env-file=' + path.resolve(APP_DIR, '.env.local'),
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '512M',
+      restart_delay: 2000,
+      env: {
+        NODE_ENV: 'production',
+        APP_ENV: 'development',
+        NODE_ROLE: 'standalone',
+        API_PORT: 7020,
+        API_HOST: '0.0.0.0',
+        TZ: 'Asia/Jakarta',
+      },
+      // Log output
+      out_file: `${APP_DIR}/logs/dev-api.out.log`,
+      error_file: `${APP_DIR}/logs/dev-api.err.log`,
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      merge_logs: true,
+    },
   ],
 };
