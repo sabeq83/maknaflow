@@ -21,3 +21,4 @@
 [08.57.00] [WARN] [PostgreSQL Slow Query] 1342ms: SELECT * FROM re_campaign_items WHERE campaign_id = $1 ORDER BY id ASC
 [10.10.01] [WARN] [PostgreSQL Slow Query] 29221ms: SELECT * FROM re_campaign_items WHERE campaign_id = $1 ORDER BY id ASC
 [12.39.30] [WARN] [PostgreSQL Slow Query] 1063ms: SELECT * FROM re_campaign_items WHERE campaign_id = $1 ORDER BY id ASC
+[17.23.41] [WARN] [PostgreSQL Slow Query] 2449ms: SELECT * FROM re_campaign_items WHERE campaign_id = $1 ORDER BY id ASC

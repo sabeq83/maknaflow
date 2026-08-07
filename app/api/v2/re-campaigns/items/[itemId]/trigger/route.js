@@ -70,6 +70,11 @@ export const POST = withTenantContext(async (request, { params }) => {
     // Reset retry count on manual trigger
     updateFields.retry_count = 0;
 
+    // Reset workflow status jika sebelumnya sudah completed
+    if (item.workflow_status === 'completed') {
+      updateFields.workflow_status = 'pending';
+    }
+
     // Update item status in DB
     await updateReCampaignItem(itemId, updateFields);
 

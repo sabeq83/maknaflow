@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.243 — Fix: trigger route status reset (07/08/2026)
+- Reset workflow_status when triggering manual retries on completed items
+
 ## V2.2.242 — Fix Rsync Excludes (07/08/2026)
 - Remove trailing slashes from rsync excludes in deploy scripts to prevent remote git deletion attempts
 
