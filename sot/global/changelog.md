@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.2.247 — Fix FFmpeg and FFprobe Architecture Path Resolution (08/08/2026)
+- Prioritize Homebrew native arm64 binaries of ffmpeg and ffprobe on Apple Silicon macOS to resolve spawn system error -86
+- Deploy and verify pipeline run on Mac Mini Dev
+
 ## V2.2.246 — Fix isBridge ReferenceError on Start Frame Regen (07/08/2026)
 - Declare isBridge dynamically in regenerate-t2i API route
 - Deploy fix to Mac Mini Dev
