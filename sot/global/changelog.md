@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.240 — Rename Staging Deploy Command (07/08/2026)
+- Rename deploy:macmini to deploy:macmini-staging in package.json
+
 ## V2.2.239 — Refactor Staging to Local Build (07/08/2026)
 - Update deploy-macmini.js to use local build and rsync sync
 
