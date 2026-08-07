@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.2.239 — Refactor Staging to Local Build (07/08/2026)
+- Update deploy-macmini.js to use local build and rsync sync
+
 ## V2.2.238 — Setup Mac Mini Production Deployment (07/08/2026)
 - Add deploy-macmini-prod script
 - Add ecosystem.macmini-prod.config.cjs configuration
