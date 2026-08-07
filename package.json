@@ -9,7 +9,7 @@
     "deploy:node1": "node scripts/deploy-production.js",
     "deploy:production": "node scripts/deploy-production.js",
     "deploy:staging": "node scripts/deploy-staging.js",
-    "deploy:macmini": "node scripts/deploy-macmini.js",
+    "deploy:macmini-staging": "node scripts/deploy-macmini.js",
     "deploy:macmini-prod": "node scripts/deploy-macmini-prod.js",
     "deploy:dev": "node scripts/deploy-dev.js",
     "deploy:node2-wsl": "node scripts/deploy-node2-wsl.js",
