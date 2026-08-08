@@ -1,5 +1,13 @@
 # Changelog
 
+## V2.3.0 — RE Campaign Dual Mode: Full Auto Pilot (5 Accordions & Pure T2V) vs Manual Review (08/08/2026)
+- Add Dual Mode pipeline switcher to RE Campaign creation modal: Full Auto Pilot and Manual Review
+- Render 5 complete accordions including Workflow & Audio Settings (TTS, G-Labs, FFmpeg, Social Post)
+- Enforce Pure T2V locking with informative badge in Full Auto Pilot mode
+- Auto-advance workflow_status to production_processing for Full Auto Pilot in scheduler engine
+- Add mode badge indicator to campaign detail header
+- Add execution_mode column migration to PostgreSQL and database queries
+
 ## V2.2.250 — Fix ReferenceErrors in RE Campaign Modal (08/08/2026)
 - Declare missing React state variables: productionMode, enableVoAudit, and massUploading in app/re-campaigns/page.js
 - Prevent ReferenceErrors and rendering crashes when opening New Campaign modal

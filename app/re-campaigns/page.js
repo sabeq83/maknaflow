@@ -122,10 +122,13 @@ export default function RECampaignsPage() {
   const logIntervalRef = useRef(null);
   const terminalRef = useRef(null);
 
+  // Execution Mode state (Dual Mode: full_autopilot vs manual_review)
+  const [executionMode, setExecutionMode] = useState('full_autopilot');
+
   // Workflow control states (v8.0)
-  const [enableTts, setEnableTts] = useState(false);
-  const [enableGlabs, setEnableGlabs] = useState(false);
-  const [enableFfmpeg, setEnableFfmpeg] = useState(false);
+  const [enableTts, setEnableTts] = useState(true);
+  const [enableGlabs, setEnableGlabs] = useState(true);
+  const [enableFfmpeg, setEnableFfmpeg] = useState(true);
   const [enableSocialPost, setEnableSocialPost] = useState(false);
   const [ttsModelQuality, setTtsModelQuality] = useState('speech-2.8-turbo');
   const [nextcloudParentFolder, setNextcloudParentFolder] = useState('/MAKNA_Assets');
@@ -133,7 +136,7 @@ export default function RECampaignsPage() {
   const [enableAudioSegment, setEnableAudioSegment] = useState(false);
   const [voiceCast, setVoiceCast] = useState([]); // [{id, name, gemini_voice_id, minimax_voice_id}]
 
-  const [visualMode, setVisualMode] = useState('hybrid_lock');
+  const [visualMode, setVisualMode] = useState('pure_t2v');
   const [productRefImage, setProductRefImage] = useState(null);
   const [productFilenameDeclare, setProductFilenameDeclare] = useState('');
   const [productionMode, setProductionMode] = useState('single');
@@ -453,7 +456,8 @@ export default function RECampaignsPage() {
         enable_audio_segment: enableAudioSegment,
         voice_cast_json: voiceCast.length > 0 ? JSON.stringify({ characters: voiceCast }) : null,
         local_scheduler: syncMode === 'auto' ? 0 : 1,
-        scheduler_pause_at: 'tts'
+        scheduler_pause_at: executionMode === 'full_autopilot' ? null : 'tts',
+        execution_mode: executionMode
       };
 
       const res = await fetch('/api/v2/re-campaigns/bulk', {
@@ -735,6 +739,7 @@ export default function RECampaignsPage() {
       }
       
       formData.append('status', submitStatus);
+      formData.append('execution_mode', executionMode);
       
       if (isBridgingActive && visualMode === 'hybrid_lock') {
         if (productRefImage) {
@@ -1060,6 +1065,64 @@ export default function RECampaignsPage() {
                 >
                   Mass Production (CSV/XLSX)
                 </button>
+              </div>
+
+              {/* EXECUTION MODE SWITCHER (Full Auto Pilot vs Manual Review) */}
+              <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-color)', background: 'rgba(255, 255, 255, 0.015)' }}>
+                <label className="form-label" style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85rem' }}>
+                  <span>🚀 Mode Eksekusi Pipeline:</span>
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
+                  <div 
+                    onClick={() => {
+                      setExecutionMode('full_autopilot');
+                      setVisualMode('pure_t2v');
+                      setEnableTts(true);
+                      setEnableGlabs(true);
+                      setEnableFfmpeg(true);
+                    }}
+                    style={{
+                      border: `1px solid ${executionMode === 'full_autopilot' ? 'var(--accent-color)' : 'var(--border-color)'}`,
+                      background: executionMode === 'full_autopilot' ? 'rgba(59, 130, 246, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                      borderRadius: 8,
+                      padding: '12px 16px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                      <span style={{ fontWeight: 700, fontSize: '0.9rem', color: executionMode === 'full_autopilot' ? 'var(--accent-color)' : 'var(--text-color)' }}>
+                        🤖 Mode Full Auto Pilot
+                      </span>
+                      {executionMode === 'full_autopilot' && <span style={{ fontSize: '0.75rem', background: 'var(--accent-color)', color: '#fff', padding: '2px 8px', borderRadius: 12 }}>Aktif</span>}
+                    </div>
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
+                      Otomatis jalan penuh dari Naskah ➔ TTS ➔ G-Labs Video ➔ FFmpeg tanpa jeda review. Visual mode dikunci ke Pure Text-to-Video.
+                    </p>
+                  </div>
+
+                  <div 
+                    onClick={() => setExecutionMode('manual_review')}
+                    style={{
+                      border: `1px solid ${executionMode === 'manual_review' ? '#f59e0b' : 'var(--border-color)'}`,
+                      background: executionMode === 'manual_review' ? 'rgba(245, 158, 11, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                      borderRadius: 8,
+                      padding: '12px 16px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                      <span style={{ fontWeight: 700, fontSize: '0.9rem', color: executionMode === 'manual_review' ? '#f59e0b' : 'var(--text-color)' }}>
+                        👁️ Mode Manual Review (Fase 1 & 2)
+                      </span>
+                      {executionMode === 'manual_review' && <span style={{ fontSize: '0.75rem', background: '#f59e0b', color: '#000', padding: '2px 8px', borderRadius: 12 }}>Aktif</span>}
+                    </div>
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
+                      Fase 1 Discovery berhenti untuk review storyboard & naskah. Fase 2 produksi dijalankan manual setelah persetujuan.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* PRESET SELECTOR */}
@@ -1521,17 +1584,28 @@ export default function RECampaignsPage() {
                       </select>
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Visual Mode</label>
+                      <label className="form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span>Visual Mode</span>
+                        {executionMode === 'full_autopilot' && (
+                          <span style={{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '2px 6px', borderRadius: 4 }}>
+                            🔒 Terkunci Pure T2V (Auto Pilot)
+                          </span>
+                        )}
+                      </label>
                       <select
                         className="form-input"
-                        value={visualMode}
+                        value={executionMode === 'full_autopilot' ? 'pure_t2v' : visualMode}
                         onChange={e => setVisualMode(e.target.value)}
+                        disabled={executionMode === 'full_autopilot'}
+                        style={executionMode === 'full_autopilot' ? { opacity: 0.7, cursor: 'not-allowed' } : {}}
                       >
                         <option value="pure_t2v">Pure T2V (Klasik - Text-to-Video untuk semua klip)</option>
                         <option value="hybrid_lock">Hybrid Lock (RE Hybrid & Product Pixel Lock - Double-Pass)</option>
                       </select>
                       <small style={{ color: 'var(--text-muted)' }}>
-                        Hybrid Lock menggunakan Double-Pass (T2I - I2V) mulai dari klip transisi (ke-{bridgeAtClip}) untuk menjaga detail produk.
+                        {executionMode === 'full_autopilot'
+                          ? 'Pada mode Full Auto Pilot, visual mode terkunci ke Pure T2V untuk menjamin eksekusi otomatis tanpa jeda approval foto/start-frame.'
+                          : 'Hybrid Lock menggunakan Double-Pass (T2I - I2V) mulai dari klip transisi (ke-' + bridgeAtClip + ') untuk menjaga detail produk.'}
                       </small>
                     </div>
                   </div>
@@ -2025,6 +2099,182 @@ export default function RECampaignsPage() {
                         </div>
                       </div>
                     )}
+                  </div>
+                )}
+              </div>
+
+              {/* ACCORDION SECTION 5: Workflow & Audio Settings */}
+              <div style={{ borderBottom: '1px solid var(--border-color)' }}>
+                <div 
+                  onClick={() => setActiveAccordion(4)} 
+                  style={{ padding: '16px 24px', background: activeAccordion === 4 ? 'rgba(59, 130, 246, 0.05)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>⚙️ 5. Workflow & Audio Settings</span>
+                    <span style={{ fontSize: '0.72rem', background: (enableTts || enableGlabs || enableFfmpeg || enableSocialPost) ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.05)', color: (enableTts || enableGlabs || enableFfmpeg || enableSocialPost) ? '#10b981' : 'var(--text-muted)', padding: '2px 6px', borderRadius: 4 }}>
+                      {(enableTts || enableGlabs || enableFfmpeg || enableSocialPost) ? 'Active Stages' : 'All Off'}
+                    </span>
+                  </div>
+                  <span>{activeAccordion === 4 ? '▲' : '▼'}</span>
+                </div>
+                {activeAccordion === 4 && (
+                  <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    
+                    {/* Active Stages Checklist */}
+                    <div>
+                      <label className="form-label" style={{ marginBottom: 10 }}>Tahapan Workflow Aktif</label>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+                        
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
+                          <span style={{ fontSize: '0.85rem', color: 'var(--text-color)', fontWeight: '500' }}>Enable TTS (Voiceover)</span>
+                          <input type="checkbox" checked={enableTts} onChange={e => setEnableTts(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
+                          <span style={{ fontSize: '0.85rem', color: 'var(--text-color)', fontWeight: '500' }}>Enable G-Labs (AI Video)</span>
+                          <input type="checkbox" checked={enableGlabs} onChange={e => setEnableGlabs(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
+                          <span style={{ fontSize: '0.85rem', color: 'var(--text-color)', fontWeight: '500' }}>Enable FFmpeg Muxing</span>
+                          <input type="checkbox" checked={enableFfmpeg} onChange={e => setEnableFfmpeg(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
+                          <span style={{ fontSize: '0.85rem', color: 'var(--text-color)', fontWeight: '500' }}>Enable Social Draft Post</span>
+                          <input type="checkbox" checked={enableSocialPost} onChange={e => setEnableSocialPost(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
+                        </div>
+
+                      </div>
+                    </div>
+
+                    {/* Audio settings */}
+                    {enableTts && (
+                      <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: 14 }}>
+                        <label className="form-label" style={{ fontWeight: 600, color: 'var(--accent-color)' }}>🔊 TTS Audio Engine Settings</label>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 8 }}>
+                          <div>
+                            <label className="form-label" style={{ fontSize: '0.78rem' }}>Voice Provider</label>
+                            <select className="form-input" value={voiceProvider} onChange={e => setVoiceProvider(e.target.value)}>
+                              <option value="minimax">MiniMax VO Engine</option>
+                              <option value="gemini">Gemini TTS Engine</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="form-label" style={{ fontSize: '0.78rem' }}>Voice Persona</label>
+                            <select 
+                              className="form-input" 
+                              value={voicePersona} 
+                              onChange={e => setVoicePersona(e.target.value)}
+                            >
+                              {voiceProvider === 'gemini' 
+                                ? GEMINI_VOICES.map(v => <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>)
+                                : (targetLanguage === 'en-US' ? MINIMAX_ENGLISH_VOICES : MINIMAX_VOICES).map(v => <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>)
+                              }
+                            </select>
+                          </div>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 10 }}>
+                          <div>
+                            <label className="form-label" style={{ fontSize: '0.78rem' }}>Speed ({voiceSpeed}x)</label>
+                            <input type="range" min="0.5" max="2.0" step="0.1" value={voiceSpeed} onChange={e => setVoiceSpeed(parseFloat(e.target.value))} style={{ width: '100%' }} />
+                          </div>
+                          <div>
+                            <label className="form-label" style={{ fontSize: '0.78rem' }}>Volume ({voiceVolume}x)</label>
+                            <input type="range" min="0.0" max="1.0" step="0.1" value={voiceVolume} onChange={e => setVoiceVolume(parseFloat(e.target.value))} style={{ width: '100%' }} />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* FFmpeg Video Studio Settings */}
+                    {enableFfmpeg && (
+                      <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                        <label className="form-label" style={{ fontWeight: 600, color: 'var(--accent-color)' }}>🎬 FFmpeg Video Studio Settings</label>
+                        
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          <label className="form-label" style={{ fontSize: '0.78rem' }}>Mode Sinkronisasi Audio-Video</label>
+                          <div style={{ display: 'flex', gap: 24, marginTop: 2 }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.82rem', color: 'var(--text-color)' }}>
+                              <input
+                                type="radio"
+                                name="syncModeReAutopilot"
+                                value="auto"
+                                checked={syncMode === 'auto'}
+                                onChange={() => {
+                                  setSyncMode('auto');
+                                  setFfmpegSyncOption('smart_sync');
+                                }}
+                                style={{ width: 14, height: 14, cursor: 'pointer' }}
+                              />
+                              <span><b>Auto-Pilot Smart Sync</b></span>
+                            </label>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.82rem', color: 'var(--text-color)' }}>
+                              <input
+                                type="radio"
+                                name="syncModeReAutopilot"
+                                value="manual"
+                                checked={syncMode === 'manual'}
+                                onChange={() => {
+                                  setSyncMode('manual');
+                                  setFfmpegSyncOption('shortest');
+                                }}
+                                style={{ width: 14, height: 14, cursor: 'pointer' }}
+                              />
+                              <span>Kustom Manual</span>
+                            </label>
+                          </div>
+
+                          {syncMode === 'manual' && (
+                            <div className="form-group" style={{ flex: 1, marginTop: 6, marginBottom: 0 }}>
+                              <label className="form-label" style={{ fontSize: '0.78rem' }}>Metode Manual</label>
+                              <select className="form-input" value={ffmpegSyncOption} onChange={e => setFfmpegSyncOption(e.target.value)}>
+                                <option value="shortest">shortest (Potong video - Default)</option>
+                                <option value="loop">loop (Ulang video)</option>
+                                <option value="stretch">stretch (Ubah kecepatan)</option>
+                                <option value="freeze">freeze (Tahan frame terakhir)</option>
+                              </select>
+                            </div>
+                          )}
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                          <div>
+                            <label className="form-label" style={{ fontSize: '0.78rem', display: 'flex', justifyContent: 'space-between' }}>
+                              <span>Video Scale:</span>
+                              <span style={{ color: 'var(--accent-color)', fontWeight: 'bold' }}>{Math.round(ffmpegVideoScale * 100)}%</span>
+                            </label>
+                            <input 
+                              type="range" 
+                              min="1.0" 
+                              max="2.0" 
+                              step="0.05" 
+                              className="form-input" 
+                              value={ffmpegVideoScale} 
+                              onChange={e => setFfmpegVideoScale(parseFloat(e.target.value))} 
+                              style={{ width: '100%', padding: 0 }} 
+                            />
+                          </div>
+                          <div>
+                            <label className="form-label" style={{ fontSize: '0.78rem', display: 'flex', justifyContent: 'space-between' }}>
+                              <span>BGM Volume:</span>
+                              <span style={{ color: 'var(--accent-color)', fontWeight: 'bold' }}>{Math.round(ffmpegBgmVolume * 100)}%</span>
+                            </label>
+                            <input 
+                              type="range" 
+                              min="0.0" 
+                              max="1.0" 
+                              step="0.05" 
+                              className="form-input" 
+                              value={ffmpegBgmVolume} 
+                              onChange={e => setFfmpegBgmVolume(parseFloat(e.target.value))} 
+                              style={{ width: '100%', padding: 0 }} 
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                   </div>
                 )}
               </div>

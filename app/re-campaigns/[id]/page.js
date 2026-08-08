@@ -4485,7 +4485,40 @@ export default function RECampaignDetailPage() {
               <Link href="/re-campaigns" style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textDecoration: 'none', display: 'inline-block', marginBottom: 8 }}>
                 ← Kembali ke RE Campaign
               </Link>
-              <h1 className="page-title" style={{ marginTop: 0, fontSize: '2.2rem', fontWeight: 800 }}>🎬 {campaign.campaign_name}</h1>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <h1 className="page-title" style={{ marginTop: 0, marginBottom: 0, fontSize: '2.2rem', fontWeight: 800 }}>🎬 {campaign.campaign_name}</h1>
+                {campaign.execution_mode === 'full_autopilot' ? (
+                  <span style={{
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    padding: '4px 12px',
+                    borderRadius: '20px',
+                    background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(59, 130, 246, 0.2))',
+                    color: '#10b981',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6
+                  }}>
+                    🤖 FULL AUTO PILOT
+                  </span>
+                ) : (
+                  <span style={{
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    padding: '4px 12px',
+                    borderRadius: '20px',
+                    background: 'rgba(245, 158, 11, 0.15)',
+                    color: '#f59e0b',
+                    border: '1px solid rgba(245, 158, 11, 0.4)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6
+                  }}>
+                    👁️ MANUAL REVIEW (FASE 1 & 2)
+                  </span>
+                )}
+              </div>
               
               {/* 2. ID Kampanye | Nama Akun Brand | Created Date */}
               <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 8, fontSize: '0.9rem', color: 'var(--text-muted)' }}>

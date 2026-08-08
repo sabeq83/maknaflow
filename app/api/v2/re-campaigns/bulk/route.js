@@ -28,6 +28,7 @@ export const POST = withTenantContext(async (request) => {
     await createReCampaign({
       id: campaignId,
       campaign_name: campaign_name.trim(),
+      execution_mode: global_settings.execution_mode || 'manual_review',
       status: global_settings.status || 'running',
       aspect_ratio: global_settings.aspect_ratio || '9:16',
       target_ai: global_settings.target_ai || 'Google Veo (8s)',

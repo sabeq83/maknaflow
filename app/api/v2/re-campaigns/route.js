@@ -194,7 +194,8 @@ export const POST = withTenantContext(async (request, _context, user) => {
       target_demographic,
       target_demographic_custom,
       ai_directive,
-      mandatory_outro_line
+      mandatory_outro_line,
+      execution_mode
     } = parsedBody;
 
     if (!campaign_name?.trim()) {
@@ -207,6 +208,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
     await createReCampaign({
       id,
       campaign_name: campaign_name.trim(),
+      execution_mode: execution_mode || 'manual_review',
       status: status || 'running',
       aspect_ratio: aspect_ratio || '9:16',
       target_ai: target_ai || 'Google Veo (8s)',
