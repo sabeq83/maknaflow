@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.5.14 — Align FFmpeg Controls Vertically (08/08/2026)
+- Align Sync Option and Video Scale inputs vertically in a single column
+
 ## V2.5.13 — Fix Slider Reset Bug & Remove SFX/BGM Sliders (08/08/2026)
 - Prevent background poll from overwriting unsaved slider and text changes in campaign detail page
 - Remove SFX Volume and BGM Volume sliders from FFmpeg Muxing Section

@@ -844,8 +844,8 @@ export default function BridgeBulkCampaignDetailPage() {
 
                   {enableFfmpeg === 1 && (
                     <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      <div style={{ display: 'flex', gap: '10px' }}>
-                        <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div>
                           <label style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Sync Option</label>
                           <select
                             value={ffmpegSyncOption}
@@ -860,7 +860,7 @@ export default function BridgeBulkCampaignDetailPage() {
                             <option value="loop">Loop Visual</option>
                           </select>
                         </div>
-                        <div style={{ flex: 1 }}>
+                        <div>
                           <label style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                             <span>Video Scale (Zoom)</span>
                             <span>{ffmpegVideoScale}x</span>
