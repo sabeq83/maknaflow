@@ -345,6 +345,29 @@ export default function BridgeBulkCampaignDetailPage() {
     setActionLoading(false);
   }
 
+  async function handleRetryStep(step) {
+    if (!selectedItemId) return;
+    setActionLoading(true);
+    showToast(`Memulai ulang langkah '${step}'...`, 'info');
+    try {
+      const res = await fetch(`/api/v2/bridge-injector/items/${selectedItemId}/retry`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ step })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message);
+        fetchCampaignDetails(true);
+      } else {
+        showToast(data.error, 'error');
+      }
+    } catch (err) {
+      showToast('Gagal memicu ulang langkah.', 'error');
+    }
+    setActionLoading(false);
+  }
+
   function getStatusLabel(status) {
     switch (status) {
       case 'pending': return { text: 'Antrean (Pending)', color: 'var(--text-muted)' };
@@ -911,7 +934,7 @@ export default function BridgeBulkCampaignDetailPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
               <tbody>
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                  <th style={{ padding: '10px', color: 'var(--text-muted)' }}>URL Naskah Sumber</th>
+                  <th style={{ padding: '10px', color: 'var(--text-muted)', width: '220px' }}>URL Naskah Sumber</th>
                   <td style={{ padding: '10px', wordBreak: 'break-all' }}>
                     <a href={item.original_script_url} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-light)' }}>
                       {item.original_script_url}
@@ -934,6 +957,16 @@ export default function BridgeBulkCampaignDetailPage() {
                   <th style={{ padding: '10px', color: 'var(--text-muted)' }}>Folder Nextcloud</th>
                   <td style={{ padding: '10px', fontFamily: 'var(--font-mono)' }}>{item.nextcloud_folder}</td>
                 </tr>
+                {item.nextcloud_url && (
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    <th style={{ padding: '10px', color: 'var(--text-muted)' }}>Link Aset Baru (Nextcloud)</th>
+                    <td style={{ padding: '10px', wordBreak: 'break-all' }}>
+                      <a href={item.nextcloud_url} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-light)', fontWeight: 600 }}>
+                        🔗 Buka Folder / Video Hasil Sync
+                      </a>
+                    </td>
+                  </tr>
+                )}
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
                   <th style={{ padding: '10px', color: 'var(--text-muted)' }}>Path Naskah Bridging Lokal</th>
                   <td style={{ padding: '10px', fontFamily: 'var(--font-mono)' }}>{item.injected_script_md_path || '-'}</td>
@@ -946,17 +979,126 @@ export default function BridgeBulkCampaignDetailPage() {
                   <th style={{ padding: '10px', color: 'var(--text-muted)' }}>Path Video Klip Lokal</th>
                   <td style={{ padding: '10px', fontFamily: 'var(--font-mono)' }}>{item.clip2_video_path || '-'}</td>
                 </tr>
+
+                {/* Pipeline Steps with Manual Retry buttons */}
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                  <th style={{ padding: '10px', color: 'var(--text-muted)' }}>Status TTS</th>
-                  <td style={{ padding: '10px', fontWeight: 600 }}>{item.tts_status || 'pending'}</td>
+                  <th style={{ padding: '10px', color: 'var(--text-muted)' }}>1. Unduh Aset</th>
+                  <td style={{ padding: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontWeight: 600, color: item.download_status === 'completed' ? '#2ecc71' : 'var(--text-muted)' }}>
+                      {item.download_status || 'pending'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleRetryStep('download')}
+                      className="btn btn-secondary"
+                      style={{ padding: '2px 8px', fontSize: '0.68rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}
+                      disabled={actionLoading}
+                    >
+                      🔄 Retry
+                    </button>
+                  </td>
                 </tr>
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                  <th style={{ padding: '10px', color: 'var(--text-muted)' }}>Status FFmpeg Muxing</th>
-                  <td style={{ padding: '10px', fontWeight: 600 }}>{item.ffmpeg_status || 'pending'}</td>
+                  <th style={{ padding: '10px', color: 'var(--text-muted)' }}>2. AI Scripting Planning</th>
+                  <td style={{ padding: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontWeight: 600, color: item.gemini_status === 'completed' ? '#2ecc71' : 'var(--text-muted)' }}>
+                      {item.gemini_status || 'pending'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleRetryStep('gemini')}
+                      className="btn btn-secondary"
+                      style={{ padding: '2px 8px', fontSize: '0.68rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}
+                      disabled={actionLoading}
+                    >
+                      🔄 Retry
+                    </button>
+                  </td>
                 </tr>
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                  <th style={{ padding: '10px', color: 'var(--text-muted)' }}>Status Sync Nextcloud</th>
-                  <td style={{ padding: '10px', fontWeight: 600 }}>{item.sync_status || 'pending'}</td>
+                  <th style={{ padding: '10px', color: 'var(--text-muted)' }}>3. Start Frame T2I</th>
+                  <td style={{ padding: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontWeight: 600, color: item.t2i_status === 'completed' ? '#2ecc71' : 'var(--text-muted)' }}>
+                      {item.t2i_status || 'pending'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleRetryStep('t2i')}
+                      className="btn btn-secondary"
+                      style={{ padding: '2px 8px', fontSize: '0.68rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}
+                      disabled={actionLoading}
+                    >
+                      🔄 Retry
+                    </button>
+                  </td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                  <th style={{ padding: '10px', color: 'var(--text-muted)' }}>4. Video Klip G-Labs I2V</th>
+                  <td style={{ padding: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontWeight: 600, color: item.i2v_status === 'completed' ? '#2ecc71' : 'var(--text-muted)' }}>
+                      {item.i2v_status || 'pending'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleRetryStep('i2v')}
+                      className="btn btn-secondary"
+                      style={{ padding: '2px 8px', fontSize: '0.68rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}
+                      disabled={actionLoading}
+                    >
+                      🔄 Retry
+                    </button>
+                  </td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                  <th style={{ padding: '10px', color: 'var(--text-muted)' }}>5. TTS Voiceover</th>
+                  <td style={{ padding: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontWeight: 600, color: item.tts_status === 'completed' ? '#2ecc71' : 'var(--text-muted)' }}>
+                      {item.tts_status || 'pending'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleRetryStep('tts')}
+                      className="btn btn-secondary"
+                      style={{ padding: '2px 8px', fontSize: '0.68rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}
+                      disabled={actionLoading}
+                    >
+                      🔄 Retry
+                    </button>
+                  </td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                  <th style={{ padding: '10px', color: 'var(--text-muted)' }}>6. FFmpeg Muxing</th>
+                  <td style={{ padding: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontWeight: 600, color: item.ffmpeg_status === 'completed' ? '#2ecc71' : 'var(--text-muted)' }}>
+                      {item.ffmpeg_status || 'pending'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleRetryStep('ffmpeg')}
+                      className="btn btn-secondary"
+                      style={{ padding: '2px 8px', fontSize: '0.68rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}
+                      disabled={actionLoading}
+                    >
+                      🔄 Retry
+                    </button>
+                  </td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                  <th style={{ padding: '10px', color: 'var(--text-muted)' }}>7. Sync Nextcloud</th>
+                  <td style={{ padding: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontWeight: 600, color: item.sync_status === 'completed' ? '#2ecc71' : 'var(--text-muted)' }}>
+                      {item.sync_status || 'pending'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleRetryStep('sync')}
+                      className="btn btn-secondary"
+                      style={{ padding: '2px 8px', fontSize: '0.68rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}
+                      disabled={actionLoading}
+                    >
+                      🔄 Retry
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>

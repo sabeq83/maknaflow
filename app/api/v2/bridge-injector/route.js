@@ -74,7 +74,8 @@ export const POST = withTenantContext(async (request) => {
       custom_instruction,
       account_name,
       status,
-      brand_profile_id // Tambahkan brand_profile_id
+      brand_profile_id,
+      bridge_at_clip
     } = body;
 
     if (campaign_type === 'bulk') {
@@ -90,14 +91,14 @@ export const POST = withTenantContext(async (request) => {
 
       // 1. Simpan kampanye ke database dengan default Minimax
       await db.prepare(`
-        INSERT INTO bridge_injector_campaigns (id, campaign_name, original_script_md, status, campaign_type, custom_instruction, account_name, voice_provider, voice_persona, brand_profile_id)
-        VALUES (?, ?, '[CSV Bulk Campaign]', ?, 'bulk', ?, ?, 'minimax', 'Indonesian_casual_reporter_vv2', ?)
-      `).run(campaignId, campaign_name, initialStatus, custom_instruction || null, account_name || null, brand_profile_id || null);
+        INSERT INTO bridge_injector_campaigns (id, campaign_name, original_script_md, status, campaign_type, custom_instruction, account_name, voice_provider, voice_persona, brand_profile_id, bridge_at_clip)
+        VALUES (?, ?, '[CSV Bulk Campaign]', ?, 'bulk', ?, ?, 'minimax', 'Indonesian_casual_reporter_vv2', ?, ?)
+      `).run(campaignId, campaign_name, initialStatus, custom_instruction || null, account_name || null, brand_profile_id || null, bridge_at_clip !== undefined ? Number(bridge_at_clip) : 2);
 
       // 2. Simpan items ke database
       const insertItem = await db.prepare(`
-        INSERT INTO bridge_injector_items (campaign_id, original_script_url, product_url, nextcloud_folder, custom_instruction, workflow_status, account_name, voice_provider, voice_persona, target_product_id)
-        VALUES (?, ?, ?, ?, ?, 'pending', ?, 'minimax', 'Indonesian_casual_reporter_vv2', ?)
+        INSERT INTO bridge_injector_items (campaign_id, original_script_url, product_url, nextcloud_folder, custom_instruction, workflow_status, account_name, voice_provider, voice_persona, target_product_id, bridge_at_clip)
+        VALUES (?, ?, ?, ?, ?, 'pending', ?, 'minimax', 'Indonesian_casual_reporter_vv2', ?, ?)
       `);
 
       const promises = [];
@@ -108,9 +109,10 @@ export const POST = withTenantContext(async (request) => {
         const rowInstruction = item.custom_instruction ? String(item.custom_instruction).trim() : null;
         const rowAccount = item.account_name ? String(item.account_name).trim() : account_name;
         const rowProductId = item.target_product_id || null;
+        const rowBridgeAtClip = item.bridge_at_clip !== undefined ? Number(item.bridge_at_clip) : (bridge_at_clip !== undefined ? Number(bridge_at_clip) : 2);
         if (scriptUrl && prodUrl) {
           promises.push(
-            insertItem.run(campaignId, scriptUrl, prodUrl, ncFolder, rowInstruction, rowAccount || null, rowProductId)
+            insertItem.run(campaignId, scriptUrl, prodUrl, ncFolder, rowInstruction, rowAccount || null, rowProductId, rowBridgeAtClip)
           );
         }
       }

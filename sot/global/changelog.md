@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.5.11 — Product Bridge Enhancements (08/08/2026)
+- Direct Nextcloud asset link in Tab 3
+- Manual pipeline step retry options
+- Dynamic bridge positioning at N clips
+- Single campaign creation via Nextcloud URL asset
+
 ## V2.5.10 — Migrate Mac Mini deploy to remote build & batch save UI (08/08/2026)
 - Remove local build step from deploy-macmini scripts
 - Add .next and public/uploads excludes to rsync in deploy scripts

@@ -31,6 +31,8 @@ export default function ProductBridgeInjectPage() {
   const [verifiedRows, setVerifiedRows] = useState([]);
   const [isVerificationComplete, setIsVerificationComplete] = useState(false);
   const [originalScript, setOriginalScript] = useState('');
+  const [assetUrl, setAssetUrl] = useState('');
+  const [bridgeAtClip, setBridgeAtClip] = useState(2);
   const [sourceMode, setSourceMode] = useState('select_existing');
   const [targetProductId, setTargetProductId] = useState('');
   const [productSearchQuery, setProductSearchQuery] = useState('');
@@ -388,7 +390,7 @@ export default function ProductBridgeInjectPage() {
       }
     }
 
-    showToast('Memulai proses injeksi otonom Gemini...', 'info');
+    showToast('Membuat kampanye bridging otomatis...', 'info');
 
     try {
       const res = await fetch('/api/v2/bridge-injector', {
@@ -396,24 +398,29 @@ export default function ProductBridgeInjectPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           campaign_name: campaignName,
-          original_script_md: originalScript,
-          bridging_mode: finalBridgingMode,
-          target_product_id: finalTargetProductId,
-          ephemeral_product_data: ephemeralData,
-          custom_instruction: customInstruction,
-          enable_vo_audit: enableVoAudit,
-          status: submitStatus === 'draft' ? 'draft' : 'active',
-          brand_profile_id: selectedBrandId
+          campaign_type: 'bulk',
+          status: 'running',
+          account_name: products.find(p => String(p.id) === String(finalTargetProductId))?.brand_name || 'nutribake',
+          brand_profile_id: selectedBrandId,
+          bridge_at_clip: bridgeAtClip,
+          items: [
+            {
+              original_script_url: assetUrl,
+              product_url: sourceMode === 'url_extract' ? productUrl : (products.find(p => String(p.id) === String(finalTargetProductId))?.source_url || ''),
+              nextcloud_folder: '',
+              custom_instruction: customInstruction,
+              target_product_id: finalTargetProductId,
+              bridge_at_clip: bridgeAtClip
+            }
+          ]
         })
       });
 
       const data = await res.json();
       if (data.success) {
-        showToast('Naskah baru berhasil dirajut otonom!');
+        showToast('Kampanye berhasil dibuat di background!');
         setCampaignName('');
-        setOriginalScript('');
-        setFileName('');
-        setFileSize(0);
+        setAssetUrl('');
         setTargetProductId('');
         setManualProductName('');
         setManualDescription('');
@@ -423,7 +430,6 @@ export default function ProductBridgeInjectPage() {
         setShowConfigForm(false);
         
         await fetchCampaigns();
-        handleToggleExpand(data.data.campaign_id);
       } else {
         showToast(data.error, 'error');
       }
@@ -1093,38 +1099,30 @@ export default function ProductBridgeInjectPage() {
                     </div>
 
                     <div className="form-group">
-                      <label className="form-label" htmlFor="md-file-input">Unggah Naskah Asli (.md)</label>
-                      <input
-                        id="md-file-input"
-                        type="file"
+                      <label className="form-label">Posisi Bridge (Klip Ke-N)</label>
+                      <select
                         className="form-input"
-                        accept=".md"
-                        onChange={handleFileUpload}
+                        value={bridgeAtClip}
+                        onChange={e => setBridgeAtClip(Number(e.target.value))}
+                        style={{ background: 'var(--bg-primary)' }}
+                      >
+                        <option value={2}>Klip Ke-2 (Awal / Default)</option>
+                        <option value={3}>Klip Ke-3 (Tengah)</option>
+                        <option value={4}>Klip Ke-4 (Akhir)</option>
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">URL ASET (Nextcloud Folder)</label>
+                      <input
+                        type="url"
+                        className="form-input"
+                        placeholder="https://nextcloud.domain/index.php/s/xxxxxxxxxxxxxxx"
+                        value={assetUrl}
+                        onChange={e => setAssetUrl(e.target.value)}
                         required
-                        style={{ padding: '8px', cursor: 'pointer' }}
+                        style={{ background: 'var(--bg-primary)' }}
                       />
-                      {fileName && (
-                        <div style={{ marginTop: '8px', fontSize: '0.8rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span>📄 File terpilih:</span> <strong>{fileName}</strong> <span style={{ color: 'var(--text-secondary)' }}>({fileSize} bytes)</span>
-                        </div>
-                      )}
-                      {originalScript && (
-                        <div style={{
-                          marginTop: '8px',
-                          padding: '10px',
-                          background: 'rgba(255,255,255,0.03)',
-                          borderRadius: '4px',
-                          border: '1px dashed var(--border)',
-                          maxHeight: '120px',
-                          overflowY: 'auto',
-                          fontFamily: 'var(--font-mono)',
-                          fontSize: '0.75rem',
-                          color: 'var(--text-secondary)',
-                          whiteSpace: 'pre-wrap'
-                        }}>
-                          {originalScript.slice(0, 300) + (originalScript.length > 300 ? '...' : '')}
-                        </div>
-                      )}
                     </div>
 
                   </div>
