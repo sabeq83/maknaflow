@@ -42,6 +42,18 @@ export default function BridgeBulkCampaignDetailPage() {
   const [t2iPrompt, setT2iPrompt] = useState('');
   const [i2vPrompt, setI2vPrompt] = useState('');
 
+  // Render & TTS configuration states
+  const [enableTts, setEnableTts] = useState(1);
+  const [voiceProvider, setVoiceProvider] = useState('minimax');
+  const [voicePersona, setVoicePersona] = useState('Indonesian_casual_reporter_vv2');
+  const [voiceSpeed, setVoiceSpeed] = useState(1.0);
+  const [voiceVolume, setVoiceVolume] = useState(1.0);
+  const [enableFfmpeg, setEnableFfmpeg] = useState(1);
+  const [ffmpegSyncOption, setFfmpegSyncOption] = useState('smart_sync');
+  const [ffmpegVideoScale, setFfmpegVideoScale] = useState(1.0);
+  const [ffmpegSfxVolume, setFfmpegSfxVolume] = useState(0.0);
+  const [ffmpegBgmVolume, setFfmpegBgmVolume] = useState(0.0);
+
   // UI state loaders & alerts
   const [toast, setToast] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -138,6 +150,24 @@ export default function BridgeBulkCampaignDetailPage() {
     setVo4(item.injected_vo_4 || '');
     setT2iPrompt(item.clip2_t2i_prompt || '');
     setI2vPrompt(item.clip2_i2v_prompt || '');
+    setEnableTts(item.enable_tts !== undefined ? Number(item.enable_tts) : 1);
+    setVoiceProvider(item.voice_provider || 'minimax');
+    setVoicePersona(item.voice_persona || 'Indonesian_casual_reporter_vv2');
+    setVoiceSpeed(item.voice_speed !== undefined ? Number(item.voice_speed) : 1.0);
+    setVoiceVolume(item.voice_volume !== undefined ? Number(item.voice_volume) : 1.0);
+    setEnableFfmpeg(item.enable_ffmpeg !== undefined ? Number(item.enable_ffmpeg) : 1);
+    setFfmpegSyncOption(item.ffmpeg_sync_option || 'smart_sync');
+    setFfmpegVideoScale(item.ffmpeg_video_scale !== undefined ? Number(item.ffmpeg_video_scale) : 1.0);
+    setFfxSfxVol(item.ffmpeg_sfx_volume);
+    setFfxBgmVol(item.ffmpeg_bgm_volume);
+  }
+
+  function setFfxSfxVol(v) {
+    setFfmpegSfxVolume(v !== undefined && v !== null ? Number(v) : 0.0);
+  }
+
+  function setFfxBgmVol(v) {
+    setFfmpegBgmVolume(v !== undefined && v !== null ? Number(v) : 0.0);
   }
 
   function showToast(message, type = 'success') {
@@ -167,6 +197,7 @@ export default function BridgeBulkCampaignDetailPage() {
     if (!selectedItemId) return;
     setSaving(true);
     try {
+      // 1. Simpan Naskah & Prompt (PUT)
       const res = await fetch(`/api/v2/bridge-injector/items/${selectedItemId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -180,14 +211,32 @@ export default function BridgeBulkCampaignDetailPage() {
         })
       });
       const data = await res.json();
-      if (data.success) {
-        showToast('Naskah & prompt berhasil disimpan!');
-        fetchCampaignDetails(true);
-      } else {
-        showToast(data.error, 'error');
-      }
+      if (!data.success) throw new Error(data.error || 'Gagal menyimpan naskah');
+
+      // 2. Simpan Konfigurasi Render & TTS (PATCH)
+      const resPatch = await fetch(`/api/v2/bridge-injector/items/${selectedItemId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          enable_tts: enableTts,
+          voice_provider: voiceProvider,
+          voice_persona: voicePersona,
+          voice_speed: voiceSpeed,
+          voice_volume: voiceVolume,
+          enable_ffmpeg: enableFfmpeg,
+          ffmpeg_sync_option: ffmpegSyncOption,
+          ffmpeg_video_scale: ffmpegVideoScale,
+          ffmpeg_sfx_volume: ffmpegSfxVolume,
+          ffmpeg_bgm_volume: ffmpegBgmVolume
+        })
+      });
+      const dataPatch = await resPatch.json();
+      if (!dataPatch.success) throw new Error(dataPatch.error || 'Gagal menyimpan konfigurasi');
+
+      showToast('Perubahan naskah, prompt, dan konfigurasi berhasil disimpan!');
+      fetchCampaignDetails(true);
     } catch (err) {
-      showToast('Gagal menyimpan perubahan.', 'error');
+      showToast(err.message, 'error');
     }
     setSaving(false);
   }
@@ -649,28 +698,28 @@ export default function BridgeBulkCampaignDetailPage() {
                     <label className="switch" style={{ position: 'relative', display: 'inline-block', width: '40px', height: '20px' }}>
                       <input
                         type="checkbox"
-                        checked={Number(item.enable_tts) === 1}
-                        onChange={(e) => updateItemSettings(item.id, { enable_tts: e.target.checked ? 1 : 0 })}
+                        checked={enableTts === 1}
+                        onChange={(e) => setEnableTts(e.target.checked ? 1 : 0)}
                         disabled={['pending', 'processing'].includes(item.workflow_status)}
                         style={{ opacity: 0, width: 0, height: 0 }}
                       />
                       <span className="slider" style={{
                         position: 'absolute', cursor: 'pointer', top: 0, left: 0, right: 0, bottom: 0,
-                        backgroundColor: Number(item.enable_tts) === 1 ? 'var(--accent)' : '#ccc',
+                        backgroundColor: enableTts === 1 ? 'var(--accent)' : '#ccc',
                         borderRadius: '20px', transition: '0.4s'
                       }}></span>
                     </label>
                     <span style={{ fontSize: '0.8rem', color: '#fff', fontWeight: 600 }}>Aktifkan TTS Voiceover</span>
                   </div>
 
-                  {Number(item.enable_tts) === 1 && (
+                  {enableTts === 1 && (
                     <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div style={{ display: 'flex', gap: '10px' }}>
                         <div style={{ flex: 1 }}>
                           <label style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>TTS Provider</label>
                           <select
-                            value={item.voice_provider || 'minimax'}
-                            onChange={(e) => updateItemSettings(item.id, { voice_provider: e.target.value })}
+                            value={voiceProvider}
+                            onChange={(e) => setVoiceProvider(e.target.value)}
                             disabled={['pending', 'processing'].includes(item.workflow_status)}
                             style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '6px', color: '#fff', fontSize: '0.78rem', outline: 'none' }}
                           >
@@ -681,12 +730,12 @@ export default function BridgeBulkCampaignDetailPage() {
                         <div style={{ flex: 1 }}>
                           <label style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Voice Persona</label>
                           <select
-                            value={item.voice_persona || 'Indonesian_casual_reporter_vv2'}
-                            onChange={(e) => updateItemSettings(item.id, { voice_persona: e.target.value })}
+                            value={voicePersona}
+                            onChange={(e) => setVoicePersona(e.target.value)}
                             disabled={['pending', 'processing'].includes(item.workflow_status)}
                             style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '6px', color: '#fff', fontSize: '0.78rem', outline: 'none' }}
                           >
-                            {((item.voice_provider || 'minimax') === 'minimax' ? MINIMAX_VOICES : GEMINI_VOICES).map(voice => (
+                            {(voiceProvider === 'minimax' ? MINIMAX_VOICES : GEMINI_VOICES).map(voice => (
                               <option key={voice.id} value={voice.id}>
                                 {voice.name}
                               </option>
@@ -699,15 +748,15 @@ export default function BridgeBulkCampaignDetailPage() {
                         <div style={{ flex: 1 }}>
                           <label style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                             <span>Speed</span>
-                            <span>{item.voice_speed || 1.0}x</span>
+                            <span>{voiceSpeed}x</span>
                           </label>
                           <input
                             type="range"
                             min="0.5"
                             max="2.0"
                             step="0.1"
-                            value={item.voice_speed || 1.0}
-                            onChange={(e) => updateItemSettings(item.id, { voice_speed: Number(e.target.value) })}
+                            value={voiceSpeed}
+                            onChange={(e) => setVoiceSpeed(Number(e.target.value))}
                             disabled={['pending', 'processing'].includes(item.workflow_status)}
                             style={{ width: '100%', accentColor: 'var(--accent)' }}
                           />
@@ -715,15 +764,15 @@ export default function BridgeBulkCampaignDetailPage() {
                         <div style={{ flex: 1 }}>
                           <label style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                             <span>Volume</span>
-                            <span>{item.voice_volume || 1.0}</span>
+                            <span>{voiceVolume}</span>
                           </label>
                           <input
                             type="range"
                             min="0.1"
                             max="2.0"
                             step="0.1"
-                            value={item.voice_volume || 1.0}
-                            onChange={(e) => updateItemSettings(item.id, { voice_volume: Number(e.target.value) })}
+                            value={voiceVolume}
+                            onChange={(e) => setVoiceVolume(Number(e.target.value))}
                             disabled={['pending', 'processing'].includes(item.workflow_status)}
                             style={{ width: '100%', accentColor: 'var(--accent)' }}
                           />
@@ -739,28 +788,28 @@ export default function BridgeBulkCampaignDetailPage() {
                     <label className="switch" style={{ position: 'relative', display: 'inline-block', width: '40px', height: '20px' }}>
                       <input
                         type="checkbox"
-                        checked={Number(item.enable_ffmpeg) === 1}
-                        onChange={(e) => updateItemSettings(item.id, { enable_ffmpeg: e.target.checked ? 1 : 0 })}
+                        checked={enableFfmpeg === 1}
+                        onChange={(e) => setEnableFfmpeg(e.target.checked ? 1 : 0)}
                         disabled={['pending', 'processing'].includes(item.workflow_status)}
                         style={{ opacity: 0, width: 0, height: 0 }}
                       />
                       <span className="slider" style={{
                         position: 'absolute', cursor: 'pointer', top: 0, left: 0, right: 0, bottom: 0,
-                        backgroundColor: Number(item.enable_ffmpeg) === 1 ? 'var(--accent)' : '#ccc',
+                        backgroundColor: enableFfmpeg === 1 ? 'var(--accent)' : '#ccc',
                         borderRadius: '20px', transition: '0.4s'
                       }}></span>
                     </label>
                     <span style={{ fontSize: '0.8rem', color: '#fff', fontWeight: 600 }}>Aktifkan FFmpeg Muxing</span>
                   </div>
 
-                  {Number(item.enable_ffmpeg) === 1 && (
+                  {enableFfmpeg === 1 && (
                     <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div style={{ display: 'flex', gap: '10px' }}>
                         <div style={{ flex: 1 }}>
                           <label style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Sync Option</label>
                           <select
-                            value={item.ffmpeg_sync_option || 'smart_sync'}
-                            onChange={(e) => updateItemSettings(item.id, { ffmpeg_sync_option: e.target.value })}
+                            value={ffmpegSyncOption}
+                            onChange={(e) => setFfmpegSyncOption(e.target.value)}
                             disabled={['pending', 'processing'].includes(item.workflow_status)}
                             style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '6px', color: '#fff', fontSize: '0.78rem', outline: 'none' }}
                           >
@@ -774,15 +823,15 @@ export default function BridgeBulkCampaignDetailPage() {
                         <div style={{ flex: 1 }}>
                           <label style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                             <span>Video Scale (Zoom)</span>
-                            <span>{item.ffmpeg_video_scale || 1.0}x</span>
+                            <span>{ffmpegVideoScale}x</span>
                           </label>
                           <input
                             type="range"
                             min="1.0"
                             max="2.0"
                             step="0.05"
-                            value={item.ffmpeg_video_scale || 1.0}
-                            onChange={(e) => updateItemSettings(item.id, { ffmpeg_video_scale: Number(e.target.value) })}
+                            value={ffmpegVideoScale}
+                            onChange={(e) => setFfmpegVideoScale(Number(e.target.value))}
                             disabled={['pending', 'processing'].includes(item.workflow_status)}
                             style={{ width: '100%', accentColor: 'var(--accent)' }}
                           />
@@ -793,15 +842,15 @@ export default function BridgeBulkCampaignDetailPage() {
                         <div style={{ flex: 1 }}>
                           <label style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                             <span>SFX Volume</span>
-                            <span>{item.ffmpeg_sfx_volume !== undefined ? item.ffmpeg_sfx_volume : 0.0}</span>
+                            <span>{ffmpegSfxVolume}</span>
                           </label>
                           <input
                             type="range"
                             min="0.0"
                             max="2.0"
                             step="0.1"
-                            value={item.ffmpeg_sfx_volume !== undefined ? item.ffmpeg_sfx_volume : 0.0}
-                            onChange={(e) => updateItemSettings(item.id, { ffmpeg_sfx_volume: Number(e.target.value) })}
+                            value={ffmpegSfxVolume}
+                            onChange={(e) => setFfmpegSfxVolume(Number(e.target.value))}
                             disabled={['pending', 'processing'].includes(item.workflow_status)}
                             style={{ width: '100%', accentColor: 'var(--accent)' }}
                           />
@@ -809,15 +858,15 @@ export default function BridgeBulkCampaignDetailPage() {
                         <div style={{ flex: 1 }}>
                           <label style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                             <span>BGM Volume</span>
-                            <span>{item.ffmpeg_bgm_volume !== undefined ? item.ffmpeg_bgm_volume : 0.0}</span>
+                            <span>{ffmpegBgmVolume}</span>
                           </label>
                           <input
                             type="range"
                             min="0.0"
                             max="2.0"
                             step="0.1"
-                            value={item.ffmpeg_bgm_volume !== undefined ? item.ffmpeg_bgm_volume : 0.0}
-                            onChange={(e) => updateItemSettings(item.id, { ffmpeg_bgm_volume: Number(e.target.value) })}
+                            value={ffmpegBgmVolume}
+                            onChange={(e) => setFfmpegBgmVolume(Number(e.target.value))}
                             disabled={['pending', 'processing'].includes(item.workflow_status)}
                             style={{ width: '100%', accentColor: 'var(--accent)' }}
                           />

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.5.10 — Migrate Mac Mini deploy to remote build & batch save UI (08/08/2026)
+- Remove local build step from deploy-macmini scripts
+- Add .next and public/uploads excludes to rsync in deploy scripts
+- Convert campaign details Render & TTS settings inputs to state-bound batch save
+
 ## V2.5.9 — Fix TTS and FFmpeg toggles in campaign detail page (08/08/2026)
 - Fix switch input type checked check on detail page by wrapping enable_tts and enable_ffmpeg in Number() to allow loose type coercion
 
