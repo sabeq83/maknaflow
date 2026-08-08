@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.248 — Implement Systemic Video Prompt Silence Directive and Silent Kinetics Framework (08/08/2026)
+- Introduce automatic Silence Directive prefix injection at API payload level
+- Adopt Silent Kinetics and Pure Optics framework for Gemini instructions in prompts.js
+- Validate Item 85 pipeline success on Mac Mini Dev
+
 ## V2.2.247 — Fix FFmpeg and FFprobe Architecture Path Resolution (08/08/2026)
 - Prioritize Homebrew native arm64 binaries of ffmpeg and ffprobe on Apple Silicon macOS to resolve spawn system error -86
 - Deploy and verify pipeline run on Mac Mini Dev
