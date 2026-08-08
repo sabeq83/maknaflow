@@ -63,7 +63,7 @@ export const POST = withTenantContext(async (request) => {
       enable_glabs: global_settings.enable_glabs ? 1 : 0,
       enable_ffmpeg: global_settings.enable_ffmpeg ? 1 : 0,
       enable_social_post: global_settings.enable_social_post ? 1 : 0,
-      visual_mode: global_settings.visual_mode || 'hybrid_lock',
+      visual_mode: (global_settings.execution_mode === 'full_autopilot') ? 'pure_t2v' : (global_settings.visual_mode || 'pure_t2v'),
       angle_multiplier: global_settings.angle_multiplier !== undefined ? Number(global_settings.angle_multiplier) : 0,
       visual_overrides_json: global_settings.visual_overrides_json || null,
       tts_model_quality: global_settings.tts_model_quality || 'speech-2.8-turbo',
@@ -74,10 +74,14 @@ export const POST = withTenantContext(async (request) => {
       target_spreadsheet_id: extractSpreadsheetId(global_settings.target_spreadsheet_id),
       sfx_setting: global_settings.sfx_setting || 'without_sfx',
       local_scheduler: global_settings.local_scheduler !== undefined ? (global_settings.local_scheduler ? 1 : 0) : 0,
-      scheduler_pause_at: global_settings.scheduler_pause_at || null,
+      scheduler_pause_at: global_settings.execution_mode === 'full_autopilot' ? null : (global_settings.scheduler_pause_at || null),
       enable_vo_audit: global_settings.enable_vo_audit !== undefined ? Number(global_settings.enable_vo_audit) : 0,
       enable_audio_segment: global_settings.enable_audio_segment ? 1 : 0,
-      voice_cast_json: global_settings.voice_cast_json || null
+      voice_cast_json: global_settings.voice_cast_json || null,
+      target_demographic: global_settings.target_demographic || null,
+      target_demographic_custom: global_settings.target_demographic_custom || null,
+      ai_directive: global_settings.ai_directive || null,
+      mandatory_outro_line: global_settings.mandatory_outro_line || null
     });
 
     // 2. Map row data to database format

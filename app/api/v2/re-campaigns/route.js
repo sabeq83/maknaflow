@@ -85,6 +85,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
         target_demographic_custom: formData.get('target_demographic_custom') || null,
         ai_directive: formData.get('ai_directive') || null,
         mandatory_outro_line: formData.get('mandatory_outro_line') || null,
+        execution_mode: formData.get('execution_mode') || 'manual_review',
       };
 
       const urlsRaw = formData.get('urls');
@@ -245,7 +246,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       enable_glabs: enable_glabs !== undefined ? Number(enable_glabs) : 0,
       enable_ffmpeg: enable_ffmpeg !== undefined ? Number(enable_ffmpeg) : 1,
       enable_social_post: enable_social_post !== undefined ? Number(enable_social_post) : 1,
-      visual_mode: visual_mode || 'pure_t2v',
+      visual_mode: (execution_mode === 'full_autopilot') ? 'pure_t2v' : (visual_mode || 'pure_t2v'),
       product_ref_image_path: productRefImagePath,
       product_filename_declare: productFilenameDeclare,
       angle_multiplier: angle_multiplier !== undefined ? Number(angle_multiplier) : 0,

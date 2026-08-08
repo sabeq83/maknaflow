@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.3.2 — Fix RE Campaign execution_mode Multipart Parsing & Bulk Endpoint Alignment (08/08/2026)
+- Extract execution_mode from multipart formData in Single Video Campaign creation
+- Align mass campaign bulk ingestion endpoint with execution_mode, target_demographic, ai_directive, and mandatory_outro_line
+- Support execution_mode in campaign PATCH route
+- Lock visualMode to pure_t2v on preset load when Full Auto Pilot is active
+
 ## V2.3.1 — Refine RE Campaign Mode Selector Colors & Clean FFmpeg Controls (08/08/2026)
 - Set Full Auto Pilot mode selector indicator to emerald green (#10b981)
 - Keep Manual Review mode selector indicator in amber orange (#f59e0b)

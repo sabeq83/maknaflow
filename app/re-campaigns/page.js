@@ -198,7 +198,7 @@ export default function RECampaignsPage() {
     // Accordion 2: Aesthetics & Visual Settings
     if (config.visual_engine) {
       setVisualStyle(config.visual_engine.visual_style || 'Cinematic');
-      setVisualMode(config.visual_engine.visual_mode || 'hybrid_lock');
+      setVisualMode(executionMode === 'full_autopilot' ? 'pure_t2v' : (config.visual_engine.visual_mode || 'pure_t2v'));
       setVideoModel(config.visual_engine.video_model || 'veo_31_lite');
       setFaceVisibility(config.visual_engine.face_visibility || 'Faceless');
       setTargetClipsCount(config.visual_engine.target_clips_count || 4);
