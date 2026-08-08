@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.3.1 — Refine RE Campaign Mode Selector Colors & Clean FFmpeg Controls (08/08/2026)
+- Set Full Auto Pilot mode selector indicator to emerald green (#10b981)
+- Keep Manual Review mode selector indicator in amber orange (#f59e0b)
+- Remove BGM Volume slider from Accordion 5 FFmpeg Video Studio Settings
+
 ## V2.3.0 — RE Campaign Dual Mode: Full Auto Pilot (5 Accordions & Pure T2V) vs Manual Review (08/08/2026)
 - Add Dual Mode pipeline switcher to RE Campaign creation modal: Full Auto Pilot and Manual Review
 - Render 5 complete accordions including Workflow & Audio Settings (TTS, G-Labs, FFmpeg, Social Post)

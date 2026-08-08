@@ -1082,8 +1082,8 @@ export default function RECampaignsPage() {
                       setEnableFfmpeg(true);
                     }}
                     style={{
-                      border: `1px solid ${executionMode === 'full_autopilot' ? 'var(--accent-color)' : 'var(--border-color)'}`,
-                      background: executionMode === 'full_autopilot' ? 'rgba(59, 130, 246, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                      border: `1px solid ${executionMode === 'full_autopilot' ? '#10b981' : 'var(--border-color)'}`,
+                      background: executionMode === 'full_autopilot' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(255, 255, 255, 0.02)',
                       borderRadius: 8,
                       padding: '12px 16px',
                       cursor: 'pointer',
@@ -1091,10 +1091,10 @@ export default function RECampaignsPage() {
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <span style={{ fontWeight: 700, fontSize: '0.9rem', color: executionMode === 'full_autopilot' ? 'var(--accent-color)' : 'var(--text-color)' }}>
+                      <span style={{ fontWeight: 700, fontSize: '0.9rem', color: executionMode === 'full_autopilot' ? '#10b981' : 'var(--text-color)' }}>
                         🤖 Mode Full Auto Pilot
                       </span>
-                      {executionMode === 'full_autopilot' && <span style={{ fontSize: '0.75rem', background: 'var(--accent-color)', color: '#fff', padding: '2px 8px', borderRadius: 12 }}>Aktif</span>}
+                      {executionMode === 'full_autopilot' && <span style={{ fontSize: '0.75rem', background: '#10b981', color: '#fff', padding: '2px 8px', borderRadius: 12, fontWeight: 700 }}>Aktif</span>}
                     </div>
                     <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
                       Otomatis jalan penuh dari Naskah ➔ TTS ➔ G-Labs Video ➔ FFmpeg tanpa jeda review. Visual mode dikunci ke Pure Text-to-Video.
@@ -2238,39 +2238,21 @@ export default function RECampaignsPage() {
                           )}
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                          <div>
-                            <label className="form-label" style={{ fontSize: '0.78rem', display: 'flex', justifyContent: 'space-between' }}>
-                              <span>Video Scale:</span>
-                              <span style={{ color: 'var(--accent-color)', fontWeight: 'bold' }}>{Math.round(ffmpegVideoScale * 100)}%</span>
-                            </label>
-                            <input 
-                              type="range" 
-                              min="1.0" 
-                              max="2.0" 
-                              step="0.05" 
-                              className="form-input" 
-                              value={ffmpegVideoScale} 
-                              onChange={e => setFfmpegVideoScale(parseFloat(e.target.value))} 
-                              style={{ width: '100%', padding: 0 }} 
-                            />
-                          </div>
-                          <div>
-                            <label className="form-label" style={{ fontSize: '0.78rem', display: 'flex', justifyContent: 'space-between' }}>
-                              <span>BGM Volume:</span>
-                              <span style={{ color: 'var(--accent-color)', fontWeight: 'bold' }}>{Math.round(ffmpegBgmVolume * 100)}%</span>
-                            </label>
-                            <input 
-                              type="range" 
-                              min="0.0" 
-                              max="1.0" 
-                              step="0.05" 
-                              className="form-input" 
-                              value={ffmpegBgmVolume} 
-                              onChange={e => setFfmpegBgmVolume(parseFloat(e.target.value))} 
-                              style={{ width: '100%', padding: 0 }} 
-                            />
-                          </div>
+                        <div>
+                          <label className="form-label" style={{ fontSize: '0.78rem', display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                            <span>Video Scale:</span>
+                            <span style={{ color: 'var(--accent-color)', fontWeight: 'bold' }}>{Math.round(ffmpegVideoScale * 100)}%</span>
+                          </label>
+                          <input 
+                            type="range" 
+                            min="1.0" 
+                            max="2.0" 
+                            step="0.05" 
+                            className="form-input" 
+                            value={ffmpegVideoScale} 
+                            onChange={e => setFfmpegVideoScale(parseFloat(e.target.value))} 
+                            style={{ width: '100%', padding: 0 }} 
+                          />
                         </div>
                       </div>
                     )}
