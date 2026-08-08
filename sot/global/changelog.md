@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.249 — Fix ContentFlow Ingestion Sequence Counter Bug (08/08/2026)
+- Relocate campaignSeqCounters increments to start of loops in contentflow-ingest.js
+- Prevent shifts in video_id sequence numbers when some items fail
+- Fix duplicate unique constraint violations on tenant_id and video_id
+
 ## V2.2.248 — Implement Systemic Video Prompt Silence Directive and Silent Kinetics Framework (08/08/2026)
 - Introduce automatic Silence Directive prefix injection at API payload level
 - Adopt Silent Kinetics and Pure Optics framework for Gemini instructions in prompts.js
