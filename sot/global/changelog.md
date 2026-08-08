@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.5.13 — Fix Slider Reset Bug & Remove SFX/BGM Sliders (08/08/2026)
+- Prevent background poll from overwriting unsaved slider and text changes in campaign detail page
+- Remove SFX Volume and BGM Volume sliders from FFmpeg Muxing Section
+
 ## V2.5.12 — Product Bridge Form Layout Alignment (08/08/2026)
 - Move bridge position and Nextcloud URL asset fields outside grid to render vertically full-width
 

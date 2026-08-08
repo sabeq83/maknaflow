@@ -95,10 +95,27 @@ export default function BridgeBulkCampaignDetailPage() {
         if (fetchedItems.length > 0 && !selectedItemIdRef.current) {
           selectItem(fetchedItems[0]);
         } else if (selectedItemIdRef.current) {
-          // Keep inputs updated with database values if not editing
           const currentItem = fetchedItems.find(i => i.id === selectedItemIdRef.current);
           if (currentItem && !saving) {
-            updateInputStatesFromItem(currentItem);
+            const isFormDirty =
+              vo1 !== (currentItem.injected_vo_1 || '') ||
+              vo2 !== (currentItem.injected_vo_2 || '') ||
+              vo3 !== (currentItem.injected_vo_3 || '') ||
+              vo4 !== (currentItem.injected_vo_4 || '') ||
+              t2iPrompt !== (currentItem.clip2_t2i_prompt || '') ||
+              i2vPrompt !== (currentItem.clip2_i2v_prompt || '') ||
+              enableTts !== (currentItem.enable_tts !== undefined ? Number(currentItem.enable_tts) : 1) ||
+              voiceProvider !== (currentItem.voice_provider || 'minimax') ||
+              voicePersona !== (currentItem.voice_persona || 'Indonesian_casual_reporter_vv2') ||
+              voiceSpeed !== (currentItem.voice_speed !== undefined ? Number(currentItem.voice_speed) : 1.0) ||
+              voiceVolume !== (currentItem.voice_volume !== undefined ? Number(currentItem.voice_volume) : 1.0) ||
+              enableFfmpeg !== (currentItem.enable_ffmpeg !== undefined ? Number(currentItem.enable_ffmpeg) : 1) ||
+              ffmpegSyncOption !== (currentItem.ffmpeg_sync_option || 'smart_sync') ||
+              ffmpegVideoScale !== (currentItem.ffmpeg_video_scale !== undefined ? Number(currentItem.ffmpeg_video_scale) : 1.0);
+
+            if (!isFormDirty) {
+              updateInputStatesFromItem(currentItem);
+            }
           }
         }
       } else {
@@ -855,41 +872,6 @@ export default function BridgeBulkCampaignDetailPage() {
                             step="0.05"
                             value={ffmpegVideoScale}
                             onChange={(e) => setFfmpegVideoScale(Number(e.target.value))}
-                            disabled={['pending', 'processing'].includes(item.workflow_status)}
-                            style={{ width: '100%', accentColor: 'var(--accent)' }}
-                          />
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'flex', gap: '12px' }}>
-                        <div style={{ flex: 1 }}>
-                          <label style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                            <span>SFX Volume</span>
-                            <span>{ffmpegSfxVolume}</span>
-                          </label>
-                          <input
-                            type="range"
-                            min="0.0"
-                            max="2.0"
-                            step="0.1"
-                            value={ffmpegSfxVolume}
-                            onChange={(e) => setFfmpegSfxVolume(Number(e.target.value))}
-                            disabled={['pending', 'processing'].includes(item.workflow_status)}
-                            style={{ width: '100%', accentColor: 'var(--accent)' }}
-                          />
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <label style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                            <span>BGM Volume</span>
-                            <span>{ffmpegBgmVolume}</span>
-                          </label>
-                          <input
-                            type="range"
-                            min="0.0"
-                            max="2.0"
-                            step="0.1"
-                            value={ffmpegBgmVolume}
-                            onChange={(e) => setFfmpegBgmVolume(Number(e.target.value))}
                             disabled={['pending', 'processing'].includes(item.workflow_status)}
                             style={{ width: '100%', accentColor: 'var(--accent)' }}
                           />
