@@ -3,6 +3,46 @@
 import { useState, useEffect } from 'react';
 import { resolvePlannerInstructions } from '@/lib/prompt-instructions';
 
+const GEMINI_VOICES = [
+  { id: 'Kore', name: 'Kore (Female)', avatar: '👩', desc: 'Standard Female (Skincare/Cosmetic)' },
+  { id: 'Fenrir', name: 'Fenrir (Male)', avatar: '🧔', desc: 'Deep/Heavy Male (Otomotif/High-End)' },
+  { id: 'Puck', name: 'Puck (Male)', avatar: '👦', desc: 'Ceria, Playful (Makanan/Promo Kilat)' },
+  { id: 'Charon', name: 'Charon (Male)', avatar: '👨', desc: 'Formal, News Style (Review Tech/Finansial)' },
+  { id: 'Leda', name: 'Leda (Female)', avatar: '👵', desc: 'Hangat, Ramah (Edukasi/Ibu Anak)' },
+  { id: 'Zephyr', name: 'Zephyr (Male)', avatar: 'sn', desc: 'Kasual, Santai (Storytelling/Daily Vlog)' },
+  { id: 'Orus', name: 'Orus (Male)', avatar: '🧔', desc: 'Tegas, Optimis (Motivasi/Online Course)' },
+  { id: 'Aoede', name: 'Aoede (Female)', avatar: '👩‍🎨', desc: 'Artistik, Ekspresif (Fashion/Seni)' },
+  { id: 'Callirrhoe', name: 'Callirrhoe (Female)', avatar: '👩‍💼', desc: 'Berenergi, Dinamis (Olahraga/Lifestyle)' },
+  { id: 'Autonoe', name: 'Autonoe (Female)', avatar: '👩‍🎓', desc: 'Dewasa, Profesional (Bisnis/Corporate)' },
+  { id: 'Enceladus', name: 'Enceladus (Male)', avatar: '👨‍🎤', desc: 'Misterius, Berat (Teaser/Trailer)' },
+  { id: 'Iapetus', name: 'Iapetus (Male)', avatar: '👴', desc: 'Bijaksana, Ramah (Mentor/Tips Hidup)' },
+  { id: 'Umbriel', name: 'Umbriel (Male)', avatar: '👨‍🔬', desc: 'Dingin, Fokus (Dokumenter/Sains)' },
+  { id: 'Despina', name: 'Despina (Female)', avatar: '👧', desc: 'Cepat, Riang (TikTok/Tips Singkat)' },
+];
+
+const MINIMAX_VOICES = [
+  { id: 'Indonesian_casual_reporter_vv2', name: 'Casual Reporter (Male)', avatar: '👨', desc: 'Laki-laki (Casual Reporter - Vv2)' },
+  { id: 'Indonesian_compelling_storyteller_vv2', name: 'Compelling Storyteller (Male)', avatar: '👨', desc: 'Laki-laki (Storyteller - Vv2)' },
+  { id: 'Indonesian_expressive_podcaster_vv2', name: 'Expressive Podcaster (Male)', avatar: '👨', desc: 'Laki-laki (Podcaster - Vv2)' },
+  { id: 'Indonesian_energetic_streamer_vv2', name: 'Energetic Streamer (Male)', avatar: '👨', desc: 'Laki-laki (Streamer - Vv2)' },
+  { id: 'Indonesian_intellectual_commentator_vv2', name: 'Intellectual Commentator (Female)', avatar: '👩', desc: 'Perempuan (Commentator - Vv2)' },
+  { id: 'Indonesian_professional_anchor_vv2', name: 'Professional Anchor (Female)', avatar: '👩', desc: 'Perempuan (Anchor - Vv2)' },
+  { id: 'Indonesian_crisp_reporter_vv2', name: 'Crisp Reporter (Female)', avatar: '👩', desc: 'Perempuan (Crisp Reporter - Vv2)' }
+];
+
+const MINIMAX_ENGLISH_VOICES = [
+  { id: 'English_Resonant_Man', name: 'Resonant Man (Male)', avatar: '👨', desc: 'English Resonant Man' },
+  { id: 'English_Trustworth_Man', name: 'Trustworthy Man (Male)', avatar: '👨', desc: 'English Trustworthy Man' },
+  { id: 'English_causual_narrator_vv1', name: 'Casual Narrator (Male)', avatar: '👨', desc: 'English Casual Narrator' },
+  { id: 'English_causual_podcast_vv1', name: 'Casual Podcast (Male)', avatar: '👨', desc: 'English Casual Podcast' },
+  { id: 'English_expressive_host__vv1', name: 'Expressive Host (Male)', avatar: '👨', desc: 'English Expressive Host' },
+  { id: 'English_instructive_professor_vv1', name: 'Instructive Professor (Female)', avatar: '👩', desc: 'English Instructive Professor' },
+  { id: 'English_nursery_teacher_vv2', name: 'Nursery Teacher (Female)', avatar: '👩', desc: 'English Nursery Teacher' },
+  { id: 'English_captivating_female1', name: 'Captivating Female (Female)', avatar: '👩', desc: 'English Captivating Female' },
+  { id: 'English_radiant_girl', name: 'Radiant Girl (Female)', avatar: '👩', desc: 'English Radiant Girl' },
+  { id: 'English_CalmWoman', name: 'Calm Woman (Female)', avatar: '👩', desc: 'English Calm Woman' }
+];
+
 export default function ImportPlannerModal({
   isOpen,
   onClose,
@@ -56,6 +96,14 @@ export default function ImportPlannerModal({
   const [wordsPerClip, setWordsPerClip] = useState('20-22 kata');
   const [visualMode, setVisualMode] = useState('pure_t2v'); // 'hybrid_lock' | 'pure_t2v'
   const [executionMode, setExecutionMode] = useState('full_autopilot');
+  const [enableTts, setEnableTts] = useState(true);
+  const [enableGlabs, setEnableGlabs] = useState(true);
+  const [enableFfmpeg, setEnableFfmpeg] = useState(true);
+  const [enableSocialPost, setEnableSocialPost] = useState(false);
+  const [voicePersona, setVoicePersona] = useState('Indonesian_casual_reporter_vv2');
+  const [voiceSpeed, setVoiceSpeed] = useState(1.0);
+  const [voiceVolume, setVoiceVolume] = useState(1.0);
+  const [syncMode, setSyncMode] = useState('auto');
   const [ffmpegSyncOption, setFfmpegSyncOption] = useState('smart_sync');
   const [ffmpegVideoScale, setFfmpegVideoScale] = useState(1.0);
 
@@ -419,6 +467,13 @@ export default function ImportPlannerModal({
           target_demographic: targetDemographic,
           target_demographic_custom: targetDemographicCustom,
           nextcloud_parent_folder: nextcloudParentFolder.trim(),
+          enable_tts: enableTts ? 1 : 0,
+          enable_glabs: enableGlabs ? 1 : 0,
+          enable_ffmpeg: enableFfmpeg ? 1 : 0,
+          enable_social_post: enableSocialPost ? 1 : 0,
+          voice_persona: voicePersona,
+          voice_speed: voiceSpeed,
+          voice_volume: voiceVolume,
           ffmpeg_sync_option: ffmpegSyncOption,
           ffmpeg_video_scale: Number(ffmpegVideoScale),
           ffmpeg_sfx_volume: 0.0,
@@ -1328,7 +1383,7 @@ export default function ImportPlannerModal({
               )}
             </div>
 
-            {/* ACCORDION 5: FFmpeg Video Studio Settings */}
+            {/* ACCORDION 5: Workflow & Video Studio Settings */}
             <div style={{ background: '#18181b', borderRadius: '10px', border: '1px solid #27272a', overflow: 'hidden' }}>
               <div
                 onClick={() => setActiveAccordion(4)}
@@ -1338,40 +1393,157 @@ export default function ImportPlannerModal({
                   cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                 }}
               >
-                <span>5. FFmpeg Video Studio Settings</span>
+                <span>5. Alur Kerja Produksi & Post-Processing (Workflow Settings)</span>
                 <span>{activeAccordion === 4 ? '▲' : '▼'}</span>
               </div>
 
               {activeAccordion === 4 && (
-                <div style={{ padding: '20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  
+                  {/* Active Stages Checklist */}
                   <div>
-                    <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Mode Sinkronisasi Audio-Video:</label>
-                    <select 
-                      value={ffmpegSyncOption} 
-                      onChange={e => setFfmpegSyncOption(e.target.value)} 
-                      style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
-                    >
-                      <option value="smart_sync">⚡ Smart Sync (Tempo Audio Otomatis)</option>
-                      <option value="loop_video">🔁 Loop Video (Ulang Video Jika Kurang)</option>
-                      <option value="freeze_last_frame">❄️ Freeze Last Frame (Tahan Frame Terakhir)</option>
-                      <option value="speed_adjust">⏩ Speed Adjust (Sesuaikan Kecepatan Video)</option>
-                    </select>
+                    <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '8px' }}>Tahapan Workflow Aktif:</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                      
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#09090b', padding: '10px 12px', borderRadius: '8px', border: '1px solid #27272a' }}>
+                        <span style={{ fontSize: '12px', color: '#fff', fontWeight: 500 }}>Enable TTS (Voiceover)</span>
+                        <input type="checkbox" checked={enableTts} onChange={e => setEnableTts(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#09090b', padding: '10px 12px', borderRadius: '8px', border: '1px solid #27272a' }}>
+                        <span style={{ fontSize: '12px', color: '#fff', fontWeight: 500 }}>Enable G-Labs (AI Video)</span>
+                        <input type="checkbox" checked={enableGlabs} onChange={e => setEnableGlabs(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#09090b', padding: '10px 12px', borderRadius: '8px', border: '1px solid #27272a' }}>
+                        <span style={{ fontSize: '12px', color: '#fff', fontWeight: 500 }}>Enable FFmpeg Muxing</span>
+                        <input type="checkbox" checked={enableFfmpeg} onChange={e => setEnableFfmpeg(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#09090b', padding: '10px 12px', borderRadius: '8px', border: '1px solid #27272a' }}>
+                        <span style={{ fontSize: '12px', color: '#fff', fontWeight: 500 }}>Enable Social Draft Post</span>
+                        <input type="checkbox" checked={enableSocialPost} onChange={e => setEnableSocialPost(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
+                      </div>
+
+                    </div>
                   </div>
 
-                  <div>
-                    <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>
-                      Video Scale: <strong>{ffmpegVideoScale}x</strong>
-                    </label>
-                    <input 
-                      type="range" 
-                      min="0.5" 
-                      max="2.0" 
-                      step="0.1" 
-                      value={ffmpegVideoScale} 
-                      onChange={e => setFfmpegVideoScale(parseFloat(e.target.value))}
-                      style={{ width: '100%', marginTop: '12px', accentColor: '#6366f1' }}
-                    />
-                  </div>
+                  {/* Audio settings */}
+                  {enableTts && (
+                    <div style={{ borderTop: '1px solid #27272a', paddingTop: '14px' }}>
+                      <label style={{ fontSize: '13px', fontWeight: 700, color: '#818cf8', display: 'block', marginBottom: '8px' }}>🔊 TTS Audio Engine Settings</label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <div>
+                          <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '4px' }}>Voice Provider:</label>
+                          <select 
+                            style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px', fontSize: '13px' }}
+                            value={voiceProvider} 
+                            onChange={e => setVoiceProvider(e.target.value)}
+                          >
+                            <option value="minimax">MiniMax VO Engine</option>
+                            <option value="gemini">Gemini TTS Engine</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '4px' }}>Voice Persona:</label>
+                          <select 
+                            style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px', fontSize: '13px' }}
+                            value={voicePersona} 
+                            onChange={e => setVoicePersona(e.target.value)}
+                          >
+                            {voiceProvider === 'gemini' 
+                              ? GEMINI_VOICES.map(v => <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>)
+                              : (targetLanguage === 'en-US' ? MINIMAX_ENGLISH_VOICES : MINIMAX_VOICES).map(v => <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>)
+                            }
+                          </select>
+                        </div>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '10px' }}>
+                        <div>
+                          <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '4px' }}>Speed ({voiceSpeed}x):</label>
+                          <input type="range" min="0.5" max="2.0" step="0.1" value={voiceSpeed} onChange={e => setVoiceSpeed(parseFloat(e.target.value))} style={{ width: '100%', accentColor: '#6366f1' }} />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '4px' }}>Volume ({voiceVolume}x):</label>
+                          <input type="range" min="0.0" max="1.0" step="0.1" value={voiceVolume} onChange={e => setVoiceVolume(parseFloat(e.target.value))} style={{ width: '100%', accentColor: '#6366f1' }} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* FFmpeg Video Studio Settings */}
+                  {enableFfmpeg && (
+                    <div style={{ borderTop: '1px solid #27272a', paddingTop: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <label style={{ fontSize: '13px', fontWeight: 700, color: '#818cf8' }}>🎬 FFmpeg Video Studio Settings</label>
+                      
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <label style={{ fontSize: '12px', color: '#9ca3af' }}>Mode Sinkronisasi Audio-Video:</label>
+                        <div style={{ display: 'flex', gap: '20px', marginTop: '2px' }}>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#fff' }}>
+                            <input
+                              type="radio"
+                              name="syncModePlanner"
+                              value="auto"
+                              checked={syncMode === 'auto'}
+                              onChange={() => {
+                                setSyncMode('auto');
+                                setFfmpegSyncOption('smart_sync');
+                              }}
+                              style={{ width: 14, height: 14, cursor: 'pointer' }}
+                            />
+                            <span><b>Auto-Pilot Smart Sync</b></span>
+                          </label>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#fff' }}>
+                            <input
+                              type="radio"
+                              name="syncModePlanner"
+                              value="manual"
+                              checked={syncMode === 'manual'}
+                              onChange={() => {
+                                setSyncMode('manual');
+                                setFfmpegSyncOption('shortest');
+                              }}
+                              style={{ width: 14, height: 14, cursor: 'pointer' }}
+                            />
+                            <span>Kustom Manual</span>
+                          </label>
+                        </div>
+
+                        {syncMode === 'manual' && (
+                          <div style={{ marginTop: '6px' }}>
+                            <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '4px' }}>Metode Manual:</label>
+                            <select 
+                              style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px', fontSize: '13px' }}
+                              value={ffmpegSyncOption} 
+                              onChange={e => setFfmpegSyncOption(e.target.value)}
+                            >
+                              <option value="shortest">shortest (Potong video - Default)</option>
+                              <option value="loop">loop (Ulang video)</option>
+                              <option value="stretch">stretch (Ubah kecepatan)</option>
+                              <option value="freeze">freeze (Tahan frame terakhir)</option>
+                            </select>
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        <label style={{ fontSize: '12px', color: '#9ca3af', display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                          <span>Video Scale:</span>
+                          <span style={{ color: '#818cf8', fontWeight: 'bold' }}>{Math.round(ffmpegVideoScale * 100)}%</span>
+                        </label>
+                        <input 
+                          type="range" 
+                          min="1.0" 
+                          max="2.0" 
+                          step="0.05" 
+                          value={ffmpegVideoScale} 
+                          onChange={e => setFfmpegVideoScale(parseFloat(e.target.value))} 
+                          style={{ width: '100%', accentColor: '#6366f1' }} 
+                        />
+                      </div>
+                    </div>
+                  )}
+
                 </div>
               )}
             </div>

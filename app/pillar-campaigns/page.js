@@ -2206,7 +2206,7 @@ export default function OrganicPillarPage() {
                   )}
                 </div>
 
-                {/* ACCORDION SECTION 5: FFmpeg Video Studio Settings */}
+                {/* ACCORDION SECTION 5: Workflow & Video Studio Settings */}
                 <div style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <div 
                     onClick={() => setActiveAccordion(4)} 
@@ -2221,45 +2221,152 @@ export default function OrganicPillarPage() {
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span>🎞️</span>
-                      <span style={{ fontWeight: 600 }}>5. FFmpeg Video Studio Settings</span>
+                      <span>⚙️</span>
+                      <span style={{ fontWeight: 600 }}>5. Alur Kerja Produksi & Post-Processing (Workflow Settings)</span>
                     </div>
                     <span>{activeAccordion === 4 ? '▲' : '▼'}</span>
                   </div>
 
                   {activeAccordion === 4 && (
-                    <div style={{ padding: '20px 24px', background: 'rgba(0,0,0,0.1)' }}>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-                        <div className="form-group">
-                          <label className="form-label" style={{ fontSize: '0.85rem' }}>Mode Sinkronisasi Audio-Video</label>
-                          <select 
-                            className="form-input" 
-                            value={ffmpegSyncOption} 
-                            onChange={e => setFfmpegSyncOption(e.target.value)}
-                          >
-                            <option value="smart_sync">⚡ Smart Sync (Tempo Audio Otomatis)</option>
-                            <option value="loop_video">🔁 Loop Video (Ulang Video Jika Kurang)</option>
-                            <option value="freeze_last_frame">❄️ Freeze Last Frame (Tahan Frame Terakhir)</option>
-                            <option value="speed_adjust">⏩ Speed Adjust (Sesuaikan Kecepatan Video)</option>
-                          </select>
-                        </div>
+                    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                      
+                      {/* Active Stages Checklist */}
+                      <div>
+                        <label className="form-label" style={{ marginBottom: 10 }}>Tahapan Workflow Aktif</label>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+                          
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-color)', fontWeight: '500' }}>Enable TTS (Voiceover)</span>
+                            <input type="checkbox" checked={enableTts} onChange={e => setEnableTts(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
+                          </div>
 
-                        <div className="form-group">
-                          <label className="form-label" style={{ fontSize: '0.85rem' }}>
-                            Video Scale: <strong>{ffmpegVideoScale}x</strong>
-                          </label>
-                          <input 
-                            type="range" 
-                            min="0.5" 
-                            max="2.0" 
-                            step="0.1" 
-                            value={ffmpegVideoScale} 
-                            onChange={e => setFfmpegVideoScale(parseFloat(e.target.value))}
-                            className="form-range"
-                            style={{ width: '100%' }}
-                          />
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-color)', fontWeight: '500' }}>Enable G-Labs (AI Video)</span>
+                            <input type="checkbox" checked={enableGlabs} onChange={e => setEnableGlabs(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-color)', fontWeight: '500' }}>Enable FFmpeg Muxing</span>
+                            <input type="checkbox" checked={enableFfmpeg} onChange={e => setEnableFfmpeg(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-color)', fontWeight: '500' }}>Enable Social Draft Post</span>
+                            <input type="checkbox" checked={enableSocialPost} onChange={e => setEnableSocialPost(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
+                          </div>
+
                         </div>
                       </div>
+
+                      {/* Audio settings */}
+                      {enableTts && (
+                        <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: 14 }}>
+                          <label className="form-label" style={{ fontWeight: 600, color: 'var(--accent-color)' }}>🔊 TTS Audio Engine Settings</label>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 8 }}>
+                            <div>
+                              <label className="form-label" style={{ fontSize: '0.78rem' }}>Voice Provider</label>
+                              <select className="form-input" value={voiceProvider} onChange={e => setVoiceProvider(e.target.value)}>
+                                <option value="minimax">MiniMax VO Engine</option>
+                                <option value="gemini">Gemini TTS Engine</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="form-label" style={{ fontSize: '0.78rem' }}>Voice Persona</label>
+                              <select 
+                                className="form-input" 
+                                value={voicePersona} 
+                                onChange={e => setVoicePersona(e.target.value)}
+                              >
+                                {voiceProvider === 'gemini' 
+                                  ? GEMINI_VOICES.map(v => <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>)
+                                  : (targetLanguage === 'en-US' ? MINIMAX_ENGLISH_VOICES : MINIMAX_VOICES).map(v => <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>)
+                                }
+                              </select>
+                            </div>
+                          </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 10 }}>
+                            <div>
+                              <label className="form-label" style={{ fontSize: '0.78rem' }}>Speed ({voiceSpeed}x)</label>
+                              <input type="range" min="0.5" max="2.0" step="0.1" value={voiceSpeed} onChange={e => setVoiceSpeed(parseFloat(e.target.value))} style={{ width: '100%' }} />
+                            </div>
+                            <div>
+                              <label className="form-label" style={{ fontSize: '0.78rem' }}>Volume ({voiceVolume}x)</label>
+                              <input type="range" min="0.0" max="1.0" step="0.1" value={voiceVolume} onChange={e => setVoiceVolume(parseFloat(e.target.value))} style={{ width: '100%' }} />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* FFmpeg Video Studio Settings */}
+                      {enableFfmpeg && (
+                        <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                          <label className="form-label" style={{ fontWeight: 600, color: 'var(--accent-color)' }}>🎬 FFmpeg Video Studio Settings</label>
+                          
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            <label className="form-label" style={{ fontSize: '0.78rem' }}>Mode Sinkronisasi Audio-Video</label>
+                            <div style={{ display: 'flex', gap: 24, marginTop: 2 }}>
+                              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.82rem', color: 'var(--text-color)' }}>
+                                <input
+                                  type="radio"
+                                  name="syncModeOpc"
+                                  value="auto"
+                                  checked={syncMode === 'auto'}
+                                  onChange={() => {
+                                    setSyncMode('auto');
+                                    setFfmpegSyncOption('smart_sync');
+                                  }}
+                                  style={{ width: 14, height: 14, cursor: 'pointer' }}
+                                />
+                                <span><b>Auto-Pilot Smart Sync</b></span>
+                              </label>
+                              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.82rem', color: 'var(--text-color)' }}>
+                                <input
+                                  type="radio"
+                                  name="syncModeOpc"
+                                  value="manual"
+                                  checked={syncMode === 'manual'}
+                                  onChange={() => {
+                                    setSyncMode('manual');
+                                    setFfmpegSyncOption('shortest');
+                                  }}
+                                  style={{ width: 14, height: 14, cursor: 'pointer' }}
+                                />
+                                <span>Kustom Manual</span>
+                              </label>
+                            </div>
+
+                            {syncMode === 'manual' && (
+                              <div className="form-group" style={{ flex: 1, marginTop: 6, marginBottom: 0 }}>
+                                <label className="form-label" style={{ fontSize: '0.78rem' }}>Metode Manual</label>
+                                <select className="form-input" value={ffmpegSyncOption} onChange={e => setFfmpegSyncOption(e.target.value)}>
+                                  <option value="shortest">shortest (Potong video - Default)</option>
+                                  <option value="loop">loop (Ulang video)</option>
+                                  <option value="stretch">stretch (Ubah kecepatan)</option>
+                                  <option value="freeze">freeze (Tahan frame terakhir)</option>
+                                </select>
+                              </div>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="form-label" style={{ fontSize: '0.78rem', display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                              <span>Video Scale:</span>
+                              <span style={{ color: 'var(--accent-color)', fontWeight: 'bold' }}>{Math.round(ffmpegVideoScale * 100)}%</span>
+                            </label>
+                            <input 
+                              type="range" 
+                              min="1.0" 
+                              max="2.0" 
+                              step="0.05" 
+                              className="form-input" 
+                              value={ffmpegVideoScale} 
+                              onChange={e => setFfmpegVideoScale(parseFloat(e.target.value))} 
+                              style={{ width: '100%', padding: 0 }} 
+                            />
+                          </div>
+                        </div>
+                      )}
+
                     </div>
                   )}
                 </div>

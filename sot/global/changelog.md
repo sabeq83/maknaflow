@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.5.1 — Align Accordion 5 Workflow & Studio Settings in OPC with RE (08/08/2026)
+- Penyelarasan Accordion 5 (Workflow Settings, TTS Audio Engine, & FFmpeg Studio Settings) pada pembuatan Single & Mass OPC
+- Penyelarasan Accordion 5 pada Modal Ingest Content Planner
+- Dukungan selector radio Mode Sinkronisasi (Auto-Pilot Smart Sync vs Kustom Manual) dan Video Scale slider 100%-200%
+
 ## V2.5.0 — Dual Mode Full Auto Pilot OPC & Universal Schema Migration (08/08/2026)
 - Integrasi Dual Mode (Full Auto Pilot vs Manual Review) pada Single OPC, Mass OPC, dan Ingest Content Planner
 - Penambahan Accordion 5 FFmpeg Video Studio Settings pada form pembuatan kampanye OPC
