@@ -649,21 +649,21 @@ export default function BridgeBulkCampaignDetailPage() {
                     <label className="switch" style={{ position: 'relative', display: 'inline-block', width: '40px', height: '20px' }}>
                       <input
                         type="checkbox"
-                        checked={item.enable_tts === 1}
+                        checked={Number(item.enable_tts) === 1}
                         onChange={(e) => updateItemSettings(item.id, { enable_tts: e.target.checked ? 1 : 0 })}
                         disabled={['pending', 'processing'].includes(item.workflow_status)}
                         style={{ opacity: 0, width: 0, height: 0 }}
                       />
                       <span className="slider" style={{
                         position: 'absolute', cursor: 'pointer', top: 0, left: 0, right: 0, bottom: 0,
-                        backgroundColor: item.enable_tts === 1 ? 'var(--accent)' : '#ccc',
+                        backgroundColor: Number(item.enable_tts) === 1 ? 'var(--accent)' : '#ccc',
                         borderRadius: '20px', transition: '0.4s'
                       }}></span>
                     </label>
                     <span style={{ fontSize: '0.8rem', color: '#fff', fontWeight: 600 }}>Aktifkan TTS Voiceover</span>
                   </div>
 
-                  {item.enable_tts === 1 && (
+                  {Number(item.enable_tts) === 1 && (
                     <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div style={{ display: 'flex', gap: '10px' }}>
                         <div style={{ flex: 1 }}>
@@ -739,21 +739,21 @@ export default function BridgeBulkCampaignDetailPage() {
                     <label className="switch" style={{ position: 'relative', display: 'inline-block', width: '40px', height: '20px' }}>
                       <input
                         type="checkbox"
-                        checked={item.enable_ffmpeg === 1}
+                        checked={Number(item.enable_ffmpeg) === 1}
                         onChange={(e) => updateItemSettings(item.id, { enable_ffmpeg: e.target.checked ? 1 : 0 })}
                         disabled={['pending', 'processing'].includes(item.workflow_status)}
                         style={{ opacity: 0, width: 0, height: 0 }}
                       />
                       <span className="slider" style={{
                         position: 'absolute', cursor: 'pointer', top: 0, left: 0, right: 0, bottom: 0,
-                        backgroundColor: item.enable_ffmpeg === 1 ? 'var(--accent)' : '#ccc',
+                        backgroundColor: Number(item.enable_ffmpeg) === 1 ? 'var(--accent)' : '#ccc',
                         borderRadius: '20px', transition: '0.4s'
                       }}></span>
                     </label>
                     <span style={{ fontSize: '0.8rem', color: '#fff', fontWeight: 600 }}>Aktifkan FFmpeg Muxing</span>
                   </div>
 
-                  {item.enable_ffmpeg === 1 && (
+                  {Number(item.enable_ffmpeg) === 1 && (
                     <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div style={{ display: 'flex', gap: '10px' }}>
                         <div style={{ flex: 1 }}>

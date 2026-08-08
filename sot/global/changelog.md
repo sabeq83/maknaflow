@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.5.9 — Fix TTS and FFmpeg toggles in campaign detail page (08/08/2026)
+- Fix switch input type checked check on detail page by wrapping enable_tts and enable_ffmpeg in Number() to allow loose type coercion
+
 ## V2.5.8 — Fix bridge_injector_items schema migrations (08/08/2026)
 - Add compliance and voiceover columns to PostgreSQL auto-migration in db-pg.js
 
