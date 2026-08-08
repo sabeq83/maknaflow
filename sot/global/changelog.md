@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.5.4 — Move Recipe Labs to Workflow (08/08/2026)
+- Move Recipe Labs to Workflow category in both Sidebar and Superadmin Tenant Management
+
 ## V2.5.3 — Reorganize Sidebar Menu Structure (08/08/2026)
 - Categorize sidebar menus into 5 logical groups: Planning, Workflow, Publishing, Tools, and System
 - Move Sheets Autopilot to Workflow group
