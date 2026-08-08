@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.5.8 — Fix bridge_injector_items schema migrations (08/08/2026)
+- Add compliance and voiceover columns to PostgreSQL auto-migration in db-pg.js
+
 ## V2.5.7 — Fix Product Bridge detail loading and bulk imports (08/08/2026)
 - Fix tenant_id ambiguity SQL error on campaign details GET route
 - Fix bulk items insertion by removing non-existent brand_profile_id column
