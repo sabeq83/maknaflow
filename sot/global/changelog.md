@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.5.15 — Migrate Staging to Mac Mini & Decommission Node 1 (08/08/2026)
+- Stop and disable old staging node services on 100.65.62.63
+- Update deploy:staging npm script to deploy remotely to Mac Mini
+- Update AGENTS.md rules with new Mac Mini Staging specs
+
 ## V2.5.14 — Align FFmpeg Controls Vertically (08/08/2026)
 - Align Sync Option and Video Scale inputs vertically in a single column
 
