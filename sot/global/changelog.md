@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.5.2 — Fix TTS Batch ID collision under concurrency in OPC, RE, and IFC (08/08/2026)
+- Fix concurrency duplicate key constraint violation on tts_studio_batches table by appending item.id to batchId
+- Ensure OPC, RE, and IFC TTS batch generation use item.id prefix for 100% unique batch IDs
+
 ## V2.5.1 — Align Accordion 5 Workflow & Studio Settings in OPC with RE (08/08/2026)
 - Penyelarasan Accordion 5 (Workflow Settings, TTS Audio Engine, & FFmpeg Studio Settings) pada pembuatan Single & Mass OPC
 - Penyelarasan Accordion 5 pada Modal Ingest Content Planner
