@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.5.0 — Dual Mode Full Auto Pilot OPC & Universal Schema Migration (08/08/2026)
+- Integrasi Dual Mode (Full Auto Pilot vs Manual Review) pada Single OPC, Mass OPC, dan Ingest Content Planner
+- Penambahan Accordion 5 FFmpeg Video Studio Settings pada form pembuatan kampanye OPC
+- Otomatisasi skeduler backend processPillarGenerator langsung ke production_processing pada mode Full Auto Pilot
+- Migrasi skema database PostgreSQL untuk kolom execution_mode pada re_campaigns dan pillar_campaigns di dev, staging, dan public
+
 ## V2.4.0 — Superadmin Tenant Menu Locking & User Management Superadmin Isolation (08/08/2026)
 - Add Superadmin Tenant Module & Sidebar Menu Locking (Feature Toggle)
 - Update Sidebar component with locked module indicator and access restriction

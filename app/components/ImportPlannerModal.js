@@ -54,7 +54,10 @@ export default function ImportPlannerModal({
   const [faceVisibility, setFaceVisibility] = useState('Faceless'); // 'Faceless' | 'POV' | 'Silhouette' | 'cartoon_face'
   const [targetClipsCount, setTargetClipsCount] = useState(3); // Isian bebas number
   const [wordsPerClip, setWordsPerClip] = useState('20-22 kata');
-  const [visualMode, setVisualMode] = useState('hybrid_lock'); // 'hybrid_lock' | 'pure_t2v'
+  const [visualMode, setVisualMode] = useState('pure_t2v'); // 'hybrid_lock' | 'pure_t2v'
+  const [executionMode, setExecutionMode] = useState('full_autopilot');
+  const [ffmpegSyncOption, setFfmpegSyncOption] = useState('smart_sync');
+  const [ffmpegVideoScale, setFfmpegVideoScale] = useState(1.0);
 
   // Accordion 3: Product Bridging Settings
   const [isBridgingActive, setIsBridgingActive] = useState(true);
@@ -112,7 +115,7 @@ export default function ImportPlannerModal({
     // Accordion 2: Aesthetics & Veo Engine Settings
     if (config.visual_engine) {
       setVisualStyle(config.visual_engine.visual_style || 'Cinematic');
-      setVisualMode(config.visual_engine.visual_mode || 'hybrid_lock');
+      setVisualMode(executionMode === 'full_autopilot' ? 'pure_t2v' : (config.visual_engine.visual_mode || 'pure_t2v'));
       setVideoModel(config.visual_engine.video_model || 'veo_31_lite');
       setFaceVisibility(config.visual_engine.face_visibility || 'Faceless');
       setTargetClipsCount(Number(config.visual_engine.target_clips_count ?? 3));
@@ -386,6 +389,7 @@ export default function ImportPlannerModal({
         campaign_name: campaignName,
         global_settings: {
           status: targetStatus,
+          execution_mode: executionMode,
           brand_profile_id: selectedBrandId || null,
           account_name: accountName || null,
           custom_instruction: customInstruction,
@@ -400,7 +404,8 @@ export default function ImportPlannerModal({
           face_visibility: faceVisibility,
           target_clips_count: Number(targetClipsCount),
           words_per_clip: wordsPerClip,
-          visual_mode: visualMode,
+          visual_mode: executionMode === 'full_autopilot' ? 'pure_t2v' : visualMode,
+          scheduler_pause_at: executionMode === 'full_autopilot' ? null : 'tts',
           is_bridging_active: isBridgingActive ? 1 : 0,
           bridge_at_clip: Number(bridgeAtClip),
           bridge_duration_clips: Number(bridgeDurationClips),
@@ -414,6 +419,8 @@ export default function ImportPlannerModal({
           target_demographic: targetDemographic,
           target_demographic_custom: targetDemographicCustom,
           nextcloud_parent_folder: nextcloudParentFolder.trim(),
+          ffmpeg_sync_option: ffmpegSyncOption,
+          ffmpeg_video_scale: Number(ffmpegVideoScale),
           ffmpeg_sfx_volume: 0.0,
           ffmpeg_bgm_volume: 0.0,
           target_spreadsheet_id: '',
@@ -471,10 +478,65 @@ export default function ImportPlannerModal({
           {/* Top Mode Header Banner */}
           <div style={{
             padding: '12px 16px', background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.3)',
-            borderRadius: '10px', marginBottom: '20px', color: '#818cf8', fontWeight: 700, fontSize: '13px',
+            borderRadius: '10px', marginBottom: '16px', color: '#818cf8', fontWeight: 700, fontSize: '13px',
             display: 'flex', alignItems: 'center', gap: '8px'
           }}>
             <span>📊 Mode Impor Content Planner Master ke Engine Produksi Autopilot OPC</span>
+          </div>
+
+          {/* EXECUTION MODE SWITCHER (Full Auto Pilot vs Manual Review) */}
+          <div style={{ padding: '16px 20px', border: '1px solid #27272a', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.015)', marginBottom: '20px' }}>
+            <label style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85rem', color: '#f3f4f6', fontWeight: 700 }}>
+              <span>🚀 Mode Eksekusi Pipeline:</span>
+            </label>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
+              <div 
+                onClick={() => {
+                  setExecutionMode('full_autopilot');
+                  setVisualMode('pure_t2v');
+                }}
+                style={{
+                  border: `1px solid ${executionMode === 'full_autopilot' ? '#10b981' : '#27272a'}`,
+                  background: executionMode === 'full_autopilot' ? 'rgba(16, 185, 129, 0.08)' : '#18181b',
+                  borderRadius: 8,
+                  padding: '12px 16px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{ fontWeight: 700, fontSize: '0.9rem', color: executionMode === 'full_autopilot' ? '#10b981' : '#fff' }}>
+                    🤖 Mode Full Auto Pilot
+                  </span>
+                  {executionMode === 'full_autopilot' && <span style={{ fontSize: '0.75rem', background: '#10b981', color: '#fff', padding: '2px 8px', borderRadius: 12, fontWeight: 700 }}>Aktif</span>}
+                </div>
+                <p style={{ fontSize: '0.78rem', color: '#9ca3af', margin: 0, lineHeight: 1.4 }}>
+                  Otomatis jalan penuh dari Storyboard ➔ TTS ➔ G-Labs Video ➔ FFmpeg tanpa jeda review. Visual mode dikunci ke Pure Text-to-Video.
+                </p>
+              </div>
+
+              <div 
+                onClick={() => setExecutionMode('manual_review')}
+                style={{
+                  border: `1px solid ${executionMode === 'manual_review' ? '#f59e0b' : '#27272a'}`,
+                  background: executionMode === 'manual_review' ? 'rgba(245, 158, 11, 0.08)' : '#18181b',
+                  borderRadius: 8,
+                  padding: '12px 16px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{ fontWeight: 700, fontSize: '0.9rem', color: executionMode === 'manual_review' ? '#f59e0b' : '#fff' }}>
+                    👁️ Mode Manual Review (Fase 1 & 2)
+                  </span>
+                  {executionMode === 'manual_review' && <span style={{ fontSize: '0.75rem', background: '#f59e0b', color: '#000', padding: '2px 8px', borderRadius: 12 }}>Aktif</span>}
+                </div>
+                <p style={{ fontSize: '0.78rem', color: '#9ca3af', margin: 0, lineHeight: 1.4 }}>
+                  Fase 1 Discovery berhenti untuk review storyboard & naskah. Fase 2 produksi dijalankan manual setelah persetujuan.
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* PRESET SELECTOR */}
@@ -870,8 +932,29 @@ export default function ImportPlannerModal({
                     </div>
 
                     <div>
-                      <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Visual Mode (Metode Generasi):</label>
-                      <select value={visualMode} onChange={e => setVisualMode(e.target.value)} style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}>
+                      <label style={{ fontSize: '12px', color: '#9ca3af', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <span>Visual Mode (Metode Generasi):</span>
+                        {executionMode === 'full_autopilot' && (
+                          <span style={{ fontSize: '11px', color: '#10b981', fontWeight: 700 }}>
+                            🔒 Terkunci Pure T2V
+                          </span>
+                        )}
+                      </label>
+                      <select 
+                        value={executionMode === 'full_autopilot' ? 'pure_t2v' : visualMode} 
+                        onChange={e => setVisualMode(e.target.value)} 
+                        disabled={executionMode === 'full_autopilot'}
+                        style={{ 
+                          width: '100%', 
+                          padding: '10px', 
+                          background: '#09090b', 
+                          border: '1px solid #27272a', 
+                          color: '#fff', 
+                          borderRadius: '8px',
+                          opacity: executionMode === 'full_autopilot' ? 0.7 : 1,
+                          cursor: executionMode === 'full_autopilot' ? 'not-allowed' : 'pointer'
+                        }}
+                      >
                         <option value="hybrid_lock">Double-Pass Pixel Lock (Nano Banana Pro T2I ➜ Veo 3.1 I2V)</option>
                         <option value="pure_t2v">Pure Text-To-Video (T2V Langsung)</option>
                       </select>
@@ -1241,6 +1324,54 @@ export default function ImportPlannerModal({
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+            </div>
+
+            {/* ACCORDION 5: FFmpeg Video Studio Settings */}
+            <div style={{ background: '#18181b', borderRadius: '10px', border: '1px solid #27272a', overflow: 'hidden' }}>
+              <div
+                onClick={() => setActiveAccordion(4)}
+                style={{
+                  padding: '14px 18px', background: activeAccordion === 4 ? 'rgba(99, 102, 241, 0.12)' : '#18181b',
+                  color: activeAccordion === 4 ? '#818cf8' : '#f3f4f6', fontWeight: 700, fontSize: '14px',
+                  cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                }}
+              >
+                <span>5. FFmpeg Video Studio Settings</span>
+                <span>{activeAccordion === 4 ? '▲' : '▼'}</span>
+              </div>
+
+              {activeAccordion === 4 && (
+                <div style={{ padding: '20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div>
+                    <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Mode Sinkronisasi Audio-Video:</label>
+                    <select 
+                      value={ffmpegSyncOption} 
+                      onChange={e => setFfmpegSyncOption(e.target.value)} 
+                      style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
+                    >
+                      <option value="smart_sync">⚡ Smart Sync (Tempo Audio Otomatis)</option>
+                      <option value="loop_video">🔁 Loop Video (Ulang Video Jika Kurang)</option>
+                      <option value="freeze_last_frame">❄️ Freeze Last Frame (Tahan Frame Terakhir)</option>
+                      <option value="speed_adjust">⏩ Speed Adjust (Sesuaikan Kecepatan Video)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>
+                      Video Scale: <strong>{ffmpegVideoScale}x</strong>
+                    </label>
+                    <input 
+                      type="range" 
+                      min="0.5" 
+                      max="2.0" 
+                      step="0.1" 
+                      value={ffmpegVideoScale} 
+                      onChange={e => setFfmpegVideoScale(parseFloat(e.target.value))}
+                      style={{ width: '100%', marginTop: '12px', accentColor: '#6366f1' }}
+                    />
+                  </div>
                 </div>
               )}
             </div>

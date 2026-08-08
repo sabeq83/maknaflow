@@ -118,6 +118,7 @@ export default function OrganicPillarPage() {
   // Section 4: Visual Swap Overrides
   const [isVsoActive, setIsVsoActive] = useState(false);
   const [characterConcept, setCharacterConcept] = useState('faceless');
+  const [executionMode, setExecutionMode] = useState('full_autopilot');
   const [subjectDemographic, setSubjectDemographic] = useState('syari_classic');
   const [wardrobeStyle, setWardrobeStyle] = useState('amber_terracotta');
   const [wardrobeStyleCustom, setWardrobeStyleCustom] = useState('');
@@ -204,7 +205,7 @@ export default function OrganicPillarPage() {
     // Accordion 2: Aesthetics & Visual Settings
     if (config.visual_engine) {
       setVisualStyle(config.visual_engine.visual_style || 'Cinematic');
-      setVisualMode(config.visual_engine.visual_mode || 'hybrid_lock');
+      setVisualMode(executionMode === 'full_autopilot' ? 'pure_t2v' : (config.visual_engine.visual_mode || 'pure_t2v'));
       setVideoModel(config.visual_engine.video_model || 'veo_31_lite');
       setFaceVisibility(config.visual_engine.face_visibility || 'Faceless');
       setTargetClipsCount(config.visual_engine.target_clips_count || 4);
@@ -716,8 +717,10 @@ export default function OrganicPillarPage() {
           ffmpeg_bgm_volume: ffmpegBgmVolume,
           target_spreadsheet_id: '',
           nextcloud_parent_folder: nextcloudParentFolder.trim(),
-          bridge_duration_clips: Number(bridgeDurationClips),
-          enable_vo_audit: enableVoAudit ? 1 : 0
+          enable_vo_audit: enableVoAudit ? 1 : 0,
+          execution_mode: executionMode,
+          visual_mode: executionMode === 'full_autopilot' ? 'pure_t2v' : visualMode,
+          scheduler_pause_at: executionMode === 'full_autopilot' ? null : 'tts'
         };
 
         const res = await fetch('/api/v2/pillar-campaigns/bulk', {
@@ -857,6 +860,7 @@ export default function OrganicPillarPage() {
       formData.append('status', submitStatus);
       formData.append('ai_directive', aiDirective);
       formData.append('mandatory_outro_line', mandatoryOutroLine);
+      formData.append('execution_mode', executionMode);
 
       if (isVsoActive) {
         const isMascot = subjectDemographic.startsWith('mascot_universe_');
@@ -1249,6 +1253,64 @@ export default function OrganicPillarPage() {
                   >
                     Mass Production (CSV/XLSX)
                   </button>
+                </div>
+
+                {/* EXECUTION MODE SWITCHER (Full Auto Pilot vs Manual Review) */}
+                <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-color)', background: 'rgba(255, 255, 255, 0.015)' }}>
+                  <label className="form-label" style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85rem' }}>
+                    <span>🚀 Mode Eksekusi Pipeline:</span>
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
+                    <div 
+                      onClick={() => {
+                        setExecutionMode('full_autopilot');
+                        setVisualMode('pure_t2v');
+                        setEnableTts(true);
+                        setEnableGlabs(true);
+                        setEnableFfmpeg(true);
+                      }}
+                      style={{
+                        border: `1px solid ${executionMode === 'full_autopilot' ? '#10b981' : 'var(--border-color)'}`,
+                        background: executionMode === 'full_autopilot' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                        borderRadius: 8,
+                        padding: '12px 16px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: executionMode === 'full_autopilot' ? '#10b981' : 'var(--text-color)' }}>
+                          🤖 Mode Full Auto Pilot
+                        </span>
+                        {executionMode === 'full_autopilot' && <span style={{ fontSize: '0.75rem', background: '#10b981', color: '#fff', padding: '2px 8px', borderRadius: 12, fontWeight: 700 }}>Aktif</span>}
+                      </div>
+                      <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
+                        Otomatis jalan penuh dari Storyboard ➔ TTS ➔ G-Labs Video ➔ FFmpeg tanpa jeda review. Visual mode dikunci ke Pure Text-to-Video.
+                      </p>
+                    </div>
+
+                    <div 
+                      onClick={() => setExecutionMode('manual_review')}
+                      style={{
+                        border: `1px solid ${executionMode === 'manual_review' ? '#f59e0b' : 'var(--border-color)'}`,
+                        background: executionMode === 'manual_review' ? 'rgba(245, 158, 11, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                        borderRadius: 8,
+                        padding: '12px 16px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: executionMode === 'manual_review' ? '#f59e0b' : 'var(--text-color)' }}>
+                          👁️ Mode Manual Review (Fase 1 & 2)
+                        </span>
+                        {executionMode === 'manual_review' && <span style={{ fontSize: '0.75rem', background: '#f59e0b', color: '#000', padding: '2px 8px', borderRadius: 12 }}>Aktif</span>}
+                      </div>
+                      <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
+                        Fase 1 Discovery berhenti untuk review storyboard & naskah. Fase 2 produksi dijalankan manual setelah persetujuan.
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 {/* PRESET SELECTOR */}
@@ -1734,11 +1796,29 @@ export default function OrganicPillarPage() {
                         </select>
                       </div>
                       <div className="form-group">
-                        <label className="form-label">Visual Mode</label>
-                        <select className="form-input" value={visualMode} onChange={e => setVisualMode(e.target.value)}>
+                        <label className="form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span>Visual Mode</span>
+                          {executionMode === 'full_autopilot' && (
+                            <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 600 }}>
+                              🔒 Terkunci Pure T2V (Mode Full Auto Pilot)
+                            </span>
+                          )}
+                        </label>
+                        <select 
+                          className="form-input" 
+                          value={executionMode === 'full_autopilot' ? 'pure_t2v' : visualMode} 
+                          onChange={e => setVisualMode(e.target.value)}
+                          disabled={executionMode === 'full_autopilot'}
+                          style={executionMode === 'full_autopilot' ? { opacity: 0.7, cursor: 'not-allowed' } : {}}
+                        >
                           <option value="hybrid_lock">Double-Pass Pixel Lock (Nano Banana Pro T2I ➜ Veo 3.1 I2V)</option>
                           <option value="pure_t2v">Pure Text-To-Video (T2V Langsung)</option>
                         </select>
+                        {executionMode === 'full_autopilot' && (
+                          <small style={{ display: 'block', marginTop: 4, color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                            ℹ️ Mode Full Auto Pilot hanya mendukung Pure Text-to-Video untuk eksekusi tanpa intervensi.
+                          </small>
+                        )}
                       </div>
                     </div>
                   )}
@@ -2122,6 +2202,64 @@ export default function OrganicPillarPage() {
                           </div>
                         </div>
                       )}
+                    </div>
+                  )}
+                </div>
+
+                {/* ACCORDION SECTION 5: FFmpeg Video Studio Settings */}
+                <div style={{ borderBottom: '1px solid var(--border-color)' }}>
+                  <div 
+                    onClick={() => setActiveAccordion(4)} 
+                    style={{ 
+                      padding: '16px 24px', 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center', 
+                      cursor: 'pointer', 
+                      background: activeAccordion === 4 ? 'rgba(59, 130, 246, 0.05)' : 'transparent',
+                      borderLeft: activeAccordion === 4 ? '3px solid var(--accent-color)' : '3px solid transparent'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span>🎞️</span>
+                      <span style={{ fontWeight: 600 }}>5. FFmpeg Video Studio Settings</span>
+                    </div>
+                    <span>{activeAccordion === 4 ? '▲' : '▼'}</span>
+                  </div>
+
+                  {activeAccordion === 4 && (
+                    <div style={{ padding: '20px 24px', background: 'rgba(0,0,0,0.1)' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+                        <div className="form-group">
+                          <label className="form-label" style={{ fontSize: '0.85rem' }}>Mode Sinkronisasi Audio-Video</label>
+                          <select 
+                            className="form-input" 
+                            value={ffmpegSyncOption} 
+                            onChange={e => setFfmpegSyncOption(e.target.value)}
+                          >
+                            <option value="smart_sync">⚡ Smart Sync (Tempo Audio Otomatis)</option>
+                            <option value="loop_video">🔁 Loop Video (Ulang Video Jika Kurang)</option>
+                            <option value="freeze_last_frame">❄️ Freeze Last Frame (Tahan Frame Terakhir)</option>
+                            <option value="speed_adjust">⏩ Speed Adjust (Sesuaikan Kecepatan Video)</option>
+                          </select>
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label" style={{ fontSize: '0.85rem' }}>
+                            Video Scale: <strong>{ffmpegVideoScale}x</strong>
+                          </label>
+                          <input 
+                            type="range" 
+                            min="0.5" 
+                            max="2.0" 
+                            step="0.1" 
+                            value={ffmpegVideoScale} 
+                            onChange={e => setFfmpegVideoScale(parseFloat(e.target.value))}
+                            className="form-range"
+                            style={{ width: '100%' }}
+                          />
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>

@@ -2887,13 +2887,23 @@ export default function PillarCampaignDetailPage() {
               </Link>
               <h1 style={{ margin: '4px 0 0 0', fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.5px' }}>🎬 {campaign.campaign_name}</h1>
               
-              {/* 2. ID Kampanye | Nama Akun Brand | Created Date */}
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 12, fontSize: '0.9rem', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)', paddingBottom: 16, marginBottom: 20 }}>
+              {/* 2. ID Kampanye | Nama Akun Brand | Created Date | Mode */}
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', marginTop: 12, fontSize: '0.9rem', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)', paddingBottom: 16, marginBottom: 20 }}>
                 <span>🔑 ID: <code style={{ background: 'rgba(255,255,255,0.05)', padding: '3px 8px', borderRadius: '4px', color: 'var(--accent-light)', fontFamily: 'monospace', fontSize: '0.85rem' }}>{campaign.id}</code></span>
                 <span style={{ opacity: 0.3 }}>|</span>
                 <span>🏷️ Brand: <strong>{campaign.account_name || campaign.brand_name || 'Tidak Ditentukan'}</strong></span>
                 <span style={{ opacity: 0.3 }}>|</span>
                 <span>📅 Dibuat: <strong>{new Date(campaign.created_at).toLocaleString('id-ID')}</strong></span>
+                <span style={{ opacity: 0.3 }}>|</span>
+                {campaign?.execution_mode === 'full_autopilot' ? (
+                  <span style={{ fontSize: '0.72rem', background: '#10b981', color: '#fff', padding: '3px 8px', borderRadius: 4, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    🤖 FULL AUTO PILOT
+                  </span>
+                ) : (
+                  <span style={{ fontSize: '0.72rem', background: '#f59e0b', color: '#000', padding: '3px 8px', borderRadius: 4, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    👁️ MANUAL REVIEW (FASE 1 & 2)
+                  </span>
+                )}
               </div>
             </div>
 

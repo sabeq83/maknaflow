@@ -114,7 +114,8 @@ export const POST = withTenantContext(async (request, _context, user) => {
         target_demographic: formData.get('target_demographic') || null,
         target_demographic_custom: formData.get('target_demographic_custom') || null,
         ai_directive: formData.get('ai_directive') || null,
-        mandatory_outro_line: formData.get('mandatory_outro_line') || null
+        mandatory_outro_line: formData.get('mandatory_outro_line') || null,
+        execution_mode: formData.get('execution_mode') || 'manual_review'
       };
 
       const file = formData.get('product_ref_image');
@@ -160,6 +161,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       parsedBody.enable_audio_segment = parsedBody.enable_audio_segment !== undefined ? Number(parsedBody.enable_audio_segment) : 0;
       parsedBody.ai_directive = parsedBody.ai_directive || null;
       parsedBody.mandatory_outro_line = parsedBody.mandatory_outro_line || null;
+      parsedBody.execution_mode = parsedBody.execution_mode || 'manual_review';
     }
 
     if (parsedBody.visual_overrides_json) {
@@ -270,7 +272,8 @@ export const POST = withTenantContext(async (request, _context, user) => {
       aspect_ratio: aspect_ratio || '9:16',
       target_ai: target_ai || 'Google Veo (8s)',
       video_model: video_model || 'veo_31_lite',
-      visual_mode: visual_mode || 'hybrid_lock',
+      execution_mode: parsedBody.execution_mode || 'manual_review',
+      visual_mode: (parsedBody.execution_mode === 'full_autopilot') ? 'pure_t2v' : (visual_mode || 'pure_t2v'),
       product_ref_image_path: productRefImagePath,
       product_filename_declare: productFilenameDeclare,
       visual_overrides_json: visual_overrides_json || null,

@@ -56,7 +56,8 @@ export const POST = withTenantContext(async (request) => {
       aspect_ratio: global_settings.aspect_ratio || '9:16',
       target_ai: global_settings.target_ai || 'Google Veo (8s)',
       video_model: global_settings.video_model || 'veo_31_lite',
-      visual_mode: global_settings.visual_mode || 'hybrid_lock',
+      execution_mode: global_settings.execution_mode || 'manual_review',
+      visual_mode: (global_settings.execution_mode === 'full_autopilot') ? 'pure_t2v' : (global_settings.visual_mode || 'pure_t2v'),
       product_ref_image_path: null,
       product_filename_declare: null,
       visual_overrides_json: global_settings.visual_overrides_json || null,
@@ -75,7 +76,7 @@ export const POST = withTenantContext(async (request) => {
       voice_volume: global_settings.voice_volume !== undefined ? Number(global_settings.voice_volume) : 1.0,
       target_language: global_settings.target_language || 'id-ID',
       local_scheduler: global_settings.local_scheduler !== undefined ? (global_settings.local_scheduler ? 1 : 0) : 1,
-      scheduler_pause_at: global_settings.scheduler_pause_at || null,
+      scheduler_pause_at: global_settings.execution_mode === 'full_autopilot' ? null : (global_settings.scheduler_pause_at || null),
       is_mass_production: 1,
       ffmpeg_sync_option: global_settings.ffmpeg_sync_option || 'smart_sync',
       ffmpeg_video_scale: global_settings.ffmpeg_video_scale !== undefined ? Number(global_settings.ffmpeg_video_scale) : 1.0,
@@ -83,9 +84,12 @@ export const POST = withTenantContext(async (request) => {
       ffmpeg_bgm_volume: global_settings.ffmpeg_bgm_volume !== undefined ? Number(global_settings.ffmpeg_bgm_volume) : 0.15,
       nextcloud_parent_folder: global_settings.nextcloud_parent_folder || 'MAKNA_Production_Final',
       fb_draft_mode: global_settings.fb_draft_mode || 'auto',
+      sfx_setting: global_settings.sfx_setting || 'without_sfx',
       enable_vo_audit: global_settings.enable_vo_audit !== undefined ? Number(global_settings.enable_vo_audit) : 0,
       enable_audio_segment: global_settings.enable_audio_segment ? 1 : 0,
-      voice_cast_json: global_settings.voice_cast_json || null
+      voice_cast_json: global_settings.voice_cast_json || null,
+      ai_directive: global_settings.ai_directive || null,
+      mandatory_outro_line: global_settings.mandatory_outro_line || null
     };
 
     const items = rows_data.map((row, i) => {

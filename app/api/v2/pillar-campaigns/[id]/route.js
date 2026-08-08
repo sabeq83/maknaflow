@@ -83,6 +83,9 @@ export const PATCH = withTenantContext(async (request, { params }, user) => {
     if (body.status !== undefined && ['running', 'paused', 'completed', 'draft'].includes(body.status)) {
       updates.status = body.status;
     }
+    if (body.execution_mode !== undefined && ['full_autopilot', 'manual_review'].includes(body.execution_mode)) {
+      updates.execution_mode = body.execution_mode;
+    }
     if (body.local_scheduler !== undefined) {
       updates.local_scheduler = body.local_scheduler ? 1 : 0;
     }
