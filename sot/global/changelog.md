@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.5.12 — Product Bridge Form Layout Alignment (08/08/2026)
+- Move bridge position and Nextcloud URL asset fields outside grid to render vertically full-width
+
 ## V2.5.11 — Product Bridge Enhancements (08/08/2026)
 - Direct Nextcloud asset link in Tab 3
 - Manual pipeline step retry options

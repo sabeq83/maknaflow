@@ -904,9 +904,7 @@ export default function ProductBridgeInjectPage() {
 
               {formMode === 'single' ? (
                 <form onSubmit={handleCreateCampaign} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                    
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                       <div className="form-group">
                         <label className="form-label">🏷️ Nama Akun (Brand Account)</label>
                         <select
@@ -1124,8 +1122,6 @@ export default function ProductBridgeInjectPage() {
                         style={{ background: 'var(--bg-primary)' }}
                       />
                     </div>
-
-                  </div>
 
                   <div className="form-group" style={{ marginTop: '4px' }}>
                     <label className="form-label">Audit Kepatuhan TikTok Safe</label>
