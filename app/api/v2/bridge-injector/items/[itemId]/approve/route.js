@@ -19,6 +19,11 @@ export const POST = withTenantContext(async (request, { params }) => {
       return NextResponse.json({ success: false, error: 'Item tidak ditemukan.' }, { status: 404 });
     }
 
+    const campaign = await db.prepare('SELECT id FROM bridge_injector_campaigns WHERE id = ?').get(item.campaign_id);
+    if (!campaign) {
+      return NextResponse.json({ success: false, error: 'Kampanye tidak ditemukan atau Anda tidak memiliki akses.' }, { status: 404 });
+    }
+
     logToBridgeInjector(`[BULK Item #${itemId}] Pengguna menyetujui (Approve & Proceed) pembuatan video.`);
 
     // Update status ke 'approved' agar scheduler memicu I2V & Nextcloud sync

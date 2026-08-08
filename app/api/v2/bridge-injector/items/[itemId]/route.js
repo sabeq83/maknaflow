@@ -3,8 +3,9 @@ import { getDb } from '@/lib/db';
 import { logToBridgeInjector } from '@/lib/bridge-injector-logger';
 import fs from 'fs';
 import path from 'path';
+import { withTenantContext } from '@/lib/auth';
 
-export async function PUT(request, { params }) {
+export const PUT = withTenantContext(async (request, { params }) => {
   try {
     const { itemId } = await params;
     const body = await request.json().catch(() => ({}));
@@ -88,17 +89,22 @@ ${injected_vo_4 || ''}
     console.error('[Bridge Injector Item PUT Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function PATCH(request, { params }) {
+export const PATCH = withTenantContext(async (request, { params }) => {
   try {
     const { itemId } = await params;
     const body = await request.json().catch(() => ({}));
     const db = getDb();
 
-    const item = await db.prepare('SELECT id FROM bridge_injector_items WHERE id = ?').get(itemId);
+    const item = await db.prepare('SELECT id, campaign_id FROM bridge_injector_items WHERE id = ?').get(itemId);
     if (!item) {
       return NextResponse.json({ success: false, error: 'Item tidak ditemukan.' }, { status: 404 });
+    }
+
+    const campaign = await db.prepare('SELECT campaign_name FROM bridge_injector_campaigns WHERE id = ?').get(item.campaign_id);
+    if (!campaign) {
+      return NextResponse.json({ success: false, error: 'Kampanye tidak ditemukan atau Anda tidak memiliki akses.' }, { status: 404 });
     }
 
     const allowedFields = [
@@ -141,4 +147,4 @@ export async function PATCH(request, { params }) {
     console.error('[Bridge Injector Item PATCH Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

@@ -10,10 +10,12 @@ import fs from 'fs';
 import path from 'path';
 
 import { withTenantContext } from '@/lib/auth';
+import { getActiveTenantId } from '@/lib/tenant-context';
 
 export const GET = withTenantContext(async () => {
   try {
     const db = getDb();
+    const tenantId = getActiveTenantId();
     const campaigns = await db.prepare(`
       SELECT c.*, p.product_name, o.injected_script_md_path, o.clip2_video_path, b.brand_name,
              (SELECT COUNT(*) FROM bridge_injector_items WHERE campaign_id = c.id) as total_items,
@@ -22,8 +24,9 @@ export const GET = withTenantContext(async () => {
       LEFT JOIN product_extractions p ON c.target_product_id = p.id
       LEFT JOIN bridge_injector_outputs o ON c.id = o.campaign_id
       LEFT JOIN brand_profiles b ON c.brand_profile_id = b.id
+      WHERE c.tenant_id = ?
       ORDER BY c.created_at DESC
-    `).all();
+    `).all(tenantId);
 
     const isSchedulerActiveSetting = await getSetting('bridge_injector_scheduler_active');
     const isSchedulerActive = isSchedulerActiveSetting === null ? true : isSchedulerActiveSetting === 'true';

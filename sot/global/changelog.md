@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.5.6 — Secure Product Bridge under Multi-tenancy (08/08/2026)
+- Fix tenant_id ambiguity SQL error on GET bridge-injector list query
+- Wrap items PUT and PATCH endpoints in withTenantContext
+- Add strict campaign ownership check to all bridge-injector endpoints
+
 ## V2.5.5 — Dynamic Sidebar Menu Sorting (08/08/2026)
 - Sort sidebar items inside sections dynamically: active items on top, tenant-disabled/locked items on bottom
 

@@ -61,6 +61,11 @@ export const POST = withTenantContext(async (req, { params }) => {
       return NextResponse.json({ success: false, error: "Item kampanye tidak ditemukan." }, { status: 404 });
     }
 
+    const campaign = await db.prepare('SELECT id FROM bridge_injector_campaigns WHERE id = ?').get(item.campaign_id);
+    if (!campaign) {
+      return NextResponse.json({ success: false, error: 'Kampanye tidak ditemukan atau Anda tidak memiliki akses.' }, { status: 404 });
+    }
+
     logToBridgeInjector(`[BULK Item #${itemId}] Memulai regenerasi Start Frame T2I kustom dengan prompt: "${t2i_prompt}"`);
 
     // 1. Update t2i prompt di DB

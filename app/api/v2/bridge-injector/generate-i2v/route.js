@@ -33,6 +33,11 @@ export const POST = withTenantContext(async (request) => {
     }
 
     const db = getDb();
+    const campaign = await db.prepare('SELECT id FROM bridge_injector_campaigns WHERE id = ?').get(campaignId);
+    if (!campaign) {
+      return NextResponse.json({ success: false, error: 'Kampanye tidak ditemukan atau Anda tidak memiliki akses.' }, { status: 404 });
+    }
+
     const output = await db.prepare('SELECT clip2_i2v_prompt, clip2_t2i_image_path FROM bridge_injector_outputs WHERE campaign_id = ?').get(campaignId);
 
     if (!output) {

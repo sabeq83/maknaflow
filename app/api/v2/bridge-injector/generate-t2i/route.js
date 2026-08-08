@@ -44,6 +44,11 @@ export const POST = withTenantContext(async (request) => {
     }
 
     const db = getDb();
+    const campaign = await db.prepare('SELECT target_product_id FROM bridge_injector_campaigns WHERE id = ?').get(campaignId);
+    if (!campaign) {
+      return NextResponse.json({ success: false, error: 'Kampanye tidak ditemukan atau Anda tidak memiliki akses.' }, { status: 404 });
+    }
+
     const output = await db.prepare('SELECT clip2_t2i_prompt FROM bridge_injector_outputs WHERE campaign_id = ?').get(campaignId);
 
     if (!output) {
@@ -53,10 +58,9 @@ export const POST = withTenantContext(async (request) => {
     let finalPrompt = output.clip2_t2i_prompt || '';
 
     // Resolusi gambar produk dari database
-    const campaign = await db.prepare('SELECT target_product_id FROM bridge_injector_campaigns WHERE id = ?').get(campaignId);
     const reference_images = [];
 
-    if (campaign && campaign.target_product_id) {
+    if (campaign.target_product_id) {
       const product = await db.prepare('SELECT photo_url, active_photo, clean_photo_url, cleaned_photo_url, generated_photo_url, product_truth, geometric_truth FROM product_extractions WHERE id = ?').get(campaign.target_product_id);
       if (product) {
         if (product.product_truth && !finalPrompt.includes('Product Truth:')) {
