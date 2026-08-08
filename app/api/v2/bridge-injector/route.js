@@ -96,26 +96,25 @@ export const POST = withTenantContext(async (request) => {
 
       // 2. Simpan items ke database
       const insertItem = await db.prepare(`
-        INSERT INTO bridge_injector_items (campaign_id, original_script_url, product_url, nextcloud_folder, custom_instruction, workflow_status, account_name, voice_provider, voice_persona, target_product_id, brand_profile_id)
-        VALUES (?, ?, ?, ?, ?, 'pending', ?, 'minimax', 'Indonesian_casual_reporter_vv2', ?, ?)
+        INSERT INTO bridge_injector_items (campaign_id, original_script_url, product_url, nextcloud_folder, custom_instruction, workflow_status, account_name, voice_provider, voice_persona, target_product_id)
+        VALUES (?, ?, ?, ?, ?, 'pending', ?, 'minimax', 'Indonesian_casual_reporter_vv2', ?)
       `);
 
-      const insertMany = db.transaction((campaignId, itemsList, globalAccount, globalBrandId) => {
-        for (const item of itemsList) {
-          const scriptUrl = (item.original_script_url || '').trim();
-          const prodUrl = (item.product_url || '').trim();
-          const ncFolder = (item.nextcloud_folder || '').trim();
-          const rowInstruction = item.custom_instruction ? String(item.custom_instruction).trim() : null;
-          const rowAccount = item.account_name ? String(item.account_name).trim() : globalAccount;
-          const rowBrandId = item.brand_profile_id || globalBrandId;
-          const rowProductId = item.target_product_id || null;
-          if (scriptUrl && prodUrl) {
-            insertItem.run(campaignId, scriptUrl, prodUrl, ncFolder, rowInstruction, rowAccount || null, rowProductId, rowBrandId);
-          }
+      const promises = [];
+      for (const item of items) {
+        const scriptUrl = (item.original_script_url || '').trim();
+        const prodUrl = (item.product_url || '').trim();
+        const ncFolder = (item.nextcloud_folder || '').trim();
+        const rowInstruction = item.custom_instruction ? String(item.custom_instruction).trim() : null;
+        const rowAccount = item.account_name ? String(item.account_name).trim() : account_name;
+        const rowProductId = item.target_product_id || null;
+        if (scriptUrl && prodUrl) {
+          promises.push(
+            insertItem.run(campaignId, scriptUrl, prodUrl, ncFolder, rowInstruction, rowAccount || null, rowProductId)
+          );
         }
-      });
-
-      insertMany(campaignId, items, account_name, brand_profile_id);
+      }
+      await Promise.all(promises);
 
       logToBridgeInjector(`[${campaignId}] Sukses mengimpor ${items.length} baris ke bridge_injector_items. Status kampanye diatur ke ${initialStatus}.`);
 

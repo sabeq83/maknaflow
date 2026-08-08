@@ -4,18 +4,20 @@ import { logToBridgeInjector } from '@/lib/bridge-injector-logger';
 import fs from 'fs';
 import path from 'path';
 import { withTenantContext } from '@/lib/auth';
+import { getActiveTenantId } from '@/lib/tenant-context';
 
 export const GET = withTenantContext(async (request, { params }) => {
   try {
     const { id } = await params;
     const db = getDb();
+    const tenantId = getActiveTenantId();
 
     const campaign = await db.prepare(`
       SELECT c.*, p.product_name 
       FROM bridge_injector_campaigns c
       LEFT JOIN product_extractions p ON c.target_product_id = p.id
-      WHERE c.id = ?
-    `).get(id);
+      WHERE c.id = ? AND c.tenant_id = ?
+    `).get(id, tenantId);
 
     if (!campaign) {
       return NextResponse.json({ success: false, error: 'Kampanye tidak ditemukan.' }, { status: 404 });

@@ -909,6 +909,12 @@ export default function ProductBridgeInjectPage() {
                           onChange={e => {
                             const newAcc = e.target.value;
                             setAccountName(newAcc);
+                            const matchingBp = brandProfiles.find(bp => (bp.account_name || bp.brand_name) === newAcc);
+                            if (matchingBp) {
+                              setSelectedBrandId(String(matchingBp.id));
+                            } else {
+                              setSelectedBrandId('');
+                            }
                             const now = new Date();
                             const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
                             setCampaignName(`[ BRIDGE ${dateStr} ] - ${newAcc ? newAcc + ' - ' : ''}`);
@@ -944,7 +950,18 @@ export default function ProductBridgeInjectPage() {
                           <select
                             className="form-input"
                             value={selectedBrandId}
-                            onChange={e => setSelectedBrandId(e.target.value)}
+                            onChange={e => {
+                              const newBpId = e.target.value;
+                              setSelectedBrandId(newBpId);
+                              const matchingBp = brandProfiles.find(bp => String(bp.id) === String(newBpId));
+                              if (matchingBp) {
+                                const newAcc = matchingBp.account_name || matchingBp.brand_name;
+                                setAccountName(newAcc);
+                                const now = new Date();
+                                const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+                                setCampaignName(`[ BRIDGE ${dateStr} ] - ${newAcc ? newAcc + ' - ' : ''}`);
+                              }
+                            }}
                           >
                             <option value="">-- Tanpa Brand (Generik) --</option>
                             {brandProfiles.map(bp => (
@@ -1165,7 +1182,19 @@ export default function ProductBridgeInjectPage() {
                     <select
                       className="form-input"
                       value={accountName}
-                      onChange={e => setAccountName(e.target.value)}
+                      onChange={e => {
+                        const newAcc = e.target.value;
+                        setAccountName(newAcc);
+                        const matchingBp = brandProfiles.find(bp => (bp.account_name || bp.brand_name) === newAcc);
+                        if (matchingBp) {
+                          setSelectedBrandId(String(matchingBp.id));
+                        } else {
+                          setSelectedBrandId('');
+                        }
+                        const now = new Date();
+                        const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+                        setCampaignName(`[ BRIDGE ${dateStr} ] - ${newAcc ? newAcc + ' - ' : ''}`);
+                      }}
                       style={{ background: 'var(--bg-primary)' }}
                     >
                       <option value="">-- Pilih Nama Akun Brand --</option>
@@ -1197,7 +1226,18 @@ export default function ProductBridgeInjectPage() {
                       <select
                         className="form-input"
                         value={selectedBrandId}
-                        onChange={e => setSelectedBrandId(e.target.value)}
+                        onChange={e => {
+                          const newBpId = e.target.value;
+                          setSelectedBrandId(newBpId);
+                          const matchingBp = brandProfiles.find(bp => String(bp.id) === String(newBpId));
+                          if (matchingBp) {
+                            const newAcc = matchingBp.account_name || matchingBp.brand_name;
+                            setAccountName(newAcc);
+                            const now = new Date();
+                            const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+                            setCampaignName(`[ BRIDGE ${dateStr} ] - ${newAcc ? newAcc + ' - ' : ''}`);
+                          }
+                        }}
                       >
                         <option value="">-- Tanpa Brand (Generik) --</option>
                         {brandProfiles.map(bp => (

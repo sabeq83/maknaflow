@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.5.7 — Fix Product Bridge detail loading and bulk imports (08/08/2026)
+- Fix tenant_id ambiguity SQL error on campaign details GET route
+- Fix bulk items insertion by removing non-existent brand_profile_id column
+- Use Promise.all to await bulk items insert completion
+- Add dynamic auto-sync between brand account and brand profile select inputs
+
 ## V2.5.6 — Secure Product Bridge under Multi-tenancy (08/08/2026)
 - Fix tenant_id ambiguity SQL error on GET bridge-injector list query
 - Wrap items PUT and PATCH endpoints in withTenantContext
