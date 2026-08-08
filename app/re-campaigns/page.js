@@ -136,6 +136,9 @@ export default function RECampaignsPage() {
   const [visualMode, setVisualMode] = useState('hybrid_lock');
   const [productRefImage, setProductRefImage] = useState(null);
   const [productFilenameDeclare, setProductFilenameDeclare] = useState('');
+  const [productionMode, setProductionMode] = useState('single');
+  const [enableVoAudit, setEnableVoAudit] = useState(1);
+  const [massUploading, setMassUploading] = useState(false);
 
   // Visual Swap Overrides (VSO) states
   const [isVsoActive, setIsVsoActive] = useState(false);

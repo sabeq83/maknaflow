@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.2.250 — Fix ReferenceErrors in RE Campaign Modal (08/08/2026)
+- Declare missing React state variables: productionMode, enableVoAudit, and massUploading in app/re-campaigns/page.js
+- Prevent ReferenceErrors and rendering crashes when opening New Campaign modal
+- Verify successful modal display on Mac Mini Dev UI
+
 ## V2.2.249 — Fix ContentFlow Ingestion Sequence Counter Bug (08/08/2026)
 - Relocate campaignSeqCounters increments to start of loops in contentflow-ingest.js
 - Prevent shifts in video_id sequence numbers when some items fail
