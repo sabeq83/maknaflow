@@ -29,6 +29,10 @@ export const PUT = withTenantContext(async (req, { params }, currentUser) => {
       return NextResponse.json({ success: false, error: 'User tidak ditemukan' }, { status: 404 });
     }
 
+    if (user.role === 'superadmin' && currentUser.role !== 'superadmin') {
+      return NextResponse.json({ success: false, error: 'Akses ditolak. Tidak dapat memodifikasi akun Superadmin.' }, { status: 403 });
+    }
+
     // Update user info
     if (password && password.trim() !== '') {
       const hashedPassword = hashPassword(password.trim());
@@ -92,9 +96,14 @@ export const DELETE = withTenantContext(async (req, { params }, currentUser) => 
 
     const db = getDb();
 
-    // Prevent deleting default admin
+    // Prevent deleting default admin or superadmin
     if (userId === 'usr_admin_default') {
       return NextResponse.json({ success: false, error: 'Default Admin tidak dapat dihapus' }, { status: 400 });
+    }
+
+    const targetUser = await db.prepare('SELECT role FROM users WHERE id = ?').get(userId);
+    if (targetUser?.role === 'superadmin') {
+      return NextResponse.json({ success: false, error: 'Akun Superadmin tidak dapat dihapus dari menu ini' }, { status: 403 });
     }
 
     await db.prepare('DELETE FROM users WHERE id = ?').run(userId);

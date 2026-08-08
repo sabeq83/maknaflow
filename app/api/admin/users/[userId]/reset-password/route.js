@@ -24,10 +24,14 @@ export const POST = withTenantContext(async (req, { params }, currentUser) => {
     }
 
     const db = getDb();
-    const user = await db.prepare('SELECT id, username FROM users WHERE id = ?').get(userId);
+    const user = await db.prepare('SELECT id, username, role FROM users WHERE id = ?').get(userId);
 
     if (!user) {
       return NextResponse.json({ success: false, error: 'User tidak ditemukan' }, { status: 404 });
+    }
+
+    if (user.role === 'superadmin' && currentUser.role !== 'superadmin') {
+      return NextResponse.json({ success: false, error: 'Akses ditolak. Tidak dapat mereset password Superadmin.' }, { status: 403 });
     }
 
     const hashedPassword = hashPassword(newPassword.trim());

@@ -5,15 +5,17 @@ import { hashPassword, ALL_MENU_KEYS } from '@/lib/schema/user-schema';
 
 export const GET = withTenantContext(async (req, _context, currentUser) => {
   try {
-    if (!currentUser || currentUser.role !== 'admin') {
+    if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'superadmin')) {
       return NextResponse.json({ success: false, error: 'Akses ditolak. Khusus Admin.' }, { status: 403 });
     }
 
     const db = getDb();
     const users = await db.prepare(`
       SELECT id, username, email, role, status, created_at, updated_at
-      FROM users ORDER BY created_at DESC
-    `).all();
+      FROM users
+      WHERE (role != 'superadmin' OR ? = 'superadmin')
+      ORDER BY created_at DESC
+    `).all(currentUser.role);
 
     // Attach menu permissions and assigned brand profiles for each user
     const formattedUsers = await Promise.all(users.map(async u => {

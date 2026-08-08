@@ -177,29 +177,32 @@ function SidebarContent() {
 
           const enabledMenusEnv = process.env.NEXT_PUBLIC_ENABLED_MENUS;
           const enabledMenusSet = enabledMenusEnv
-            ? new Set(enabledMenusEnv.split(',').map(s => s.trim()))
-            : null;
-
-          const isMenuEnabled = !enabledMenusSet || enabledMenusSet.has(item.href);
+          const menuKey = menuKeyMap[item.href];
+          const isTenantDisabled = user?.role !== 'superadmin' && menuKey && Array.isArray(user?.tenantDisabledMenus) && user.tenantDisabledMenus.includes(menuKey);
+          const isMenuEnabled = (!enabledMenusSet || enabledMenusSet.has(item.href)) && !isTenantDisabled;
 
           if (!isMenuEnabled) {
             return (
               <div
                 key={item.href}
                 className="nav-link disabled"
+                onClick={() => alert(`Modul "${item.label}" dinonaktifkan oleh Superadmin untuk organisasi/tenant Anda.`)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  opacity: 0.35,
+                  opacity: 0.4,
                   cursor: 'not-allowed',
-                  pointerEvents: 'none',
-                  userSelect: 'none'
+                  userSelect: 'none',
+                  padding: '10px 12px',
+                  borderRadius: '6px',
+                  marginBottom: '2px'
                 }}
+                title="Modul ini dinonaktifkan oleh Superadmin"
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span className="nav-icon">{item.icon}</span>
-                  {item.label}
+                  <span style={{ fontSize: '0.85rem' }}>{item.label}</span>
                 </div>
                 <span style={{ fontSize: '12px' }}>🔒</span>
               </div>

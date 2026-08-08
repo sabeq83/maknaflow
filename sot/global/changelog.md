@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.4.0 — Superadmin Tenant Menu Locking & User Management Superadmin Isolation (08/08/2026)
+- Add Superadmin Tenant Module & Sidebar Menu Locking (Feature Toggle)
+- Update Sidebar component with locked module indicator and access restriction
+- Add interactive Kelola Modul Menu modal in Tenant Management
+- Isolate Superadmin accounts from tenant User Management listings and mutation handlers
+
 ## V2.3.2 — Fix RE Campaign execution_mode Multipart Parsing & Bulk Endpoint Alignment (08/08/2026)
 - Extract execution_mode from multipart formData in Single Video Campaign creation
 - Align mass campaign bulk ingestion endpoint with execution_mode, target_demographic, ai_directive, and mandatory_outro_line
