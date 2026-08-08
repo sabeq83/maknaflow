@@ -29,25 +29,32 @@ const menuKeyMap = {
 
 const navItems = [
   { label: 'Dashboard', href: '/', icon: '◈' },
-  { section: 'WORKFLOW' },
+  
+  { section: 'PLANNING' },
   { label: 'Content Planner', href: '/content-planner', icon: '🗓️' },
-  { label: 'Content Automations', href: '/content-automations', icon: '⏱️' },
-  { label: 'ContentFlow Hub', href: '/content-flow', icon: '📊' },
-  { label: 'RE Campaign', href: '/re-campaigns', icon: '🎬' },
-  { label: 'Pillar Campaign', href: '/pillar-campaigns', icon: '🌱' },
   { label: 'Product Database', href: '/products', icon: '📦' },
   { label: 'Deconstruct Lab', href: '/deconstruct', icon: '🔬' },
-  { label: 'Multiplier Lab', href: '/multiplier-lab', icon: '🎛️' },
   { label: 'Recipe Labs', href: '/recipe-labs', icon: '🍳' },
-  { label: 'Product Bridging', href: '/product-bridge-inject', icon: '🎯' },
+  { label: 'Brand Profile Manager', href: '/settings/brand-profiles', icon: '🧬' },
+
+  { section: 'WORKFLOW' },
+  { label: 'RE Campaign', href: '/re-campaigns', icon: '🎬' },
+  { label: 'Pillar Campaign', href: '/pillar-campaigns', icon: '🌱' },
   { label: 'Sheets Autopilot', href: '/sheets-autopilot', icon: '🤖' },
   { label: 'Instant Campaign', href: '/instant-factory', icon: '🚀' },
+  { label: 'Multiplier Lab', href: '/multiplier-lab', icon: '🎛️' },
+  { label: 'Product Bridging', href: '/product-bridge-inject', icon: '🎯' },
+
+  { section: 'PUBLISHING' },
+  { label: 'ContentFlow Hub', href: '/content-flow', icon: '📊' },
+  { label: 'Content Automations', href: '/content-automations', icon: '⏱️' },
+
   { section: 'TOOLS' },
   { label: 'Video Studio', href: '/video-studio', icon: '🎞' },
   { label: 'TTS Studio', href: '/tts-studio', icon: '🎙' },
   { label: 'Video Library', href: '/scraper', icon: '📼' },
+
   { section: 'SYSTEM' },
-  { label: 'Brand Profile Manager', href: '/settings/brand-profiles', icon: '🧬' },
   { label: 'User Management', href: '/settings/users', icon: '👥', adminOnly: true },
   { label: 'Tenant Management', href: '/settings/tenants', icon: '🏢', superadminOnly: true },
   { label: 'System Health', href: '/system-health', icon: '🩺' },
