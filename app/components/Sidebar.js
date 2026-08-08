@@ -103,14 +103,48 @@ function SidebarContent() {
     return Array.isArray(user.menuPermissions) && user.menuPermissions.includes(requiredKey);
   };
 
-  const visibleItems = navItems.filter((item, idx, arr) => {
-    if (item.section) {
-      const nextSectionIdx = arr.findIndex((x, i) => i > idx && x.section);
-      const childItems = arr.slice(idx + 1, nextSectionIdx === -1 ? arr.length : nextSectionIdx);
-      return childItems.some(child => !child.section && isMenuAllowed(child));
+  const checkIsTenantDisabled = (item) => {
+    const menuKey = menuKeyMap[item.href];
+    return user?.role !== 'superadmin' && menuKey && Array.isArray(user?.tenantDisabledMenus) && user.tenantDisabledMenus.includes(menuKey);
+  };
+
+  const processedItems = [];
+  let currentSection = null;
+  let sectionChildren = [];
+
+  for (const item of navItems) {
+    if (item.href === '/') {
+      processedItems.push(item);
+      continue;
     }
-    return isMenuAllowed(item);
-  });
+    if (item.section) {
+      if (currentSection) {
+        const allowedChildren = sectionChildren.filter(c => isMenuAllowed(c));
+        if (allowedChildren.length > 0) {
+          processedItems.push(currentSection);
+          const enabled = allowedChildren.filter(c => !checkIsTenantDisabled(c));
+          const disabled = allowedChildren.filter(c => checkIsTenantDisabled(c));
+          processedItems.push(...enabled, ...disabled);
+        }
+      }
+      currentSection = item;
+      sectionChildren = [];
+    } else {
+      sectionChildren.push(item);
+    }
+  }
+
+  if (currentSection) {
+    const allowedChildren = sectionChildren.filter(c => isMenuAllowed(c));
+    if (allowedChildren.length > 0) {
+      processedItems.push(currentSection);
+      const enabled = allowedChildren.filter(c => !checkIsTenantDisabled(c));
+      const disabled = allowedChildren.filter(c => checkIsTenantDisabled(c));
+      processedItems.push(...enabled, ...disabled);
+    }
+  }
+
+  const visibleItems = processedItems;
 
   return (
     <aside className="sidebar">

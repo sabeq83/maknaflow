@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.5.5 — Dynamic Sidebar Menu Sorting (08/08/2026)
+- Sort sidebar items inside sections dynamically: active items on top, tenant-disabled/locked items on bottom
+
 ## V2.5.4 — Move Recipe Labs to Workflow (08/08/2026)
 - Move Recipe Labs to Workflow category in both Sidebar and Superadmin Tenant Management
 
