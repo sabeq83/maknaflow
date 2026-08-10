@@ -124,11 +124,53 @@ async function runItemRegenerateStartFramesBackground(itemId, campaign, item, ne
         ? await db.prepare('SELECT * FROM brand_profiles WHERE id = ?').get(campaign.brand_profile_id)
         : null;
 
+      const storyboardObj = (newVideoPlan || []).find(p => Number(p.clip_index) === Number(clipIndex));
+      let clipCharacters = [];
+      if (storyboardObj && Array.isArray(storyboardObj.characters)) {
+        clipCharacters = storyboardObj.characters;
+      } else {
+        if (rowPayload.main_character) {
+          const clean = rowPayload.main_character.trim().toLowerCase();
+          if (clean === 'mochi') clipCharacters.push('mochi');
+          else if (clean === 'dr. paw' || clean === 'dr paw') clipCharacters.push('dr_paw');
+          else if (clean === 'coco') clipCharacters.push('coco');
+          else if (clean === 'boba') clipCharacters.push('boba');
+          else if (clean === 'tofu') clipCharacters.push('tofu');
+        }
+        clipCharacters = Array.from(new Set(clipCharacters));
+      }
+
+      const { normalizeCharacterId } = require('../../../../../../../lib/universe-manifests');
+      const { resolveClipReferenceImages } = require('../../../../../../../lib/cartoon-reference-resolver');
+      const normalizedClipChars = clipCharacters.map(normalizeCharacterId).filter(Boolean);
+
+      const isCartoon = rowPayload.content_world === 'cartoon_universe' || campaign.content_world === 'cartoon_universe';
+      let resolvedRefs = { allReferences: [] };
+      if (isCartoon) {
+        let universeSnapshot = null;
+        try {
+          universeSnapshot = campaign.universe_snapshot_json ? JSON.parse(campaign.universe_snapshot_json) : null;
+        } catch (_) {}
+        resolvedRefs = resolveClipReferenceImages({
+          contentWorld: 'cartoon_universe',
+          universeProfile: campaign.universe_profile || rowPayload.universe_profile || 'pawville',
+          universeSnapshot,
+          clip: clipIndex,
+          productReference: productBase64,
+          productRevealBeat: rowPayload.product_reveal_beat || campaign.product_reveal_beat || 'none',
+          clipCharacters: normalizedClipChars
+        });
+      } else {
+        if (isBridge && productBase64) {
+          resolvedRefs = { allReferences: [productBase64] };
+        }
+      }
+
       const t2iResult = await generateImage({
         prompt: clip.t2i_prompt,
         model: imageModel,
         aspect_ratio: campaign.aspect_ratio || '9:16',
-        reference_images: (isBridge && productBase64) ? [productBase64] : undefined,
+        reference_images: resolvedRefs.allReferences.length > 0 ? resolvedRefs.allReferences : undefined,
         webhookOverride: brandProfile
       });
       

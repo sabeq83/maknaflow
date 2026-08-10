@@ -1,5 +1,15 @@
 # Changelog
 
+## V2.7.1 — Kartun Tahap 2.5: Character Reference Lock (10/08/2026)
+- Definisikan manifest karakter PawVille dan upload endpoint
+- Sediakan UI Modal dengan Character Lock status check dan hybrid_lock enforcement
+- Bangun snapshot universe_snapshot_json saat ingest campaign
+- Integrasi storyboard contract characters array per clip dengan fallback terkontrol
+- Helper resolveClipReferenceImages untuk meresolusi style/character/product references
+- Visual worker processPillarGlabs, regenerate-start-frames, regenerate-t2i diperbarui
+- Perluas Check 8 Character Reference Lock di cartoon continuity validator
+- Uji otomatis baru scripts/test-cartoon-reference-lock.js
+
 ## V2.7.0 — Kartun Tahap 2: Storyboard & Production Continuity (10/08/2026)
 - World-aware OPC prompt builder — deteksi cartoon via content_world
 - 7-Beat Story Arc directive dengan character identity lock, location continuity lock, product geometry lock

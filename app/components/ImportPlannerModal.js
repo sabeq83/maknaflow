@@ -131,6 +131,97 @@ export default function ImportPlannerModal({
   const [newPresetKey, setNewPresetKey] = useState('');
   const [user, setUser] = useState(null);
 
+  // States for Character Reference Lock (Tahap 2.5)
+  const [manifest, setManifest] = useState(null);
+  const [characterStatuses, setCharacterStatuses] = useState({});
+
+  useEffect(() => {
+    if (planner && planner.content_world === 'cartoon_universe') {
+      const profile = planner.universe_profile || 'pawville';
+      fetch(`/api/v2/cartoon-universe/manifest?profile=${profile}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.manifest) {
+            setManifest(data.manifest);
+            const statuses = {};
+            Object.keys(data.manifest.characters).forEach(key => {
+              const char = data.manifest.characters[key];
+              statuses[key] = {
+                available: char.available,
+                previewUrl: char.identity_reference_path,
+                version: char.version
+              };
+            });
+            setCharacterStatuses(statuses);
+            
+            // Force visual_mode to hybrid_lock
+            setVisualMode('hybrid_lock');
+          }
+        })
+        .catch(err => console.error('[ImportPlannerModal] Fetch manifest error:', err));
+    } else {
+      setManifest(null);
+      setCharacterStatuses({});
+    }
+  }, [planner]);
+
+  const getUsedCharacters = () => {
+    if (!planner || !rows || rows.length === 0) return [];
+    const selectedRows = rows.filter(r => selectedRowIds.includes(r.id));
+    const used = new Set();
+    selectedRows.forEach(r => {
+      if (r.main_character) {
+        const clean = r.main_character.trim().toLowerCase();
+        if (clean === 'mochi') used.add('mochi');
+        else if (clean === 'dr. paw' || clean === 'dr paw') used.add('dr_paw');
+        else if (clean === 'coco') used.add('coco');
+        else if (clean === 'boba') used.add('boba');
+        else if (clean === 'tofu') used.add('tofu');
+      }
+      if (r.supporting_characters) {
+        r.supporting_characters.split(',').forEach(c => {
+          const clean = c.trim().toLowerCase();
+          if (clean === 'mochi') used.add('mochi');
+          else if (clean === 'dr. paw' || clean === 'dr paw') used.add('dr_paw');
+          else if (clean === 'coco') used.add('coco');
+          else if (clean === 'boba') used.add('boba');
+          else if (clean === 'tofu') used.add('tofu');
+        });
+      }
+    });
+    return Array.from(used);
+  };
+
+  const handleUploadCharacterRef = async (charKey, file) => {
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('universe_profile', planner.universe_profile || 'pawville');
+    formData.append('character_id', charKey);
+    
+    try {
+      const res = await fetch('/api/v2/cartoon-universe/manifest', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        setCharacterStatuses(prev => ({
+          ...prev,
+          [charKey]: {
+            ...prev[charKey],
+            available: true,
+            previewUrl: data.path
+          }
+        }));
+      } else {
+        alert('Gagal mengunggah gambar referensi: ' + data.error);
+      }
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  };
+
   const fetchPresets = () => {
     fetch('/api/v2/operator-presets')
       .then(r => r.json())
@@ -428,6 +519,18 @@ export default function ImportPlannerModal({
       return;
     }
 
+    if (planner && planner.content_world === 'cartoon_universe') {
+      const usedChars = getUsedCharacters();
+      const missing = usedChars.filter(charKey => {
+        const status = characterStatuses[charKey];
+        return !status || !status.available;
+      });
+      if (missing.length > 0) {
+        alert(`Produksi diblokir: Karakter wajib berikut belum memiliki reference image kanonis: ${missing.map(m => m.toUpperCase()).join(', ')}.`);
+        return;
+      }
+    }
+
     try {
       setSubmitting(true);
       setSubmitStatusTarget(targetStatus);
@@ -452,7 +555,7 @@ export default function ImportPlannerModal({
           face_visibility: faceVisibility,
           target_clips_count: Number(targetClipsCount),
           words_per_clip: wordsPerClip,
-          visual_mode: executionMode === 'full_autopilot' ? 'pure_t2v' : visualMode,
+          visual_mode: planner?.content_world === 'cartoon_universe' ? 'hybrid_lock' : (executionMode === 'full_autopilot' ? 'pure_t2v' : visualMode),
           scheduler_pause_at: executionMode === 'full_autopilot' ? null : 'tts',
           is_bridging_active: isBridgingActive ? 1 : 0,
           bridge_at_clip: Number(bridgeAtClip),
@@ -740,6 +843,74 @@ export default function ImportPlannerModal({
                           ))}
                         </div>
                       </div>
+
+                      {/* Character Reference Lock Section */}
+                      {manifest && (
+                        <div style={{ background: 'rgba(245, 158, 11, 0.08)', padding: '16px', borderRadius: '10px', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '13px', fontWeight: 700, color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span>🔒</span> Character Reference Lock (v{manifest.version})
+                            </span>
+                            <span style={{ fontSize: '10px', background: 'rgba(245, 158, 11, 0.2)', color: '#f59e0b', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>
+                              Wajib Aktif
+                            </span>
+                          </div>
+                          
+                          <p style={{ fontSize: '11px', color: '#cbd5e1', margin: 0, lineHeight: 1.4 }}>
+                            Reference karakter digunakan untuk membuat start frame setiap klip. Reference ini bukan start frame final.
+                          </p>
+
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
+                            {getUsedCharacters().map(charKey => {
+                              const char = manifest.characters[charKey];
+                              if (!char) return null;
+                              const status = characterStatuses[charKey];
+                              const isAvailable = status?.available;
+                              const previewUrl = status?.previewUrl;
+
+                              return (
+                                <div key={charKey} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#09090b', padding: '10px', borderRadius: '8px', border: '1px solid #27272a' }}>
+                                  <div style={{ width: '48px', height: '48px', borderRadius: '6px', overflow: 'hidden', background: '#18181b', border: '1px solid #27272a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                    {isAvailable && previewUrl ? (
+                                      <img src={previewUrl.startsWith('http') || previewUrl.startsWith('/universe-assets/') ? previewUrl : `/universe-assets/${previewUrl}`} alt={char.display_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    ) : (
+                                      <span style={{ fontSize: '20px' }}>❓</span>
+                                    )}
+                                  </div>
+                                  <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+                                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>{char.display_name}</span>
+                                      <span style={{ fontSize: '10px', color: '#9ca3af' }}>v{char.version}</span>
+                                      <span style={{
+                                        fontSize: '10px', fontWeight: 700, padding: '1px 6px', borderRadius: '4px',
+                                        background: isAvailable ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                                        color: isAvailable ? '#34d399' : '#f87171',
+                                        border: isAvailable ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid rgba(239, 68, 68, 0.4)'
+                                      }}>
+                                        {isAvailable ? 'Tersedia kanonis ✅' : 'Belum Tersedia ⚠️'}
+                                      </span>
+                                    </div>
+                                    <div style={{ fontSize: '10px', color: '#9ca3af', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                      {char.canonical_description}
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label style={{ display: 'inline-block', background: '#27272a', color: '#fff', fontSize: '11px', fontWeight: 600, padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', border: '1px solid #3f3f46' }}>
+                                      📤 {isAvailable ? 'Ganti Foto' : 'Unggah Foto'}
+                                      <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => handleUploadCharacterRef(charKey, e.target.files[0])}
+                                        style={{ display: 'none' }}
+                                      />
+                                    </label>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -989,16 +1160,20 @@ export default function ImportPlannerModal({
                     <div>
                       <label style={{ fontSize: '12px', color: '#9ca3af', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                         <span>Visual Mode (Metode Generasi):</span>
-                        {executionMode === 'full_autopilot' && (
+                        {planner?.content_world === 'cartoon_universe' ? (
+                          <span style={{ fontSize: '11px', color: '#f59e0b', fontWeight: 700 }}>
+                            🔒 Terkunci Hybrid Lock (Wajib Cartoon)
+                          </span>
+                        ) : executionMode === 'full_autopilot' && (
                           <span style={{ fontSize: '11px', color: '#10b981', fontWeight: 700 }}>
                             🔒 Terkunci Pure T2V
                           </span>
                         )}
                       </label>
                       <select 
-                        value={executionMode === 'full_autopilot' ? 'pure_t2v' : visualMode} 
+                        value={planner?.content_world === 'cartoon_universe' ? 'hybrid_lock' : (executionMode === 'full_autopilot' ? 'pure_t2v' : visualMode)} 
                         onChange={e => setVisualMode(e.target.value)} 
-                        disabled={executionMode === 'full_autopilot'}
+                        disabled={executionMode === 'full_autopilot' || planner?.content_world === 'cartoon_universe'}
                         style={{ 
                           width: '100%', 
                           padding: '10px', 

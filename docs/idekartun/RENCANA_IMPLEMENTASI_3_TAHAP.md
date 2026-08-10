@@ -770,6 +770,38 @@ Tambah opsi Pet-Story-Arc di dropdown narrative mode.
 
 ---
 
+# TAHAP 2.5 — Character Reference Lock [SELESAI]
+
+**Tujuan**: Menghilangkan risiko pergeseran identitas visual karakter (identity drift) di Cartoon Universe PawVille dengan mengunci start frame adegan via T2I (menggunakan gambar referensi kanonikal) dan menganimasikannya menggunakan I2V.
+
+---
+
+## 2.5.1 Arsitektur Aliran Visual
+Setiap klip yang menampilkan karakter diproses melalui:
+```text
+Canonical Character Reference (diambil dari manifest/snapshot)
+    ↓
+T2I menghasilkan start frame unik untuk klip (menggunakan reference_images)
+    ↓
+Start frame disimpan secara lokal di server
+    ↓
+I2V menganimasikan start frame (mode: start_image, reference_images: [startFrame])
+```
+Pure T2V tidak diizinkan untuk klip yang memuat karakter. Product reference image hanya dikirim ke T2I mulai beat reveal ke atas.
+
+## 2.5.2 Daftar Task
+- [x] Persiapan Aset (Style & Character directories)
+- [x] File Manifest & API Endpoint (universe-manifests.js, upload & GET endpoints)
+- [x] UI Modal Integration (ImportPlannerModal.js)
+- [x] Campaign Snapshotting (Simpan konfigurasi dan manifest utuh ke universe_snapshot_json saat ingest)
+- [x] Storyboard Contract & Character Resolving (characters, location, product_visible di storyboard JSON)
+- [x] Helper resolveClipReferenceImages (Deduplikasi, stable sorting, check limits)
+- [x] Visual Worker (processPillarGlabs, regenerate-start-frames, regenerate-t2i)
+- [x] Validator Continuity (Perluas Check 8: Character Reference Lock structural check)
+- [x] Uji Otomatis (test-cartoon-reference-lock.js)
+
+---
+
 # TAHAP 3 — Universe Platform
 
 **Tujuan**: MAKNA Flow menjadi platform serial character content, mendukung berbagai universe dan niche.
