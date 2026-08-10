@@ -591,9 +591,14 @@ export default function ContentPlannerDashboard() {
                       background: '#18181b', border: '1px solid #27272a', color: '#fff', fontSize: '14px'
                     }}
                   >
-                    <option value="general">📋 Umum (General)</option>
-                    <option value="pet_supplies">🐱 Pet Supplies</option>
-                    <option value="food_culinary">🍳 Food & Culinary</option>
+                    <option value="general">General</option>
+                    <option value="pet_supplies">Pet Supplies</option>
+                    <option value="food_culinary">Food &amp; Culinary</option>
+                    <option value="history">History</option>
+                    <option value="islamic_history">Islamic History</option>
+                    <option value="kitchen">Kitchen</option>
+                    <option value="home_improvement">Home Improvement</option>
+                    <option value="herbal">Herbal</option>
                   </select>
                 </div>
 

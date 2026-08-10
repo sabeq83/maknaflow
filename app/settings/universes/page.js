@@ -9,6 +9,9 @@ const emptyUniverseForm = {
   premise: '',
   tone: '',
   knowledge_domain: 'general',
+  universe_type: 'animal',
+  depiction_policy: '',
+  historical_period: '',
   human_presence: 'allowed',
   visual_style: '',
   aspect_ratio: '9:16',
@@ -32,6 +35,9 @@ const emptyCharForm = {
   movement_style: '',
   relative_size: 'medium',
   role: 'supporting',
+  depiction_mode: 'normal',
+  reference_type: 'identity',
+  historical_period: '',
   canonical_prompt: '',
   reference_image: null
 };
@@ -41,7 +47,9 @@ const emptyLocForm = {
   location_key: '',
   visual_description: '',
   lighting_default: '',
-  props: ''
+  props: '',
+  historical_period: '',
+  reference_type: 'location'
 };
 
 export default function UniverseManagerPage() {
@@ -376,16 +384,57 @@ export default function UniverseManagerPage() {
                       <select name="knowledge_domain" value={formData.knowledge_domain} onChange={handleUniverseChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }}>
                         <option value="general">General</option>
                         <option value="pet_supplies">Pet Supplies</option>
-                        <option value="food_culinary">Food & Culinary</option>
+                        <option value="food_culinary">Food &amp; Culinary</option>
+                        <option value="history">History</option>
+                        <option value="islamic_history">Islamic History</option>
+                        <option value="kitchen">Kitchen</option>
+                        <option value="home_improvement">Home Improvement</option>
+                        <option value="herbal">Herbal</option>
                       </select>
                     </div>
                     <div>
+                      <div style={{ marginBottom: '12px' }}>
+                        <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#a0a0c0' }}>Universe Type</label>
+                        <select
+                          value={formData.universe_type || 'animal'}
+                          onChange={e => setFormData(f => ({ ...f, universe_type: e.target.value }))}
+                          style={{ width: '100%', padding: '8px', background: '#1e1e3a', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px' }}
+                        >
+                          <option value="animal">🐾 Animal</option>
+                          <option value="mascot_object">🎭 Mascot / Object</option>
+                          <option value="human">👤 Human</option>
+                        </select>
+                      </div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Human Presence</label>
                       <select name="human_presence" value={formData.human_presence} onChange={handleUniverseChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }}>
                         <option value="allowed">Allowed</option>
                         <option value="faceless_only">Faceless Only</option>
                         <option value="none">None</option>
                       </select>
+                      {formData.universe_type === 'human' && (
+                        <>
+                          <div style={{ marginBottom: '12px', marginTop: '12px' }}>
+                            <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#a0a0c0' }}>Historical Period</label>
+                            <input
+                              type="text"
+                              value={formData.historical_period || ''}
+                              onChange={e => setFormData(f => ({ ...f, historical_period: e.target.value }))}
+                              placeholder="e.g. Abad ke-7 sampai abad ke-15"
+                              style={{ width: '100%', padding: '8px', background: '#1e1e3a', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px', boxSizing: 'border-box' }}
+                            />
+                          </div>
+                          <div style={{ marginBottom: '12px' }}>
+                            <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#a0a0c0' }}>Depiction Policy</label>
+                            <textarea
+                              value={formData.depiction_policy || ''}
+                              onChange={e => setFormData(f => ({ ...f, depiction_policy: e.target.value }))}
+                              placeholder="Aturan penggambaran karakter sensitif, larangan, dan panduan representasi..."
+                              rows={4}
+                              style={{ width: '100%', padding: '8px', background: '#1e1e3a', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px', resize: 'vertical', boxSizing: 'border-box' }}
+                            />
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                   <div>
@@ -474,6 +523,7 @@ export default function UniverseManagerPage() {
                           setFormData({ 
                             name: u.name || '', slug: u.slug || '', premise: u.premise || '', tone: u.tone || '',
                             knowledge_domain: u.knowledge_domain || 'general', human_presence: u.human_presence || 'allowed',
+                            universe_type: u.universe_type || 'animal', depiction_policy: u.depiction_policy || '', historical_period: u.historical_period || '',
                             visual_style: u.visual_style || '', aspect_ratio: u.aspect_ratio || '9:16', scene_count: u.scene_count || 5,
                             scene_duration: u.scene_duration || 3, story_template: u.story_template || '', cta_personality: u.cta_personality || '',
                             pillars: (() => { try { return typeof u.pillars === 'string' ? JSON.parse(u.pillars) : (u.pillars || []); } catch { return []; } })()
@@ -578,6 +628,43 @@ export default function UniverseManagerPage() {
                       </select>
                     </div>
                   </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#a0a0c0' }}>Depiction Mode</label>
+                      <select
+                        value={charFormData.depiction_mode || 'normal'}
+                        onChange={e => setCharFormData(f => ({ ...f, depiction_mode: e.target.value }))}
+                        style={{ width: '100%', padding: '8px', background: '#1e1e3a', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px' }}
+                      >
+                        <option value="normal">Normal</option>
+                        <option value="faceless">Faceless</option>
+                        <option value="back_view">Back View</option>
+                        <option value="silhouette">Silhouette</option>
+                        <option value="environment_only">Environment Only</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#a0a0c0' }}>Reference Type</label>
+                      <select
+                        value={charFormData.reference_type || 'identity'}
+                        onChange={e => setCharFormData(f => ({ ...f, reference_type: e.target.value }))}
+                        style={{ width: '100%', padding: '8px', background: '#1e1e3a', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px' }}
+                      >
+                        <option value="identity">Identity</option>
+                        <option value="wardrobe">Wardrobe</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div style={{ marginBottom: '12px' }}>
+                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#a0a0c0' }}>Historical Period (opsional)</label>
+                    <input
+                      type="text"
+                      value={charFormData.historical_period || ''}
+                      onChange={e => setCharFormData(f => ({ ...f, historical_period: e.target.value }))}
+                      placeholder="e.g. Abad ke-7 sampai abad ke-15"
+                      style={{ width: '100%', padding: '8px', background: '#1e1e3a', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px', boxSizing: 'border-box' }}
+                    />
+                  </div>
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Canonical Prompt</label>
                     <textarea name="canonical_prompt" value={charFormData.canonical_prompt} onChange={handleCharChange} rows="3" style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
@@ -622,7 +709,8 @@ export default function UniverseManagerPage() {
                           name: c.name || '', character_key: c.character_key || '', species: c.species || '', breed: c.breed || '',
                           body_shape: c.body_shape || '', fur_color: c.fur_color || '', eye_color: c.eye_color || '', wardrobe: c.wardrobe || '',
                           personality: c.personality || '', movement_style: c.movement_style || '', relative_size: c.relative_size || 'medium',
-                          role: c.role || 'supporting', canonical_prompt: c.canonical_prompt || '', reference_image: null
+                          role: c.role || 'supporting', canonical_prompt: c.canonical_prompt || '', reference_image: null,
+                          depiction_mode: c.depiction_mode || 'normal', reference_type: c.reference_type || 'identity', historical_period: c.historical_period || ''
                         });
                         setShowCharForm(true);
                       }} style={{ flex: 1, padding: '8px', borderRadius: '4px', border: 'none', backgroundColor: '#3498db', color: '#fff', cursor: 'pointer' }}>Edit</button>
@@ -672,6 +760,29 @@ export default function UniverseManagerPage() {
                       <input name="props" value={locFormData.props} onChange={handleLocChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} placeholder="Comma separated" />
                     </div>
                   </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#a0a0c0' }}>Historical Period (opsional)</label>
+                      <input
+                        type="text"
+                        value={locFormData.historical_period || ''}
+                        onChange={e => setLocFormData(f => ({ ...f, historical_period: e.target.value }))}
+                        placeholder="e.g. Abad ke-7 sampai abad ke-15"
+                        style={{ width: '100%', padding: '8px', background: '#1e1e3a', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px', boxSizing: 'border-box' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#a0a0c0' }}>Reference Type</label>
+                      <select
+                        value={locFormData.reference_type || 'location'}
+                        onChange={e => setLocFormData(f => ({ ...f, reference_type: e.target.value }))}
+                        style={{ width: '100%', padding: '8px', background: '#1e1e3a', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px' }}
+                      >
+                        <option value="location">Location</option>
+                        <option value="visual_style">Visual Style</option>
+                      </select>
+                    </div>
+                  </div>
                   <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
                     <button type="submit" style={{ backgroundColor: '#6c5ce7', color: '#fff', border: 'none', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer' }}>Save Location</button>
                     <button type="button" onClick={() => setShowLocForm(false)} style={{ backgroundColor: '#34495e', color: '#fff', border: 'none', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer' }}>Cancel</button>
@@ -705,7 +816,8 @@ export default function UniverseManagerPage() {
                           setEditingId(l.id);
                           setLocFormData({
                             name: l.name || '', location_key: l.location_key || '', visual_description: l.visual_description || '',
-                            lighting_default: l.lighting_default || '', props: l.props || ''
+                            lighting_default: l.lighting_default || '', props: l.props || '',
+                            historical_period: l.historical_period || '', reference_type: l.reference_type || 'location'
                           });
                           setShowLocForm(true);
                         }} style={{ padding: '6px 12px', borderRadius: '4px', border: 'none', backgroundColor: '#3498db', color: '#fff', cursor: 'pointer' }}>Edit</button>

@@ -119,9 +119,60 @@ pet_supplies
 food_culinary
 history
 islamic_history
+kitchen
+home_improvement
+herbal
 ```
 
-Field ini hanya digunakan untuk klasifikasi dan routing prompt. Jangan membuat knowledge base sejarah otomatis pada Tahap 3.5.
+Gunakan label UI dan ID sistem berikut secara konsisten:
+
+| Label UI | ID sistem | Fokus |
+|---|---|---|
+| General | `general` | Konten umum tanpa domain khusus |
+| Food & Culinary | `food_culinary` | Resep, bahan makanan, teknik memasak, dan penyajian |
+| Pet Supplies | `pet_supplies` | Hewan peliharaan, perawatan, dan perlengkapan |
+| History | `history` | Sejarah umum, tokoh, tempat, peristiwa, dan peradaban |
+| Islamic History | `islamic_history` | Sejarah dan peradaban Islam dengan depiction policy |
+| Kitchen | `kitchen` | Peralatan dapur, organisasi dapur, dan problem-solving |
+| Home Improvement | `home_improvement` | Perawatan, penataan, kebersihan, dan perbaikan rumah |
+| Herbal | `herbal` | Tanaman herbal, tradisi penggunaan, dan edukasi bahan |
+
+Knowledge Domain harus tetap terpisah dari `universe_type`. Contoh:
+
+```text
+Universe Type: mascot_object
+Knowledge Domain: herbal
+
+Universe Type: mascot_object
+Knowledge Domain: kitchen
+
+Universe Type: human
+Knowledge Domain: islamic_history
+```
+
+Terapkan batas domain berikut:
+
+- `food_culinary` berfokus pada makanan dan proses memasak;
+- `kitchen` berfokus pada alat serta aktivitas di lingkungan dapur;
+- `home_improvement` berfokus pada benda, ruangan, kebersihan, organisasi, dan perawatan rumah;
+- `herbal` berfokus pada edukasi bahan dan tradisi penggunaan tanpa klaim medis berlebihan;
+- `history` berfokus pada sejarah umum;
+- `islamic_history` mewarisi aturan sejarah dan menambahkan depiction policy, sumber, serta pencegahan anakronisme.
+
+Tambahkan routing prompt dasar:
+
+```text
+history          -> historical_explainer_7beat
+islamic_history  -> historical_explainer_7beat + depiction_policy
+kitchen          -> problem_solution_7beat
+home_improvement -> problem_solution_7beat
+herbal           -> educational_discovery_7beat
+pet_supplies     -> pet_problem_solution_7beat
+```
+
+Setiap domain minimal dapat meneruskan `domain_prompt_rules`, `allowed_content`, `forbidden_claims`, dan `recommended_story_template` ke prompt builder. Terapkan safety rule untuk `herbal` dan depiction policy untuk `islamic_history`.
+
+Jangan membuat Knowledge Base Manager atau knowledge base sejarah otomatis pada Tahap 3.5.
 
 ---
 
@@ -259,6 +310,7 @@ Lakukan pengujian minimal:
 - [ ] Tambahkan migrasi field Universe Profile.
 - [ ] Tambahkan migrasi field Character Library.
 - [ ] Tambahkan migrasi field Location Library.
+- [ ] Tambahkan lima Knowledge Domain baru dan routing prompt dasarnya.
 - [ ] Perbarui CRUD dan API serialization.
 - [ ] Perbarui Universe Manager UI.
 - [ ] Integrasikan field baru ke Content Planner dan OPC snapshot.
@@ -305,4 +357,3 @@ Setelah selesai, laporkan:
 ```
 
 Berhenti setelah implementasi, pengujian, dokumentasi, dan prosedur rilis repository selesai. Jangan melanjutkan ke scope lain.
-

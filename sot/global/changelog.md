@@ -1,5 +1,15 @@
 # Changelog
 
+## V2.9.0 — Tahap 3.5: Human Claymation Universe Support (10/08/2026)
+- Tambah universe_type (animal/mascot_object/human) di universe_profiles
+- Tambah depiction_policy dan historical_period untuk universe bertipe human
+- Tambah depiction_mode dan reference_type di universe_characters dan universe_locations
+- Expand Knowledge Domain dari 3 ke 8 domain (history, islamic_history, kitchen, home_improvement, herbal)
+- Prompt builder kini dinamis: HUMAN PRESENCE dan depiction_policy diinjeksi berdasarkan konfigurasi universe
+- cartoon-continuity-validator disesuaikan untuk mendukung universe bertipe human
+- Seed universe Jejak Peradaban Islam (domain: islamic_history, 2 karakter, 2 lokasi)
+- Migrasi database migrateUniversePlatformV2 untuk kolom baru
+
 ## V2.8.1 — Fix: SQL parameters in universe CRUD (10/08/2026)
 - Change PG specific parameter placeholders to standard positional ? placeholders to support query interception and sqliteToPgQuery mapping
 
