@@ -52,6 +52,56 @@ const emptyLocForm = {
   reference_type: 'location'
 };
 
+// Helpers untuk boundary mapping (API <-> UI Form) (Tahap 3.6)
+function mapUniverseRecordToForm(u) {
+  return {
+    name: u.name || '',
+    slug: u.slug || '',
+    premise: u.premise || '',
+    tone: u.tone || '',
+    knowledge_domain: u.knowledge_domain || 'general',
+    universe_type: u.universe_type || 'animal',
+    depiction_policy: u.depiction_policy || '',
+    historical_period: u.historical_period || '',
+    human_presence: u.human_presence || 'allowed',
+    visual_style: u.default_visual_style ?? u.visual_style ?? '',
+    aspect_ratio: u.default_aspect_ratio ?? u.aspect_ratio ?? '9:16',
+    scene_count: u.default_scene_count ?? u.scene_count ?? 5,
+    scene_duration: u.default_scene_duration ?? u.scene_duration ?? 3,
+    story_template: u.default_story_template ?? u.story_template ?? '',
+    cta_personality: u.cta_personality || '',
+    pillars: (() => {
+      const pData = u.default_pillars_json ?? u.pillars ?? [];
+      try {
+        return typeof pData === 'string' ? JSON.parse(pData) : (pData || []);
+      } catch {
+        return [];
+      }
+    })()
+  };
+}
+
+function mapUniverseFormToPayload(form) {
+  return {
+    name: form.name,
+    slug: form.slug,
+    premise: form.premise,
+    tone: form.tone,
+    knowledge_domain: form.knowledge_domain,
+    universe_type: form.universe_type,
+    depiction_policy: form.depiction_policy,
+    historical_period: form.historical_period,
+    human_presence: form.human_presence,
+    default_visual_style: form.visual_style,
+    default_aspect_ratio: form.aspect_ratio,
+    default_scene_count: Number(form.scene_count),
+    default_scene_duration: Number(form.scene_duration),
+    default_story_template: form.story_template,
+    cta_personality: form.cta_personality,
+    default_pillars_json: form.pillars
+  };
+}
+
 export default function UniverseManagerPage() {
   const [universes, setUniverses] = useState([]);
   const [characters, setCharacters] = useState([]);
@@ -195,6 +245,10 @@ export default function UniverseManagerPage() {
 
   async function handleUniverseSave(e) {
     e.preventDefault();
+    if (!formData.visual_style || !formData.visual_style.trim()) {
+      showToast('Visual Style is required.', 'error');
+      return;
+    }
     try {
       const url = editingId 
         ? `/api/v2/universe-profiles/${editingId}`
@@ -204,7 +258,7 @@ export default function UniverseManagerPage() {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(mapUniverseFormToPayload(formData))
       });
       
       if (!res.ok) throw new Error('Failed to save universe');
@@ -529,8 +583,8 @@ export default function UniverseManagerPage() {
                     <tr key={u.id} style={{ borderBottom: '1px solid #2d3436' }}>
                       <td style={{ padding: '16px', fontWeight: 'bold' }}>{u.name}</td>
                       <td style={{ padding: '16px', color: '#a29bfe' }}>{u.slug}</td>
-                      <td style={{ padding: '16px', color: '#bdc3c7', maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.visual_style}</td>
-                      <td style={{ padding: '16px' }}>{u.scene_count}</td>
+                      <td style={{ padding: '16px', color: '#bdc3c7', maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.default_visual_style || u.visual_style || ''}</td>
+                      <td style={{ padding: '16px' }}>{u.default_scene_count ?? u.scene_count ?? 5}</td>
                       <td style={{ padding: '16px' }}>
                         <span style={{ padding: '4px 8px', borderRadius: '4px', fontSize: '12px', backgroundColor: u.status === 'active' || !u.status ? '#27ae60' : '#7f8c8d' }}>
                           {u.status === 'active' || !u.status ? 'Active' : 'Archived'}
@@ -540,14 +594,7 @@ export default function UniverseManagerPage() {
                         <button onClick={() => { setSelectedUniverse(u); setActiveTab('characters'); }} style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid #6c5ce7', backgroundColor: 'transparent', color: '#6c5ce7', cursor: 'pointer' }}>Manage</button>
                         <button onClick={() => { 
                           setEditingId(u.id); 
-                          setFormData({ 
-                            name: u.name || '', slug: u.slug || '', premise: u.premise || '', tone: u.tone || '',
-                            knowledge_domain: u.knowledge_domain || 'general', human_presence: u.human_presence || 'allowed',
-                            universe_type: u.universe_type || 'animal', depiction_policy: u.depiction_policy || '', historical_period: u.historical_period || '',
-                            visual_style: u.visual_style || '', aspect_ratio: u.aspect_ratio || '9:16', scene_count: u.scene_count || 5,
-                            scene_duration: u.scene_duration || 3, story_template: u.story_template || '', cta_personality: u.cta_personality || '',
-                            pillars: (() => { try { return typeof u.pillars === 'string' ? JSON.parse(u.pillars) : (u.pillars || []); } catch { return []; } })()
-                          });
+                          setFormData(mapUniverseRecordToForm(u));
                           setShowForm(true); 
                         }} style={{ padding: '6px 12px', borderRadius: '4px', border: 'none', backgroundColor: '#3498db', color: '#fff', cursor: 'pointer' }}>Edit</button>
                         <button onClick={() => handleUniverseArchive(u.id)} style={{ padding: '6px 12px', borderRadius: '4px', border: 'none', backgroundColor: '#e74c3c', color: '#fff', cursor: 'pointer' }}>Archive</button>
@@ -1014,6 +1061,7 @@ export default function UniverseManagerPage() {
                     <div style={{ marginBottom: '8px' }}><strong>Starter Characters ({selectedPreset.character_count}):</strong> {selectedPreset.character_count > 0 ? `${selectedPreset.character_count} karakter siap pakai` : 'Tidak ada — tambahkan sendiri'}</div>
                     <div style={{ marginBottom: '8px' }}><strong>Starter Locations ({selectedPreset.location_count}):</strong> {selectedPreset.location_count > 0 ? `${selectedPreset.location_count} lokasi siap pakai` : 'Tidak ada — tambahkan sendiri'}</div>
                     <div style={{ marginBottom: '8px' }}><strong>Story Template:</strong> {selectedPreset.story_template}</div>
+                    <div style={{ marginBottom: '8px', color: '#d1d1f6' }}><strong>Visual Style:</strong> {selectedPreset.visual_style || 'Handcrafted 3D clay'}</div>
                     {selectedPreset.has_depiction_policy && (
                       <div style={{ background: '#2d1a1a', border: '1px solid #6e3d3d', borderRadius: '6px', padding: '10px', marginTop: '8px' }}>
                         <strong style={{ color: '#ff9a9a' }}>⚠️ Depiction Policy Aktif</strong>

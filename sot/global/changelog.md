@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.11.2 — Fix Universe Profile Field Mapping (10/08/2026)
+- Tambahkan mapping helper record-to-form dan form-to-payload di page.js
+- Perbaiki Visual Style preset detail preview di UI
+- Perbaiki doubled path bug universes/universes/ di kb-loader.js
+- Tambahkan regression test untuk field mapping
+
 ## V2.11.1 — Remove real_animal option from Content Planner UI (10/08/2026)
 - Sembunyikan opsi Hewan Nyata dari selector Dunia Konten di generator baru
 - Atur layout selector Dunia Konten ke 2 kolom grid (1fr 1fr)

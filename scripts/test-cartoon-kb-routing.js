@@ -47,10 +47,13 @@ const {
   getUniverseDefaults,
   buildUniverseConfigJson,
   normalizeContentWorldParams,
+  refreshDynamicProfiles,
   CONTENT_WORLDS,
   KNOWLEDGE_DOMAINS,
   UNIVERSE_PROFILES
 } = await import('../lib/content-world-contract.js');
+
+await refreshDynamicProfiles();
 
 assert(validateContentWorld('real_world') === 'real_world', 'real_world accepted');
 assert(validateContentWorld('cartoon_universe') === 'cartoon_universe', 'cartoon_universe accepted');
