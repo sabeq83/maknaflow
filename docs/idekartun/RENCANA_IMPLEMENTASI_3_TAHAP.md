@@ -2,6 +2,12 @@
 
 Diadopsi dari [00_USULAN_INTERNALISASI](file:///Users/sabeqmmursyid/_maknaflow-staging/docs/idekartun/00_USULAN_INTERNALISASI_PET_CARTOON_UNIVERSE_MAKNAFLOW.md), diperkaya dengan mapping kode teknis.
 
+| Tahap | Status | Versi |
+|---|---|---|
+| Tahap 1 — MVP World-Aware Planner | ✅ SELESAI | v2.6.0 |
+| Tahap 2 — Storyboard & Production Continuity | ✅ SELESAI | v2.7.0 |
+| Tahap 3 — Universe Platform | 🕐 BELUM DIMULAI | — |
+
 ---
 
 ## Prinsip Desain (7 Keputusan Wajib)
@@ -48,7 +54,7 @@ flowchart TB
 
 ---
 
-# TAHAP 1 — MVP World-Aware Planner
+# TAHAP 1 — MVP World-Aware Planner (SELESAI v2.6.0 ✅)
 
 **Tujuan**: Content Planner dapat menghasilkan kalender ide PawVille yang tidak dipaksa mengikuti dunia manusia realistis.
 
@@ -687,19 +693,21 @@ Teruskan `content_world`, `knowledge_domain`, `universe_profile`, `universe_conf
 
 ---
 
-## Execution Task List — Tahap 1
+## Execution Task List — Tahap 1 (SELESAI v2.6.0 ✅)
 
-- [ ] Buat file `kb/PET_CONTENT_KB.md`
-- [ ] Buat file `kb/CARTOON_UNIVERSE_STORY_ENGINE.md`
-- [ ] Buat file `kb/CARTOON_VISUAL_CONTINUITY_KB.md`
-- [ ] Buat folder `kb/universes/` dan file `PAWVILLE_UNIVERSE_PROFILE.md`
-- [ ] Modifikasi `lib/kb-stitcher.js` — tambah `buildKBFileList()`, `getStitchedKB()`, refaktor `stitchFiles()`
-- [ ] Modifikasi `lib/db.js` — ALTER TABLE migrasi 4 kolom `content_planners` + 7 kolom `content_planner_rows`
-- [ ] Modifikasi `app/content-planner/page.js` — tambah 3 state + 3 dropdown + preset auto-fill + submit payload
-- [ ] Modifikasi `lib/content-planner-engine.js` — conditional KB loading + cartoon directive + extra output fields
-- [ ] Modifikasi `app/api/content-planner/route.js` — teruskan field baru
-- [ ] Testing: generate 6 baris planner PawVille mode → verifikasi context dunia kartun
-- [ ] Testing: generate 6 baris planner real_world mode → verifikasi tidak ada regresi
+- [x] Buat file `kb/PET_CONTENT_KB.md`
+- [x] Buat file `kb/CARTOON_UNIVERSE_STORY_ENGINE.md`
+- [x] Buat file `kb/CARTOON_VISUAL_CONTINUITY_KB.md`
+- [x] Buat folder `kb/universes/` dan file `PAWVILLE_UNIVERSE_PROFILE.md`
+- [x] Buat `lib/content-world-contract.js` — validator/normalizer terpusat
+- [x] Modifikasi `lib/db-pg.js` — ALTER TABLE migrasi 4 kolom `content_planners` + 7 kolom `content_planner_rows`
+- [x] Modifikasi `app/content-planner/[id]/page.js` — Universe selector, Character panel, metadata display
+- [x] Modifikasi `lib/content-planner-engine.js` — conditional KB loading + cartoon directive + extra output fields
+- [x] Modifikasi `app/api/content-planner/route.js` — teruskan field baru
+- [x] Modifikasi `app/api/content-planner/[id]/rows/[rowId]/route.js` — universe fields
+- [x] Modifikasi `app/api/content-planner/[id]/export/route.js` — universe fields di CSV/markdown
+- [x] Modifikasi `lib/pillar-campaign-ingest.js` — forward universe metadata ke row payload
+- [x] Testing: build berhasil, backward compatibility real_world terjaga
 
 ---
 
