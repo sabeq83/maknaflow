@@ -21,6 +21,7 @@ const menuKeyMap = {
   '/tts-studio': 'tts_studio',
   '/scraper': 'video_library',
   '/settings/brand-profiles': 'brand_profiles',
+  '/settings/universes': 'universe_manager',
   '/settings/users': 'admin_only',
   '/settings/tenants': 'superadmin_only',
   '/settings': 'system_settings',
@@ -35,6 +36,7 @@ const navItems = [
   { label: 'Product Database', href: '/products', icon: '📦' },
   { label: 'Deconstruct Lab', href: '/deconstruct', icon: '🔬' },
   { label: 'Brand Profile Manager', href: '/settings/brand-profiles', icon: '🧬' },
+  { label: 'Universe Manager', href: '/settings/universes', icon: '🏰' },
 
   { section: 'WORKFLOW' },
   { label: 'RE Campaign', href: '/re-campaigns', icon: '🎬' },

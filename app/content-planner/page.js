@@ -47,6 +47,8 @@ export default function ContentPlannerDashboard() {
   const [contentWorld, setContentWorld] = useState('real_world');
   const [knowledgeDomain, setKnowledgeDomain] = useState('general');
   const [universeProfile, setUniverseProfile] = useState(null);
+  const [availableUniverses, setAvailableUniverses] = useState([]);
+  const [selectedUniverseInfo, setSelectedUniverseInfo] = useState(null);
 
   function generateAutofillTitle(accName, prodName) {
     const now = new Date();
@@ -99,6 +101,33 @@ export default function ContentPlannerDashboard() {
       return;
     }
   }, [editorialRowsPerPillar, maxEditorialRowsPerPillar]);
+
+  // Fetch available universes when cartoon_universe is selected
+  useEffect(() => {
+    if (contentWorld === 'cartoon_universe') {
+      fetch('/api/v2/universe-profiles').then(r => r.json()).then(data => {
+        if (data.success && data.profiles) {
+          setAvailableUniverses(data.profiles);
+          // Auto-select first if none selected
+          if (!universeProfile && data.profiles.length > 0) {
+            const first = data.profiles[0];
+            setUniverseProfile(first.slug);
+            setKnowledgeDomain(first.knowledge_domain || 'general');
+            setSelectedUniverseInfo(first);
+          } else if (universeProfile) {
+            const found = data.profiles.find(p => p.slug === universeProfile);
+            if (found) setSelectedUniverseInfo(found);
+          }
+        }
+      }).catch(() => {
+        // Fallback: keep PawVille as static option
+        setAvailableUniverses([{ slug: 'pawville', name: 'PawVille Pet Universe', knowledge_domain: 'pet_supplies', default_visual_style: 'cinematic_3d_clay', default_scene_count: 7, default_scene_duration: 8, human_presence: 'none' }]);
+      });
+    } else {
+      setAvailableUniverses([]);
+      setSelectedUniverseInfo(null);
+    }
+  }, [contentWorld]);
 
   async function fetchPlanners() {
     try {
@@ -244,9 +273,12 @@ export default function ContentPlannerDashboard() {
           content_world: contentWorld,
           knowledge_domain: knowledgeDomain,
           universe_profile: universeProfile,
-          universe_config_json: universeProfile === 'pawville' ? JSON.stringify({
-            visual_style: 'cinematic_3d_clay', human_presence: 'none',
-            scene_count: 7, scene_duration: 8, aspect_ratio: '9:16',
+          universe_config_json: selectedUniverseInfo ? JSON.stringify({
+            visual_style: selectedUniverseInfo.default_visual_style || 'cinematic_3d_clay',
+            human_presence: selectedUniverseInfo.human_presence || 'none',
+            scene_count: selectedUniverseInfo.default_scene_count || 7,
+            scene_duration: selectedUniverseInfo.default_scene_duration || 8,
+            aspect_ratio: selectedUniverseInfo.default_aspect_ratio || '9:16',
           }) : null,
         })
       });
@@ -575,19 +607,42 @@ export default function ContentPlannerDashboard() {
                       🏰 Universe Profile:
                     </label>
                     <select
-                      value={universeProfile || 'pawville'}
-                      onChange={e => setUniverseProfile(e.target.value)}
+                      value={universeProfile || ''}
+                      onChange={e => {
+                        const slug = e.target.value;
+                        setUniverseProfile(slug);
+                        const info = availableUniverses.find(u => u.slug === slug);
+                        if (info) {
+                          setSelectedUniverseInfo(info);
+                          setKnowledgeDomain(info.knowledge_domain || 'general');
+                        }
+                      }}
                       style={{
                         width: '100%', padding: '10px 12px', borderRadius: '10px',
                         background: '#312e81', border: '1px solid #4338ca', color: '#fff', fontSize: '14px'
                       }}
                     >
-                      <option value="pawville">🐾 PawVille Pet Universe</option>
+                      {availableUniverses.length === 0 && (
+                        <option value="pawville">🐾 PawVille Pet Universe</option>
+                      )}
+                      {availableUniverses.map(u => (
+                        <option key={u.slug} value={u.slug}>
+                          {u.slug === 'pawville' ? '🐾' : u.slug === 'kitchentails' ? '🍳' : '🏰'} {u.name}
+                        </option>
+                      ))}
                     </select>
-                    <div style={{ marginTop: '10px', fontSize: '11px', color: '#a5b4fc', lineHeight: 1.5 }}>
-                      <strong>Preset:</strong> 3D Clay Style • 7 Scene × 8s • No Human<br/>
-                      <strong>Karakter:</strong> Mochi (British Shorthair) • Dr. Paw (Shiba Inu) • Coco (Corgi) • Boba (Hamster) • Tofu (Rabbit)
-                    </div>
+                    {selectedUniverseInfo && (
+                      <div style={{ marginTop: '10px', fontSize: '11px', color: '#a5b4fc', lineHeight: 1.5 }}>
+                        <strong>Preset:</strong> {selectedUniverseInfo.default_visual_style || 'cinematic_3d_clay'} • {selectedUniverseInfo.default_scene_count || 7} Scene × {selectedUniverseInfo.default_scene_duration || 8}s • {selectedUniverseInfo.human_presence === 'none' ? 'No Human' : selectedUniverseInfo.human_presence}<br/>
+                        {selectedUniverseInfo.tone && <><strong>Tone:</strong> {selectedUniverseInfo.tone}<br/></>}
+                      </div>
+                    )}
+                    {!selectedUniverseInfo && (
+                      <div style={{ marginTop: '10px', fontSize: '11px', color: '#a5b4fc', lineHeight: 1.5 }}>
+                        <strong>Preset:</strong> 3D Clay Style • 7 Scene × 8s • No Human<br/>
+                        <strong>Karakter:</strong> Mochi (British Shorthair) • Dr. Paw (Shiba Inu) • Coco (Corgi) • Boba (Hamster) • Tofu (Rabbit)
+                      </div>
+                    )}
                   </div>
                 )}
 

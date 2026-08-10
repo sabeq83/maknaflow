@@ -1,5 +1,17 @@
 # Changelog
 
+## V2.8.0 — Tahap 3: Universe Platform (10/08/2026)
+- 4 tabel baru tenant-aware (universe_profiles, universe_characters, universe_locations, universe_episodes)
+- CRUD API 7 endpoint untuk universe profiles, characters, locations, episodes
+- Universe Manager UI di /settings/universes dengan 4 tab
+- Hybrid manifest loader (DB-backed dengan static fallback)
+- Dynamic universe dropdown di Content Planner
+- Episode memory dan anti-repetition per universe
+- Seed PawVille dan KitchenTails ke database
+- Dynamic KB routing di prompts.js
+- Refaktor cartoon-continuity-validator dinamis dari snapshot
+- Dokumentasi SOT universe-manager.md
+
 ## V2.7.1 — Kartun Tahap 2.5: Character Reference Lock (10/08/2026)
 - Definisikan manifest karakter PawVille dan upload endpoint
 - Sediakan UI Modal dengan Character Lock status check dan hybrid_lock enforcement
