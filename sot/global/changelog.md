@@ -1,5 +1,21 @@
 # Changelog
 
+## V2.11.0 — Tahap 3.6: Universe Starter Presets & Centralized KB Routing (10/08/2026)
+- Tambah 6 system preset universe bawaan (PawVille, Herbal Grove, Kitchen Town, Rumah Rapi, Jejak Peradaban Islam, General Clay Story)
+- Buat StarterPickerModal di Universe Manager — clone preset jadi universe baru dengan 1 klik
+- API baru: GET /api/v2/universe-presets, GET /api/v2/universe-presets/:key, POST /api/v2/universe-presets/:key/instantiate (atomic transaction)
+- Centralized KB routing via lib/kb-routing.js — routing domain KB tidak lagi hardcode di prompts atau scheduler
+- Fix bug fallback PawVille di kb-loader.js dan prompts.js — universe non-PawVille tidak bocor ke PAWVILLE_UNIVERSE_PROFILE
+- Tambah 9 KB file baru: 5 domain KB (Herbal, Kitchen, Home Improvement, History, Islamic History) + 4 universe profile KB
+
+## V2.10.0 — Tahap 3.6: Universe Starter Presets & Centralized KB Routing (10/08/2026)
+- Tambah 6 system preset universe bawaan (PawVille, Herbal Grove, Kitchen Town, Rumah Rapi, Jejak Peradaban Islam, General Clay Story)
+- Buat StarterPickerModal di Universe Manager — clone preset jadi universe baru dengan 1 klik
+- API baru: GET /api/v2/universe-presets, GET /api/v2/universe-presets/:key, POST /api/v2/universe-presets/:key/instantiate (atomic transaction)
+- Centralized KB routing via lib/kb-routing.js — routing domain KB tidak lagi hardcode di prompts atau scheduler
+- Fix bug fallback PawVille di kb-loader.js dan prompts.js — universe non-PawVille tidak bocor ke PAWVILLE_UNIVERSE_PROFILE
+- Tambah 9 KB file baru: 5 domain KB (Herbal, Kitchen, Home Improvement, History, Islamic History) + 4 universe profile KB
+
 ## V2.9.0 — Tahap 3.5: Human Claymation Universe Support (10/08/2026)
 - Tambah universe_type (animal/mascot_object/human) di universe_profiles
 - Tambah depiction_policy dan historical_period untuk universe bertipe human

@@ -73,6 +73,16 @@ export default function UniverseManagerPage() {
   const [toast, setToast] = useState(null);
   const [pillarDraft, setPillarDraft] = useState('');
 
+  // Tahap 3.6: Preset picker state
+  const [showStarterPicker, setShowStarterPicker] = useState(false);
+  const [presets, setPresets] = useState([]);
+  const [selectedPreset, setSelectedPreset] = useState(null);
+  const [pickerMode, setPickerMode] = useState('choice'); // 'choice' | 'grid' | 'preview'
+  const [presetNameInput, setPresetNameInput] = useState('');
+  const [presetSlugInput, setPresetSlugInput] = useState('');
+  const [presetInstantiating, setPresetInstantiating] = useState(false);
+  const [presetError, setPresetError] = useState('');
+
   useEffect(() => {
     fetchUniverses();
   }, []);
@@ -105,6 +115,16 @@ export default function UniverseManagerPage() {
       setLoading(false);
     }
   }
+
+  const fetchPresets = async () => {
+    try {
+      const res = await fetch('/api/v2/universe-presets');
+      const json = await res.json();
+      if (json.success) setPresets(json.data);
+    } catch (e) {
+      console.error('Failed to fetch presets:', e);
+    }
+  };
 
   // API Call: Fetch Characters
   async function fetchCharacters(universeId) {
@@ -330,8 +350,8 @@ export default function UniverseManagerPage() {
             <p className="page-subtitle" style={{ color: '#a29bfe', margin: '8px 0 0' }}>Define and manage your rich, consistent story universes.</p>
           </div>
           {activeTab === 'universes' && (
-            <button className="btn btn-primary" style={{ backgroundColor: '#6c5ce7', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: '6px', cursor: 'pointer' }} onClick={() => { setShowForm(!showForm); setEditingId(null); setFormData({ ...emptyUniverseForm }); }}>
-              {showForm ? '✕ Close Form' : '+ New Universe'}
+            <button className="btn btn-primary" style={{ backgroundColor: '#6c5ce7', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: '6px', cursor: 'pointer' }} onClick={() => { fetchPresets(); setShowStarterPicker(true); setPickerMode('choice'); setSelectedPreset(null); setPresetNameInput(''); setPresetSlugInput(''); setPresetError(''); }}>
+              + New Universe
             </button>
           )}
         </div>
@@ -895,6 +915,177 @@ export default function UniverseManagerPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* Tahap 3.6: Starter Picker Modal */}
+        {showStarterPicker && (
+          <div style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 1000, padding: '20px'
+          }}>
+            <div style={{
+              background: '#1a1a2e', borderRadius: '16px', padding: '32px',
+              width: '100%', maxWidth: '800px', maxHeight: '90vh',
+              overflowY: 'auto', border: '1px solid #2d2d4e'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h2 style={{ color: '#e0e0ff', margin: 0, fontSize: '20px' }}>✨ Buat Universe Baru</h2>
+                <button onClick={() => setShowStarterPicker(false)}
+                  style={{ background: 'none', border: 'none', color: '#a0a0c0', fontSize: '20px', cursor: 'pointer' }}>✕</button>
+              </div>
+
+              {/* Mode: choice */}
+              {pickerMode === 'choice' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <button
+                    onClick={() => setPickerMode('grid')}
+                    style={{
+                      background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)', color: '#fff',
+                      border: 'none', borderRadius: '12px', padding: '28px 20px',
+                      cursor: 'pointer', textAlign: 'left'
+                    }}>
+                    <div style={{ fontSize: '32px', marginBottom: '12px' }}>📦</div>
+                    <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '6px' }}>Create from Preset</div>
+                    <div style={{ fontSize: '13px', opacity: 0.85 }}>Mulai dari 6 template siap pakai — lengkap dengan karakter dan lokasi starter.</div>
+                  </button>
+                  <button
+                    onClick={() => { setShowStarterPicker(false); setShowForm(true); setEditingId(null); setFormData({ ...emptyUniverseForm }); }}
+                    style={{
+                      background: '#2d2d4e', color: '#e0e0ff',
+                      border: '1px solid #3d3d6e', borderRadius: '12px', padding: '28px 20px',
+                      cursor: 'pointer', textAlign: 'left'
+                    }}>
+                    <div style={{ fontSize: '32px', marginBottom: '12px' }}>📝</div>
+                    <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '6px' }}>Start from Blank</div>
+                    <div style={{ fontSize: '13px', opacity: 0.75 }}>Isi semua field secara manual. Cocok jika kamu punya konsep universe sendiri.</div>
+                  </button>
+                </div>
+              )}
+
+              {/* Mode: grid — 6 preset cards */}
+              {pickerMode === 'grid' && (
+                <div>
+                  <button onClick={() => setPickerMode('choice')}
+                    style={{ background: 'none', border: 'none', color: '#a29bfe', cursor: 'pointer', marginBottom: '16px', fontSize: '13px' }}>← Kembali</button>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
+                    {presets.map(p => (
+                      <button key={p.key} onClick={() => { setSelectedPreset(p); setPickerMode('preview');
+                        setPresetNameInput(p.label); setPresetSlugInput(p.key.replace(/_/g, '-')); }}
+                        style={{
+                          background: '#242444', border: '1px solid #3d3d6e', borderRadius: '12px',
+                          padding: '20px', cursor: 'pointer', textAlign: 'left', color: '#e0e0ff',
+                          transition: 'border-color 0.2s'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.borderColor = '#6c5ce7'}
+                        onMouseLeave={e => e.currentTarget.style.borderColor = '#3d3d6e'}
+                      >
+                        <div style={{ fontSize: '28px', marginBottom: '8px' }}>{p.icon}</div>
+                        <div style={{ fontWeight: 700, marginBottom: '4px', fontSize: '14px' }}>{p.label}</div>
+                        <div style={{ fontSize: '12px', color: '#a0a0c0', marginBottom: '10px' }}>{p.description}</div>
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                          <span style={{ background: '#3d3d6e', borderRadius: '4px', padding: '2px 8px', fontSize: '11px' }}>{p.universe_type}</span>
+                          <span style={{ background: '#3d3d6e', borderRadius: '4px', padding: '2px 8px', fontSize: '11px' }}>{p.knowledge_domain}</span>
+                        </div>
+                        <div style={{ marginTop: '8px', fontSize: '11px', color: '#7070a0' }}>{p.character_count} karakter · {p.location_count} lokasi</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Mode: preview + name input */}
+              {pickerMode === 'preview' && selectedPreset && (
+                <div>
+                  <button onClick={() => setPickerMode('grid')}
+                    style={{ background: 'none', border: 'none', color: '#a29bfe', cursor: 'pointer', marginBottom: '16px', fontSize: '13px' }}>← Pilih Preset Lain</button>
+
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '16px' }}>
+                    <span style={{ fontSize: '32px' }}>{selectedPreset.icon}</span>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '16px', color: '#e0e0ff' }}>{selectedPreset.label}</div>
+                      <div style={{ fontSize: '12px', color: '#a0a0c0' }}>{selectedPreset.universe_type} · {selectedPreset.knowledge_domain}</div>
+                    </div>
+                  </div>
+
+                  <div style={{ background: '#242444', borderRadius: '8px', padding: '16px', marginBottom: '20px', fontSize: '13px', color: '#c0c0e0' }}>
+                    <div style={{ marginBottom: '8px' }}><strong>Starter Characters ({selectedPreset.character_count}):</strong> {selectedPreset.character_count > 0 ? `${selectedPreset.character_count} karakter siap pakai` : 'Tidak ada — tambahkan sendiri'}</div>
+                    <div style={{ marginBottom: '8px' }}><strong>Starter Locations ({selectedPreset.location_count}):</strong> {selectedPreset.location_count > 0 ? `${selectedPreset.location_count} lokasi siap pakai` : 'Tidak ada — tambahkan sendiri'}</div>
+                    <div style={{ marginBottom: '8px' }}><strong>Story Template:</strong> {selectedPreset.story_template}</div>
+                    {selectedPreset.has_depiction_policy && (
+                      <div style={{ background: '#2d1a1a', border: '1px solid #6e3d3d', borderRadius: '6px', padding: '10px', marginTop: '8px' }}>
+                        <strong style={{ color: '#ff9a9a' }}>⚠️ Depiction Policy Aktif</strong>
+                        <div style={{ fontSize: '12px', marginTop: '4px', color: '#e0b0b0' }}>Universe ini memiliki aturan penggambaran karakter. Wajib dipatuhi saat produksi konten.</div>
+                      </div>
+                    )}
+                    {selectedPreset.historical_period && (
+                      <div style={{ marginTop: '8px' }}>🕐 <strong>Periode Historis:</strong> {selectedPreset.historical_period}</div>
+                    )}
+                  </div>
+
+                  <div style={{ marginBottom: '12px' }}>
+                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#a0a0c0' }}>Nama Universe *</label>
+                    <input
+                      type="text" value={presetNameInput}
+                      onChange={e => {
+                        setPresetNameInput(e.target.value);
+                        setPresetSlugInput(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''));
+                      }}
+                      style={{ width: '100%', padding: '10px', background: '#1e1e3a', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px', boxSizing: 'border-box', fontSize: '14px' }}
+                    />
+                  </div>
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', color: '#a0a0c0' }}>Slug *</label>
+                    <input
+                      type="text" value={presetSlugInput}
+                      onChange={e => setPresetSlugInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                      style={{ width: '100%', padding: '10px', background: '#1e1e3a', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px', boxSizing: 'border-box', fontSize: '14px', fontFamily: 'monospace' }}
+                    />
+                  </div>
+
+                  {presetError && (
+                    <div style={{ background: '#2d1a1a', border: '1px solid #6e3d3d', borderRadius: '6px', padding: '10px', marginBottom: '12px', color: '#ff9a9a', fontSize: '13px' }}>{presetError}</div>
+                  )}
+
+                  <button
+                    disabled={presetInstantiating || !presetNameInput.trim() || !presetSlugInput.trim()}
+                    onClick={async () => {
+                      setPresetInstantiating(true);
+                      setPresetError('');
+                      try {
+                        const res = await fetch(`/api/v2/universe-presets/${selectedPreset.key}/instantiate`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ name: presetNameInput, slug: presetSlugInput })
+                        });
+                        const json = await res.json();
+                        if (json.success) {
+                          setShowStarterPicker(false);
+                          await fetchUniverses();
+                          setToast({ type: 'success', message: `Universe '${presetNameInput}' berhasil dibuat dari preset ${selectedPreset.label}!` });
+                          setTimeout(() => setToast(null), 4000);
+                        } else {
+                          setPresetError(json.error || 'Gagal membuat universe.');
+                        }
+                      } catch (e) {
+                        setPresetError('Network error: ' + e.message);
+                      } finally {
+                        setPresetInstantiating(false);
+                      }
+                    }}
+                    style={{
+                      width: '100%', padding: '14px',
+                      background: presetInstantiating ? '#3d3d6e' : 'linear-gradient(135deg, #6c5ce7, #a29bfe)',
+                      color: '#fff', border: 'none', borderRadius: '8px',
+                      fontSize: '15px', fontWeight: 700, cursor: presetInstantiating ? 'not-allowed' : 'pointer'
+                    }}
+                  >
+                    {presetInstantiating ? '⏳ Membuat Universe...' : '🚀 Create Universe'}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}

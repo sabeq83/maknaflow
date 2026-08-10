@@ -2,7 +2,9 @@
 
 ## Deskripsi
 
-Universe Manager adalah fitur MAKNA Flow untuk mengelola multiple cartoon universe secara dinamis melalui database PostgreSQL. Mendukung tipe universe **animal** (PawVille, KitchenTails) maupun **human claymation** (Jejak Peradaban Islam).
+Universe Manager adalah fitur MAKNA Flow untuk mengelola multiple cartoon universe secara dinamis melalui database PostgreSQL. Mendukung tipe universe **animal** (PawVille), **mascot_object** (Herbal Grove, Kitchen Town, Rumah Rapi), maupun **human claymation** (Jejak Peradaban Islam, General Clay Story).
+
+Sejak **Tahap 3.6**, user dapat membuat universe baru dari **6 System Preset** bawaan (1-klik via StarterPickerModal) atau tetap membuat dari blank form secara manual.
 
 ## Tabel Database
 
@@ -82,11 +84,60 @@ Untuk universe bertipe human:
 - Saat Pillar Campaign di-ingest, entry baru direkam ke universe_episodes
 - Digest hanya mengambil 30 episode terakhir per universe
 
-## Universe yang Tersedia
+## Universe yang Tersedia (Contoh Seed)
 
-1. **PawVille Pet Universe** (pawville) - Type: animal, Domain: pet_supplies, 5 karakter, 5 lokasi
-2. **KitchenTails Culinary Universe** (kitchentails) - Type: animal, Domain: food_culinary, 2 karakter, 2 lokasi
-3. **Jejak Peradaban Islam** (jejak-peradaban-islam) - Type: human, Domain: islamic_history, Historical Period: Abad ke-7 s.d. ke-15, 2 karakter, 2 lokasi
+1. **PawVille Pet Universe** (pawville) — Type: animal, Domain: pet_supplies
+2. **Jejak Peradaban Islam** (jejak-peradaban-islam) — Type: human, Domain: islamic_history, Historical Period: Abad ke-7 s.d. ke-15
+
+> User dapat membuat universe baru dari 6 System Preset (lihat seksi di bawah) atau dari blank form.
+
+## System Presets — Tahap 3.6
+
+Didefinisikan di `lib/universe-presets.js` (immutable, versioned, tidak tersimpan di DB — hanya template).
+
+| Key | Label | Type | Domain | Karakter | Lokasi |
+|---|---|---|---|---|---|
+| `pawville_pet_story` | PawVille Pet Story | animal | pet_supplies | 3 | 3 |
+| `herbal_grove` | Herbal Grove | mascot_object | herbal | 3 | 3 |
+| `kitchen_town` | Kitchen Town | mascot_object | kitchen | 3 | 3 |
+| `rumah_rapi` | Rumah Rapi | mascot_object | home_improvement | 3 | 3 |
+| `jejak_peradaban_islam` | Jejak Peradaban Islam | human | islamic_history | 2 | 2 |
+| `general_clay_story` | General Clay Story | human | general | 0 | 0 |
+
+### Cara Membuat Universe dari Preset
+1. Buka Universe Manager → klik `+ New Universe`
+2. Pilih **Create from Preset** → grid 6 preset muncul
+3. Klik card preset → preview detail tampil (tone, visual style, karakter, lokasi)
+4. Isi `Universe Name` + `Slug` → klik `Create Universe`
+5. Universe baru terbentuk via atomic transaction (karakter & lokasi sekaligus)
+
+### API Endpoints Preset (Tahap 3.6)
+
+| Method | Endpoint | Fungsi |
+|---|---|---|
+| `GET` | `/api/v2/universe-presets` | List 6 preset (summary) |
+| `GET` | `/api/v2/universe-presets/:key` | Detail preset (sanitized, tanpa filesystem path) |
+| `POST` | `/api/v2/universe-presets/:key/instantiate` | Clone preset → universe baru (atomic transaction) |
+
+## Centralized KB Routing — Tahap 3.6
+
+Routing KB terpusat via `lib/kb-routing.js`. Tidak ada lagi hardcode domain KB di prompts atau scheduler.
+
+| Domain | KB Files |
+|---|---|
+| `pet_supplies` | `PET_CONTENT_KB` |
+| `herbal` | `HERBAL_CONTENT_KB` |
+| `kitchen` | `KITCHEN_CONTENT_KB` |
+| `home_improvement` | `HOME_IMPROVEMENT_KB` |
+| `history` | `HISTORY_CONTENT_KB` |
+| `islamic_history` | `HISTORY_CONTENT_KB` + `ISLAMIC_HISTORY_CONTENT_KB` |
+| `food_culinary` | `Food Styling & Photography KB` |
+| `general` | *(tidak ada domain KB)* |
+
+**Cartoon universe** selalu mendapat: `CARTOON_UNIVERSE_STORY_ENGINE` + `CARTOON_VISUAL_CONTINUITY_KB` + domain KB + universe profile KB (auto-derived dari slug).
+
+> [!IMPORTANT]
+> Bug **fallback PawVille** sudah dihapus di Tahap 3.6. Universe non-PawVille tidak lagi mendapat `PAWVILLE_UNIVERSE_PROFILE` sebagai fallback.
 
 ## Batasan
 
@@ -95,3 +146,6 @@ Untuk universe bertipe human:
 - Real-world content planner tidak terpengaruh oleh fitur ini
 - Universe bertipe human wajib mengisi depiction_policy untuk keamanan konten
 - depiction_mode = faceless atau silhouette direkomendasikan untuk karakter sensitif di universe islamic_history
+- System Preset bersifat **immutable** — hanya tersimpan di code, tidak di DB. Perubahan preset memerlukan update `lib/universe-presets.js`
+- `reference_image_path` pada karakter/lokasi preset di-null-kan saat clone — user perlu upload referensi sendiri
+- Slug harus unik per tenant — clone preset dengan nama berbeda tetap bisa untuk universe kedua bertipe sama
