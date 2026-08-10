@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.8.1 — Fix: SQL parameters in universe CRUD (10/08/2026)
+- Change PG specific parameter placeholders to standard positional ? placeholders to support query interception and sqliteToPgQuery mapping
+
 ## V2.8.0 — Tahap 3: Universe Platform (10/08/2026)
 - 4 tabel baru tenant-aware (universe_profiles, universe_characters, universe_locations, universe_episodes)
 - CRUD API 7 endpoint untuk universe profiles, characters, locations, episodes
