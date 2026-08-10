@@ -106,16 +106,16 @@ export default function ContentPlannerDashboard() {
   useEffect(() => {
     if (contentWorld === 'cartoon_universe') {
       fetch('/api/v2/universe-profiles').then(r => r.json()).then(data => {
-        if (data.success && data.profiles) {
-          setAvailableUniverses(data.profiles);
+        if (data.success && data.data) {
+          setAvailableUniverses(data.data);
           // Auto-select first if none selected
-          if (!universeProfile && data.profiles.length > 0) {
-            const first = data.profiles[0];
+          if (!universeProfile && data.data.length > 0) {
+            const first = data.data[0];
             setUniverseProfile(first.slug);
             setKnowledgeDomain(first.knowledge_domain || 'general');
             setSelectedUniverseInfo(first);
           } else if (universeProfile) {
-            const found = data.profiles.find(p => p.slug === universeProfile);
+            const found = data.data.find(p => p.slug === universeProfile);
             if (found) setSelectedUniverseInfo(found);
           }
         }

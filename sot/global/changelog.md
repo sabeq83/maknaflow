@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.11.3 — Fix Dynamic Universe Profiles Dropdown in Content Planner UI (10/08/2026)
+- Perbaiki parsing respons endpoint API /api/v2/universe-profiles di content planner page.js dari data.profiles ke data.data
+- Aktifkan pemuatan universe profile dinamis dari database di dropdown modal Generator
+
 ## V2.11.2 — Fix Universe Profile Field Mapping (10/08/2026)
 - Tambahkan mapping helper record-to-form dan form-to-payload di page.js
 - Perbaiki Visual Style preset detail preview di UI
