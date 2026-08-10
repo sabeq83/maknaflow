@@ -1715,6 +1715,7 @@ export default function OrganicPillarPage() {
                           <option value="Storytelling">Storytelling (Bercerita / Daily-life)</option>
                           <option value="Problem-Solution">Problem-Solution (Masalah & Solusi)</option>
                           <option value="Educational">Educational (Tutorial / Penjelasan Ilmiah)</option>
+                          <option value="Pet-Story-Arc">🐾 Pet Story Arc (7-Beat Cartoon Universe)</option>
                         </select>
                       </div>
                       <div className="form-group">

@@ -703,140 +703,62 @@ Teruskan `content_world`, `knowledge_domain`, `universe_profile`, `universe_conf
 
 ---
 
-# TAHAP 2 — Storyboard & Production Continuity
+# TAHAP 2 — Storyboard & Production Continuity (SELESAI v2.7.0)
 
-**Tujuan**: Ide terpilih dari Content Planner dapat dikembangkan menjadi storyboard 7-scene dan prompt produksi yang konsisten.
+**Tujuan**: Ide terpilih dari Content Planner dapat dikembangkan menjadi storyboard 7-beat dan prompt produksi yang world-aware.
 
----
-
-## 2.1 [MODIFY] Pillar Campaign — Narrative Mode `Pet-Story-Arc`
-
-#### File: [`app/pillar-campaigns/page.js`](file:///Users/sabeqmmursyid/_maknaflow-staging/app/pillar-campaigns/page.js)
-
-**Code Sebelum (L1421-1425):**
-```jsx
-<option value="Storytelling">Storytelling (Bercerita / Daily-life)</option>
-<option value="Problem-Solution">Problem-Solution (Masalah & Solusi)</option>
-<option value="Educational">Educational (Tutorial / Penjelasan Ilmiah)</option>
-```
-
-**Code Sesudah:**
-```jsx
-<option value="Storytelling">Storytelling (Bercerita / Daily-life)</option>
-<option value="Problem-Solution">Problem-Solution (Masalah & Solusi)</option>
-<option value="Educational">Educational (Tutorial / Penjelasan Ilmiah)</option>
-<option value="Pet-Story-Arc">🐾 Pet Story Arc (7-Beat Cartoon Universe)</option>
-```
-
-**Auto-configure saat `Pet-Story-Arc` dipilih:**
-```js
-useEffect(() => {
-  if (narrativeMode === 'Pet-Story-Arc') {
-    setTargetClipsCount(7);
-    setBridgeAtClip(4);         // Beat 4 = Solution Introduction
-    setBridgeDurationClips(2);  // Beat 4-5 = Solution + Demo
-    setFaceVisibility('cartoon_face');
-    setIsBridgingActive(true);
-  }
-}, [narrativeMode]);
-```
+**Prinsip**: Deteksi cartoon via `content_world === 'cartoon_universe'` (bukan narrative_mode saja).
 
 ---
 
-## 2.2 [MODIFY] OPC Prompt Builder — Pet Story Arc Directive
+## 2.1 [MODIFY] `lib/db-pg.js` — Migrasi OPC Content World
 
-#### File: [`lib/prompts.js`](file:///Users/sabeqmmursyid/_maknaflow-staging/lib/prompts.js) — `buildOrganicPillarPrompt` (~L1712)
+Tambah 4 kolom di `pillar_campaigns`: `content_world`, `story_template`, `universe_profile`, `universe_snapshot_json`.
 
-Tambah branch untuk narrative mode `Pet-Story-Arc`:
+## 2.2 [MODIFY] `lib/pillar-campaign-ingest.js` — Metadata Forwarding
 
-```js
-const narrativeDirective = narrativeMode === 'Pet-Story-Arc' ? `
-NARRATIVE MODE: PET STORY ARC (7-BEAT CARTOON UNIVERSE)
-Struktur cerita WAJIB:
-Beat 1 (0-8s): Visual Hook — masalah karakter terlihat, produk BELUM muncul
-Beat 2 (8-16s): Problem Development — dampak ringan, karakter pendukung menyadari
-Beat 3 (16-24s): Discovery — karakter pendukung memeriksa, menemukan penyebab
-Beat 4 (24-32s): Solution Introduction — produk diperkenalkan sebagai solusi
-Beat 5 (32-40s): Product Demonstration — macro shot, fungsi produk terlihat
-Beat 6 (40-48s): Resolution — karakter utama menggunakan produk, emosi berubah
-Beat 7 (48-56s): Emotional Closing + CTA — hasil memuaskan, CTA hanya via VO
+- Forward metadata universe dari planner ke campaign level dan setiap row payload
+- Auto-configure `target_clips_count=7`, `bridge_at_clip=4`, `bridge_duration_clips=2` untuk cartoon_universe
 
-ATURAN:
-- Produk TIDAK BOLEH muncul sebelum Beat 4. CTA hanya di Beat 7.
-- TANPA manusia. Cerita harus terbaca tanpa voice-over.
-- VO: maksimal 15 kata per beat, tone hangat, TANPA klaim medis.
-` : existingNarrativeDirective;
-```
+## 2.3 [MODIFY] `lib/prompts.js` — World-Aware Prompt Builder
 
----
+- KB filtering: cartoon KBs masuk, realist KBs keluar
+- 7-Beat Story Arc directive + character/location/product locks
+- World-aware negative prompt (suppress anti-cartoon)
+- Editorial mode: Beat 4-5 = story progression (bukan product intro)
 
-## 2.3 [MODIFY] Negative Prompt Logic — Suppress Anti-Cartoon
+## 2.4 [MODIFY] `lib/scheduler-processors.js` — KB Loading & Validator
 
-#### File: [`lib/prompts.js`](file:///Users/sabeqmmursyid/_maknaflow-staging/lib/prompts.js) (~L1938-1941)
+- Load cartoon KB files dari disk saat cartoon_universe
+- Forward rowPayload metadata ke tempCampaign
+- Panggil continuity validator post-generation
 
-**Code Sebelum:**
-```js
-// (appends anti-cartoon negatives unconditionally for realistic styles)
-negativePrompt += ', CGI look, plastic skin, anime, cartoon';
-```
+## 2.5 [NEW] `lib/cartoon-continuity-validator.js` — Validator 7 Cek
 
-**Code Sesudah:**
-```js
-const isCartoonMode = (narrativeMode === 'Pet-Story-Arc') || 
-                       subjectDemographic?.startsWith('mascot_universe_');
-if (!isCartoonMode) {
-  negativePrompt += ', CGI look, plastic skin, anime, cartoon';
-}
-```
+Validator non-blocking: scene count, character consistency, location continuity, product reveal beat, CTA placement, pet claims, human presence.
 
----
+## 2.6 [MODIFY] `app/pillar-campaigns/page.js` — Pet-Story-Arc Dropdown
 
-## 2.4 [MODIFY] Planner → OPC Import — Universe Metadata Forwarding
-
-Saat planner row di-import ke Pillar Campaign, metadata universe ikut:
-
-```js
-const opcDefaults = {
-  narrative_mode: plannerRow.universe_profile ? 'Pet-Story-Arc' : 'Storytelling',
-  visual_mode: plannerRow.universe_profile ? 'mascot_universe_pet' : 'hybrid_lock',
-  target_clips_count: plannerRow.universe_profile ? 7 : 4,
-  bridge_at_clip: plannerRow.universe_profile ? 4 : 2,
-  bridge_duration_clips: plannerRow.universe_profile ? 2 : 1,
-  face_visibility: plannerRow.universe_profile ? 'cartoon_face' : 'Faceless',
-};
-```
-
----
-
-## 2.5 [MODIFY] Character & Product Locks di T2I/I2V Prompts
-
-Saat `Pet-Story-Arc` mode aktif, injeksikan character identity lock dan product geometry lock dari universe profile ke setiap scene prompt:
-
-```js
-// Dalam prompt T2I per scene:
-const characterLock = `
-CHARACTER IDENTITY LOCK (MANDATORY):
-- Mochi: grey British Shorthair, round body, short legs, amber eyes, green scarf — NEVER changes
-- Dr. Paw: tan Shiba Inu, white coat, brown medical bag — NEVER changes
-- [other characters from universe profile]
-- Relative sizes MUST be consistent across all scenes
-`;
-```
+Tambah opsi Pet-Story-Arc di dropdown narrative mode.
 
 ---
 
 ## Execution Task List — Tahap 2
 
-- [ ] Tambah `Pet-Story-Arc` di dropdown narrative mode Pillar Campaign
-- [ ] Auto-configure clips/bridging/face saat `Pet-Story-Arc` dipilih
-- [ ] Tambah pet story arc directive di `buildOrganicPillarPrompt`
-- [ ] Modifikasi negative prompt logic — suppress anti-cartoon saat cartoon mode aktif
-- [ ] Implement Planner → OPC import dengan universe metadata forwarding
-- [ ] Tambah Character Identity Lock ke T2I prompt builder
-- [ ] Tambah Product Geometry Lock ke T2I/I2V prompt builder
-- [ ] Testing: generate 1 item OPC `Pet-Story-Arc`, verifikasi 7-beat storyboard
-- [ ] Testing: verifikasi negative prompt tidak berisi `cartoon` saat cartoon mode
-- [ ] Testing: verifikasi pipeline existing (real_world) tidak terpengaruh
+- [x] Migrasi 4 kolom baru di `pillar_campaigns`
+- [x] Forward metadata universe dari planner ke OPC campaign
+- [x] Auto-configure 7 clips, bridge at 4, duration 2
+- [x] KB filtering (cartoon KBs masuk, realist KBs keluar)
+- [x] Inject 7-Beat Story Arc directive + character/location/product locks
+- [x] World-aware negative prompt
+- [x] Handle editorial tanpa produk (Beat 4-5 story progression)
+- [x] Forward rowPayload universe metadata ke tempCampaign
+- [x] Load cartoon KB files saat cartoon_universe
+- [x] Panggil continuity validator post-generation
+- [x] Buat cartoon-continuity-validator.js
+- [x] Tambah Pet-Story-Arc di dropdown
+- [x] Test: 35/35 passed
+- [x] Build verification: success
 
 ---
 

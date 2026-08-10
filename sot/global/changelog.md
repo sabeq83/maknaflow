@@ -1,5 +1,17 @@
 # Changelog
 
+## V2.7.0 — Kartun Tahap 2: Storyboard & Production Continuity (10/08/2026)
+- World-aware OPC prompt builder — deteksi cartoon via content_world
+- 7-Beat Story Arc directive dengan character identity lock, location continuity lock, product geometry lock
+- KB routing kondisional — cartoon KBs masuk, realist KBs keluar saat cartoon_universe
+- World-aware negative prompt — suppress anti-cartoon negatives untuk cartoon mode
+- Auto-configure 7 clips, bridge at beat 4, duration 2 untuk cartoon universe
+- Metadata forwarding content_world/universe_profile/story_template dari planner ke OPC campaign
+- Cartoon continuity validator post-generation (7 cek non-blocking)
+- Pet-Story-Arc narrative mode option di Pillar Campaign dropdown
+- Editorial mode — Beat 4-5 jadi story progression tanpa produk
+- 35/35 automated tests passed
+
 ## V2.6.0 — Kartun Tahap 1: World-Aware Content Planner PawVille MVP (10/08/2026)
 - Tambah 4 KB baru: PET_CONTENT_KB, CARTOON_UNIVERSE_STORY_ENGINE, CARTOON_VISUAL_CONTINUITY_KB, PAWVILLE_UNIVERSE_PROFILE
 - Buat content-world-contract.js validator/normalizer terpusat
