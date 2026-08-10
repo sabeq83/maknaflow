@@ -43,6 +43,11 @@ export default function ContentPlannerDashboard() {
   const [editorialSource, setEditorialSource] = useState('empty');
   const [pendingEditorialBrandId, setPendingEditorialBrandId] = useState('');
 
+  // World-Aware state (Tahap 1)
+  const [contentWorld, setContentWorld] = useState('real_world');
+  const [knowledgeDomain, setKnowledgeDomain] = useState('general');
+  const [universeProfile, setUniverseProfile] = useState(null);
+
   function generateAutofillTitle(accName, prodName) {
     const now = new Date();
     const yyyy = now.getFullYear();
@@ -234,7 +239,15 @@ export default function ContentPlannerDashboard() {
           platform,
           objective,
           planner_count: effectivePlannerCount,
-          target_audience: effectiveTargetAudience
+          target_audience: effectiveTargetAudience,
+          // World-Aware fields (Tahap 1)
+          content_world: contentWorld,
+          knowledge_domain: knowledgeDomain,
+          universe_profile: universeProfile,
+          universe_config_json: universeProfile === 'pawville' ? JSON.stringify({
+            visual_style: 'cinematic_3d_clay', human_presence: 'none',
+            scene_count: 7, scene_duration: 8, aspect_ratio: '9:16',
+          }) : null,
         })
       });
 
@@ -495,6 +508,88 @@ export default function ContentPlannerDashboard() {
                     ))}
                   </div>
                 </div>
+
+                {/* === Content World Selector (Tahap 1) === */}
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '8px', fontWeight: 600 }}>
+                    🌍 Dunia Konten:
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                    {[
+                      ['real_world', '🏠 Dunia Nyata', 'Konten realistis dengan manusia & produk nyata'],
+                      ['real_animal', '🐾 Hewan Nyata', 'Konten hewan nyata (bukan kartun)'],
+                      ['cartoon_universe', '🎬 Cartoon Universe', 'Dunia karakter fiksi animasi']
+                    ].map(([value, label, desc]) => (
+                      <button key={value} type="button" onClick={() => {
+                        setContentWorld(value);
+                        if (value === 'cartoon_universe') {
+                          setUniverseProfile('pawville');
+                          setKnowledgeDomain('pet_supplies');
+                        } else if (value === 'real_animal') {
+                          setUniverseProfile(null);
+                          setKnowledgeDomain('pet_supplies');
+                        } else {
+                          setUniverseProfile(null);
+                          if (knowledgeDomain === 'pet_supplies' && value === 'real_world') {
+                            // Keep pet_supplies if user already selected it
+                          }
+                        }
+                      }} style={{
+                        padding: '10px 8px', textAlign: 'left', borderRadius: '10px', cursor: 'pointer',
+                        border: contentWorld === value ? '1px solid #6366f1' : '1px solid #27272a',
+                        background: contentWorld === value ? '#312e81' : '#18181b', color: '#fff'
+                      }}>
+                        <div style={{ fontWeight: 700, fontSize: '13px', marginBottom: '3px' }}>{label}</div>
+                        <div style={{ fontSize: '10px', color: '#a1a1aa', lineHeight: 1.3 }}>{desc}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Knowledge Domain Selector */}
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '8px', fontWeight: 600 }}>
+                    📚 Domain Pengetahuan:
+                  </label>
+                  <select
+                    value={knowledgeDomain}
+                    onChange={e => setKnowledgeDomain(e.target.value)}
+                    style={{
+                      width: '100%', padding: '10px 12px', borderRadius: '10px',
+                      background: '#18181b', border: '1px solid #27272a', color: '#fff', fontSize: '14px'
+                    }}
+                  >
+                    <option value="general">📋 Umum (General)</option>
+                    <option value="pet_supplies">🐱 Pet Supplies</option>
+                    <option value="food_culinary">🍳 Food & Culinary</option>
+                  </select>
+                </div>
+
+                {/* Universe Profile (conditional - only for cartoon_universe) */}
+                {contentWorld === 'cartoon_universe' && (
+                  <div style={{
+                    marginBottom: '20px', background: '#1e1b4b', border: '1px solid #4338ca',
+                    borderRadius: '12px', padding: '16px'
+                  }}>
+                    <label style={{ display: 'block', fontSize: '13px', color: '#c7d2fe', marginBottom: '8px', fontWeight: 600 }}>
+                      🏰 Universe Profile:
+                    </label>
+                    <select
+                      value={universeProfile || 'pawville'}
+                      onChange={e => setUniverseProfile(e.target.value)}
+                      style={{
+                        width: '100%', padding: '10px 12px', borderRadius: '10px',
+                        background: '#312e81', border: '1px solid #4338ca', color: '#fff', fontSize: '14px'
+                      }}
+                    >
+                      <option value="pawville">🐾 PawVille Pet Universe</option>
+                    </select>
+                    <div style={{ marginTop: '10px', fontSize: '11px', color: '#a5b4fc', lineHeight: 1.5 }}>
+                      <strong>Preset:</strong> 3D Clay Style • 7 Scene × 8s • No Human<br/>
+                      <strong>Karakter:</strong> Mochi (British Shorthair) • Dr. Paw (Shiba Inu) • Coco (Corgi) • Boba (Hamster) • Tofu (Rabbit)
+                    </div>
+                  </div>
+                )}
 
                 {/* Input Mode Selector */}
                 {plannerFocus === 'product_campaign' && <div style={{ marginBottom: '20px', background: '#18181b', padding: '4px', borderRadius: '10px', display: 'flex' }}>

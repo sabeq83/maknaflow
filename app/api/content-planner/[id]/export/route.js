@@ -36,14 +36,14 @@ export const GET = withTenantContext(async (request, { params }, user) => {
       md += `**Platform:** ${planner.platform}\n`;
       md += `**Dibuat:** ${planner.created_at}\n\n`;
       md += `---\n\n`;
-      md += `| # | Pillar | Category CEP | W'S Matrix | Context | VFO | Strategic Angle | Hook | Visual Action | Content Subject | Product Reference | CTA |\n`;
-      md += `|---|---|---|---|---|---|---|---|---|---|---|---|\n`;
+      md += `| # | Pillar | Category CEP | W'S Matrix | Context | VFO | Strategic Angle | Hook | Visual Action | Content Subject | Product Reference | CTA | Main Character | Story Premise | Pet Problem |\n`;
+      md += `|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n`;
 
       rows.forEach((r, idx) => {
         const cleanHook = r.hook.replace(/\|/g, '\\|').replace(/\n/g, ' ');
         const cleanVisual = r.visual_action.replace(/\|/g, '\\|').replace(/\n/g, ' ');
         const cleanContext = r.context.replace(/\|/g, '\\|').replace(/\n/g, ' ');
-        md += `| ${idx + 1} | ${r.pillar} | ${r.category_cep} | ${r.ws_matrix} | ${cleanContext} | ${r.vfo} | ${r.strategic_angle} | ${cleanHook} | ${cleanVisual} | ${r.content_subject || r.context} | ${r.product_reference || r.product || ''} | ${r.cta_type || ''} |\n`;
+        md += `| ${idx + 1} | ${r.pillar} | ${r.category_cep} | ${r.ws_matrix} | ${cleanContext} | ${r.vfo} | ${r.strategic_angle} | ${cleanHook} | ${cleanVisual} | ${r.content_subject || r.context} | ${r.product_reference || r.product || ''} | ${r.cta_type || ''} | ${r.main_character || ''} | ${r.story_premise || ''} | ${r.pet_problem || ''} |\n`;
       });
 
       return new NextResponse(md, {
@@ -68,7 +68,14 @@ export const GET = withTenantContext(async (request, { params }, user) => {
       'Content Subject',
       'Product Reference',
       'Commercial Intent',
-      'CTA Type'
+      'CTA Type',
+      'Main Character',
+      'Supporting Characters',
+      'Story Premise',
+      'Pet Problem',
+      'Product Role',
+      'Product Reveal Beat',
+      'Universe Profile'
     ];
 
     const escapeCsv = (str) => {
@@ -92,7 +99,14 @@ export const GET = withTenantContext(async (request, { params }, user) => {
         r.content_subject || r.context,
         r.product_reference || r.product || '',
         r.commercial_intent || '',
-        r.cta_type || ''
+        r.cta_type || '',
+        r.main_character || '',
+        r.supporting_characters || '',
+        r.story_premise || '',
+        r.pet_problem || '',
+        r.product_role || '',
+        r.product_reveal_beat || '',
+        r.universe_profile || ''
       ];
       csvContent += rowArr.map(escapeCsv).join(',') + '\n';
     });

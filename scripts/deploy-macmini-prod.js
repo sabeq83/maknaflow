@@ -14,7 +14,7 @@ async function deployMacMiniProd() {
     --exclude 'logs' \
     --exclude '.next' \
     --exclude 'public/uploads' \
-    ./ masbenu@100.73.95.3:~/maknaflow-production/`;
+    ./ masbenu@100.95.245.55:~/maknaflow-production/`;
   execSync(rsyncCmd, { stdio: 'inherit' });
 
   // Step 2: Run build and startup on Mac Mini via SSH
@@ -35,7 +35,7 @@ async function deployMacMiniProd() {
   `;
 
   try {
-    const sshCmd = `ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=10 -o ConnectTimeout=30 masbenu@100.73.95.3 "${remoteScript.replace(/"/g, '\\"')}"`;
+    const sshCmd = `ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=10 -o ConnectTimeout=30 masbenu@100.95.245.55 "${remoteScript.replace(/"/g, '\\"')}"`;
     execSync(sshCmd, { stdio: 'inherit', timeout: 300000 });
     console.log('\n🎉 Production Deployment completed successfully!');
   } catch (err) {

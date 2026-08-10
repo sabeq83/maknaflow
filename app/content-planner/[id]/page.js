@@ -280,6 +280,46 @@ export default function ContentPlannerWorkbench() {
             </button>
           </div>
         )}
+        {/* Cartoon Universe Info Panel (Tahap 1) */}
+        {!loading && planner?.content_world && planner.content_world !== 'real_world' && (
+          <div style={{
+            marginBottom: '20px', padding: '16px 20px',
+            background: planner.content_world === 'cartoon_universe' ? '#1e1b4b' : '#1a2332',
+            border: `1px solid ${planner.content_world === 'cartoon_universe' ? '#4338ca' : '#334155'}`,
+            borderRadius: '12px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <span style={{
+                background: planner.content_world === 'cartoon_universe' ? '#6366f1' : '#0ea5e9',
+                color: '#fff', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 700
+              }}>
+                {planner.content_world === 'cartoon_universe' ? '🎬 Cartoon Universe' : '🐾 Hewan Nyata'}
+              </span>
+              {planner.universe_profile && (
+                <span style={{
+                  background: '#312e81', color: '#c7d2fe', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 600
+                }}>
+                  🏰 {planner.universe_profile === 'pawville' ? 'PawVille Pet Universe' : planner.universe_profile}
+                </span>
+              )}
+              {planner.knowledge_domain && planner.knowledge_domain !== 'general' && (
+                <span style={{
+                  background: '#164e63', color: '#67e8f9', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 600
+                }}>
+                  📚 {planner.knowledge_domain === 'pet_supplies' ? 'Pet Supplies' : planner.knowledge_domain}
+                </span>
+              )}
+            </div>
+            {planner.content_world === 'cartoon_universe' && planner.universe_profile === 'pawville' && (
+              <div style={{ marginTop: '10px', fontSize: '11px', color: '#a5b4fc', lineHeight: 1.6 }}>
+                <strong>Karakter:</strong> Mochi (Main) • Dr. Paw • Coco • Boba • Tofu &nbsp;|&nbsp;
+                <strong>Style:</strong> 3D Clay &nbsp;|&nbsp;
+                <strong>Human:</strong> None &nbsp;|&nbsp;
+                <strong>Scene:</strong> 7 × 8s
+              </div>
+            )}
+          </div>
+        )}
 
         {/* 9-Column Planner Table */}
         {loading ? (
@@ -441,6 +481,30 @@ export default function ContentPlannerWorkbench() {
                     <td style={{ padding: '12px', fontWeight: 600, color: '#f3f4f6' }}>
                       {planner?.planner_focus === 'brand_editorial' ? (row.content_subject || row.context) : (row.product_reference || row.product)}
                       {planner?.planner_focus === 'brand_editorial' && <div style={{ marginTop: '4px', fontSize: '10px', color: '#a1a1aa' }}>{row.cta_type || 'save'} · {row.commercial_intent || 'none'}</div>}
+                      {/* Cartoon Universe Metadata (Tahap 1) */}
+                      {planner?.content_world === 'cartoon_universe' && row.main_character && (
+                        <div style={{ marginTop: '6px', padding: '6px 8px', background: '#1e1b4b', borderRadius: '6px', border: '1px solid #312e81' }}>
+                          <div style={{ fontSize: '10px', color: '#a5b4fc', lineHeight: 1.5 }}>
+                            <span title="Karakter Utama">🐱 {row.main_character}</span>
+                            {row.supporting_characters && <span style={{ marginLeft: '6px', color: '#818cf8' }}>+ {row.supporting_characters}</span>}
+                          </div>
+                          {row.story_premise && (
+                            <div style={{ fontSize: '10px', color: '#c7d2fe', marginTop: '3px' }}>
+                              📖 {row.story_premise}
+                            </div>
+                          )}
+                          {row.pet_problem && (
+                            <div style={{ fontSize: '10px', color: '#fca5a5', marginTop: '2px' }}>
+                              ⚠️ {row.pet_problem}
+                            </div>
+                          )}
+                          {row.product_role && row.product_role !== 'none' && (
+                            <div style={{ fontSize: '10px', color: '#6ee7b7', marginTop: '2px' }}>
+                              🎯 {row.product_role} @ {row.product_reveal_beat || '-'}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </td>
 
                     {/* Actions Column */}

@@ -1,5 +1,16 @@
 # Changelog
 
+## V2.6.0 — Kartun Tahap 1: World-Aware Content Planner PawVille MVP (10/08/2026)
+- Tambah 4 KB baru: PET_CONTENT_KB, CARTOON_UNIVERSE_STORY_ENGINE, CARTOON_VISUAL_CONTINUITY_KB, PAWVILLE_UNIVERSE_PROFILE
+- Buat content-world-contract.js validator/normalizer terpusat
+- Conditional KB routing di kb-loader.js: cartoon universe skip REALIST_VIRAL_NARRATIVE dan VISUAL_STYLE_GUIDE
+- Migrasi PostgreSQL 4 kolom content_planners + 7 kolom content_planner_rows
+- Content planner engine: cartoon directive, extra output fields (main_character, story_premise, pet_problem, product_role)
+- UI: 3 selector baru (Content World, Knowledge Domain, Universe Profile) dengan PawVille preset auto-fill
+- Detail page: info panel cartoon universe + metadata karakter per row
+- Export CSV/MD dan OPC ingest forward universe metadata
+- Test deterministik 53/53 passed
+
 ## V2.5.15 — Migrate Staging to Mac Mini & Decommission Node 1 (08/08/2026)
 - Stop and disable old staging node services on 100.65.62.63
 - Update deploy:staging npm script to deploy remotely to Mac Mini

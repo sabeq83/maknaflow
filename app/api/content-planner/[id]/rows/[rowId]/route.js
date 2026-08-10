@@ -17,7 +17,9 @@ export const PATCH = withTenantContext(async (request, { params }, user) => {
     // Allowed updatable fields
     const fields = [
       'pillar', 'category_cep', 'ws_matrix', 'context', 'vfo', 'strategic_angle',
-      'hook', 'visual_action', 'product', 'is_locked'
+      'hook', 'visual_action', 'product', 'is_locked',
+      'main_character', 'supporting_characters', 'story_premise', 'pet_problem',
+      'product_role', 'product_reveal_beat', 'universe_profile'
     ];
 
     const updates = [];
