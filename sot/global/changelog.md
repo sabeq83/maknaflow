@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.11.1 — Remove real_animal option from Content Planner UI (10/08/2026)
+- Sembunyikan opsi Hewan Nyata dari selector Dunia Konten di generator baru
+- Atur layout selector Dunia Konten ke 2 kolom grid (1fr 1fr)
+- Pertahankan support data real_animal lama di DB/contract agar backward compatible
+
 ## V2.11.0 — Tahap 3.6: Universe Starter Presets & Centralized KB Routing (10/08/2026)
 - Tambah 6 system preset universe bawaan (PawVille, Herbal Grove, Kitchen Town, Rumah Rapi, Jejak Peradaban Islam, General Clay Story)
 - Buat StarterPickerModal di Universe Manager — clone preset jadi universe baru dengan 1 klik

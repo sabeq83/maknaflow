@@ -546,19 +546,15 @@ export default function ContentPlannerDashboard() {
                   <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '8px', fontWeight: 600 }}>
                     🌍 Dunia Konten:
                   </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                     {[
                       ['real_world', '🏠 Dunia Nyata', 'Konten realistis dengan manusia & produk nyata'],
-                      ['real_animal', '🐾 Hewan Nyata', 'Konten hewan nyata (bukan kartun)'],
                       ['cartoon_universe', '🎬 Cartoon Universe', 'Dunia karakter fiksi animasi']
                     ].map(([value, label, desc]) => (
                       <button key={value} type="button" onClick={() => {
                         setContentWorld(value);
                         if (value === 'cartoon_universe') {
                           setUniverseProfile('pawville');
-                          setKnowledgeDomain('pet_supplies');
-                        } else if (value === 'real_animal') {
-                          setUniverseProfile(null);
                           setKnowledgeDomain('pet_supplies');
                         } else {
                           setUniverseProfile(null);
