@@ -32,6 +32,8 @@ function MultiplierLabPageContent() {
   // Forms and Scheduler States
   const [showConfigForm, setShowConfigForm] = useState(false);
   const [isSchedulerActive, setIsSchedulerActive] = useState(true);
+  const [presets, setPresets] = useState([]);
+  const [selectedPresetKey, setSelectedPresetKey] = useState('');
   const [terminalLogs, setTerminalLogs] = useState('');
   const [activeTabs, setActiveTabs] = useState({}); // { [taskId]: 'concept' | 'storyboard' | 'prompts' | 'social' | 'logs' }
 
@@ -85,7 +87,7 @@ function MultiplierLabPageContent() {
   // 3. Workflow & Audio Settings
   const [enableTts, setEnableTts] = useState(false);
   const [voiceProvider, setVoiceProvider] = useState('minimax');
-  const [voicePersona, setVoicePersona] = useState('Indonesian_SweetGirl');
+  const [voicePersona, setVoicePersona] = useState('Indonesian_professional_anchor_vv2');
   const [voiceSpeed, setVoiceSpeed] = useState(1.0);
   const [voiceVolume, setVoiceVolume] = useState(1.0);
   const [ttsModelQuality, setTtsModelQuality] = useState('speech-2.8-turbo');
@@ -116,6 +118,7 @@ function MultiplierLabPageContent() {
     pollLogs();
     fetch('/api/v2/brand-profiles').then(r => r.json()).then(d => { if (d.success) setBrandProfiles(d.data || []); }).catch(() => {});
     fetch('/api/product-agent').then(r => r.json()).then(d => { if (d.success) setProducts(d.data || []); }).catch(() => {});
+    fetch('/api/v2/operator-presets').then(r => r.json()).then(d => { if (d.success) setPresets(d.presets || []); }).catch(() => {});
 
     pollingRef.current = setInterval(() => {
       fetchTasks(true);
@@ -146,6 +149,71 @@ function MultiplierLabPageContent() {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 4000);
   }
+
+  const handleApplyPreset = (presetKey) => {
+    setSelectedPresetKey(presetKey);
+    const preset = presets.find(p => p.key === presetKey);
+    if (!preset || !preset.config) return;
+    const config = preset.config;
+
+    // 1. Creative Strategy (basic_strategy)
+    if (config.basic_strategy) {
+      setNarrativeMode(config.basic_strategy.narrative_mode || 'Storytelling');
+      setTargetLanguage(config.basic_strategy.target_language || 'id-ID');
+      setEnableVoAudit(config.basic_strategy.enable_vo_audit ?? 1);
+      setPromotionStyle(config.basic_strategy.promotion_style || 'Softselling');
+    }
+
+    // 2. Aesthetics & Visual (visual_engine)
+    if (config.visual_engine) {
+      setVisualStyle(config.visual_engine.visual_style || 'Cinematic');
+      setVideoModel(config.visual_engine.video_model || 'veo_31_lite');
+      setAspectRatio(config.visual_engine.aspect_ratio || '9:16');
+      setFaceVisibility(config.visual_engine.face_visibility || 'Faceless');
+      setWordsPerClip(config.visual_engine.words_per_clip || '17-19 kata');
+      setVisualMode(config.visual_engine.visual_mode || 'hybrid_lock');
+      if (config.visual_engine.video_model === 'veo_31_lite') {
+        setTargetAi('Google Veo (8s)');
+      } else {
+        setTargetAi('Google Veo (5s)');
+      }
+    }
+
+    // 3. Product Bridging (product_bridging)
+    if (config.product_bridging) {
+      setIsBridgingActive(config.product_bridging.is_bridging_active || false);
+      setBridgeAtClip(config.product_bridging.bridge_at_clip || 2);
+      setBridgeDurationClips(config.product_bridging.bridge_duration_clips || 1);
+    }
+
+    // 4. Visual Swap Overrides (visual_swap)
+    if (config.visual_swap) {
+      setIsVsoActive(config.visual_swap.is_vso_active || false);
+      setCharacterConcept(config.visual_swap.character_concept || 'faceless');
+      setSubjectDemographic(config.visual_swap.subject_demographic || 'syari_classic');
+      setWardrobeStyle(config.visual_swap.wardrobe_style || 'random');
+      setWardrobeStyleCustom(config.visual_swap.wardrobe_style_custom || '');
+      setLightingStyle(config.visual_swap.lighting_style || 'random');
+      setLightingStyleCustom(config.visual_swap.lighting_style_custom || '');
+    }
+
+    // 5. Workflow (workflow)
+    if (config.workflow) {
+      setEnableTts(config.workflow.enable_tts || false);
+      setVoiceProvider(config.basic_strategy?.voice_provider || 'minimax');
+      setVoicePersona(config.basic_strategy?.voice_persona || 'Indonesian_professional_anchor_vv2');
+      setVoiceSpeed(Number(config.basic_strategy?.voice_speed ?? 1.0));
+      setVoiceVolume(Number(config.basic_strategy?.voice_volume ?? 1.0));
+      setTtsModelQuality(config.basic_strategy?.tts_model_quality || 'speech-2.8-turbo');
+      setEnableGlabs(config.workflow.enable_glabs || false);
+      setEnableFfmpeg(config.workflow.enable_ffmpeg || false);
+      setFfmpegSyncOption(config.workflow.ffmpeg_sync_option || 'smart_sync');
+      setFfmpegVideoScale(Number(config.workflow.ffmpeg_video_scale ?? 1.0));
+      setFfmpegSfxVolume(Number(config.workflow.ffmpeg_sfx_volume ?? 0.0));
+      setFfmpegBgmVolume(Number(config.workflow.ffmpeg_bgm_volume ?? 0.00));
+    }
+    showToast(`Preset "${preset.label}" berhasil diterapkan!`);
+  };
 
   async function fetchAssets() {
     setLoadingAssets(true);
@@ -648,6 +716,22 @@ function MultiplierLabPageContent() {
                       value={campaignName}
                       onChange={e => setCampaignName(e.target.value)}
                     />
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">🎛️ Terapkan Preset Kampanye</label>
+                    <select
+                      className="form-input"
+                      value={selectedPresetKey}
+                      onChange={e => handleApplyPreset(e.target.value)}
+                    >
+                      <option value="">-- Tanpa Preset (Atur Manual) --</option>
+                      {presets.map(p => (
+                        <option key={p.key} value={p.key}>
+                          {p.label} {p.is_system ? ' (System)' : ''}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 

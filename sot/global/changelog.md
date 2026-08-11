@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.14.0 — Standalone Preset Manager Page (12/08/2026)
+- Membuat halaman Preset Manager mandiri di /settings/presets dengan 5 accordion form
+- Menyisipkan Preset Manager di sidebar PLANNING yang dapat dikunci Superadmin per tenant
+- Mengintegrasikan loader preset di Multiplier Lab untuk auto-fill parameter form
+- Membersihkan tombol kelola presets lama di Content Automations
+
 ## V2.13.21 — Pilihan Mode Approval Content Automation (12/08/2026)
 - Membuka opsi Full Auto (none) selain Manual Review (storyboard) di validasi kontrak
 - Menambahkan dropdown Mode Approval di modal pembuatan jadwal UI

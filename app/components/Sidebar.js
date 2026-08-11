@@ -22,6 +22,7 @@ const menuKeyMap = {
   '/scraper': 'video_library',
   '/settings/brand-profiles': 'brand_profiles',
   '/settings/universes': 'universe_manager',
+  '/settings/presets': 'operator_presets',
   '/settings/users': 'admin_only',
   '/settings/tenants': 'superadmin_only',
   '/settings': 'system_settings',
@@ -35,6 +36,7 @@ const navItems = [
   { label: 'Content Planner', href: '/content-planner', icon: '🗓️' },
   { label: 'Product Database', href: '/products', icon: '📦' },
   { label: 'Deconstruct Lab', href: '/deconstruct', icon: '🔬' },
+  { label: 'Preset Manager', href: '/settings/presets', icon: '🎛️' },
   { label: 'Brand Profile Manager', href: '/settings/brand-profiles', icon: '🧬' },
   { label: 'Universe Manager', href: '/settings/universes', icon: '🏰' },
 
