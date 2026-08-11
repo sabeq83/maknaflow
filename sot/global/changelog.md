@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.13.19 — Fix waiting_media query claim bug & Add UI Approve button (11/08/2026)
+- Tambahkan status waiting_media pada query claim scheduler
+- Tambahkan tombol Approve dan badge Pending Approval di halaman Publishing Scheduler
+
 ## V2.13.18 — Strict Role Check Enforcement Revert (11/08/2026)
 - Mengembalikan hak akses otorisasi settings kembali ketat khusus untuk admin tenant
 

@@ -456,6 +456,32 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
     }
   };
 
+  // Approve Job
+  const handleApproveJob = async (jobId) => {
+    if (!confirm('Apakah Anda yakin ingin menyetujui (Approve) jadwal postingan ini untuk dipublikasikan langsung?')) return;
+    try {
+      const res = await fetch(`/api/v2/publishing/jobs/${jobId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'approve' })
+      });
+      const json = await res.json();
+      if (json.success) {
+        showToast('Jadwal publikasi berhasil disetujui! 🟢');
+        fetchJobs();
+        if (selectedJobId === jobId) {
+          fetch(`/api/v2/publishing/jobs/${jobId}`)
+            .then(r => r.json())
+            .then(d => { if (d.success) setSelectedJobDetail(d.data); });
+        }
+      } else {
+        showToast(`Gagal menyetujui: ${json.error} ❌`);
+      }
+    } catch (err) {
+      showToast(`Error: ${err.message} ❌`);
+    }
+  };
+
   // Submit Reschedule
   const handleExecuteReschedule = async () => {
     if (!rescheduleModalJob || !newScheduleTime) return;
@@ -540,7 +566,10 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
     }) + ` (${tz === 'Asia/Jakarta' ? 'WIB' : tz})`;
   };
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (status, approvalStatus) => {
+    if (status === 'scheduled' && approvalStatus === 'pending_approval') {
+      return <span style={{ background: '#3b2514', color: '#f97316', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: '#f97316' }}></span>PENDING APPROVAL</span>;
+    }
     switch (status) {
       case 'published':
         return <span style={{ background: '#123828', color: '#4ade80', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4ade80' }}></span>PUBLISHED</span>;
@@ -839,11 +868,19 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                               </div>
                             )}
                           </td>
-                          <td style={{ padding: '12px 14px' }}>
-                            {getStatusBadge(job.status)}
+                           <td style={{ padding: '12px 14px' }}>
+                            {getStatusBadge(job.status, job.approval_status)}
                           </td>
                           <td style={{ padding: '12px 14px', textAlign: 'right' }} onClick={(e) => e.stopPropagation()}>
                             <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                              {job.approval_status === 'pending_approval' && (
+                                <button
+                                  onClick={() => handleApproveJob(job.id)}
+                                  style={{ background: '#14532d', border: '1px solid #166534', color: '#86efac', padding: '5px 9px', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontWeight: 700 }}
+                                >
+                                  Approve
+                                </button>
+                              )}
                               {job.status === 'scheduled' && (
                                 <>
                                   <button
@@ -934,7 +971,28 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
 
               <div style={{ marginBottom: 12 }}>
                 <div style={{ fontSize: 11, color: '#637087', fontWeight: 800, textTransform: 'uppercase' }}>Status & Jadwal</div>
-                <div style={{ marginTop: 4 }}>{getStatusBadge(selectedJobDetail.status)}</div>
+                <div style={{ marginTop: 4 }}>{getStatusBadge(selectedJobDetail.status, selectedJobDetail.approval_status)}</div>
+                {selectedJobDetail.approval_status === 'pending_approval' && (
+                  <div style={{ marginTop: 8 }}>
+                    <button
+                      onClick={() => handleApproveJob(selectedJobDetail.id)}
+                      style={{
+                        width: '100%',
+                        background: '#166534',
+                        border: '1px solid #15803d',
+                        color: '#bbf7d0',
+                        padding: '6px 12px',
+                        borderRadius: 6,
+                        fontSize: 11,
+                        cursor: 'pointer',
+                        fontWeight: 700,
+                        textAlign: 'center'
+                      }}
+                    >
+                      ✅ Approve & Posting Sekarang
+                    </button>
+                  </div>
+                )}
                 <div style={{ color: '#cbd5e1', fontSize: 11, marginTop: 4 }}>
                   {formatScheduleTime(selectedJobDetail.scheduled_at, selectedJobDetail.account_timezone)}
                 </div>
