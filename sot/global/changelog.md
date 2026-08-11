@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.13.21 — Pilihan Mode Approval Content Automation (12/08/2026)
+- Membuka opsi Full Auto (none) selain Manual Review (storyboard) di validasi kontrak
+- Menambahkan dropdown Mode Approval di modal pembuatan jadwal UI
+- Memperbarui test suite untuk validasi mode none
+
 ## V2.13.20 — Fix Facebook Graph API is_published field error (11/08/2026)
 - Hapus field is_published yang tidak didukung dari query Graph API fetchMetaPostDetails
 

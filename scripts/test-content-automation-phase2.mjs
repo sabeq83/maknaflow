@@ -51,7 +51,7 @@ try{
     assert.equal(blocked.blocker_count,1);
     await assert.rejects(()=>purgeSchedule(scheduleId,{actor:'tester',confirmationName:blocked.schedule_name,previewToken:blocked.preview_token}),/non-terminal/);
     await purgeRun(runFailed,{actor:'tester'});
-    await assert.rejects(()=>purgeRun(runActive,{actor:'tester'}),/non-terminal/);
+    await assert.rejects(()=>purgeRun(runActive,{actor:'tester'}),/tidak dapat dihapus/);
   });
   await pgQuery("UPDATE content_automation_runs SET status='completed',completed_at=CURRENT_TIMESTAMP WHERE id=$1",[runActive]);
   await tenantContext.run(tenant,async()=>{
