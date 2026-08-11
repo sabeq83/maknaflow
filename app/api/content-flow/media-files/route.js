@@ -42,12 +42,24 @@ export const GET = withTenantContext(async (request) => {
     const filesList = [];
 
     if (shareToken) {
-      try {
-        const publicClient = createClient(`${internalNcBase}/public.php/webdav/`, {
-          username: shareToken,
-          password: ''
-        });
-        const contents = await publicClient.getDirectoryContents('/');
+      let contents = null;
+      const hostsToTry = [internalNcBase, publicCloudDomain, 'http://100.78.186.123', 'https://cloud.ast402.my.id'];
+      const uniqueHosts = [...new Set(hostsToTry.filter(Boolean))];
+
+      for (const host of uniqueHosts) {
+        try {
+          const publicClient = createClient(`${host}/public.php/webdav/`, {
+            username: shareToken,
+            password: ''
+          });
+          contents = await publicClient.getDirectoryContents('/');
+          if (Array.isArray(contents) && contents.length > 0) break;
+        } catch (err) {
+          // Try next host
+        }
+      }
+
+      if (Array.isArray(contents)) {
         for (const c of contents) {
           if (c.type === 'file') {
             const isVideo = /\.(mp4|mov|webm)$/i.test(c.basename);
@@ -68,8 +80,6 @@ export const GET = withTenantContext(async (request) => {
             });
           }
         }
-      } catch (ncErr) {
-        console.warn('[Media Files Scanner] WebDAV scan error:', ncErr.message);
       }
     }
 

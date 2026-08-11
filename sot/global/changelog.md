@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.13.14 — Fix Media Files Scanning and Auto-Resolve in Publishing Scheduler (11/08/2026)
+- Export getContentFlowItemByVideoId di contentflow-repository
+- Dukungan multi-host WebDAV fallback scanner di /api/content-flow/media-files
+- Auto-trigger pemindaian media files saat modal Publishing Scheduler dibuka
+- Auto-replace media_url dengan tautan download .mp4 tunggal
+
 ## V2.13.13 — Auto-Scan Folder Media Files and Direct Single File MP4 Download in Publishing Scheduler (11/08/2026)
 - Endpoint pemindaian file folder Nextcloud /api/content-flow/media-files
 - Komponen dropdown pemilih file media folder cloud di modal Publishing Scheduler

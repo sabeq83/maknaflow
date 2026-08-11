@@ -179,7 +179,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
     if (!videoId && !customUrl) return;
     setLoadingMediaFiles(true);
     try {
-      const q = videoId ? `videoId=${encodeURIComponent(videoId)}` : `folderUrl=${encodeURIComponent(customUrl)}`;
+      const q = `videoId=${encodeURIComponent(videoId || '')}&folderUrl=${encodeURIComponent(customUrl || '')}`;
       const res = await fetch(`/api/content-flow/media-files?${q}`);
       const json = await res.json();
       if (json.success && Array.isArray(json.files) && json.files.length > 0) {
@@ -332,6 +332,13 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
   useEffect(() => {
     fetchJobs();
   }, [fetchJobs]);
+
+  // Scan media files on modal open if video content is loaded
+  useEffect(() => {
+    if (showScheduleModal && scheduleForm.content_id) {
+      fetchMediaFiles(scheduleForm.content_id, scheduleForm.media_url);
+    }
+  }, [showScheduleModal, scheduleForm.content_id]);
 
   // Preflight Runner
   const runPreflight = async () => {
