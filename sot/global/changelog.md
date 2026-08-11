@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.13.8 — Fix product visual rendering lock overlay and heal stale processing status (11/08/2026)
+- Fix legacy extraction_status lock overlay on products page
+- Add self-healing background recovery for stale product processing jobs
+- Heal database product status in dev schema
+
 ## V2.13.7 — Content Flow Publishing Scheduler (11/08/2026)
 - Menambahkan antrean dan kalender publishing tenant-aware
 - Menambahkan Facebook draft scheduler dan fondasi Instagram yang aman

@@ -150,7 +150,6 @@ export default function ProductDatabasePage() {
   };
 
   const hasBulkQueueActive = products.some(p =>
-    (p.extraction_status && ['pending', 'pending_image', 'generating_image'].includes(p.extraction_status)) ||
     (p.enrichment_status && ['pending', 'processing'].includes(p.enrichment_status)) ||
     (p.photo_status && ['pending', 'processing'].includes(p.photo_status))
   );
@@ -1246,43 +1245,54 @@ export default function ProductDatabasePage() {
                         borderBottom: '1px solid var(--border)'
                       }}>
                         {/* Glassmorphic Background Processing Status Overlay */}
-                        {p.extraction_status && p.extraction_status !== 'completed' && (
-                          <div style={{
-                            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                            background: 'rgba(18, 18, 20, 0.88)', display: 'flex', flexDirection: 'column',
-                            alignItems: 'center', justifyContent: 'center', zIndex: 10, padding: '16px',
-                            textAlign: 'center', backdropFilter: 'blur(4px)'
-                          }}>
-                            {p.extraction_status === 'pending' && (
-                              <>
-                                <div className="spinner" style={{ width: '22px', height: '22px', marginBottom: '8px', borderTopColor: '#0984e3' }}></div>
-                                <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#74b9ff' }}>⏳ AI Enrichment Pending</div>
-                                <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: '1.4' }}>Mengantre untuk dianalisis oleh Gemini...</div>
-                              </>
-                            )}
-                            {p.extraction_status === 'pending_image' && (
-                              <>
-                                <div className="spinner" style={{ width: '22px', height: '22px', marginBottom: '8px', borderTopColor: '#e17055' }}></div>
-                                <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#ff7675' }}>🎨 Visual Rendering Queued</div>
-                                <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: '1.4' }}>Mengantre untuk render studio G-Labs...</div>
-                              </>
-                            )}
-                            {p.extraction_status === 'generating_image' && (
-                              <>
-                                <div className="spinner" style={{ width: '22px', height: '22px', marginBottom: '8px', borderTopColor: '#fdcb6e' }}></div>
-                                <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#ffeaa7' }}>⚡ Generating Studio Shot</div>
-                                <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: '1.4' }}>G-Labs sedang memproses visual...</div>
-                              </>
-                            )}
-                            {p.extraction_status === 'failed' && (
-                              <>
-                                <div style={{ fontSize: '1.4rem', marginBottom: '4px' }}>❌</div>
-                                <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--danger)' }}>Proses Gagal</div>
-                                <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: '1.4' }}>Terjadi kesalahan saat pengayaan AI/visual.</div>
-                              </>
-                            )}
-                          </div>
-                        )}
+                        {(() => {
+                          const isEnriching = p.enrichment_status === 'pending' || p.enrichment_status === 'processing';
+                          const isPhotoGenerating = (p.photo_status === 'pending' || p.photo_status === 'processing') && p.photo_status !== 'approved';
+                          const isFailed = (p.enrichment_status === 'failed' || p.photo_status === 'failed') && !p.clean_photo_url && !p.raw_photo_url;
+
+                          if (!isEnriching && !isPhotoGenerating && !isFailed) return null;
+
+                          return (
+                            <div style={{
+                              position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                              background: 'rgba(18, 18, 20, 0.88)', display: 'flex', flexDirection: 'column',
+                              alignItems: 'center', justifyContent: 'center', zIndex: 10, padding: '16px',
+                              textAlign: 'center', backdropFilter: 'blur(4px)'
+                            }}>
+                              {isEnriching && (
+                                <>
+                                  <div className="spinner" style={{ width: '22px', height: '22px', marginBottom: '8px', borderTopColor: '#0984e3' }}></div>
+                                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#74b9ff' }}>
+                                    ⏳ AI Enrichment {p.enrichment_status === 'processing' ? 'Processing' : 'Pending'}
+                                  </div>
+                                  <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: '1.4' }}>
+                                    Sedang dianalisis oleh Gemini...
+                                  </div>
+                                </>
+                              )}
+                              {!isEnriching && isPhotoGenerating && (
+                                <>
+                                  <div className="spinner" style={{ width: '22px', height: '22px', marginBottom: '8px', borderTopColor: '#e17055' }}></div>
+                                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#ff7675' }}>
+                                    🎨 Visual Rendering {p.photo_status === 'processing' ? 'Active' : 'Queued'}
+                                  </div>
+                                  <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: '1.4' }}>
+                                    Sedang diproses studio AI / G-Labs...
+                                  </div>
+                                </>
+                              )}
+                              {isFailed && (
+                                <>
+                                  <div style={{ fontSize: '1.4rem', marginBottom: '4px' }}>❌</div>
+                                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--danger)' }}>Proses Gagal</div>
+                                  <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: '1.4' }}>
+                                    {p.photo_error || p.enrichment_error || 'Terjadi kesalahan saat pengayaan AI/visual.'}
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          );
+                        })()}
 
                         {displayPhotoUrl ? (
                           <div 

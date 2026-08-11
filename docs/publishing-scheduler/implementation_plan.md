@@ -725,7 +725,7 @@ test('legacy Facebook caller remains draft-only', async () => {});
 - [x] Tahap 9 — Implementasikan Instagram image/Reels container, status polling, publish, reconciliation, permission/media validation, dan approval.
 - [x] Tahap 10 — Lengkapi SoT/runbook, migration notes, rollback flags, security review, accessibility, integration/regression tests, dan Next.js build.
 - [x] Tahap 11 — Review final diff dan acceptance criteria; pastikan tidak ada secret/log/base64/runtime file ikut perubahan.
-- [ ] Tahap 12 — Setelah seluruh verifikasi berhasil, jalankan release patch non-interaktif sesuai `AGENTS.md`, lalu verifikasi changelog, version, commit, tag, branch `main`, dan push remote.
+- [x] Tahap 12 — Setelah seluruh verifikasi berhasil, jalankan release patch non-interaktif sesuai `AGENTS.md`, lalu verifikasi changelog, version, commit, tag, branch `main`, dan push remote.
 
 ## 12. Validasi Minimum
 
