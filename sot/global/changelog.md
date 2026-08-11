@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.13.1 — Fix multi-tenant bulk worker getSetting TypeError (11/08/2026)
+- Fix TypeError in saveAndCommitCleanPhoto by resolving synchronous getSetting call properly
+
 ## V2.13.0 — Product Database AI Photo Pipeline v2 (11/08/2026)
 - Implementasi pipeline AI photo produk baru dengan 3-stage processing (enrichment, photo dispatch, polling)
 - Refactor bulk worker ke tenant-aware PostgreSQL dengan skip locked concurrency
