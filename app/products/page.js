@@ -7,7 +7,7 @@ export default function ProductDatabasePage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [scrapingCount, setScrapingCount] = useState(0);
-  const [viewTabs, setViewTabs] = useState({}); // productId -> 'raw' | 'cleaned' | 'generated'
+  const [viewTabs, setViewTabs] = useState({}); // productId -> 'raw' | 'cleaned'
   const [zoomedImage, setZoomedImage] = useState(null);
   const [uploadingProductId, setUploadingProductId] = useState(null);
   
@@ -49,6 +49,7 @@ export default function ProductDatabasePage() {
   const [rawPhotoPreview, setRawPhotoPreview] = useState(null);
   const [formErrors, setFormErrors] = useState({});
   const [regenerateOnSave, setRegenerateOnSave] = useState(false);
+  const [regeneratingPhotoId, setRegeneratingPhotoId] = useState(null);
 
   // Scraper fields
   const [scraperUrls, setScraperUrls] = useState('');
@@ -311,7 +312,7 @@ export default function ProductDatabasePage() {
       });
       const data = await res.json();
       if (data.success) {
-        showToast(`✅ Foto ${tabType === 'raw' ? 'Raw' : tabType === 'cleaned' ? 'Clean' : 'Studio'} aktif digunakan!`);
+        showToast(`✅ Foto ${tabType === 'raw' ? 'Raw' : 'Clean'} aktif digunakan!`);
         fetchProducts();
       } else {
         showToast(data.error || 'Gagal mengubah foto aktif', 'error');
@@ -336,7 +337,7 @@ export default function ProductDatabasePage() {
       });
       const data = await res.json();
       if (data.success) {
-        showToast(`✅ Foto ${tabType === 'raw' ? 'Raw' : tabType === 'cleaned' ? 'Clean' : 'Studio'} berhasil diunggah!`);
+        showToast(`✅ Foto ${tabType === 'raw' ? 'Raw' : 'Clean'} berhasil diunggah!`);
         // Force the UI view tab to switch to the newly uploaded image tab
         setViewTabs(prev => ({ ...prev, [productId]: tabType }));
         fetchProducts();
@@ -561,6 +562,29 @@ export default function ProductDatabasePage() {
       showToast(err.message, 'error');
     } finally {
       setRegeneratingPhotos(false);
+    }
+  }
+
+  // Fungsi untuk trigger generasi foto clean per-produk
+  async function handleRegeneratePhoto(productId) {
+    setRegeneratingPhotoId(productId);
+    try {
+      const res = await fetch('/api/v2/products/regenerate-photos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: [productId] })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`✅ ${data.message}`);
+        fetchProducts(); // Refresh list agar UI terupdate dan memulai polling status
+      } else {
+        showToast(data.error || 'Gagal memulai render foto clean', 'error');
+      }
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setRegeneratingPhotoId(null);
     }
   }
 
@@ -1138,12 +1162,13 @@ export default function ProductDatabasePage() {
                 }
 
                 // Resolve active tab and display URL
-                const activeTab = viewTabs[p.id] || (p.active_photo === 'raw_photo_url' ? 'raw' : ((p.active_photo === 'cleaned_photo_url' || p.active_photo === 'clean_photo_url') ? 'cleaned' : 'generated'));
+                // Resolve active tab and display URL (Hanya Raw & Clean)
+                const activeTab = viewTabs[p.id] || (p.active_photo === 'raw_photo_url' ? 'raw' : 'cleaned');
                 const displayPhotoUrl = activeTab === 'raw' 
                   ? p.raw_photo_url 
-                  : (activeTab === 'cleaned' ? (p.cleaned_photo_url || p.clean_photo_url) : p.generated_photo_url);
-                const isTabAvailable = (tab) => tab === 'raw' ? !!p.raw_photo_url : (tab === 'cleaned' ? (!!p.cleaned_photo_url || !!p.clean_photo_url) : !!p.generated_photo_url);
-                const isCurrentlyActive = (tab) => p.active_photo === (tab === 'raw' ? 'raw_photo_url' : (tab === 'cleaned' ? 'cleaned_photo_url' : 'generated_photo_url')) || (tab === 'cleaned' && p.active_photo === 'clean_photo_url');
+                  : (p.cleaned_photo_url || p.clean_photo_url);
+                const isTabAvailable = (tab) => tab === 'raw' ? !!p.raw_photo_url : (!!p.cleaned_photo_url || !!p.clean_photo_url);
+                const isCurrentlyActive = (tab) => p.active_photo === (tab === 'raw' ? 'raw_photo_url' : 'cleaned_photo_url') || (tab === 'cleaned' && p.active_photo === 'clean_photo_url');
 
                 return (
                   <div key={p.id} className="card product-card" style={{
@@ -1249,14 +1274,14 @@ export default function ProductDatabasePage() {
                           >
                             <div style={{ fontSize: '2rem', opacity: 0.5 }}>📤</div>
                             <div style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                              {uploadingProductId === p.id ? 'Mengunggah...' : `Unggah Foto ${activeTab === 'raw' ? 'Raw' : activeTab === 'cleaned' ? 'Clean' : 'Studio'}`}
+                              {uploadingProductId === p.id ? 'Mengunggah...' : `Unggah Foto ${activeTab === 'raw' ? 'Raw' : 'Clean'}`}
                             </div>
                             <div style={{ fontSize: '0.62rem', color: 'var(--text-muted)' }}>Belum ada foto. Klik untuk menambahkan.</div>
                           </div>
                         )}
 
                         {/* Hidden file inputs for upload */}
-                        {['raw', 'cleaned', 'generated'].map(tab => (
+                        {['raw', 'cleaned'].map(tab => (
                           <input
                             key={tab}
                             id={`upload-${p.id}-${tab}`}
@@ -1293,7 +1318,7 @@ export default function ProductDatabasePage() {
                               boxShadow: '0 2px 8px rgba(0,0,0,0.5)'
                             }}
                           >
-                            ✓ Use {activeTab === 'raw' ? 'Raw' : activeTab === 'cleaned' ? 'Clean' : 'Studio'}
+                            ✓ Use {activeTab === 'raw' ? 'Raw' : 'Clean'}
                           </button>
                         )}
 
@@ -1340,7 +1365,7 @@ export default function ProductDatabasePage() {
                           backdropFilter: 'blur(4px)',
                           borderTop: '1px solid rgba(255,255,255,0.08)'
                         }}>
-                          {['raw', 'cleaned', 'generated'].map(tab => {
+                          {['raw', 'cleaned'].map(tab => {
                             const avail = isTabAvailable(tab);
                             const active = isCurrentlyActive(tab);
                             const selected = activeTab === tab;
@@ -1363,7 +1388,7 @@ export default function ProductDatabasePage() {
                                   gap: '4px',
                                 }}
                               >
-                                {tab === 'raw' ? 'Raw' : tab === 'cleaned' ? 'Clean' : 'Studio'}
+                                {tab === 'raw' ? 'Raw' : 'Clean'}
                                 {active && <span style={{ color: 'var(--success-light)', fontSize: '8px' }}>●</span>}
                                 {!avail && <span style={{ color: 'var(--text-muted)', fontSize: '9px', fontWeight: 'normal' }}>(kosong)</span>}
                               </button>
@@ -1669,6 +1694,54 @@ export default function ProductDatabasePage() {
                           </button>
                         )}
                       </div>
+                    </div>
+
+                    {/* Clean Photo Generation Button Row */}
+                    <div style={{
+                      padding: '8px 18px',
+                      borderTop: '1px solid var(--border)',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      background: 'rgba(255, 255, 255, 0.01)'
+                    }}>
+                      <button
+                        type="button"
+                        onClick={() => handleRegeneratePhoto(p.id)}
+                        disabled={regeneratingPhotoId === p.id || (p.photo_status && ['pending', 'processing'].includes(p.photo_status))}
+                        style={{
+                          width: '100%',
+                          background: (p.clean_photo_url || p.cleaned_photo_url)
+                            ? 'linear-gradient(135deg, rgba(255, 127, 80, 0.2) 0%, rgba(255, 165, 0, 0.2) 100%)'
+                            : 'linear-gradient(135deg, rgba(108, 92, 231, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%)',
+                          border: (p.clean_photo_url || p.cleaned_photo_url)
+                            ? '1px solid rgba(255, 127, 80, 0.4)'
+                            : '1px solid rgba(108, 92, 231, 0.4)',
+                          color: '#fff',
+                          fontSize: '0.72rem',
+                          fontWeight: 600,
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        {regeneratingPhotoId === p.id || (p.photo_status && ['pending', 'processing'].includes(p.photo_status)) ? (
+                          <>
+                            <div className="spinner" style={{ width: '12px', height: '12px', borderTopColor: '#fff' }} />
+                            Memproses Visual...
+                          </>
+                        ) : (
+                          (p.clean_photo_url || p.cleaned_photo_url) ? (
+                            <>✨ Re-Generate Clean Photo</>
+                          ) : (
+                            <>✨ Generate Clean Photo</>
+                          )
+                        )}
+                      </button>
                     </div>
 
                     {/* Actions panel */}

@@ -110,9 +110,9 @@ export const POST = withTenantContext(async (req) => {
         productData.is_in_packaging = 0;
       }
 
-      // Status pipeline untuk produk baru
+      // Status pipeline untuk produk baru (Opsi B: Generasi foto dipisah, default 'approved')
       productData.enrichment_status = 'pending';
-      productData.photo_status = rawPhotoRelPath ? 'pending' : 'approved';
+      productData.photo_status = 'approved';
       productData.import_status = 'completed';
       productData.extraction_status = 'pending';
 

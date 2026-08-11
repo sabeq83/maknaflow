@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.13.2 — Pisah Generasi Foto Clean (11/08/2026)
+- Memisahkan generasi foto clean otomatis dari enrichment
+- Hapus tab Studio di card produk hanya sisakan Raw dan Clean
+- Tambah tombol Generate/Re-Generate Clean Photo di setiap card produk
+
 ## V2.13.1 — Fix multi-tenant bulk worker getSetting TypeError (11/08/2026)
 - Fix TypeError in saveAndCommitCleanPhoto by resolving synchronous getSetting call properly
 

@@ -158,8 +158,7 @@ export const POST = withTenantContext(async (req) => {
           const updates = {};
           if (!dup.raw_photo_url && raw_photo_source_url) {
             updates.raw_photo_source_url = raw_photo_source_url;
-            // photo_status = pending agar worker download foto
-            updates.photo_status = 'pending';
+            updates.photo_status = 'approved';
             updates.extraction_status = 'pending';
           }
           if (affiliate_link) updates.affiliate_link = affiliate_link;
@@ -197,7 +196,7 @@ export const POST = withTenantContext(async (req) => {
             $1, $2, $3, $4, $5, $6, $7,
             $8, $9, $10, $11,
             $12, $13, $14,
-            'pending', 'pending', 'completed', 'pending',
+            'pending', 'approved', 'completed', 'pending',
             NOW(), NOW()
           )
         `, [
