@@ -121,9 +121,16 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
       const res = await fetch(url);
       const json = await res.json();
       if (json.success && Array.isArray(json.data)) {
-        setAccounts(json.data);
+        const seenKeys = new Set();
+        const unique = json.data.filter(acc => {
+          const key = `${acc.platform}_${acc.facebook_page_id || ''}_${acc.instagram_user_id || ''}`;
+          if (seenKeys.has(key)) return false;
+          seenKeys.add(key);
+          return true;
+        });
+        setAccounts(unique);
         if (isManualSync) {
-          showToast(`Berhasil menyinkronkan ${json.data.length} akun Meta! 🟢`);
+          showToast(`Berhasil menyinkronkan ${unique.length} akun Meta! 🟢`);
         }
       } else if (isManualSync) {
         showToast(json.error || 'Gagal menyinkronkan akun ❌');

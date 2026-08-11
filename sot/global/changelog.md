@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.13.12 — Fix Duplicate Publishing Accounts Upsert and Deduplication (11/08/2026)
+- Eliminasi duplikasi akun Meta di database dengan resilient check-and-update upsert
+- Auto-cleanup baris duplikat di tabel publishing_accounts
+- Proteksi deduplikasi akun di dropdown Publishing Scheduler
+
 ## V2.13.11 — Fix Sidebar Logout Footer and Session Auth Resilience (11/08/2026)
 - Pastikan footer Logout selalu tampil di Sidebar
 - Tambahkan direct PostgreSQL session DB fallback di getCurrentUserAsync dan /api/auth/me
