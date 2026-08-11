@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.13.11 — Fix Sidebar Logout Footer and Session Auth Resilience (11/08/2026)
+- Pastikan footer Logout selalu tampil di Sidebar
+- Tambahkan direct PostgreSQL session DB fallback di getCurrentUserAsync dan /api/auth/me
+
 ## V2.13.10 — Quick Add and Direct Verification for Meta Page IDs (11/08/2026)
 - Fitur input Page ID manual dengan verifikasi langsung ke Meta Graph API
 - Dukungan penuh Meta App dalam Development Mode dan Business Portfolio

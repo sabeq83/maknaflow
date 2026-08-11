@@ -339,11 +339,30 @@ function SidebarContent() {
         })}
       </nav>
 
-      {user && (
-        <div className="sidebar-footer" style={{ padding: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: 'auto' }}>
-          <div style={{ fontSize: '0.85rem', color: '#a0aec0', marginBottom: '0.5rem' }}>
-            Logged in as: <strong style={{ color: '#fff' }}>{user.username}</strong> ({user.role})
-          </div>
+      <div className="sidebar-footer" style={{ padding: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: 'auto' }}>
+        {user ? (
+          <>
+            <div style={{ fontSize: '0.85rem', color: '#a0aec0', marginBottom: '0.5rem' }}>
+              Logged in as: <strong style={{ color: '#fff' }}>{user.username}</strong> ({user.role})
+            </div>
+            <button
+              onClick={handleLogout}
+              style={{
+                width: '100%',
+                padding: '0.4rem 0.8rem',
+                borderRadius: '6px',
+                border: 'none',
+                background: 'rgba(239, 68, 68, 0.2)',
+                color: '#f87171',
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+                fontWeight: 500
+              }}
+            >
+              🚪 Logout
+            </button>
+          </>
+        ) : (
           <button
             onClick={handleLogout}
             style={{
@@ -358,10 +377,10 @@ function SidebarContent() {
               fontWeight: 500
             }}
           >
-            🚪 Logout
+            🚪 Logout / Login
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </aside>
   );
 }

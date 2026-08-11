@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, getCurrentUserAsync } from '@/lib/auth';
 import { ALL_MENU_KEYS } from '@/lib/schema/user-schema';
 
 export async function GET(req) {
   try {
-    const user = getCurrentUser(req);
+    let user = getCurrentUser(req);
+    if (!user) {
+      user = await getCurrentUserAsync(req);
+    }
 
     if (!user) {
       // Fallback: If no user session, return guest/default admin view if single-user mode, or unauthenticated status
