@@ -90,6 +90,8 @@ export default function SettingsPage() {
   const [discoveredPages, setDiscoveredPages] = useState([]);
   const [selectedPageIds, setSelectedPageIds] = useState([]);
   const [discoveringPages, setDiscoveringPages] = useState(false);
+  const [manualInputPageId, setManualInputPageId] = useState('');
+  const [addingManualPage, setAddingManualPage] = useState(false);
 
   // Marketplace Scraper Settings
   const [scraperUseCdp, setScraperUseCdp] = useState(true);
@@ -286,6 +288,38 @@ export default function SettingsPage() {
       showToast(e.message, 'error');
     }
     setDiscoveringPages(false);
+  }
+
+  async function handleAddManualPage() {
+    if (!manualInputPageId.trim()) return;
+    setAddingManualPage(true);
+    try {
+      const tokenToUse = fbPageToken || undefined;
+      const inputIds = manualInputPageId.split(',').map(s => s.trim()).filter(Boolean);
+      const allKnownIds = Array.from(new Set([...selectedPageIds, ...discoveredPages.map(p => p.id), ...inputIds]));
+
+      const res = await fetch('/api/settings/facebook-pages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: tokenToUse,
+          manualPageIds: allKnownIds
+        })
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.pages)) {
+        setDiscoveredPages(data.pages);
+        const newSelected = Array.from(new Set([...selectedPageIds, ...inputIds]));
+        setSelectedPageIds(newSelected);
+        setManualInputPageId('');
+        showToast(`Berhasil menambahkan dan memverifikasi ${data.pages.length} Halaman Meta! 🟢`, 'success');
+      } else {
+        showToast(data.error || 'Gagal memverifikasi Page ID ke Meta', 'error');
+      }
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+    setAddingManualPage(false);
   }
 
   async function saveFbSettings() {
@@ -2003,12 +2037,42 @@ export default function SettingsPage() {
                 ) : (
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', padding: '12px' }}>
                     {hasFbToken ? (
-                      <span>Halaman belum dimuat. Klik tombol <strong>"🔍 Pindai & Muat Halaman"</strong> di atas.</span>
+                      <span>Halaman belum dimuat. Klik tombol <strong>"🔍 Pindai & Muat Halaman"</strong> di atas atau masukkan Page ID di bawah.</span>
                     ) : (
                       <span>Masukkan Access Token di atas lalu klik tombol <strong>"🔍 Pindai & Muat Halaman"</strong>.</span>
                     )}
                   </div>
                 )}
+
+                {/* Form Quick Add Manual Page ID */}
+                <div style={{
+                  marginTop: '14px', paddingTop: '14px', borderTop: '1px dashed rgba(255,255,255,0.12)',
+                  display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap'
+                }}>
+                  <div style={{ flex: 1, minWidth: '220px' }}>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="Masukkan Page ID tambahan (misal: 1030799026791337)..."
+                      value={manualInputPageId}
+                      onChange={e => setManualInputPageId(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddManualPage(); } }}
+                      style={{ fontSize: '0.8rem', padding: '6px 10px' }}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-secondary"
+                    onClick={handleAddManualPage}
+                    disabled={addingManualPage || !manualInputPageId.trim() || (!hasFbToken && !fbPageToken)}
+                    style={{ whiteSpace: 'nowrap', fontSize: '0.78rem' }}
+                  >
+                    {addingManualPage ? '⏳ Memverifikasi...' : '➕ Tambah & Verifikasi Page ID'}
+                  </button>
+                </div>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  💡 Gunakan ini jika halaman Anda dikelola di Meta Business Suite atau Meta App masih dalam Development Mode.
+                </div>
               </div>
 
               {fbTestResult && (

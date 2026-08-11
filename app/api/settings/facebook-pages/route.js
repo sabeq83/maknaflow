@@ -14,8 +14,8 @@ export const GET = withTenantContext(async () => {
 export const POST = withTenantContext(async (request) => {
   try {
     const body = await request.json().catch(() => ({}));
-    const { token } = body;
-    const result = await getConnectedFacebookPages(token || undefined);
+    const { token, manualPageIds } = body;
+    const result = await getConnectedFacebookPages(token || undefined, manualPageIds || undefined);
     return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

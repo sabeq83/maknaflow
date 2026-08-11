@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.13.10 — Quick Add and Direct Verification for Meta Page IDs (11/08/2026)
+- Fitur input Page ID manual dengan verifikasi langsung ke Meta Graph API
+- Dukungan penuh Meta App dalam Development Mode dan Business Portfolio
+- Auto-sync halaman manual ke publishing_accounts
+
 ## V2.13.9 — Publishing Scheduler & Meta Page Auto-Discovery Enhancements (11/08/2026)
 - Auto-discovery dan multi-select toggle ON/OFF Facebook Page & Instagram di menu Settings
 - Live search combobox Video ID dan autoload data media/caption di Publishing Scheduler
