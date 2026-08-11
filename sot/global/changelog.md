@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.13.18 — Strict Role Check Enforcement Revert (11/08/2026)
+- Mengembalikan hak akses otorisasi settings kembali ketat khusus untuk admin tenant
+
 ## V2.13.17 — Fix Superadmin Authorization Settings Access Bug (11/08/2026)
 - Izinkan peran superadmin mengelola dan melihat kredensial di rute API settings
 
