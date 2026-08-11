@@ -103,6 +103,8 @@ function mapUniverseFormToPayload(form) {
 }
 
 export default function UniverseManagerPage() {
+  const [user, setUser] = useState(null);
+  const [isTenantDisabled, setIsTenantDisabled] = useState(false);
   const [universes, setUniverses] = useState([]);
   const [characters, setCharacters] = useState([]);
   const [locations, setLocations] = useState([]);
@@ -134,7 +136,30 @@ export default function UniverseManagerPage() {
   const [presetError, setPresetError] = useState('');
 
   useEffect(() => {
-    fetchUniverses();
+    fetch('/api/auth/me')
+      .then(res => res.json())
+      .then(data => {
+        if (data.authenticated && data.user) {
+          setUser(data.user);
+          const tenantDisabled = data.user.role !== 'superadmin' &&
+            Array.isArray(data.user.tenantDisabledMenus) &&
+            data.user.tenantDisabledMenus.includes('universe_manager');
+          const userNotPermitted = data.user.role === 'user' &&
+            Array.isArray(data.user.menuPermissions) &&
+            !data.user.menuPermissions.includes('universe_manager');
+          if (tenantDisabled || userNotPermitted) {
+            setIsTenantDisabled(true);
+          } else {
+            fetchUniverses();
+          }
+        } else {
+          fetchUniverses();
+        }
+      })
+      .catch(err => {
+        console.error('[Universe Manager Auth Check Failed]', err);
+        fetchUniverses();
+      });
   }, []);
 
   useEffect(() => {
@@ -403,12 +428,35 @@ export default function UniverseManagerPage() {
             <h1 className="page-title" style={{ margin: 0, fontSize: '24px' }}>🏰 Universe Manager</h1>
             <p className="page-subtitle" style={{ color: '#a29bfe', margin: '8px 0 0' }}>Define and manage your rich, consistent story universes.</p>
           </div>
-          {activeTab === 'universes' && (
+          {!isTenantDisabled && activeTab === 'universes' && (
             <button className="btn btn-primary" style={{ backgroundColor: '#6c5ce7', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: '6px', cursor: 'pointer' }} onClick={() => { fetchPresets(); setShowStarterPicker(true); setPickerMode('choice'); setSelectedPreset(null); setPresetNameInput(''); setPresetSlugInput(''); setPresetError(''); }}>
               + New Universe
             </button>
           )}
         </div>
+
+        {isTenantDisabled ? (
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(220, 38, 38, 0.03))',
+            border: '1px solid rgba(239, 68, 68, 0.25)',
+            borderRadius: '12px',
+            padding: '48px 24px',
+            textAlign: 'center',
+            marginTop: '32px'
+          }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔒</div>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#f87171', margin: '0 0 8px' }}>
+              Modul Dinonaktifkan
+            </h2>
+            <p style={{ color: '#94a3b8', fontSize: '0.95rem', maxWidth: '520px', margin: '0 auto 20px', lineHeight: 1.6 }}>
+              Modul <strong>Universe Manager</strong> saat ini dinonaktifkan oleh Superadmin untuk organisasi/tenant Anda, atau Anda tidak memiliki izin akses untuk modul ini.
+            </p>
+            <p style={{ color: '#64748b', fontSize: '0.82rem', margin: 0 }}>
+              Silakan hubungi Superadmin platform untuk mengaktifkan modul ini bagi tenant Anda.
+            </p>
+          </div>
+        ) : (
+          <>
 
         {toast && (
           <div style={{ position: 'fixed', top: '20px', right: '20px', backgroundColor: toast.type === 'error' ? '#e74c3c' : '#2ecc71', color: '#fff', padding: '12px 20px', borderRadius: '4px', zIndex: 1000 }}>
@@ -1136,6 +1184,8 @@ export default function UniverseManagerPage() {
               )}
             </div>
           </div>
+        )}
+        </>
         )}
       </main>
     </div>

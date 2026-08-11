@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.13.6 — Integrasi Modul Universe Manager Multi-Tenant (11/08/2026)
+- Daftarkan universe_manager ke master ALL_MENU_KEYS agar dapat di-enable/disable per tenant
+- Tambahkan access guard dan lock UI di halaman Universe Manager
+
 ## V2.13.5 — Brand-Product Affiliate Routing & Lineage to Content Flow Integration (11/08/2026)
 - Implement Brand-Product junction table & tenant-scoped precedence affiliate resolution
 - Add immutable campaign product binding snapshots across all 9 workflows
