@@ -95,5 +95,17 @@ export async function register() {
     } else {
       console.log('ℹ️  Content Automation Notification Worker disabled by environment.');
     }
+
+    if (backgroundServicesEnabled && process.env.ENABLE_PUBLISHING_WORKER === 'true') {
+      try {
+        const { startPublishingWorker } = await import('./lib/publishing-worker.js');
+        startPublishingWorker();
+        console.log('⚡ MAKNA Meta Publishing Worker auto-started.');
+      } catch (err) {
+        console.error('❌ Failed to start MAKNA Meta Publishing Worker:', err.message);
+      }
+    } else {
+      console.log('ℹ️  MAKNA Meta Publishing Worker disabled by environment.');
+    }
   }
 }

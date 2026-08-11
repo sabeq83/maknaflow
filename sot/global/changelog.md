@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.13.7 — Content Flow Publishing Scheduler (11/08/2026)
+- Menambahkan antrean dan kalender publishing tenant-aware
+- Menambahkan Facebook draft scheduler dan fondasi Instagram yang aman
+- Menambahkan audit retry rekonsiliasi dan monitoring publishing
+
 ## V2.13.6 — Integrasi Modul Universe Manager Multi-Tenant (11/08/2026)
 - Daftarkan universe_manager ke master ALL_MENU_KEYS agar dapat di-enable/disable per tenant
 - Tambahkan access guard dan lock UI di halaman Universe Manager

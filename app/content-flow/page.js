@@ -3,6 +3,7 @@
 import Sidebar from '../components/Sidebar';
 import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import PublishingScheduler from './PublishingScheduler';
 
 const SearchIcon = ({ style }) => (
   <svg style={style} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,6 +94,10 @@ function ContentFlowHubPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const accountQuery = searchParams.get('account') || 'all';
+  const initialView = searchParams.get('view') === 'publishing' ? 'publishing' : 'library';
+
+  const [mainView, setMainView] = useState(initialView);
+  const [schedulePreloadItem, setSchedulePreloadItem] = useState(null);
 
   const [items, setItems] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -658,8 +663,59 @@ function ContentFlowHubPageContent() {
             </div>
           </div>
 
-          {/* Quick Metrics Bar */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '24px' }}>
+          {/* Primary View Switcher: Content Library vs Publishing Scheduler */}
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #1f293d', paddingBottom: '14px' }}>
+            <button
+              onClick={() => { setMainView('library'); setSchedulePreloadItem(null); }}
+              style={{
+                padding: '9px 18px',
+                borderRadius: '10px',
+                background: mainView === 'library' ? '#2563eb' : '#111827',
+                border: `1px solid ${mainView === 'library' ? '#60a5fa' : '#27272a'}`,
+                color: '#fff',
+                fontSize: '13px',
+                fontWeight: 750,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: mainView === 'library' ? '0 4px 14px rgba(37, 99, 235, 0.35)' : 'none'
+              }}
+            >
+              <LayersIcon style={{ width: 15, height: 15 }} />
+              <span>▣ Content Library</span>
+            </button>
+            <button
+              onClick={() => setMainView('publishing')}
+              style={{
+                padding: '9px 18px',
+                borderRadius: '10px',
+                background: mainView === 'publishing' ? 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)' : '#111827',
+                border: `1px solid ${mainView === 'publishing' ? '#c084fc' : '#27272a'}`,
+                color: '#fff',
+                fontSize: '13px',
+                fontWeight: 750,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: mainView === 'publishing' ? '0 4px 14px rgba(168, 85, 247, 0.35)' : 'none'
+              }}
+            >
+              <ClockIcon style={{ width: 15, height: 15 }} />
+              <span>⏱️ Publishing Scheduler</span>
+            </button>
+          </div>
+
+          {mainView === 'publishing' ? (
+            <PublishingScheduler
+              initialPreloadItem={schedulePreloadItem}
+              onBackToLibrary={() => { setMainView('library'); setSchedulePreloadItem(null); }}
+            />
+          ) : (
+            <>
+              {/* Quick Metrics Bar */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '24px' }}>
             <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(18, 19, 24, 0.8)', border: '1px solid #27272a' }}>
               <span style={{ fontSize: '12px', color: '#9ca3af', fontWeight: 600, display: 'block' }}>Total Konten Terindeks</span>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '6px' }}>
@@ -1382,6 +1438,24 @@ function ContentFlowHubPageContent() {
                     </h2>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const itemToSchedule = { ...activeItem };
+                        setActiveItem(null);
+                        setSchedulePreloadItem(itemToSchedule);
+                        setMainView('publishing');
+                      }}
+                      style={{
+                        padding: '6px 12px', borderRadius: '8px',
+                        background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
+                        border: '1px solid #c084fc', color: '#fff', fontSize: '11px',
+                        fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
+                      }}
+                      title="Jadwalkan publikasi Facebook / Instagram untuk konten ini"
+                    >
+                      <span>⏱️ Jadwalkan Publikasi</span>
+                    </button>
                     {currentUser?.role === 'admin' && (
                       <button
                         type="button"
@@ -2177,6 +2251,8 @@ function ContentFlowHubPageContent() {
               </div>
             </div>
           )}
+          </>
+        )}
         </div>
       </main>
     </div>

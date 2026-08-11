@@ -1810,11 +1810,11 @@ export default function SettingsPage() {
             </div>
           ))}
 
-          {/* 9. CARD: Facebook Page Integration */}
-          {renderCollapsibleCard('facebook_page', 'automation', 'Facebook Page Integration', '📘', (
+          {/* 9. CARD: Meta Publishing Accounts Integration */}
+          {renderCollapsibleCard('facebook_page', 'automation', 'Meta Publishing Accounts Integration (Facebook & Instagram)', '📘', (
             <div>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
-                Konfigurasi Access Token untuk mengirim draf postingan ke Halaman Facebook Page (Unpublished).
+                Konfigurasi Access Token Meta Graph API untuk menjadwalkan dan mempublikasikan konten ke Facebook Page dan Instagram Professional melalui Publishing Scheduler.
               </p>
 
               <div className="form-group" style={{ marginBottom: '12px' }}>
@@ -1828,7 +1828,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="form-group" style={{ marginBottom: '16px' }}>
-                <label className="form-label">Page Access Token</label>
+                <label className="form-label">Page Access Token (Facebook & Instagram Connected)</label>
                 {hasFbToken && !editingFb ? (
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <input className="form-input" value={maskedFbToken} disabled style={{ background: 'var(--bg-glass)', opacity: 0.8 }} />
@@ -1876,10 +1876,10 @@ export default function SettingsPage() {
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
                 <button className="btn btn-secondary" onClick={testFbSettings} disabled={testingFb || (!hasFbToken && !fbPageToken)}>
-                  {testingFb ? '⏳ Testing...' : '🟢 Test Koneksi Facebook'}
+                  {testingFb ? '⏳ Testing...' : '🟢 Test Koneksi Meta Graph API'}
                 </button>
                 <button className="btn btn-primary" onClick={saveFbSettings} disabled={savingFb}>
-                  {savingFb ? '⏳ Menyimpan...' : '💾 Simpan Konfigurasi Facebook'}
+                  {savingFb ? '⏳ Menyimpan...' : '💾 Simpan Konfigurasi Meta'}
                 </button>
               </div>
             </div>

@@ -1,20 +1,22 @@
-# **Facebook Graph API Integration Blueprint**
+# **Facebook Graph API & Meta Integration Blueprint**
 
-This blueprint defines the architecture, data structures, and implementation logic for publishing automated or manual draft posts directly to a target Facebook Page. 
+This blueprint defines the architecture, data structures, and implementation logic for publishing automated or manual draft posts directly to a target Facebook Page and Instagram accounts.
+
+> [!NOTE]
+> Dimulai dari implementasi **Publishing Scheduler** (`sot/global/publishing-scheduler.md`), engine Meta Graph API telah ditingkatkan ke versi **v22.0** melalui modul terpusat `lib/meta-publisher.js`. Seluruh pemanggil legacy (`lib/facebook-helper.js`) secara otomatis mendelegasikan pemrosesan draft ke `createFacebookDraft()` dengan guardrail ketat `published: false` & `unpublished_content_type: 'DRAFT'`.
 
 ---
 
 ## **1. Architecture & Workflow**
 
-Unlike other scheduling modules that use a dedicated queue table, the Facebook integration acts as a **Direct Dispatcher Service** embedded inside the existing workflows (such as Recipe Labs campaigns) and manual action buttons.
+The Facebook & Instagram integration supports two execution modes:
+1. **Direct Dispatcher Mode (Legacy):** Embedded inside specific workflows (such as Recipe Labs campaigns) using `postDraftToFacebookPage` in `lib/facebook-helper.js`.
+2. **Publishing Scheduler Queue Mode (V2):** Multi-tenant scheduled and queued publishing managed by `lib/publishing-worker.js` and `lib/publishing-repository.js`.
 
-1. **Credentials Management:** Credentials (`fb_page_id` and `fb_page_token`) are configured globally by the user via the settings panel and stored as key-value entries in the `settings` database table.
-2. **Context Enrichment & Formatting:** When a post is generated (e.g., a recipe item in Recipe Labs), the raw markdown content is passed to `formatFacebookRecipeCaption()` in `lib/facebook-helper.js`. This function dynamically formats headings, replaces ingredient bullet points with cooking-related emojis, numbers instructions, and appends a randomized Call to Action (CTA) and hashtags.
-3. **Draft Guardrail:** To prevent unintended live posts, all posts sent by MAKNA are forced to be **unpublished drafts**. The API call explicitly sets `published: false` and `unpublished_content_type: 'DRAFT'`, making them visible only within the Meta Business Suite draft workspace.
-4. **Token Exchange:** The system exchanges the configured User Token for a true Page Access Token via the Page ID endpoint. This guarantees proper publishing scopes and bypasses scope expiration issues.
-5. **Execution Paths:**
-   - **Manual Trigger:** Initiated via a POST request to `/api/recipe-labs/items/[id]/post-fb`.
-   - **Automated Scheduler Trigger:** Fired by the background runner in `lib/scheduler-processors.js` (`recipe_generator` or `recipe_exporter`) depending on the `post_to_facebook` campaign setting.
+1. **Credentials Management:** Credentials can be configured globally in `settings` or securely per-tenant as encrypted tokens in the `publishing_accounts` table.
+2. **Context Enrichment & Formatting:** Markdown content is processed by `formatFacebookRecipeCaption()` in `lib/facebook-helper.js`.
+3. **Draft Guardrail:** To prevent unintended live posts, all automated posts sent by MAKNA are forced to be **unpublished drafts** (`published: false` and `unpublished_content_type: 'DRAFT'`).
+4. **Token Exchange:** The system exchanges user tokens for true Page Access Tokens via `resolvePageAccessToken` in `lib/meta-publisher.js`.
 
 ---
 
