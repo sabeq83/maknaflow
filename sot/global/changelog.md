@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.13.16 — Enable Background Publishing Worker by Default on Mac Mini (11/08/2026)
+- Auto-start publishing worker by default in instrumentation.js
+- Aktifkan ENABLE_PUBLISHING_WORKER dan ENABLE_FACEBOOK_LIVE di PM2 ecosystem config
+
 ## V2.13.15 — Facebook Live Mode Publishing and Meta Post Canonical URL Sync (11/08/2026)
 - Dukungan penuh publikasi langsung Facebook Live (Published Mode) tanpa blokir safety guard
 - Fungsi fetchMetaPostDetails untuk menarik URL kanonikal dan status resmi dari Meta Graph API

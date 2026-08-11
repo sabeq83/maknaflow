@@ -30,6 +30,8 @@ module.exports = {
         PORT: 5010,
         HOSTNAME: '0.0.0.0',
         TZ: 'Asia/Jakarta',
+        ENABLE_PUBLISHING_WORKER: 'true',
+        ENABLE_FACEBOOK_LIVE: 'true',
       },
       // Log output
       out_file: `${APP_DIR}/logs/staging-ui.out.log`,
@@ -84,6 +86,8 @@ module.exports = {
         PORT: 5020,
         HOSTNAME: '0.0.0.0',
         TZ: 'Asia/Jakarta',
+        ENABLE_PUBLISHING_WORKER: 'true',
+        ENABLE_FACEBOOK_LIVE: 'true',
       },
       // Log output
       out_file: `${APP_DIR}/logs/dev-ui.out.log`,

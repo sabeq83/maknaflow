@@ -96,7 +96,7 @@ export async function register() {
       console.log('ℹ️  Content Automation Notification Worker disabled by environment.');
     }
 
-    if (backgroundServicesEnabled && process.env.ENABLE_PUBLISHING_WORKER === 'true') {
+    if (backgroundServicesEnabled && process.env.ENABLE_PUBLISHING_WORKER !== 'false') {
       try {
         const { startPublishingWorker } = await import('./lib/publishing-worker.js');
         startPublishingWorker();
