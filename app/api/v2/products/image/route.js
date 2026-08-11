@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs';
-import { updateProductExtraction } from '@/lib/db';
 import { withTenantContext } from '@/lib/auth';
+import { getActiveTenantId } from '@/lib/tenant-context';
+import { getProductById, updateProduct } from '@/lib/product-repository';
+import { saveRawProductImage, saveCleanProductImage, validateRawProductImage } from '@/lib/product-image-storage';
 
 export const dynamic = 'force-dynamic';
+
+// Base dir untuk keamanan path traversal check
+const BASE_PRODUCTS_DIR = path.join(process.cwd(), 'public', 'uploads', 'products');
 
 export const GET = withTenantContext(async (request) => {
   try {
@@ -15,134 +20,117 @@ export const GET = withTenantContext(async (request) => {
       return NextResponse.json({ success: false, error: 'path parameter is required' }, { status: 400 });
     }
 
-    // 1. Resolve base directory
-    const baseDir = path.join(process.cwd(), 'public', 'uploads', 'products');
-
-    // 2. Sanitize input path to prevent directory traversal
-    // Convert backslashes to forward slashes and replace duplicate slashes
-    let cleanPath = relativePath.replace(/\\/g, '/');
-    cleanPath = cleanPath.replace(/\/+/g, '/');
-
-    // Strip leading slash if present
-    if (cleanPath.startsWith('/')) {
-      cleanPath = cleanPath.slice(1);
+    // Tolak URL eksternal — jangan proxy URL HTTP/HTTPS
+    if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
+      return NextResponse.json({ success: false, error: 'External URLs are not proxied by this endpoint' }, { status: 400 });
     }
 
-    // Strip prefixes like "public/" or "uploads/products/"
-    if (cleanPath.startsWith('public/')) {
-      cleanPath = cleanPath.slice(7);
-    }
-    if (cleanPath.startsWith('uploads/products/')) {
-      cleanPath = cleanPath.slice(17);
-    }
+    // Sanitize path
+    let cleanPath = relativePath.replace(/\\/g, '/').replace(/\/+/g, '/');
+    if (cleanPath.startsWith('/')) cleanPath = cleanPath.slice(1);
+    if (cleanPath.startsWith('public/')) cleanPath = cleanPath.slice(7);
+    if (cleanPath.startsWith('uploads/products/')) cleanPath = cleanPath.slice(17);
 
-    // Protect against path traversal (e.g. ".." patterns)
-    const resolvedPath = path.resolve(path.join(baseDir, cleanPath));
-
-    // Security check: ensure the resolved path starts with baseDir
-    if (!resolvedPath.startsWith(baseDir)) {
-      return NextResponse.json({ success: false, error: 'Unauthorized path traversal access' }, { status: 403 });
+    // Security: cek path traversal
+    const resolvedPath = path.resolve(path.join(BASE_PRODUCTS_DIR, cleanPath));
+    if (!resolvedPath.startsWith(BASE_PRODUCTS_DIR)) {
+      return NextResponse.json({ success: false, error: 'Unauthorized path' }, { status: 403 });
     }
 
-    // 3. Check if file exists on disk
     if (!fs.existsSync(resolvedPath)) {
-      // Fallback: serve a 1x1 transparent GIF pixel
+      // Fallback: transparent pixel dengan header diagnostik
       const pixel = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
       return new NextResponse(pixel, {
-        headers: { 'Content-Type': 'image/gif', 'Cache-Control': 'public, max-age=3600' },
+        headers: {
+          'Content-Type': 'image/gif',
+          'Cache-Control': 'no-cache',
+          'X-Image-Missing': 'true'
+        },
       });
     }
 
-    // 4. Determine content-type based on extension
     const ext = path.extname(resolvedPath).toLowerCase();
-    let contentType = 'image/jpeg';
-    if (ext === '.png') {
-      contentType = 'image/png';
-    } else if (ext === '.gif') {
-      contentType = 'image/gif';
-    } else if (ext === '.webp') {
-      contentType = 'image/webp';
-    } else if (ext === '.svg') {
-      contentType = 'image/svg+xml';
-    }
+    const contentTypeMap = { '.png': 'image/png', '.gif': 'image/gif', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
+    const contentType = contentTypeMap[ext] || 'image/jpeg';
 
-    // 5. Read file and serve
     const fileBuffer = fs.readFileSync(resolvedPath);
     return new NextResponse(fileBuffer, {
       headers: {
         'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=86400', // cache for 1 day
+        'Cache-Control': 'public, max-age=86400',
       },
     });
   } catch (error) {
-    console.error('[Products Image API Error]:', error);
+    console.error('[Products Image GET Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 });
 
 export const POST = withTenantContext(async (request) => {
   try {
+    const tenantId = getActiveTenantId();
     const formData = await request.formData();
     const file = formData.get('file');
     const productId = formData.get('productId');
-    const type = formData.get('type'); // 'raw', 'cleaned', 'generated'
+    const type = formData.get('type'); // 'raw' atau 'clean'
 
     if (!file || !productId || !type) {
       return NextResponse.json({ success: false, error: 'Missing file, productId, or type' }, { status: 400 });
     }
 
-    // Validate type
-    const validTypes = ['raw', 'cleaned', 'generated'];
+    // Pada pipeline baru: hanya 'raw' dan 'clean' yang valid
+    // 'generated' dan 'studio' tidak lagi diterima
+    const validTypes = ['raw', 'clean'];
     if (!validTypes.includes(type)) {
-      return NextResponse.json({ success: false, error: 'Invalid type parameter' }, { status: 400 });
+      return NextResponse.json({
+        success: false,
+        error: `Tipe "${type}" tidak valid. Gunakan "raw" atau "clean".`
+      }, { status: 400 });
+    }
+
+    // Pastikan produk ada dan milik tenant ini
+    const product = await getProductById(productId);
+    if (!product) {
+      return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });
     }
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Save to disk
-    const typeSubdir = type === 'cleaned' ? 'clean' : type;
-    const targetDir = path.join(process.cwd(), 'public', 'uploads', 'products', typeSubdir);
-    if (!fs.existsSync(targetDir)) {
-      fs.mkdirSync(targetDir, { recursive: true });
+    // Validasi magic bytes
+    const { valid, mimeType, error: imgError } = validateRawProductImage(buffer, file.name || '');
+    if (!valid) {
+      return NextResponse.json({ success: false, error: imgError }, { status: 400 });
     }
 
-    let ext = path.extname(file.name || '').toLowerCase();
-    if (!ext) ext = '.png'; // default fallback
-    const filename = `${type}_${productId}_${Date.now()}${ext}`;
-    const absolutePath = path.join(targetDir, filename);
-
-    fs.writeFileSync(absolutePath, buffer);
-
-    const relativePath = `/uploads/products/${typeSubdir}/${filename}`;
-
-    // Update SQLite database fields
+    let stored;
     const updateData = {};
+
     if (type === 'raw') {
-      updateData.raw_photo_url = relativePath;
-      updateData.photo_url = relativePath;
-      updateData.active_photo = 'raw_photo_url';
-    } else if (type === 'cleaned') {
-      updateData.clean_photo_url = relativePath;
-      updateData.cleaned_photo_url = relativePath;
-      updateData.photo_url = relativePath;
-      updateData.active_photo = 'cleaned_photo_url';
-    } else if (type === 'generated') {
-      updateData.generated_photo_url = relativePath;
-      updateData.photo_url = relativePath;
-      updateData.active_photo = 'generated_photo_url';
+      stored = await saveRawProductImage({ tenantId, productId, buffer, originalName: file.name || 'upload' });
+      updateData.raw_photo_url = stored.relativePath;
+      updateData.photo_url = stored.relativePath;
+      updateData.raw_photo_sha256 = stored.sha256;
+      // Setelah replace raw, tandai foto perlu review
+      updateData.photo_status = 'needs_review';
+    } else if (type === 'clean') {
+      stored = await saveCleanProductImage({ tenantId, productId, buffer, mimeType });
+      updateData.clean_photo_url = stored.relativePath;
+      updateData.cleaned_photo_url = stored.relativePath; // mirror compatibility
+      updateData.photo_url = stored.relativePath;
+      updateData.photo_status = 'needs_review';
     }
 
-    await updateProductExtraction(productId, updateData);
+    await updateProduct(productId, updateData);
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: 'Product image updated successfully',
-      relativePath 
+      relativePath: stored.relativePath,
+      type
     });
   } catch (error) {
-    console.error('[Products Image API POST Error]:', error);
+    console.error('[Products Image POST Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 });
-

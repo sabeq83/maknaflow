@@ -1,5 +1,29 @@
 # Changelog
 
+## V2.13.0 — Product Database AI Photo Pipeline v2 (11/08/2026)
+- Implementasi pipeline AI photo produk baru dengan 3-stage processing (enrichment, photo dispatch, polling)
+- Refactor bulk worker ke tenant-aware PostgreSQL dengan skip locked concurrency
+- Tambah product-validation, product-image-storage, product-photo-service libraries
+- Tambah Gemini dan G-Labs photo providers yang dapat dikonfigurasi per tenant
+- Refactor API routes ke multipart-safe dengan JSON backward compatibility
+- UI form produk: radio packaging, required validation, photo preview, provider selection
+- Normalisasi photo resolver: clean_photo_url prioritas utama untuk campaign consumer
+- Tambah settings provider/model/auto-approve untuk pipeline foto
+- Migrasi PostgreSQL: kolom enrichment_status, photo_status, photo_provider, normalized_source_url
+- CSV import: 6-column canonical mapping dengan per-row errors dan duplicate mode
+
+## V2.12.0 — Product Database AI Photo Pipeline v2 (11/08/2026)
+- Implementasi pipeline AI photo produk baru dengan 3-stage processing (enrichment, photo dispatch, polling)
+- Refactor bulk worker ke tenant-aware PostgreSQL dengan skip locked concurrency
+- Tambah product-validation, product-image-storage, product-photo-service libraries
+- Tambah Gemini dan G-Labs photo providers yang dapat dikonfigurasi per tenant
+- Refactor API routes ke multipart-safe dengan JSON backward compatibility
+- UI form produk: radio packaging, required validation, photo preview, provider selection
+- Normalisasi photo resolver: clean_photo_url prioritas utama untuk campaign consumer
+- Tambah settings provider/model/auto-approve untuk pipeline foto
+- Migrasi PostgreSQL: kolom enrichment_status, photo_status, photo_provider, normalized_source_url
+- CSV import: 6-column canonical mapping dengan per-row errors dan duplicate mode
+
 ## V2.11.3 — Fix Dynamic Universe Profiles Dropdown in Content Planner UI (10/08/2026)
 - Perbaiki parsing respons endpoint API /api/v2/universe-profiles di content planner page.js dari data.profiles ke data.data
 - Aktifkan pemuatan universe profile dinamis dari database di dropdown modal Generator

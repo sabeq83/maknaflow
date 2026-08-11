@@ -1,35 +1,27 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
 import * as XLSX from 'xlsx';
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import { withTenantContext } from '@/lib/auth';
 import { getActiveTenantId } from '@/lib/tenant-context';
+import { pgQuery, withPgTransaction } from '@/lib/db-pg';
+import { validateProductImportRow, normalizeProductUrl } from '@/lib/product-validation';
 
 export const dynamic = 'force-dynamic';
 
-function getHeaderVal(row, aliases) {
-  const keys = Object.keys(row);
-  for (const alias of aliases) {
-    const cleanAlias = alias.toLowerCase().trim().replace(/[\s_-]+/g, '');
-    for (const key of keys) {
-      const cleanKey = key.toLowerCase().trim().replace(/[\s_-]+/g, '');
-      if (cleanKey === cleanAlias || cleanKey.includes(cleanAlias)) {
-        return row[key];
-      }
-    }
-  }
-  return null;
+// ============================================================
+// Logging (tenant-aware)
+// ============================================================
+function safeTenantId(id) {
+  return String(id || 'default').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 40);
 }
 
-function appendToLog(message) {
+function appendToLog(message, tenantId) {
   try {
     const logDir = path.join(process.cwd(), 'public');
-    if (!fs.existsSync(logDir)) {
-      fs.mkdirSync(logDir, { recursive: true });
-    }
-    const tenantId = getActiveTenantId();
-    const logPath = path.join(logDir, `product_bulk_logs_${tenantId}.txt`);
+    if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
+    const logPath = path.join(logDir, `product_bulk_logs_${safeTenantId(tenantId)}.txt`);
     const timestamp = new Date().toLocaleString('id-ID');
     fs.appendFileSync(logPath, `[${timestamp}] ${message}\n`);
   } catch (err) {
@@ -37,11 +29,50 @@ function appendToLog(message) {
   }
 }
 
+// ============================================================
+// Canonical header mapping
+// ============================================================
+const HEADER_ALIASES = {
+  page: ['page', 'halaman', 'page_number'],
+  product_name: ['nama produk raw', 'nama_produk_raw', 'product_name_raw', 'nama produk', 'product_name', 'product name', 'nama'],
+  product_description: ['deskripsi produk raw', 'deskripsi_produk_raw', 'product_description_raw', 'deskripsi produk', 'product_description', 'description', 'deskripsi'],
+  source_url: ['link produk', 'link_produk', 'link_product', 'product_link', 'source_url', 'url_produk', 'url produk', 'link'],
+  raw_photo_source_url: ['url foto produk raw', 'url_foto_produk_raw', 'product_image_url_raw', 'photo_url_raw', 'photo_url', 'product_image_url', 'image_url', 'url foto', 'foto url', 'url gambar'],
+  affiliate_link: ['link aff', 'link_aff', 'link affiliate', 'affiliate_link', 'linkaff', 'affiliate link']
+};
+
+function normalizeHeaderKey(raw) {
+  return String(raw || '').toLowerCase().trim().replace(/[\s_-]+/g, ' ');
+}
+
+function mapRowHeaders(rawRow) {
+  const mapped = {};
+  const rowKeys = Object.keys(rawRow);
+
+  for (const [canonicalKey, aliases] of Object.entries(HEADER_ALIASES)) {
+    const normalizedAliases = aliases.map(a => a.toLowerCase().trim().replace(/[\s_-]+/g, ' '));
+    for (const rawKey of rowKeys) {
+      const normalizedKey = normalizeHeaderKey(rawKey);
+      if (normalizedAliases.some(a => normalizedKey === a || normalizedKey.includes(a))) {
+        mapped[canonicalKey] = rawRow[rawKey];
+        break;
+      }
+    }
+  }
+  return mapped;
+}
+
+// ============================================================
+// Import handler
+// ============================================================
 export const POST = withTenantContext(async (req) => {
+  const tenantId = getActiveTenantId();
   try {
     const formData = await req.formData();
-    const file = formData.get('file'); 
-    
+    const file = formData.get('file');
+    const duplicateMode = formData.get('duplicate_mode') || 'update_missing'; // 'update_missing' | 'skip_existing'
+    const photoProvider = formData.get('photo_provider') || 'system_default';
+
     if (!file) {
       return NextResponse.json({ success: false, error: 'File is required' }, { status: 400 });
     }
@@ -56,78 +87,154 @@ export const POST = withTenantContext(async (req) => {
       return NextResponse.json({ success: false, error: 'Berkas CSV/Excel kosong' }, { status: 400 });
     }
 
-    const db = getDb();
+    appendToLog(`========================================================================`, tenantId);
+    appendToLog(`[INPUT] Impor CSV/Excel: ${rawRows.length} baris ditemukan. Mode: ${duplicateMode}, Provider: ${photoProvider}`, tenantId);
+
+    // Map headers ke canonical
+    const parsedRows = rawRows.map((rawRow, idx) => {
+      const mapped = mapRowHeaders(rawRow);
+      return {
+        ...mapped,
+        source_row_number: idx + 2 // +2 karena baris 1 adalah header
+      };
+    });
+
+    // Validasi per baris (tidak membatalkan seluruh import)
+    const validRows = [];
+    const rowErrors = [];
+    for (const row of parsedRows) {
+      const validation = validateProductImportRow(row, row.source_row_number);
+      if (validation.valid) {
+        validRows.push(validation.data);
+      } else {
+        rowErrors.push({ row: row.source_row_number, errors: validation.errors });
+      }
+    }
+
+    if (validRows.length === 0) {
+      return NextResponse.json({
+        success: false,
+        error: 'Tidak ada baris valid dalam file',
+        row_errors: rowErrors
+      }, { status: 400 });
+    }
+
+    // Simpan dalam transaksi — tidak ada AI/network di dalam transaksi
     let importedCount = 0;
+    let updatedCount = 0;
     let skippedCount = 0;
 
-    appendToLog(`========================================================================`);
-    appendToLog(`[INPUT] Impor massal CSV/Excel dipicu. Menemukan ${rawRows.length} baris data raw.`);
+    await withPgTransaction(async (client) => {
+      for (const row of validRows) {
+        const {
+          product_name, product_description, source_url,
+          raw_photo_source_url, affiliate_link, page, source_row_number
+        } = row;
 
-    await db.transaction(async () => {
-      for (const row of rawRows) {
-        // Map synonyms
-        const rawName = getHeaderVal(row, ['Nama Produk Raw', 'nama_produk_raw', 'product_name_raw', 'Nama Produk', 'product_name', 'product name']);
-        const rawDesc = getHeaderVal(row, ['Deskripsi Produk Raw', 'deskripsi_produk_raw', 'product_description_raw', 'Deskripsi Produk', 'product_description', 'description', 'deskripsi']);
-        const rawLink = getHeaderVal(row, ['Link Produk', 'link_produk', 'link_product', 'product_link', 'source_url', 'url_produk', 'url produk']);
-        const rawPhoto = getHeaderVal(row, ['URL Foto Produk Raw', 'url_foto_produk_raw', 'product_image_url_raw', 'photo_url_raw', 'photo_url', 'product_image_url', 'image_url', 'url foto']);
+        const normalizedUrl = source_url ? normalizeProductUrl(source_url) : null;
+        const normalizedName = product_name.toLowerCase().trim();
 
-        if (!rawName || rawName.trim().length === 0) {
-          skippedCount++;
+        // Cek duplikat dalam tenant
+        const dupResult = await client.query(`
+          SELECT id, raw_photo_url, clean_photo_url, photo_status, enrichment_status
+          FROM product_extractions
+          WHERE tenant_id = $1
+            AND (
+              ($2 IS NOT NULL AND normalized_source_url = $2)
+              OR (LOWER(TRIM(product_name)) = $3)
+            )
+          LIMIT 1
+        `, [tenantId, normalizedUrl, normalizedName]);
+
+        if (dupResult.rowCount > 0) {
+          const dup = dupResult.rows[0];
+
+          if (duplicateMode === 'skip_existing') {
+            skippedCount++;
+            continue;
+          }
+
+          // update_missing: isi field yang kosong, perbarui affiliate link
+          const updates = {};
+          if (!dup.raw_photo_url && raw_photo_source_url) {
+            updates.raw_photo_source_url = raw_photo_source_url;
+            // photo_status = pending agar worker download foto
+            updates.photo_status = 'pending';
+            updates.extraction_status = 'pending';
+          }
+          if (affiliate_link) updates.affiliate_link = affiliate_link;
+          if (page) updates.page = page;
+          if (!dup.raw_photo_url && product_description) updates.product_description = product_description;
+          if (!dup.raw_photo_url && product_description) updates.raw_description = product_description;
+
+          if (Object.keys(updates).length > 0) {
+            // Jangan timpa foto yang sudah approved
+            const updateEntries = Object.entries(updates);
+            const sets = updateEntries.map(([k], i) => `${k} = $${i + 3}`).join(', ');
+            await client.query(
+              `UPDATE product_extractions SET ${sets}, updated_at = NOW() WHERE id = $1 AND tenant_id = $2`,
+              [dup.id, tenantId, ...updateEntries.map(([, v]) => v)]
+            );
+            updatedCount++;
+          } else {
+            skippedCount++;
+          }
           continue;
         }
 
-        // Prevent duplicates based on source_url or product_name
-        let exists = false;
-        if (rawLink && rawLink.trim().startsWith('http')) {
-          const matched = await db.prepare('SELECT id FROM product_extractions WHERE source_url = ? OR input_source = ?').get(rawLink.trim(), rawLink.trim());
-          if (matched) exists = true;
-        } else {
-          const matched = await db.prepare('SELECT id FROM product_extractions WHERE product_name = ?').get(rawName.trim());
-          if (matched) exists = true;
-        }
+        // Insert produk baru — data disimpan dulu, AI dikerjakan oleh worker
+        const productId = crypto.randomUUID();
+        const isUrl = (source_url && source_url.startsWith('http')) ? 1 : 0;
 
-        if (exists) {
-          skippedCount++;
-          continue;
-        }
-
-        const id = `pe_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-        const isUrl = (rawLink && rawLink.trim().startsWith('http')) ? 1 : 0;
-        const inputSource = rawLink || 'Manual';
-
-        await db.prepare(`
+        await client.query(`
           INSERT INTO product_extractions (
-            id, input_source, is_url, product_name, product_description, raw_description,
-            source_url, scraped_image_url, raw_photo_url, extraction_status
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
-        `).run(
-          id,
-          inputSource,
+            id, tenant_id, input_source, is_url, product_name, product_description, raw_description,
+            source_url, normalized_source_url, scraped_image_url, raw_photo_url,
+            affiliate_link, page, photo_provider,
+            enrichment_status, photo_status, import_status, extraction_status,
+            created_at, updated_at
+          ) VALUES (
+            $1, $2, $3, $4, $5, $6, $7,
+            $8, $9, $10, $11,
+            $12, $13, $14,
+            'pending', 'pending', 'completed', 'pending',
+            NOW(), NOW()
+          )
+        `, [
+          productId,
+          tenantId,
+          source_url || 'CSV Import',
           isUrl,
-          rawName.trim(),
-          rawDesc ? rawDesc.trim() : '',
-          rawDesc ? rawDesc.trim() : '',
-          rawLink ? rawLink.trim() : '',
-          rawPhoto ? rawPhoto.trim() : '',
-          rawPhoto ? rawPhoto.trim() : ''
-        );
+          product_name,
+          product_description,
+          product_description,
+          source_url || null,
+          normalizedUrl,
+          raw_photo_source_url || null,  // scraped_image_url untuk backward compat
+          null,                           // raw_photo_url diisi worker setelah download
+          affiliate_link || null,
+          page || null,
+          photoProvider !== 'system_default' ? photoProvider : null
+        ]);
 
         importedCount++;
       }
-    })();
+    });
 
-    appendToLog(`[SUCCESS] Impor selesai. ${importedCount} produk masuk antrean 'pending', ${skippedCount} baris dilewati (kosong atau duplikat).`);
+    appendToLog(`[SUCCESS] Import selesai: ${importedCount} baru, ${updatedCount} diperbarui, ${skippedCount} dilewati. ${rowErrors.length} baris error.`, tenantId);
 
-    return NextResponse.json({ 
-      success: true, 
-      message: `Impor CSV raw selesai! ${importedCount} produk ditambahkan ke antrean, ${skippedCount} produk dilewati.`,
-      imported_count: importedCount,
-      skipped_count: skippedCount
+    return NextResponse.json({
+      success: true,
+      message: `Import selesai! ${importedCount} produk baru, ${updatedCount} diperbarui, ${skippedCount} dilewati.`,
+      imported: importedCount,
+      updated: updatedCount,
+      skipped: skippedCount,
+      row_errors: rowErrors
     });
 
   } catch (error) {
     console.error('[Products Import CSV Error]:', error);
-    appendToLog(`[ERROR] Impor massal gagal: ${error.message}`);
+    appendToLog(`[ERROR] Import gagal: ${error.message}`, tenantId);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 });

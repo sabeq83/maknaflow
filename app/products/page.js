@@ -27,24 +27,28 @@ export default function ProductDatabasePage() {
   
   // Form fields for Add/Edit full product
   const [formData, setFormData] = useState({
-    id: '',
     product_name: '',
     category: '',
     tags: '',
     product_description: '',
     unique_selling_point: '',
     affiliate_link: '',
-    photo_url: '',
     source_url: '',
-    is_in_packaging: 0,
+    packaging_status: '',  // 'packaged' | 'unpackaged'
     packaging_type: '',
+    packaging_notes: '',
     i2v_action_prompt: '',
     t2i_prompt: '',
     product_truth: '',
     geometric_truth: '',
+    photo_provider: 'system_default',
   });
 
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  // State untuk upload raw photo baru (file dipilih, belum dikirim)
+  const [rawPhotoFile, setRawPhotoFile] = useState(null);
+  const [rawPhotoPreview, setRawPhotoPreview] = useState(null);
+  const [formErrors, setFormErrors] = useState({});
+  const [regenerateOnSave, setRegenerateOnSave] = useState(false);
 
   // Scraper fields
   const [scraperUrls, setScraperUrls] = useState('');
@@ -115,7 +119,11 @@ export default function ProductDatabasePage() {
     }
   };
 
-  const hasBulkQueueActive = products.some(p => p.extraction_status && ['pending', 'pending_image', 'generating_image'].includes(p.extraction_status));
+  const hasBulkQueueActive = products.some(p =>
+    (p.extraction_status && ['pending', 'pending_image', 'generating_image'].includes(p.extraction_status)) ||
+    (p.enrichment_status && ['pending', 'processing'].includes(p.enrichment_status)) ||
+    (p.photo_status && ['pending', 'processing'].includes(p.photo_status))
+  );
 
   // Poll for updates if scraper queue or bulk queue is active
   useEffect(() => {
@@ -156,36 +164,81 @@ export default function ProductDatabasePage() {
   // Extract unique categories for filter dropdown
   const categories = Array.from(new Set(products.map(p => p.category).filter(Boolean)));
 
-  // Manual save for full add/edit product
+  // Validasi client-side sebelum submit
+  function validateProductForm() {
+    const errors = {};
+    if (!formData.product_name.trim() || formData.product_name.trim().length < 2) {
+      errors.product_name = 'Nama produk wajib diisi (min 2 karakter)';
+    }
+    if (!formData.product_description.trim() || formData.product_description.trim().length < 10) {
+      errors.product_description = 'Deskripsi produk wajib diisi (min 10 karakter)';
+    }
+    if (!editingProduct && !rawPhotoFile) {
+      errors.raw_photo = 'Foto produk wajib diunggah saat membuat produk baru';
+    }
+    if (!formData.packaging_status) {
+      errors.packaging_status = 'Status kemasan wajib dipilih';
+    }
+    if (formData.packaging_status === 'packaged' && !formData.packaging_type.trim()) {
+      errors.packaging_type = 'Jenis kemasan wajib diisi jika produk dikemas';
+    }
+    return errors;
+  }
+
+  // Manual save for full add/edit product — multipart
   async function handleSaveProduct(e) {
     e.preventDefault();
-    if (!formData.product_name.trim()) {
-      showToast('Nama produk wajib diisi!', 'error');
+
+    const errors = validateProductForm();
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
       return;
     }
+    setFormErrors({});
 
     try {
-      const url = editingProduct 
-        ? `/api/v2/products/${editingProduct.id}` 
+      const payload = new FormData();
+      const productPayload = {
+        product_name: formData.product_name.trim(),
+        product_description: formData.product_description.trim(),
+        raw_description: formData.product_description.trim(),
+        category: formData.category.trim() || null,
+        tags: formData.tags.trim() || null,
+        affiliate_link: formData.affiliate_link.trim() || null,
+        source_url: formData.source_url.trim() || null,
+        packaging_status: formData.packaging_status,
+        packaging_type: formData.packaging_status === 'packaged' ? formData.packaging_type.trim() : null,
+        packaging_notes: formData.packaging_notes?.trim() || null,
+        unique_selling_point: formData.unique_selling_point.trim() || null,
+        i2v_action_prompt: formData.i2v_action_prompt.trim() || null,
+        t2i_prompt: formData.t2i_prompt.trim() || null,
+        product_truth: formData.product_truth.trim() || null,
+        geometric_truth: formData.geometric_truth.trim() || null,
+        photo_provider: formData.photo_provider !== 'system_default' ? formData.photo_provider : null,
+      };
+      payload.set('product', JSON.stringify(productPayload));
+      if (rawPhotoFile) payload.set('raw_photo', rawPhotoFile);
+      if (editingProduct && regenerateOnSave) payload.set('regenerate', 'true');
+
+      const url = editingProduct
+        ? `/api/v2/products/${editingProduct.id}`
         : '/api/v2/products';
-      
       const method = editingProduct ? 'PUT' : 'POST';
 
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
+      const res = await fetch(url, { method, body: payload });
       const data = await res.json();
 
       if (data.success) {
-        showToast(editingProduct ? '✅ Produk berhasil diperbarui!' : '✅ Produk berhasil ditambahkan!');
+        showToast(editingProduct ? '✅ Produk berhasil diperbarui!' : '✅ Produk berhasil ditambahkan! AI enrichment berjalan otomatis.');
         setShowAddEditModal(false);
         setEditingProduct(null);
         resetForm();
         fetchProducts();
       } else {
-        showToast(data.error || 'Gagal menyimpan produk', 'error');
+        if (data.errors) {
+          setFormErrors(data.errors);
+        }
+        showToast(data.error || Object.values(data.errors || {})[0] || 'Gagal menyimpan produk', 'error');
       }
     } catch (err) {
       showToast(err.message, 'error');
@@ -570,62 +623,40 @@ export default function ProductDatabasePage() {
     }
   }
 
-  // Upload product photo during Add Product
-  async function handlePhotoUpload(e) {
-    const file = e.target.files[0];
+  // Pilih raw photo file (disimpan di state, tidak langsung upload)
+  function handleRawPhotoSelect(e) {
+    const file = e.target.files?.[0];
     if (!file) return;
-    setUploadingPhoto(true);
-
-    const tempId = formData.id || `pe_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-
-    const fileData = new FormData();
-    fileData.append('file', file);
-    fileData.append('productId', tempId);
-    fileData.append('type', 'raw');
-
-    try {
-      const res = await fetch('/api/v2/products/image', {
-        method: 'POST',
-        body: fileData
-      });
-      const data = await res.json();
-      if (data.success) {
-        setFormData(prev => ({
-          ...prev,
-          id: tempId,
-          photo_url: data.relativePath
-        }));
-        showToast('Foto produk berhasil diunggah!');
-      } else {
-        showToast(data.error || 'Gagal mengunggah foto produk', 'error');
-      }
-    } catch (err) {
-      showToast(err.message, 'error');
-    } finally {
-      setUploadingPhoto(false);
-    }
+    setRawPhotoFile(file);
+    const url = URL.createObjectURL(file);
+    setRawPhotoPreview(url);
+    setFormErrors(prev => ({ ...prev, raw_photo: undefined }));
   }
 
   // Edit action
   function handleEditProduct(product) {
     setEditingProduct(product);
     setFormData({
-      id: product.id || '',
       product_name: product.product_name || '',
       category: product.category || '',
       tags: product.tags || '',
       product_description: product.product_description || '',
       unique_selling_point: product.unique_selling_point || '',
       affiliate_link: product.affiliate_link || '',
-      photo_url: product.photo_url || '',
       source_url: product.source_url || '',
-      is_in_packaging: product.is_in_packaging || 0,
+      packaging_status: product.packaging_status || (product.is_in_packaging ? 'packaged' : 'unpackaged'),
       packaging_type: product.packaging_type || '',
+      packaging_notes: product.packaging_notes || '',
       i2v_action_prompt: product.i2v_action_prompt || '',
       t2i_prompt: product.t2i_prompt || '',
       product_truth: product.product_truth || '',
       geometric_truth: product.geometric_truth || '',
+      photo_provider: product.photo_provider || 'system_default',
     });
+    setRawPhotoFile(null);
+    setRawPhotoPreview(null);
+    setFormErrors({});
+    setRegenerateOnSave(false);
     setShowAddEditModal(true);
   }
 
@@ -649,22 +680,26 @@ export default function ProductDatabasePage() {
 
   function resetForm() {
     setFormData({
-      id: '',
       product_name: '',
       category: '',
       tags: '',
       product_description: '',
       unique_selling_point: '',
       affiliate_link: '',
-      photo_url: '',
       source_url: '',
-      is_in_packaging: 0,
+      packaging_status: '',
       packaging_type: '',
+      packaging_notes: '',
       i2v_action_prompt: '',
       t2i_prompt: '',
       product_truth: '',
       geometric_truth: '',
+      photo_provider: 'system_default',
     });
+    setRawPhotoFile(null);
+    setRawPhotoPreview(null);
+    setFormErrors({});
+    setRegenerateOnSave(false);
   }
 
   return (
@@ -1836,7 +1871,7 @@ export default function ProductDatabasePage() {
             <form onSubmit={handleSaveProduct}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">Nama Produk *</label>
+                  <label className="form-label" style={{ color: formErrors.product_name ? '#ef4444' : undefined }}>Nama Produk *</label>
                   <input
                     type="text"
                     className="form-input"
@@ -1845,6 +1880,7 @@ export default function ProductDatabasePage() {
                     placeholder="Nama produk..."
                     required
                   />
+                  {formErrors.product_name && <span style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '4px', display: 'block' }}>{formErrors.product_name}</span>}
                 </div>
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="form-label">Kategori</label>
@@ -1882,14 +1918,15 @@ export default function ProductDatabasePage() {
               </div>
 
               <div className="form-group" style={{ marginBottom: '12px' }}>
-                <label className="form-label">Deskripsi Produk</label>
+                <label className="form-label" style={{ color: formErrors.product_description ? '#ef4444' : undefined }}>Deskripsi Produk *</label>
                 <textarea
                   className="form-textarea"
                   value={formData.product_description}
                   onChange={e => setFormData({ ...formData, product_description: e.target.value })}
-                  placeholder="Deskripsi singkat mengenai produk..."
+                  placeholder="Deskripsi singkat mengenai produk (min 10 karakter)..."
                   style={{ minHeight: '60px' }}
                 />
+                {formErrors.product_description && <span style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '4px', display: 'block' }}>{formErrors.product_description}</span>}
               </div>
 
               <div className="form-group" style={{ marginBottom: '12px' }}>
@@ -1915,28 +1952,53 @@ export default function ProductDatabasePage() {
                   📦 Kemasan & Prompt AI
                 </div>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '12px', marginBottom: '12px', alignItems: 'center' }}>
-                  <div className="form-group" style={{ margin: 0, display: 'flex', alignItems: 'center', height: '40px' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-primary)', userSelect: 'none' }}>
-                      <input
-                        type="checkbox"
-                        checked={formData.is_in_packaging === 1 || formData.is_in_packaging === true}
-                        onChange={e => setFormData({ ...formData, is_in_packaging: e.target.checked ? 1 : 0 })}
-                        style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--accent)' }}
-                      />
-                      Dalam Kemasan
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px', alignItems: 'start' }}>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label" style={{ color: formErrors.packaging_status ? '#ef4444' : undefined }}>
+                      Status Kemasan *
                     </label>
+                    <div style={{ display: 'flex', gap: '16px', marginTop: '6px' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                        <input
+                          id="pkg-packaged"
+                          type="radio"
+                          name="packaging_status"
+                          value="packaged"
+                          checked={formData.packaging_status === 'packaged'}
+                          onChange={e => setFormData({ ...formData, packaging_status: e.target.value })}
+                          style={{ accentColor: 'var(--accent)', cursor: 'pointer' }}
+                        />
+                        📦 Dikemas
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                        <input
+                          id="pkg-unpackaged"
+                          type="radio"
+                          name="packaging_status"
+                          value="unpackaged"
+                          checked={formData.packaging_status === 'unpackaged'}
+                          onChange={e => setFormData({ ...formData, packaging_status: e.target.value })}
+                          style={{ accentColor: 'var(--accent)', cursor: 'pointer' }}
+                        />
+                        🔓 Tidak Dikemas
+                      </label>
+                    </div>
+                    {formErrors.packaging_status && <span style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '4px', display: 'block' }}>{formErrors.packaging_status}</span>}
                   </div>
                   <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label" style={{ color: formErrors.packaging_type ? '#ef4444' : undefined }}>
+                      Jenis Kemasan {formData.packaging_status === 'packaged' ? '*' : ''}
+                    </label>
                     <input
                       type="text"
                       className="form-input"
                       value={formData.packaging_type}
                       onChange={e => setFormData({ ...formData, packaging_type: e.target.value })}
-                      placeholder="Tipe Kemasan (misal: Botol Kaca, Kotak Kardus)"
-                      disabled={!(formData.is_in_packaging === 1 || formData.is_in_packaging === true)}
-                      style={{ opacity: (formData.is_in_packaging === 1 || formData.is_in_packaging === true) ? 1 : 0.5 }}
+                      placeholder="Botol Kaca, Kotak Kardus, Pouch..."
+                      disabled={formData.packaging_status !== 'packaged'}
+                      style={{ opacity: formData.packaging_status === 'packaged' ? 1 : 0.4 }}
                     />
+                    {formErrors.packaging_type && <span style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '4px', display: 'block' }}>{formErrors.packaging_type}</span>}
                   </div>
                 </div>
 
@@ -1984,58 +2046,75 @@ export default function ProductDatabasePage() {
                   />
                 </div>
 
-                {!editingProduct && (
-                  <div className="form-group" style={{ marginTop: '12px' }}>
-                    <label className="form-label" style={{ fontWeight: 600, color: '#60a5fa' }}>📤 Upload Foto Produk</label>
-                    <input 
-                      type="file" 
-                      accept="image/*"
-                      onChange={handlePhotoUpload}
-                      style={{ 
-                        width: '100%', 
-                        padding: '8px', 
-                        background: '#0d1527', 
-                        border: '1px dashed #3b82f6', 
-                        borderRadius: '8px', 
-                        color: '#cbd5e1', 
-                        cursor: 'pointer',
-                        fontSize: '0.82rem'
-                      }}
-                    />
-                    {uploadingPhoto && <span style={{ fontSize: '0.75rem', color: '#60a5fa', marginTop: '4px', display: 'block' }}>⏳ Mengunggah foto...</span>}
-                  </div>
-                )}
+                {/* Upload Foto Produk Raw */}
+                <div className="form-group" style={{ marginTop: '12px' }}>
+                  <label className="form-label" style={{ fontWeight: 600, color: formErrors.raw_photo ? '#ef4444' : '#60a5fa' }}>
+                    📷 Foto Produk Raw {!editingProduct ? '*' : '(Ganti Foto)'}
+                  </label>
+                  <input
+                    id="raw-photo-input"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleRawPhotoSelect}
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      background: '#0d1527',
+                      border: `1px dashed ${formErrors.raw_photo ? '#ef4444' : '#3b82f6'}`,
+                      borderRadius: '8px',
+                      color: '#cbd5e1',
+                      cursor: 'pointer',
+                      fontSize: '0.82rem'
+                    }}
+                  />
+                  {rawPhotoPreview && (
+                    <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <img src={rawPhotoPreview} alt="Preview" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #3b82f6' }} />
+                      <span style={{ fontSize: '0.75rem', color: '#60a5fa' }}>✅ {rawPhotoFile?.name}</span>
+                    </div>
+                  )}
+                  {formErrors.raw_photo && <span style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '4px', display: 'block' }}>{formErrors.raw_photo}</span>}
+                  {editingProduct && !rawPhotoPreview && editingProduct.raw_photo_url && (
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>Foto raw saat ini sudah ada. Biarkan kosong untuk mempertahankan.</p>
+                  )}
+                </div>
+
+                {/* Provider Selection */}
+                <div className="form-group" style={{ marginTop: '12px', marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontWeight: 600 }}>🤖 Provider Foto Clean</label>
+                  <select
+                    id="photo-provider-select"
+                    className="form-input"
+                    value={formData.photo_provider}
+                    onChange={e => setFormData({ ...formData, photo_provider: e.target.value })}
+                    style={{ fontSize: '0.85rem' }}
+                  >
+                    <option value="system_default">🔧 Default Sistem</option>
+                    <option value="glabs">🏭 G-Labs</option>
+                    <option value="gemini">✨ Gemini AI</option>
+                  </select>
+                  <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px' }}>AI Enrichment dan Clean Photo dibuat secara otomatis setelah produk disimpan.</p>
+                </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">Photo URL / Path</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={formData.photo_url}
-                    onChange={e => setFormData({ ...formData, photo_url: e.target.value })}
-                    placeholder="/uploads/products/image.png"
-                  />
-                </div>
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">Original Source URL</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={formData.source_url}
-                    onChange={e => setFormData({ ...formData, source_url: e.target.value })}
-                    placeholder="https://shopee.co.id/..."
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid var(--border)' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => { setShowAddEditModal(false); setEditingProduct(null); }}>
                   Batal
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  💾 Simpan Produk
+                {editingProduct && (
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.8rem', color: 'var(--text-muted)', userSelect: 'none' }}>
+                    <input
+                      id="regenerate-on-save"
+                      type="checkbox"
+                      checked={regenerateOnSave}
+                      onChange={e => setRegenerateOnSave(e.target.checked)}
+                      style={{ accentColor: 'var(--accent)' }}
+                    />
+                    Generate Ulang Foto
+                  </label>
+                )}
+                <button type="submit" className="btn btn-primary" id="save-product-btn">
+                  💾 {editingProduct ? 'Simpan Perubahan' : 'Simpan Produk'}
                 </button>
               </div>
             </form>

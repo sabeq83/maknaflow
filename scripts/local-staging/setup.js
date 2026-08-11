@@ -105,6 +105,27 @@ async function applyStagingMigrations(client) {
       await client.query(`ALTER TABLE ${quoteIdent(table)} ADD COLUMN IF NOT EXISTS tenant_id TEXT`);
     }
   }
+  await client.query(`
+    ALTER TABLE product_extractions
+    ADD COLUMN IF NOT EXISTS page TEXT,
+    ADD COLUMN IF NOT EXISTS packaging_status TEXT,
+    ADD COLUMN IF NOT EXISTS packaging_notes TEXT,
+    ADD COLUMN IF NOT EXISTS import_status TEXT DEFAULT 'completed',
+    ADD COLUMN IF NOT EXISTS enrichment_status TEXT DEFAULT 'pending',
+    ADD COLUMN IF NOT EXISTS photo_status TEXT DEFAULT 'approved',
+    ADD COLUMN IF NOT EXISTS photo_provider TEXT,
+    ADD COLUMN IF NOT EXISTS photo_task_id TEXT,
+    ADD COLUMN IF NOT EXISTS photo_error TEXT,
+    ADD COLUMN IF NOT EXISTS enrichment_error TEXT,
+    ADD COLUMN IF NOT EXISTS enrichment_reviewed_at TIMESTAMPTZ,
+    ADD COLUMN IF NOT EXISTS photo_reviewed_at TIMESTAMPTZ,
+    ADD COLUMN IF NOT EXISTS normalized_source_url TEXT,
+    ADD COLUMN IF NOT EXISTS raw_photo_sha256 TEXT,
+    ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+  `);
+  await client.query(`CREATE INDEX IF NOT EXISTS idx_product_extractions_enrichment_status ON product_extractions(tenant_id, enrichment_status, created_at)`);
+  await client.query(`CREATE INDEX IF NOT EXISTS idx_product_extractions_photo_status ON product_extractions(tenant_id, photo_status, created_at)`);
+  await client.query(`CREATE INDEX IF NOT EXISTS idx_product_extractions_normalized_url ON product_extractions(tenant_id, normalized_source_url)`);
   await client.query(`ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS nextcloud_parent_folder TEXT`);
   await client.query(`ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS drive_parent_folder TEXT`);
   await client.query(`ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS editorial_brand_context TEXT`);
