@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.13.3 — Fitur Re-Enrichment AI dan Perbaikan Prompt Kemasan (11/08/2026)
+- Mengubah tombol RE-Generate Truths menjadi Re-Enrich AI asinkron
+- Menghapus prompt visual kampanye t2i dan i2v yang usang
+- Menambahkan field edit manual Prompt Foto Clean di modal edit produk
+- Mengintegrasikan parameter packaging_type ke Gemini Enrichment
+
 ## V2.13.2 — Pisah Generasi Foto Clean (11/08/2026)
 - Memisahkan generasi foto clean otomatis dari enrichment
 - Hapus tab Studio di card produk hanya sisakan Raw dan Clean

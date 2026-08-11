@@ -37,8 +37,7 @@ export default function ProductDatabasePage() {
     packaging_status: '',  // 'packaged' | 'unpackaged'
     packaging_type: '',
     packaging_notes: '',
-    i2v_action_prompt: '',
-    t2i_prompt: '',
+    clean_photo_t2i_prompt: '',
     product_truth: '',
     geometric_truth: '',
     photo_provider: 'system_default',
@@ -211,8 +210,7 @@ export default function ProductDatabasePage() {
         packaging_type: formData.packaging_status === 'packaged' ? formData.packaging_type.trim() : null,
         packaging_notes: formData.packaging_notes?.trim() || null,
         unique_selling_point: formData.unique_selling_point.trim() || null,
-        i2v_action_prompt: formData.i2v_action_prompt.trim() || null,
-        t2i_prompt: formData.t2i_prompt.trim() || null,
+        clean_photo_t2i_prompt: formData.clean_photo_t2i_prompt.trim() || null,
         product_truth: formData.product_truth.trim() || null,
         geometric_truth: formData.geometric_truth.trim() || null,
         photo_provider: formData.photo_provider !== 'system_default' ? formData.photo_provider : null,
@@ -515,12 +513,37 @@ export default function ProductDatabasePage() {
     }
   }
 
-  // Regenerate Product Truths & Geometry Truths in a batch
-  async function handleBulkRegenerateTruths() {
+  const [reEnrichingId, setReEnrichingId] = useState(null);
+
+  // Trigger AI enrichment asinkron per-produk
+  async function handleReEnrichProduct(productId) {
+    setReEnrichingId(productId);
+    try {
+      const res = await fetch('/api/v2/products/re-enrich', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: [productId] })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`✅ ${data.message}`);
+        fetchProducts(); // Refresh list
+      } else {
+        showToast(data.error || 'Gagal mengantrekan re-enrichment', 'error');
+      }
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setReEnrichingId(null);
+    }
+  }
+
+  // Trigger AI enrichment asinkron massal (bulk)
+  async function handleBulkReEnrich() {
     if (selectedIds.length === 0) return;
     setRegeneratingTruths(true);
     try {
-      const res = await fetch('/api/v2/products/regenerate-truths', {
+      const res = await fetch('/api/v2/products/re-enrich', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids: selectedIds })
@@ -531,7 +554,7 @@ export default function ProductDatabasePage() {
         fetchProducts(); // Refresh list
         setSelectedIds([]);
       } else {
-        showToast(data.error || 'Gagal men-generate ulang truths', 'error');
+        showToast(data.error || 'Gagal memproses re-enrichment massal', 'error');
       }
     } catch (err) {
       showToast(err.message, 'error');
@@ -671,8 +694,7 @@ export default function ProductDatabasePage() {
       packaging_status: product.packaging_status || (product.is_in_packaging ? 'packaged' : 'unpackaged'),
       packaging_type: product.packaging_type || '',
       packaging_notes: product.packaging_notes || '',
-      i2v_action_prompt: product.i2v_action_prompt || '',
-      t2i_prompt: product.t2i_prompt || '',
+      clean_photo_t2i_prompt: product.clean_photo_t2i_prompt || '',
       product_truth: product.product_truth || '',
       geometric_truth: product.geometric_truth || '',
       photo_provider: product.photo_provider || 'system_default',
@@ -714,8 +736,7 @@ export default function ProductDatabasePage() {
       packaging_status: '',
       packaging_type: '',
       packaging_notes: '',
-      i2v_action_prompt: '',
-      t2i_prompt: '',
+      clean_photo_t2i_prompt: '',
       product_truth: '',
       geometric_truth: '',
       photo_provider: 'system_default',
@@ -1076,10 +1097,10 @@ export default function ProductDatabasePage() {
                     </div>
                     <button
                       type="button"
-                      onClick={handleBulkRegenerateTruths}
+                      onClick={handleBulkReEnrich}
                       disabled={regeneratingTruths}
                       style={{
-                        background: 'linear-gradient(135deg, #a855f7 0%, #6c5ce7 100%)',
+                        background: 'linear-gradient(135deg, #0984e3 0%, #74b9ff 100%)',
                         border: 'none',
                         color: '#fff',
                         fontSize: '0.75rem',
@@ -1090,16 +1111,16 @@ export default function ProductDatabasePage() {
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '6px',
-                        boxShadow: '0 2px 8px rgba(108, 92, 231, 0.4)'
+                        boxShadow: '0 2px 8px rgba(9, 132, 227, 0.4)'
                       }}
                     >
                       {regeneratingTruths ? (
                         <>
                           <div className="spinner" style={{ width: '12px', height: '12px', borderTopColor: '#fff' }} />
-                          Memproses...
+                          Enriching...
                         </>
                       ) : (
-                        <>🔄 RE-Generate Truths</>
+                        <>🧠 Re-Enrich AI</>
                       )}
                     </button>
                     <button
@@ -1696,12 +1717,12 @@ export default function ProductDatabasePage() {
                       </div>
                     </div>
 
-                    {/* Clean Photo Generation Button Row */}
+                    {/* Clean Photo & Re-Enrich AI Button Row */}
                     <div style={{
                       padding: '8px 18px',
                       borderTop: '1px solid var(--border)',
                       display: 'flex',
-                      justifyContent: 'center',
+                      gap: '8px',
                       background: 'rgba(255, 255, 255, 0.01)'
                     }}>
                       <button
@@ -1709,7 +1730,7 @@ export default function ProductDatabasePage() {
                         onClick={() => handleRegeneratePhoto(p.id)}
                         disabled={regeneratingPhotoId === p.id || (p.photo_status && ['pending', 'processing'].includes(p.photo_status))}
                         style={{
-                          width: '100%',
+                          flex: 1,
                           background: (p.clean_photo_url || p.cleaned_photo_url)
                             ? 'linear-gradient(135deg, rgba(255, 127, 80, 0.2) 0%, rgba(255, 165, 0, 0.2) 100%)'
                             : 'linear-gradient(135deg, rgba(108, 92, 231, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%)',
@@ -1717,29 +1738,56 @@ export default function ProductDatabasePage() {
                             ? '1px solid rgba(255, 127, 80, 0.4)'
                             : '1px solid rgba(108, 92, 231, 0.4)',
                           color: '#fff',
-                          fontSize: '0.72rem',
+                          fontSize: '0.7rem',
                           fontWeight: 600,
-                          padding: '6px 12px',
+                          padding: '6px 8px',
                           borderRadius: '6px',
                           cursor: 'pointer',
                           display: 'inline-flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          gap: '6px',
+                          gap: '4px',
                           transition: 'all 0.2s ease'
                         }}
                       >
                         {regeneratingPhotoId === p.id || (p.photo_status && ['pending', 'processing'].includes(p.photo_status)) ? (
                           <>
-                            <div className="spinner" style={{ width: '12px', height: '12px', borderTopColor: '#fff' }} />
-                            Memproses Visual...
+                            <div className="spinner" style={{ width: '10px', height: '10px', borderTopColor: '#fff' }} />
+                            Rendering...
                           </>
                         ) : (
-                          (p.clean_photo_url || p.cleaned_photo_url) ? (
-                            <>✨ Re-Generate Clean Photo</>
-                          ) : (
-                            <>✨ Generate Clean Photo</>
-                          )
+                          p.clean_photo_url || p.cleaned_photo_url ? '✨ Re-Gen Photo' : '✨ Gen Photo'
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleReEnrichProduct(p.id)}
+                        disabled={reEnrichingId === p.id || (p.enrichment_status && ['pending', 'processing'].includes(p.enrichment_status))}
+                        style={{
+                          flex: 1,
+                          background: 'linear-gradient(135deg, rgba(9, 132, 227, 0.2) 0%, rgba(116, 185, 255, 0.2) 100%)',
+                          border: '1px solid rgba(9, 132, 227, 0.4)',
+                          color: '#fff',
+                          fontSize: '0.7rem',
+                          fontWeight: 600,
+                          padding: '6px 8px',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '4px',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        {reEnrichingId === p.id || (p.enrichment_status && ['pending', 'processing'].includes(p.enrichment_status)) ? (
+                          <>
+                            <div className="spinner" style={{ width: '10px', height: '10px', borderTopColor: '#fff' }} />
+                            Enriching...
+                          </>
+                        ) : (
+                          '🧠 Re-Enrich AI'
                         )}
                       </button>
                     </div>
@@ -2098,24 +2146,13 @@ export default function ProductDatabasePage() {
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '12px' }}>
-                  <label className="form-label">Prompt Studio Generator (T2I Prompt)</label>
+                  <label className="form-label" style={{ fontWeight: 600, color: '#60a5fa' }}>✨ Prompt Foto Clean (Clean Photo T2I Prompt)</label>
                   <textarea
                     className="form-textarea"
-                    value={formData.t2i_prompt}
-                    onChange={e => setFormData({ ...formData, t2i_prompt: e.target.value })}
-                    placeholder="Deskripsi visual untuk studio photo generator..."
-                    style={{ minHeight: '60px', fontSize: '0.82rem' }}
-                  />
-                </div>
-
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">Prompt Aksi Video (I2V Action Prompt)</label>
-                  <textarea
-                    className="form-textarea"
-                    value={formData.i2v_action_prompt}
-                    onChange={e => setFormData({ ...formData, i2v_action_prompt: e.target.value })}
-                    placeholder="Petunjuk pergerakan kamera / aksi produk..."
-                    style={{ minHeight: '60px', fontSize: '0.82rem' }}
+                    value={formData.clean_photo_t2i_prompt}
+                    onChange={e => setFormData({ ...formData, clean_photo_t2i_prompt: e.target.value })}
+                    placeholder="Deskripsi visual untuk menghasilkan foto clean berlatar putih..."
+                    style={{ minHeight: '80px', fontSize: '0.82rem', borderColor: 'rgba(96, 165, 250, 0.3)' }}
                   />
                 </div>
 
