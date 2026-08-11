@@ -130,6 +130,8 @@ export const PUT = withTenantContext(async (req, { params }) => {
       for (const [k, v] of Object.entries(updateData)) {
         if (ALLOWED_UPDATE_FIELDS.has(k)) filteredUpdate[k] = v;
       }
+      filteredUpdate.i2v_action_prompt = null;
+      filteredUpdate.t2i_prompt = null;
 
       const updated = await updateProduct(id, filteredUpdate);
       if (!updated) {
@@ -165,6 +167,9 @@ export const PUT = withTenantContext(async (req, { params }) => {
     // packaging compatibility
     if (updateData.packaging_status === 'packaged') updateData.is_in_packaging = 1;
     else if (updateData.packaging_status === 'unpackaged') updateData.is_in_packaging = 0;
+
+    updateData.i2v_action_prompt = null;
+    updateData.t2i_prompt = null;
 
     const updated = await updateProduct(id, updateData);
     if (!updated) return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 });

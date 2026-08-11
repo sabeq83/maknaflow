@@ -24,6 +24,8 @@ export default function ProductDatabasePage() {
   const [inlineAffiliateLinks, setInlineAffiliateLinks] = useState({});
   const [savingAffiliateId, setSavingAffiliateId] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
+  const [productBrandLinks, setProductBrandLinks] = useState([]);
+  const [brandProfiles, setBrandProfiles] = useState([]);
   
   // Form fields for Add/Edit full product
   const [formData, setFormData] = useState({
@@ -111,6 +113,34 @@ export default function ProductDatabasePage() {
   useEffect(() => {
     fetchProducts();
   }, [selectedCategory]);
+
+  useEffect(() => {
+    fetchBrandProfiles();
+  }, []);
+
+  async function fetchBrandProfiles() {
+    try {
+      const res = await fetch('/api/v2/brand-profiles');
+      const data = await res.json();
+      if (data.success) {
+        setBrandProfiles(data.data || []);
+      }
+    } catch (e) {
+      console.error('Failed to fetch brand profiles:', e);
+    }
+  }
+
+  async function fetchProductBrandLinks(productId) {
+    try {
+      const res = await fetch(`/api/v2/products/${productId}/brands`);
+      const data = await res.json();
+      if (data.success) {
+        setProductBrandLinks(data.data || []);
+      }
+    } catch (e) {
+      console.error('Failed to fetch product brand links:', e);
+    }
+  }
 
   // Run search on Enter key
   const handleSearchKeyPress = (e) => {
@@ -703,6 +733,7 @@ export default function ProductDatabasePage() {
     setRawPhotoPreview(null);
     setFormErrors({});
     setRegenerateOnSave(false);
+    fetchProductBrandLinks(product.id);
     setShowAddEditModal(true);
   }
 
@@ -2027,7 +2058,7 @@ export default function ProductDatabasePage() {
                   />
                 </div>
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">Affiliate Link</label>
+                  <label className="form-label" style={{ color: 'var(--text-muted)' }}>Default Affiliate Link (Legacy/Fallback)</label>
                   <input
                     type="text"
                     className="form-input"
@@ -2206,6 +2237,123 @@ export default function ProductDatabasePage() {
                   <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px' }}>AI Enrichment dan Clean Photo dibuat secara otomatis setelah produk disimpan.</p>
                 </div>
               </div>
+
+              {/* Brand Profile Affiliate Links Section (Hanya untuk Edit) */}
+              {editingProduct && (
+                <div style={{ marginTop: '20px', padding: '16px', border: '1px solid var(--border)', borderRadius: '6px', background: 'rgba(255,255,255,0.01)', marginBottom: '16px' }}>
+                  <h4 style={{ margin: '0 0 12px 0', color: 'var(--accent-light)' }}>🔗 Affiliate Links per Brand Profile</h4>
+                  
+                  {/* Daftar link aktif per brand */}
+                  {productBrandLinks.length === 0 ? (
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                      Belum ada brand profile yang terhubung ke produk ini.
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+                      {productBrandLinks.map(link => (
+                        <div key={link.brand_product_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '8px 12px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                          <div>
+                            <div style={{ fontSize: '0.82rem', fontWeight: 600 }}>{link.brand_name}</div>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', wordBreak: 'break-all' }}>{link.affiliate_link}</div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              if (!confirm(`Hapus link affiliate untuk brand ${link.brand_name}?`)) return;
+                              try {
+                                const res = await fetch(`/api/v2/brand-profiles/${link.brand_profile_id}/products?productId=${editingProduct.id}`, {
+                                  method: 'DELETE'
+                                });
+                                const data = await res.json();
+                                if (data.success) {
+                                  showToast(`🗑 Link brand ${link.brand_name} berhasil dihapus.`);
+                                  fetchProductBrandLinks(editingProduct.id);
+                                }
+                              } catch (err) {
+                                showToast(err.message, 'error');
+                              }
+                            }}
+                            style={{ background: 'transparent', border: 'none', color: '#ff7675', fontSize: '0.8rem', cursor: 'pointer', padding: '4px' }}
+                          >
+                            Hapus
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Form tambah/update link brand */}
+                  <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '8px' }}>Tambah / Update Link Brand</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
+                      <select
+                        id="new-link-brand-id"
+                        className="form-input"
+                        style={{ height: '34px', padding: '0 8px', fontSize: '0.8rem' }}
+                      >
+                        <option value="">-- Pilih Brand --</option>
+                        {brandProfiles.map(bp => (
+                          <option key={bp.id} value={bp.id}>{bp.brand_name}</option>
+                        ))}
+                      </select>
+                      <input
+                        id="new-link-tracking-code"
+                        type="text"
+                        placeholder="Tracking Code (Opsional)"
+                        className="form-input"
+                        style={{ height: '34px', fontSize: '0.8rem' }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <input
+                        id="new-link-url"
+                        type="text"
+                        placeholder="Affiliate Link (https://...)"
+                        className="form-input"
+                        style={{ flex: 1, height: '34px', fontSize: '0.8rem' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const brandId = document.getElementById('new-link-brand-id').value;
+                          const affLink = document.getElementById('new-link-url').value;
+                          const trackCode = document.getElementById('new-link-tracking-code').value;
+                          if (!brandId || !affLink.trim()) {
+                            showToast('Brand dan Affiliate Link wajib diisi.', 'error');
+                            return;
+                          }
+                          try {
+                            const res = await fetch(`/api/v2/brand-profiles/${brandId}/products`, {
+                              method: 'PUT',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                productId: editingProduct.id,
+                                affiliateLink: affLink.trim(),
+                                trackingCode: trackCode.trim() || null
+                              })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                              showToast('✅ Link brand berhasil disimpan!');
+                              document.getElementById('new-link-url').value = '';
+                              document.getElementById('new-link-tracking-code').value = '';
+                              fetchProductBrandLinks(editingProduct.id);
+                            } else {
+                              showToast(data.error || 'Gagal menyimpan link', 'error');
+                            }
+                          } catch (err) {
+                            showToast(err.message, 'error');
+                          }
+                        }}
+                        className="btn btn-primary"
+                        style={{ height: '34px', padding: '0 12px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
+                      >
+                        Simpan Link
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid var(--border)' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => { setShowAddEditModal(false); setEditingProduct(null); }}>

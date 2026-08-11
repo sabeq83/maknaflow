@@ -82,6 +82,37 @@ export const POST = withTenantContext(async (request) => {
       createdItemIds.push(itemId);
     }
 
+    // Create campaign product binding if product_id is available
+    const rawProductId = body.product_id || body.target_product_id;
+    let recipeProductId = rawProductId || null;
+    if (!recipeProductId && config_json) {
+      try {
+        const cfg = typeof config_json === 'string' ? JSON.parse(config_json) : config_json;
+        recipeProductId = cfg?.product_id || cfg?.target_product_id || null;
+      } catch (_) {}
+    }
+
+    if (recipeProductId) {
+      try {
+        const { createOrUpdateCampaignProductBinding } = await import('@/lib/campaign-product-binding');
+        const { getActiveTenantId } = await import('@/lib/tenant-context');
+        const tenantId = getActiveTenantId();
+
+        await createOrUpdateCampaignProductBinding({
+          tenantId,
+          sourceType: 'recipe',
+          sourceCampaignId: campaignId,
+          sourceItemId: null,
+          brandProfileId: brand_profile_id || null,
+          productId: recipeProductId,
+          explicitAffiliateOverride: null,
+          affiliateRequired: false
+        });
+      } catch (bindErr) {
+        console.error('[Recipe Ingest Binding Warning]:', bindErr.message);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Kampanye resep berhasil dibuat dan dimasukkan ke antrean.',

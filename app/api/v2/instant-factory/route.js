@@ -80,6 +80,8 @@ export const POST = withTenantContext(async (req, _context, user) => {
     let finalProductDescription = productDescription;
     let finalProductUsp = '';
 
+    let resolvedProductId = target_product_id;
+
     // If URL is provided, scrape and extract product data synchronously
     if (productUrl) {
       try {
@@ -131,6 +133,7 @@ export const POST = withTenantContext(async (req, _context, user) => {
           extractedText
         );
         console.log(`[Instant Factory] Extracted and saved product ID: ${newProductId}`);
+        resolvedProductId = newProductId;
       } catch (err) {
         console.error('[Instant Factory] Failed scraping/extracting product URL:', err);
       }
@@ -173,6 +176,28 @@ export const POST = withTenantContext(async (req, _context, user) => {
 
     // 1. Simpan ke database (Pending)
     await createInstantCampaign(campaignData, configData);
+
+    // Create campaign product binding snapshot
+    try {
+      const { getActiveTenantId } = await import('@/lib/tenant-context');
+      const { createOrUpdateCampaignProductBinding } = await import('@/lib/campaign-product-binding');
+      const tenantId = getActiveTenantId();
+
+      if (resolvedProductId) {
+        await createOrUpdateCampaignProductBinding({
+          tenantId,
+          sourceType: 'instant',
+          sourceCampaignId: id,
+          sourceItemId: null,
+          brandProfileId: brandProfileId || null,
+          productId: resolvedProductId,
+          explicitAffiliateOverride: null,
+          affiliateRequired: false
+        });
+      }
+    } catch (bindErr) {
+      console.error('[Instant Factory Binding Warning]:', bindErr.message);
+    }
 
     if (status === 'draft') {
       return NextResponse.json({ success: true, campaignId: id, status: 'draft' }, { status: 201 });

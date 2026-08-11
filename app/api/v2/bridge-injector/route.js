@@ -118,6 +118,36 @@ export const POST = withTenantContext(async (request) => {
       }
       await Promise.all(promises);
 
+      // Create campaign bindings for bulk items
+      try {
+        const { createOrUpdateCampaignProductBinding } = await import('@/lib/campaign-product-binding');
+        const tenantId = getActiveTenantId();
+
+        const insertedItems = await db.prepare('SELECT id, target_product_id, product_url FROM bridge_injector_items WHERE campaign_id = ? ORDER BY id ASC').all(campaignId);
+        for (const item of insertedItems) {
+          let productId = item.target_product_id;
+          if (!productId && item.product_url) {
+            const pRow = await db.prepare('SELECT id FROM product_extractions WHERE tenant_id = ? AND source_url = ? LIMIT 1').get(tenantId, item.product_url.trim());
+            if (pRow) productId = pRow.id;
+          }
+
+          if (productId) {
+            await createOrUpdateCampaignProductBinding({
+              tenantId,
+              sourceType: 'bridge',
+              sourceCampaignId: campaignId,
+              sourceItemId: item.id,
+              brandProfileId: brand_profile_id || null,
+              productId,
+              explicitAffiliateOverride: null,
+              affiliateRequired: false
+            });
+          }
+        }
+      } catch (bindErr) {
+        console.error('[Bridge Bulk Ingest Binding Warning]:', bindErr.message);
+      }
+
       logToBridgeInjector(`[${campaignId}] Sukses mengimpor ${items.length} baris ke bridge_injector_items. Status kampanye diatur ke ${initialStatus}.`);
 
       return NextResponse.json({
@@ -155,6 +185,27 @@ export const POST = withTenantContext(async (request) => {
       account_name || null,
       brand_profile_id || null
     );
+
+    // Create campaign binding for single campaign
+    try {
+      const { createOrUpdateCampaignProductBinding } = await import('@/lib/campaign-product-binding');
+      const tenantId = getActiveTenantId();
+
+      if (target_product_id) {
+        await createOrUpdateCampaignProductBinding({
+          tenantId,
+          sourceType: 'bridge',
+          sourceCampaignId: campaignId,
+          sourceItemId: campaignId, // single mode uses campaign ID as item ID
+          brandProfileId: brand_profile_id || null,
+          productId: target_product_id,
+          explicitAffiliateOverride: null,
+          affiliateRequired: false
+        });
+      }
+    } catch (bindErr) {
+      console.error('[Bridge Single Ingest Binding Warning]:', bindErr.message);
+    }
 
     // 2. Selesaikan polymorphic data produk
     logToBridgeInjector(`[${campaignId}] Memetakan data produk dengan mode sourcing: ${bridging_mode}...`);
@@ -203,16 +254,16 @@ export const POST = withTenantContext(async (request) => {
     fs.mkdirSync(outputDir, { recursive: true });
     
     const mdContent = `# ${campaign_name} - Naskah Bridging Product
-
+ 
 ## Klip 1: Hook (Original)
 ${injected_vo_1}
-
+ 
 ## Klip 2: Product (New Injected)
 ${injected_vo_2}
-
+ 
 ## Klip 3: Continuation
 ${injected_vo_3}
-
+ 
 ## Klip 4: CTA
 ${injected_vo_4}
 `;

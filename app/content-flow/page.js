@@ -1741,6 +1741,35 @@ function ContentFlowHubPageContent() {
                               )}
                             </div>
 
+                            {/* Lineage & Affiliate Source info */}
+                            <div style={{ background: '#05070d', padding: '12px 14px', borderRadius: '10px', border: '1px solid #1e293b', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '11px', color: '#9ca3af', marginTop: '12px' }}>
+                              <span style={{ fontSize: '11px', color: '#38bdf8', fontWeight: 700, display: 'block' }}>🛡️ Lineage & Affiliate Source Info:</span>
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                                <div>
+                                  <span style={{ display: 'block', color: '#64748b', fontSize: '10px' }}>Affiliate Source:</span>
+                                  <strong style={{ color: '#e2e8f0', textTransform: 'uppercase' }}>{activeItem.affiliate_source || 'legacy'}</strong>
+                                </div>
+                                <div>
+                                  <span style={{ display: 'block', color: '#64748b', fontSize: '10px' }}>Affiliate Status:</span>
+                                  <strong style={{ color: '#e2e8f0', textTransform: 'uppercase' }}>{activeItem.affiliate_status || 'missing'}</strong>
+                                </div>
+                                <div>
+                                  <span style={{ display: 'block', color: '#64748b', fontSize: '10px' }}>Product ID:</span>
+                                  <strong style={{ color: '#e2e8f0' }}>{activeItem.product_id || '-'}</strong>
+                                </div>
+                                <div>
+                                  <span style={{ display: 'block', color: '#64748b', fontSize: '10px' }}>Brand Profile ID:</span>
+                                  <strong style={{ color: '#e2e8f0' }}>{activeItem.brand_profile_id || '-'}</strong>
+                                </div>
+                                {activeItem.affiliate_resolved_at && (
+                                  <div style={{ gridColumn: 'span 2' }}>
+                                    <span style={{ display: 'block', color: '#64748b', fontSize: '10px' }}>Resolved At:</span>
+                                    <strong style={{ color: '#e2e8f0' }}>{new Date(activeItem.affiliate_resolved_at).toLocaleString('id-ID')}</strong>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
                             {/* Caption Panel */}
                             <div style={{ marginTop: '4px' }}>
                               <span style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Caption:</span>

@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.13.5 — Brand-Product Affiliate Routing & Lineage to Content Flow Integration (11/08/2026)
+- Implement Brand-Product junction table & tenant-scoped precedence affiliate resolution
+- Add immutable campaign product binding snapshots across all 9 workflows
+- Integrate lineage propagation & binding lookup into Content Flow pipeline and UI
+- Add comprehensive verification test suites
+
 ## V2.13.4 — Perbaikan UI Lock Status Produk (11/08/2026)
 - Mengubah extraction_status menjadi completed di akhir enrichProduct
 - Membuka kunci card UI secara otomatis setelah AI Enrichment selesai

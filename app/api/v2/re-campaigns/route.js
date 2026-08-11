@@ -265,6 +265,35 @@ export const POST = withTenantContext(async (request, _context, user) => {
     });
     await addReCampaignItems(id, urls);
 
+    // Create campaign product bindings
+    try {
+      const { pgQuery } = await import('../../../../lib/db-pg');
+      const { createOrUpdateCampaignProductBinding } = await import('../../../../lib/campaign-product-binding');
+      const tenantId = user.tenantId || 'default_tenant';
+
+      if (target_product_id) {
+        const insertedItems = (await pgQuery(
+          'SELECT id FROM re_campaign_items WHERE campaign_id = $1 ORDER BY id ASC',
+          [id]
+        )).rows;
+
+        for (const item of insertedItems) {
+          await createOrUpdateCampaignProductBinding({
+            tenantId,
+            sourceType: 're',
+            sourceCampaignId: id,
+            sourceItemId: item.id,
+            brandProfileId: brand_profile_id || null,
+            productId: target_product_id,
+            explicitAffiliateOverride: null,
+            affiliateRequired: false
+          });
+        }
+      }
+    } catch (bindErr) {
+      console.error('[RE Campaign Binding Warning]:', bindErr.message);
+    }
+
     return NextResponse.json({ campaign: { id, campaign_name, status: status || 'running' } }, { status: 201 });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });

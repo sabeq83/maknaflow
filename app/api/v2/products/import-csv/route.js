@@ -72,6 +72,8 @@ export const POST = withTenantContext(async (req) => {
     const file = formData.get('file');
     const duplicateMode = formData.get('duplicate_mode') || 'update_missing'; // 'update_missing' | 'skip_existing'
     const photoProvider = formData.get('photo_provider') || 'system_default';
+    const brandProfileId = formData.get('brand_profile_id') || null;
+    const affiliateMode = formData.get('affiliate_mode') || 'brand_product'; // 'brand_product' | 'legacy_product'
 
     if (!file) {
       return NextResponse.json({ success: false, error: 'File is required' }, { status: 400 });
@@ -88,7 +90,7 @@ export const POST = withTenantContext(async (req) => {
     }
 
     appendToLog(`========================================================================`, tenantId);
-    appendToLog(`[INPUT] Impor CSV/Excel: ${rawRows.length} baris ditemukan. Mode: ${duplicateMode}, Provider: ${photoProvider}`, tenantId);
+    appendToLog(`[INPUT] Impor CSV/Excel: ${rawRows.length} baris ditemukan. Mode: ${duplicateMode}, Provider: ${photoProvider}, Brand: ${brandProfileId || 'None'}, AffMode: ${affiliateMode}`, tenantId);
 
     // Map headers ke canonical
     const parsedRows = rawRows.map((rawRow, idx) => {
@@ -125,6 +127,14 @@ export const POST = withTenantContext(async (req) => {
     let skippedCount = 0;
 
     await withPgTransaction(async (client) => {
+      // Validasi Brand Profile jika disuplai
+      if (brandProfileId) {
+        const brandRes = await client.query('SELECT id FROM brand_profiles WHERE id = $1 AND tenant_id = $2', [brandProfileId, tenantId]);
+        if (brandRes.rowCount === 0) {
+          throw new Error(`Brand Profile dengan ID ${brandProfileId} tidak ditemukan.`);
+        }
+      }
+
       for (const row of validRows) {
         const {
           product_name, product_description, source_url,
@@ -150,6 +160,19 @@ export const POST = withTenantContext(async (req) => {
           const dup = dupResult.rows[0];
 
           if (duplicateMode === 'skip_existing') {
+            // Tetap re-map link ke brand profile jika modenya skip_existing tetapi link disuplai
+            if (affiliate_link && brandProfileId && affiliateMode === 'brand_product') {
+              const brandProductId = crypto.randomUUID();
+              await client.query(`
+                INSERT INTO brand_products (
+                  id, tenant_id, brand_profile_id, product_id, affiliate_link, is_active, created_at, updated_at
+                ) VALUES ($1, $2, $3, $4, $5, TRUE, NOW(), NOW())
+                ON CONFLICT (tenant_id, brand_profile_id, product_id) DO UPDATE SET
+                  affiliate_link = EXCLUDED.affiliate_link,
+                  is_active = TRUE,
+                  updated_at = NOW()
+              `, [brandProductId, tenantId, brandProfileId, dup.id, affiliate_link.trim()]);
+            }
             skippedCount++;
             continue;
           }
@@ -161,10 +184,29 @@ export const POST = withTenantContext(async (req) => {
             updates.photo_status = 'approved';
             updates.extraction_status = 'pending';
           }
-          if (affiliate_link) updates.affiliate_link = affiliate_link;
           if (page) updates.page = page;
-          if (!dup.raw_photo_url && product_description) updates.product_description = product_description;
-          if (!dup.raw_photo_url && product_description) updates.raw_description = product_description;
+          if (!dup.raw_photo_url && product_description) {
+            updates.product_description = product_description;
+            updates.raw_description = product_description;
+          }
+
+          // Pemetaan affiliate link pada mode update
+          if (affiliate_link) {
+            if (brandProfileId && affiliateMode === 'brand_product') {
+              const brandProductId = crypto.randomUUID();
+              await client.query(`
+                INSERT INTO brand_products (
+                  id, tenant_id, brand_profile_id, product_id, affiliate_link, is_active, created_at, updated_at
+                ) VALUES ($1, $2, $3, $4, $5, TRUE, NOW(), NOW())
+                ON CONFLICT (tenant_id, brand_profile_id, product_id) DO UPDATE SET
+                  affiliate_link = EXCLUDED.affiliate_link,
+                  is_active = TRUE,
+                  updated_at = NOW()
+              `, [brandProductId, tenantId, brandProfileId, dup.id, affiliate_link.trim()]);
+            } else {
+              updates.affiliate_link = affiliate_link.trim();
+            }
+          }
 
           if (Object.keys(updates).length > 0) {
             // Jangan timpa foto yang sudah approved
@@ -176,7 +218,7 @@ export const POST = withTenantContext(async (req) => {
             );
             updatedCount++;
           } else {
-            skippedCount++;
+            updatedCount++; // Dihitung updated karena link brand profil mungkin ter-update
           }
           continue;
         }
@@ -184,6 +226,7 @@ export const POST = withTenantContext(async (req) => {
         // Insert produk baru — data disimpan dulu, AI dikerjakan oleh worker
         const productId = crypto.randomUUID();
         const isUrl = (source_url && source_url.startsWith('http')) ? 1 : 0;
+        const legacyAffLink = (affiliate_link && (!brandProfileId || affiliateMode === 'legacy_product')) ? affiliate_link.trim() : null;
 
         await client.query(`
           INSERT INTO product_extractions (
@@ -211,10 +254,20 @@ export const POST = withTenantContext(async (req) => {
           normalizedUrl,
           raw_photo_source_url || null,  // scraped_image_url untuk backward compat
           null,                           // raw_photo_url diisi worker setelah download
-          affiliate_link || null,
+          legacyAffLink,
           page || null,
           photoProvider !== 'system_default' ? photoProvider : null
         ]);
+
+        // Hubungkan brand link untuk produk baru jika opsinya menyala
+        if (affiliate_link && brandProfileId && affiliateMode === 'brand_product') {
+          const brandProductId = crypto.randomUUID();
+          await client.query(`
+            INSERT INTO brand_products (
+              id, tenant_id, brand_profile_id, product_id, affiliate_link, is_active, created_at, updated_at
+            ) VALUES ($1, $2, $3, $4, $5, TRUE, NOW(), NOW())
+          `, [brandProductId, tenantId, brandProfileId, productId, affiliate_link.trim()]);
+        }
 
         importedCount++;
       }
