@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.13.4 — Perbaikan UI Lock Status Produk (11/08/2026)
+- Mengubah extraction_status menjadi completed di akhir enrichProduct
+- Membuka kunci card UI secara otomatis setelah AI Enrichment selesai
+
 ## V2.13.3 — Fitur Re-Enrichment AI dan Perbaikan Prompt Kemasan (11/08/2026)
 - Mengubah tombol RE-Generate Truths menjadi Re-Enrich AI asinkron
 - Menghapus prompt visual kampanye t2i dan i2v yang usang
