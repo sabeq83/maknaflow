@@ -98,6 +98,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
   const [rescheduleModalJob, setRescheduleModalJob] = useState(null);
   const [newScheduleTime, setNewScheduleTime] = useState('');
   const [submittingReschedule, setSubmittingReschedule] = useState(false);
+  const [syncingJobId, setSyncingJobId] = useState(null);
 
   // Toast
   const [toastMsg, setToastMsg] = useState('');
@@ -424,6 +425,34 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
       }
     } catch (err) {
       showToast(`Error: ${err.message} ❌`);
+    }
+  };
+
+  // Sync Status & Canonical URL from Meta Graph API
+  const handleSyncMetaPost = async (jobId) => {
+    setSyncingJobId(jobId);
+    try {
+      const res = await fetch(`/api/v2/publishing/jobs/${jobId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'sync-meta' })
+      });
+      const json = await res.json();
+      if (json.success) {
+        showToast('Status & URL postingan berhasil disinkronkan dari Meta! 🟢');
+        fetchJobs();
+        if (selectedJobId === jobId) {
+          fetch(`/api/v2/publishing/jobs/${jobId}`)
+            .then(r => r.json())
+            .then(d => { if (d.success) setSelectedJobDetail(d.data); });
+        }
+      } else {
+        showToast(`Gagal sinkronisasi Meta: ${json.error || 'Terjadi kesalahan'} ❌`);
+      }
+    } catch (err) {
+      showToast('Gagal terhubung ke server saat sinkronisasi Meta ❌');
+    } finally {
+      setSyncingJobId(null);
     }
   };
 
@@ -839,6 +868,32 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                                   Retry
                                 </button>
                               )}
+                              {(job.external_post_id || job.status === 'published') && (
+                                <button
+                                  disabled={syncingJobId === job.id}
+                                  onClick={() => handleSyncMetaPost(job.id)}
+                                  title="Sinkronkan status dan URL postingan dari Meta Graph API"
+                                  style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid #3b82f6', color: '#93c5fd', padding: '5px 8px', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontWeight: 600 }}
+                                >
+                                  {syncingJobId === job.id ? '⏳' : '🔄 Sync'}
+                                </button>
+                              )}
+                              {job.external_permalink && (
+                                <a
+                                  href={job.external_permalink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  title={`Buka postingan di ${job.platform === 'instagram' ? 'Instagram' : 'Facebook'}`}
+                                  style={{
+                                    background: job.platform === 'instagram' ? 'rgba(236,72,153,0.2)' : 'rgba(37,99,235,0.2)',
+                                    border: `1px solid ${job.platform === 'instagram' ? '#ec4899' : '#3b82f6'}`,
+                                    color: job.platform === 'instagram' ? '#f472b6' : '#93c5fd',
+                                    padding: '5px 8px', borderRadius: 6, fontSize: 11, textDecoration: 'none', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 2
+                                  }}
+                                >
+                                  ↗️ {job.platform === 'instagram' ? 'IG' : 'FB'}
+                                </a>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -886,20 +941,41 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
               </div>
 
               {selectedJobDetail.external_post_id && (
-                <div style={{ marginBottom: 12 }}>
-                  <div style={{ fontSize: 11, color: '#637087', fontWeight: 800, textTransform: 'uppercase' }}>External Meta ID</div>
-                  <div style={{ color: '#60a5fa', fontSize: 11, wordBreak: 'break-all', marginTop: 2 }}>
-                    #{selectedJobDetail.external_post_id}
+                <div style={{ marginBottom: 12, padding: 10, background: '#0b111d', border: '1px solid #1e293b', borderRadius: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ fontSize: 11, color: '#637087', fontWeight: 800, textTransform: 'uppercase' }}>External Meta Post</div>
+                    <button
+                      type="button"
+                      disabled={syncingJobId === selectedJobDetail.id}
+                      onClick={() => handleSyncMetaPost(selectedJobDetail.id)}
+                      style={{
+                        background: 'rgba(59,130,246,0.2)', border: '1px solid #3b82f6', color: '#93c5fd',
+                        fontSize: 10, fontWeight: 700, padding: '3px 7px', borderRadius: 4, cursor: 'pointer'
+                      }}
+                    >
+                      {syncingJobId === selectedJobDetail.id ? '⏳ Sinkronkan...' : '🔄 Sinkronkan URL'}
+                    </button>
                   </div>
-                  {selectedJobDetail.external_permalink && (
+                  <div style={{ color: '#60a5fa', fontSize: 11, wordBreak: 'break-all', marginTop: 4 }}>
+                    ID: #{selectedJobDetail.external_post_id}
+                  </div>
+                  {selectedJobDetail.external_permalink ? (
                     <a
                       href={selectedJobDetail.external_permalink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ color: '#a78bfa', fontSize: 11, textDecoration: 'underline', marginTop: 2, display: 'inline-block' }}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 8,
+                        background: selectedJobDetail.platform === 'instagram' ? 'linear-gradient(135deg, #ec4899, #8b5cf6)' : '#2563eb',
+                        color: '#fff', fontSize: 11, fontWeight: 700, padding: '6px 12px', borderRadius: 6, textDecoration: 'none'
+                      }}
                     >
-                      Buka Postingan Eksternal ↗
+                      <span>↗️ Buka di {selectedJobDetail.platform === 'instagram' ? 'Instagram' : 'Facebook'}</span>
                     </a>
+                  ) : (
+                    <div style={{ color: '#94a3b8', fontSize: 10, marginTop: 4 }}>
+                      Klik "Sinkronkan URL" untuk memuat link kanonikal postingan.
+                    </div>
                   )}
                 </div>
               )}

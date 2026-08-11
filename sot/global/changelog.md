@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.13.15 — Facebook Live Mode Publishing and Meta Post Canonical URL Sync (11/08/2026)
+- Dukungan penuh publikasi langsung Facebook Live (Published Mode) tanpa blokir safety guard
+- Fungsi fetchMetaPostDetails untuk menarik URL kanonikal dan status resmi dari Meta Graph API
+- Action sync-meta di PATCH /api/v2/publishing/jobs/[id]
+- Tombol Sinkronkan URL Meta dan tautan Buka di Facebook pada Publishing Scheduler
+
 ## V2.13.14 — Fix Media Files Scanning and Auto-Resolve in Publishing Scheduler (11/08/2026)
 - Export getContentFlowItemByVideoId di contentflow-repository
 - Dukungan multi-host WebDAV fallback scanner di /api/content-flow/media-files

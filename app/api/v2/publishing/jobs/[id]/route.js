@@ -5,8 +5,13 @@ import {
   getPublishingJobById,
   reschedulePublishingJob,
   cancelPublishingJob,
-  approvePublishingJob
+  approvePublishingJob,
+  getPublishingAccountById,
+  markPublishingResult
 } from '@/lib/publishing-repository';
+import { fetchMetaPostDetails } from '@/lib/meta-publisher';
+import { decryptSecret } from '@/lib/encrypted-secret';
+import { pgQuery } from '@/lib/db-pg';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,9 +57,65 @@ export const PATCH = withTenantContext(async (request, { params }, user) => {
       result = await cancelPublishingJob(tenantId, id, reason);
     } else if (action === 'approve') {
       result = await approvePublishingJob(tenantId, id, user?.id || 'admin');
+    } else if (action === 'sync-meta') {
+      const job = await getPublishingJobById(tenantId, id);
+      if (!job) {
+        return NextResponse.json({ success: false, error: 'Job tidak ditemukan.' }, { status: 404 });
+      }
+      if (!job.external_post_id) {
+        return NextResponse.json({ success: false, error: 'Job ini belum memiliki ID postingan Meta. Tunggu hingga job selesai dieksekusi.' }, { status: 400 });
+      }
+
+      const account = await getPublishingAccountById(tenantId, job.account_id, true);
+      if (!account || !account.token_ciphertext) {
+        return NextResponse.json({ success: false, error: 'Akun publishing atau token tidak ditemukan.' }, { status: 400 });
+      }
+
+      const plainToken = decryptSecret(account.token_ciphertext);
+      const metaDetail = await fetchMetaPostDetails({
+        token: plainToken,
+        platform: job.platform,
+        externalPostId: job.external_post_id
+      });
+
+      // Update job di database
+      await markPublishingResult(tenantId, id, {
+        externalPermalink: metaDetail.permalink,
+        status: metaDetail.isPublished ? 'published' : job.status
+      });
+
+      // Sync ke Content Flow item
+      if (job.content_id) {
+        if (job.platform === 'facebook') {
+          await pgQuery(`
+            UPDATE content_flow_items
+            SET 
+              permalink_facebook = $1,
+              facebook_status = CASE WHEN $2 = true THEN 'Published' ELSE facebook_status END,
+              updated_at = CURRENT_TIMESTAMP
+            WHERE video_id = $3 AND tenant_id = $4
+          `, [metaDetail.permalink, metaDetail.isPublished, job.content_id, tenantId]);
+        } else if (job.platform === 'instagram') {
+          await pgQuery(`
+            UPDATE content_flow_items
+            SET 
+              permalink_instagram = $1,
+              instagram_status = CASE WHEN $2 = true THEN 'Published' ELSE instagram_status END,
+              updated_at = CURRENT_TIMESTAMP
+            WHERE video_id = $3 AND tenant_id = $4
+          `, [metaDetail.permalink, metaDetail.isPublished, job.content_id, tenantId]);
+        }
+      }
+
+      result = {
+        jobId: id,
+        postId: metaDetail.postId,
+        permalink: metaDetail.permalink,
+        isPublished: metaDetail.isPublished
+      };
     } else {
       return NextResponse.json(
-        { success: false, error: `Action '${action}' tidak dikenal. Pilih: 'reschedule', 'cancel', atau 'approve'.` },
+        { success: false, error: `Action '${action}' tidak dikenal. Pilih: 'reschedule', 'cancel', 'approve', atau 'sync-meta'.` },
         { status: 400 }
       );
     }
