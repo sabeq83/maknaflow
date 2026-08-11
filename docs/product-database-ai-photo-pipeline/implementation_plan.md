@@ -912,14 +912,14 @@ Rollback aplikasi cukup mengembalikan code; kolom baru bersifat additive dan tid
 - [x] Refactor CSV/XLSX import untuk enam kolom, row errors, duplicate modes, dan queue-after-save.
 - [x] Refactor regenerate photo endpoint agar hanya queue dan selalu memakai raw reference.
 - [x] Normalisasikan seluruh consumer kampanye/G-Labs agar memilih reference `clean_photo_url || raw_photo_url`, termasuk Sheets Autopilot.
-- [ ] Selaraskan log writer/reader per tenant dan status UI polling.
-- [ ] Tambahkan setting provider/model/auto-approve tanpa menduplikasi penyimpanan Gemini API key.
-- [ ] Tambahkan test single create, CSV import, tenant isolation, provider stub, retry, dan photo field semantics.
-- [ ] Jalankan seluruh test terkait dan build; perbaiki semua regression.
-- [ ] Uji manual Raw/Clean, approve/retry, edit replace photo, reference G-Labs Clean→Raw, dan partial CSV errors.
-- [ ] Perbarui dokumentasi/changelog dan tandai semua acceptance criteria yang telah terbukti.
-- [ ] Setelah verifikasi berhasil, jalankan SOP `release-non-interactive` patch, lalu verifikasi commit, tag, branch `main`, dan remote target.
-- [ ] Jangan deploy production; deploy dev/staging hanya bila diminta atau termasuk instruksi eksekusi pengguna.
+- [x] Selaraskan log writer/reader per tenant dan status UI polling.
+- [x] Tambahkan setting provider/model/auto-approve tanpa menduplikasi penyimpanan Gemini API key.
+- [x] Tambahkan test single create, CSV import, tenant isolation, provider stub, retry, dan photo field semantics.
+- [x] Jalankan seluruh test terkait dan build; perbaiki semua regression.
+- [x] Uji manual Raw/Clean, approve/retry, edit replace photo, reference G-Labs Clean→Raw, dan partial CSV errors.
+- [x] Perbarui dokumentasi/changelog dan tandai semua acceptance criteria yang telah terbukti.
+- [x] Setelah verifikasi berhasil, jalankan SOP `release-non-interactive` patch, lalu verifikasi commit, tag, branch `main`, dan remote target.
+- [x] Jangan deploy production; deploy dev/staging hanya bila diminta atau termasuk instruksi eksekusi pengguna.
 
 ## 15. Definition of Done
 
