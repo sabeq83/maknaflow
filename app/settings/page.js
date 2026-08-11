@@ -87,6 +87,9 @@ export default function SettingsPage() {
   const [savingFb, setSavingFb] = useState(false);
   const [testingFb, setTestingFb] = useState(false);
   const [fbTestResult, setFbTestResult] = useState(null);
+  const [discoveredPages, setDiscoveredPages] = useState([]);
+  const [selectedPageIds, setSelectedPageIds] = useState([]);
+  const [discoveringPages, setDiscoveringPages] = useState(false);
 
   // Marketplace Scraper Settings
   const [scraperUseCdp, setScraperUseCdp] = useState(true);
@@ -193,6 +196,26 @@ export default function SettingsPage() {
       setMaskedFbToken(data.data.fb_page_token || '');
       setHasFbToken(data.data.has_fb_token);
       setFbServerUrl(data.data.fb_server_url || '');
+
+      const initialSelected = (data.data.fb_page_ids || data.data.fb_page_id || '')
+        .split(',')
+        .map(id => id.trim())
+        .filter(Boolean);
+      setSelectedPageIds(initialSelected);
+
+      if (data.data.has_fb_token) {
+        fetch('/api/settings/facebook-pages')
+          .then(r => r.json())
+          .then(res => {
+            if (res.success && Array.isArray(res.pages)) {
+              setDiscoveredPages(res.pages);
+              if (initialSelected.length === 0 && res.pages.length > 0) {
+                setSelectedPageIds(res.pages.map(p => p.id));
+              }
+            }
+          })
+          .catch(() => {});
+      }
       setScraperUseCdp(true);
       setScraperChromeProfile(data.data.scraper_chrome_profile || 'Default');
       setYtdlpCookiesFromBrowser(data.data.ytdlp_cookies_from_browser || 'none');
@@ -240,13 +263,39 @@ export default function SettingsPage() {
     }
   }
 
+  async function discoverFacebookPages(overrideToken = null) {
+    setDiscoveringPages(true);
+    try {
+      const tokenToUse = overrideToken || fbPageToken;
+      const res = await fetch('/api/settings/facebook-pages', {
+        method: tokenToUse ? 'POST' : 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        ...(tokenToUse ? { body: JSON.stringify({ token: tokenToUse }) } : {})
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.pages) && data.pages.length > 0) {
+        setDiscoveredPages(data.pages);
+        if (selectedPageIds.length === 0) {
+          setSelectedPageIds(data.pages.map(p => p.id));
+        }
+        showToast(`Berhasil menemukan ${data.pages.length} Halaman Facebook / IG!`, 'success');
+      } else {
+        showToast(data.error || 'Tidak ada Halaman Facebook yang ditemukan untuk token ini.', 'error');
+      }
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+    setDiscoveringPages(false);
+  }
+
   async function saveFbSettings() {
     setSavingFb(true);
     try {
+      const activeIds = selectedPageIds.filter(Boolean);
       const body = { 
-        fb_page_id: fbPageId,
-        fb_page_ids: fbPageIds,
-        fb_server_url: fbServerUrl
+        fb_page_id: activeIds.length > 0 ? activeIds[0] : '',
+        fb_page_ids: activeIds.join(','),
+        fb_server_url: fbServerUrl.trim()
       };
       if (fbPageToken) body.fb_page_token = fbPageToken;
 
@@ -257,7 +306,20 @@ export default function SettingsPage() {
       });
       const data = await res.json();
       if (data.success) {
-        showToast('Konfigurasi Facebook Page disimpan!');
+        // Sync selected pages to publishing_accounts
+        if (discoveredPages.length > 0) {
+          const selectedPagesToSave = discoveredPages.filter(p => selectedPageIds.includes(p.id));
+          await fetch('/api/v2/publishing/accounts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              token: fbPageToken || undefined,
+              pages: selectedPagesToSave
+            })
+          }).catch(err => console.warn('[Publishing Accounts Batch Save Warning]', err));
+        }
+
+        showToast('Konfigurasi Meta & Halaman Publikasi berhasil disimpan!');
         setFbPageToken('');
         setEditingFb(false);
         fetchSettings();
@@ -274,9 +336,10 @@ export default function SettingsPage() {
     setTestingFb(true);
     setFbTestResult(null);
     try {
+      const activeIds = selectedPageIds.filter(Boolean);
       const body = { 
-        fb_page_id: fbPageId,
-        fb_page_ids: fbPageIds
+        fb_page_id: activeIds.length > 0 ? activeIds[0] : '',
+        fb_page_ids: activeIds.join(',')
       };
       if (fbPageToken) body.fb_page_token = fbPageToken;
 
@@ -1850,14 +1913,102 @@ export default function SettingsPage() {
                 )}
               </div>
 
-              <div className="form-group" style={{ marginBottom: '16px', marginTop: '12px' }}>
-                <label className="form-label">Facebook Page IDs (Opsional, pisahkan dengan koma)</label>
-                <input
-                  className="form-input"
-                  placeholder="Misal: 1116771044860610, 343532836260751"
-                  value={fbPageIds}
-                  onChange={e => setFbPageIds(e.target.value)}
-                />
+              {/* Auto-Discovery Section & Daftar Halaman Interaktif dengan Toggle Slide */}
+              <div style={{
+                marginTop: '16px', marginBottom: '16px', padding: '14px',
+                background: 'rgba(0,0,0,0.25)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: 8 }}>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                      📑 Daftar Halaman Terhubung (Auto-Discovery)
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                      Pindai otomatis semua Facebook Page dan akun Instagram Bisnis yang dikelola oleh token Anda.
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-secondary"
+                    onClick={() => discoverFacebookPages()}
+                    disabled={discoveringPages || (!hasFbToken && !fbPageToken)}
+                    style={{ whiteSpace: 'nowrap' }}
+                  >
+                    {discoveringPages ? '⏳ Memindai...' : '🔍 Pindai & Muat Halaman'}
+                  </button>
+                </div>
+
+                {discoveredPages.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {discoveredPages.map(page => {
+                      const isSelected = selectedPageIds.includes(page.id);
+                      return (
+                        <div
+                          key={page.id}
+                          style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            padding: '10px 14px',
+                            background: isSelected ? 'rgba(59, 130, 246, 0.12)' : 'var(--bg-glass)',
+                            borderRadius: 'var(--radius-xs)',
+                            border: `1px solid ${isSelected ? 'var(--accent, #3b82f6)' : 'var(--border)'}`,
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <span style={{ fontSize: '1.3rem' }}>📘</span>
+                            <div>
+                              <div style={{ fontWeight: 600, fontSize: '0.84rem', color: '#fff' }}>
+                                {page.name}
+                              </div>
+                              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                                ID: <code style={{ color: '#93c5fd' }}>{page.id}</code> · {page.category || 'Facebook Page'}
+                                {page.instagram && (
+                                  <span style={{ marginLeft: 8, color: '#f472b6', fontWeight: 600 }}>
+                                    📸 @{page.instagram.username || page.instagram.id}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Toggle Slide ON/OFF Switch */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: isSelected ? '#34d399' : '#64748b' }}>
+                              {isSelected ? 'ON' : 'OFF'}
+                            </span>
+                            <div
+                              onClick={() => {
+                                if (isSelected) setSelectedPageIds(selectedPageIds.filter(id => id !== page.id));
+                                else setSelectedPageIds([...selectedPageIds, page.id]);
+                              }}
+                              style={{
+                                position: 'relative', width: '46px', height: '24px', borderRadius: '12px',
+                                backgroundColor: isSelected ? 'var(--accent, #3b82f6)' : '#334155',
+                                cursor: 'pointer', transition: 'background-color 0.25s ease'
+                              }}
+                            >
+                              <div style={{
+                                position: 'absolute', top: '2px',
+                                left: isSelected ? '24px' : '2px',
+                                width: '20px', height: '20px', borderRadius: '50%',
+                                backgroundColor: '#ffffff', transition: 'left 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                              }} />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', padding: '12px' }}>
+                    {hasFbToken ? (
+                      <span>Halaman belum dimuat. Klik tombol <strong>"🔍 Pindai & Muat Halaman"</strong> di atas.</span>
+                    ) : (
+                      <span>Masukkan Access Token di atas lalu klik tombol <strong>"🔍 Pindai & Muat Halaman"</strong>.</span>
+                    )}
+                  </div>
+                )}
               </div>
 
               {fbTestResult && (

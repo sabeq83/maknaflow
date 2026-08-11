@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.13.9 — Publishing Scheduler & Meta Page Auto-Discovery Enhancements (11/08/2026)
+- Auto-discovery dan multi-select toggle ON/OFF Facebook Page & Instagram di menu Settings
+- Live search combobox Video ID dan autoload data media/caption di Publishing Scheduler
+- Auto-sync akun Meta ke tabel publishing_accounts
+
 ## V2.13.8 — Fix product visual rendering lock overlay and heal stale processing status (11/08/2026)
 - Fix legacy extraction_status lock overlay on products page
 - Add self-healing background recovery for stale product processing jobs

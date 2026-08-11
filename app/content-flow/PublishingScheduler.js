@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 
 const ClockIcon = ({ style }) => (
   <svg style={style} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,6 +79,15 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
   const [preflightResult, setPreflightResult] = useState(null);
   const [runningPreflight, setRunningPreflight] = useState(false);
 
+  // Video Autocomplete & Settings State
+  const [cloudBaseUrl, setCloudBaseUrl] = useState('');
+  const [videoSearchQuery, setVideoSearchQuery] = useState(initialPreloadItem?.video_id || '');
+  const [videoSearchResults, setVideoSearchResults] = useState([]);
+  const [searchingVideos, setSearchingVideos] = useState(false);
+  const [showVideoDropdown, setShowVideoDropdown] = useState(false);
+  const [syncingAccounts, setSyncingAccounts] = useState(false);
+  const searchTimeoutRef = useRef(null);
+
   // Reschedule Modal State
   const [rescheduleModalJob, setRescheduleModalJob] = useState(null);
   const [newScheduleTime, setNewScheduleTime] = useState('');
@@ -91,18 +100,105 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
     setTimeout(() => setToastMsg(''), 3500);
   };
 
+  // Load Settings for Cloud Base Domain
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(data => {
+        if (data.success && data.data) {
+          const sUrl = data.data.fb_server_url || data.data.nextcloud_url || '';
+          setCloudBaseUrl(sUrl);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // 1. Fetch Accounts
-  const fetchAccounts = useCallback(async () => {
+  const fetchAccounts = useCallback(async (isManualSync = false) => {
+    if (isManualSync) setSyncingAccounts(true);
     try {
-      const res = await fetch('/api/v2/publishing/accounts');
+      const url = isManualSync ? '/api/v2/publishing/accounts?sync=1' : '/api/v2/publishing/accounts';
+      const res = await fetch(url);
       const json = await res.json();
       if (json.success && Array.isArray(json.data)) {
         setAccounts(json.data);
+        if (isManualSync) {
+          showToast(`Berhasil menyinkronkan ${json.data.length} akun Meta! 🟢`);
+        }
+      } else if (isManualSync) {
+        showToast(json.error || 'Gagal menyinkronkan akun ❌');
       }
     } catch (err) {
       console.error('Error fetching publishing accounts:', err);
+      if (isManualSync) showToast('Gagal terhubung ke server');
+    } finally {
+      if (isManualSync) setSyncingAccounts(false);
     }
   }, []);
+
+  // Debounced Video Search in Content Flow
+  const handleSearchVideos = (query) => {
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    if (!query || !query.trim()) {
+      setVideoSearchResults([]);
+      setShowVideoDropdown(false);
+      return;
+    }
+    setSearchingVideos(true);
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/content-flow?q=${encodeURIComponent(query.trim())}&limit=12`);
+        const json = await res.json();
+        if (json.success && Array.isArray(json.items)) {
+          setVideoSearchResults(json.items);
+          setShowVideoDropdown(true);
+        }
+      } catch (e) {
+        console.warn('Video search error:', e);
+      } finally {
+        setSearchingVideos(false);
+      }
+    }, 250);
+  };
+
+  // Autoload Selected Video Data into Schedule Form
+  const selectVideoItem = (item) => {
+    // 1. Resolve media type
+    const rawAsset = item.url_asset || item.nextcloud_url || '';
+    const isImage = /\.(png|jpg|jpeg|webp)$/i.test(rawAsset);
+    const mediaType = isImage ? 'image' : 'video';
+
+    // 2. Resolve public URL
+    let resolvedMediaUrl = '';
+    if (item.nextcloud_url && item.nextcloud_url.startsWith('http')) {
+      resolvedMediaUrl = item.nextcloud_url;
+    } else if (item.url_asset && item.url_asset.startsWith('http')) {
+      resolvedMediaUrl = item.url_asset;
+    } else if (rawAsset) {
+      if (cloudBaseUrl) {
+        resolvedMediaUrl = `${cloudBaseUrl.replace(/\/$/, '')}/${rawAsset.replace(/^\//, '')}`;
+      } else {
+        resolvedMediaUrl = rawAsset;
+      }
+    }
+
+    // 3. Resolve caption & hashtags
+    let autoCaption = item.caption || '';
+    if (!autoCaption && (item.campaign_title || item.hook)) {
+      const topic = item.campaign_title || item.hook || 'Resep Spesial';
+      autoCaption = `✨ ${topic.toUpperCase()} ✨\n\n${item.hook || ''}\n\n${item.nama_produk ? `Produk: ${item.nama_produk}\n` : ''}#${(item.account_name || 'resep').replace(/\s+/g, '')} #kuliner #viral #fyp`;
+    }
+
+    setScheduleForm(prev => ({
+      ...prev,
+      content_id: item.video_id,
+      media_url: resolvedMediaUrl,
+      media_type: mediaType,
+      caption: autoCaption
+    }));
+    setVideoSearchQuery(`${item.video_id} - ${item.campaign_title || item.hook || item.nama_produk || ''}`);
+    setShowVideoDropdown(false);
+  };
 
   // 2. Fetch Jobs and Metrics
   const fetchJobs = useCallback(async () => {
@@ -855,43 +951,126 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
             </div>
 
             <form onSubmit={handleScheduleSubmit}>
-              <div style={{ marginBottom: 12 }}>
-                <label style={{ display: 'block', fontSize: 11, color: '#94a3b8', fontWeight: 700, marginBottom: 4 }}>ID Konten / Video ID</label>
-                <input
-                  type="text"
-                  value={scheduleForm.content_id}
-                  onChange={(e) => setScheduleForm({ ...scheduleForm, content_id: e.target.value })}
-                  placeholder="Misal: VID-RCP-0811-01"
-                  required
-                  style={{ width: '100%', background: '#0b101b', border: '1px solid #28354d', padding: '8px 10px', borderRadius: 6, color: '#fff', fontSize: 12 }}
-                />
+              {/* 1. Searchable Video ID Combobox */}
+              <div style={{ marginBottom: 12, position: 'relative' }}>
+                <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#94a3b8', fontWeight: 700, marginBottom: 4 }}>
+                  <span>ID Konten / Video ID <span style={{ color: '#ef4444' }}>*</span></span>
+                  <span style={{ color: '#60a5fa', fontWeight: 400, fontSize: 10 }}>Ketik untuk mencari di Video Library</span>
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="text"
+                    value={videoSearchQuery || scheduleForm.content_id}
+                    onChange={(e) => {
+                      setVideoSearchQuery(e.target.value);
+                      setScheduleForm({ ...scheduleForm, content_id: e.target.value });
+                      handleSearchVideos(e.target.value);
+                    }}
+                    onFocus={() => { if (videoSearchResults.length > 0) setShowVideoDropdown(true); }}
+                    placeholder="🔍 Cari Video ID, Judul Resep, atau Nama Produk..."
+                    required
+                    style={{ width: '100%', background: '#0b101b', border: '1px solid #28354d', padding: '8px 10px', borderRadius: 6, color: '#fff', fontSize: 12 }}
+                  />
+                  {searchingVideos && (
+                    <span style={{ position: 'absolute', right: 10, top: 8, fontSize: 11, color: '#60a5fa' }}>⏳</span>
+                  )}
+                </div>
+
+                {/* Dropdown Hasil Pencarian Video */}
+                {showVideoDropdown && videoSearchResults.length > 0 && (
+                  <div style={{
+                    position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 100,
+                    background: '#0e1626', border: '1px solid #3b82f6', borderRadius: 8,
+                    marginTop: 4, maxHeight: 220, overflowY: 'auto', boxShadow: '0 10px 25px rgba(0,0,0,0.8)'
+                  }}>
+                    {videoSearchResults.map(item => (
+                      <div
+                        key={item.id || item.video_id}
+                        onClick={() => selectVideoItem(item)}
+                        style={{
+                          padding: '8px 12px', borderBottom: '1px solid #1e293b', cursor: 'pointer',
+                          display: 'flex', flexDirection: 'column', gap: 2, transition: 'background 0.15s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#1e293b'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontWeight: 700, fontSize: 12, color: '#60a5fa' }}>🎬 {item.video_id}</span>
+                          <span style={{ fontSize: 10, color: '#94a3b8', background: '#1e293b', padding: '1px 6px', borderRadius: 4 }}>
+                            {item.account_name || 'Umum'}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: 11, color: '#e2e8f0', fontWeight: 600 }}>
+                          {item.campaign_title || item.hook || item.nama_produk || 'Konten Video'}
+                        </div>
+                        {item.nama_produk && (
+                          <div style={{ fontSize: 10, color: '#94a3b8' }}>Produk: {item.nama_produk}</div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
+              {/* 2. Pilih Akun Publikasi */}
               <div style={{ marginBottom: 12 }}>
-                <label style={{ display: 'block', fontSize: 11, color: '#94a3b8', fontWeight: 700, marginBottom: 4 }}>Pilih Akun Publikasi</label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 120, overflowY: 'auto', background: '#0b101b', padding: 8, borderRadius: 6, border: '1px solid #28354d' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                  <label style={{ fontSize: 11, color: '#94a3b8', fontWeight: 700 }}>
+                    Pilih Akun Publikasi <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => fetchAccounts(true)}
+                    disabled={syncingAccounts}
+                    style={{
+                      background: 'transparent', border: 'none', color: '#60a5fa',
+                      fontSize: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, padding: 0
+                    }}
+                  >
+                    <span>{syncingAccounts ? '⏳' : '🔄'}</span>
+                    <span>{syncingAccounts ? 'Menyinkronkan...' : 'Sinkronkan Akun'}</span>
+                  </button>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 130, overflowY: 'auto', background: '#0b101b', padding: 8, borderRadius: 6, border: '1px solid #28354d' }}>
                   {accounts.length === 0 ? (
-                    <div style={{ color: '#64748b', fontSize: 11 }}>Belum ada akun Meta terdaftar. Tambahkan di Pengaturan.</div>
+                    <div style={{ color: '#64748b', fontSize: 11, padding: 6, textAlign: 'center' }}>
+                      Belum ada akun Meta terdeteksi. <button type="button" onClick={() => fetchAccounts(true)} style={{ color: '#60a5fa', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>Klik untuk menyinkronkan dari Pengaturan</button>.
+                    </div>
                   ) : (
                     accounts.map(acc => (
-                      <label key={acc.id} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, cursor: 'pointer' }}>
-                        <input
-                          type="checkbox"
-                          checked={scheduleForm.account_ids.includes(acc.id)}
-                          onChange={(e) => {
-                            const next = e.target.checked
-                              ? [...scheduleForm.account_ids, acc.id]
-                              : scheduleForm.account_ids.filter(id => id !== acc.id);
-                            setScheduleForm({ ...scheduleForm, account_ids: next, platform: acc.platform });
-                          }}
-                        />
-                        <span>{acc.display_name} <span style={{ color: '#64748b', fontSize: 10 }}>({acc.platform.toUpperCase()})</span></span>
+                      <label key={acc.id} style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '4px 8px', borderRadius: 4, background: scheduleForm.account_ids.includes(acc.id) ? 'rgba(59,130,246,0.1)' : 'transparent',
+                        fontSize: 12, cursor: 'pointer'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <input
+                            type="checkbox"
+                            checked={scheduleForm.account_ids.includes(acc.id)}
+                            onChange={(e) => {
+                              const next = e.target.checked
+                                ? [...scheduleForm.account_ids, acc.id]
+                                : scheduleForm.account_ids.filter(id => id !== acc.id);
+                              setScheduleForm({ ...scheduleForm, account_ids: next, platform: acc.platform });
+                            }}
+                          />
+                          <span style={{ fontWeight: 600, color: '#f3f4f6' }}>{acc.display_name}</span>
+                        </div>
+                        <span style={{
+                          fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 10,
+                          background: acc.platform === 'instagram' ? 'rgba(236, 72, 153, 0.2)' : 'rgba(59, 130, 246, 0.2)',
+                          color: acc.platform === 'instagram' ? '#f472b6' : '#93c5fd',
+                          border: `1px solid ${acc.platform === 'instagram' ? '#ec4899' : '#3b82f6'}`
+                        }}>
+                          {acc.platform === 'instagram' ? '📸 INSTAGRAM' : '📘 FACEBOOK'}
+                        </span>
                       </label>
                     ))
                   )}
                 </div>
               </div>
 
+              {/* 3. Mode Publikasi & Tipe Media */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
                 <div>
                   <label style={{ display: 'block', fontSize: 11, color: '#94a3b8', fontWeight: 700, marginBottom: 4 }}>Mode Publikasi</label>
@@ -905,34 +1084,65 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 11, color: '#94a3b8', fontWeight: 700, marginBottom: 4 }}>Tipe Media</label>
+                  <label style={{ display: 'block', fontSize: 11, color: '#94a3b8', fontWeight: 700, marginBottom: 4 }}>
+                    Tipe Media <span style={{ color: '#60a5fa', fontWeight: 400 }}>(Autoload)</span>
+                  </label>
                   <select
                     value={scheduleForm.media_type}
                     onChange={(e) => setScheduleForm({ ...scheduleForm, media_type: e.target.value })}
                     style={{ width: '100%', background: '#0b101b', border: '1px solid #28354d', padding: '8px 10px', borderRadius: 6, color: '#fff', fontSize: 12 }}
                   >
-                    <option value="video">Video (MP4 / Reels)</option>
-                    <option value="image">Gambar / Foto (JPEG/PNG)</option>
-                    <option value="text_only">Teks Saja</option>
+                    <option value="video">🎬 Video (MP4 / Reels)</option>
+                    <option value="image">🖼️ Gambar / Foto (JPEG/PNG)</option>
+                    <option value="text_only">📝 Teks Saja</option>
                   </select>
                 </div>
               </div>
 
+              {/* 4. URL Media Publik (Nextcloud / Cloud) */}
               <div style={{ marginBottom: 12 }}>
-                <label style={{ display: 'block', fontSize: 11, color: '#94a3b8', fontWeight: 700, marginBottom: 4 }}>URL Media Publik (Nextcloud / Cloud)</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                  <label style={{ fontSize: 11, color: '#94a3b8', fontWeight: 700 }}>
+                    URL Media Publik (Nextcloud / Cloud)
+                  </label>
+                  {cloudBaseUrl && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (scheduleForm.media_url && !scheduleForm.media_url.startsWith('http')) {
+                          setScheduleForm(prev => ({
+                            ...prev,
+                            media_url: `${cloudBaseUrl.replace(/\/$/, '')}/${prev.media_url.replace(/^\//, '')}`
+                          }));
+                        } else if (!scheduleForm.media_url) {
+                          setScheduleForm(prev => ({ ...prev, media_url: cloudBaseUrl }));
+                        }
+                      }}
+                      style={{
+                        background: 'transparent', border: 'none', color: '#60a5fa',
+                        fontSize: 10, cursor: 'pointer', textDecoration: 'underline', padding: 0
+                      }}
+                    >
+                      ⚙️ Terapkan Domain Cloud ({new URL(cloudBaseUrl.startsWith('http') ? cloudBaseUrl : `http://${cloudBaseUrl}`).hostname || 'Settings'})
+                    </button>
+                  )}
+                </div>
                 <input
                   type="url"
                   value={scheduleForm.media_url}
                   onChange={(e) => setScheduleForm({ ...scheduleForm, media_url: e.target.value })}
-                  placeholder="https://cloud.example.com/s/xyz/download"
+                  placeholder="https://cloud.example.com/s/xyz/download atau https://cloud.ast402.my.id/uploads/..."
                   style={{ width: '100%', background: '#0b101b', border: '1px solid #28354d', padding: '8px 10px', borderRadius: 6, color: '#fff', fontSize: 12 }}
                 />
               </div>
 
+              {/* 5. Caption & Tag */}
               <div style={{ marginBottom: 12 }}>
-                <label style={{ display: 'block', fontSize: 11, color: '#94a3b8', fontWeight: 700, marginBottom: 4 }}>Caption & Tag</label>
+                <label style={{ display: 'block', fontSize: 11, color: '#94a3b8', fontWeight: 700, marginBottom: 4 }}>
+                  Caption & Tag <span style={{ color: '#60a5fa', fontWeight: 400 }}>(Autoload dari Video)</span>
+                </label>
                 <textarea
-                  rows={3}
+                  rows={4}
                   value={scheduleForm.caption}
                   onChange={(e) => setScheduleForm({ ...scheduleForm, caption: e.target.value })}
                   placeholder="Tulis caption lengkap beserta hashtag..."
