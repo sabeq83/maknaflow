@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.13.20 — Fix Facebook Graph API is_published field error (11/08/2026)
+- Hapus field is_published yang tidak didukung dari query Graph API fetchMetaPostDetails
+
 ## V2.13.19 — Fix waiting_media query claim bug & Add UI Approve button (11/08/2026)
 - Tambahkan status waiting_media pada query claim scheduler
 - Tambahkan tombol Approve dan badge Pending Approval di halaman Publishing Scheduler

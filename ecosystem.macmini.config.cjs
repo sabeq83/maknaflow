@@ -33,6 +33,7 @@ module.exports = {
         ENABLE_PUBLISHING_WORKER: 'true',
         ENABLE_FACEBOOK_LIVE: 'true',
         PG_SEARCH_PATH: 'staging',
+        PGPOOL_MAX: '3',
       },
       // Log output
       out_file: `${APP_DIR}/logs/staging-ui.out.log`,
@@ -61,6 +62,7 @@ module.exports = {
         API_HOST: '0.0.0.0',
         TZ: 'Asia/Jakarta',
         PG_SEARCH_PATH: 'staging',
+        PGPOOL_MAX: '3',
       },
       // Log output
       out_file: `${APP_DIR}/logs/staging-api.out.log`,
@@ -91,6 +93,7 @@ module.exports = {
         ENABLE_PUBLISHING_WORKER: 'true',
         ENABLE_FACEBOOK_LIVE: 'true',
         PG_SEARCH_PATH: 'dev',
+        PGPOOL_MAX: '3',
       },
       // Log output
       out_file: `${APP_DIR}/logs/dev-ui.out.log`,
@@ -119,6 +122,7 @@ module.exports = {
         API_HOST: '0.0.0.0',
         TZ: 'Asia/Jakarta',
         PG_SEARCH_PATH: 'dev',
+        PGPOOL_MAX: '3',
       },
       // Log output
       out_file: `${APP_DIR}/logs/dev-api.out.log`,
