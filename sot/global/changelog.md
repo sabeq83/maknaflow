@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.13.17 — Fix Superadmin Authorization Settings Access Bug (11/08/2026)
+- Izinkan peran superadmin mengelola dan melihat kredensial di rute API settings
+
 ## V2.13.16 — Enable Background Publishing Worker by Default on Mac Mini (11/08/2026)
 - Auto-start publishing worker by default in instrumentation.js
 - Aktifkan ENABLE_PUBLISHING_WORKER dan ENABLE_FACEBOOK_LIVE di PM2 ecosystem config

@@ -9,7 +9,7 @@ function requireSettingsAdmin(request) {
   if (!user) {
     const error = new Error('Unauthorized'); error.status = 401; throw error;
   }
-  if (user.role !== 'admin') {
+  if (user.role !== 'admin' && user.role !== 'superadmin') {
     const error = new Error('Hanya Admin tenant yang dapat mengelola credential.'); error.status = 403; throw error;
   }
   return user;
@@ -17,7 +17,7 @@ function requireSettingsAdmin(request) {
 
 export const GET = withTenantContext(async (request, _context, user) => {
   try {
-    if (user.role !== 'admin') {
+    if (user.role !== 'admin' && user.role !== 'superadmin') {
       return NextResponse.json({ success: false, error: 'Hanya Admin tenant yang dapat mengelola credential.' }, { status: 403 });
     }
     const apiKey = await getSetting('gemini_api_key');
@@ -87,7 +87,7 @@ export const GET = withTenantContext(async (request, _context, user) => {
 
 export const POST = withTenantContext(async (request, _context, user) => {
   try {
-    if (user.role !== 'admin') {
+    if (user.role !== 'admin' && user.role !== 'superadmin') {
       return NextResponse.json({ success: false, error: 'Hanya Admin tenant yang dapat mengelola credential.' }, { status: 403 });
     }
     const body = await request.json();
