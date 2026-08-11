@@ -88,6 +88,12 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
   const [syncingAccounts, setSyncingAccounts] = useState(false);
   const searchTimeoutRef = useRef(null);
 
+  // Cloud Folder Media Files State
+  const [folderMediaFiles, setFolderMediaFiles] = useState([]);
+  const [loadingMediaFiles, setLoadingMediaFiles] = useState(false);
+  const [selectedMediaFileName, setSelectedMediaFileName] = useState('');
+  const [showVideoPreview, setShowVideoPreview] = useState(false);
+
   // Reschedule Modal State
   const [rescheduleModalJob, setRescheduleModalJob] = useState(null);
   const [newScheduleTime, setNewScheduleTime] = useState('');
@@ -168,6 +174,47 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
     }, 250);
   };
 
+  // Scan Folder Media Files (Auto-Detect *_video_final.mp4)
+  const fetchMediaFiles = async (videoId, customUrl = null) => {
+    if (!videoId && !customUrl) return;
+    setLoadingMediaFiles(true);
+    try {
+      const q = videoId ? `videoId=${encodeURIComponent(videoId)}` : `folderUrl=${encodeURIComponent(customUrl)}`;
+      const res = await fetch(`/api/content-flow/media-files?${q}`);
+      const json = await res.json();
+      if (json.success && Array.isArray(json.files) && json.files.length > 0) {
+        setFolderMediaFiles(json.files);
+        const best = json.defaultFile || json.files[0];
+        if (best) {
+          setSelectedMediaFileName(best.name);
+          setScheduleForm(prev => ({
+            ...prev,
+            media_url: best.directUrl,
+            media_type: best.mediaType || 'video'
+          }));
+        }
+      } else {
+        setFolderMediaFiles([]);
+      }
+    } catch (e) {
+      console.warn('Failed to scan folder media files:', e);
+    } finally {
+      setLoadingMediaFiles(false);
+    }
+  };
+
+  const handleSelectMediaFile = (fileName) => {
+    setSelectedMediaFileName(fileName);
+    const found = folderMediaFiles.find(f => f.name === fileName);
+    if (found) {
+      setScheduleForm(prev => ({
+        ...prev,
+        media_url: found.directUrl,
+        media_type: found.mediaType || 'video'
+      }));
+    }
+  };
+
   // Autoload Selected Video Data into Schedule Form
   const selectVideoItem = (item) => {
     // 1. Resolve media type
@@ -205,6 +252,9 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
     }));
     setVideoSearchQuery(`${item.video_id} - ${item.campaign_title || item.hook || item.nama_produk || ''}`);
     setShowVideoDropdown(false);
+
+    // Auto-scan folder for *_video_final.mp4 and set direct download URL
+    fetchMediaFiles(item.video_id, item.nextcloud_url);
   };
 
   // 2. Fetch Jobs and Metrics
@@ -1106,41 +1156,109 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                 </div>
               </div>
 
-              {/* 4. URL Media Publik (Nextcloud / Cloud) */}
+              {/* 3.5. File Media di Folder Cloud (Auto-Scan) */}
+              {loadingMediaFiles ? (
+                <div style={{ marginBottom: 12, padding: '8px 12px', background: 'rgba(59,130,246,0.08)', borderRadius: 6, border: '1px dashed #3b82f6', fontSize: 11, color: '#93c5fd', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span>⏳</span>
+                  <span>Memindai file media di folder Cloud...</span>
+                </div>
+              ) : folderMediaFiles.length > 0 ? (
+                <div style={{ marginBottom: 12, padding: '10px', background: 'rgba(59,130,246,0.1)', borderRadius: 6, border: '1px solid rgba(59,130,246,0.35)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                    <label style={{ fontSize: 11, color: '#60a5fa', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span>📁</span>
+                      <span>Pilih File Media di Folder Cloud (Facebook Downloadable):</span>
+                    </label>
+                    <span style={{ fontSize: 10, color: '#38bdf8', background: 'rgba(56,189,248,0.15)', padding: '2px 6px', borderRadius: 4 }}>
+                      {folderMediaFiles.length} file terdeteksi
+                    </span>
+                  </div>
+                  <select
+                    value={selectedMediaFileName}
+                    onChange={(e) => handleSelectMediaFile(e.target.value)}
+                    style={{
+                      width: '100%', background: '#0b101b', border: '1px solid #3b82f6', padding: '8px 10px',
+                      borderRadius: 6, color: '#fff', fontSize: 12, fontWeight: 500, outline: 'none'
+                    }}
+                  >
+                    {folderMediaFiles.map(file => (
+                      <option key={file.name} value={file.name}>
+                        {file.mediaType === 'video' ? '🎬 ' : (file.mediaType === 'image' ? '🖼️ ' : '📄 ')}
+                        {file.name} ({file.sizeFormatted}) {file.isRecommended ? '⭐ [Rekomendasi Utama]' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : null}
+
+              {/* 4. URL Media Publik (Direct Downloadable .MP4) */}
               <div style={{ marginBottom: 12 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                  <label style={{ fontSize: 11, color: '#94a3b8', fontWeight: 700 }}>
-                    URL Media Publik (Nextcloud / Cloud)
+                  <label style={{ fontSize: 11, color: '#94a3b8', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span>URL Media Publik</span>
+                    <span style={{ color: '#22c55e', fontSize: 10, fontWeight: 600 }}>⚡ Direct Downloadable .MP4</span>
                   </label>
-                  {cloudBaseUrl && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (scheduleForm.media_url && !scheduleForm.media_url.startsWith('http')) {
-                          setScheduleForm(prev => ({
-                            ...prev,
-                            media_url: `${cloudBaseUrl.replace(/\/$/, '')}/${prev.media_url.replace(/^\//, '')}`
-                          }));
-                        } else if (!scheduleForm.media_url) {
-                          setScheduleForm(prev => ({ ...prev, media_url: cloudBaseUrl }));
-                        }
-                      }}
-                      style={{
-                        background: 'transparent', border: 'none', color: '#60a5fa',
-                        fontSize: 10, cursor: 'pointer', textDecoration: 'underline', padding: 0
-                      }}
-                    >
-                      ⚙️ Terapkan Domain Cloud ({new URL(cloudBaseUrl.startsWith('http') ? cloudBaseUrl : `http://${cloudBaseUrl}`).hostname || 'Settings'})
-                    </button>
-                  )}
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    {scheduleForm.media_url && (
+                      <button
+                        type="button"
+                        onClick={() => setShowVideoPreview(!showVideoPreview)}
+                        style={{
+                          background: showVideoPreview ? 'rgba(239,68,68,0.2)' : 'rgba(59,130,246,0.2)',
+                          border: `1px solid ${showVideoPreview ? '#ef4444' : '#3b82f6'}`,
+                          color: showVideoPreview ? '#f87171' : '#60a5fa',
+                          fontSize: 10, cursor: 'pointer', padding: '2px 8px', borderRadius: 4
+                        }}
+                      >
+                        {showVideoPreview ? '✕ Tutup Preview' : '▶️ Preview Media'}
+                      </button>
+                    )}
+                    {cloudBaseUrl && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (scheduleForm.media_url && !scheduleForm.media_url.startsWith('http')) {
+                            setScheduleForm(prev => ({
+                              ...prev,
+                              media_url: `${cloudBaseUrl.replace(/\/$/, '')}/${prev.media_url.replace(/^\//, '')}`
+                            }));
+                          } else if (!scheduleForm.media_url) {
+                            setScheduleForm(prev => ({ ...prev, media_url: cloudBaseUrl }));
+                          }
+                        }}
+                        style={{
+                          background: 'transparent', border: 'none', color: '#60a5fa',
+                          fontSize: 10, cursor: 'pointer', textDecoration: 'underline', padding: 0
+                        }}
+                      >
+                        ⚙️ Set Domain Cloud
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <input
                   type="url"
                   value={scheduleForm.media_url}
                   onChange={(e) => setScheduleForm({ ...scheduleForm, media_url: e.target.value })}
-                  placeholder="https://cloud.example.com/s/xyz/download atau https://cloud.ast402.my.id/uploads/..."
+                  placeholder="https://cloud.ast402.my.id/index.php/s/TOKEN/download?files=video_final.mp4"
                   style={{ width: '100%', background: '#0b101b', border: '1px solid #28354d', padding: '8px 10px', borderRadius: 6, color: '#fff', fontSize: 12 }}
                 />
+
+                {/* Mini Player Preview */}
+                {showVideoPreview && scheduleForm.media_url && (
+                  <div style={{ marginTop: 8, padding: 8, background: '#080d1a', borderRadius: 6, border: '1px solid #1e293b', textAlign: 'center' }}>
+                    {scheduleForm.media_type === 'image' ? (
+                      <img src={scheduleForm.media_url} alt="Preview" style={{ maxHeight: 200, maxWidth: '100%', borderRadius: 4, objectFit: 'contain' }} />
+                    ) : (
+                      <video
+                        src={scheduleForm.media_url}
+                        controls
+                        autoPlay
+                        style={{ maxHeight: 220, maxWidth: '100%', borderRadius: 4, background: '#000' }}
+                      />
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* 5. Caption & Tag */}

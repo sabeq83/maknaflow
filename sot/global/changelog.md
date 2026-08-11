@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.13.13 — Auto-Scan Folder Media Files and Direct Single File MP4 Download in Publishing Scheduler (11/08/2026)
+- Endpoint pemindaian file folder Nextcloud /api/content-flow/media-files
+- Komponen dropdown pemilih file media folder cloud di modal Publishing Scheduler
+- Auto-select file video final dan auto-resolve direct download URL .mp4 tunggal untuk Facebook Graph API
+- Tombol preview video langsung di dalam modal scheduler
+
 ## V2.13.12 — Fix Duplicate Publishing Accounts Upsert and Deduplication (11/08/2026)
 - Eliminasi duplikasi akun Meta di database dengan resilient check-and-update upsert
 - Auto-cleanup baris duplikat di tabel publishing_accounts
