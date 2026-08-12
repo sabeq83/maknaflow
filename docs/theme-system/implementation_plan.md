@@ -899,4 +899,4 @@ Route detail dinilai menggunakan data staging yang tersedia tanpa melakukan aksi
 - [x] Batasi search Video ID dan filter produk ContentFlow menjadi 220px.
 - [x] Perkecil kartu/form login agar field password proporsional.
 - [x] Migrasikan header serta kartu Skedul Produk ke surface light/dark.
-- [ ] Jalankan build, rilis patch, dan deploy hanya ke Mac Mini dev.
+- [x] Jalankan build, rilis patch, dan deploy hanya ke Mac Mini dev.
