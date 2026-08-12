@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.17 — Penyelarasan Lanjutan Light Theme ContentFlow (12/08/2026)
+- Samakan dimensi tombol aset dan rapikan proporsi pencarian ContentFlow
+- Perkuat kontras status platform, badge, dan thumbnail Video ID
+- Selaraskan tab, filter, antrean, status, dan kalender Publishing Scheduler
+
 ## V2.14.16 — Harmonisasi Warna ContentFlow dan User Management (12/08/2026)
 - Selaraskan tombol Nextcloud, Drive, download, dan modal ContentFlow pada light/dark theme
 - Perbaiki surface tabel, badge role, dan badge brand User Management pada light theme

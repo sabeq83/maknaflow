@@ -568,24 +568,24 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
 
   const getStatusBadge = (status, approvalStatus) => {
     if (status === 'scheduled' && approvalStatus === 'pending_approval') {
-      return <span style={{ background: '#3b2514', color: '#f97316', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: '#f97316' }}></span>PENDING APPROVAL</span>;
+      return <span style={{ background: 'var(--status-warning-soft)', color: 'var(--status-warning)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-warning)' }}></span>PENDING APPROVAL</span>;
     }
     switch (status) {
       case 'published':
-        return <span style={{ background: '#123828', color: 'var(--status-success)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-success)' }}></span>PUBLISHED</span>;
+        return <span style={{ background: 'var(--status-success-soft)', color: 'var(--status-success)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-success)' }}></span>PUBLISHED</span>;
       case 'scheduled':
-        return <span style={{ background: '#182b47', color: 'var(--link)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--link)' }}></span>SCHEDULED</span>;
+        return <span style={{ background: 'var(--status-info-soft)', color: 'var(--status-info)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-info)' }}></span>SCHEDULED</span>;
       case 'processing':
       case 'publishing':
       case 'creating_container':
       case 'waiting_media':
-        return <span style={{ background: '#2e2640', color: 'var(--status-neutral)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-neutral)' }}></span>PROCESSING</span>;
+        return <span style={{ background: 'var(--status-neutral-soft)', color: 'var(--status-neutral)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-neutral)' }}></span>PROCESSING</span>;
       case 'verifying':
-        return <span style={{ background: '#3b2d18', color: 'var(--status-warning)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-warning)' }}></span>VERIFYING</span>;
+        return <span style={{ background: 'var(--status-warning-soft)', color: 'var(--status-warning)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-warning)' }}></span>VERIFYING</span>;
       case 'retry_wait':
-        return <span style={{ background: '#453314', color: 'var(--status-warning)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-warning)' }}></span>RETRY WAIT</span>;
+        return <span style={{ background: 'var(--status-warning-soft)', color: 'var(--status-warning)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-warning)' }}></span>RETRY WAIT</span>;
       case 'failed':
-        return <span style={{ background: '#481d29', color: '#fb7185', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fb7185' }}></span>FAILED</span>;
+        return <span style={{ background: 'var(--status-danger-soft)', color: 'var(--status-danger)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-danger)' }}></span>FAILED</span>;
       case 'cancelled':
         return <span style={{ background: 'var(--surface)', color: 'var(--text-muted)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--text-muted)' }}></span>CANCELLED</span>;
       default:
@@ -640,7 +640,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
           <h2 style={{ fontSize: 22, fontWeight: 850, margin: '0 0 4px', color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>
             Publishing Scheduler
           </h2>
-          <p style={{ margin: 0, color: '#748198', fontSize: 13 }}>
+          <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: 13 }}>
             Jadwalkan dan pantau publikasi Facebook & Instagram dari Content Flow secara aman dan terpantau.
           </p>
         </div>
@@ -649,7 +649,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
             <button
               onClick={onBackToLibrary}
               style={{
-                padding: '9px 15px', background: '#141d2e', border: '1px solid #334155',
+                padding: '9px 15px', background: 'var(--surface)', border: '1px solid var(--border-strong)',
                 borderRadius: 8, color: 'var(--text-secondary)', fontSize: 12, fontWeight: 750, cursor: 'pointer'
               }}
             >
@@ -661,10 +661,10 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
             disabled={togglingPause}
             style={{
               padding: '9px 15px',
-              background: isPaused ? '#371923' : '#141d2e',
-              border: `1px solid ${isPaused ? 'var(--status-danger)' : '#334155'}`,
+              background: isPaused ? 'var(--status-danger-soft)' : 'var(--surface)',
+              border: `1px solid ${isPaused ? 'var(--status-danger)' : 'var(--border-strong)'}`,
               borderRadius: 8,
-              color: isPaused ? '#fca5a5' : 'var(--text-secondary)',
+              color: isPaused ? 'var(--status-danger)' : 'var(--text-secondary)',
               fontSize: 12,
               fontWeight: 750,
               cursor: 'pointer',
@@ -707,19 +707,19 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
         </div>
         <div style={{ background: 'var(--surface)', border: '1px solid var(--surface-interactive)', borderRadius: 12, padding: 14 }}>
           <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Perlu Tindakan</div>
-          <div style={{ fontSize: 24, fontWeight: 850, color: metrics.needsAction > 0 ? '#fb7185' : 'var(--text-muted)', marginTop: 4 }}>{metrics.needsAction}</div>
+          <div style={{ fontSize: 24, fontWeight: 850, color: metrics.needsAction > 0 ? 'var(--status-danger)' : 'var(--text-muted)', marginTop: 4 }}>{metrics.needsAction}</div>
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>Failed / Needs review</div>
         </div>
       </div>
 
       {/* Navigation Tabs & Toolbar */}
-      <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #263044', marginBottom: 16, flexWrap: 'wrap', gap: 6 }}>
+      <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid var(--border-subtle)', marginBottom: 16, flexWrap: 'wrap', gap: 6 }}>
         <button
           onClick={() => setActiveTab('queue')}
           style={{
             background: 'transparent', border: 'none',
             borderBottom: activeTab === 'queue' ? '2px solid var(--status-neutral)' : '2px solid transparent',
-            color: activeTab === 'queue' ? '#c4b5fd' : '#718097',
+            color: activeTab === 'queue' ? 'var(--status-neutral)' : 'var(--text-muted)',
             padding: '10px 16px', fontSize: 13, fontWeight: 800, cursor: 'pointer'
           }}
         >
@@ -730,7 +730,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
           style={{
             background: 'transparent', border: 'none',
             borderBottom: activeTab === 'calendar' ? '2px solid var(--status-neutral)' : '2px solid transparent',
-            color: activeTab === 'calendar' ? '#c4b5fd' : '#718097',
+            color: activeTab === 'calendar' ? 'var(--status-neutral)' : 'var(--text-muted)',
             padding: '10px 16px', fontSize: 13, fontWeight: 800, cursor: 'pointer'
           }}
         >
@@ -741,7 +741,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
           style={{
             background: 'transparent', border: 'none',
             borderBottom: activeTab === 'history' ? '2px solid var(--status-neutral)' : '2px solid transparent',
-            color: activeTab === 'history' ? '#c4b5fd' : '#718097',
+            color: activeTab === 'history' ? 'var(--status-neutral)' : 'var(--text-muted)',
             padding: '10px 16px', fontSize: 13, fontWeight: 800, cursor: 'pointer'
           }}
         >
@@ -753,7 +753,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
           <select
             value={filterAccount}
             onChange={(e) => setFilterAccount(e.target.value)}
-            style={{ background: 'var(--surface)', border: '1px solid #2a354b', color: '#9eabc0', padding: '6px 10px', borderRadius: 7, fontSize: 12 }}
+            style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', padding: '6px 10px', borderRadius: 7, fontSize: 12 }}
           >
             <option value="all">Semua Akun</option>
             {accounts.map(acc => (
@@ -764,7 +764,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
           <select
             value={filterPlatform}
             onChange={(e) => setFilterPlatform(e.target.value)}
-            style={{ background: 'var(--surface)', border: '1px solid #2a354b', color: '#9eabc0', padding: '6px 10px', borderRadius: 7, fontSize: 12 }}
+            style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', padding: '6px 10px', borderRadius: 7, fontSize: 12 }}
           >
             <option value="all">Semua Platform</option>
             <option value="facebook">Facebook Page</option>
@@ -774,7 +774,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            style={{ background: 'var(--surface)', border: '1px solid #2a354b', color: '#9eabc0', padding: '6px 10px', borderRadius: 7, fontSize: 12 }}
+            style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', padding: '6px 10px', borderRadius: 7, fontSize: 12 }}
           >
             <option value="all">Semua Status</option>
             <option value="scheduled">Scheduled</option>
@@ -787,7 +787,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
 
           <button
             onClick={fetchJobs}
-            style={{ background: 'var(--surface)', border: '1px solid #2a354b', color: '#9eabc0', padding: '6px 10px', borderRadius: 7, cursor: 'pointer' }}
+            style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', padding: '6px 10px', borderRadius: 7, cursor: 'pointer' }}
             title="Refresh antrean"
           >
             <RefreshCwIcon style={{ width: 14, height: 14 }} />
@@ -801,7 +801,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
           <div style={{ background: 'var(--surface)', border: '1px solid var(--surface-interactive)', borderRadius: 12, overflow: 'hidden' }}>
             <div style={{ height: 46, borderBottom: '1px solid var(--surface-interactive)', display: 'flex', alignItems: 'center', padding: '0 16px', color: 'var(--text-primary)', fontSize: 12, fontWeight: 800 }}>
               {activeTab === 'queue' ? 'Daftar Antrean Terjadwal' : 'Riwayat Hasil Publikasi'}
-              <span style={{ color: '#68768c', fontWeight: 500, marginLeft: 8 }}>({jobs.length} item)</span>
+              <span style={{ color: 'var(--text-muted)', fontWeight: 500, marginLeft: 8 }}>({jobs.length} item)</span>
             </div>
 
             {loading ? (
@@ -831,8 +831,8 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                           onClick={() => setSelectedJobId(job.id)}
                           style={{
                             cursor: 'pointer',
-                            background: isSelected ? '#1a233a' : 'transparent',
-                            borderBottom: '1px solid #1c2638',
+                            background: isSelected ? 'var(--surface-interactive)' : 'transparent',
+                            borderBottom: '1px solid var(--border-subtle)',
                             boxShadow: isSelected ? 'inset 3px 0 var(--status-neutral)' : 'none'
                           }}
                         >
@@ -855,7 +855,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                             </div>
                           </td>
                           <td style={{ padding: '12px 14px' }}>
-                            <div style={{ fontWeight: 700, color: '#d1d5db' }}>{job.account_name || 'Meta Account'}</div>
+                            <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{job.account_name || 'Meta Account'}</div>
                             <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>{job.platform.toUpperCase()} ({job.media_type})</div>
                           </td>
                           <td style={{ padding: '12px 14px' }}>
@@ -1086,19 +1086,19 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
         <div style={{ background: 'var(--surface)', border: '1px solid var(--surface-interactive)', borderRadius: 12, overflow: 'hidden' }}>
           <div style={{ height: 46, borderBottom: '1px solid var(--surface-interactive)', display: 'flex', alignItems: 'center', padding: '0 16px', color: 'var(--text-primary)', fontSize: 12, fontWeight: 800 }}>
             <span>Kalender Jadwal Mingguan</span>
-            <span style={{ color: '#68768c', fontWeight: 500, marginLeft: 8 }}>({calendarWeek[0].dateStr} s.d. {calendarWeek[6].dateStr})</span>
+            <span style={{ color: 'var(--text-muted)', fontWeight: 500, marginLeft: 8 }}>({calendarWeek[0].dateStr} s.d. {calendarWeek[6].dateStr})</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1, background: '#263044' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1, background: 'var(--border-subtle)' }}>
             {calendarWeek.map((day) => (
-              <div key={day.dateStr} style={{ minHeight: 280, background: day.isToday ? '#141d2f' : '#101725', padding: 10 }}>
+              <div key={day.dateStr} style={{ minHeight: 280, background: day.isToday ? 'var(--surface-interactive)' : 'var(--surface)', padding: 10 }}>
                 <div style={{ fontSize: 10, color: day.isToday ? 'var(--link)' : 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800 }}>
                   {day.dayName} {day.isToday && '· HARI INI'}
                 </div>
-                <div style={{ fontSize: 16, color: '#dbe2ee', fontWeight: 800, margin: '4px 0 10px' }}>
+                <div style={{ fontSize: 16, color: 'var(--text-primary)', fontWeight: 800, margin: '4px 0 10px' }}>
                   {day.dateNum}
                 </div>
                 {day.jobs.length === 0 ? (
-                  <div style={{ color: '#3f4b60', fontSize: 10, textAlign: 'center', marginTop: 30 }}>Belum ada jadwal</div>
+                  <div style={{ color: 'var(--text-muted)', fontSize: 10, textAlign: 'center', marginTop: 30 }}>Belum ada jadwal</div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     {day.jobs.map((j) => (

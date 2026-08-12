@@ -877,3 +877,12 @@ Route detail dinilai menggunakan data staging yang tersedia tanpa melakukan aksi
 - [x] Ganti surface, header, row, role badge, dan brand badge tabel User Management dengan token tema.
 - [x] Jalankan build lokal dan pemeriksaan visual light/dark.
 - [x] Rilis patch dan deploy hanya ke Mac Mini dev.
+
+### Follow-up ContentFlow visual consistency II
+
+- [x] Samakan dimensi tombol Nextcloud dan Download.
+- [x] Perpendek proporsi search box Video ID.
+- [x] Tingkatkan kontras status TikTok, Facebook, Instagram, dan badge Not Published.
+- [x] Selaraskan thumbnail serta badge Video ID dengan light theme.
+- [x] Migrasikan surface utama Publishing Scheduler ke token light/dark.
+- [ ] Jalankan build, rilis patch, dan deploy hanya ke Mac Mini dev.

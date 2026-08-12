@@ -150,12 +150,12 @@ function ContentFlowHubPageContent() {
     if (statusVal === 'Skipped') {
       return { background: 'rgba(168, 85, 247, 0.2)', border: '1px solid var(--status-neutral)', color: '#e9d5ff', fontWeight: 700 };
     }
-    return { background: 'var(--bg-secondary)', border: '1px solid var(--surface-interactive)', color: 'var(--text-muted)' };
+    return { background: 'var(--surface-interactive)', border: '1px solid var(--border-strong)', color: 'var(--text-secondary)', fontWeight: 700 };
   };
 
   const getDateInputStyle = (dateVal) => {
     if (dateVal && dateVal.trim() !== '') {
-      return { background: 'rgba(59, 130, 246, 0.18)', border: '1px solid var(--link)', color: '#93c5fd', fontWeight: 700 };
+      return { background: 'var(--status-info-soft)', border: '1px solid var(--status-info)', color: 'var(--status-info)', fontWeight: 700 };
     }
     return { background: 'var(--bg-secondary)', border: '1px solid var(--surface-interactive)', color: 'var(--text-muted)' };
   };
@@ -592,7 +592,7 @@ function ContentFlowHubPageContent() {
     switch (status) {
       case 'Published':
         return (
-          <span style={{
+          <span className="contentflow-status-unpublished" style={{
             display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 8px', borderRadius: '12px',
             background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success-soft)',
             fontSize: '11px', fontWeight: 600
@@ -614,10 +614,9 @@ function ContentFlowHubPageContent() {
         return (
           <span style={{
             display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 8px', borderRadius: '12px',
-            background: 'rgba(39, 39, 42, 0.8)', color: 'var(--text-muted)', border: '1px solid rgba(63, 63, 70, 0.8)',
-            fontSize: '11px', fontWeight: 500
+            fontSize: '11px', fontWeight: 700
           }}>
-            <AlertCircleIcon style={{ width: 12, height: 12, color: 'var(--text-muted)' }} /> Not Published
+            <AlertCircleIcon style={{ width: 12, height: 12 }} /> Not Published
           </span>
         );
     }
@@ -718,22 +717,19 @@ function ContentFlowHubPageContent() {
           </div>
 
           {/* Primary View Switcher: Content Library vs Publishing Scheduler */}
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #1f293d', paddingBottom: '14px' }}>
+          <div className="contentflow-view-tabs" style={{ display: 'flex', gap: '10px', marginBottom: '20px', paddingBottom: '14px' }}>
             <button
               onClick={() => { setMainView('library'); setSchedulePreloadItem(null); }}
+              className={`content-action contentflow-view-tab ${mainView === 'library' ? 'contentflow-view-tab-active' : ''}`}
               style={{
                 padding: '9px 18px',
                 borderRadius: '10px',
-                background: mainView === 'library' ? '#2563eb' : 'var(--bg-secondary)',
-                border: `1px solid ${mainView === 'library' ? 'var(--link)' : 'var(--border-subtle)'}`,
-                color: 'var(--text-primary)',
                 fontSize: '13px',
                 fontWeight: 750,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                boxShadow: mainView === 'library' ? '0 4px 14px rgba(37, 99, 235, 0.35)' : 'none'
               }}
             >
               <LayersIcon style={{ width: 15, height: 15 }} />
@@ -741,19 +737,16 @@ function ContentFlowHubPageContent() {
             </button>
             <button
               onClick={() => setMainView('publishing')}
+              className={`content-action contentflow-view-tab ${mainView === 'publishing' ? 'contentflow-view-tab-active' : ''}`}
               style={{
                 padding: '9px 18px',
                 borderRadius: '10px',
-                background: mainView === 'publishing' ? 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)' : 'var(--bg-secondary)',
-                border: `1px solid ${mainView === 'publishing' ? 'var(--status-neutral)' : 'var(--border-subtle)'}`,
-                color: 'var(--text-primary)',
                 fontSize: '13px',
                 fontWeight: 750,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                boxShadow: mainView === 'publishing' ? '0 4px 14px rgba(168, 85, 247, 0.35)' : 'none'
               }}
             >
               <ClockIcon style={{ width: 15, height: 15 }} />
@@ -1091,7 +1084,7 @@ function ContentFlowHubPageContent() {
           {/* Multi-level Search & Filter Panel */}
           <div style={{ padding: '20px', borderRadius: '16px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', marginBottom: '24px', boxShadow: '0 8px 24px var(--overlay-subtle)' }}>
             {/* Row 1: Universal Search & Metadata Filters (4 Columns) */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr 1fr', gap: '12px', marginBottom: '14px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(220px, 0.8fr) repeat(3, 1fr)', gap: '12px', marginBottom: '14px' }}>
               {/* Universal Search */}
               <div style={{ position: 'relative' }}>
                 <SearchIcon style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: 14, height: 14, color: 'var(--text-muted)' }} />
@@ -1170,7 +1163,7 @@ function ContentFlowHubPageContent() {
                 <select
                   value={tiktokFilter}
                   onChange={(e) => setTiktokFilter(e.target.value)}
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--border-strong)', color: '#d4d4d8', fontSize: '12px', outline: 'none' }}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', background: 'var(--input-bg)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)', fontSize: '12px', outline: 'none' }}
                 >
                   <option value="Semua">🎵 Semua TikTok Status</option>
                   <option value="Not Published">Not Published</option>
@@ -1183,7 +1176,7 @@ function ContentFlowHubPageContent() {
                 <select
                   value={fbFilter}
                   onChange={(e) => setFbFilter(e.target.value)}
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--border-strong)', color: '#d4d4d8', fontSize: '12px', outline: 'none' }}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', background: 'var(--input-bg)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)', fontSize: '12px', outline: 'none' }}
                 >
                   <option value="Semua">📘 Semua Facebook Status</option>
                   <option value="Not Published">Not Published</option>
@@ -1196,7 +1189,7 @@ function ContentFlowHubPageContent() {
                 <select
                   value={igFilter}
                   onChange={(e) => setIgFilter(e.target.value)}
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--border-strong)', color: '#d4d4d8', fontSize: '12px', outline: 'none' }}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', background: 'var(--input-bg)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)', fontSize: '12px', outline: 'none' }}
                 >
                   <option value="Semua">📷 Semua Instagram Status</option>
                   <option value="Not Published">Not Published</option>
@@ -1295,9 +1288,8 @@ function ContentFlowHubPageContent() {
 
                     {/* KOLOM KIRI: Thumbnail Video, Video ID, & Link Asset */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      <div style={{
+                      <div className="contentflow-video-thumbnail" style={{
                         position: 'relative', width: '100%', height: '110px', borderRadius: '12px',
-                        background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', border: '1px solid var(--surface-interactive)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden'
                       }}>
                         <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'var(--status-info-soft)', border: '1px solid var(--status-info-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--link)' }}>
@@ -1305,7 +1297,7 @@ function ContentFlowHubPageContent() {
                         </div>
 
                         <div style={{ position: 'absolute', top: '8px', left: '8px', zIndex: 2 }}>
-                          <span style={{ padding: '3px 8px', borderRadius: '6px', background: 'rgba(15, 23, 42, 0.9)', border: '1px solid var(--status-info)', color: 'var(--link)', fontSize: '10px', fontWeight: 700, fontFamily: 'monospace' }}>
+                          <span className="contentflow-video-id" style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 700, fontFamily: 'monospace' }}>
                             {item.video_id}
                           </span>
                         </div>
@@ -1342,7 +1334,7 @@ function ContentFlowHubPageContent() {
                             const isCardLoading = loadingUrls[item.id];
                             return (
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                <a className="content-action content-action-cloud" href={targetUrl} target="_blank" rel="noreferrer" style={{ display: 'block', width: '100%', textAlign: 'center', padding: '6px 10px', fontSize: '11px' }} title="Buka Link Nextcloud">
+                                <a className="content-action content-action-cloud content-action-compact" href={targetUrl} target="_blank" rel="noreferrer" style={{ width: '100%', textAlign: 'center', padding: '6px 10px', fontSize: '11px' }} title="Buka Link Nextcloud">
                                   ☁️ Nextcloud
                                 </a>
                                 <button
@@ -1352,7 +1344,7 @@ function ContentFlowHubPageContent() {
                                     handleDownload(item);
                                   }}
                                   disabled={isCardCooldown || isCardLoading}
-                                  className="content-action content-action-download"
+                                  className="content-action content-action-download content-action-compact"
                                   style={{
                                     display: 'block',
                                     width: '100%',
@@ -1419,33 +1411,33 @@ function ContentFlowHubPageContent() {
                       {/* 3. Platform Status Chips Bar */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', paddingTop: '2px' }}>
                         {/* TikTok Chip */}
-                        <div style={{
+                        <div className={!isTkPub ? 'contentflow-platform-chip' : ''} style={{
                           padding: '3px 9px', borderRadius: '6px', fontSize: '11px', fontWeight: 700,
-                          background: isTkPub ? 'var(--status-success-soft)' : 'rgba(15, 23, 42, 0.8)',
-                          border: isTkPub ? '1px solid var(--status-success)' : '1px solid var(--surface-interactive)',
-                          color: isTkPub ? 'var(--status-success)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px'
+                          background: isTkPub ? 'var(--status-success-soft)' : undefined,
+                          border: isTkPub ? '1px solid var(--status-success)' : undefined,
+                          color: isTkPub ? 'var(--status-success)' : undefined, display: 'flex', alignItems: 'center', gap: '4px'
                         }}>
                           <span>🎵 TikTok</span>
                           <span>{item.tiktok_status === 'Published' ? `✓ Published (${formatDate(item.tiktok_publish_date)})` : item.tiktok_status === 'Skipped' ? '⏭️ Skipped' : item.tiktok_status}</span>
                         </div>
 
                         {/* FB Chip */}
-                        <div style={{
+                        <div className={!isFbPub ? 'contentflow-platform-chip' : ''} style={{
                           padding: '3px 9px', borderRadius: '6px', fontSize: '11px', fontWeight: 700,
-                          background: isFbPub ? 'var(--status-info-soft)' : 'rgba(15, 23, 42, 0.8)',
-                          border: isFbPub ? '1px solid var(--status-info)' : '1px solid var(--surface-interactive)',
-                          color: isFbPub ? 'var(--link)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px'
+                          background: isFbPub ? 'var(--status-info-soft)' : undefined,
+                          border: isFbPub ? '1px solid var(--status-info)' : undefined,
+                          color: isFbPub ? 'var(--status-info)' : undefined, display: 'flex', alignItems: 'center', gap: '4px'
                         }}>
                           <span>📘 FB</span>
                           <span>{item.facebook_status === 'Published' ? `✓ Published (${formatDate(item.facebook_publish_date)})` : item.facebook_status === 'Skipped' ? '⏭️ Skipped' : item.facebook_status}</span>
                         </div>
 
                         {/* IG Chip */}
-                        <div style={{
+                        <div className={!isIgPub ? 'contentflow-platform-chip' : ''} style={{
                           padding: '3px 9px', borderRadius: '6px', fontSize: '11px', fontWeight: 700,
-                          background: isIgPub ? 'var(--status-danger-soft)' : 'rgba(15, 23, 42, 0.8)',
-                          border: isIgPub ? '1px solid var(--status-danger)' : '1px solid var(--surface-interactive)',
-                          color: isIgPub ? 'var(--status-danger)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px'
+                          background: isIgPub ? 'var(--status-danger-soft)' : undefined,
+                          border: isIgPub ? '1px solid var(--status-danger)' : undefined,
+                          color: isIgPub ? 'var(--status-danger)' : undefined, display: 'flex', alignItems: 'center', gap: '4px'
                         }}>
                           <span>📸 IG</span>
                           <span>{item.instagram_status === 'Published' ? `✓ Published (${formatDate(item.instagram_publish_date)})` : item.instagram_status === 'Skipped' ? '⏭️ Skipped' : item.instagram_status}</span>

@@ -215,6 +215,17 @@ textarea::placeholder { color: var(--text-muted); opacity: 1; }
 .content-action-neutral { background: var(--status-neutral-soft); border-color: var(--status-neutral); color: var(--status-neutral); }
 .content-action-success { background: var(--status-success-soft); border-color: var(--status-success); color: var(--status-success); }
 .content-action:disabled { background: var(--surface-interactive); border-color: var(--border-subtle); color: var(--text-disabled); cursor: not-allowed; box-shadow: none; transform: none; }
+.content-action-compact { min-height: 30px; box-sizing: border-box; display: flex !important; align-items: center; justify-content: center; line-height: 1.2; }
+
+.contentflow-view-tabs { border-bottom: 1px solid var(--border-subtle); }
+.contentflow-view-tab { background: var(--surface); border: 1px solid var(--border-subtle); color: var(--text-secondary); }
+.contentflow-view-tab:hover { background: var(--surface-hover); border-color: var(--border-strong); color: var(--text-primary); }
+.contentflow-view-tab-active { background: var(--status-info-soft); border-color: var(--status-info); color: var(--status-info); }
+.contentflow-view-tab-active:hover { background: var(--status-info-soft); color: var(--status-info); }
+.contentflow-video-thumbnail { background: linear-gradient(135deg, var(--surface-raised), var(--surface-interactive)); border: 1px solid var(--border-subtle); }
+.contentflow-video-id { background: color-mix(in srgb, var(--surface) 88%, transparent); border: 1px solid var(--status-info); color: var(--status-info); }
+.contentflow-platform-chip { background: var(--surface-raised); border: 1px solid var(--border-strong); color: var(--text-secondary); }
+.contentflow-status-unpublished { background: var(--surface-interactive); border: 1px solid var(--border-strong); color: var(--text-secondary); }
 
 /* User Management table surfaces remain legible in both themes. */
 .user-table-shell { background: var(--surface); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-card); }
