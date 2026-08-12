@@ -890,7 +890,7 @@ Route detail dinilai menggunakan data staging yang tersedia tanpa melakukan aksi
 ### Follow-up tab akun brand ContentFlow
 
 - [x] Tingkatkan kontras tab brand default, hover, dan selected pada light/dark theme.
-- [ ] Jalankan build, rilis patch, dan deploy hanya ke Mac Mini dev.
+- [x] Jalankan build, rilis patch, dan deploy hanya ke Mac Mini dev.
 
 ### Follow-up Content Planner detail dan Video ID search
 
