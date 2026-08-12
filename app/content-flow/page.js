@@ -181,21 +181,42 @@ function ContentFlowHubPageContent() {
   const [loadingDownloadUrl, setLoadingDownloadUrl] = useState(false);
   const [copiedKeys, setCopiedKeys] = useState({});
   const [downloadCooldowns, setDownloadCooldowns] = useState({});
+  const [resolvedUrls, setResolvedUrls] = useState({});
+  const [loadingUrls, setLoadingUrls] = useState({});
 
-  const getDirectDownloadUrl = (nextcloudUrl, videoId) => {
-    if (!nextcloudUrl || !videoId) return null;
-    const cleanUrl = nextcloudUrl.replace(/\/+$/, '');
-    const filename = `${videoId}_video_final.mp4`;
-    return `${cleanUrl}/download?files=${encodeURIComponent(filename)}`;
-  };
+  const handleDownload = async (item, directUrl = null) => {
+    if (downloadCooldowns[item.id]) return;
 
-  const handleDownload = (itemId, downloadUrl) => {
-    if (!downloadUrl) return;
-    window.open(downloadUrl, '_blank');
-    setDownloadCooldowns(prev => ({ ...prev, [itemId]: true }));
-    setTimeout(() => {
-      setDownloadCooldowns(prev => ({ ...prev, [itemId]: false }));
-    }, 30000);
+    let urlToOpen = directUrl || resolvedUrls[item.id];
+
+    if (!urlToOpen) {
+      setLoadingUrls(prev => ({ ...prev, [item.id]: true }));
+      try {
+        const res = await fetch(`/api/content-flow/media-files?videoId=${encodeURIComponent(item.video_id)}&folderUrl=${encodeURIComponent(item.nextcloud_url)}`);
+        const json = await res.json();
+        if (json.success && json.defaultFile) {
+          urlToOpen = json.defaultFile.directUrl;
+          setResolvedUrls(prev => ({ ...prev, [item.id]: urlToOpen }));
+        } else {
+          alert('Gagal mendeteksi file video final di folder Nextcloud.');
+          return;
+        }
+      } catch (err) {
+        console.error('Error resolving media files:', err);
+        alert('Terjadi kesalahan saat menghubungi server.');
+        return;
+      } finally {
+        setLoadingUrls(prev => ({ ...prev, [item.id]: false }));
+      }
+    }
+
+    if (urlToOpen) {
+      window.open(urlToOpen, '_blank');
+      setDownloadCooldowns(prev => ({ ...prev, [item.id]: true }));
+      setTimeout(() => {
+        setDownloadCooldowns(prev => ({ ...prev, [item.id]: false }));
+      }, 30000);
+    }
   };
   const [editStatusForm, setEditStatusForm] = useState({
     tiktok_status: 'Not Published',
@@ -1318,7 +1339,7 @@ function ContentFlowHubPageContent() {
 
                           if (isNextcloud) {
                             const isCardCooldown = downloadCooldowns[item.id];
-                            const cardDownloadUrl = getDirectDownloadUrl(targetUrl, item.video_id);
+                            const isCardLoading = loadingUrls[item.id];
                             return (
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                 <a href={targetUrl} target="_blank" rel="noreferrer" style={{ display: 'block', width: '100%', textAlign: 'center', padding: '6px 10px', borderRadius: '8px', background: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)', color: '#ffffff', fontSize: '11px', fontWeight: 700, textDecoration: 'none', boxShadow: '0 2px 8px rgba(56, 189, 248, 0.25)' }} title="Buka Link Nextcloud">
@@ -1328,28 +1349,28 @@ function ContentFlowHubPageContent() {
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleDownload(item.id, cardDownloadUrl);
+                                    handleDownload(item);
                                   }}
-                                  disabled={isCardCooldown || !cardDownloadUrl}
+                                  disabled={isCardCooldown || isCardLoading}
                                   style={{
                                     display: 'block',
                                     width: '100%',
                                     textAlign: 'center',
                                     padding: '6px 10px',
                                     borderRadius: '8px',
-                                    background: isCardCooldown
+                                    background: (isCardCooldown || isCardLoading)
                                       ? 'rgba(74, 85, 104, 0.5)'
                                       : 'linear-gradient(135deg, #a855f7 0%, #c084fc 100%)',
-                                    border: isCardCooldown ? '1px solid #4a5568' : '1px solid #c084fc',
-                                    color: isCardCooldown ? '#a0aec0' : '#ffffff',
+                                    border: (isCardCooldown || isCardLoading) ? '1px solid #4a5568' : '1px solid #c084fc',
+                                    color: (isCardCooldown || isCardLoading) ? '#a0aec0' : '#ffffff',
                                     fontSize: '11px',
                                     fontWeight: 700,
-                                    cursor: (isCardCooldown || !cardDownloadUrl) ? 'not-allowed' : 'pointer',
-                                    boxShadow: isCardCooldown ? 'none' : '0 2px 8px rgba(192, 132, 252, 0.25)',
+                                    cursor: (isCardCooldown || isCardLoading) ? 'not-allowed' : 'pointer',
+                                    boxShadow: (isCardCooldown || isCardLoading) ? 'none' : '0 2px 8px rgba(192, 132, 252, 0.25)',
                                     transition: 'all 0.2s ease'
                                   }}
                                 >
-                                  {isCardCooldown ? '⏳ Cooldown' : '📥 Download Video'}
+                                  {isCardLoading ? '🔄 Loading...' : isCardCooldown ? '⏳ Cooldown' : '📥 Download Video'}
                                 </button>
                               </div>
                             );

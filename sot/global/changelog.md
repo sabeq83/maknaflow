@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.14.6 — Align card download to fetch URL on-demand (12/08/2026)
+- Align card-level download URL resolving logic with modal dynamically on click
+
 ## V2.14.5 — Fix card-level download button URL formatting (12/08/2026)
 - Align card-level download filename prefix and suffix with Nextcloud standards
 
