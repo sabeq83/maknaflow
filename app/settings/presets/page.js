@@ -92,8 +92,9 @@ const initialForm = {
   tts_model_quality: 'speech-2.8-turbo',
   enable_glabs: true,
   enable_ffmpeg: true,
-  upload_markdown: true,
-  upload_spreadsheet: false
+  ffmpeg_video_scale: 1.00,
+  ffmpeg_bgm_volume: 0.00,
+  ffmpeg_sfx_volume: 0.00
 };
 
 function mapPresetToForm(p) {
@@ -153,8 +154,9 @@ function mapPresetToForm(p) {
     tts_model_quality: bs.tts_model_quality || 'speech-2.8-turbo',
     enable_glabs: wf.enable_glabs || false,
     enable_ffmpeg: wf.enable_ffmpeg || false,
-    upload_markdown: wf.upload_markdown ?? true,
-    upload_spreadsheet: wf.upload_spreadsheet ?? false
+    ffmpeg_video_scale: Number(wf.ffmpeg_video_scale ?? 1.00),
+    ffmpeg_bgm_volume: Number(wf.ffmpeg_bgm_volume ?? 0.00),
+    ffmpeg_sfx_volume: Number(wf.ffmpeg_sfx_volume ?? 0.00)
   };
 }
 
@@ -211,9 +213,12 @@ function mapFormToPayload(f) {
         enable_tts: f.enable_tts,
         enable_glabs: f.enable_glabs,
         enable_ffmpeg: f.enable_ffmpeg,
+        ffmpeg_video_scale: Number(f.ffmpeg_video_scale),
+        ffmpeg_bgm_volume: Number(f.ffmpeg_bgm_volume),
+        ffmpeg_sfx_volume: Number(f.ffmpeg_sfx_volume),
         enable_social_post: false,
-        upload_markdown: f.upload_markdown,
-        upload_spreadsheet: f.upload_spreadsheet
+        upload_markdown: true,
+        upload_spreadsheet: false
       }
     }
   };
@@ -630,11 +635,31 @@ export default function PresetsPage() {
                           </label>
                           <label className="form-label">
                             Subject Demographic
-                            <select className="form-select" value={form.subject_demographic} onChange={e => setForm({ ...form, subject_demographic: e.target.value })}>
-                              <option value="syari_classic">Syari Muslimah Classic</option>
-                              <option value="hijab_modern">Hijab Modern Casual</option>
-                              <option value="casual_indonesian_male">Casual Indonesian Male</option>
-                              <option value="kids_family">Family / Kids Character</option>
+                            <select className="form-select" value={form.subject_demographic} onChange={e => {
+                              const val = e.target.value;
+                              let concept = form.character_concept;
+                              if (val.startsWith('mascot_universe_')) {
+                                concept = 'cartoon_face';
+                              } else if (val.startsWith('stylized_3d_')) {
+                                concept = 'stylized_3d';
+                              } else {
+                                concept = 'faceless';
+                              }
+                              setForm({ ...form, subject_demographic: val, character_concept: concept, wardrobe_style: 'random' });
+                            }}>
+                              <optgroup label="── Manusia Terpercaya ──">
+                                <option value="syari_classic">Wanita Gamis Syar'iy (Hanya Tangan)</option>
+                                <option value="caucasian_male">Pria Kaukasia (Hanya Tangan)</option>
+                                <option value="stylized_3d_muslimah">Wanita 3D Stylized (Clay Art)</option>
+                                <option value="stylized_3d_male">Pria 3D Stylized (Clay Art)</option>
+                                <option value="stylized_3d_duo">Duo 3D Stylized - 2 Karakter (Clay Art)</option>
+                              </optgroup>
+                              <optgroup label="── Semesta Maskot Otonom ──">
+                                <option value="mascot_universe_herbal">🌿 Semesta Herbal (Jahe, Kunyit, Mint...)</option>
+                                <option value="mascot_universe_kitchen">🍳 Semesta Dapur (Wajan, Blender, Tomat...)</option>
+                                <option value="mascot_universe_home_living">🏠 Semesta Rumah (Vacuum, Sofa, Lampu...)</option>
+                                <option value="mascot_universe_pet">🐾 Semesta Hewan Peliharaan (Kucing, Anjing...)</option>
+                              </optgroup>
                             </select>
                           </label>
                         </div>
@@ -675,14 +700,16 @@ export default function PresetsPage() {
                           )}
                         </div>
 
-                        <label className="form-label">
-                          Visual Style Preset
-                          <select className="form-select" value={form.visual_style_preset} onChange={e => setForm({ ...form, visual_style_preset: e.target.value })}>
-                            <option value="3d_claymation_cozy">3D Claymation Cozy Cozy</option>
-                            <option value="hyper_ugc">Hyper-Realist UGC</option>
-                            <option value="warm_film_grain">Warm Film Grain</option>
-                          </select>
-                        </label>
+                        {form.subject_demographic.startsWith('mascot_universe_') && (
+                          <label className="form-label">
+                            🎨 Gaya Estetika Animasi Maskot
+                            <select className="form-select" value={form.visual_style_preset} onChange={e => setForm({ ...form, visual_style_preset: e.target.value })}>
+                              <option value="3d_claymation_cozy">3D Claymation Cozy (Shaun the Sheep Look)</option>
+                              <option value="kawaii_flat_vector">2D Kawaii Flat Vector (Minimalis Jepang)</option>
+                              <option value="ghibli_watercolor">Studio Ghibli Watercolor (Cat Air Magis)</option>
+                            </select>
+                          </label>
+                        )}
                       </>
                     )}
                   </div>
@@ -765,16 +792,26 @@ export default function PresetsPage() {
                       </label>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                      <label className="form-label" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                        <input type="checkbox" checked={form.upload_markdown} onChange={e => setForm({ ...form, upload_markdown: e.target.checked })} />
-                        Upload Markdown Aset
-                      </label>
-                      <label className="form-label" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                        <input type="checkbox" checked={form.upload_spreadsheet} onChange={e => setForm({ ...form, upload_spreadsheet: e.target.checked })} />
-                        Upload Spreadsheet Aset
-                      </label>
-                    </div>
+                    {form.enable_ffmpeg && (
+                      <fieldset style={{ border: '1px solid var(--border-color)', borderRadius: 8, padding: 16, display: 'grid', gap: 12 }}>
+                        <legend style={{ padding: '0 8px', fontSize: 13, fontWeight: 600 }}>🎞️ FFmpeg Render Settings</legend>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
+                          <label className="form-label">
+                            Video Scale (Zoom: {Math.round(form.ffmpeg_video_scale * 100)}%)
+                            <input type="range" min="1.0" max="2.0" step="0.05" value={form.ffmpeg_video_scale} onChange={e => setForm({ ...form, ffmpeg_video_scale: parseFloat(e.target.value) })} style={{ width: '100%', padding: 0 }} />
+                          </label>
+                          <label className="form-label">
+                            BGM Volume ({form.ffmpeg_bgm_volume}x)
+                            <input type="range" min="0.0" max="1.0" step="0.05" value={form.ffmpeg_bgm_volume} onChange={e => setForm({ ...form, ffmpeg_bgm_volume: parseFloat(e.target.value) })} style={{ width: '100%', padding: 0 }} />
+                          </label>
+                          <label className="form-label">
+                            SFX Volume ({form.ffmpeg_sfx_volume}x)
+                            <input type="range" min="0.0" max="1.0" step="0.05" value={form.ffmpeg_sfx_volume} onChange={e => setForm({ ...form, ffmpeg_sfx_volume: parseFloat(e.target.value) })} style={{ width: '100%', padding: 0 }} />
+                          </label>
+                        </div>
+                      </fieldset>
+                    )}
+
                   </div>
                 )}
               </div>

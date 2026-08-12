@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.1 — Refine Preset Manager UI Form (12/08/2026)
+- Hapus checkbox upload markdown & spreadsheet
+- Tambah slider Video Scale, BGM/SFX Volume di FFmpeg dengan default 0
+- Kondisionalkan visual_style_preset hanya untuk Semesta Maskot
+
 ## V2.14.0 — Standalone Preset Manager Page (12/08/2026)
 - Membuat halaman Preset Manager mandiri di /settings/presets dengan 5 accordion form
 - Menyisipkan Preset Manager di sidebar PLANNING yang dapat dikunci Superadmin per tenant
