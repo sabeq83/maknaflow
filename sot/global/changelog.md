@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.10 — Penyelarasan Kontras Light Theme Semua Menu (12/08/2026)
+- Menyematkan CSS attribute selectors untuk override teks putih/terang inline di seluruh menu
+- Menyelaraskan form input, textarea, select, dan tabel secara otomatis di Light Mode
+- Mengecualikan tombol solid dan status badge dari override warna
+
 ## V2.14.9 — Perbaikan Kontras Preset Manage (12/08/2026)
 - Mengubah teks judul akordion preset dari putih statis ke text-primary
 

@@ -125,6 +125,62 @@
   border-color: rgba(124, 58, 237, 0.25);
 }
 
+/* Scoped Light Theme Contrast Overrides for Inline Styles */
+[data-theme='light'] h1:not(button *):not(.badge *):not([class*='btn']):not([class*='status-']):not([class*='brand-']),
+[data-theme='light'] h2:not(button *):not(.badge *):not([class*='btn']):not([class*='status-']):not([class*='brand-']),
+[data-theme='light'] h3:not(button *):not(.badge *):not([class*='btn']):not([class*='status-']):not([class*='brand-']),
+[data-theme='light'] h4:not(button *):not(.badge *):not([class*='btn']):not([class*='status-']):not([class*='brand-']),
+[data-theme='light'] h5:not(button *):not(.badge *):not([class*='btn']):not([class*='status-']):not([class*='brand-']),
+[data-theme='light'] h6:not(button *):not(.badge *):not([class*='btn']):not([class*='status-']):not([class*='brand-']),
+[data-theme='light'] strong:not(button *):not(.badge *):not([class*='btn']):not([class*='status-']):not([class*='brand-']),
+[data-theme='light'] b:not(button *):not(.badge *):not([class*='btn']):not([class*='status-']):not([class*='brand-']),
+[data-theme='light'] label:not(button *):not(.badge *):not([class*='btn']):not([class*='status-']):not([class*='brand-']),
+[data-theme='light'] [style*='color: #fff']:not(button *):not(.badge *):not([class*='btn']):not([class*='status-']):not([class*='brand-']),
+[data-theme='light'] [style*='color:#fff']:not(button *):not(.badge *):not([class*='btn']):not([class*='status-']):not([class*='brand-']),
+[data-theme='light'] [style*='color: #ffffff']:not(button *):not(.badge *):not([class*='btn']):not([class*='status-']):not([class*='brand-']),
+[data-theme='light'] [style*='color:#ffffff']:not(button *):not(.badge *):not([class*='btn']):not([class*='status-']):not([class*='brand-']),
+[data-theme='light'] [style*='color: white']:not(button *):not(.badge *):not([class*='btn']):not([class*='status-']):not([class*='brand-']),
+[data-theme='light'] [style*='color:white']:not(button *):not(.badge *):not([class*='btn']):not([class*='status-']):not([class*='brand-']) {
+  color: var(--text-primary) !important;
+}
+
+/* Scoped Muted Light Theme Overrides */
+[data-theme='light'] [style*='color: #a0aec0']:not(button *):not(.badge *):not([class*='btn']),
+[data-theme='light'] [style*='color:#a0aec0']:not(button *):not(.badge *):not([class*='btn']),
+[data-theme='light'] [style*='color: #cbd5e1']:not(button *):not(.badge *):not([class*='btn']),
+[data-theme='light'] [style*='color:#cbd5e1']:not(button *):not(.badge *):not([class*='btn']),
+[data-theme='light'] [style*='color: #94a3b8']:not(button *):not(.badge *):not([class*='btn']),
+[data-theme='light'] [style*='color:#94a3b8']:not(button *):not(.badge *):not([class*='btn']) {
+  color: var(--text-muted) !important;
+}
+
+/* Form input fields & textareas inline-override */
+[data-theme='light'] input:not([type='checkbox']):not([type='radio']),
+[data-theme='light'] textarea,
+[data-theme='light'] select {
+  color: var(--text-primary) !important;
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border) !important;
+}
+
+/* Tables and cells overrides */
+[data-theme='light'] th {
+  color: var(--text-primary) !important;
+  background-color: var(--bg-glass) !important;
+}
+[data-theme='light'] td {
+  color: var(--text-secondary) !important;
+}
+[data-theme='light'] td strong {
+  color: var(--text-primary) !important;
+}
+
+/* Custom interactive code tags */
+[data-theme='light'] code {
+  color: var(--accent-light) !important;
+  background-color: var(--bg-glass) !important;
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body { height: 100%; overflow: hidden; }
