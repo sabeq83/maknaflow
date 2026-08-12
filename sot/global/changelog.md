@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.14.9 — Perbaikan Kontras Preset Manage (12/08/2026)
+- Mengubah teks judul akordion preset dari putih statis ke text-primary
+
 ## V2.14.8 — Perbaikan Kontras Tombol Product Database (12/08/2026)
 - Mengubah tulisan tombol card produk dari putih statis ke warna kontras adaptif tema
 
