@@ -1482,6 +1482,23 @@ function MultiplierLabPageContent() {
                               }}>
                                 {statusLabel}
                               </span>
+                              {t.is_synced ? (
+                                <span style={{
+                                  fontSize: '0.68rem',
+                                  padding: '2px 8px',
+                                  borderRadius: '4px',
+                                  fontWeight: 'bold',
+                                  textTransform: 'uppercase',
+                                  background: 'rgba(52,211,153,0.15)',
+                                  color: '#34d399',
+                                  border: '1px solid rgba(52,211,153,0.3)',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}>
+                                  🔗 Synced to ContentFlow
+                                </span>
+                              ) : null}
                             </div>
                             <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>ID: {t.id}</span>
                           </div>

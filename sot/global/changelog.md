@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.14.3 — Implement campaign sync badges, video download button, and contentflow filters (12/08/2026)
+- Align Phase 1 product image lookup with Re-Gen
+- Add Synced to ContentFlow badges to OPC, RE, Recipe, Multiplier, and Product Bridge campaigns
+- Add Download Video Final button in ContentFlow modal
+- Filter out video IDs without Nextcloud assets from ContentFlow list
+
 ## V2.14.2 — Fix strategic campaigns schema and typecast bindings query (12/08/2026)
 - Add brand_profile_id column migration for strategic_campaigns
 - Add parameter typecast for campaign_product_bindings

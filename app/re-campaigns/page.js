@@ -2451,6 +2451,23 @@ export default function RECampaignsPage() {
                           <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', padding: '3px 8px', borderRadius: 8, background: statusBg, color: statusColor, border: `1px solid ${statusBorder}` }}>
                             {c.status}
                           </span>
+                          {c.is_synced ? (
+                            <span style={{
+                              fontSize: '0.7rem',
+                              fontWeight: 700,
+                              textTransform: 'uppercase',
+                              padding: '3px 8px',
+                              borderRadius: 8,
+                              background: 'rgba(52,211,153,0.15)',
+                              color: '#34d399',
+                              border: '1px solid rgba(52,211,153,0.3)',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}>
+                              🔗 Synced to ContentFlow
+                            </span>
+                          ) : null}
                         </div>
                       </div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>

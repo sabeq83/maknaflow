@@ -177,6 +177,8 @@ function ContentFlowHubPageContent() {
 
   // Detail Modal State
   const [activeItem, setActiveItem] = useState(null);
+  const [directDownloadUrl, setDirectDownloadUrl] = useState(null);
+  const [loadingDownloadUrl, setLoadingDownloadUrl] = useState(false);
   const [copiedKeys, setCopiedKeys] = useState({});
   const [editStatusForm, setEditStatusForm] = useState({
     tiktok_status: 'Not Published',
@@ -390,6 +392,7 @@ function ContentFlowHubPageContent() {
 
   function openDetailModal(item) {
     setActiveItem(item);
+    setDirectDownloadUrl(null);
     setEditStatusForm({
       tiktok_status: item.tiktok_status || 'Not Published',
       tiktok_publish_date: item.tiktok_publish_date || '',
@@ -408,6 +411,19 @@ function ContentFlowHubPageContent() {
       link_affiliate: item.link_affiliate || '',
       catatan: item.catatan || ''
     });
+
+    if (item.nextcloud_url) {
+      setLoadingDownloadUrl(true);
+      fetch(`/api/content-flow/media-files?videoId=${encodeURIComponent(item.video_id)}&folderUrl=${encodeURIComponent(item.nextcloud_url)}`)
+        .then(res => res.json())
+        .then(json => {
+          if (json.success && json.defaultFile) {
+            setDirectDownloadUrl(json.defaultFile.directUrl);
+          }
+        })
+        .catch(err => console.error('Error fetching media files:', err))
+        .finally(() => setLoadingDownloadUrl(false));
+    }
   }
 
   async function handleSaveStatus(e) {
@@ -1587,21 +1603,48 @@ function ContentFlowHubPageContent() {
                           }
 
                           return (
-                            <a
-                              href={targetUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              style={{
-                                padding: '10px 14px', borderRadius: '10px',
-                                background: isNextcloud ? 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)' : 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-                                border: isNextcloud ? '1px solid #38bdf8' : '1px solid #10b981', color: '#ffffff', fontWeight: 700, fontSize: '13px',
-                                textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                                boxShadow: isNextcloud ? '0 4px 14px rgba(56, 189, 248, 0.3)' : '0 4px 14px rgba(16, 185, 129, 0.3)'
-                              }}
-                            >
-                              {isNextcloud ? '☁️ Nextcloud Asset' : '📁 Drive Asset'}
-                            </a>
-                          );
+                             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                               <a
+                                 href={targetUrl}
+                                 target="_blank"
+                                 rel="noreferrer"
+                                 style={{
+                                   padding: '10px 14px', borderRadius: '10px',
+                                   background: isNextcloud ? 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)' : 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+                                   border: isNextcloud ? '1px solid #38bdf8' : '1px solid #10b981', color: '#ffffff', fontWeight: 700, fontSize: '13px',
+                                   textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                   boxShadow: isNextcloud ? '0 4px 14px rgba(56, 189, 248, 0.3)' : '0 4px 14px rgba(16, 185, 129, 0.3)'
+                                 }}
+                               >
+                                 {isNextcloud ? '☁️ Nextcloud Asset' : '📁 Drive Asset'}
+                               </a>
+
+                               {isNextcloud && (
+                                 <button
+                                   onClick={() => {
+                                     if (directDownloadUrl) {
+                                       window.open(directDownloadUrl, '_blank');
+                                     } else {
+                                       alert('Tautan unduhan langsung sedang dimuat...');
+                                     }
+                                   }}
+                                   disabled={loadingDownloadUrl || !directDownloadUrl}
+                                   style={{
+                                     padding: '10px 14px', borderRadius: '10px',
+                                     background: 'linear-gradient(135deg, #a855f7 0%, #c084fc 100%)',
+                                     border: '1px solid #c084fc', color: '#ffffff', fontWeight: 700, fontSize: '13px',
+                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                     cursor: (loadingDownloadUrl || !directDownloadUrl) ? 'not-allowed' : 'pointer',
+                                     boxShadow: '0 4px 14px rgba(192, 132, 252, 0.3)',
+                                     opacity: (loadingDownloadUrl || !directDownloadUrl) ? 0.6 : 1,
+                                     transition: 'all 0.2s ease'
+                                   }}
+                                 >
+                                   {loadingDownloadUrl ? '🔄 Loading Link...' : '📥 Download Video Final'}
+                                 </button>
+                               )}
+                             </div>
+                           );
                         })()}
                       </div>
 

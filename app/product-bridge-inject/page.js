@@ -1535,6 +1535,24 @@ export default function ProductBridgeInjectPage() {
                           {c.status.toUpperCase()}
                         </span>
 
+                        {c.is_synced ? (
+                          <span style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            padding: '4px 10px',
+                            borderRadius: '12px',
+                            background: 'rgba(52,211,153,0.15)',
+                            color: '#34d399',
+                            border: '1px solid rgba(52,211,153,0.3)',
+                            marginLeft: '6px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}>
+                            🔗 Synced to ContentFlow
+                          </span>
+                        ) : null}
+
                         {(c.status === 'completed' || c.campaign_type === 'bulk') && (
                           <button 
                             onClick={(e) => { e.stopPropagation(); handleSyncContentFlow(c.id); }}

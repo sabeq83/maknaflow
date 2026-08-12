@@ -19,7 +19,8 @@ export const GET = withTenantContext(async () => {
     const campaigns = await db.prepare(`
       SELECT c.*, p.product_name, o.injected_script_md_path, o.clip2_video_path, b.brand_name,
              (SELECT COUNT(*) FROM bridge_injector_items WHERE campaign_id = c.id) as total_items,
-             (SELECT COUNT(*) FROM bridge_injector_items WHERE campaign_id = c.id AND workflow_status = 'completed') as completed_items
+             (SELECT COUNT(*) FROM bridge_injector_items WHERE campaign_id = c.id AND workflow_status = 'completed') as completed_items,
+             EXISTS(SELECT 1 FROM content_flow_items cf WHERE cf.source_campaign_id = c.id AND cf.source_type = 'bridge' AND cf.tenant_id = c.tenant_id) as is_synced
       FROM bridge_injector_campaigns c
       LEFT JOIN product_extractions p ON c.target_product_id = p.id
       LEFT JOIN bridge_injector_outputs o ON c.id = o.campaign_id

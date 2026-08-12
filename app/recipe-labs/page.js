@@ -2181,9 +2181,28 @@ export default function RecipeLabsPage() {
                           {c.completed_items} / {c.target_recipe_count} Item
                         </td>
                         <td style={{ padding: '12px' }}>
-                          <span className={`stat-value ${c.status === 'completed' ? 'success' : c.status === 'failed' ? 'danger' : 'warning'}`} style={{ fontSize: '0.85rem' }}>
-                            {c.status.toUpperCase()}
-                          </span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span className={`stat-value ${c.status === 'completed' ? 'success' : c.status === 'failed' ? 'danger' : 'warning'}`} style={{ fontSize: '0.85rem' }}>
+                              {c.status.toUpperCase()}
+                            </span>
+                            {c.is_synced ? (
+                              <span style={{
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                fontSize: '0.7rem',
+                                fontWeight: 700,
+                                background: 'rgba(52,211,153,0.15)',
+                                color: '#34d399',
+                                border: '1px solid rgba(52,211,153,0.3)',
+                                textTransform: 'uppercase',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px'
+                              }}>
+                                🔗 Synced
+                              </span>
+                            ) : null}
+                          </div>
                         </td>
                         <td style={{ padding: '12px', textAlign: 'right' }}>
                           <button
