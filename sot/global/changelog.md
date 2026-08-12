@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.22 — Warna Subtab Brand Sidebar (13/08/2026)
+- Hapus warna putih dan gradient hardcode pada subtab brand Sidebar
+- Gunakan teks hijau gelap dan background hijau lembut untuk selected light theme
+
 ## V2.14.21 — Proporsi Tanggal Rilis dan Kontras Brand (12/08/2026)
 - Batasi lebar field Tanggal Rilis modal ContentFlow menjadi 168px
 - Pastikan selected brand light theme menggunakan teks hijau gelap yang nyaman dibaca

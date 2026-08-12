@@ -292,9 +292,9 @@ function SidebarContent() {
                 }}>
                   <Link
                     href="/content-flow?account=all"
+                    className={`sidebar-brand-subtab ${currentAccount === 'all' ? 'sidebar-brand-subtab-active' : ''}`}
                     style={{
                       fontSize: '11px',
-                      color: currentAccount === 'all' ? '#ffffff' : '#a1a1aa',
                       fontWeight: currentAccount === 'all' ? 700 : 500,
                       padding: '5px 10px',
                       borderRadius: '6px',
@@ -302,9 +302,6 @@ function SidebarContent() {
                       display: 'flex',
                       alignItems: 'center',
                       gap: '6px',
-                      background: currentAccount === 'all' ? 'linear-gradient(135deg, rgba(16,185,129,0.25) 0%, rgba(5,150,105,0.2) 100%)' : 'var(--surface-interactive)',
-                      borderLeft: currentAccount === 'all' ? '3px solid #10b981' : '3px solid transparent',
-                      boxShadow: currentAccount === 'all' ? '0 0 12px rgba(16,185,129,0.25)' : 'none',
                       transition: 'all 0.2s ease'
                     }}
                   >
@@ -316,9 +313,9 @@ function SidebarContent() {
                       <Link
                         key={acc}
                         href={`/content-flow?account=${encodeURIComponent(acc)}`}
+                        className={`sidebar-brand-subtab ${isSubActive ? 'sidebar-brand-subtab-active' : ''}`}
                         style={{
                           fontSize: '11px',
-                          color: isSubActive ? '#ffffff' : '#a1a1aa',
                           fontWeight: isSubActive ? 700 : 500,
                           padding: '5px 10px',
                           borderRadius: '6px',
@@ -326,9 +323,6 @@ function SidebarContent() {
                           display: 'flex',
                           alignItems: 'center',
                           gap: '6px',
-                          background: isSubActive ? 'linear-gradient(135deg, rgba(16,185,129,0.25) 0%, rgba(5,150,105,0.2) 100%)' : 'var(--surface-interactive)',
-                          borderLeft: isSubActive ? '3px solid #10b981' : '3px solid transparent',
-                          boxShadow: isSubActive ? '0 0 12px rgba(16,185,129,0.25)' : 'none',
                           transition: 'all 0.2s ease'
                         }}
                       >
