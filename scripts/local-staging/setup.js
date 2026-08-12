@@ -128,6 +128,7 @@ async function applyStagingMigrations(client) {
   await client.query(`CREATE INDEX IF NOT EXISTS idx_product_extractions_normalized_url ON product_extractions(tenant_id, normalized_source_url)`);
   await client.query(`ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS nextcloud_parent_folder TEXT`);
   await client.query(`ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS drive_parent_folder TEXT`);
+  await client.query(`ALTER TABLE strategic_campaigns ADD COLUMN IF NOT EXISTS brand_profile_id TEXT`);
   await client.query(`ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS editorial_brand_context TEXT`);
   await client.query(`ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS editorial_content_goal TEXT`);
   await client.query(`ALTER TABLE brand_profiles ADD COLUMN IF NOT EXISTS editorial_content_pillars_json TEXT DEFAULT '[]'`);

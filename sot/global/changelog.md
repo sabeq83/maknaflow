@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.2 — Fix strategic campaigns schema and typecast bindings query (12/08/2026)
+- Add brand_profile_id column migration for strategic_campaigns
+- Add parameter typecast for campaign_product_bindings
+
 ## V2.14.1 — Refine Preset Manager UI Form (12/08/2026)
 - Hapus checkbox upload markdown & spreadsheet
 - Tambah slider Video Scale, BGM/SFX Volume di FFmpeg dengan default 0
