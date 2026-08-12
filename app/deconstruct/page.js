@@ -239,7 +239,7 @@ export default function DeconstructPage() {
     if (s === 'completed' || s === 'deconstructed') return 'var(--success-glow)';
     if (['processing','downloading','uploading','analyzing'].includes(s)) return 'rgba(116,185,255,0.15)';
     if (s === 'failed') return 'var(--danger-glow)';
-    return 'rgba(255,255,255,0.06)';
+    return 'var(--surface-interactive)';
   }
   function getStatusLabel(s) {
     const m = { pending_download:'PENDING', downloading:'DOWNLOADING', uploading:'UPLOADING',
@@ -263,7 +263,7 @@ export default function DeconstructPage() {
           return asset.gemini_file_uri ? 'danger' : 'pending';
         }
       }
-      
+
       if (stage === 'scrape') {
         if (s === 'pending_download') return 'pending';
         if (s === 'downloading') return 'active';
@@ -292,24 +292,24 @@ export default function DeconstructPage() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
         {stages.map((stage, sIdx) => {
           let color = 'var(--text-muted)';
-          let bg = 'rgba(255, 255, 255, 0.05)';
-          let border = '1px solid rgba(255, 255, 255, 0.1)';
+          let bg = 'var(--surface-interactive)';
+          let border = '1px solid var(--border-subtle)';
           let labelText = stage.label;
           let anim = 'none';
 
           if (stage.status === 'success') {
-            color = '#fff';
-            bg = 'rgba(46, 204, 113, 0.15)';
-            border = '1px solid rgba(46, 204, 113, 0.5)';
+            color = 'var(--text-primary)';
+            bg = 'var(--status-success-soft)';
+            border = '1px solid var(--status-success-soft)';
             labelText = `✓ ${stage.label}`;
           } else if (stage.status === 'danger') {
-            color = '#fff';
-            bg = 'rgba(231, 76, 60, 0.15)';
-            border = '1px solid rgba(231, 76, 60, 0.5)';
+            color = 'var(--text-primary)';
+            bg = 'var(--status-danger-soft)';
+            border = '1px solid var(--status-danger-soft)';
             labelText = `✗ ${stage.label}`;
           } else if (stage.status === 'active') {
-            color = '#fff';
-            bg = 'rgba(52, 152, 219, 0.25)';
+            color = 'var(--text-primary)';
+            bg = 'var(--status-info-soft)';
             border = '1px solid var(--accent-light)';
             labelText = `⏳ ${stage.label}`;
             anim = 'active-pulse 1.5s infinite alternate';
@@ -334,7 +334,7 @@ export default function DeconstructPage() {
               }}>
                 {labelText}
               </span>
-              {sIdx < stages.length - 1 && <span style={{ color: 'rgba(255, 255, 255, 0.15)', fontSize: '0.75rem', marginLeft: 2 }}>➔</span>}
+              {sIdx < stages.length - 1 && <span style={{ color: 'var(--border-subtle)', fontSize: '0.75rem', marginLeft: 2 }}>➔</span>}
             </div>
           );
         })}
@@ -499,13 +499,13 @@ export default function DeconstructPage() {
                           <div style={{ marginTop: 12 }}>
                             {/* Debug info strip */}
                             {csvDebug && (
-                              <div style={{ marginBottom: 8, padding: '6px 10px', borderRadius: 'var(--radius-sm)', background: 'rgba(108,92,231,0.08)', border: '1px solid rgba(108,92,231,0.2)', fontSize: '0.7rem', color: 'var(--text-muted)', display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                              <div style={{ marginBottom: 8, padding: '6px 10px', borderRadius: 'var(--radius-sm)', background: 'rgba(108,92,231,0.08)', border: '1px solid var(--status-neutral-soft)', fontSize: '0.7rem', color: 'var(--text-muted)', display: 'flex', gap: 16, flexWrap: 'wrap' }}>
                                 <span>Delimiter: <strong style={{ color: 'var(--accent-light)' }}>"{csvDebug.delimiter}"</strong></span>
                                 <span>Kolom URL: <strong style={{ color: 'var(--success)' }}>{csvDebug.urlCol}</strong></span>
                                 <span>Kolom Caption: <strong style={{ color: 'var(--info)' }}>{csvDebug.captionCol}</strong></span>
                               </div>
                             )}
-                            <div style={{ 
+                            <div style={{
                               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                               marginBottom: 8,
                             }}>
@@ -528,7 +528,7 @@ export default function DeconstructPage() {
                                 </thead>
                                 <tbody>
                                   {csvData.map((row, i) => (
-                                    <tr key={i} style={{ borderBottom: i < csvData.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)' }}>
+                                    <tr key={i} style={{ borderBottom: i < csvData.length - 1 ? '1px solid var(--surface-interactive)' : 'none', background: i % 2 === 0 ? 'transparent' : 'var(--surface-interactive)' }}>
                                       <td style={{ padding: '5px 8px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{i + 1}</td>
                                       <td style={{ padding: '5px 8px', fontFamily: 'var(--font-mono)', color: 'var(--accent-light)', maxWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                                         title={row.url}>{row.url}</td>
@@ -549,7 +549,7 @@ export default function DeconstructPage() {
                 <div style={{ marginTop: 20, display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
                   <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>Batal</button>
                   <button type="submit" className="btn btn-primary" disabled={submitting}
-                    style={{ background: 'linear-gradient(135deg, var(--accent), #6c5ce7)', minWidth: 200 }}>
+                    style={{ background: 'linear-gradient(135deg, var(--accent), var(--status-neutral))', minWidth: 200 }}>
                     {submitting ? '⏳ Memproses...' : '⚡ Mulai Dekonstruksi'}
                   </button>
                 </div>
@@ -601,7 +601,7 @@ export default function DeconstructPage() {
                             </div>
                             {b.status === 'processing' && (
                               <div style={{ width: 120, height: 4, background: 'var(--bg-glass)', borderRadius: 2, overflow: 'hidden', marginTop: 4 }}>
-                                <div style={{ height: '100%', width: `${progressPct}%`, background: 'linear-gradient(90deg, var(--accent), #6c5ce7)', borderRadius: 2, transition: 'width 0.5s' }} />
+                                <div style={{ height: '100%', width: `${progressPct}%`, background: 'linear-gradient(90deg, var(--accent), var(--status-neutral))', borderRadius: 2, transition: 'width 0.5s' }} />
                               </div>
                             )}
                           </div>
@@ -655,29 +655,29 @@ export default function DeconstructPage() {
                                           #{idx + 1}
                                         </span>
                                         <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1, gap: 2 }}>
-                                          <a 
-                                            href={asset.source_url} 
-                                            target="_blank" 
+                                          <a
+                                            href={asset.source_url}
+                                            target="_blank"
                                             rel="noopener noreferrer"
                                             onClick={(e) => e.stopPropagation()}
-                                            style={{ 
-                                              fontSize: '0.82rem', 
-                                              fontFamily: 'var(--font-mono)', 
-                                              color: 'var(--accent-light)', 
+                                            style={{
+                                              fontSize: '0.82rem',
+                                              fontFamily: 'var(--font-mono)',
+                                              color: 'var(--accent-light)',
                                               textDecoration: 'none',
                                               display: 'inline-flex',
                                               alignItems: 'center',
                                               gap: '4px',
                                               width: 'fit-content',
                                               maxWidth: '100%',
-                                              overflow: 'hidden', 
-                                              textOverflow: 'ellipsis', 
+                                              overflow: 'hidden',
+                                              textOverflow: 'ellipsis',
                                               whiteSpace: 'nowrap',
-                                              borderBottom: '1px dashed rgba(108, 92, 231, 0.4)',
+                                              borderBottom: '1px dashed var(--status-neutral-soft)',
                                               transition: 'color 0.2s, border-bottom-color 0.2s'
                                             }}
-                                            onMouseEnter={(e) => { e.currentTarget.style.color = '#a29bfe'; e.currentTarget.style.borderBottomColor = '#a29bfe'; }}
-                                            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--accent-light)'; e.currentTarget.style.borderBottomColor = 'rgba(108, 92, 231, 0.4)'; }}
+                                            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--status-neutral)'; e.currentTarget.style.borderBottomColor = 'var(--status-neutral)'; }}
+                                            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--accent-light)'; e.currentTarget.style.borderBottomColor = 'var(--status-neutral-soft)'; }}
                                           >
                                             🔗 {asset.source_url}
                                           </a>
@@ -695,7 +695,7 @@ export default function DeconstructPage() {
                                                     borderRadius: 3,
                                                     background: 'rgba(108, 92, 231, 0.08)',
                                                     color: 'var(--accent-light)',
-                                                    border: '1px solid rgba(108, 92, 231, 0.15)'
+                                                    border: '1px solid var(--status-neutral-soft)'
                                                   }}>
                                                     #{cleaned}
                                                   </span>
@@ -766,9 +766,9 @@ export default function DeconstructPage() {
                                                         fontWeight: 600,
                                                         padding: '2px 8px',
                                                         borderRadius: 4,
-                                                        background: 'rgba(108, 92, 231, 0.12)',
+                                                        background: 'var(--status-neutral-soft)',
                                                         color: 'var(--accent-light)',
-                                                        border: '1px solid rgba(108, 92, 231, 0.2)'
+                                                        border: '1px solid var(--status-neutral-soft)'
                                                       }}>
                                                         #{cleaned}
                                                       </span>
@@ -806,14 +806,14 @@ export default function DeconstructPage() {
                                                     window.location.href = `/recipe-labs?source_deconstruct_id=${asset.id}`;
                                                   }}
                                                   className="btn btn-primary"
-                                                  style={{ 
-                                                    padding: '4px 10px', 
-                                                    fontSize: '0.75rem', 
-                                                    height: '30px', 
-                                                    display: 'flex', 
+                                                  style={{
+                                                    padding: '4px 10px',
+                                                    fontSize: '0.75rem',
+                                                    height: '30px',
+                                                    display: 'flex',
                                                     alignItems: 'center',
                                                     background: 'linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%)',
-                                                    color: '#fff',
+                                                    color: 'var(--text-primary)',
                                                     fontWeight: 600,
                                                     border: 'none'
                                                   }}
@@ -853,17 +853,17 @@ export default function DeconstructPage() {
                                                 {storyboard.map((sc, si) => (
                                                   <tr key={si}>
                                                     <td style={{ fontWeight: 700, fontFamily: 'var(--font-mono)', verticalAlign: 'middle' }}>
-                                                      <span style={{ 
-                                                        display: 'inline-flex', 
-                                                        alignItems: 'center', 
-                                                        justifyContent: 'center', 
-                                                        width: 22, 
-                                                        height: 22, 
-                                                        borderRadius: '50%', 
-                                                        background: 'rgba(108, 92, 231, 0.15)', 
+                                                      <span style={{
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        width: 22,
+                                                        height: 22,
+                                                        borderRadius: '50%',
+                                                        background: 'var(--status-neutral-soft)',
                                                         color: 'var(--accent-light)',
                                                         fontSize: '0.72rem',
-                                                        border: '1px solid rgba(108, 92, 231, 0.3)'
+                                                        border: '1px solid var(--status-neutral-soft)'
                                                       }}>
                                                         {sc.scene || si+1}
                                                       </span>
@@ -876,11 +876,11 @@ export default function DeconstructPage() {
                                                           const cleaned = hook.trim();
                                                           if (!cleaned) return null;
                                                           return (
-                                                            <span key={hi} style={{ 
-                                                              fontSize: '0.65rem', 
-                                                              padding: '2px 6px', 
-                                                              borderRadius: 4, 
-                                                              background: 'rgba(253, 203, 110, 0.12)', 
+                                                            <span key={hi} style={{
+                                                              fontSize: '0.65rem',
+                                                              padding: '2px 6px',
+                                                              borderRadius: 4,
+                                                              background: 'rgba(253, 203, 110, 0.12)',
                                                               color: 'var(--warning)',
                                                               border: '1px solid rgba(253, 203, 110, 0.2)',
                                                               whiteSpace: 'normal',
@@ -907,17 +907,17 @@ export default function DeconstructPage() {
                                           </div>
                                           {/* Narrations */}
                                           {storyboard.some(s => s.narration_transcript) && (
-                                            <div style={{ 
-                                              marginTop: 14, 
-                                              padding: '12px 16px', 
-                                              background: 'rgba(255, 255, 255, 0.02)', 
-                                              borderRadius: 'var(--radius-sm)', 
-                                              border: '1px solid var(--border)' 
+                                            <div style={{
+                                              marginTop: 14,
+                                              padding: '12px 16px',
+                                              background: 'var(--surface-interactive)',
+                                              borderRadius: 'var(--radius-sm)',
+                                              border: '1px solid var(--border)'
                                             }}>
-                                              <div style={{ 
-                                                fontSize: '0.75rem', 
-                                                fontWeight: 700, 
-                                                color: 'var(--text-muted)', 
+                                              <div style={{
+                                                fontSize: '0.75rem',
+                                                fontWeight: 700,
+                                                color: 'var(--text-muted)',
                                                 marginBottom: 10,
                                                 display: 'flex',
                                                 alignItems: 'center',
@@ -927,21 +927,21 @@ export default function DeconstructPage() {
                                               </div>
                                               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                                                 {storyboard.filter(s => s.narration_transcript).map((s, si) => (
-                                                  <div key={si} style={{ 
-                                                    fontSize: '0.8rem', 
+                                                  <div key={si} style={{
+                                                    fontSize: '0.8rem',
                                                     lineHeight: 1.5,
                                                     display: 'flex',
                                                     alignItems: 'flex-start',
                                                     gap: 8,
                                                     paddingBottom: 6,
-                                                    borderBottom: si < storyboard.filter(s => s.narration_transcript).length - 1 ? '1px solid rgba(255, 255, 255, 0.03)' : 'none'
+                                                    borderBottom: si < storyboard.filter(s => s.narration_transcript).length - 1 ? '1px solid var(--surface-interactive)' : 'none'
                                                   }}>
-                                                    <span style={{ 
-                                                      fontFamily: 'var(--font-mono)', 
-                                                      fontSize: '0.7rem', 
-                                                      color: 'var(--accent-light)', 
+                                                    <span style={{
+                                                      fontFamily: 'var(--font-mono)',
+                                                      fontSize: '0.7rem',
+                                                      color: 'var(--accent-light)',
                                                       fontWeight: 600,
-                                                      background: 'rgba(108, 92, 231, 0.1)',
+                                                      background: 'var(--status-neutral-soft)',
                                                       padding: '1px 5px',
                                                       borderRadius: 3,
                                                       flexShrink: 0
@@ -969,27 +969,27 @@ export default function DeconstructPage() {
                                               <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--success)', marginBottom: 8, letterSpacing: '0.06em' }}>💚 Low Ticket</div>
                                               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                                                 {lowTicket.map((p, pi) => (
-                                                  <div key={pi} style={{ padding: 12, borderRadius: 'var(--radius-sm)', border: '1px solid rgba(46, 204, 113, 0.15)', background: 'rgba(46, 204, 113, 0.02)', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                                                    <div style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: 4, color: '#fff' }}>{p.product_name}</div>
+                                                  <div key={pi} style={{ padding: 12, borderRadius: 'var(--radius-sm)', border: '1px solid var(--status-success-soft)', background: 'rgba(46, 204, 113, 0.02)', boxShadow: '0 2px 8px var(--overlay-subtle)' }}>
+                                                    <div style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: 4, color: 'var(--text-primary)' }}>{p.product_name}</div>
                                                     <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 6 }}>
-                                                      <span style={{ fontSize: '0.62rem', padding: '2px 6px', borderRadius: 4, background: 'rgba(46, 204, 113, 0.15)', color: 'var(--success)' }}>{p.category}</span>
+                                                      <span style={{ fontSize: '0.62rem', padding: '2px 6px', borderRadius: 4, background: 'var(--status-success-soft)', color: 'var(--success)' }}>{p.category}</span>
                                                       {p.estimated_price_range && <span style={{ fontSize: '0.62rem', padding: '2px 6px', borderRadius: 4, background: 'rgba(253,203,110,0.12)', color: 'var(--warning)' }}>{p.estimated_price_range}</span>}
                                                     </div>
                                                     <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: 4, lineHeight: 1.45 }}>{p.reason}</p>
-                                                    <div style={{ 
-                                                      marginTop: 8, 
-                                                      display: 'flex', 
-                                                      alignItems: 'center', 
+                                                    <div style={{
+                                                      marginTop: 8,
+                                                      display: 'flex',
+                                                      alignItems: 'center',
                                                       justifyContent: 'space-between',
-                                                      background: 'rgba(0, 0, 0, 0.2)', 
-                                                      padding: '4px 8px', 
-                                                      borderRadius: 4, 
-                                                      border: '1px solid rgba(255, 255, 255, 0.05)'
+                                                      background: 'var(--overlay-subtle)',
+                                                      padding: '4px 8px',
+                                                      borderRadius: 4,
+                                                      border: '1px solid var(--surface-interactive)'
                                                     }}>
                                                       <span style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: 'var(--accent-light)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                                         🔍 {p.marketplace_search_query}
                                                       </span>
-                                                      <button 
+                                                      <button
                                                         type="button"
                                                         onClick={() => handleCopyQuery(p.marketplace_search_query, `low-${asset.id}-${pi}`)}
                                                         style={{
@@ -1000,7 +1000,7 @@ export default function DeconstructPage() {
                                                           cursor: 'pointer',
                                                           padding: '2px 6px',
                                                           borderRadius: 3,
-                                                          background: 'rgba(255, 255, 255, 0.05)',
+                                                          background: 'var(--surface-interactive)',
                                                           fontFamily: 'var(--font-sans)',
                                                           fontWeight: 600,
                                                           transition: 'all 0.15s'
@@ -1016,30 +1016,30 @@ export default function DeconstructPage() {
                                             </div>
                                             {/* High Ticket */}
                                             <div>
-                                              <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#e17055', marginBottom: 8, letterSpacing: '0.06em' }}>🔥 High Ticket</div>
+                                              <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--status-warning)', marginBottom: 8, letterSpacing: '0.06em' }}>🔥 High Ticket</div>
                                               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                                                 {highTicket.map((p, pi) => (
-                                                  <div key={pi} style={{ padding: 12, borderRadius: 'var(--radius-sm)', border: '1px solid rgba(225,112,85,0.15)', background: 'rgba(225,112,85,0.02)', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                                                    <div style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: 4, color: '#fff' }}>{p.product_name}</div>
+                                                  <div key={pi} style={{ padding: 12, borderRadius: 'var(--radius-sm)', border: '1px solid rgba(225,112,85,0.15)', background: 'rgba(225,112,85,0.02)', boxShadow: '0 2px 8px var(--overlay-subtle)' }}>
+                                                    <div style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: 4, color: 'var(--text-primary)' }}>{p.product_name}</div>
                                                     <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 6 }}>
-                                                      <span style={{ fontSize: '0.62rem', padding: '2px 6px', borderRadius: 4, background: 'rgba(225,112,85,0.15)', color: '#e17055' }}>{p.category}</span>
+                                                      <span style={{ fontSize: '0.62rem', padding: '2px 6px', borderRadius: 4, background: 'rgba(225,112,85,0.15)', color: 'var(--status-warning)' }}>{p.category}</span>
                                                       {p.estimated_price_range && <span style={{ fontSize: '0.62rem', padding: '2px 6px', borderRadius: 4, background: 'rgba(253,203,110,0.12)', color: 'var(--warning)' }}>{p.estimated_price_range}</span>}
                                                     </div>
                                                     <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: 4, lineHeight: 1.45 }}>{p.reason}</p>
-                                                    <div style={{ 
-                                                      marginTop: 8, 
-                                                      display: 'flex', 
-                                                      alignItems: 'center', 
+                                                    <div style={{
+                                                      marginTop: 8,
+                                                      display: 'flex',
+                                                      alignItems: 'center',
                                                       justifyContent: 'space-between',
-                                                      background: 'rgba(0, 0, 0, 0.2)', 
-                                                      padding: '4px 8px', 
-                                                      borderRadius: 4, 
-                                                      border: '1px solid rgba(255, 255, 255, 0.05)'
+                                                      background: 'var(--overlay-subtle)',
+                                                      padding: '4px 8px',
+                                                      borderRadius: 4,
+                                                      border: '1px solid var(--surface-interactive)'
                                                     }}>
                                                       <span style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', color: 'var(--accent-light)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                                         🔍 {p.marketplace_search_query}
                                                       </span>
-                                                      <button 
+                                                      <button
                                                         type="button"
                                                         onClick={() => handleCopyQuery(p.marketplace_search_query, `high-${asset.id}-${pi}`)}
                                                         style={{
@@ -1050,7 +1050,7 @@ export default function DeconstructPage() {
                                                           cursor: 'pointer',
                                                           padding: '2px 6px',
                                                           borderRadius: 3,
-                                                          background: 'rgba(255, 255, 255, 0.05)',
+                                                          background: 'var(--surface-interactive)',
                                                           fontFamily: 'var(--font-sans)',
                                                           fontWeight: 600,
                                                           transition: 'all 0.15s'
@@ -1069,30 +1069,30 @@ export default function DeconstructPage() {
 
                                         {/* Viral Pattern Summary */}
                                         {asset.viral_pattern_summary && (
-                                          <div style={{ 
-                                            marginTop: 20, 
-                                            padding: '16px 20px', 
-                                            borderRadius: 'var(--radius-sm)', 
-                                            background: 'linear-gradient(135deg, rgba(108,92,231,0.08) 0%, rgba(108,92,231,0.02) 100%)', 
+                                          <div style={{
+                                            marginTop: 20,
+                                            padding: '16px 20px',
+                                            borderRadius: 'var(--radius-sm)',
+                                            background: 'linear-gradient(135deg, rgba(108,92,231,0.08) 0%, rgba(108,92,231,0.02) 100%)',
                                             border: '1px solid rgba(108,92,231,0.25)',
                                             borderLeft: '4px solid var(--accent)',
-                                            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)'
+                                            boxShadow: '0 4px 20px var(--overlay-subtle)'
                                           }}>
-                                            <h4 style={{ 
-                                              fontSize: '0.85rem', 
-                                              fontWeight: 700, 
-                                              marginBottom: 8, 
-                                              display: 'flex', 
-                                              alignItems: 'center', 
-                                              gap: 8, 
+                                            <h4 style={{
+                                              fontSize: '0.85rem',
+                                              fontWeight: 700,
+                                              marginBottom: 8,
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              gap: 8,
                                               color: 'var(--accent-light)',
                                               letterSpacing: '0.02em'
                                             }}>
                                               🧠 AI Viral Pattern & Insights
                                             </h4>
-                                            <p style={{ 
-                                              fontSize: '0.82rem', 
-                                              color: 'var(--text-secondary)', 
+                                            <p style={{
+                                              fontSize: '0.82rem',
+                                              color: 'var(--text-secondary)',
                                               lineHeight: 1.7,
                                               margin: 0
                                             }}>
@@ -1102,7 +1102,7 @@ export default function DeconstructPage() {
                                         )}
 
                                         <div style={{ marginTop: 20, display: 'flex', justifyContent: 'flex-end' }}>
-                                          <Link 
+                                          <Link
                                             href={`/multiplier-lab?asset_id=${asset.id}`}
                                             style={{
                                               display: 'inline-flex',
@@ -1110,7 +1110,7 @@ export default function DeconstructPage() {
                                               gap: '8px',
                                               padding: '8px 16px',
                                               background: 'var(--accent)',
-                                              color: '#fff',
+                                              color: 'var(--text-primary)',
                                               border: 'none',
                                               borderRadius: 'var(--radius-sm)',
                                               fontSize: '0.78rem',
@@ -1118,7 +1118,7 @@ export default function DeconstructPage() {
                                               textDecoration: 'none',
                                               cursor: 'pointer',
                                               transition: 'background 0.2s',
-                                              boxShadow: '0 4px 12px rgba(108, 92, 231, 0.2)'
+                                              boxShadow: '0 4px 12px var(--status-neutral-soft)'
                                             }}
                                             onMouseEnter={(e) => e.currentTarget.style.background = '#5b3fcb'}
                                             onMouseLeave={(e) => e.currentTarget.style.background = 'var(--accent)'}

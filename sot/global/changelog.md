@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.15 — Unified Light and Dark Theme System (12/08/2026)
+- Menambahkan token warna semantik light dan dark untuk seluruh UI MAKNA Flow
+- Menyelaraskan modal, form, status, sidebar, login, dan studio pada kedua tema
+- Menghapus override warna inline yang rapuh dan menambahkan kontrol tema reusable
+
 ## V2.14.14 — Align Dashboard ContentFlow and User Table in Light Theme (12/08/2026)
 - Convert dashboard, contentflow, and user management table hardcoded backgrounds directly to css variables
 - Scan all pages using automated browser subagent to verify visual correctness

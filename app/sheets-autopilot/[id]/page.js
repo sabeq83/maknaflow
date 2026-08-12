@@ -220,7 +220,7 @@ export default function CampaignDetailPage({ params }) {
       case 'completed': return { bg: 'rgba(0,184,148,0.15)', color: 'var(--success)', border: '1px solid rgba(0,184,148,0.3)' };
       case 'failed': return { bg: 'rgba(225,112,85,0.15)', color: 'var(--danger)', border: '1px solid rgba(225,112,85,0.3)' };
       case 'processing': return { bg: 'rgba(116,185,255,0.15)', color: 'var(--info)', border: '1px solid rgba(116,185,255,0.3)', pulse: true };
-      default: return { bg: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)', border: '1px solid var(--border)' };
+      default: return { bg: 'var(--surface-interactive)', color: 'var(--text-muted)', border: '1px solid var(--border)' };
     }
   };
 
@@ -249,10 +249,10 @@ export default function CampaignDetailPage({ params }) {
           const clipNum = scene.scene || scene.clip || scene.scene_number || (idx + 1);
           const vo = voiceover.find(v => Number(v.scene || v.clip || v.scene_number) === Number(clipNum)) || {};
           const audioClipPath = `/temp/tts_autopilot_${job.batch_id}_clip_${idx}.${audioExt}`;
-          
+
           return (
             <div key={idx} style={{
-              background: 'rgba(255,255,255,0.01)',
+              background: 'var(--surface-interactive)',
               border: '1px solid var(--border)',
               borderRadius: '8px',
               padding: '16px'
@@ -275,7 +275,7 @@ export default function CampaignDetailPage({ params }) {
                     </div>
                   )}
                 </div>
-                <div style={{ borderLeft: '1px solid rgba(255,255,255,0.05)', paddingLeft: '16px' }}>
+                <div style={{ borderLeft: '1px solid var(--surface-interactive)', paddingLeft: '16px' }}>
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2 }}>VOICEOVER & AUDIO MOOD</div>
                   <p style={{ fontSize: '0.88rem', margin: 0, fontWeight: 500, color: 'var(--accent)', lineHeight: 1.4 }}>
                     "{vo.narration || vo.voiceover_text || ''}"
@@ -320,12 +320,12 @@ export default function CampaignDetailPage({ params }) {
           const t2v = (prompts.t2v_prompts || []).find(p => Number(p.clip) === Number(clipNum))?.prompt;
           const t2i = (prompts.t2i_prompts || []).find(p => Number(p.clip) === Number(clipNum))?.prompt;
           const i2v = (prompts.i2v_prompts || []).find(p => Number(p.clip) === Number(clipNum))?.prompt;
-          
+
           const videoClipPath = `/temp/temp_clip_${job.batch_id}_${clipNum}.mp4`;
 
           return (
             <div key={idx} style={{
-              background: 'rgba(255,255,255,0.01)',
+              background: 'var(--surface-interactive)',
               border: '1px solid var(--border)',
               borderRadius: '8px',
               padding: '16px'
@@ -399,18 +399,18 @@ export default function CampaignDetailPage({ params }) {
                 {campaign?.enable_glabs === 1 && job.status === 'completed' && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>🎬 Generated Visual Clip</span>
-                    <video 
-                      src={videoClipPath} 
-                      controls 
+                    <video
+                      src={videoClipPath}
+                      controls
                       preload="metadata"
-                      style={{ 
-                        width: '100%', 
-                        maxHeight: '240px', 
-                        borderRadius: 6, 
-                        border: '1px solid rgba(255,255,255,0.08)', 
+                      style={{
+                        width: '100%',
+                        maxHeight: '240px',
+                        borderRadius: 6,
+                        border: '1px solid var(--border-subtle)',
                         background: '#000',
                         display: 'block'
-                      }} 
+                      }}
                     />
                   </div>
                 )}
@@ -435,9 +435,9 @@ export default function CampaignDetailPage({ params }) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {universalCaption ? (
-          <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border)', borderRadius: 8, padding: 16 }}>
+          <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 8, padding: 16 }}>
             <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--accent)', display: 'block', marginBottom: 8 }}>📲 Social Media Package & Caption</span>
-            <p style={{ fontSize: '0.85rem', margin: 0, whiteSpace: 'pre-wrap', color: '#fff', lineHeight: 1.5 }}>{universalCaption}</p>
+            <p style={{ fontSize: '0.85rem', margin: 0, whiteSpace: 'pre-wrap', color: 'var(--text-primary)', lineHeight: 1.5 }}>{universalCaption}</p>
           </div>
         ) : (
           <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontStyle: 'italic' }}>
@@ -519,11 +519,11 @@ export default function CampaignDetailPage({ params }) {
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <h2 style={{ margin: 0 }}>{campaign.campaign_name}</h2>
-                      <span style={{ 
-                        fontSize: '0.75rem', 
-                        background: 'var(--accent-glow)', 
-                        color: 'var(--accent-light)', 
-                        padding: '2px 8px', 
+                      <span style={{
+                        fontSize: '0.75rem',
+                        background: 'var(--accent-glow)',
+                        color: 'var(--accent-light)',
+                        padding: '2px 8px',
                         borderRadius: '4px',
                         border: '1px solid var(--accent)'
                       }}>
@@ -536,17 +536,17 @@ export default function CampaignDetailPage({ params }) {
                   </div>
 
                   <div style={{ display: 'flex', gap: '10px' }}>
-                    <a 
-                      href={`https://docs.google.com/spreadsheets/d/${campaign.spreadsheet_id}`} 
-                      target="_blank" 
-                      rel="noreferrer" 
+                    <a
+                      href={`https://docs.google.com/spreadsheets/d/${campaign.spreadsheet_id}`}
+                      target="_blank"
+                      rel="noreferrer"
                       className="btn btn-secondary"
                       style={{ fontSize: '0.8rem', padding: '8px 14px' }}
                     >
                       🟢 Buka Google Spreadsheet ↗
                     </a>
-                    <button 
-                      onClick={fetchDetail} 
+                    <button
+                      onClick={fetchDetail}
                       className="btn btn-primary"
                       style={{ fontSize: '0.8rem', padding: '8px 14px' }}
                     >
@@ -581,13 +581,13 @@ export default function CampaignDetailPage({ params }) {
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '20px', borderTop: '1px solid var(--border)', paddingTop: '20px', fontSize: '0.85rem' }}>
                   <div>
-                    <span style={{ color: 'var(--text-muted)' }}>Target Language:</span> <strong style={{ color: '#fff' }}>{campaign.target_language}</strong>
+                    <span style={{ color: 'var(--text-muted)' }}>Target Language:</span> <strong style={{ color: 'var(--text-primary)' }}>{campaign.target_language}</strong>
                   </div>
                   <div>
-                    <span style={{ color: 'var(--text-muted)' }}>Aspect Ratio:</span> <strong style={{ color: '#fff' }}>{campaign.aspect_ratio}</strong>
+                    <span style={{ color: 'var(--text-muted)' }}>Aspect Ratio:</span> <strong style={{ color: 'var(--text-primary)' }}>{campaign.aspect_ratio}</strong>
                   </div>
                   <div>
-                    <span style={{ color: 'var(--text-muted)' }}>Visual Mode:</span> <strong style={{ color: '#fff' }}>{campaign.visual_mode}</strong>
+                    <span style={{ color: 'var(--text-muted)' }}>Visual Mode:</span> <strong style={{ color: 'var(--text-primary)' }}>{campaign.visual_mode}</strong>
                   </div>
                   <div>
                     <span style={{ color: 'var(--text-muted)' }}>Product Bridging:</span>{' '}
@@ -736,7 +736,7 @@ export default function CampaignDetailPage({ params }) {
                                 </td>
                                 <td style={{ padding: '14px 8px' }}>
                                   {(job.storyboard || job.voiceover) ? (
-                                    <button 
+                                    <button
                                       className="btn btn-secondary"
                                       onClick={() => setExpandedJobId(expandedJobId === job.id ? null : job.id)}
                                       style={{ padding: '4px 10px', fontSize: '0.72rem' }}
@@ -749,9 +749,9 @@ export default function CampaignDetailPage({ params }) {
                                 </td>
                                 <td style={{ padding: '14px 8px' }}>
                                   {job.gdrive_folder_url ? (
-                                    <a 
-                                      href={job.gdrive_folder_url} 
-                                      target="_blank" 
+                                    <a
+                                      href={job.gdrive_folder_url}
+                                      target="_blank"
                                       rel="noreferrer"
                                       className="btn btn-secondary"
                                       style={{ padding: '4px 10px', fontSize: '0.72rem', borderColor: 'var(--success)', color: 'var(--success)' }}
@@ -769,11 +769,11 @@ export default function CampaignDetailPage({ params }) {
                                         className="btn btn-secondary"
                                         onClick={() => handleRetryJob(job.row_index, false)}
                                         disabled={retryLoading[`${job.row_index}-false`] || retryLoading[`${job.row_index}-true`]}
-                                        style={{ 
-                                          padding: '4px 8px', 
-                                          fontSize: '0.72rem', 
-                                          display: 'inline-flex', 
-                                          alignItems: 'center', 
+                                        style={{
+                                          padding: '4px 8px',
+                                          fontSize: '0.72rem',
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
                                           gap: '4px',
                                           cursor: (retryLoading[`${job.row_index}-false`] || retryLoading[`${job.row_index}-true`]) ? 'not-allowed' : 'pointer'
                                         }}
@@ -784,11 +784,11 @@ export default function CampaignDetailPage({ params }) {
                                         className="btn btn-secondary"
                                         onClick={() => handleRetryJob(job.row_index, true)}
                                         disabled={retryLoading[`${job.row_index}-false`] || retryLoading[`${job.row_index}-true`]}
-                                        style={{ 
-                                          padding: '4px 8px', 
-                                          fontSize: '0.72rem', 
-                                          display: 'inline-flex', 
-                                          alignItems: 'center', 
+                                        style={{
+                                          padding: '4px 8px',
+                                          fontSize: '0.72rem',
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
                                           gap: '4px',
                                           borderColor: 'rgba(225,112,85,0.4)',
                                           color: 'var(--danger)',
@@ -822,11 +822,11 @@ export default function CampaignDetailPage({ params }) {
 
                                       {/* Media Paths if available */}
                                       {(job.local_video_path || job.local_audio_path) && (
-                                        <div style={{ 
-                                          display: 'flex', 
+                                        <div style={{
+                                          display: 'flex',
                                           flexDirection: 'column',
                                           gap: '16px',
-                                          background: 'rgba(255,255,255,0.01)',
+                                          background: 'var(--surface-interactive)',
                                           border: '1px solid var(--border)',
                                           borderRadius: '8px',
                                           padding: '16px',
@@ -861,12 +861,12 @@ export default function CampaignDetailPage({ params }) {
                                               key={t.id}
                                               className={`btn ${activeTab === t.id ? 'btn-primary' : 'btn-secondary'}`}
                                               onClick={() => setActiveTabs(prev => ({ ...prev, [job.id]: t.id }))}
-                                              style={{ 
-                                                padding: '6px 12px', 
+                                              style={{
+                                                padding: '6px 12px',
                                                 fontSize: '0.78rem',
                                                 borderBottom: activeTab === t.id ? '2px solid var(--accent)' : 'none',
                                                 background: activeTab === t.id ? 'var(--accent)' : 'transparent',
-                                                color: '#fff',
+                                                color: 'var(--text-primary)',
                                                 borderColor: 'transparent',
                                                 whiteSpace: 'nowrap'
                                               }}

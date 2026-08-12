@@ -185,7 +185,7 @@ export default function PillarCampaignDetailPage() {
       formData.append('product_usp', editForm.product_usp);
       formData.append('source_product_url', editForm.source_product_url);
       formData.append('reset_status', editForm.reset_status ? 'true' : 'false');
-      
+
       if (editForm.product_image_file) {
         formData.append('product_image_file', editForm.product_image_file);
       }
@@ -529,51 +529,51 @@ export default function PillarCampaignDetailPage() {
   function renderItemStatus(item, campaign) {
     let text = 'Fase 1 : Pending';
     let color = 'var(--text-muted)';
-    let bg = 'rgba(255, 255, 255, 0.05)';
+    let bg = 'var(--surface-interactive)';
     let pulse = false;
 
     const pauseAt = campaign?.scheduler_pause_at;
 
     // 1. Errors
     if (
-      item.generation_status === 'failed' || 
-      item.tts_status === 'failed' || 
-      item.visual_status === 'failed' || 
-      item.ffmpeg_status === 'failed' || 
-      item.upload_status === 'failed' || 
+      item.generation_status === 'failed' ||
+      item.tts_status === 'failed' ||
+      item.visual_status === 'failed' ||
+      item.ffmpeg_status === 'failed' ||
+      item.upload_status === 'failed' ||
       item.social_post_status === 'failed'
     ) {
       text = '⚠️ Error / Failed';
-      color = '#e74c3c';
-      bg = 'rgba(231, 76, 60, 0.1)';
+      color = 'var(--status-danger)';
+      bg = 'var(--status-danger-soft)';
     }
     // 2. Pause states
     else if (pauseAt === 'tts' && item.generation_status === 'completed' && item.tts_status === 'pending' && item.workflow_status === 'ready_for_review') {
       text = '⏸️ Fase 2 : Paused (Review Script)';
-      color = '#f39c12';
+      color = 'var(--status-warning)';
       bg = 'rgba(243, 156, 18, 0.1)';
     } else if (pauseAt === 'visuals' && item.tts_status === 'completed' && item.visual_status === 'pending') {
       text = '⏸️ Fase 2 : Paused (Review Prompts)';
-      color = '#f39c12';
+      color = 'var(--status-warning)';
       bg = 'rgba(243, 156, 18, 0.1)';
     } else if (pauseAt === 'ffmpeg' && item.visual_status === 'completed' && item.ffmpeg_status === 'pending') {
       text = '⏸️ Fase 2 : Paused (Review Clips)';
-      color = '#f39c12';
+      color = 'var(--status-warning)';
       bg = 'rgba(243, 156, 18, 0.1)';
     } else if (pauseAt === 'social' && item.ffmpeg_status === 'completed' && item.social_post_status === 'pending') {
       text = '⏸️ Fase 2 : Paused (Ready to Post)';
-      color = '#f39c12';
+      color = 'var(--status-warning)';
       bg = 'rgba(243, 156, 18, 0.1)';
     }
     // 3. Active processing states
     else if (item.generation_status === 'processing') {
       text = '⚡ Fase 1 : AI Generation';
       color = 'var(--accent-light)';
-      bg = 'rgba(59, 130, 246, 0.1)';
+      bg = 'var(--status-info-soft)';
       pulse = true;
     } else if (item.generation_status === 'pending_sourcing') {
       text = '⚡ Fase 1 : JIT Product Sourcing';
-      color = '#9b59b6';
+      color = 'var(--status-neutral)';
       bg = 'rgba(155, 89, 182, 0.1)';
       pulse = true;
     } else if (item.generation_status === 'pending') {
@@ -582,14 +582,14 @@ export default function PillarCampaignDetailPage() {
     } else if (item.tts_status === 'processing') {
       text = '⚡ Fase 2 : Generate TTS';
       color = 'var(--accent-light)';
-      bg = 'rgba(59, 130, 246, 0.1)';
+      bg = 'var(--status-info-soft)';
       pulse = true;
     } else if (item.tts_status === 'pending' && item.generation_status === 'completed' && item.workflow_status === 'production_processing') {
       text = '⏳ Fase 2 : Queue for TTS';
       color = 'var(--text-muted)';
     } else if (item.visual_status === 'processing') {
       text = '⚡ Fase 2 : Generate Video';
-      color = '#9b59b6';
+      color = 'var(--status-neutral)';
       bg = 'rgba(155, 89, 182, 0.1)';
       pulse = true;
     } else if (item.visual_status === 'pending' && item.tts_status === 'completed') {
@@ -597,38 +597,38 @@ export default function PillarCampaignDetailPage() {
       color = 'var(--text-muted)';
     } else if (item.ffmpeg_status === 'processing') {
       text = '⚡ Fase 2 : FFMPEG Process';
-      color = '#3498db';
-      bg = 'rgba(52, 152, 219, 0.1)';
+      color = 'var(--status-info)';
+      bg = 'var(--status-info-soft)';
       pulse = true;
     } else if (item.ffmpeg_status === 'pending' && item.visual_status === 'completed') {
       text = '⏳ Fase 2 : Queue for FFmpeg';
       color = 'var(--text-muted)';
     } else if (item.upload_status === 'uploading') {
       text = '⚡ Fase 2 : Uploading Assets';
-      color = '#3498db';
-      bg = 'rgba(52, 152, 219, 0.1)';
+      color = 'var(--status-info)';
+      bg = 'var(--status-info-soft)';
       pulse = true;
     } else if (item.social_post_status === 'processing') {
       text = '⚡ Fase 2 : Social Posting';
-      color = '#e67e22';
+      color = 'var(--status-warning)';
       bg = 'rgba(230, 126, 34, 0.1)';
       pulse = true;
     }
     // 3.5 Paused Review
     else if (item.workflow_status === 'ready_for_review') {
       text = '⏸️ Fase 2 : Paused (Ready for Review)';
-      color = '#f39c12';
+      color = 'var(--status-warning)';
       bg = 'rgba(243, 156, 18, 0.1)';
     }
     // 4. Completed states
     else if (item.social_post_status === 'completed' || item.upload_status === 'completed') {
       text = '✅ Fase 2 : Completed';
       color = 'var(--success)';
-      bg = 'rgba(46, 204, 113, 0.1)';
+      bg = 'var(--status-success-soft)';
     } else if (item.generation_status === 'completed') {
       text = '✅ Fase 1 : Completed';
       color = 'var(--success)';
-      bg = 'rgba(46, 204, 113, 0.1)';
+      bg = 'var(--status-success-soft)';
     }
 
     return (
@@ -679,29 +679,29 @@ export default function PillarCampaignDetailPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
           {stages.map((stage, idx) => {
             let color = 'var(--text-muted)';
-            let bg = 'rgba(255, 255, 255, 0.05)';
-            let border = '1px solid rgba(255, 255, 255, 0.1)';
+            let bg = 'var(--surface-interactive)';
+            let border = '1px solid var(--border-subtle)';
             let label = stage.label;
             let anim = 'none';
 
             if (stage.status === 'success') {
-              color = '#fff';
-              bg = 'rgba(16, 185, 129, 0.15)';
+              color = 'var(--text-primary)';
+              bg = 'var(--status-success-soft)';
               border = '1px solid rgba(16, 185, 129, 0.5)';
               label = `✓ ${stage.label}`;
             } else if (stage.status === 'skipped') {
               color = 'rgba(255, 255, 255, 0.4)';
-              bg = 'rgba(255, 255, 255, 0.03)';
-              border = '1px dashed rgba(255, 255, 255, 0.15)';
+              bg = 'var(--surface-interactive)';
+              border = '1px dashed var(--border-subtle)';
               label = `⚡ ${stage.label}`;
             } else if (stage.status === 'danger') {
-              color = '#fff';
-              bg = 'rgba(239, 68, 68, 0.15)';
+              color = 'var(--text-primary)';
+              bg = 'var(--status-danger-soft)';
               border = '1px solid rgba(239, 68, 68, 0.5)';
               label = `✗ ${stage.label}`;
             } else if (stage.status === 'active') {
-              color = '#fff';
-              bg = 'rgba(59, 130, 246, 0.2)';
+              color = 'var(--text-primary)';
+              bg = 'var(--status-info-soft)';
               border = '1px solid rgba(59, 130, 246, 0.5)';
               label = `⏳ ${stage.label}`;
               anim = 'active-pulse 1.5s infinite alternate';
@@ -803,51 +803,51 @@ export default function PillarCampaignDetailPage() {
 
     if (editingItemId === item.id) {
       return (
-        <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', borderRadius: 8, padding: 20 }}>
+        <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-color)', borderRadius: 8, padding: 20 }}>
           <h4 style={{ margin: '0 0 16px 0', fontSize: '1rem', fontWeight: 600, color: 'var(--accent-color)' }}>
             ✏️ Edit Detail & Konsep Produk (Video #{items.indexOf(item) + 1})
           </h4>
-          
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
             {/* Kolom Kiri: Konsep Iklan */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 6 }}>🎯 PILAR KONTEN UTAMA</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={editForm.content_pillar}
                   onChange={(e) => setEditForm(prev => ({ ...prev, content_pillar: e.target.value }))}
-                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: '#fff', outline: 'none' }}
+                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: 'var(--text-primary)', outline: 'none' }}
                 />
               </div>
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 6 }}>🪝 NASKAH HOOK UTAMA (KLIP 1)</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={editForm.custom_hook}
                   onChange={(e) => setEditForm(prev => ({ ...prev, custom_hook: e.target.value }))}
-                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: '#fff', outline: 'none' }}
+                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: 'var(--text-primary)', outline: 'none' }}
                 />
               </div>
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 6 }}>🎬 PANDUAN AKSI VISUAL (MACRO)</label>
-                <textarea 
+                <textarea
                   rows={3}
                   value={editForm.visual_action_guideline}
                   onChange={(e) => setEditForm(prev => ({ ...prev, visual_action_guideline: e.target.value }))}
-                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: '#fff', outline: 'none', resize: 'vertical' }}
+                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: 'var(--text-primary)', outline: 'none', resize: 'vertical' }}
                 />
               </div>
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 6 }}>🔗 TAUTAN E-COMMERCE (SHOPEE/TOKOPEDIA)</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={editForm.source_product_url}
                   onChange={(e) => setEditForm(prev => ({ ...prev, source_product_url: e.target.value }))}
-                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: '#fff', outline: 'none' }}
+                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: 'var(--text-primary)', outline: 'none' }}
                 />
               </div>
             </div>
@@ -856,38 +856,38 @@ export default function PillarCampaignDetailPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 6 }}>📦 NAMA PRODUK</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={editForm.product_name}
                   onChange={(e) => setEditForm(prev => ({ ...prev, product_name: e.target.value }))}
-                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: '#fff', outline: 'none' }}
+                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: 'var(--text-primary)', outline: 'none' }}
                 />
               </div>
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 6 }}>📝 DESKRIPSI PRODUK</label>
-                <textarea 
+                <textarea
                   rows={3}
                   value={editForm.product_desc}
                   onChange={(e) => setEditForm(prev => ({ ...prev, product_desc: e.target.value }))}
-                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: '#fff', outline: 'none', resize: 'vertical' }}
+                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: 'var(--text-primary)', outline: 'none', resize: 'vertical' }}
                 />
               </div>
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 6 }}>✨ UNIQUE SELLING POINT (USP)</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={editForm.product_usp}
                   onChange={(e) => setEditForm(prev => ({ ...prev, product_usp: e.target.value }))}
-                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: '#fff', outline: 'none' }}
+                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: 'var(--text-primary)', outline: 'none' }}
                 />
               </div>
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 6 }}>🖼️ UNGGAH FOTO PRODUK (MANUAL)</label>
-                <input 
-                  type="file" 
+                <input
+                  type="file"
                   accept="image/*"
                   onChange={(e) => {
                     const file = e.target.files[0];
@@ -907,8 +907,8 @@ export default function PillarCampaignDetailPage() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--border-color)', flexWrap: 'wrap', gap: 12 }}>
-            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: '0.82rem', color: '#f39c12', cursor: 'pointer', fontWeight: 600 }}>
-              <input 
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: '0.82rem', color: 'var(--status-warning)', cursor: 'pointer', fontWeight: 600 }}>
+              <input
                 type="checkbox"
                 checked={editForm.reset_status}
                 onChange={(e) => setEditForm(prev => ({ ...prev, reset_status: e.target.checked }))}
@@ -918,16 +918,16 @@ export default function PillarCampaignDetailPage() {
             </label>
 
             <div style={{ display: 'flex', gap: 12 }}>
-              <button 
-                className="btn btn-secondary" 
+              <button
+                className="btn btn-secondary"
                 onClick={() => setEditingItemId(null)}
                 disabled={savingEdit}
                 style={{ padding: '8px 16px', fontSize: '0.85rem' }}
               >
                 Batal
               </button>
-              <button 
-                className="btn btn-primary" 
+              <button
+                className="btn btn-primary"
                 onClick={() => handleSaveCreative(item.id)}
                 disabled={savingEdit}
                 style={{ padding: '8px 20px', fontSize: '0.85rem', fontWeight: 600 }}
@@ -945,14 +945,14 @@ export default function PillarCampaignDetailPage() {
     return (
       <div style={{ width: '100%' }}>
         {hasNoScrapeData && item.generation_status === 'failed' && (
-          <div style={{ 
-            background: 'rgba(239, 68, 68, 0.1)', 
-            border: '1px solid rgba(239, 68, 68, 0.3)', 
-            borderRadius: 8, 
-            padding: '12px 16px', 
-            marginBottom: 16, 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <div style={{
+            background: 'var(--status-danger-soft)',
+            border: '1px solid var(--status-danger-soft)',
+            borderRadius: 8,
+            padding: '12px 16px',
+            marginBottom: 16,
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
             gap: 12
@@ -960,9 +960,9 @@ export default function PillarCampaignDetailPage() {
             <span style={{ fontSize: '0.85rem', color: '#ff4a4a', fontWeight: 600 }}>
               ⚠️ JIT Sourcing produk dari Shopee gagal karena diblokir anti-bot. Silakan isi detail produk secara manual.
             </span>
-            <button 
-              className="btn btn-primary" 
-              style={{ background: '#ef4444', padding: '6px 12px', fontSize: '0.78rem' }}
+            <button
+              className="btn btn-primary"
+              style={{ background: 'var(--status-danger)', padding: '6px 12px', fontSize: '0.78rem' }}
               onClick={() => {
                 setEditForm({
                   content_pillar: pillar === '-' ? '' : pillar,
@@ -985,7 +985,7 @@ export default function PillarCampaignDetailPage() {
         )}
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
-          <button 
+          <button
             className="btn btn-secondary"
             onClick={() => {
               setEditForm({
@@ -1010,10 +1010,10 @@ export default function PillarCampaignDetailPage() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
           {/* Kolom 1: Konsep Ide & Naskah Kreatif */}
-          <div style={{ 
-            background: 'rgba(255, 255, 255, 0.01)', 
-            border: '1px solid var(--border-color)', 
-            borderRadius: 8, 
+          <div style={{
+            background: 'var(--surface-interactive)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 8,
             padding: 16,
             display: 'flex',
             flexDirection: 'column',
@@ -1022,7 +1022,7 @@ export default function PillarCampaignDetailPage() {
             <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: 'var(--accent-color)', borderBottom: '1px solid var(--border-color)', paddingBottom: 8 }}>
               💡 Konsep Ide & Naskah Kreatif
             </h4>
-            
+
             <div>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 4, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
                 🎯 Pilar Konten Utama
@@ -1055,7 +1055,7 @@ export default function PillarCampaignDetailPage() {
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 4, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
                   📝 Custom Instruction (AI Directive)
                 </div>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-primary)', background: 'rgba(230, 126, 34, 0.05)', borderLeft: '3px solid #f39c12', padding: 12, borderRadius: 6, margin: 0, lineHeight: 1.4 }}>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-primary)', background: 'rgba(230, 126, 34, 0.05)', borderLeft: '3px solid var(--status-warning)', padding: 12, borderRadius: 6, margin: 0, lineHeight: 1.4 }}>
                   {campaign.custom_instruction}
                 </p>
               </div>
@@ -1063,10 +1063,10 @@ export default function PillarCampaignDetailPage() {
           </div>
 
           {/* Kolom 2: Detail Produk & Strategi USP */}
-          <div style={{ 
-            background: 'rgba(255, 255, 255, 0.01)', 
-            border: '1px solid var(--border-color)', 
-            borderRadius: 8, 
+          <div style={{
+            background: 'var(--surface-interactive)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 8,
             padding: 16,
             display: 'flex',
             flexDirection: 'column',
@@ -1109,16 +1109,16 @@ export default function PillarCampaignDetailPage() {
                   🖼️ Gambar Produk
                 </div>
                 <div style={{ background: 'var(--bg-secondary)', padding: 12, borderRadius: 6, display: 'inline-block' }}>
-                  <img 
-                    src={prodImage} 
-                    alt={prodName} 
-                    style={{ 
-                      maxWidth: '100%', 
-                      maxHeight: '180px', 
-                      borderRadius: 4, 
+                  <img
+                    src={prodImage}
+                    alt={prodName}
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '180px',
+                      borderRadius: 4,
                       border: '1px solid var(--border-color)',
                       display: 'block'
-                    }} 
+                    }}
                   />
                 </div>
               </div>
@@ -1129,16 +1129,16 @@ export default function PillarCampaignDetailPage() {
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 4, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
                   🔗 Tautan E-commerce
                 </div>
-                <a 
-                  href={prodUrl} 
-                  target="_blank" 
-                  rel="noreferrer" 
+                <a
+                  href={prodUrl}
+                  target="_blank"
+                  rel="noreferrer"
                   className="btn btn-secondary"
-                  style={{ 
-                    fontSize: '0.8rem', 
-                    padding: '8px 12px', 
-                    display: 'inline-flex', 
-                    alignItems: 'center', 
+                  style={{
+                    fontSize: '0.8rem',
+                    padding: '8px 12px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
                     gap: 6,
                     textDecoration: 'none',
                     wordBreak: 'break-all'
@@ -1168,7 +1168,7 @@ export default function PillarCampaignDetailPage() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {parsed.analysis_summary && (
-          <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-color)', padding: 16, borderRadius: 8, fontSize: '0.85rem' }}>
+          <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-color)', padding: 16, borderRadius: 8, fontSize: '0.85rem' }}>
             <div style={{ fontWeight: 600, marginBottom: 4, color: 'var(--accent-color)' }}>Ringkasan Strategi Konten Organik:</div>
             <div style={{ marginBottom: 8 }}><span style={{ color: 'var(--text-muted)' }}>Pilar Strategy:</span> {parsed.analysis_summary.pillar_strategy}</div>
             <div><span style={{ color: 'var(--text-muted)' }}>Rencana Transisi Sandwich:</span> {parsed.analysis_summary.sandwich_transition_plan}</div>
@@ -1181,21 +1181,21 @@ export default function PillarCampaignDetailPage() {
             const isBridge = campaign?.visual_mode === 'hybrid_lock' && campaign?.is_bridging_active && scene.scene === campaign.bridge_at_clip;
 
             return (
-              <div 
-                key={index} 
-                style={{ 
-                  background: isBridge ? 'rgba(59, 130, 246, 0.04)' : 'rgba(255,255,255,0.01)', 
-                  border: isBridge ? '1px solid rgba(59, 130, 246, 0.25)' : '1px solid var(--border-color)',
-                  borderRadius: 8, 
-                  padding: 16 
+              <div
+                key={index}
+                style={{
+                  background: isBridge ? 'rgba(59, 130, 246, 0.04)' : 'var(--surface-interactive)',
+                  border: isBridge ? '1px solid var(--status-info-soft)' : '1px solid var(--border-color)',
+                  borderRadius: 8,
+                  padding: 16
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                   <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ background: isBridge ? '#3b82f6' : 'var(--bg-secondary)', color: isBridge ? '#fff' : 'var(--text-primary)', padding: '2px 8px', borderRadius: 4, fontSize: '0.75rem' }}>
+                    <span style={{ background: isBridge ? 'var(--status-info)' : 'var(--bg-secondary)', color: isBridge ? 'var(--text-primary)' : 'var(--text-primary)', padding: '2px 8px', borderRadius: 4, fontSize: '0.75rem' }}>
                       Scene {scene.scene}
                     </span>
-                    {isBridge && <span style={{ color: '#3b82f6', fontSize: '0.75rem', fontWeight: 'bold' }}>[🌉 TITIK BRIDGE PRODUK]</span>}
+                    {isBridge && <span style={{ color: 'var(--status-info)', fontSize: '0.75rem', fontWeight: 'bold' }}>[🌉 TITIK BRIDGE PRODUK]</span>}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                     Durasi: {scene.duration}
@@ -1257,7 +1257,7 @@ export default function PillarCampaignDetailPage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {clipsList.map(cNum => {
           const isBridge = campaign?.visual_mode === 'hybrid_lock' && campaign?.is_bridging_active && cNum === campaign.bridge_at_clip;
-          
+
           let displayPrompts = [];
           if (isHybrid) {
             const promptT2i = t2i.find(p => Number(p.clip) === cNum)?.prompt || '';
@@ -1286,13 +1286,13 @@ export default function PillarCampaignDetailPage() {
           const clipStartFramePath = t2iImagePaths[cNum - 1] || (isBridge ? item.t2i_start_frame_path : null);
 
           return (
-            <div 
-              key={cNum} 
-              style={{ 
-                background: 'rgba(255,255,255,0.01)', 
-                border: '1px solid var(--border-color)', 
-                borderRadius: 8, 
-                padding: 16 
+            <div
+              key={cNum}
+              style={{
+                background: 'var(--surface-interactive)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 8,
+                padding: 16
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -1307,8 +1307,8 @@ export default function PillarCampaignDetailPage() {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                         <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)' }}>{p.type}</span>
                         {p.text && (
-                          <button 
-                            className="btn btn-secondary" 
+                          <button
+                            className="btn btn-secondary"
                             style={{ padding: '2px 6px', fontSize: '0.65rem' }}
                             onClick={() => handleCopy(p.text, p.key)}
                           >
@@ -1332,18 +1332,18 @@ export default function PillarCampaignDetailPage() {
                 {localClipPath && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>🎬 Generated Visual Clip (Local)</span>
-                    <video 
-                      src={localClipPath} 
-                      controls 
+                    <video
+                      src={localClipPath}
+                      controls
                       preload="metadata"
-                      style={{ 
-                        width: '100%', 
-                        maxHeight: '260px', 
-                        borderRadius: 6, 
-                        border: '1px solid rgba(255,255,255,0.08)', 
+                      style={{
+                        width: '100%',
+                        maxHeight: '260px',
+                        borderRadius: 6,
+                        border: '1px solid var(--border-subtle)',
                         background: '#000',
                         display: 'block'
-                      }} 
+                      }}
                     />
                   </div>
                 )}
@@ -1369,7 +1369,7 @@ export default function PillarCampaignDetailPage() {
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-color)', borderRadius: 8, padding: 16 }}>
+        <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-color)', borderRadius: 8, padding: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>📱 Universal Social Media Caption</span>
             <button className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '0.75rem' }} onClick={() => handleCopy(universalCap, capKey)}>
@@ -1378,7 +1378,7 @@ export default function PillarCampaignDetailPage() {
           </div>
           <textarea
             className="form-textarea"
-            style={{ width: '100%', minHeight: 120, fontSize: '0.85rem', background: '#09090b', color: '#fff', borderRadius: 6, padding: 10 }}
+            style={{ width: '100%', minHeight: 120, fontSize: '0.85rem', background: 'var(--surface)', color: 'var(--text-primary)', borderRadius: 6, padding: 10 }}
             value={universalCap}
             onChange={(e) => updateSocialField('caption', e.target.value)}
             placeholder="Naskah caption universal media sosial (TikTok, Instagram, Facebook, Shorts)..."
@@ -1386,8 +1386,8 @@ export default function PillarCampaignDetailPage() {
         </div>
 
         {item.social_post_status === 'completed' && item.social_links_json && (
-          <div style={{ marginTop: 12, background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: 16, borderRadius: 8 }}>
-            <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#10b981', marginBottom: 8 }}>Link Publish Draft Sosmed:</div>
+          <div style={{ marginTop: 12, background: 'rgba(16, 185, 129, 0.05)', border: '1px solid var(--status-success-soft)', padding: 16, borderRadius: 8 }}>
+            <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--status-success)', marginBottom: 8 }}>Link Publish Draft Sosmed:</div>
             {(() => {
               try {
                 const links = JSON.parse(item.social_links_json);
@@ -1457,7 +1457,7 @@ export default function PillarCampaignDetailPage() {
             <div style={{ fontWeight: 600, fontSize: '0.85rem', marginBottom: 8, color: 'var(--text-primary)' }}>Antrean Video Task (GLabs):</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {item.glabs_tasks.map(task => (
-                <div key={task.task_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.2)', padding: '8px 12px', borderRadius: 6, fontSize: '0.75rem' }}>
+                <div key={task.task_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--overlay-subtle)', padding: '8px 12px', borderRadius: 6, fontSize: '0.75rem' }}>
                   <div>
                     <div style={{ fontWeight: 600 }}>Task ID: {task.task_id}</div>
                     <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Klip {Number(task.clip_index) + 1} | Prompt: {task.prompt.slice(0, 50)}...</div>
@@ -1568,7 +1568,7 @@ export default function PillarCampaignDetailPage() {
     const dna = editedVideoDnas[item.id] || {};
     const sc = socialCaptions[item.id] || {};
     const settings = workflowSettings[item.id] || {};
-    const isProductionFailed = 
+    const isProductionFailed =
       item.visual_status === 'failed' ||
       item.tts_status === 'failed' ||
       item.ffmpeg_status === 'failed' ||
@@ -1645,7 +1645,7 @@ export default function PillarCampaignDetailPage() {
       if (!file) return;
       const taskKey = `${item.id}_${clipIdx}`;
       setReplacingSF(prev => ({ ...prev, [taskKey]: true }));
-      
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('clipIndex', clipIdx);
@@ -1879,40 +1879,40 @@ export default function PillarCampaignDetailPage() {
       <div style={{ color: 'var(--text-primary)', fontSize: '0.82rem', textAlign: 'left' }}>
         {/* Status Banners */}
         {item.workflow_status === 'ready_for_review' && (
-          <div style={{ background: 'rgba(230, 126, 34, 0.08)', border: '1px solid rgba(230, 126, 34, 0.3)', color: '#f39c12', padding: '16px 20px', borderRadius: '8px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px', lineHeight: 1.5 }}>
+          <div style={{ background: 'rgba(230, 126, 34, 0.08)', border: '1px solid rgba(230, 126, 34, 0.3)', color: 'var(--status-warning)', padding: '16px 20px', borderRadius: '8px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px', lineHeight: 1.5 }}>
             <span style={{ fontSize: '1.4rem' }}>⏳</span>
             <div>
-              <strong style={{ display: 'block', marginBottom: '2px', color: '#fff' }}>Menunggu Review Kreatif (Human-in-the-Loop)</strong>
+              <strong style={{ display: 'block', marginBottom: '2px', color: 'var(--text-primary)' }}>Menunggu Review Kreatif (Human-in-the-Loop)</strong>
               Gemini telah merancang Konsep Awal & Rencana Video baru di bawah ini. Harap tinjau voiceover, prompt start frame T2I, dan prompt pergerakan I2V. Anda bisa mengedit teksnya secara bebas, meregenerasi gambar T2I, dan menyesuaikan tahapan pipa produksi sebelum klik tombol <strong>"Approve & Proceed to Production"</strong>.
             </div>
           </div>
         )}
 
         {item.workflow_status === 'production_processing' && (
-          <div style={{ background: 'rgba(52, 152, 219, 0.08)', border: '1px solid rgba(52, 152, 219, 0.3)', color: '#3498db', padding: '16px 20px', borderRadius: '8px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px', lineHeight: 1.5 }}>
+          <div style={{ background: 'var(--status-info-soft)', border: '1px solid var(--status-info-soft)', color: 'var(--status-info)', padding: '16px 20px', borderRadius: '8px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px', lineHeight: 1.5 }}>
             <span style={{ fontSize: '1.4rem' }}>⚙️</span>
             <div>
-              <strong style={{ display: 'block', marginBottom: '2px', color: '#fff' }}>Sedang Memproses Produksi...</strong>
+              <strong style={{ display: 'block', marginBottom: '2px', color: 'var(--text-primary)' }}>Sedang Memproses Produksi...</strong>
               Antrean produksi sedang berjalan. Mesin sedang melakukan render audio TTS, visual G-Labs (Veo/Kling), dan penggabungan FFmpeg. Antarmuka ini dikunci sementara (Read-Only) hingga produksi selesai.
             </div>
           </div>
         )}
 
         {item.workflow_status === 'completed' && !isProductionFailed && (
-          <div style={{ background: 'rgba(46, 204, 113, 0.08)', border: '1px solid rgba(46, 204, 113, 0.3)', color: '#2ecc71', padding: '16px 20px', borderRadius: '8px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px', lineHeight: 1.5 }}>
+          <div style={{ background: 'var(--status-success-soft)', border: '1px solid var(--status-success-soft)', color: 'var(--status-success)', padding: '16px 20px', borderRadius: '8px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px', lineHeight: 1.5 }}>
             <span style={{ fontSize: '1.4rem' }}>✅</span>
             <div>
-              <strong style={{ display: 'block', marginBottom: '2px', color: '#fff' }}>Produksi Selesai</strong>
+              <strong style={{ display: 'block', marginBottom: '2px', color: 'var(--text-primary)' }}>Produksi Selesai</strong>
               Tahapan produksi (TTS, Video G-Labs, dan Muxing FFmpeg) telah selesai dieksekusi sepenuhnya! Video akhir siap diunduh atau diposting.
             </div>
           </div>
         )}
 
         {isProductionFailed && (
-          <div style={{ background: 'rgba(231, 76, 60, 0.08)', border: '1px solid rgba(231, 76, 60, 0.3)', color: '#e74c3c', padding: '16px 20px', borderRadius: '8px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px', lineHeight: 1.5 }}>
+          <div style={{ background: 'var(--status-danger-soft)', border: '1px solid var(--status-danger-soft)', color: 'var(--status-danger)', padding: '16px 20px', borderRadius: '8px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px', lineHeight: 1.5 }}>
             <span style={{ fontSize: '1.4rem' }}>❌</span>
             <div>
-              <strong style={{ display: 'block', marginBottom: '2px', color: '#fff' }}>Produksi Gagal / Terhenti</strong>
+              <strong style={{ display: 'block', marginBottom: '2px', color: 'var(--text-primary)' }}>Produksi Gagal / Terhenti</strong>
               Terjadi kegagalan saat memproses tahapan produksi (TTS, Video G-Labs, atau FFmpeg). Anda dapat mengedit storyboard di bawah ini, mengunggah Start Frame pengganti, lalu klik tombol <strong>"Approve & Proceed to Production"</strong> untuk merender ulang video.
             </div>
           </div>
@@ -1933,9 +1933,9 @@ export default function PillarCampaignDetailPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '1.2rem' }}>🛡️</span>
-                <span style={{ fontWeight: '700', fontSize: '0.9rem', color: '#fff' }}>TikTok Shop Compliance Audit</span>
+                <span style={{ fontWeight: '700', fontSize: '0.9rem', color: 'var(--text-primary)' }}>TikTok Shop Compliance Audit</span>
               </div>
-              
+
               {/* Verdict Badge */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Status:</span>
@@ -1945,27 +1945,27 @@ export default function PillarCampaignDetailPage() {
                   textTransform: 'uppercase',
                   padding: '4px 10px',
                   borderRadius: '20px',
-                  background: item.compliance_status === 'PASS' 
-                    ? 'rgba(46, 204, 113, 0.15)' 
-                    : item.compliance_status === 'REVISE' 
-                      ? 'rgba(241, 196, 15, 0.15)' 
-                      : 'rgba(231, 76, 60, 0.15)',
-                  color: item.compliance_status === 'PASS' 
-                    ? '#2ecc71' 
-                    : item.compliance_status === 'REVISE' 
-                      ? '#f1c40f' 
-                      : '#e74c3c',
+                  background: item.compliance_status === 'PASS'
+                    ? 'var(--status-success-soft)'
+                    : item.compliance_status === 'REVISE'
+                      ? 'rgba(241, 196, 15, 0.15)'
+                      : 'var(--status-danger-soft)',
+                  color: item.compliance_status === 'PASS'
+                    ? 'var(--status-success)'
+                    : item.compliance_status === 'REVISE'
+                      ? 'var(--status-warning)'
+                      : 'var(--status-danger)',
                   border: `1px solid ${
-                    item.compliance_status === 'PASS' 
-                      ? '#2ecc71' 
-                      : item.compliance_status === 'REVISE' 
-                        ? '#f1c40f' 
-                        : '#e74c3c'
+                    item.compliance_status === 'PASS'
+                      ? 'var(--status-success)'
+                      : item.compliance_status === 'REVISE'
+                        ? 'var(--status-warning)'
+                        : 'var(--status-danger)'
                   }`
                 }}>
                   {item.compliance_status}
                 </span>
-                
+
                 {/* Risk Score */}
                 {item.compliance_score !== undefined && (
                   <span style={{
@@ -1973,9 +1973,9 @@ export default function PillarCampaignDetailPage() {
                     fontWeight: '700',
                     padding: '4px 10px',
                     borderRadius: '20px',
-                    background: 'rgba(255,255,255,0.05)',
+                    background: 'var(--surface-interactive)',
                     border: '1px solid var(--border)',
-                    color: item.compliance_score < 30 ? '#2ecc71' : item.compliance_score < 70 ? '#f1c40f' : '#e74c3c'
+                    color: item.compliance_score < 30 ? 'var(--status-success)' : item.compliance_score < 70 ? 'var(--status-warning)' : 'var(--status-danger)'
                   }}>
                     Skor Risiko: {item.compliance_score}/100
                   </span>
@@ -1991,12 +1991,12 @@ export default function PillarCampaignDetailPage() {
               if (issues.length === 0) return null;
               return (
                 <div style={{
-                  background: 'rgba(0,0,0,0.2)',
+                  background: 'var(--overlay-subtle)',
                   borderRadius: '8px',
                   padding: '12px 16px',
-                  borderLeft: '4px solid #f1c40f'
+                  borderLeft: '4px solid var(--status-warning)'
                 }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#f1c40f', display: 'block', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--status-warning)', display: 'block', marginBottom: '6px' }}>
                     Peringatan Kepatuhan Kebijakan:
                   </span>
                   <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -2022,9 +2022,9 @@ export default function PillarCampaignDetailPage() {
                     flex: 1,
                     padding: '10px 14px',
                     borderRadius: '8px',
-                    background: activeVoVersion === 'original' ? 'rgba(255,255,255,0.08)' : 'transparent',
+                    background: activeVoVersion === 'original' ? 'var(--border-subtle)' : 'transparent',
                     border: `1px solid ${activeVoVersion === 'original' ? 'var(--accent)' : 'var(--border)'}`,
-                    color: activeVoVersion === 'original' ? '#fff' : 'var(--text-muted)',
+                    color: activeVoVersion === 'original' ? 'var(--text-primary)' : 'var(--text-muted)',
                     cursor: isReadOnly ? 'not-allowed' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -2049,9 +2049,9 @@ export default function PillarCampaignDetailPage() {
                     flex: 1,
                     padding: '10px 14px',
                     borderRadius: '8px',
-                    background: activeVoVersion === 'safe' ? 'rgba(46, 204, 113, 0.08)' : 'transparent',
-                    border: `1px solid ${activeVoVersion === 'safe' ? '#2ecc71' : 'var(--border)'}`,
-                    color: activeVoVersion === 'safe' ? '#2ecc71' : 'var(--text-muted)',
+                    background: activeVoVersion === 'safe' ? 'var(--status-success-soft)' : 'transparent',
+                    border: `1px solid ${activeVoVersion === 'safe' ? 'var(--status-success)' : 'var(--border)'}`,
+                    color: activeVoVersion === 'safe' ? 'var(--status-success)' : 'var(--text-muted)',
                     cursor: isReadOnly ? 'not-allowed' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -2073,7 +2073,7 @@ export default function PillarCampaignDetailPage() {
         )}
 
         {/* Tab Headers */}
-        <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '10px', marginBottom: '20px', overflowX: 'auto' }}>
+        <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '10px', marginBottom: '20px', overflowX: 'auto' }}>
           {[
             { id: 'concept', label: '💡 Tab 1: Konsep Awal & Produk' },
             { id: 'storyboard', label: '📖 Tab 2: Storyboard & Rencana Visual' },
@@ -2086,7 +2086,7 @@ export default function PillarCampaignDetailPage() {
               type="button"
               onClick={() => setActiveTab(t.id)}
               style={{
-                background: activeTab === t.id ? 'rgba(108, 92, 231, 0.15)' : 'transparent',
+                background: activeTab === t.id ? 'var(--status-neutral-soft)' : 'transparent',
                 border: activeTab === t.id ? '1px solid var(--accent)' : '1px solid transparent',
                 color: activeTab === t.id ? 'var(--accent-light)' : 'var(--text-muted)',
                 padding: '8px 16px',
@@ -2108,12 +2108,12 @@ export default function PillarCampaignDetailPage() {
 
         {activeTab === 'storyboard' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginBottom: '24px' }}>
-            <h4 style={{ margin: 0, fontWeight: '700', fontSize: '0.9rem', color: '#fff' }}>📖 Storyboard & Rencana Visual Baru</h4>
+            <h4 style={{ margin: 0, fontWeight: '700', fontSize: '0.9rem', color: 'var(--text-primary)' }}>📖 Storyboard & Rencana Visual Baru</h4>
 
             {/* Start Frame Grid */}
             {campaign?.visual_mode === 'hybrid_lock' && (
-              <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '8px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '6px' }}>
+              <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--surface-interactive)', borderRadius: '8px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--surface-interactive)', paddingBottom: '6px' }}>
                   <span style={{ fontWeight: '600', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                     🖼️ Grid Preview Start Frame Gambar (T2I)
                   </span>
@@ -2127,7 +2127,7 @@ export default function PillarCampaignDetailPage() {
                       padding: '4px 10px',
                       background: item.regenerate_start_frames_status === 'running' ? 'rgba(155, 89, 182, 0.4)' : 'rgba(155, 89, 182, 0.15)',
                       borderColor: 'rgba(155, 89, 182, 0.3)',
-                      color: '#fff',
+                      color: 'var(--text-primary)',
                       cursor: item.regenerate_start_frames_status === 'running' ? 'not-allowed' : 'pointer'
                     }}
                   >
@@ -2145,25 +2145,25 @@ export default function PillarCampaignDetailPage() {
                     const hasT2iPrompt = !!p.t2i_prompt;
 
                     return (
-                      <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center', background: 'rgba(0,0,0,0.1)', padding: '10px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.03)' }}>
+                      <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center', background: 'var(--overlay-subtle)', padding: '10px', borderRadius: '6px', border: '1px solid var(--surface-interactive)' }}>
                         <div style={{ fontWeight: '700', fontSize: '0.72rem', color: 'var(--accent-light)' }}>
                           Klip #{p.clip_index || (idx + 1)}
                         </div>
-                        <div style={{ width: '100%', height: '180px', position: 'relative', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <div style={{ width: '100%', height: '180px', position: 'relative', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
                           {clipImgPath ? (
                             <img src={clipImgPath.includes('?') ? `${clipImgPath}&t=${cacheBuster}` : `${clipImgPath}?t=${cacheBuster}`} alt={`Klip ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           ) : (
-                            <div style={{ width: '100%', height: '100%', background: 'rgba(255,255,255,0.01)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.62rem', padding: '5px', textAlign: 'center' }}>
+                            <div style={{ width: '100%', height: '100%', background: 'var(--surface-interactive)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.62rem', padding: '5px', textAlign: 'center' }}>
                               <span>{hasT2iPrompt ? '🖼️ Belum Ada Start Frame' : '🎬 T2V (No Start Frame)'}</span>
                             </div>
                           )}
                         </div>
                         {hasT2iPrompt && (
                           <>
-                            <input 
-                              type="file" 
-                              accept="image/*" 
-                              style={{ display: 'none' }} 
+                            <input
+                              type="file"
+                              accept="image/*"
+                              style={{ display: 'none' }}
                               id={`replace-sf-${item.id}-${p.clip_index || (idx + 1)}`}
                               onChange={(e) => {
                                 handleUploadStartFrame(p.clip_index || (idx + 1), e.target.files[0]);
@@ -2180,9 +2180,9 @@ export default function PillarCampaignDetailPage() {
                                   flex: 1,
                                   fontSize: '0.62rem',
                                   padding: '4px 2px',
-                                  background: 'rgba(255,255,255,0.05)',
-                                  border: '1px solid rgba(255,255,255,0.1)',
-                                  color: '#fff',
+                                  background: 'var(--surface-interactive)',
+                                  border: '1px solid var(--border-subtle)',
+                                  color: 'var(--text-primary)',
                                   borderRadius: '4px',
                                   cursor: 'pointer',
                                   textAlign: 'center',
@@ -2200,9 +2200,9 @@ export default function PillarCampaignDetailPage() {
                                   flex: 1,
                                   fontSize: '0.62rem',
                                   padding: '4px 2px',
-                                  background: 'rgba(255,255,255,0.05)',
-                                  border: '1px solid rgba(255,255,255,0.1)',
-                                  color: '#fff',
+                                  background: 'var(--surface-interactive)',
+                                  border: '1px solid var(--border-subtle)',
+                                  color: 'var(--text-primary)',
                                   borderRadius: '4px',
                                   cursor: 'pointer',
                                   textAlign: 'center',
@@ -2227,17 +2227,17 @@ export default function PillarCampaignDetailPage() {
               const isExpanded = (activeClipIndex[item.id] !== undefined ? activeClipIndex[item.id] : 0) === idx;
 
               return (
-                <div key={idx} style={{ background: isBridge ? 'rgba(59, 130, 246, 0.03)' : 'rgba(255, 255, 255, 0.02)', borderRadius: '8px', border: isBridge ? '1px solid rgba(59,130,246,0.2)' : '1px solid rgba(255, 255, 255, 0.05)', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  <div 
+                <div key={idx} style={{ background: isBridge ? 'rgba(59, 130, 246, 0.03)' : 'var(--surface-interactive)', borderRadius: '8px', border: isBridge ? '1px solid var(--status-info-soft)' : '1px solid var(--surface-interactive)', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  <div
                     onClick={() => toggleClip(item.id, idx)}
-                    style={{ 
-                      fontWeight: 700, 
-                      fontSize: '0.82rem', 
-                      color: isBridge ? '#3b82f6' : 'var(--accent-light)', 
-                      borderBottom: isExpanded ? '1px solid rgba(255,255,255,0.04)' : 'none', 
-                      paddingBottom: '8px', 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
+                    style={{
+                      fontWeight: 700,
+                      fontSize: '0.82rem',
+                      color: isBridge ? 'var(--status-info)' : 'var(--accent-light)',
+                      borderBottom: isExpanded ? '1px solid var(--surface-interactive)' : 'none',
+                      paddingBottom: '8px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
                       alignItems: 'center',
                       cursor: 'pointer',
                       userSelect: 'none'
@@ -2245,7 +2245,7 @@ export default function PillarCampaignDetailPage() {
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span>{isExpanded ? '▼' : '▶'} Aset Klip #{p.clip_index || (idx + 1)}</span>
-                      {isBridge && <span style={{ fontSize: '0.72rem', fontWeight: 'bold', color: '#3b82f6' }}>🌉 BRIDGE TRANSISI PRODUK</span>}
+                      {isBridge && <span style={{ fontSize: '0.72rem', fontWeight: 'bold', color: 'var(--status-info)' }}>🌉 BRIDGE TRANSISI PRODUK</span>}
                     </div>
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                       {isExpanded ? 'Tutup Aset' : 'Buka Aset'}
@@ -2273,7 +2273,7 @@ export default function PillarCampaignDetailPage() {
                       </div>
                       <textarea
                         disabled={isReadOnly}
-                        style={{ width: '100%', minHeight: '45px', background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '8px', color: '#fff', fontSize: '0.78rem', resize: 'vertical', lineHeight: 1.4 }}
+                        style={{ width: '100%', minHeight: '45px', background: 'var(--overlay-subtle)', border: '1px solid var(--surface-interactive)', borderRadius: '4px', padding: '8px', color: 'var(--text-primary)', fontSize: '0.78rem', resize: 'vertical', lineHeight: 1.4 }}
                         value={p.new_vo || ''}
                         onChange={(e) => updatePlanField(idx, 'new_vo', e.target.value)}
                       />
@@ -2298,7 +2298,7 @@ export default function PillarCampaignDetailPage() {
                       </div>
                       <textarea
                         disabled={isReadOnly}
-                        style={{ width: '100%', minHeight: '45px', background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '8px', color: '#fff', fontSize: '0.78rem', resize: 'vertical', lineHeight: 1.4 }}
+                        style={{ width: '100%', minHeight: '45px', background: 'var(--overlay-subtle)', border: '1px solid var(--surface-interactive)', borderRadius: '4px', padding: '8px', color: 'var(--text-primary)', fontSize: '0.78rem', resize: 'vertical', lineHeight: 1.4 }}
                         value={p.visual_action || ''}
                         onChange={(e) => updatePlanField(idx, 'visual_action', e.target.value)}
                       />
@@ -2324,7 +2324,7 @@ export default function PillarCampaignDetailPage() {
                         </div>
                         <textarea
                           disabled={isReadOnly}
-                          style={{ width: '100%', minHeight: '45px', background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '8px', color: '#fff', fontSize: '0.74rem', fontFamily: 'monospace', resize: 'vertical', lineHeight: 1.4 }}
+                          style={{ width: '100%', minHeight: '45px', background: 'var(--overlay-subtle)', border: '1px solid var(--surface-interactive)', borderRadius: '4px', padding: '8px', color: 'var(--text-primary)', fontSize: '0.74rem', fontFamily: 'monospace', resize: 'vertical', lineHeight: 1.4 }}
                           value={p.t2i_prompt || ''}
                           onChange={(e) => updatePlanField(idx, 't2i_prompt', e.target.value)}
                         />
@@ -2351,7 +2351,7 @@ export default function PillarCampaignDetailPage() {
                         </div>
                         <textarea
                           disabled={isReadOnly}
-                          style={{ width: '100%', minHeight: '45px', background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '8px', color: '#fff', fontSize: '0.74rem', fontFamily: 'monospace', resize: 'vertical', lineHeight: 1.4 }}
+                          style={{ width: '100%', minHeight: '45px', background: 'var(--overlay-subtle)', border: '1px solid var(--surface-interactive)', borderRadius: '4px', padding: '8px', color: 'var(--text-primary)', fontSize: '0.74rem', fontFamily: 'monospace', resize: 'vertical', lineHeight: 1.4 }}
                           value={p.t2v_prompt || ''}
                           onChange={(e) => updatePlanField(idx, 't2v_prompt', e.target.value)}
                         />
@@ -2378,7 +2378,7 @@ export default function PillarCampaignDetailPage() {
                         </div>
                         <textarea
                           disabled={isReadOnly}
-                          style={{ width: '100%', minHeight: '120px', background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '8px', color: '#fff', fontSize: '0.74rem', fontFamily: 'monospace', resize: 'vertical', lineHeight: 1.4 }}
+                          style={{ width: '100%', minHeight: '120px', background: 'var(--overlay-subtle)', border: '1px solid var(--surface-interactive)', borderRadius: '4px', padding: '8px', color: 'var(--text-primary)', fontSize: '0.74rem', fontFamily: 'monospace', resize: 'vertical', lineHeight: 1.4 }}
                           value={getFormattedPrompt(p.i2v_prompt || '')}
                           onChange={(e) => updatePlanField(idx, 'i2v_prompt', e.target.value)}
                         />
@@ -2396,15 +2396,15 @@ export default function PillarCampaignDetailPage() {
             })}
 
             {/* Unified Social Caption Editor */}
-            <div style={{ background: 'rgba(255, 255, 255, 0.02)', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.05)', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--accent-light)', borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '8px' }}>
+            <div style={{ background: 'var(--surface-interactive)', borderRadius: '8px', border: '1px solid var(--surface-interactive)', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--accent-light)', borderBottom: '1px solid var(--surface-interactive)', paddingBottom: '8px' }}>
                 📲 Social Media Package & Caption
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '6px' }}>Caption & Social Media Copy (Unified Single Field)</label>
                 <textarea
                   disabled={isReadOnly}
-                  style={{ width: '100%', minHeight: '140px', background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '6px', padding: '12px', color: '#fff', fontSize: '0.82rem', resize: 'vertical', lineHeight: 1.5 }}
+                  style={{ width: '100%', minHeight: '140px', background: 'var(--overlay-subtle)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '12px', color: 'var(--text-primary)', fontSize: '0.82rem', resize: 'vertical', lineHeight: 1.5 }}
                   value={sc.caption || sc.tiktok_caption || sc.ig_caption || ''}
                   onChange={(e) => {
                     updateSocialField('caption', e.target.value);
@@ -2420,18 +2420,18 @@ export default function PillarCampaignDetailPage() {
 
         {activeTab === 'assets' && (
           <div style={{
-            background: 'rgba(255, 255, 255, 0.02)',
+            background: 'var(--surface-interactive)',
             padding: '20px',
             borderRadius: '8px',
-            border: '1px solid rgba(255, 255, 255, 0.05)',
+            border: '1px solid var(--surface-interactive)',
             marginBottom: '20px',
             display: 'flex',
             flexDirection: 'column',
             gap: '20px'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--surface-interactive)', paddingBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
               <div>
-                <h4 style={{ margin: '0 0 4px 0', color: '#fff', fontSize: '0.95rem', fontWeight: 700 }}>☁️ Asset Vault & Cloud Recovery Panel</h4>
+                <h4 style={{ margin: '0 0 4px 0', color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700 }}>☁️ Asset Vault & Cloud Recovery Panel</h4>
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
                   Kelola aset lokal (T2I, I2V, TTS, MD) dan unggah manual ke Nextcloud / Drive meskipun pipeline belum komplit.
                 </span>
@@ -2443,7 +2443,7 @@ export default function PillarCampaignDetailPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="btn btn-secondary btn-sm"
-                    style={{ fontSize: '0.72rem', padding: '6px 12px', background: 'rgba(52, 152, 219, 0.2)', borderColor: 'rgba(52, 152, 219, 0.4)', color: '#3498db' }}
+                    style={{ fontSize: '0.72rem', padding: '6px 12px', background: 'var(--status-info-soft)', borderColor: 'var(--status-info-soft)', color: 'var(--status-info)' }}
                   >
                     🔗 Buka Folder Nextcloud
                   </a>
@@ -2467,7 +2467,7 @@ export default function PillarCampaignDetailPage() {
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', textAlign: 'left' }}>
                   <thead>
-                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', color: 'var(--text-muted)' }}>
+                    <tr style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}>
                       <th style={{ padding: '8px' }}>Klip</th>
                       <th style={{ padding: '8px' }}>🖼️ Start Frame (T2I)</th>
                       <th style={{ padding: '8px' }}>🎥 Motion Video (I2V)</th>
@@ -2485,26 +2485,26 @@ export default function PillarCampaignDetailPage() {
                       const clipVidPath = vPaths[idx];
 
                       return (
-                        <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                          <td style={{ padding: '10px 8px', fontWeight: 700, color: '#fff' }}>Klip #{cIdx}</td>
+                        <tr key={idx} style={{ borderBottom: '1px solid var(--surface-interactive)' }}>
+                          <td style={{ padding: '10px 8px', fontWeight: 700, color: 'var(--text-primary)' }}>Klip #{cIdx}</td>
                           <td style={{ padding: '10px 8px' }}>
                             {clipImgPath ? (
-                              <span style={{ color: '#2ecc71', fontWeight: 600 }}>✅ Ready</span>
+                              <span style={{ color: 'var(--status-success)', fontWeight: 600 }}>✅ Ready</span>
                             ) : (
                               <span style={{ color: 'var(--text-muted)' }}>❌ Missing</span>
                             )}
                           </td>
                           <td style={{ padding: '10px 8px' }}>
                             {clipVidPath ? (
-                              <span style={{ color: '#2ecc71', fontWeight: 600 }}>✅ Ready</span>
+                              <span style={{ color: 'var(--status-success)', fontWeight: 600 }}>✅ Ready</span>
                             ) : item.status === 'failed' || item.workflow_status === 'failed' ? (
-                              <span style={{ color: '#e74c3c', fontWeight: 600 }}>❌ Failed</span>
+                              <span style={{ color: 'var(--status-danger)', fontWeight: 600 }}>❌ Failed</span>
                             ) : (
-                              <span style={{ color: '#f1c40f', fontWeight: 600 }}>⏳ Pending</span>
+                              <span style={{ color: 'var(--status-warning)', fontWeight: 600 }}>⏳ Pending</span>
                             )}
                           </td>
                           <td style={{ padding: '10px 8px' }}>
-                            <span style={{ color: '#2ecc71', fontWeight: 600 }}>✅ Script Ready</span>
+                            <span style={{ color: 'var(--status-success)', fontWeight: 600 }}>✅ Script Ready</span>
                           </td>
                           <td style={{ padding: '10px 8px', textAlign: 'right' }}>
                             <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Aset Tersedia</span>
@@ -2520,8 +2520,8 @@ export default function PillarCampaignDetailPage() {
         )}
 
         {activeTab === 'dna' && (
-          <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '20px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.05)', marginBottom: '20px' }}>
-            <h4 style={{ margin: '0 0 20px 0', fontWeight: '700', fontSize: '0.9rem', color: '#fff' }}>🧬 Video DNA & Narasi Metrik (OPC Campaign)</h4>
+          <div style={{ background: 'var(--surface-interactive)', padding: '20px', borderRadius: '8px', border: '1px solid var(--surface-interactive)', marginBottom: '20px' }}>
+            <h4 style={{ margin: '0 0 20px 0', fontWeight: '700', fontSize: '0.9rem', color: 'var(--text-primary)' }}>🧬 Video DNA & Narasi Metrik (OPC Campaign)</h4>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
               {[
@@ -2543,7 +2543,7 @@ export default function PillarCampaignDetailPage() {
                     disabled={isReadOnly}
                     value={dna[d.field] ?? ''}
                     onChange={(e) => updateDnaField(d.field, d.type === 'number' ? (parseInt(e.target.value) || 0) : e.target.value)}
-                    style={{ width: '100%', padding: '8px', background: '#1c1c1e', border: '1px solid rgba(255,255,255,0.08)', color: '#fff', borderRadius: '4px', fontSize: '0.8rem' }}
+                    style={{ width: '100%', padding: '8px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.8rem' }}
                   />
                 </div>
               ))}
@@ -2556,7 +2556,7 @@ export default function PillarCampaignDetailPage() {
         {/* Workflow & Production Settings Form */}
         {(item.workflow_status === 'ready_for_review' || isProductionFailed) && activeTab === 'storyboard' && (
           <>
-            <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '8px', padding: '16px 20px', marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--surface-interactive)', borderRadius: '8px', padding: '16px 20px', marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ fontWeight: '700', fontSize: '0.8rem', color: 'var(--accent-light)' }}>⚙️ Workflow & Production Settings (Fase 2)</div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -2569,7 +2569,7 @@ export default function PillarCampaignDetailPage() {
                     <span style={{ fontSize: '0.78rem', fontWeight: 600 }}>Generate TTS (Audio Voiceover)</span>
                   </div>
                   {settings.enable_tts && (
-                    <div style={{ background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '6px', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ background: 'var(--overlay-subtle)', border: '1px solid var(--surface-interactive)', borderRadius: '6px', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div>
                         <label style={{ display: 'block', fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>Voice Provider</label>
                         <select
@@ -2584,7 +2584,7 @@ export default function PillarCampaignDetailPage() {
                               updateSettingField('voice_persona', campaign.target_language === 'en-US' ? 'English_causual_narrator_vv1' : 'Indonesian_casual_reporter_vv2');
                             }
                           }}
-                          style={{ width: '100%', padding: '6px 8px', background: '#1c1c1e', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '4px', fontSize: '0.75rem' }}
+                          style={{ width: '100%', padding: '6px 8px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.75rem' }}
                         >
                           <option value="gemini">Google Gemini TTS</option>
                           <option value="minimax">MiniMax Speech</option>
@@ -2603,7 +2603,7 @@ export default function PillarCampaignDetailPage() {
                             disabled={isReadOnly}
                             value={settings.voice_persona || 'Indonesian_casual_reporter_vv2'}
                             onChange={(e) => updateSettingField('voice_persona', e.target.value)}
-                            style={{ width: '100%', padding: '6px 8px', background: '#1c1c1e', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '4px', fontSize: '0.75rem' }}
+                            style={{ width: '100%', padding: '6px 8px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.75rem' }}
                           >
                             {settings.voice_provider === 'gemini' ? (
                               GEMINI_VOICES.map(v => <option key={v.id} value={v.id}>{v.avatar} {v.name} - {v.desc}</option>)
@@ -2613,7 +2613,7 @@ export default function PillarCampaignDetailPage() {
                           </select>
                         </div>
                       ) : (
-                        <div style={{ marginTop: '4px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '10px' }}>
+                        <div style={{ marginTop: '4px', borderTop: '1px solid var(--surface-interactive)', paddingTop: '10px' }}>
                           <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: '8px' }}>🎭 Voice Cast Configuration</span>
                           {voiceCast.length === 0 ? (
                             <div style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '0.72rem', padding: '4px 0' }}>
@@ -2622,7 +2622,7 @@ export default function PillarCampaignDetailPage() {
                           ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                               {voiceCast.map((ch, idx) => (
-                                <div key={idx} style={{ background: 'rgba(0,0,0,0.2)', padding: '8px', borderRadius: '4px' }}>
+                                <div key={idx} style={{ background: 'var(--overlay-subtle)', padding: '8px', borderRadius: '4px' }}>
                                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                                     <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--accent-light)' }}>{ch.name}</span>
                                     <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>ID: {ch.id}</span>
@@ -2630,7 +2630,7 @@ export default function PillarCampaignDetailPage() {
                                   <select
                                     disabled={isReadOnly}
                                     value={settings.voice_provider === 'gemini' ? (ch.gemini_voice_id || 'Kore') : (ch.minimax_voice_id || 'Indonesian_casual_reporter_vv2')}
-                                    style={{ width: '100%', padding: '4px 6px', background: '#1c1c1e', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '4px', fontSize: '0.7rem' }}
+                                    style={{ width: '100%', padding: '4px 6px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.7rem' }}
                                     onChange={e => {
                                       const a = [...voiceCast];
                                       if (settings.voice_provider === 'gemini') {
@@ -2684,7 +2684,7 @@ export default function PillarCampaignDetailPage() {
                     <span style={{ fontSize: '0.78rem', fontWeight: 600 }}>Generate Video (G-Labs AI Video)</span>
                   </div>
                   {settings.enable_glabs && (
-                    <div style={{ background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '6px', padding: '12px 14px', fontSize: '0.7rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                    <div style={{ background: 'var(--overlay-subtle)', border: '1px solid var(--surface-interactive)', borderRadius: '6px', padding: '12px 14px', fontSize: '0.7rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
                       ℹ️ Menggunakan model video kustom Veo/Kling. Klip bridge yang menggunakan start frame akan dijalankan dengan I2V (Image-to-Video), klip lain dijalankan dengan T2V (Text-to-Video).
                     </div>
                   )}
@@ -2699,14 +2699,14 @@ export default function PillarCampaignDetailPage() {
                     <span style={{ fontSize: '0.78rem', fontWeight: 600 }}>FFmpeg Muxing & Compiling</span>
                   </div>
                   {settings.enable_ffmpeg && (
-                    <div style={{ background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '6px', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ background: 'var(--overlay-subtle)', border: '1px solid var(--surface-interactive)', borderRadius: '6px', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div>
                         <label style={{ display: 'block', fontSize: '0.68rem', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>Sync Option</label>
                         <select
                           disabled={isReadOnly}
                           value={settings.ffmpeg_sync_option || 'smart_sync'}
                           onChange={(e) => updateSettingField('ffmpeg_sync_option', e.target.value)}
-                          style={{ width: '100%', padding: '6px 8px', background: '#1c1c1e', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '4px', fontSize: '0.72rem' }}
+                          style={{ width: '100%', padding: '6px 8px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.72rem' }}
                         >
                           <option value="smart_sync">Auto-Pilot Smart Sync</option>
                           <option value="shortest">Shortest Clip</option>
@@ -2749,7 +2749,7 @@ export default function PillarCampaignDetailPage() {
                 className="btn btn-primary"
                 disabled={savingDraft[item.id] || approvingItems[item.id]}
                 onClick={handleApprove}
-                style={{ background: 'var(--success)', borderColor: 'var(--success)', padding: '12px 24px', fontSize: '0.9rem', fontWeight: 'bold', borderRadius: '6px', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}
+                style={{ background: 'var(--success)', borderColor: 'var(--success)', padding: '12px 24px', fontSize: '0.9rem', fontWeight: 'bold', borderRadius: '6px', cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}
               >
                 {approvingItems[item.id] ? '⏳ Memproses Rilis...' : '🚀 Approve & Proceed to Production'}
               </button>
@@ -2758,16 +2758,16 @@ export default function PillarCampaignDetailPage() {
         )}
 
         {item.workflow_status === 'completed' && !isProductionFailed && (
-          <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '20px' }}>
-            <h4 style={{ margin: 0, fontWeight: '700', fontSize: '0.85rem', color: '#fff' }}>🎬 Hasil Render Video Akhir (Final Output)</h4>
+          <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--surface-interactive)', borderRadius: '8px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '20px' }}>
+            <h4 style={{ margin: 0, fontWeight: '700', fontSize: '0.85rem', color: 'var(--text-primary)' }}>🎬 Hasil Render Video Akhir (Final Output)</h4>
 
             <div style={{ display: 'grid', gridTemplateColumns: item.ffmpeg_output_path ? '1fr 2fr' : '1fr', gap: '20px', alignItems: 'center' }}>
               {item.ffmpeg_output_path ? (
-                <div style={{ display: 'flex', justifyContent: 'center', background: '#000', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', maxHeight: '380px' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', background: '#000', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-subtle)', maxHeight: '380px' }}>
                   <video src={item.ffmpeg_output_path} controls preload="metadata" style={{ width: '100%', maxHeight: '380px', display: 'block' }} />
                 </div>
               ) : (
-                <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px dashed rgba(255,255,255,0.1)', padding: '30px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <div style={{ background: 'var(--surface-interactive)', border: '1px dashed var(--border-subtle)', padding: '30px', textAlign: 'center', color: 'var(--text-muted)' }}>
                   🎥 File video belum dikompilasi / langkah FFmpeg di-skip.
                 </div>
               )}
@@ -2820,7 +2820,7 @@ export default function PillarCampaignDetailPage() {
                 </div>
 
                 {item.social_links_json && (
-                  <div style={{ background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.78rem', marginTop: '10px' }}>
+                  <div style={{ background: 'var(--surface-interactive)', padding: '10px 14px', borderRadius: '6px', border: '1px solid var(--surface-interactive)', fontSize: '0.78rem', marginTop: '10px' }}>
                     <div style={{ fontWeight: 600, marginBottom: '4px' }}>Tautan Distribusi:</div>
                     {(() => {
                       try {
@@ -2865,7 +2865,7 @@ export default function PillarCampaignDetailPage() {
       <Sidebar />
       <main className="main-content">
         <div style={{ padding: '24px 32px', maxWidth: '1200px', margin: '0 auto' }}>
-          
+
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
             <Link href="/pillar-campaigns" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.85rem' }}>
               ← Kembali ke Dashboard
@@ -2886,21 +2886,21 @@ export default function PillarCampaignDetailPage() {
                 ← Kembali ke Dashboard
               </Link>
               <h1 style={{ margin: '4px 0 0 0', fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.5px' }}>🎬 {campaign.campaign_name}</h1>
-              
+
               {/* 2. ID Kampanye | Nama Akun Brand | Created Date | Mode */}
               <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', marginTop: 12, fontSize: '0.9rem', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)', paddingBottom: 16, marginBottom: 20 }}>
-                <span>🔑 ID: <code style={{ background: 'rgba(255,255,255,0.05)', padding: '3px 8px', borderRadius: '4px', color: 'var(--accent-light)', fontFamily: 'monospace', fontSize: '0.85rem' }}>{campaign.id}</code></span>
+                <span>🔑 ID: <code style={{ background: 'var(--surface-interactive)', padding: '3px 8px', borderRadius: '4px', color: 'var(--accent-light)', fontFamily: 'monospace', fontSize: '0.85rem' }}>{campaign.id}</code></span>
                 <span style={{ opacity: 0.3 }}>|</span>
                 <span>🏷️ Brand: <strong>{campaign.account_name || campaign.brand_name || 'Tidak Ditentukan'}</strong></span>
                 <span style={{ opacity: 0.3 }}>|</span>
                 <span>📅 Dibuat: <strong>{new Date(campaign.created_at).toLocaleString('id-ID')}</strong></span>
                 <span style={{ opacity: 0.3 }}>|</span>
                 {campaign?.execution_mode === 'full_autopilot' ? (
-                  <span style={{ fontSize: '0.72rem', background: '#10b981', color: '#fff', padding: '3px 8px', borderRadius: 4, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ fontSize: '0.72rem', background: 'var(--status-success)', color: 'var(--text-primary)', padding: '3px 8px', borderRadius: 4, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                     🤖 FULL AUTO PILOT
                   </span>
                 ) : (
-                  <span style={{ fontSize: '0.72rem', background: '#f59e0b', color: '#000', padding: '3px 8px', borderRadius: 4, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ fontSize: '0.72rem', background: 'var(--status-warning)', color: '#000', padding: '3px 8px', borderRadius: 4, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                     👁️ MANUAL REVIEW (FASE 1 & 2)
                   </span>
                 )}
@@ -2909,36 +2909,36 @@ export default function PillarCampaignDetailPage() {
 
             {/* 3. Tombol Aksi Utama */}
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <button 
+              <button
                 className="btn"
                 onClick={toggleStatus}
                 style={{
-                  background: campaign.status === 'running' ? 'linear-gradient(135deg, #e67e22 0%, #d35400 100%)' : 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)',
-                  color: '#fff', border: 'none', padding: '10px 16px', fontWeight: 600, borderRadius: '6px', cursor: 'pointer',
-                  boxShadow: campaign.status === 'running' ? '0 4px 12px rgba(230, 126, 34, 0.3)' : '0 4px 12px rgba(46, 204, 113, 0.3)'
+                  background: campaign.status === 'running' ? 'linear-gradient(135deg, var(--status-warning) 0%, #d35400 100%)' : 'linear-gradient(135deg, var(--status-success) 0%, #27ae60 100%)',
+                  color: 'var(--text-primary)', border: 'none', padding: '10px 16px', fontWeight: 600, borderRadius: '6px', cursor: 'pointer',
+                  boxShadow: campaign.status === 'running' ? '0 4px 12px rgba(230, 126, 34, 0.3)' : '0 4px 12px var(--status-success-soft)'
                 }}
               >
                 {campaign.status === 'running' ? '⏸️ Pause Campaign' : '🟢 Start Campaign'}
               </button>
-              <button 
+              <button
                 className="btn"
                 onClick={handleSyncContentFlow}
                 disabled={syncing}
                 style={{
-                  background: 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)',
-                  color: '#fff', border: 'none', padding: '10px 16px', fontWeight: 600, borderRadius: '6px', cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(52, 152, 219, 0.3)'
+                  background: 'linear-gradient(135deg, var(--status-info) 0%, #2980b9 100%)',
+                  color: 'var(--text-primary)', border: 'none', padding: '10px 16px', fontWeight: 600, borderRadius: '6px', cursor: 'pointer',
+                  boxShadow: '0 4px 12px var(--status-info-soft)'
                 }}
               >
                 🚀 Push to Contentflow
               </button>
-              <button 
+              <button
                 className="btn"
                 onClick={handleSyncDrive}
                 disabled={syncing}
                 style={{
                   background: 'linear-gradient(135deg, #1abc9c 0%, #16a085 100%)',
-                  color: '#fff', border: 'none', padding: '10px 16px', fontWeight: 600, borderRadius: '6px', cursor: 'pointer',
+                  color: 'var(--text-primary)', border: 'none', padding: '10px 16px', fontWeight: 600, borderRadius: '6px', cursor: 'pointer',
                   boxShadow: '0 4px 12px rgba(26, 188, 156, 0.3)'
                 }}
               >
@@ -2962,13 +2962,13 @@ export default function PillarCampaignDetailPage() {
 
           {/* 4. Accordion Info Konfigurasi */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '24px', marginBottom: '24px' }}>
-            
+
             {/* Accordion A: Info Konfigurasi Basic Creative Strategy */}
-            <details open style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
-              <summary style={{ padding: '16px 20px', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.01)' }}>
+            <details open style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
+              <summary style={{ padding: '16px 20px', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)' }}>
                 <span>📂 Info Konfigurasi Basic Creative Strategy</span>
               </summary>
-              <div style={{ padding: '20px', borderTop: '1px solid var(--border)', background: 'rgba(0,0,0,0.2)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+              <div style={{ padding: '20px', borderTop: '1px solid var(--border)', background: 'var(--overlay-subtle)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>🏷️ Nama Akun (Brand Account)</span>
                   <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{campaign.account_name || campaign.brand_name || 'Tidak Ditentukan'}</span>
@@ -3000,7 +3000,7 @@ export default function PillarCampaignDetailPage() {
                 {campaign.custom_instruction && (
                   <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>Custom Instruction (Opsional)</span>
-                    <pre style={{ margin: 0, padding: '12px', background: 'rgba(0,0,0,0.3)', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.04)', fontSize: '0.82rem', fontFamily: 'monospace', whiteSpace: 'pre-wrap', color: 'var(--text-primary)' }}>
+                    <pre style={{ margin: 0, padding: '12px', background: 'var(--overlay-subtle)', borderRadius: '6px', border: '1px solid var(--surface-interactive)', fontSize: '0.82rem', fontFamily: 'monospace', whiteSpace: 'pre-wrap', color: 'var(--text-primary)' }}>
                       {campaign.custom_instruction}
                     </pre>
                   </div>
@@ -3015,11 +3015,11 @@ export default function PillarCampaignDetailPage() {
             </details>
 
             {/* Accordion B: Info Konfigurasi Aesthetics & Visual Settings */}
-            <details style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
-              <summary style={{ padding: '16px 20px', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.01)' }}>
+            <details style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
+              <summary style={{ padding: '16px 20px', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)' }}>
                 <span>🎬 Info Konfigurasi Aesthetics & Visual Settings</span>
               </summary>
-              <div style={{ padding: '20px', borderTop: '1px solid var(--border)', background: 'rgba(0,0,0,0.2)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+              <div style={{ padding: '20px', borderTop: '1px solid var(--border)', background: 'var(--overlay-subtle)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>Narrative Mode</span>
                   <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{campaign.narrative_mode || 'Storytelling / Casual'}</span>
@@ -3060,11 +3060,11 @@ export default function PillarCampaignDetailPage() {
             </details>
 
             {/* Accordion C: Info Konfigurasi Product Bridging Settings */}
-            <details style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
-              <summary style={{ padding: '16px 20px', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.01)' }}>
+            <details style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
+              <summary style={{ padding: '16px 20px', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)' }}>
                 <span>🌉 Info Konfigurasi Product Bridging Settings</span>
               </summary>
-              <div style={{ padding: '20px', borderTop: '1px solid var(--border)', background: 'rgba(0,0,0,0.2)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+              <div style={{ padding: '20px', borderTop: '1px solid var(--border)', background: 'var(--overlay-subtle)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>Bridging Promosi Produk</span>
                   <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{campaign.is_bridging_active === 1 ? 'Aktif' : 'Nonaktif'}</span>
@@ -3085,11 +3085,11 @@ export default function PillarCampaignDetailPage() {
             </details>
 
             {/* Accordion D: Info Konfigurasi Visual Swap Overrides */}
-            <details style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
-              <summary style={{ padding: '16px 20px', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.01)' }}>
+            <details style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
+              <summary style={{ padding: '16px 20px', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)' }}>
                 <span>🎭 Info Konfigurasi Visual Swap Overrides</span>
               </summary>
-              <div style={{ padding: '20px', borderTop: '1px solid var(--border)', background: 'rgba(0,0,0,0.2)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+              <div style={{ padding: '20px', borderTop: '1px solid var(--border)', background: 'var(--overlay-subtle)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>Konsep Karakter (Framing)</span>
                   <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{getVisualOverrideLabel('character', visualOverrides.character_concept)}</span>
@@ -3104,7 +3104,7 @@ export default function PillarCampaignDetailPage() {
                 </div>
               </div>
             </details>
-            
+
           </div>
 
 
@@ -3182,9 +3182,9 @@ export default function PillarCampaignDetailPage() {
                                 style={{
                                   fontSize: '0.7rem',
                                   padding: '3px 8px',
-                                  background: expandedItemId === item.id ? 'var(--accent)' : 'rgba(255,255,255,0.08)',
-                                  color: '#fff',
-                                  border: '1px solid rgba(255,255,255,0.1)'
+                                  background: expandedItemId === item.id ? 'var(--accent)' : 'var(--border-subtle)',
+                                  color: 'var(--text-primary)',
+                                  border: '1px solid var(--border-subtle)'
                                 }}
                               >
                                 {expandedItemId === item.id ? '📖 Tutup' : '📖 Detail'}
@@ -3231,8 +3231,8 @@ export default function PillarCampaignDetailPage() {
                                             key={t.id}
                                             className={`btn ${activeTab === t.id ? 'btn-primary' : 'btn-secondary'}`}
                                             onClick={() => setActiveTabs(prev => ({ ...prev, [item.id]: t.id }))}
-                                            style={{ 
-                                              padding: '6px 12px', 
+                                            style={{
+                                              padding: '6px 12px',
                                               fontSize: '0.8rem',
                                               borderBottom: activeTab === t.id ? '2px solid var(--accent-color)' : 'none',
                                               background: activeTab === t.id ? 'var(--btn-primary-bg)' : 'transparent',

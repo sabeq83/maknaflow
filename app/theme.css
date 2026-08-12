@@ -1,0 +1,232 @@
+/* MAKNA Flow semantic theme system. Keep color decisions here, not in pages. */
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+  --radius: 12px;
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sidebar-w: 260px;
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --canvas: #080c14;
+  --sidebar: #0c121e;
+  --surface: #101827;
+  --surface-raised: #162235;
+  --surface-interactive: #1c2a40;
+  --surface-hover: #22334b;
+  --input-bg: #0c1422;
+  --overlay-subtle: rgba(0, 0, 0, 0.24);
+  --overlay-backdrop: rgba(2, 6, 14, 0.76);
+  --text-primary: #f4f7fb;
+  --text-secondary: #b6c2d2;
+  --text-muted: #8290a5;
+  --text-disabled: #66758a;
+  --border-subtle: #26354a;
+  --border-strong: #3c506b;
+  --action-primary: #2dd4bf;
+  --action-primary-hover: #5eead4;
+  --on-action-primary: #042f2e;
+  --link: #67e8f9;
+  --link-hover: #a5f3fc;
+  --status-info: #60a5fa;
+  --status-info-soft: rgba(96, 165, 250, 0.14);
+  --status-success: #4ade80;
+  --status-success-soft: rgba(74, 222, 128, 0.14);
+  --status-warning: #fbbf24;
+  --status-warning-soft: rgba(251, 191, 36, 0.14);
+  --status-danger: #fb7185;
+  --status-danger-soft: rgba(251, 113, 133, 0.14);
+  --status-neutral: #a78bfa;
+  --status-neutral-soft: rgba(167, 139, 250, 0.14);
+  --focus-ring: #a78bfa;
+  --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+  --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+  --platform-google: #8ab4f8;
+  --platform-facebook: #60a5fa;
+  --platform-youtube: #ef4444;
+
+  /* Compatibility aliases while page-level literals are migrated. */
+  --bg-primary: var(--canvas);
+  --bg-secondary: var(--surface);
+  --bg-card: var(--surface);
+  --bg-card-hover: var(--surface-hover);
+  --bg-glass: var(--surface-interactive);
+  --border: var(--border-subtle);
+  --border-color: var(--border-subtle);
+  --border-hover: var(--border-strong);
+  --accent: var(--action-primary);
+  --accent-color: var(--action-primary);
+  --accent-light: var(--action-primary-hover);
+  --accent-glow: rgba(45, 212, 191, 0.18);
+  --accent-dark: #0f766e;
+  --accent-rgb: 45, 212, 191;
+  --success: var(--status-success);
+  --success-light: var(--status-success);
+  --success-glow: var(--status-success-soft);
+  --warning: var(--status-warning);
+  --danger: var(--status-danger);
+  --danger-glow: var(--status-danger-soft);
+  --info: var(--status-info);
+  --shadow: var(--shadow-card);
+  --shadow-lg: var(--shadow-modal);
+  --bg: var(--canvas);
+  --bg-app: var(--canvas);
+  --bg-main: var(--canvas);
+  --bg-dark: var(--canvas);
+  --bg-panel: var(--surface);
+  --bg-input: var(--input-bg);
+  --text: var(--text-primary);
+  --text-color: var(--text-primary);
+  --text-normal: var(--text-secondary);
+  --btn-primary-bg: var(--action-primary);
+  --brand-blue-bg: var(--status-info-soft);
+  --brand-blue-border: var(--status-info);
+  --brand-blue-text: var(--status-info);
+  --brand-blue-glow: var(--status-info-soft);
+  --brand-red-bg: var(--status-danger-soft);
+  --brand-red-border: var(--status-danger);
+  --brand-red-text: var(--status-danger);
+  --brand-red-glow: var(--status-danger-soft);
+  --brand-green-bg: var(--status-success-soft);
+  --brand-green-border: var(--status-success);
+  --brand-green-text: var(--status-success);
+  --brand-green-glow: var(--status-success-soft);
+  --btn-clean-photo-text: var(--on-action-primary);
+  --btn-gen-photo-text: var(--on-action-primary);
+  --btn-enrich-text: var(--on-action-primary);
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+  --canvas: #f2f5f8;
+  --sidebar: #ffffff;
+  --surface: #ffffff;
+  --surface-raised: #f7f9fc;
+  --surface-interactive: #edf2f7;
+  --surface-hover: #e6edf5;
+  --input-bg: #ffffff;
+  --overlay-subtle: rgba(30, 41, 59, 0.08);
+  --overlay-backdrop: rgba(15, 23, 42, 0.54);
+  --text-primary: #152033;
+  --text-secondary: #40506a;
+  --text-muted: #66758a;
+  --text-disabled: #8794a6;
+  --border-subtle: #d8e0ea;
+  --border-strong: #aebccd;
+  --action-primary: #087f73;
+  --action-primary-hover: #06665d;
+  --on-action-primary: #ffffff;
+  --link: #075ea8;
+  --link-hover: #064b86;
+  --status-info: #1d63b7;
+  --status-info-soft: #e8f1fc;
+  --status-success: #177a43;
+  --status-success-soft: #e6f5ec;
+  --status-warning: #925c08;
+  --status-warning-soft: #fff3d7;
+  --status-danger: #b4233d;
+  --status-danger-soft: #fdebef;
+  --status-neutral: #6548bd;
+  --status-neutral-soft: #f0ecfb;
+  --focus-ring: #6d4ed6;
+  --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+  --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+  --platform-google: #185abc;
+  --platform-facebook: #1769c2;
+  --platform-youtube: #c81e1e;
+  --accent-glow: rgba(8, 127, 115, 0.14);
+  --accent-dark: #06665d;
+  --accent-rgb: 8, 127, 115;
+}
+
+html,
+body { background: var(--canvas); color: var(--text-primary); }
+
+body,
+button,
+input,
+textarea,
+select { color: var(--text-primary); }
+
+a { color: var(--link); }
+a:hover { color: var(--link-hover); }
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--focus-ring) 72%, transparent);
+  outline-offset: 2px;
+}
+
+.sidebar { background: var(--sidebar); border-color: var(--border-subtle); }
+.card,
+.modal,
+.modal-content,
+[role='dialog'] { background-color: var(--surface); border-color: var(--border-subtle); color: var(--text-primary); }
+
+.modal-overlay,
+.dialog-overlay,
+[data-modal-overlay='true'] { background: var(--overlay-backdrop); }
+
+.modal-header,
+.modal-footer { border-color: var(--border-subtle); }
+
+.form-input,
+.form-select,
+input:not([type='checkbox']):not([type='radio']):not([type='file']),
+textarea,
+select {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border-color: var(--border-subtle);
+}
+
+input::placeholder,
+textarea::placeholder { color: var(--text-muted); opacity: 1; }
+
+.btn-primary {
+  background: var(--action-primary);
+  border-color: var(--action-primary);
+  color: var(--on-action-primary);
+}
+.btn-primary:hover { background: var(--action-primary-hover); border-color: var(--action-primary-hover); }
+.btn-secondary { background: var(--surface-interactive); border-color: var(--border-subtle); color: var(--text-primary); }
+.btn-danger { background: var(--status-danger-soft); border-color: var(--status-danger); color: var(--status-danger); }
+.btn-success { background: var(--status-success-soft); border-color: var(--status-success); color: var(--status-success); }
+
+.text-danger { color: var(--status-danger); }
+.status-pending,
+.status-warning { color: var(--status-warning); background: var(--status-warning-soft); }
+.status-success,
+.status-completed { color: var(--status-success); background: var(--status-success-soft); }
+.status-error,
+.status-failed { color: var(--status-danger); background: var(--status-danger-soft); }
+.status-info,
+.status-running { color: var(--status-info); background: var(--status-info-soft); }
+
+/* Native controls and browser-owned dropdown popups must match the active scheme. */
+option { background: var(--surface); color: var(--text-primary); }
+
+/* Reusable theme control. */
+.theme-toggle {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--surface-interactive);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: .85rem;
+  font-weight: 650;
+}
+.theme-toggle:hover { background: var(--surface-hover); border-color: var(--border-strong); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}

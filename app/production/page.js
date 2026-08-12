@@ -358,7 +358,7 @@ export default function ProductionPage() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                 <h3 style={{ fontSize: '1.2rem', margin: 0 }}>🎬 Production Assets</h3>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button className="btn btn-sm btn-outline-warning" 
+                  <button className="btn btn-sm btn-outline-warning"
                     onClick={() => regeneratePrompts(activeAsset.idea_id, activeAsset.asset_id)}
                     disabled={generating === activeAsset.idea_id}
                     title="Hanya regenerate prompt T2I & I2V (Stage 2.B) tanpa mengubah Storyboard & Voiceover"
@@ -464,7 +464,7 @@ export default function ProductionPage() {
                       <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border)', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                         <button className="btn btn-sm" onClick={() => generateAssetProd(i, 'image', p.prompt)}
                           disabled={!!imgGen}
-                          style={{ background: 'linear-gradient(135deg, #e17055, #d63031)', color: '#fff', fontSize: '0.72rem', padding: '4px 10px' }}>
+                          style={{ background: 'linear-gradient(135deg, var(--status-warning), var(--status-danger))', color: 'var(--text-primary)', fontSize: '0.72rem', padding: '4px 10px' }}>
                           {imgGen ? `⏳ ${imgGen}` : '🖼️ Generate Image'}
                         </button>
                         {imgResult?.status === 'done' && imgResult.urls?.map((url, ui) => (
@@ -484,7 +484,7 @@ export default function ProductionPage() {
                       📋 Copy All T2I Prompts
                     </button>
                     <button className="btn btn-sm" onClick={() => generateAllProd('image', activeAsset.t2i_prompts || [])}
-                      style={{ background: 'linear-gradient(135deg, #e17055, #d63031)', color: '#fff' }}>
+                      style={{ background: 'linear-gradient(135deg, var(--status-warning), var(--status-danger))', color: 'var(--text-primary)' }}>
                       🖼️ Generate All Images
                     </button>
                   </div>
@@ -513,7 +513,7 @@ export default function ProductionPage() {
                       <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border)', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                         <button className="btn btn-sm" onClick={() => generateAssetProd(i, 'video', p.prompt)}
                           disabled={!!vidGen}
-                          style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)', color: '#fff', fontSize: '0.72rem', padding: '4px 10px' }}>
+                          style={{ background: 'linear-gradient(135deg, var(--status-neutral), var(--status-neutral))', color: 'var(--text-primary)', fontSize: '0.72rem', padding: '4px 10px' }}>
                           {vidGen ? `⏳ ${vidGen}` : '🎬 Generate Video'}
                         </button>
                         {vidResult?.status === 'done' && vidResult.urls?.map((url, ui) => (
@@ -533,7 +533,7 @@ export default function ProductionPage() {
                       📋 Copy All I2V Prompts
                     </button>
                     <button className="btn btn-sm" onClick={() => generateAllProd('video', activeAsset.i2v_prompts || [])}
-                      style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)', color: '#fff' }}>
+                      style={{ background: 'linear-gradient(135deg, var(--status-neutral), var(--status-neutral))', color: 'var(--text-primary)' }}>
                       🎬 Generate All Videos
                     </button>
                   </div>
@@ -603,7 +603,7 @@ export default function ProductionPage() {
                       className="btn btn-sm btn-primary"
                       onClick={syncToPipeline}
                       disabled={!!syncing}
-                      style={{ background: 'linear-gradient(135deg, var(--accent), #6c5ce7)' }}
+                      style={{ background: 'linear-gradient(135deg, var(--accent), var(--status-neutral))' }}
                     >{syncing ? '⏳ Syncing...' : '📌 Sync to Pipeline'}</button>
                     {pipelineUrl && (
                       <a href={pipelineUrl} target="_blank" rel="noopener" style={{ fontSize: '0.72rem', color: 'var(--accent-light)' }}>

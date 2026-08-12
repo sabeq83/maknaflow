@@ -348,7 +348,7 @@ export default function PresetsPage() {
         </div>
 
         {message && (
-          <div className="card" style={{ padding: 14, marginBottom: 20, background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
+          <div className="card" style={{ padding: 14, marginBottom: 20, background: 'var(--status-info-soft)', border: '1px solid var(--status-info-soft)' }}>
             {message}
           </div>
         )}
@@ -364,7 +364,7 @@ export default function PresetsPage() {
             ) : (
               <div style={{ display: 'grid', gap: 12 }}>
                 {presets.map(p => (
-                  <div key={p.key} style={{ padding: 16, border: '1px solid var(--border-color)', borderRadius: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.01)' }}>
+                  <div key={p.key} style={{ padding: 16, border: '1px solid var(--border-color)', borderRadius: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)' }}>
                     <div>
                       <strong style={{ fontSize: '1.05rem', color: 'var(--text-primary)' }}>{p.label}</strong>
                       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
@@ -421,12 +421,12 @@ export default function PresetsPage() {
 
             {/* Accordion Panels */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              
+
               {/* Accordion 1: Creative Strategy */}
               <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                <div 
-                  onClick={() => setActiveAccordion(activeAccordion === 0 ? -1 : 0)} 
-                  style={{ padding: '16px 20px', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: activeAccordion === 0 ? '1px solid var(--border-color)' : 'none' }}
+                <div
+                  onClick={() => setActiveAccordion(activeAccordion === 0 ? -1 : 0)}
+                  style={{ padding: '16px 20px', background: 'var(--surface-interactive)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: activeAccordion === 0 ? '1px solid var(--border-color)' : 'none' }}
                 >
                   <strong style={{ color: activeAccordion === 0 ? 'var(--accent-color)' : 'var(--text-primary)' }}>1. Creative Strategy (basic_strategy)</strong>
                   <span>{activeAccordion === 0 ? '▼' : '▶'}</span>
@@ -505,9 +505,9 @@ export default function PresetsPage() {
 
               {/* Accordion 2: Aesthetics & Visual Settings */}
               <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                <div 
-                  onClick={() => setActiveAccordion(activeAccordion === 1 ? -1 : 1)} 
-                  style={{ padding: '16px 20px', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: activeAccordion === 1 ? '1px solid var(--border-color)' : 'none' }}
+                <div
+                  onClick={() => setActiveAccordion(activeAccordion === 1 ? -1 : 1)}
+                  style={{ padding: '16px 20px', background: 'var(--surface-interactive)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: activeAccordion === 1 ? '1px solid var(--border-color)' : 'none' }}
                 >
                   <strong style={{ color: activeAccordion === 1 ? 'var(--accent-color)' : 'var(--text-primary)' }}>2. Aesthetics & Visual (visual_engine)</strong>
                   <span>{activeAccordion === 1 ? '▼' : '▶'}</span>
@@ -576,9 +576,9 @@ export default function PresetsPage() {
 
               {/* Accordion 3: Product Bridging Settings */}
               <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                <div 
-                  onClick={() => setActiveAccordion(activeAccordion === 2 ? -1 : 2)} 
-                  style={{ padding: '16px 20px', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: activeAccordion === 2 ? '1px solid var(--border-color)' : 'none' }}
+                <div
+                  onClick={() => setActiveAccordion(activeAccordion === 2 ? -1 : 2)}
+                  style={{ padding: '16px 20px', background: 'var(--surface-interactive)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: activeAccordion === 2 ? '1px solid var(--border-color)' : 'none' }}
                 >
                   <strong style={{ color: activeAccordion === 2 ? 'var(--accent-color)' : 'var(--text-primary)' }}>3. Product Bridging (product_bridging)</strong>
                   <span>{activeAccordion === 2 ? '▼' : '▶'}</span>
@@ -608,9 +608,9 @@ export default function PresetsPage() {
 
               {/* Accordion 4: Visual Swap Overrides (VSO) */}
               <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                <div 
-                  onClick={() => setActiveAccordion(activeAccordion === 3 ? -1 : 3)} 
-                  style={{ padding: '16px 20px', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: activeAccordion === 3 ? '1px solid var(--border-color)' : 'none' }}
+                <div
+                  onClick={() => setActiveAccordion(activeAccordion === 3 ? -1 : 3)}
+                  style={{ padding: '16px 20px', background: 'var(--surface-interactive)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: activeAccordion === 3 ? '1px solid var(--border-color)' : 'none' }}
                 >
                   <strong style={{ color: activeAccordion === 3 ? 'var(--accent-color)' : 'var(--text-primary)' }}>4. Visual Swap Overrides (visual_swap)</strong>
                   <span>{activeAccordion === 3 ? '▼' : '▶'}</span>
@@ -718,9 +718,9 @@ export default function PresetsPage() {
 
               {/* Accordion 5: Workflow & Production Settings */}
               <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                <div 
-                  onClick={() => setActiveAccordion(activeAccordion === 4 ? -1 : 4)} 
-                  style={{ padding: '16px 20px', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: activeAccordion === 4 ? '1px solid var(--border-color)' : 'none' }}
+                <div
+                  onClick={() => setActiveAccordion(activeAccordion === 4 ? -1 : 4)}
+                  style={{ padding: '16px 20px', background: 'var(--surface-interactive)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: activeAccordion === 4 ? '1px solid var(--border-color)' : 'none' }}
                 >
                   <strong style={{ color: activeAccordion === 4 ? 'var(--accent-color)' : 'var(--text-primary)' }}>5. Workflow & Audio (workflow)</strong>
                   <span>{activeAccordion === 4 ? '▼' : '▶'}</span>

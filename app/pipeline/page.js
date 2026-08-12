@@ -62,7 +62,7 @@ export default function PipelinePage() {
       ]);
       const pData = await pRes.json();
       if (pData.success) setProducts(pData.data || []);
-      
+
       const hData = await hRes.json();
       if (hData.success) setHistory(hData.data || []);
     } catch (e) {
@@ -74,7 +74,7 @@ export default function PipelinePage() {
   async function handleExtractProduct() {
     if (!inputSource.trim() && inputMode === 'url') { setError('URL wajib diisi'); return; }
     if (!inputSource.trim() && inputMode === 'manual') { setError('Deskripsi wajib diisi'); return; }
-    
+
     let finalSource = inputSource;
     if (inputMode === 'manual' && inputName.trim()) {
       finalSource = `Nama Produk: ${inputName}\nDeskripsi: ${inputSource}`;
@@ -219,7 +219,7 @@ export default function PipelinePage() {
           target_audience: asset.target_audience,
           pain_point_solved: asset.pain_point_solved,
         });
-        
+
         if (asset.status === 'completed') {
           setPipelineResult(asset);
           setStep(4);
@@ -273,7 +273,7 @@ export default function PipelinePage() {
               <div key={i} style={{
                 flex: 1, padding: '8px', textAlign: 'center', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 600,
                 background: step > i ? 'var(--accent)' : step === i + 1 ? 'var(--accent-glow)' : 'var(--bg-glass)',
-                color: step > i ? '#fff' : step === i + 1 ? 'var(--accent-light)' : 'var(--text-muted)',
+                color: step > i ? 'var(--text-primary)' : step === i + 1 ? 'var(--accent-light)' : 'var(--text-muted)',
                 border: `1px solid ${step === i + 1 ? 'var(--accent)' : 'var(--border)'}`,
                 transition: 'all 0.3s ease',
               }}>
@@ -293,8 +293,8 @@ export default function PipelinePage() {
               </p>
 
               <div style={{ display: 'flex', gap: '4px', marginBottom: '16px', background: 'var(--bg-glass)', padding: '4px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-                <button onClick={() => setInputMode('manual')} style={{ flex: 1, padding: '8px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-sans)', background: inputMode === 'manual' ? 'var(--accent)' : 'none', color: inputMode === 'manual' ? '#fff' : 'var(--text-secondary)' }}>📝 Input Manual</button>
-                <button onClick={() => setInputMode('url')} style={{ flex: 1, padding: '8px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-sans)', background: inputMode === 'url' ? 'var(--accent)' : 'none', color: inputMode === 'url' ? '#fff' : 'var(--text-secondary)' }}>🔗 Scrape URL</button>
+                <button onClick={() => setInputMode('manual')} style={{ flex: 1, padding: '8px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-sans)', background: inputMode === 'manual' ? 'var(--accent)' : 'none', color: inputMode === 'manual' ? 'var(--text-primary)' : 'var(--text-secondary)' }}>📝 Input Manual</button>
+                <button onClick={() => setInputMode('url')} style={{ flex: 1, padding: '8px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-sans)', background: inputMode === 'url' ? 'var(--accent)' : 'none', color: inputMode === 'url' ? 'var(--text-primary)' : 'var(--text-secondary)' }}>🔗 Scrape URL</button>
               </div>
 
               {inputMode === 'url' ? (
@@ -368,7 +368,7 @@ export default function PipelinePage() {
               {ideas.length > 0 && (
                 <div style={{ marginTop: '20px' }}>
                   {hotTrend && (
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: 'linear-gradient(135deg, rgba(108,92,231,0.15), rgba(162,155,254,0.1))', border: '1px solid rgba(108,92,231,0.3)', borderRadius: '20px', marginBottom: '16px', fontSize: '0.82rem' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: 'linear-gradient(135deg, var(--status-neutral-soft), rgba(162,155,254,0.1))', border: '1px solid var(--status-neutral-soft)', borderRadius: '20px', marginBottom: '16px', fontSize: '0.82rem' }}>
                       🔥 <strong>Hot Trend Detected:</strong> <span style={{ color: 'var(--accent-light)' }}>{hotTrend}</span>
                     </div>
                   )}
@@ -409,7 +409,7 @@ export default function PipelinePage() {
                   <div className="form-group"><label className="form-label">Target AI Engine</label><select className="form-select" value={config.target_ai} onChange={e => setConfig(p => ({ ...p, target_ai: e.target.value }))}>{TARGET_AIS.map(a => <option key={a} value={a}>{a}</option>)}</select></div>
                   <div className="form-group"><label className="form-label">Aspect Ratio</label><select className="form-select" value={config.aspect_ratio} onChange={e => setConfig(p => ({ ...p, aspect_ratio: e.target.value }))}>{ASPECT_RATIOS.map(r => <option key={r} value={r}>{r}</option>)}</select></div>
                 </div>
-                <button className="btn btn-primary btn-lg btn-block" style={{ marginTop: '20px', background: 'linear-gradient(135deg, var(--accent), #6c5ce7)' }} onClick={handleRunPipeline} disabled={loading}>
+                <button className="btn btn-primary btn-lg btn-block" style={{ marginTop: '20px', background: 'linear-gradient(135deg, var(--accent), var(--status-neutral))' }} onClick={handleRunPipeline} disabled={loading}>
                   {loading ? '⏳ Running Pipeline...' : '⚡ Run Full Pipeline (Stage 3→5)'}
                 </button>
               </div>
@@ -445,7 +445,7 @@ export default function PipelinePage() {
               {activeTab === 'audio' && pipelineResult.audio_blueprint && (
                 <div>
                   <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', flexWrap: 'wrap' }}>
-                    {pipelineResult.audio_blueprint.voice_id_selected && <span style={{ fontSize: '0.75rem', padding: '4px 10px', background: 'rgba(108,92,231,0.15)', borderRadius: '12px', color: 'var(--accent-light)' }}>🎤 {pipelineResult.audio_blueprint.voice_id_selected}</span>}
+                    {pipelineResult.audio_blueprint.voice_id_selected && <span style={{ fontSize: '0.75rem', padding: '4px 10px', background: 'var(--status-neutral-soft)', borderRadius: '12px', color: 'var(--accent-light)' }}>🎤 {pipelineResult.audio_blueprint.voice_id_selected}</span>}
                     {pipelineResult.audio_blueprint.global_mood && <span style={{ fontSize: '0.75rem', padding: '4px 10px', background: 'rgba(0,184,148,0.12)', borderRadius: '12px', color: 'var(--success)' }}>🎭 {pipelineResult.audio_blueprint.global_mood}</span>}
                     <div style={{ flex: 1, textAlign: 'right' }}>
                        <button className="btn btn-sm" style={{ background: 'var(--accent-glow)', color: 'var(--accent-light)', border: '1px solid var(--accent)' }} onClick={() => handleRegenerate('narration')} disabled={loading}>🔄 Regenerate Voiceover</button>
@@ -527,7 +527,7 @@ export default function PipelinePage() {
               )}
             </div>
           )}
-          
+
           {/* Pipeline History Table */}
           {history.length > 0 && step === 1 && (
             <div className="card" style={{ marginTop: '32px' }}>

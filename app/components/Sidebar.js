@@ -3,6 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect, Suspense } from 'react';
+import ThemeToggle from './ThemeToggle';
 
 const menuKeyMap = {
   '/content-flow': 'content_flow',
@@ -31,7 +32,7 @@ const menuKeyMap = {
 
 const navItems = [
   { label: 'Dashboard', href: '/', icon: '◈' },
-  
+
   { section: 'PLANNING' },
   { label: 'Content Planner', href: '/content-planner', icon: '🗓️' },
   { label: 'Product Database', href: '/products', icon: '📦' },
@@ -72,22 +73,6 @@ function SidebarContent() {
   const currentAccount = searchParams ? (searchParams.get('account') || 'all') : 'all';
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  const [theme, setTheme] = useState('dark');
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
-      setTheme(currentTheme);
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    setTheme(newTheme);
-  };
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -317,7 +302,7 @@ function SidebarContent() {
                       display: 'flex',
                       alignItems: 'center',
                       gap: '6px',
-                      background: currentAccount === 'all' ? 'linear-gradient(135deg, rgba(16,185,129,0.25) 0%, rgba(5,150,105,0.2) 100%)' : 'rgba(255,255,255,0.02)',
+                      background: currentAccount === 'all' ? 'linear-gradient(135deg, rgba(16,185,129,0.25) 0%, rgba(5,150,105,0.2) 100%)' : 'var(--surface-interactive)',
                       borderLeft: currentAccount === 'all' ? '3px solid #10b981' : '3px solid transparent',
                       boxShadow: currentAccount === 'all' ? '0 0 12px rgba(16,185,129,0.25)' : 'none',
                       transition: 'all 0.2s ease'
@@ -341,7 +326,7 @@ function SidebarContent() {
                           display: 'flex',
                           alignItems: 'center',
                           gap: '6px',
-                          background: isSubActive ? 'linear-gradient(135deg, rgba(16,185,129,0.25) 0%, rgba(5,150,105,0.2) 100%)' : 'rgba(255,255,255,0.02)',
+                          background: isSubActive ? 'linear-gradient(135deg, rgba(16,185,129,0.25) 0%, rgba(5,150,105,0.2) 100%)' : 'var(--surface-interactive)',
                           borderLeft: isSubActive ? '3px solid #10b981' : '3px solid transparent',
                           boxShadow: isSubActive ? '0 0 12px rgba(16,185,129,0.25)' : 'none',
                           transition: 'all 0.2s ease'
@@ -359,28 +344,9 @@ function SidebarContent() {
       </nav>
 
       <div className="sidebar-footer" style={{ padding: '1rem', borderTop: '1px solid var(--border)', marginTop: 'auto' }}>
-        <button
-          onClick={toggleTheme}
-          style={{
-            width: '100%',
-            padding: '8px 12px',
-            borderRadius: 'var(--radius-sm)',
-            border: '1px solid var(--border)',
-            background: 'var(--bg-glass)',
-            color: 'var(--text-primary)',
-            cursor: 'pointer',
-            fontSize: '0.85rem',
-            fontWeight: 600,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            marginBottom: '12px',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          {theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode'}
-        </button>
+        <div style={{ marginBottom: '12px' }}>
+          <ThemeToggle />
+        </div>
         {user ? (
           <>
             <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>

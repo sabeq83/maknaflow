@@ -96,11 +96,11 @@ export default function BrandProductSelector({
   const selectedProductObj = products.find(p => p.id === selectedProductId);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border)', borderRadius: '8px' }}>
-      
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px', background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: '8px' }}>
+
       {/* Row 1: Brand & Product Selection */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-        
+
         {/* Brand Dropdown */}
         <div className="form-group" style={{ margin: 0 }}>
           <label className="form-label">🎯 Brand Profile {required && '*'}</label>
@@ -143,7 +143,7 @@ export default function BrandProductSelector({
 
       {/* Row 2: Selected Product Thumbnail & Clean Photo Preview */}
       {selectedProductObj && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.04)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--surface-interactive)', padding: '10px 14px', borderRadius: '6px', border: '1px solid var(--surface-interactive)' }}>
           <div style={{ width: '48px', height: '48px', borderRadius: '4px', overflow: 'hidden', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <img
               src={selectedProductObj.clean_photo_url || selectedProductObj.raw_photo_url || 'https://placehold.co/100x100?text=No+Photo'}
@@ -195,22 +195,22 @@ export default function BrandProductSelector({
           background:
             resolutionPreview.status === 'missing' ? 'rgba(239, 68, 68, 0.05)' :
             resolutionPreview.source === 'campaign_override' ? 'rgba(108, 92, 231, 0.05)' :
-            resolutionPreview.source === 'brand_product' ? 'rgba(46, 204, 113, 0.05)' :
+            resolutionPreview.source === 'brand_product' ? 'var(--status-success-soft)' :
             'rgba(241, 196, 15, 0.05)',
           borderColor:
             resolutionPreview.status === 'missing' ? 'rgba(239, 68, 68, 0.2)' :
-            resolutionPreview.source === 'campaign_override' ? 'rgba(108, 92, 231, 0.2)' :
-            resolutionPreview.source === 'brand_product' ? 'rgba(46, 204, 113, 0.2)' :
+            resolutionPreview.source === 'campaign_override' ? 'var(--status-neutral-soft)' :
+            resolutionPreview.source === 'brand_product' ? 'var(--status-success-soft)' :
             'rgba(241, 196, 15, 0.2)',
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, marginBottom: '4px' }}>
             <span>Status Resolusi Link:</span>
             <span style={{
               color:
-                resolutionPreview.status === 'missing' ? '#ef4444' :
+                resolutionPreview.status === 'missing' ? 'var(--status-danger)' :
                 resolutionPreview.source === 'campaign_override' ? '#a55eea' :
-                resolutionPreview.source === 'brand_product' ? '#2ecc71' :
-                '#f1c40f'
+                resolutionPreview.source === 'brand_product' ? 'var(--status-success)' :
+                'var(--status-warning)'
             }}>
               {resolutionPreview.status === 'missing' ? '⚠️ Missing / Tidak Ada Link' :
                resolutionPreview.source === 'campaign_override' ? '🟣 Campaign Override' :
@@ -218,13 +218,13 @@ export default function BrandProductSelector({
                '🟡 Legacy Product Fallback'}
             </span>
           </div>
-          
+
           {resolutionPreview.affiliateLink ? (
             <div style={{ fontMemo: 'monospace', wordBreak: 'break-all', color: 'var(--text-normal)' }}>
               {resolutionPreview.affiliateLink}
             </div>
           ) : (
-            <div style={{ color: '#ef4444' }}>
+            <div style={{ color: 'var(--status-danger)' }}>
               {affiliateRequired
                 ? 'Error: Link affiliate wajib diisi untuk memproses campaign!'
                 : 'Peringatan: Tidak ada link affiliate. System akan menggunakan link default kosong.'}
@@ -233,7 +233,7 @@ export default function BrandProductSelector({
 
           {resolutionPreview.trackingCode && (
             <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-              Tracking Code: <code style={{ background: 'rgba(255,255,255,0.05)', padding: '2px 4px', borderRadius: '3px' }}>{resolutionPreview.trackingCode}</code>
+              Tracking Code: <code style={{ background: 'var(--surface-interactive)', padding: '2px 4px', borderRadius: '3px' }}>{resolutionPreview.trackingCode}</code>
             </div>
           )}
         </div>

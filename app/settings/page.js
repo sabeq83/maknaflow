@@ -14,7 +14,7 @@ export default function SettingsPage() {
   const [uploading, setUploading] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [toast, setToast] = useState(null);
-  
+
   // Google OAuth Status
   const [googleStatus, setGoogleStatus] = useState({ credentialsSet: false, connected: false, email: null });
   const [googleClientId, setGoogleClientId] = useState('');
@@ -44,7 +44,7 @@ export default function SettingsPage() {
   const [hasMinimaxKey, setHasMinimaxKey] = useState(false);
   const [editingMinimax, setEditingMinimax] = useState(false);
   const [savingMinimax, setSavingMinimax] = useState(false);
-  
+
   // Gemini API Tier & Caching
   const [geminiApiTier, setGeminiApiTier] = useState('paid');
   const [geminiContextCaching, setGeminiContextCaching] = useState('on');
@@ -64,7 +64,7 @@ export default function SettingsPage() {
   const [validateLive, setValidateLive] = useState(true);
   const [testingHealth, setTestingHealth] = useState(false);
   const [cleaningDead, setCleaningDead] = useState(false);
-  
+
   // Cloud Storage Setup
   const [storageProvider, setStorageProvider] = useState('gdrive');
   const [nextcloudUrl, setNextcloudUrl] = useState('');
@@ -326,7 +326,7 @@ export default function SettingsPage() {
     setSavingFb(true);
     try {
       const activeIds = selectedPageIds.filter(Boolean);
-      const body = { 
+      const body = {
         fb_page_id: activeIds.length > 0 ? activeIds[0] : '',
         fb_page_ids: activeIds.join(','),
         fb_server_url: fbServerUrl.trim()
@@ -371,7 +371,7 @@ export default function SettingsPage() {
     setFbTestResult(null);
     try {
       const activeIds = selectedPageIds.filter(Boolean);
-      const body = { 
+      const body = {
         fb_page_id: activeIds.length > 0 ? activeIds[0] : '',
         fb_page_ids: activeIds.join(',')
       };
@@ -554,8 +554,8 @@ export default function SettingsPage() {
       const data = await res.json();
       if (data.success) {
         showToast('API Key successfully added to pool');
-        setNewKeyName(''); 
-        setNewKeyValue(''); 
+        setNewKeyName('');
+        setNewKeyValue('');
         setNewKeyLimit(20);
         fetchPool();
       } else {
@@ -569,7 +569,7 @@ export default function SettingsPage() {
 
   async function addPoolKeysBulk() {
     if (!bulkKeysText.trim()) return;
-    
+
     const lines = bulkKeysText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
     if (lines.length === 0) return;
 
@@ -821,7 +821,7 @@ export default function SettingsPage() {
                 borderRadius: '12px',
                 padding: '14px 18px',
                 boxShadow: '0 12px 32px rgba(0, 0, 0, 0.45)',
-                color: '#ffffff',
+                color: 'var(--text-primary)',
                 animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                 display: 'flex',
                 flexDirection: 'column',
@@ -872,7 +872,7 @@ export default function SettingsPage() {
                       background: 'rgba(255, 255, 255, 0.2)',
                       border: 'none',
                       borderRadius: '4px',
-                      color: '#ffffff',
+                      color: 'var(--text-primary)',
                       fontSize: '0.72rem',
                       fontWeight: 600,
                       padding: '4px 10px',
@@ -986,7 +986,7 @@ export default function SettingsPage() {
 
               <div style={{ borderTop: '1px solid var(--border)', marginTop: '20px', paddingTop: '20px' }}>
                 <h4 style={{ margin: '0 0 12px 0', fontSize: '0.88rem', fontWeight: '600' }}>Pengaturan Tier API & Context Caching</h4>
-                
+
                 <div className="form-group" style={{ marginBottom: '16px' }}>
                   <label className="form-label">Pilih Tier API</label>
                   <div style={{ display: 'flex', gap: '20px', marginTop: '8px' }}>
@@ -1006,8 +1006,8 @@ export default function SettingsPage() {
                     </label>
                   </div>
                   <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '6px' }}>
-                    {geminiApiTier === 'paid' 
-                      ? '✓ Menggunakan Kunci Utama yang stabil (tanpa rotasi) dan mendukung Context Caching.' 
+                    {geminiApiTier === 'paid'
+                      ? '✓ Menggunakan Kunci Utama yang stabil (tanpa rotasi) dan mendukung Context Caching.'
                       : '✓ Menggunakan rotasi key pool jika tersedia. Caching dinonaktifkan secara otomatis.'}
                   </p>
                 </div>
@@ -1078,20 +1078,20 @@ export default function SettingsPage() {
               </p>
 
               {poolSummary.total_capacity > 0 && (
-                <div style={{ marginBottom: '24px', background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
+                <div style={{ marginBottom: '24px', background: 'var(--overlay-subtle)', padding: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.75rem', fontWeight: 600 }}>
                     <span style={{ color: 'var(--text-secondary)' }}>Daily Key-Pool Quota Utilization</span>
-                    <span style={{ color: poolSummary.remaining > 0 ? '#00b894' : '#e17055' }}>
+                    <span style={{ color: poolSummary.remaining > 0 ? 'var(--status-success)' : 'var(--status-warning)' }}>
                       {poolSummary.remaining || 0} calls left
                     </span>
                   </div>
-                  <div style={{ height: '10px', borderRadius: '5px', background: 'rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+                  <div style={{ height: '10px', borderRadius: '5px', background: 'var(--surface-interactive)', overflow: 'hidden' }}>
                     <div style={{
                       height: '100%', borderRadius: '5px',
                       width: `${Math.min(100, ((poolSummary.total_used || 0) / poolSummary.total_capacity) * 100)}%`,
                       background: poolSummary.remaining > 0
-                        ? 'linear-gradient(90deg, #00b894, #00cec9)'
-                        : 'linear-gradient(90deg, #e17055, #d63031)',
+                        ? 'linear-gradient(90deg, var(--status-success), #00cec9)'
+                        : 'linear-gradient(90deg, var(--status-warning), var(--status-danger))',
                       transition: 'width 0.5s ease',
                     }} />
                   </div>
@@ -1108,7 +1108,7 @@ export default function SettingsPage() {
                   <div key={k.id} style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '14px 18px', borderRadius: 'var(--radius-sm)',
-                    background: k.is_active ? 'var(--bg-glass)' : 'rgba(255,255,255,0.02)', 
+                    background: k.is_active ? 'var(--bg-glass)' : 'var(--surface-interactive)',
                     border: '1px solid var(--border)',
                     opacity: k.is_active ? 1 : 0.45,
                     transition: 'all 0.2s ease',
@@ -1116,13 +1116,13 @@ export default function SettingsPage() {
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-primary)' }}>{k.key_name}</span>
-                        <span style={{ 
+                        <span style={{
                           fontSize: '0.65rem', padding: '1px 6px', borderRadius: '4px',
-                          background: 'rgba(255,255,255,0.08)', color: 'var(--text-muted)'
+                          background: 'var(--border-subtle)', color: 'var(--text-muted)'
                         }}>{k.tier}</span>
 
                         {k.status === 'INVALID' || k.is_active === 0 ? (
-                          <span style={{ fontSize: '0.65rem', padding: '1px 6px', borderRadius: '4px', background: 'rgba(225,112,85,0.2)', color: '#e17055', fontWeight: 600 }}>
+                          <span style={{ fontSize: '0.65rem', padding: '1px 6px', borderRadius: '4px', background: 'rgba(225,112,85,0.2)', color: 'var(--status-warning)', fontWeight: 600 }}>
                             🔴 DEAD / INVALID
                           </span>
                         ) : (k.used_today || 0) >= k.daily_limit ? (
@@ -1130,7 +1130,7 @@ export default function SettingsPage() {
                             ⏸️ COOLDOWN
                           </span>
                         ) : (
-                          <span style={{ fontSize: '0.65rem', padding: '1px 6px', borderRadius: '4px', background: 'rgba(0,184,148,0.2)', color: '#00b894', fontWeight: 600 }}>
+                          <span style={{ fontSize: '0.65rem', padding: '1px 6px', borderRadius: '4px', background: 'rgba(0,184,148,0.2)', color: 'var(--status-success)', fontWeight: 600 }}>
                             🟢 LIVE
                           </span>
                         )}
@@ -1144,13 +1144,13 @@ export default function SettingsPage() {
                         <span style={{
                           fontSize: '0.75rem', padding: '2px 8px', borderRadius: '12px',
                           background: (k.used_today || 0) >= k.daily_limit ? 'rgba(225,112,85,0.15)' : 'rgba(0,184,148,0.15)',
-                          color: (k.used_today || 0) >= k.daily_limit ? '#e17055' : '#00b894',
+                          color: (k.used_today || 0) >= k.daily_limit ? 'var(--status-warning)' : 'var(--status-success)',
                           fontWeight: 600
                         }}>
                           {k.used_today || 0} / {k.daily_limit} used
                         </span>
                       </div>
-                      
+
                       <button
                         className="btn btn-sm"
                         onClick={() => togglePoolKey(k.id, k.is_active)}
@@ -1159,7 +1159,7 @@ export default function SettingsPage() {
                           padding: '4px 12px',
                           fontWeight: 600,
                           background: k.is_active ? 'rgba(253, 203, 110, 0.18)' : 'rgba(0, 184, 148, 0.22)',
-                          color: k.is_active ? '#ffeaa7' : '#00b894',
+                          color: k.is_active ? '#ffeaa7' : 'var(--status-success)',
                           border: `1px solid ${k.is_active ? 'rgba(253, 203, 110, 0.4)' : 'rgba(0, 184, 148, 0.4)'}`,
                           cursor: 'pointer',
                           transition: 'all 0.2s ease'
@@ -1167,7 +1167,7 @@ export default function SettingsPage() {
                       >
                         {k.is_active ? '⏸ Pause' : '▶ Enable'}
                       </button>
-                      
+
                       <button className="btn btn-sm btn-danger" onClick={() => removePoolKey(k.id)}
                         style={{ fontSize: '0.75rem', padding: '4px 10px' }}>✕ Delete</button>
                     </div>
@@ -1180,8 +1180,8 @@ export default function SettingsPage() {
               </div>
 
               {/* Add Key Form */}
-              <div style={{ 
-                marginTop: '20px', padding: '16px', background: 'rgba(255,255,255,0.02)',
+              <div style={{
+                marginTop: '20px', padding: '16px', background: 'var(--surface-interactive)',
                 borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
@@ -1213,26 +1213,26 @@ export default function SettingsPage() {
                     <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Prefix Alias:</span>
-                        <input 
-                          className="form-input" 
+                        <input
+                          className="form-input"
                           placeholder="e.g. AISKey"
-                          value={bulkAliasPrefix} 
+                          value={bulkAliasPrefix}
                           onChange={e => setBulkAliasPrefix(e.target.value)}
-                          style={{ width: '110px', fontSize: '0.8rem', padding: '6px 10px' }} 
+                          style={{ width: '110px', fontSize: '0.8rem', padding: '6px 10px' }}
                         />
                       </div>
 
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Default Daily Cap:</span>
-                        <input 
-                          className="form-input" 
-                          type="number" 
-                          placeholder="20" 
-                          min="1" 
+                        <input
+                          className="form-input"
+                          type="number"
+                          placeholder="20"
+                          min="1"
                           max="1500"
-                          value={bulkDefaultLimit} 
+                          value={bulkDefaultLimit}
                           onChange={e => setBulkDefaultLimit(Number(e.target.value))}
-                          style={{ width: '80px', fontSize: '0.8rem', padding: '6px 10px', textAlign: 'center' }} 
+                          style={{ width: '80px', fontSize: '0.8rem', padding: '6px 10px', textAlign: 'center' }}
                         />
                       </div>
 
@@ -1248,7 +1248,7 @@ export default function SettingsPage() {
                       {(() => {
                         const linesCount = bulkKeysText.split('\n').map(l => l.trim()).filter(l => l.length > 0).length;
                         return (
-                          <span style={{ fontSize: '0.75rem', color: linesCount > 0 ? '#00b894' : 'var(--text-muted)', fontWeight: 600 }}>
+                          <span style={{ fontSize: '0.75rem', color: linesCount > 0 ? 'var(--status-success)' : 'var(--text-muted)', fontWeight: 600 }}>
                             🔑 Terdeteksi {linesCount} API Key {linesCount > 0 ? `(${bulkAliasPrefix}_01 s/d ${bulkAliasPrefix}_${String(linesCount).padStart(2, '0')})` : ''}
                           </span>
                         );
@@ -1265,8 +1265,8 @@ export default function SettingsPage() {
                     />
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                      <button 
-                        className="btn btn-primary" 
+                      <button
+                        className="btn btn-primary"
                         onClick={addPoolKeysBulk}
                         disabled={addingKey || !bulkKeysText.trim()}
                         style={{ fontSize: '0.82rem', padding: '8px 20px' }}
@@ -1280,11 +1280,11 @@ export default function SettingsPage() {
                     <input className="form-input" placeholder="Alias Name (e.g. WorkKey1)"
                       value={newKeyName} onChange={e => setNewKeyName(e.target.value)}
                       style={{ flex: '1 1 150px', fontSize: '0.82rem', padding: '8px 12px' }} />
-                    
+
                     <input className="form-input" type="password" placeholder="Gemini API Key"
                       value={newKeyValue} onChange={e => setNewKeyValue(e.target.value)}
                       style={{ flex: '2 1 250px', fontSize: '0.82rem', padding: '8px 12px' }} />
-                    
+
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Daily Cap:</span>
                       <input className="form-input" type="number" placeholder="Cap" min="1" max="1500"
@@ -1292,7 +1292,7 @@ export default function SettingsPage() {
                         style={{ width: '80px', fontSize: '0.82rem', padding: '8px 12px', textAlign: 'center' }} />
                     </div>
 
-                    <button className="btn btn-primary" onClick={addPoolKey} 
+                    <button className="btn btn-primary" onClick={addPoolKey}
                       disabled={addingKey || !newKeyName.trim() || !newKeyValue.trim()}
                       style={{ fontSize: '0.82rem', padding: '8px 16px' }}>
                       {addingKey ? '⏳ Adding...' : 'Add Key'}
@@ -1390,7 +1390,7 @@ export default function SettingsPage() {
                     <label className="form-label">Default Target Folder Nextcloud</label>
                     <input className="form-input" placeholder="/MAKNA_Video_Generations" value={nextcloudTargetFolder} onChange={e => setNextcloudTargetFolder(e.target.value)} />
                   </div>
-                  
+
                   <button className="btn btn-sm btn-secondary" onClick={async () => {
                     if (!nextcloudUrl || !nextcloudUsername || !nextcloudAppPassword) {
                       showToast('URL, Username, dan Password wajib diisi untuk test.', 'error'); return;
@@ -1420,11 +1420,11 @@ export default function SettingsPage() {
                   <h4 style={{ margin: '0 0 12px 0', fontSize: '0.85rem', color: 'var(--accent-light)' }}>{'>'} Google Drive Connection Setup</h4>
                   <div className="form-group" style={{ marginBottom: '12px' }}>
                     <label className="form-label">Default Target Folder Google Drive</label>
-                    <input 
-                      className="form-input" 
-                      placeholder="/MAKNA_Video_Generations" 
-                      value={driveTargetFolder} 
-                      onChange={e => setDriveTargetFolder(e.target.value)} 
+                    <input
+                      className="form-input"
+                      placeholder="/MAKNA_Video_Generations"
+                      value={driveTargetFolder}
+                      onChange={e => setDriveTargetFolder(e.target.value)}
                     />
                     <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '6px', lineHeight: 1.5 }}>
                       Folder utama penyimpanan Google Drive. Sub-folder (<code>/RE Videos</code>, <code>/RE Markdown Export</code>, <code>/Master RE Sheet</code>, <code>/_fotoproduk</code>) akan dibuat otomatis oleh backend.
@@ -1746,9 +1746,9 @@ export default function SettingsPage() {
 
               <div className="form-group" style={{ marginBottom: '16px' }}>
                 <label className="form-label">Pola T2I (Start Frame)</label>
-                <select 
-                  className="form-input" 
-                  value={webhookT2iPattern} 
+                <select
+                  className="form-input"
+                  value={webhookT2iPattern}
                   onChange={e => setWebhookT2iPattern(e.target.value)}
                 >
                   <option value="threading">Threading (Kirim berurutan dengan jeda 10-20s, pantau bersama - paralel)</option>
@@ -1765,11 +1765,11 @@ export default function SettingsPage() {
                       const res = await fetch('/api/settings', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                          webhook_api_key: webhookApiKey, 
+                        body: JSON.stringify({
+                          webhook_api_key: webhookApiKey,
                           webhook_host: webhookHost.trim(),
-                          webhook_port: webhookPort, 
-                          webhook_image_model: webhookImageModel, 
+                          webhook_port: webhookPort,
+                          webhook_image_model: webhookImageModel,
                           webhook_video_model: webhookVideoModel,
                           webhook_delay_enabled: webhookDelayEnabled ? 1 : 0,
                           webhook_delay_min: webhookDelayMin,
@@ -1813,14 +1813,14 @@ export default function SettingsPage() {
 
               <div style={{
                 padding: '14px', borderRadius: 'var(--radius-sm)',
-                background: 'var(--bg-glass)', border: '1px dashed rgba(255,255,255,0.15)',
+                background: 'var(--bg-glass)', border: '1px dashed var(--border-subtle)',
                 marginBottom: '16px'
               }}>
                 <div style={{ fontWeight: 600, fontSize: '0.78rem', color: 'var(--text-primary)', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   💡 Langkah-langkah Menghubungkan Google Chrome:
                 </div>
-                
-                <div style={{ marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '12px' }}>
+
+                <div style={{ marginBottom: '12px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '12px' }}>
                   <label style={{ display: 'block', fontSize: '0.76rem', color: 'var(--text-secondary)', marginBottom: '4px', fontWeight: '500' }}>
                     Nama Folder Profil Chrome (Profile Folder Name):
                   </label>
@@ -1830,7 +1830,7 @@ export default function SettingsPage() {
                     onChange={e => setScraperChromeProfile(e.target.value)}
                     placeholder="misal: Default, Profile 1, Profile 22"
                     style={{
-                      padding: '6px 10px', fontSize: '0.8rem', background: 'rgba(0,0,0,0.2)',
+                      padding: '6px 10px', fontSize: '0.8rem', background: 'var(--overlay-subtle)',
                       border: '1px solid var(--border)', borderRadius: 'var(--radius-xs)',
                       color: 'var(--text-primary)', width: '100%', maxWidth: '240px'
                     }}
@@ -1844,10 +1844,10 @@ export default function SettingsPage() {
                   <li>Tutup Google Chrome secara keseluruhan terlebih dahulu (<kbd>Command + Q</kbd> / <kbd>Alt + F4</kbd>).</li>
                   <li>Jalankan Chrome dalam mode debugging di terminal/command prompt sesuai OS Anda:</li>
                 </ol>
-                
+
                 <div style={{ fontSize: '0.74rem', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '4px' }}>💻 macOS:</div>
                 <pre style={{
-                  padding: '8px 12px', background: 'rgba(0,0,0,0.4)', color: '#00FFCC',
+                  padding: '8px 12px', background: 'var(--overlay-subtle)', color: '#00FFCC',
                   borderRadius: '4px', fontSize: '0.72rem', overflowX: 'auto', border: '1px solid var(--border)',
                   margin: '4px 0 8px 0', fontFamily: 'monospace'
                 }}>
@@ -1856,7 +1856,7 @@ export default function SettingsPage() {
 
                 <div style={{ fontSize: '0.74rem', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '4px', marginTop: '6px' }}>🪟 Windows:</div>
                 <pre style={{
-                  padding: '8px 12px', background: 'rgba(0,0,0,0.4)', color: '#00FFCC',
+                  padding: '8px 12px', background: 'var(--overlay-subtle)', color: '#00FFCC',
                   borderRadius: '4px', fontSize: '0.72rem', overflowX: 'auto', border: '1px solid var(--border)',
                   margin: '4px 0 8px 0', fontFamily: 'monospace'
                 }}>
@@ -1881,7 +1881,7 @@ export default function SettingsPage() {
                   value={ytdlpCookiesFromBrowser}
                   onChange={e => setYtdlpCookiesFromBrowser(e.target.value)}
                   style={{
-                    padding: '8px 12px', fontSize: '0.82rem', background: 'rgba(0,0,0,0.2)',
+                    padding: '8px 12px', fontSize: '0.82rem', background: 'var(--overlay-subtle)',
                     border: '1px solid var(--border)', borderRadius: 'var(--radius-xs)',
                     color: 'var(--text-primary)', width: '100%', maxWidth: '240px'
                   }}
@@ -1982,16 +1982,16 @@ export default function SettingsPage() {
                           style={{
                             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                             padding: '10px 14px',
-                            background: isSelected ? 'rgba(59, 130, 246, 0.12)' : 'var(--bg-glass)',
+                            background: isSelected ? 'var(--status-info-soft)' : 'var(--bg-glass)',
                             borderRadius: 'var(--radius-xs)',
-                            border: `1px solid ${isSelected ? 'var(--accent, #3b82f6)' : 'var(--border)'}`,
+                            border: `1px solid ${isSelected ? 'var(--accent, var(--status-info))' : 'var(--border)'}`,
                             transition: 'all 0.2s ease'
                           }}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <span style={{ fontSize: '1.3rem' }}>📘</span>
                             <div>
-                              <div style={{ fontWeight: 600, fontSize: '0.84rem', color: '#fff' }}>
+                              <div style={{ fontWeight: 600, fontSize: '0.84rem', color: 'var(--text-primary)' }}>
                                 {page.name}
                               </div>
                               <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
@@ -2007,7 +2007,7 @@ export default function SettingsPage() {
 
                           {/* Toggle Slide ON/OFF Switch */}
                           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: isSelected ? '#34d399' : '#64748b' }}>
+                            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: isSelected ? 'var(--status-success)' : 'var(--text-muted)' }}>
                               {isSelected ? 'ON' : 'OFF'}
                             </span>
                             <div
@@ -2017,7 +2017,7 @@ export default function SettingsPage() {
                               }}
                               style={{
                                 position: 'relative', width: '46px', height: '24px', borderRadius: '12px',
-                                backgroundColor: isSelected ? 'var(--accent, #3b82f6)' : '#334155',
+                                backgroundColor: isSelected ? 'var(--accent, var(--status-info))' : '#334155',
                                 cursor: 'pointer', transition: 'background-color 0.25s ease'
                               }}
                             >
@@ -2025,8 +2025,8 @@ export default function SettingsPage() {
                                 position: 'absolute', top: '2px',
                                 left: isSelected ? '24px' : '2px',
                                 width: '20px', height: '20px', borderRadius: '50%',
-                                backgroundColor: '#ffffff', transition: 'left 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                                boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                                backgroundColor: 'var(--text-primary)', transition: 'left 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                                boxShadow: '0 2px 4px var(--overlay-subtle)'
                               }} />
                             </div>
                           </div>
@@ -2046,7 +2046,7 @@ export default function SettingsPage() {
 
                 {/* Form Quick Add Manual Page ID */}
                 <div style={{
-                  marginTop: '14px', paddingTop: '14px', borderTop: '1px dashed rgba(255,255,255,0.12)',
+                  marginTop: '14px', paddingTop: '14px', borderTop: '1px dashed var(--border-subtle)',
                   display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap'
                 }}>
                   <div style={{ flex: 1, minWidth: '220px' }}>
@@ -2081,9 +2081,9 @@ export default function SettingsPage() {
                   borderRadius: 'var(--radius-sm)',
                   marginBottom: '16px',
                   fontSize: '0.8rem',
-                  background: fbTestResult.type === 'success' ? 'rgba(46, 204, 113, 0.15)' : 'rgba(231, 76, 60, 0.15)',
-                  border: `1px solid ${fbTestResult.type === 'success' ? 'rgba(46, 204, 113, 0.4)' : 'rgba(231, 76, 60, 0.4)'}`,
-                  color: fbTestResult.type === 'success' ? '#2ecc71' : '#e74c3c'
+                  background: fbTestResult.type === 'success' ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
+                  border: `1px solid ${fbTestResult.type === 'success' ? 'var(--status-success-soft)' : 'var(--status-danger-soft)'}`,
+                  color: fbTestResult.type === 'success' ? 'var(--status-success)' : 'var(--status-danger)'
                 }}>
                   {fbTestResult.message}
                 </div>

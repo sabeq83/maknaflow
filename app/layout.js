@@ -1,4 +1,5 @@
 import './globals.css';
+import './theme.css';
 
 export const metadata = {
   title: 'MAKNA FLOW — Isolated SaaS Content Flow Platform',
@@ -18,8 +19,9 @@ export default function RootLayout({ children }) {
               (function() {
                 try {
                   const storedTheme = localStorage.getItem('theme');
-                  const theme = storedTheme || 'dark';
-                  document.documentElement.setAttribute('data-theme', theme);
+                  const theme = storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : 'dark';
+                  document.documentElement.dataset.theme = theme;
+                  document.documentElement.style.colorScheme = theme;
                 } catch (e) {}
               })();
             `

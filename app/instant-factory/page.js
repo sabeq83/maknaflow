@@ -37,7 +37,7 @@ export default function InstantFactoryPage() {
   const [customInstruction, setCustomInstruction] = useState('');
   const [targetLanguage, setTargetLanguage] = useState('id-ID');
   const [enableVoAudit, setEnableVoAudit] = useState(1); // Default 1 (Yes)
-  
+
   // Bridging & Visual mode settings
   const [isBridgingActive, setIsBridgingActive] = useState(false);
   const [bridgeAtClip, setBridgeAtClip] = useState(2);
@@ -440,7 +440,7 @@ export default function InstantFactoryPage() {
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
         const data = XLSX.utils.sheet_to_json(ws, { defval: "" });
-        
+
         const mapped = data.map((row, idx) => {
           return {
             row_number: idx + 1,
@@ -452,7 +452,7 @@ export default function InstantFactoryPage() {
             custom_instruction: row['Custom Instruction'] || row['custom_instruction'] || ''
           };
         });
-        
+
         setParsedRows(mapped);
         setToast({ msg: `Berhasil membaca ${mapped.length} baris dari file.`, type: 'success' });
         setTimeout(() => setToast(null), 3000);
@@ -475,7 +475,7 @@ export default function InstantFactoryPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      
+
       setManualImages(prev => ({
         ...prev,
         [rowIndex]: {
@@ -510,7 +510,7 @@ export default function InstantFactoryPage() {
       }
       for (const row of parsedRows) {
         const hasUrl = row.product_image_url && row.product_image_url.trim() !== '';
-        
+
         if (!hasUrl) {
           const hasManualName = row.product_name && row.product_name.trim() !== '';
           const hasManualDesc = row.product_desc && row.product_desc.trim() !== '';
@@ -586,13 +586,13 @@ export default function InstantFactoryPage() {
 
       setToast({ msg: `Batch Mass Production "${campaignName}" berhasil didaftarkan!`, type: 'success' });
       setTimeout(() => setToast(null), 3000);
-      
+
       setCampaignName('');
       setParsedRows([]);
       setManualImages({});
       fetchHistory();
       pollLogs();
-      
+
       router.push(`/instant-factory/${data.campaign_id}`);
     } catch (err) {
       setError(err.message);
@@ -694,8 +694,8 @@ export default function InstantFactoryPage() {
               {/* TABS */}
               <div className="tabs">
                 {['storyboard', 'voiceover', 't2i_prompts', 'i2v_prompts', 'social_copy'].map(tab => (
-                  <button 
-                    key={tab} 
+                  <button
+                    key={tab}
                     onClick={() => setActiveTab(tab)}
                     className={`tab ${activeTab === tab ? 'active' : ''}`}
                   >
@@ -755,9 +755,9 @@ export default function InstantFactoryPage() {
                           </div>
                           <button className="btn btn-sm btn-secondary" onClick={() => copyToClipboard(scene.audio_segment?.voiceover_text, `Voiceover Scene ${scene.scene_number}`)}>Copy</button>
                         </div>
-                        <textarea 
-                          className="form-textarea" 
-                          value={scene.audio_segment?.voiceover_text || ''} 
+                        <textarea
+                          className="form-textarea"
+                          value={scene.audio_segment?.voiceover_text || ''}
                           onChange={(e) => handleStoryboardChange(idx, 'audio_segment', 'voiceover_text', e.target.value)}
                           style={{ fontSize: '1.05rem', color: 'var(--text-primary)', lineHeight: '1.6', width: '100%' }}
                         />
@@ -783,9 +783,9 @@ export default function InstantFactoryPage() {
                           <div className="scene-number">Scene {scene.scene_number} - T2I Prompt</div>
                           <button className="btn btn-sm btn-secondary" onClick={() => copyToClipboard(scene.ai_generation_prompts?.t2i_prompt_plaintext, `T2I Prompt Scene ${scene.scene_number}`)}>Copy</button>
                         </div>
-                        <textarea 
-                          className="form-textarea prompt-block" 
-                          value={scene.ai_generation_prompts?.t2i_prompt_plaintext || ''} 
+                        <textarea
+                          className="form-textarea prompt-block"
+                          value={scene.ai_generation_prompts?.t2i_prompt_plaintext || ''}
                           onChange={(e) => handleStoryboardChange(idx, 'ai_generation_prompts', 't2i_prompt_plaintext', e.target.value)}
                           style={{ width: '100%', minHeight: '120px' }}
                         />
@@ -811,9 +811,9 @@ export default function InstantFactoryPage() {
                           <div className="scene-number">Scene {scene.scene_number} - I2V Prompt</div>
                           <button className="btn btn-sm btn-secondary" onClick={() => copyToClipboard(scene.ai_generation_prompts?.i2v_prompt_plaintext, `I2V Prompt Scene ${scene.scene_number}`)}>Copy</button>
                         </div>
-                        <textarea 
-                          className="form-textarea prompt-block" 
-                          value={scene.ai_generation_prompts?.i2v_prompt_plaintext || ''} 
+                        <textarea
+                          className="form-textarea prompt-block"
+                          value={scene.ai_generation_prompts?.i2v_prompt_plaintext || ''}
                           onChange={(e) => handleStoryboardChange(idx, 'ai_generation_prompts', 'i2v_prompt_plaintext', e.target.value)}
                           style={{ width: '100%', minHeight: '120px' }}
                         />
@@ -838,9 +838,9 @@ export default function InstantFactoryPage() {
                         <div className="caption-label" style={{ color: '#E1306C', margin: 0 }}>📷 Instagram Reels</div>
                         <button className="btn btn-sm btn-secondary" onClick={() => copyToClipboard(result.distribution_assets?.instagram_caption, 'IG Caption')}>Copy</button>
                       </div>
-                      <textarea 
-                        className="form-textarea caption-text" 
-                        value={result.distribution_assets?.instagram_caption || ''} 
+                      <textarea
+                        className="form-textarea caption-text"
+                        value={result.distribution_assets?.instagram_caption || ''}
                         onChange={(e) => handleAssetChange('instagram_caption', e.target.value)}
                         style={{ width: '100%', minHeight: '100px' }}
                       />
@@ -850,9 +850,9 @@ export default function InstantFactoryPage() {
                         <div className="caption-label" style={{ color: 'var(--text-primary)', margin: 0 }}>🎵 TikTok</div>
                         <button className="btn btn-sm btn-secondary" onClick={() => copyToClipboard(result.distribution_assets?.tiktok_caption, 'TikTok Caption')}>Copy</button>
                       </div>
-                      <textarea 
-                        className="form-textarea caption-text" 
-                        value={result.distribution_assets?.tiktok_caption || ''} 
+                      <textarea
+                        className="form-textarea caption-text"
+                        value={result.distribution_assets?.tiktok_caption || ''}
                         onChange={(e) => handleAssetChange('tiktok_caption', e.target.value)}
                         style={{ width: '100%', minHeight: '100px' }}
                       />
@@ -864,19 +864,19 @@ export default function InstantFactoryPage() {
                       </div>
                       <div className="scene-field" style={{ marginBottom: '12px' }}>
                         <div className="scene-field-label">Title</div>
-                        <input 
+                        <input
                           type="text"
-                          className="form-input scene-field-value" 
-                          value={result.distribution_assets?.youtube_shorts_title || ''} 
+                          className="form-input scene-field-value"
+                          value={result.distribution_assets?.youtube_shorts_title || ''}
                           onChange={(e) => handleAssetChange('youtube_shorts_title', e.target.value)}
                           style={{ width: '100%' }}
                         />
                       </div>
                       <div className="scene-field">
                         <div className="scene-field-label">Description</div>
-                        <textarea 
-                          className="form-textarea caption-text" 
-                          value={result.distribution_assets?.youtube_shorts_desc || ''} 
+                        <textarea
+                          className="form-textarea caption-text"
+                          value={result.distribution_assets?.youtube_shorts_desc || ''}
                           onChange={(e) => handleAssetChange('youtube_shorts_desc', e.target.value)}
                           style={{ width: '100%', minHeight: '100px' }}
                         />
@@ -890,8 +890,8 @@ export default function InstantFactoryPage() {
             <div>
               {/* Tabs Switcher for Production Mode */}
               <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', background: 'var(--bg-glass)', padding: '4px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-                <button type="button" onClick={() => setProductionMode('single')} style={{ flex: 1, padding: '12px', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-sans)', background: productionMode === 'single' ? 'var(--accent)' : 'none', color: productionMode === 'single' ? '#fff' : 'var(--text-secondary)', transition: 'all 0.2s ease' }}>🎥 Single Video Campaign</button>
-                <button type="button" onClick={() => setProductionMode('mass')} style={{ flex: 1, padding: '12px', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-sans)', background: productionMode === 'mass' ? 'var(--accent)' : 'none', color: productionMode === 'mass' ? '#fff' : 'var(--text-secondary)', transition: 'all 0.2s ease' }}>🏭 Mass Production (CSV/XLSX)</button>
+                <button type="button" onClick={() => setProductionMode('single')} style={{ flex: 1, padding: '12px', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-sans)', background: productionMode === 'single' ? 'var(--accent)' : 'none', color: productionMode === 'single' ? 'var(--text-primary)' : 'var(--text-secondary)', transition: 'all 0.2s ease' }}>🎥 Single Video Campaign</button>
+                <button type="button" onClick={() => setProductionMode('mass')} style={{ flex: 1, padding: '12px', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-sans)', background: productionMode === 'mass' ? 'var(--accent)' : 'none', color: productionMode === 'mass' ? 'var(--text-primary)' : 'var(--text-secondary)', transition: 'all 0.2s ease' }}>🏭 Mass Production (CSV/XLSX)</button>
               </div>
 
               {productionMode === 'single' ? (
@@ -902,10 +902,10 @@ export default function InstantFactoryPage() {
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '16px' }}>
                       Ekstrak data produk secara otomatis dari URL landing page atau input manual.
                     </p>
-                    
+
                     <div style={{ display: 'flex', gap: '4px', marginBottom: '16px', background: 'var(--bg-glass)', padding: '4px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-                      <button type="button" onClick={() => setInputMode('manual')} style={{ flex: 1, padding: '8px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-sans)', background: inputMode === 'manual' ? 'var(--accent)' : 'none', color: inputMode === 'manual' ? '#fff' : 'var(--text-secondary)' }}>📝 Input Manual</button>
-                      <button type="button" onClick={() => setInputMode('url')} style={{ flex: 1, padding: '8px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-sans)', background: inputMode === 'url' ? 'var(--accent)' : 'none', color: inputMode === 'url' ? '#fff' : 'var(--text-secondary)' }}>🔗 Scrape URL</button>
+                      <button type="button" onClick={() => setInputMode('manual')} style={{ flex: 1, padding: '8px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-sans)', background: inputMode === 'manual' ? 'var(--accent)' : 'none', color: inputMode === 'manual' ? 'var(--text-primary)' : 'var(--text-secondary)' }}>📝 Input Manual</button>
+                      <button type="button" onClick={() => setInputMode('url')} style={{ flex: 1, padding: '8px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-sans)', background: inputMode === 'url' ? 'var(--accent)' : 'none', color: inputMode === 'url' ? 'var(--text-primary)' : 'var(--text-secondary)' }}>🔗 Scrape URL</button>
                     </div>
 
                     <div className="form-group" style={{ marginBottom: '16px' }}>
@@ -993,7 +993,7 @@ export default function InstantFactoryPage() {
                   <div style={{ marginBottom: '32px' }}>
                     <div className="card-title">2. Creative Settings</div>
                     <hr style={{ border: 'none', borderTop: '1px solid var(--border)', marginBottom: '20px' }} />
-                    
+
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       <div className="form-group">
                         <label className="form-label">Narrative Mode</label>
@@ -1095,7 +1095,7 @@ export default function InstantFactoryPage() {
                     <button type="submit" disabled={isProcessing} className="btn btn-primary" onClick={() => setSubmitStatus('running')}>
                       {isProcessing ? 'Manufacturing...' : '🚀 Generate Production Blueprint'}
                     </button>
-                    <button type="submit" disabled={isProcessing} className="btn" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.25)' }} onClick={() => setSubmitStatus('draft')}>
+                    <button type="submit" disabled={isProcessing} className="btn" style={{ background: 'var(--status-info-soft)', color: 'var(--status-info)', border: '1px solid var(--status-info-soft)' }} onClick={() => setSubmitStatus('draft')}>
                       {isProcessing ? 'Saving...' : '💾 Save as Draft'}
                     </button>
                   </div>
@@ -1111,9 +1111,9 @@ export default function InstantFactoryPage() {
 
                   {/* ACCORDION SECTION 0: Basic Creative Strategy */}
                   <div style={{ borderBottom: '1px solid var(--border)' }}>
-                    <div 
-                      onClick={() => setActiveAccordion(0)} 
-                      style={{ padding: '16px 24px', background: activeAccordion === 0 ? 'rgba(59, 130, 246, 0.05)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                    <div
+                      onClick={() => setActiveAccordion(0)}
+                      style={{ padding: '16px 24px', background: activeAccordion === 0 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                     >
                       <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>1. Basic Creative Strategy</span>
                       <span>{activeAccordion === 0 ? '▲' : '▼'}</span>
@@ -1157,9 +1157,9 @@ export default function InstantFactoryPage() {
                           </div>
                           <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
                             <label className="form-label">Bahasa Naskah Voiceover *</label>
-                            <select 
-                              className="form-select" 
-                              value={targetLanguage} 
+                            <select
+                              className="form-select"
+                              value={targetLanguage}
                               onChange={e => setTargetLanguage(e.target.value)}
                             >
                               <option value="id-ID">🇮🇩 Bahasa Indonesia (Lokal)</option>
@@ -1172,26 +1172,26 @@ export default function InstantFactoryPage() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 12 }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>Upload Matriks Konten (.csv / .xlsx) *</span>
-                            <button 
-                              type="button" 
+                            <button
+                              type="button"
                               onClick={downloadTemplate}
-                              className="btn btn-sm btn-secondary" 
-                              style={{ 
-                                padding: '6px 12px', 
+                              className="btn btn-sm btn-secondary"
+                              style={{
+                                padding: '6px 12px',
                                 fontSize: '0.8rem'
                               }}
                             >
                               📥 Download Template .csv
                             </button>
                           </div>
-                          
-                          <div 
+
+                          <div
                             style={{
                               border: '2px dashed var(--border)',
                               borderRadius: 8,
                               padding: '32px 24px',
                               textAlign: 'center',
-                              background: 'rgba(255, 255, 255, 0.01)',
+                              background: 'var(--surface-interactive)',
                               cursor: 'pointer',
                               transition: 'border-color 0.2s ease'
                             }}
@@ -1208,15 +1208,15 @@ export default function InstantFactoryPage() {
                             <span style={{ fontSize: '2rem' }}>📂</span>
                             <div style={{ marginTop: 8, fontWeight: 500 }}>Seret & Lepas file .csv atau .xlsx Anda di sini</div>
                             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: 4 }}>atau klik untuk menelusuri dari komputer Anda</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--accent)', marginTop: 12, padding: '6px 14px', background: 'rgba(255, 255, 255, 0.03)', borderRadius: 8, maxWidth: 650, display: 'inline-block', lineHeight: 1.4, textAlign: 'left', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--accent)', marginTop: 12, padding: '6px 14px', background: 'var(--surface-interactive)', borderRadius: 8, maxWidth: 650, display: 'inline-block', lineHeight: 1.4, textAlign: 'left', border: '1px solid var(--surface-interactive)' }}>
                                💡 <b>Petunjuk IFC Massal:</b> Setiap baris wajib memiliki <b>Tautan Gambar Produk</b> (berupa link gambar langsung untuk auto-download) <u>ATAU</u> diisi <b>secara manual lengkap</b> (Nama Produk, Deskripsi, dan Foto Produk di bawah ini jika mode Hybrid Lock).
                              </div>
-                            <input 
-                              id="ifcMassFileUploader" 
-                              type="file" 
-                              accept=".csv,.xlsx" 
-                              onChange={handleFileUpload} 
-                              style={{ display: 'none' }} 
+                            <input
+                              id="ifcMassFileUploader"
+                              type="file"
+                              accept=".csv,.xlsx"
+                              onChange={handleFileUpload}
+                              style={{ display: 'none' }}
                             />
                           </div>
 
@@ -1226,7 +1226,7 @@ export default function InstantFactoryPage() {
                                 <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--success)' }}>✓ Terdeteksi {parsedRows.length} baris produk</span>
                                 <button type="button" onClick={() => { setParsedRows([]); setManualImages({}); }} style={{ background: 'transparent', border: 'none', color: 'var(--danger)', fontSize: '0.8rem', cursor: 'pointer' }}>Hapus Semua</button>
                               </div>
-                              
+
                               <div style={{ maxHeight: 300, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 8 }}>
                                 <table className="ideas-table" style={{ width: '100%', fontSize: '0.8rem', margin: 0 }}>
                                   <thead>
@@ -1260,11 +1260,11 @@ export default function InstantFactoryPage() {
                                                   {manualImg ? (
                                                     <span style={{ color: 'var(--success)', fontWeight: 600 }}>✓ {manualImg.filename}</span>
                                                   ) : (
-                                                    <input 
-                                                      type="file" 
-                                                      accept="image/*" 
+                                                    <input
+                                                      type="file"
+                                                      accept="image/*"
                                                       disabled={uploadingImages[idx]}
-                                                      onChange={e => handleRowImageChange(idx, e.target.files[0])} 
+                                                      onChange={e => handleRowImageChange(idx, e.target.files[0])}
                                                       style={{ width: 130, fontSize: '0.75rem' }}
                                                     />
                                                   )}
@@ -1305,11 +1305,11 @@ export default function InstantFactoryPage() {
 
                         <div className="form-group">
                           <label className="form-label">Custom Instruction / Guardrails (Global)</label>
-                          <textarea 
-                            value={customInstruction} 
-                            onChange={e => setCustomInstruction(e.target.value)} 
-                            placeholder="Instruksi tambahan yang berlaku untuk seluruh video..." 
-                            className="form-textarea" 
+                          <textarea
+                            value={customInstruction}
+                            onChange={e => setCustomInstruction(e.target.value)}
+                            placeholder="Instruksi tambahan yang berlaku untuk seluruh video..."
+                            className="form-textarea"
                           />
                         </div>
                       </div>
@@ -1318,9 +1318,9 @@ export default function InstantFactoryPage() {
 
                   {/* ACCORDION SECTION 1: Aesthetics & Visual Settings */}
                   <div style={{ borderBottom: '1px solid var(--border)' }}>
-                    <div 
-                      onClick={() => setActiveAccordion(1)} 
-                      style={{ padding: '16px 24px', background: activeAccordion === 1 ? 'rgba(59, 130, 246, 0.05)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                    <div
+                      onClick={() => setActiveAccordion(1)}
+                      style={{ padding: '16px 24px', background: activeAccordion === 1 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                     >
                       <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>2. Aesthetics & Visual Settings</span>
                       <span>{activeAccordion === 1 ? '▲' : '▼'}</span>
@@ -1379,9 +1379,9 @@ export default function InstantFactoryPage() {
 
                   {/* ACCORDION SECTION 2: Product Bridging Settings */}
                   <div style={{ borderBottom: '1px solid var(--border)' }}>
-                    <div 
-                      onClick={() => setActiveAccordion(2)} 
-                      style={{ padding: '16px 24px', background: activeAccordion === 2 ? 'rgba(59, 130, 246, 0.05)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                    <div
+                      onClick={() => setActiveAccordion(2)}
+                      style={{ padding: '16px 24px', background: activeAccordion === 2 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                     >
                       <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>3. Product Bridging Settings</span>
                       <span>{activeAccordion === 2 ? '▲' : '▼'}</span>
@@ -1439,9 +1439,9 @@ export default function InstantFactoryPage() {
 
                   {/* ACCORDION SECTION 3: Workflow & Audio Settings */}
                   <div style={{ borderBottom: '1px solid var(--border)' }}>
-                    <div 
-                      onClick={() => setActiveAccordion(3)} 
-                      style={{ padding: '16px 24px', background: activeAccordion === 3 ? 'rgba(59, 130, 246, 0.05)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                    <div
+                      onClick={() => setActiveAccordion(3)}
+                      style={{ padding: '16px 24px', background: activeAccordion === 3 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                     >
                       <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>4. Workflow & Audio Settings</span>
                       <span>{activeAccordion === 3 ? '▲' : '▼'}</span>
@@ -1516,7 +1516,7 @@ export default function InstantFactoryPage() {
                     <button type="submit" disabled={isProcessing} className="btn btn-primary" onClick={() => setSubmitStatus('running')}>
                       {isProcessing ? 'Launching...' : `🚀 Launch Mass Production Batch (${parsedRows.length} Videos)`}
                     </button>
-                    <button type="submit" disabled={isProcessing} className="btn" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.25)' }} onClick={() => setSubmitStatus('draft')}>
+                    <button type="submit" disabled={isProcessing} className="btn" style={{ background: 'var(--status-info-soft)', color: 'var(--status-info)', border: '1px solid var(--status-info-soft)' }} onClick={() => setSubmitStatus('draft')}>
                       {isProcessing ? 'Saving...' : '💾 Save as Draft'}
                     </button>
                   </div>
@@ -1543,9 +1543,9 @@ export default function InstantFactoryPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <span style={{
                     fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', padding: '4px 10px', borderRadius: 12,
-                    background: isSchedulerActive ? 'rgba(46, 204, 113, 0.15)' : 'rgba(235, 77, 75, 0.15)',
+                    background: isSchedulerActive ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
                     color: isSchedulerActive ? 'var(--success)' : 'var(--danger)',
-                    border: `1px solid ${isSchedulerActive ? 'rgba(46, 204, 113, 0.3)' : 'rgba(235, 77, 75, 0.3)'}`
+                    border: `1px solid ${isSchedulerActive ? 'var(--status-success-soft)' : 'var(--status-danger-soft)'}`
                   }}>
                     {isSchedulerActive ? '🟢 SKEDULER AKTIF' : '🔴 SKEDULER MATI'}
                   </span>
@@ -1555,8 +1555,8 @@ export default function InstantFactoryPage() {
                     className={`btn ${isSchedulerActive ? 'btn-danger' : 'btn-success'}`}
                     style={{
                       fontSize: '0.8rem', padding: '6px 16px', fontWeight: 600,
-                      boxShadow: isSchedulerActive ? '0 0 15px rgba(235, 77, 75, 0.4)' : '0 0 15px rgba(46, 204, 113, 0.4)',
-                      border: isSchedulerActive ? '1px solid rgba(235, 77, 75, 0.6)' : '1px solid rgba(46, 204, 113, 0.6)'
+                      boxShadow: isSchedulerActive ? '0 0 15px var(--status-danger-soft)' : '0 0 15px var(--status-success-soft)',
+                      border: isSchedulerActive ? '1px solid var(--status-danger-soft)' : '1px solid var(--status-success-soft)'
                     }}
                   >
                     {isSchedulerActive ? '🛑 STOP SKEDULER' : '▶️ START SKEDULER'}
@@ -1565,15 +1565,15 @@ export default function InstantFactoryPage() {
               </div>
 
               {/* System Poller Logger */}
-              <div style={{ padding: '0', background: '#07070a', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
-                <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0b0b12' }}>
+              <div style={{ padding: '0', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
+                <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#00b894', display: 'inline-block', boxShadow: '0 0 8px #00b894' }}></span>
+                    <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--status-success)', display: 'inline-block', boxShadow: '0 0 8px var(--status-success)' }}></span>
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>SYSTEM POLLER LOGGER</span>
                   </div>
                   <button onClick={pollLogs} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.75rem', cursor: 'pointer', fontFamily: 'var(--font-mono)' }}>[Refresh Log]</button>
                 </div>
-                <pre ref={terminalRef} style={{ margin: 0, padding: '20px', background: '#07070a', color: '#20c20e', fontFamily: 'var(--font-mono)', fontSize: '0.82rem', maxHeight: '220px', overflowY: 'auto', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
+                <pre ref={terminalRef} style={{ margin: 0, padding: '20px', background: 'var(--surface)', color: '#20c20e', fontFamily: 'var(--font-mono)', fontSize: '0.82rem', maxHeight: '220px', overflowY: 'auto', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
                   {terminalLogs}
                 </pre>
               </div>
@@ -1582,11 +1582,11 @@ export default function InstantFactoryPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {history.map(item => {
                   let statusColor = 'var(--text-muted)';
-                  let statusBg = 'rgba(255,255,255,0.06)';
-                  let statusBorder = 'rgba(255,255,255,0.1)';
-                  if (item.status === 'completed') { statusColor = 'var(--success)'; statusBg = 'rgba(46,204,113,0.15)'; statusBorder = 'rgba(46,204,113,0.3)'; }
-                  else if (item.status === 'running') { statusColor = '#3b82f6'; statusBg = 'rgba(59,130,246,0.15)'; statusBorder = 'rgba(59,130,246,0.3)'; }
-                  else if (item.status === 'draft') { statusColor = '#a0aec0'; statusBg = 'rgba(108,117,125,0.12)'; statusBorder = 'rgba(108,117,125,0.25)'; }
+                  let statusBg = 'var(--surface-interactive)';
+                  let statusBorder = 'var(--border-subtle)';
+                  if (item.status === 'completed') { statusColor = 'var(--success)'; statusBg = 'var(--status-success-soft)'; statusBorder = 'var(--status-success-soft)'; }
+                  else if (item.status === 'running') { statusColor = 'var(--status-info)'; statusBg = 'var(--status-info-soft)'; statusBorder = 'var(--status-info-soft)'; }
+                  else if (item.status === 'draft') { statusColor = 'var(--text-muted)'; statusBg = 'rgba(108,117,125,0.12)'; statusBorder = 'rgba(108,117,125,0.25)'; }
 
                   return (
                     <div key={item.id} className="card" style={{ border: '1px solid var(--border)', background: 'var(--bg-card)', padding: '20px', borderRadius: 'var(--radius-sm)' }}>
@@ -1596,9 +1596,9 @@ export default function InstantFactoryPage() {
                           <span style={{ fontSize: '1.1rem' }}>🏭</span>
                           <strong style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>{item.product_name || 'Unknown'}</strong>
                           {item.is_mass_production === 1 && (
-                            <span style={{ fontSize: '0.65rem', background: 'var(--accent)', color: '#fff', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>MASS</span>
+                            <span style={{ fontSize: '0.65rem', background: 'var(--accent)', color: 'var(--text-primary)', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>MASS</span>
                           )}
-                          <span style={{ fontSize: '0.65rem', background: 'rgba(255,255,255,0.08)', color: 'var(--text-muted)', padding: '2px 6px', borderRadius: 4 }}>
+                          <span style={{ fontSize: '0.65rem', background: 'var(--border-subtle)', color: 'var(--text-muted)', padding: '2px 6px', borderRadius: 4 }}>
                             {item.product_source_type ? item.product_source_type.toUpperCase() : 'TEXT'}
                           </span>
                           <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', padding: '3px 8px', borderRadius: 8, background: statusBg, color: statusColor, border: `1px solid ${statusBorder}` }}>
@@ -1618,7 +1618,7 @@ export default function InstantFactoryPage() {
                       )}
 
                       {/* Action Buttons — rata KIRI, selalu terlihat */}
-                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-start', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 12 }}>
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-start', borderTop: '1px solid var(--surface-interactive)', paddingTop: 12 }}>
                         <button type="button" className="btn btn-primary btn-sm" onClick={() => viewHistoryItem(item.id)} style={{ fontSize: '0.75rem', padding: '6px 12px' }}>🔍 Detail</button>
                         <button type="button" className="btn btn-secondary btn-sm" onClick={() => handleCopy(item.id)} style={{ fontSize: '0.75rem', padding: '6px 12px' }}>📋 Copy</button>
                         <button type="button" className="btn btn-danger btn-sm" onClick={() => deleteHistoryItem(item.id)} style={{ fontSize: '0.75rem', padding: '6px 12px' }}>🗑 Hapus</button>

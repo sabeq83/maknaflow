@@ -216,10 +216,10 @@ export default function UserManagementPage() {
         <div className="page-container">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' }}>
             <div>
-              <h1 style={{ fontSize: '1.8rem', fontWeight: 700, margin: 0, background: 'linear-gradient(135deg, #38bdf8 0%, #818cf8 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              <h1 style={{ fontSize: '1.8rem', fontWeight: 700, margin: 0, background: 'linear-gradient(135deg, var(--link) 0%, var(--status-neutral) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 👥 User Management & Menu Privileges
               </h1>
-              <p style={{ color: 'var(--text-secondary, #94a3b8)', fontSize: '0.9rem', marginTop: '6px' }}>
+              <p style={{ color: 'var(--text-secondary, var(--text-muted))', fontSize: '0.9rem', marginTop: '6px' }}>
                 Kelola pengguna, ubah password, matriks izin menu, dan penugasan Akun Brand (Multi-Tenant RBAC)
               </p>
             </div>
@@ -241,7 +241,7 @@ export default function UserManagementPage() {
           </div>
 
           {error && (
-            <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#fca5a5', padding: '12px', borderRadius: '8px', marginBottom: '20px' }}>
+            <div style={{ background: 'var(--status-danger-soft)', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#fca5a5', padding: '12px', borderRadius: '8px', marginBottom: '20px' }}>
               ⚠️ {error}
             </div>
           )}
@@ -253,10 +253,10 @@ export default function UserManagementPage() {
           )}
 
           {/* Users Table */}
-          <div style={{ background: 'rgba(15, 23, 42, 0.7)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', overflow: 'hidden' }}>
+          <div style={{ background: 'rgba(15, 23, 42, 0.7)', border: '1px solid var(--border-subtle)', borderRadius: '12px', overflow: 'hidden' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
               <thead>
-                <tr style={{ background: 'rgba(30, 41, 59, 0.8)', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <tr style={{ background: 'rgba(30, 41, 59, 0.8)', borderBottom: '1px solid var(--border-subtle)' }}>
                   <th style={{ padding: '14px 16px' }}>Username</th>
                   <th style={{ padding: '14px 16px' }}>Role</th>
                   <th style={{ padding: '14px 16px' }}>Akun Brand Ter-assign</th>
@@ -278,7 +278,7 @@ export default function UserManagementPage() {
                         fontSize: '0.75rem',
                         fontWeight: 600,
                         background: u.role === 'admin' ? 'rgba(56, 189, 248, 0.2)' : 'rgba(148, 163, 184, 0.2)',
-                        color: u.role === 'admin' ? '#38bdf8' : '#cbd5e1',
+                        color: u.role === 'admin' ? 'var(--link)' : 'var(--text-secondary)',
                         border: u.role === 'admin' ? '1px solid rgba(56, 189, 248, 0.4)' : '1px solid rgba(148, 163, 184, 0.3)'
                       }}>
                         {u.role.toUpperCase()}
@@ -286,7 +286,7 @@ export default function UserManagementPage() {
                     </td>
                     <td style={{ padding: '14px 16px' }}>
                       {u.role === 'admin' ? (
-                        <span style={{ color: '#38bdf8', fontSize: '0.8rem' }}>🌟 Access All Brands</span>
+                        <span style={{ color: 'var(--link)', fontSize: '0.8rem' }}>🌟 Access All Brands</span>
                       ) : u.assignedBrands && u.assignedBrands.length > 0 ? (
                         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                           {u.assignedBrands.map(b => (
@@ -296,12 +296,12 @@ export default function UserManagementPage() {
                           ))}
                         </div>
                       ) : (
-                        <span style={{ color: '#64748b', fontSize: '0.8rem' }}>Belum ada brand</span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Belum ada brand</span>
                       )}
                     </td>
                     <td style={{ padding: '14px 16px' }}>
                       {u.role === 'admin' ? (
-                        <span style={{ color: '#818cf8', fontSize: '0.8rem' }}>🔒 Full All Menus</span>
+                        <span style={{ color: 'var(--status-neutral)', fontSize: '0.8rem' }}>🔒 Full All Menus</span>
                       ) : (
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                           {(u.menuPermissions || []).length} / {allMenus.length} Menu Diizinkan
@@ -312,20 +312,20 @@ export default function UserManagementPage() {
                       <button
                         onClick={() => openPasswordModal(u)}
                         title="Ubah Password User"
-                        style={{ background: 'rgba(234, 179, 8, 0.2)', color: '#facc15', border: '1px solid rgba(234, 179, 8, 0.4)', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', marginRight: '6px', fontSize: '0.8rem' }}
+                        style={{ background: 'rgba(234, 179, 8, 0.2)', color: 'var(--status-warning)', border: '1px solid rgba(234, 179, 8, 0.4)', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', marginRight: '6px', fontSize: '0.8rem' }}
                       >
                         🔑 Ubah Password
                       </button>
                       <button
                         onClick={() => openEditModal(u)}
-                        style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', border: '1px solid rgba(59, 130, 246, 0.4)', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', marginRight: '6px', fontSize: '0.8rem' }}
+                        style={{ background: 'var(--status-info-soft)', color: 'var(--link)', border: '1px solid rgba(59, 130, 246, 0.4)', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', marginRight: '6px', fontSize: '0.8rem' }}
                       >
                         ✏️ Edit
                       </button>
                       {u.id !== 'usr_admin_default' && (
                         <button
                           onClick={() => handleDelete(u.id, u.username)}
-                          style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.4)', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}
+                          style={{ background: 'var(--status-danger-soft)', color: 'var(--status-danger)', border: '1px solid rgba(239, 68, 68, 0.4)', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}
                         >
                           🗑️ Hapus
                         </button>
@@ -339,7 +339,7 @@ export default function UserManagementPage() {
 
           {/* Edit User Modal */}
           {isModalOpen && (
-            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
+            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'var(--overlay-backdrop)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
               <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '650px', maxHeight: '90vh', overflowY: 'auto' }}>
                 <h2 style={{ fontSize: '1.4rem', margin: '0 0 20px 0', color: 'var(--text-primary)' }}>
                   {editingUser ? `✏️ Edit Pengguna: ${editingUser.username}` : '➕ Tambah Pengguna Baru'}
@@ -355,7 +355,7 @@ export default function UserManagementPage() {
                         disabled={!!editingUser}
                         value={formData.username}
                         onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                        style={{ width: '100%', padding: '10px', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '6px', color: 'var(--text-primary)' }}
+                        style={{ width: '100%', padding: '10px', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)' }}
                       />
                     </div>
                     <div>
@@ -366,7 +366,7 @@ export default function UserManagementPage() {
                         value={formData.password}
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                         placeholder={editingUser ? '••••••••' : 'Masukkan password'}
-                        style={{ width: '100%', padding: '10px', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '6px', color: 'var(--text-primary)' }}
+                        style={{ width: '100%', padding: '10px', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)' }}
                       />
                     </div>
                   </div>
@@ -376,7 +376,7 @@ export default function UserManagementPage() {
                     <select
                       value={formData.role}
                       onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                      style={{ width: '100%', padding: '10px', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '6px', color: 'var(--text-primary)' }}
+                      style={{ width: '100%', padding: '10px', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)' }}
                     >
                       <option value="user">User Biasa (Terbatas per Brand & Menu)</option>
                       <option value="admin">Admin (Akses Full All System & Global View)</option>
@@ -386,8 +386,8 @@ export default function UserManagementPage() {
                   {formData.role !== 'admin' && (
                     <>
                       {/* Brand Assignment Section */}
-                      <div style={{ marginBottom: '20px', background: 'rgba(30, 41, 59, 0.5)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                        <label style={{ display: 'block', fontWeight: 600, fontSize: '0.9rem', color: '#38bdf8', marginBottom: '10px' }}>
+                      <div style={{ marginBottom: '20px', background: 'rgba(30, 41, 59, 0.5)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                        <label style={{ display: 'block', fontWeight: 600, fontSize: '0.9rem', color: 'var(--link)', marginBottom: '10px' }}>
                           🏷️ Penugasan Akun Brand (Multi-Brand Mapping)
                         </label>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -405,8 +405,8 @@ export default function UserManagementPage() {
                       </div>
 
                       {/* Menu Access Matrix */}
-                      <div style={{ marginBottom: '20px', background: 'rgba(30, 41, 59, 0.5)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                        <label style={{ display: 'block', fontWeight: 600, fontSize: '0.9rem', color: '#818cf8', marginBottom: '10px' }}>
+                      <div style={{ marginBottom: '20px', background: 'rgba(30, 41, 59, 0.5)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                        <label style={{ display: 'block', fontWeight: 600, fontSize: '0.9rem', color: 'var(--status-neutral)', marginBottom: '10px' }}>
                           🔒 Access Permission
                         </label>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -447,9 +447,9 @@ export default function UserManagementPage() {
 
           {/* Dedicated Password Change Modal */}
           {isPasswordModalOpen && passwordTargetUser && (
-            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1010, padding: '20px' }}>
+            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'var(--overlay-backdrop)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1010, padding: '20px' }}>
               <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '450px' }}>
-                <h2 style={{ fontSize: '1.3rem', margin: '0 0 8px 0', color: '#facc15' }}>
+                <h2 style={{ fontSize: '1.3rem', margin: '0 0 8px 0', color: 'var(--status-warning)' }}>
                   🔑 Ubah Password: {passwordTargetUser.username}
                 </h2>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
@@ -457,7 +457,7 @@ export default function UserManagementPage() {
                 </p>
 
                 {passwordModalError && (
-                  <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#fca5a5', padding: '10px', borderRadius: '6px', fontSize: '0.85rem', marginBottom: '16px' }}>
+                  <div style={{ background: 'var(--status-danger-soft)', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#fca5a5', padding: '10px', borderRadius: '6px', fontSize: '0.85rem', marginBottom: '16px' }}>
                     ⚠️ {passwordModalError}
                   </div>
                 )}
@@ -474,7 +474,7 @@ export default function UserManagementPage() {
                       value={newPasswordInput}
                       onChange={(e) => setNewPasswordInput(e.target.value)}
                       placeholder="Ketik password baru"
-                      style={{ width: '100%', padding: '12px', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid rgba(255, 255, 255, 0.15)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '0.95rem' }}
+                      style={{ width: '100%', padding: '12px', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '0.95rem' }}
                     />
                   </div>
 

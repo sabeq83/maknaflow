@@ -7,7 +7,7 @@ export default function ReportsPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+
   const [jobsData, setJobsData] = useState({ jobs: [], total: 0 });
   const [jobsLoading, setJobsLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -49,7 +49,7 @@ export default function ReportsPage() {
       const params = new URLSearchParams({ page, limit });
       if (queueFilter !== 'all') params.append('queue', queueFilter);
       if (statusFilter !== 'all') params.append('status', statusFilter);
-      
+
       const res = await fetch(`/api/reports/jobs?${params.toString()}`);
       const json = await res.json();
       if (json.success) {
@@ -114,7 +114,7 @@ export default function ReportsPage() {
   }
 
   const { executiveSummary, queueMonitor, activeCampaigns, glabsTasks = [] } = data;
-  
+
   // Transform queueStats to table format
   const queuesMap = {};
   for (const item of queueMonitor) {
@@ -214,7 +214,7 @@ export default function ReportsPage() {
                   if (camp.type === 're') {
                     const scrapePct = camp.progress.total > 0 ? (camp.progress.downloaded / camp.progress.total) * 100 : 0;
                     const analyzePct = camp.progress.total > 0 ? (camp.progress.analyzed / camp.progress.total) * 100 : 0;
-                    
+
                     return (
                       <div key={camp.id} style={{ border: '1px solid var(--border)', padding: '16px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-dark)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
@@ -287,11 +287,11 @@ export default function ReportsPage() {
                     <tr><td colSpan="8" style={{ textAlign: 'center' }}>Tidak ada log tugas G-Labs</td></tr>
                   ) : (
                     glabsTasks.map(task => {
-                      const statusColor = task.status === 'completed' ? 'var(--success)' : 
+                      const statusColor = task.status === 'completed' ? 'var(--success)' :
                                           task.status === 'failed' ? 'var(--danger)' : 'var(--accent-light)';
-                      const statusBg = task.status === 'completed' ? 'rgba(46, 213, 115, 0.1)' : 
-                                       task.status === 'failed' ? 'rgba(255, 71, 87, 0.1)' : 'rgba(52, 152, 219, 0.1)';
-                      
+                      const statusBg = task.status === 'completed' ? 'rgba(46, 213, 115, 0.1)' :
+                                       task.status === 'failed' ? 'rgba(255, 71, 87, 0.1)' : 'var(--status-info-soft)';
+
                       return (
                         <tr key={task.task_id}>
                           <td style={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>{task.task_id}</td>
@@ -333,10 +333,10 @@ export default function ReportsPage() {
                           </td>
                           <td>
                             {task.video_url ? (
-                              <a 
-                                href={task.video_url} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
+                              <a
+                                href={task.video_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="btn btn-sm btn-primary"
                                 style={{ padding: '2px 8px', fontSize: '0.75rem', textDecoration: 'none', display: 'inline-block' }}
                               >
@@ -376,7 +376,7 @@ export default function ReportsPage() {
                 </select>
               </div>
             </div>
-            
+
             <div className="table-responsive">
               <table className="table" style={{ fontSize: '0.85rem' }}>
                 <thead>
@@ -401,11 +401,11 @@ export default function ReportsPage() {
                         <td style={{ fontFamily: 'monospace', fontSize: '0.75rem' }} title={job.payload}>{job.id}</td>
                         <td>{job.queue_name}</td>
                         <td>
-                          <span style={{ 
+                          <span style={{
                             padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem',
-                            background: job.status === 'completed' ? 'rgba(46, 213, 115, 0.1)' : 
-                                       job.status === 'failed' ? 'rgba(255, 71, 87, 0.1)' : 'rgba(255, 255, 255, 0.1)',
-                            color: job.status === 'completed' ? 'var(--success)' : 
+                            background: job.status === 'completed' ? 'rgba(46, 213, 115, 0.1)' :
+                                       job.status === 'failed' ? 'rgba(255, 71, 87, 0.1)' : 'var(--border-subtle)',
+                            color: job.status === 'completed' ? 'var(--success)' :
                                    job.status === 'failed' ? 'var(--danger)' : 'var(--text-secondary)'
                           }}>
                             {job.status}
@@ -418,8 +418,8 @@ export default function ReportsPage() {
                         <td>{new Date(job.completed_at || job.started_at || job.created_at).toLocaleString('id-ID')}</td>
                         <td>
                           {job.status === 'failed' && (
-                            <button 
-                              className="btn btn-sm btn-secondary" 
+                            <button
+                              className="btn btn-sm btn-secondary"
                               style={{ padding: '2px 8px', fontSize: '0.75rem' }}
                               onClick={() => handleRetry(job.id)}
                               disabled={retrying[job.id]}
@@ -434,22 +434,22 @@ export default function ReportsPage() {
                 </tbody>
               </table>
             </div>
-            
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                 Total {jobsData.total} jobs
               </span>
               <div style={{ display: 'flex', gap: '8px' }}>
-                <button 
-                  className="btn btn-sm btn-secondary" 
-                  disabled={page <= 1} 
+                <button
+                  className="btn btn-sm btn-secondary"
+                  disabled={page <= 1}
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                 >
                   &lt; Prev
                 </button>
-                <button 
-                  className="btn btn-sm btn-secondary" 
-                  disabled={page * limit >= jobsData.total} 
+                <button
+                  className="btn btn-sm btn-secondary"
+                  disabled={page * limit >= jobsData.total}
                   onClick={() => setPage(p => p + 1)}
                 >
                   Next &gt;

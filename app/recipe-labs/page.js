@@ -312,7 +312,7 @@ export default function RecipeLabsPage() {
       const res1 = await fetch('/api/v2/products');
       const json1 = await res1.json();
       if (json1.success) setProducts(json1.data || []);
-      
+
       const res2 = await fetch('/api/settings/facebook-pages');
       const json2 = await res2.json();
       if (json2.success && json2.pages) {
@@ -503,8 +503,8 @@ export default function RecipeLabsPage() {
       if (json.success) {
         setSuccessMsg(campaignType === 'video'
           ? 'Kampanye Reels Video Storyboard berhasil dibuat! Worker sedang memproses.'
-          : (enableGlabs 
-              ? 'Kampanye resep berhasil dibuat! Worker sedang memproses alur sekuensial.' 
+          : (enableGlabs
+              ? 'Kampanye resep berhasil dibuat! Worker sedang memproses alur sekuensial.'
               : 'Kampanye resep (Mode Teks & Prompt Only) berhasil dibuat!'));
         fetchCampaigns();
         if (json.data?.campaign_id) {
@@ -543,13 +543,13 @@ export default function RecipeLabsPage() {
 
     const getStageStatus = (stage) => {
       if (s === 'failed') return 'danger';
-      
+
       if (stage === 'gemini') {
         if (['pending_gemini'].includes(s)) return 'pending';
         if (['generating_text'].includes(s)) return 'active';
         return 'success';
       }
-      
+
       if (stage === 'glabs') {
         if (['pending_gemini', 'generating_text'].includes(s)) return 'pending';
         if (['pending_glabs', 'generating_images'].includes(s)) return 'active';
@@ -577,24 +577,24 @@ export default function RecipeLabsPage() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 6, marginBottom: 12 }}>
         {stages.map((stage, sIdx) => {
           let color = 'var(--text-muted)';
-          let bg = 'rgba(255, 255, 255, 0.05)';
-          let border = '1px solid rgba(255, 255, 255, 0.1)';
+          let bg = 'var(--surface-interactive)';
+          let border = '1px solid var(--border-subtle)';
           let labelText = stage.label;
           let anim = 'none';
 
           if (stage.status === 'success') {
-            color = '#fff';
-            bg = 'rgba(46, 204, 113, 0.15)';
-            border = '1px solid rgba(46, 204, 113, 0.5)';
+            color = 'var(--text-primary)';
+            bg = 'var(--status-success-soft)';
+            border = '1px solid var(--status-success-soft)';
             labelText = `✓ ${stage.label}`;
           } else if (stage.status === 'danger') {
-            color = '#fff';
-            bg = 'rgba(231, 76, 60, 0.15)';
-            border = '1px solid rgba(231, 76, 60, 0.5)';
+            color = 'var(--text-primary)';
+            bg = 'var(--status-danger-soft)';
+            border = '1px solid var(--status-danger-soft)';
             labelText = `✗ ${stage.label}`;
           } else if (stage.status === 'active') {
-            color = '#fff';
-            bg = 'rgba(52, 152, 219, 0.25)';
+            color = 'var(--text-primary)';
+            bg = 'var(--status-info-soft)';
             border = '1px solid var(--accent-light)';
             labelText = `⏳ ${stage.label}`;
           }
@@ -639,16 +639,16 @@ export default function RecipeLabsPage() {
           <div className="page-header">
             <h2>🍳 Recipe Labs</h2>
             <p>Generator konten resep otomatis (Teks Markdown + 4 Gambar Instruksional + Grid Collage 2x2 + Ekspor Nextcloud Hub)</p>
-            
-            <button 
+
+            <button
               onClick={() => setShowGuide(!showGuide)}
               style={{
                 marginTop: '10px',
                 padding: '6px 14px',
-                background: 'rgba(255, 255, 255, 0.08)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
+                background: 'var(--border-subtle)',
+                border: '1px solid var(--border-subtle)',
                 borderRadius: '6px',
-                color: '#fff',
+                color: 'var(--text-primary)',
                 cursor: 'pointer',
                 fontSize: '0.8rem',
                 fontWeight: '600',
@@ -662,8 +662,8 @@ export default function RecipeLabsPage() {
                 e.currentTarget.style.borderColor = 'var(--accent)';
               }}
               onMouseOut={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                e.currentTarget.style.background = 'var(--border-subtle)';
+                e.currentTarget.style.borderColor = 'var(--border-subtle)';
               }}
             >
               {showGuide ? '✖ Tutup Panduan' : '📖 Panduan Penggunaan'}
@@ -679,20 +679,20 @@ export default function RecipeLabsPage() {
                 padding: '20px',
                 textAlign: 'left',
                 color: 'var(--text)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+                boxShadow: '0 8px 32px var(--overlay-subtle)',
                 lineHeight: '1.6'
               }}>
                 <h4 style={{ color: 'var(--accent)', marginTop: 0, marginBottom: '10px', fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   🍳 Panduan Operasional Recipe Labs
                 </h4>
-                
+
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
                   Recipe Labs adalah platform pembuatan konten kuliner otomatis dalam bentuk bundel resep (markdown + infografis gambar 2x2) atau naskah/storyboard video reels berdurasi penuh.
                 </p>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '16px' }}>
-                  <div style={{ background: 'rgba(255,255,255,0.02)', padding: '14px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <h5 style={{ color: '#fff', marginTop: 0, marginBottom: '6px', fontSize: '0.9rem' }}>1. Kampanye Static (Gambar & Resep)</h5>
+                  <div style={{ background: 'var(--surface-interactive)', padding: '14px', borderRadius: '6px', border: '1px solid var(--surface-interactive)' }}>
+                    <h5 style={{ color: 'var(--text-primary)', marginTop: 0, marginBottom: '6px', fontSize: '0.9rem' }}>1. Kampanye Static (Gambar & Resep)</h5>
                     <ul style={{ paddingLeft: '16px', fontSize: '0.8rem', margin: 0, color: 'var(--text-muted)' }}>
                       <li><strong>Output:</strong> Dokumen Resep (Markdown) + 4 Gambar T2I (Bahan mentah, Proses, Matang, Plating) + Grid Poster 2x2.</li>
                       <li><strong>G-Labs:</strong> Menggunakan model <code>nano_banana_pro</code> (rasio 1:1) untuk merender visual instruksional yang estetis secara otomatis.</li>
@@ -700,8 +700,8 @@ export default function RecipeLabsPage() {
                     </ul>
                   </div>
 
-                  <div style={{ background: 'rgba(255,255,255,0.02)', padding: '14px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <h5 style={{ color: '#fff', marginTop: 0, marginBottom: '6px', fontSize: '0.9rem' }}>2. Kampanye Video (Reels Storyboard)</h5>
+                  <div style={{ background: 'var(--surface-interactive)', padding: '14px', borderRadius: '6px', border: '1px solid var(--surface-interactive)' }}>
+                    <h5 style={{ color: 'var(--text-primary)', marginTop: 0, marginBottom: '6px', fontSize: '0.9rem' }}>2. Kampanye Video (Reels Storyboard)</h5>
                     <ul style={{ paddingLeft: '16px', fontSize: '0.8rem', margin: 0, color: 'var(--text-muted)' }}>
                       <li><strong>Output:</strong> 5-Module Storyboard + Naskah VO + Prompt Veo + Metadata SEO/DNA + Render Audio + Autopost.</li>
                       <li><strong>Integrasi Sheets:</strong> Otomatis menyinkronkan data visual, naskah, dan prompt ke tab Sheets yang terhubung.</li>
@@ -715,12 +715,12 @@ export default function RecipeLabsPage() {
                 </div>
 
                 <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
-                  <button 
+                  <button
                     onClick={() => setShowGuide(false)}
                     style={{
                       padding: '5px 12px',
-                      background: 'rgba(255,255,255,0.08)',
-                      color: '#fff',
+                      background: 'var(--border-subtle)',
+                      color: 'var(--text-primary)',
                       border: 'none',
                       borderRadius: '4px',
                       cursor: 'pointer',
@@ -728,8 +728,8 @@ export default function RecipeLabsPage() {
                       fontWeight: '600',
                       transition: 'background 0.2s',
                     }}
-                    onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
-                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+                    onMouseOver={(e) => e.currentTarget.style.background = 'var(--border-subtle)'}
+                    onMouseOut={(e) => e.currentTarget.style.background = 'var(--border-subtle)'}
                   >
                     Tutup Panduan
                   </button>
@@ -767,9 +767,9 @@ export default function RecipeLabsPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <span style={{
                 fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', padding: '4px 10px', borderRadius: 12,
-                background: isSchedulerActive ? 'rgba(46, 204, 113, 0.15)' : 'rgba(235, 77, 75, 0.15)',
+                background: isSchedulerActive ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
                 color: isSchedulerActive ? 'var(--success)' : 'var(--danger)',
-                border: `1px solid ${isSchedulerActive ? 'rgba(46, 204, 113, 0.3)' : 'rgba(235, 77, 75, 0.3)'}`
+                border: `1px solid ${isSchedulerActive ? 'var(--status-success-soft)' : 'var(--status-danger-soft)'}`
               }}>
                 {isSchedulerActive ? '🟢 SKEDULER AKTIF' : '🔴 SKEDULER MATI'}
               </span>
@@ -779,8 +779,8 @@ export default function RecipeLabsPage() {
                 className={`btn ${isSchedulerActive ? 'btn-danger' : 'btn-success'}`}
                 style={{
                   fontSize: '0.8rem', padding: '6px 16px', fontWeight: 600,
-                  boxShadow: isSchedulerActive ? '0 0 15px rgba(235, 77, 75, 0.4)' : '0 0 15px rgba(46, 204, 113, 0.4)',
-                  border: isSchedulerActive ? '1px solid rgba(235, 77, 75, 0.6)' : '1px solid rgba(46, 204, 113, 0.6)'
+                  boxShadow: isSchedulerActive ? '0 0 15px var(--status-danger-soft)' : '0 0 15px var(--status-success-soft)',
+                  border: isSchedulerActive ? '1px solid var(--status-danger-soft)' : '1px solid var(--status-success-soft)'
                 }}
               >
                 {isSchedulerActive ? '🛑 STOP SKEDULER' : '▶️ START SKEDULER'}
@@ -789,15 +789,15 @@ export default function RecipeLabsPage() {
           </div>
 
           {/* System Poller Logger */}
-          <div className="card" style={{ padding: '0', background: '#07070a', border: '1px solid var(--border)', marginBottom: '24px' }}>
-            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0b0b12' }}>
+          <div className="card" style={{ padding: '0', background: 'var(--surface)', border: '1px solid var(--border)', marginBottom: '24px' }}>
+            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: isSchedulerActive ? '#00b894' : '#ef4444', display: 'inline-block', boxShadow: isSchedulerActive ? '0 0 8px #00b894' : '0 0 8px #ef4444' }}></span>
+                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: isSchedulerActive ? 'var(--status-success)' : 'var(--status-danger)', display: 'inline-block', boxShadow: isSchedulerActive ? '0 0 8px var(--status-success)' : '0 0 8px var(--status-danger)' }}></span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>SYSTEM POLLER LOGGER</span>
               </div>
               <button onClick={pollLogs} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.75rem', cursor: 'pointer', fontFamily: 'var(--font-mono)' }}>[Refresh Log]</button>
             </div>
-            <pre ref={terminalRef} style={{ margin: 0, padding: '20px', background: '#07070a', color: '#20c20e', fontFamily: 'var(--font-mono)', fontSize: '0.82rem', maxHeight: '220px', overflowY: 'auto', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
+            <pre ref={terminalRef} style={{ margin: 0, padding: '20px', background: 'var(--surface)', color: '#20c20e', fontFamily: 'var(--font-mono)', fontSize: '0.82rem', maxHeight: '220px', overflowY: 'auto', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
               {terminalLogs}
             </pre>
           </div>
@@ -833,10 +833,10 @@ export default function RecipeLabsPage() {
                   <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '10px', fontWeight: '500' }}>
                     Pilih Tipe Kampanye Recipe Labs
                   </label>
-                  
+
                   {campaignType === null ? (
                     <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                      <div 
+                      <div
                         className="campaign-card"
                         onClick={() => setCampaignType('static')}
                         style={{
@@ -848,7 +848,7 @@ export default function RecipeLabsPage() {
                           borderRadius: '12px',
                           padding: '20px',
                           transition: 'var(--transition)',
-                          boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
+                          boxShadow: '0 4px 10px var(--overlay-subtle)'
                         }}
                       >
                         <div className="icon" style={{ fontSize: '2rem', marginBottom: '10px' }}>🖼️</div>
@@ -858,7 +858,7 @@ export default function RecipeLabsPage() {
                         </div>
                       </div>
 
-                      <div 
+                      <div
                         className="campaign-card"
                         onClick={() => setCampaignType('video')}
                         style={{
@@ -870,7 +870,7 @@ export default function RecipeLabsPage() {
                           borderRadius: '12px',
                           padding: '20px',
                           transition: 'var(--transition)',
-                          boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
+                          boxShadow: '0 4px 10px var(--overlay-subtle)'
                         }}
                       >
                         <div className="icon" style={{ fontSize: '2rem', marginBottom: '10px' }}>🎬</div>
@@ -881,13 +881,13 @@ export default function RecipeLabsPage() {
                       </div>
                     </div>
                   ) : (
-                    <div style={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
-                      alignItems: 'center', 
-                      background: 'rgba(255,255,255,0.02)', 
-                      border: '1px solid var(--accent)', 
-                      borderRadius: '12px', 
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      background: 'var(--surface-interactive)',
+                      border: '1px solid var(--accent)',
+                      borderRadius: '12px',
                       padding: '16px 20px',
                       boxShadow: '0 0 15px var(--accent-glow)',
                       marginBottom: '20px'
@@ -901,14 +901,14 @@ export default function RecipeLabsPage() {
                             {campaignType === 'static' ? 'Tipe Aktif: Static Post Campaign' : 'Tipe Aktif: Reels Video Storyboard'}
                           </strong>
                           <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                            {campaignType === 'static' 
-                              ? 'Generasi naskah resep lengkap terintegrasi dengan generator gambar instruksional 4-fase.' 
+                            {campaignType === 'static'
+                              ? 'Generasi naskah resep lengkap terintegrasi dengan generator gambar instruksional 4-fase.'
                               : 'Generasi naskah Reels 5-Module, voice over, Video DNA 30+ parameter, dan hipotesis performa.'}
                           </p>
                         </div>
                       </div>
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={() => setCampaignType(null)}
                         className="btn btn-secondary"
                         style={{ padding: '8px 16px', fontSize: '0.78rem', border: '1px solid var(--border)' }}
@@ -1026,8 +1026,8 @@ export default function RecipeLabsPage() {
                           🎥 Generasi Gambar G-Labs (T2I & Grid Poster)
                         </div>
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                          {enableGlabs 
-                            ? 'ON: Membuat gambar instruksional AI, kolase asimetris sesuai preset pilihan, dan ekspor ke Nextcloud.' 
+                          {enableGlabs
+                            ? 'ON: Membuat gambar instruksional AI, kolase asimetris sesuai preset pilihan, dan ekspor ke Nextcloud.'
                             : 'OFF: HANYA membuat teks resep dan prompt T2I (Tanpa memroses pembuatan gambar).'}
                         </div>
                       </div>
@@ -1042,7 +1042,7 @@ export default function RecipeLabsPage() {
                         <span style={{
                           position: 'absolute',
                           top: 0, left: 0, right: 0, bottom: 0,
-                          backgroundColor: enableGlabs ? 'var(--accent)' : '#3a3a50',
+                          backgroundColor: enableGlabs ? 'var(--accent)' : 'var(--surface-interactive)',
                           transition: 'var(--transition)',
                           borderRadius: '34px'
                         }}>
@@ -1064,7 +1064,7 @@ export default function RecipeLabsPage() {
                     {enableGlabs && (
                       <div style={{
                         padding: '16px',
-                        background: 'rgba(255, 255, 255, 0.02)',
+                        background: 'var(--surface-interactive)',
                         borderRadius: 'var(--radius-sm)',
                         border: '1px solid var(--border)',
                         marginBottom: '12px'
@@ -1251,8 +1251,8 @@ export default function RecipeLabsPage() {
                           📘 Post Draft ke Facebook Page (Status Pending/Draft)
                         </div>
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                          {postToFacebook 
-                            ? 'ON: Otomatis membuat Draft Postingan di Facebook Page (TIDAK langsung published).' 
+                          {postToFacebook
+                            ? 'ON: Otomatis membuat Draft Postingan di Facebook Page (TIDAK langsung published).'
                             : 'OFF: Tidak mengirim postingan draft ke Facebook Page.'}
                         </div>
                       </div>
@@ -1267,7 +1267,7 @@ export default function RecipeLabsPage() {
                         <span style={{
                           position: 'absolute',
                           top: 0, left: 0, right: 0, bottom: 0,
-                          backgroundColor: postToFacebook ? 'var(--accent)' : '#3a3a50',
+                          backgroundColor: postToFacebook ? 'var(--accent)' : 'var(--surface-interactive)',
                           transition: 'var(--transition)',
                           borderRadius: '34px'
                         }}>
@@ -1296,19 +1296,19 @@ export default function RecipeLabsPage() {
 
                 {/* 3. Formulir Tipe Video Reels (Mengadopsi Tab/Accordion OPC) */}
                 {campaignType === 'video' && (
-                  <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden' }}>
-                    
+                  <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden' }}>
+
                     {/* ACCORDION 1: Basic Creative Strategy */}
                     <div style={{ borderBottom: '1px solid var(--border)' }}>
-                      <div 
-                        onClick={() => setActiveAccordion(0)} 
-                        style={{ padding: '16px 20px', background: activeAccordion === 0 ? 'rgba(59, 130, 246, 0.05)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                      <div
+                        onClick={() => setActiveAccordion(0)}
+                        style={{ padding: '16px 20px', background: activeAccordion === 0 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                       >
                         <span style={{ fontWeight: 600, fontSize: '0.92rem', color: activeAccordion === 0 ? 'var(--accent-light)' : 'var(--text-primary)' }}>1. Basic Creative Strategy</span>
                         <span>{activeAccordion === 0 ? '▲' : '▼'}</span>
                       </div>
                       {activeAccordion === 0 && (
-                        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', background: 'rgba(0,0,0,0.1)' }}>
+                        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', background: 'var(--overlay-subtle)' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             <div className="form-group" style={{ flex: 1, minWidth: '200px' }}>
                               <label className="form-label">Gunakan Referensi Video Dekonstruksi (Opsional)</label>
@@ -1382,9 +1382,9 @@ export default function RecipeLabsPage() {
                             </div>
                             <div className="form-group" style={{ flex: 1, minWidth: '200px' }}>
                               <label className="form-label">Bahasa Naskah Voiceover</label>
-                              <select 
-                                className="form-select" 
-                                value={targetLanguage} 
+                              <select
+                                className="form-select"
+                                value={targetLanguage}
                                 onChange={e => setTargetLanguage(e.target.value)}
                               >
                                 <option value="id-ID">🇮🇩 Bahasa Indonesia (Lokal)</option>
@@ -1468,15 +1468,15 @@ export default function RecipeLabsPage() {
 
                     {/* ACCORDION 2: Aesthetics & Visual Settings */}
                     <div style={{ borderBottom: '1px solid var(--border)' }}>
-                      <div 
-                        onClick={() => setActiveAccordion(1)} 
-                        style={{ padding: '16px 20px', background: activeAccordion === 1 ? 'rgba(59, 130, 246, 0.05)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                      <div
+                        onClick={() => setActiveAccordion(1)}
+                        style={{ padding: '16px 20px', background: activeAccordion === 1 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                       >
                         <span style={{ fontWeight: 600, fontSize: '0.92rem', color: activeAccordion === 1 ? 'var(--accent-light)' : 'var(--text-primary)' }}>2. Aesthetics & Visual Settings</span>
                         <span>{activeAccordion === 1 ? '▲' : '▼'}</span>
                       </div>
                       {activeAccordion === 1 && (
-                        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', background: 'rgba(0,0,0,0.1)' }}>
+                        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', background: 'var(--overlay-subtle)' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             <div className="form-group" style={{ flex: 1, minWidth: '200px' }}>
                               <label className="form-label">Narrative Mode</label>
@@ -1538,17 +1538,17 @@ export default function RecipeLabsPage() {
 
                     {/* ACCORDION 3: Product Bridging Settings */}
                     <div style={{ borderBottom: '1px solid var(--border)' }}>
-                      <div 
-                        onClick={() => setActiveAccordion(2)} 
-                        style={{ padding: '16px 20px', background: activeAccordion === 2 ? 'rgba(59, 130, 246, 0.05)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                      <div
+                        onClick={() => setActiveAccordion(2)}
+                        style={{ padding: '16px 20px', background: activeAccordion === 2 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                       >
                         <span style={{ fontWeight: 600, fontSize: '0.92rem', color: activeAccordion === 2 ? 'var(--accent-light)' : 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <span>3. Product Bridging Settings</span>
-                          <span style={{ 
-                            fontSize: '0.72rem', 
-                            padding: '2px 8px', 
-                            borderRadius: '4px', 
-                            background: isBridgingActive ? 'var(--success-glow)' : 'var(--border)', 
+                          <span style={{
+                            fontSize: '0.72rem',
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            background: isBridgingActive ? 'var(--success-glow)' : 'var(--border)',
                             color: isBridgingActive ? 'var(--success)' : 'var(--text-muted)'
                           }}>
                             {isBridgingActive ? 'Active' : 'Inactive (Default)'}
@@ -1557,12 +1557,12 @@ export default function RecipeLabsPage() {
                         <span>{activeAccordion === 2 ? '▲' : '▼'}</span>
                       </div>
                       {activeAccordion === 2 && (
-                        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', background: 'rgba(0,0,0,0.1)' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', background: 'var(--overlay-subtle)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: '1px solid var(--surface-interactive)' }}>
                             <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '600' }}>Aktifkan Integrasi Produk Afiliasi</span>
                             <label style={{ position: 'relative', display: 'inline-block', width: '50px', height: '26px', cursor: 'pointer' }}>
                               <input type="checkbox" checked={isBridgingActive} onChange={e => setIsBridgingActive(e.target.checked)} style={{ opacity: 0, width: 0, height: 0 }} />
-                              <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: isBridgingActive ? 'var(--accent)' : '#3a3a50', transition: 'var(--transition)', borderRadius: '34px' }}>
+                              <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: isBridgingActive ? 'var(--accent)' : 'var(--surface-interactive)', transition: 'var(--transition)', borderRadius: '34px' }}>
                                 <span style={{ position: 'absolute', content: '""', height: '20px', width: '20px', left: isBridgingActive ? '26px' : '3px', bottom: '3px', backgroundColor: 'white', transition: 'var(--transition)', borderRadius: '50%' }} />
                               </span>
                             </label>
@@ -1616,7 +1616,7 @@ export default function RecipeLabsPage() {
                                   </select>
                                 </div>
                               ) : (
-                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <div style={{ background: 'var(--surface-interactive)', padding: '16px', borderRadius: '8px', border: '1px solid var(--surface-interactive)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                   <div className="form-group">
                                     <label className="form-label">Nama Produk Manual</label>
                                     <input className="form-input" placeholder="Contoh: Blender Bumbu Listrik" value={manualProductName} onChange={e => setManualProductName(e.target.value)} />
@@ -1643,17 +1643,17 @@ export default function RecipeLabsPage() {
 
                     {/* ACCORDION 4: Visual Swap Overrides */}
                     <div style={{ borderBottom: '1px solid var(--border)' }}>
-                      <div 
-                        onClick={() => setActiveAccordion(3)} 
-                        style={{ padding: '16px 20px', background: activeAccordion === 3 ? 'rgba(59, 130, 246, 0.05)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                      <div
+                        onClick={() => setActiveAccordion(3)}
+                        style={{ padding: '16px 20px', background: activeAccordion === 3 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                       >
                         <span style={{ fontWeight: 600, fontSize: '0.92rem', color: activeAccordion === 3 ? 'var(--accent-light)' : 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <span>4. Visual Swap Overrides</span>
-                          <span style={{ 
-                            fontSize: '0.72rem', 
-                            padding: '2px 8px', 
-                            borderRadius: '4px', 
-                            background: isVsoActive ? 'var(--success-glow)' : 'var(--border)', 
+                          <span style={{
+                            fontSize: '0.72rem',
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            background: isVsoActive ? 'var(--success-glow)' : 'var(--border)',
                             color: isVsoActive ? 'var(--success)' : 'var(--text-muted)'
                           }}>
                             {isVsoActive ? 'Active' : 'Inactive (Default)'}
@@ -1662,12 +1662,12 @@ export default function RecipeLabsPage() {
                         <span>{activeAccordion === 3 ? '▲' : '▼'}</span>
                       </div>
                       {activeAccordion === 3 && (
-                        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', background: 'rgba(0,0,0,0.1)' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', background: 'var(--overlay-subtle)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: '1px solid var(--surface-interactive)' }}>
                             <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '600' }}>Aktifkan Karakter & Setting Visual Overrides</span>
                             <label style={{ position: 'relative', display: 'inline-block', width: '50px', height: '26px', cursor: 'pointer' }}>
                               <input type="checkbox" checked={isVsoActive} onChange={e => setIsVsoActive(e.target.checked)} style={{ opacity: 0, width: 0, height: 0 }} />
-                              <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: isVsoActive ? 'var(--accent)' : '#3a3a50', transition: 'var(--transition)', borderRadius: '34px' }}>
+                              <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: isVsoActive ? 'var(--accent)' : 'var(--surface-interactive)', transition: 'var(--transition)', borderRadius: '34px' }}>
                                 <span style={{ position: 'absolute', content: '""', height: '20px', width: '20px', left: isVsoActive ? '26px' : '3px', bottom: '3px', backgroundColor: 'white', transition: 'var(--transition)', borderRadius: '50%' }} />
                               </span>
                             </label>
@@ -1687,9 +1687,9 @@ export default function RecipeLabsPage() {
 
                               <div className="form-group">
                                 <label className="form-label">Demografi Subjek / Model</label>
-                                <select 
-                                  className="form-select" 
-                                  value={subjectDemographic} 
+                                <select
+                                  className="form-select"
+                                  value={subjectDemographic}
                                   onChange={e => {
                                     const val = e.target.value;
                                     setSubjectDemographic(val);
@@ -1779,10 +1779,10 @@ export default function RecipeLabsPage() {
                                     className="form-input"
                                     style={{ marginTop: 8 }}
                                     placeholder={
-                                      subjectDemographic.startsWith('stylized_3d_') 
-                                        ? "Ketik pakaian 3D kustom..." 
-                                        : subjectDemographic === 'caucasian_male' 
-                                          ? "Ketik pakaian kustom..." 
+                                      subjectDemographic.startsWith('stylized_3d_')
+                                        ? "Ketik pakaian 3D kustom..."
+                                        : subjectDemographic === 'caucasian_male'
+                                          ? "Ketik pakaian kustom..."
                                           : "Ketik warna hijab kustom..."
                                     }
                                     value={wardrobeStyleCustom}
@@ -1820,17 +1820,17 @@ export default function RecipeLabsPage() {
 
                     {/* ACCORDION 5: Workflow & Audio Settings */}
                     <div style={{ borderBottom: 'none' }}>
-                      <div 
-                        onClick={() => setActiveAccordion(4)} 
-                        style={{ padding: '16px 20px', background: activeAccordion === 4 ? 'rgba(59, 130, 246, 0.05)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                      <div
+                        onClick={() => setActiveAccordion(4)}
+                        style={{ padding: '16px 20px', background: activeAccordion === 4 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                       >
                         <span style={{ fontWeight: 600, fontSize: '0.92rem', color: activeAccordion === 4 ? 'var(--accent-light)' : 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <span>5. Workflow & Audio Settings</span>
-                          <span style={{ 
-                            fontSize: '0.72rem', 
-                            padding: '2px 8px', 
-                            borderRadius: '4px', 
-                            background: enableTts || enableSocialPost || enableGlabsVideo ? 'var(--success-glow)' : 'var(--border)', 
+                          <span style={{
+                            fontSize: '0.72rem',
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            background: enableTts || enableSocialPost || enableGlabsVideo ? 'var(--success-glow)' : 'var(--border)',
                             color: enableTts || enableSocialPost || enableGlabsVideo ? 'var(--success)' : 'var(--text-muted)'
                           }}>
                             {enableTts || enableSocialPost || enableGlabsVideo ? 'Active' : 'Inactive (Default)'}
@@ -1839,17 +1839,17 @@ export default function RecipeLabsPage() {
                         <span>{activeAccordion === 4 ? '▲' : '▼'}</span>
                       </div>
                       {activeAccordion === 4 && (
-                        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', background: 'rgba(0,0,0,0.1)' }}>
-                          
+                        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', background: 'var(--overlay-subtle)' }}>
+
                           {/* TTS Switcher */}
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: '1px solid var(--surface-interactive)' }}>
                             <div>
                               <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '600' }}>Aktifkan Text-to-Speech (TTS Voice)</div>
                               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Generate audio suara pengiring untuk Voice Over naskah.</div>
                             </div>
                             <label style={{ position: 'relative', display: 'inline-block', width: '50px', height: '26px', cursor: 'pointer' }}>
                               <input type="checkbox" checked={enableTts} onChange={e => setEnableTts(e.target.checked)} style={{ opacity: 0, width: 0, height: 0 }} />
-                              <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: enableTts ? 'var(--accent)' : '#3a3a50', transition: 'var(--transition)', borderRadius: '34px' }}>
+                              <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: enableTts ? 'var(--accent)' : 'var(--surface-interactive)', transition: 'var(--transition)', borderRadius: '34px' }}>
                                 <span style={{ position: 'absolute', content: '""', height: '20px', width: '20px', left: enableTts ? '26px' : '3px', bottom: '3px', backgroundColor: 'white', transition: 'var(--transition)', borderRadius: '50%' }} />
                               </span>
                             </label>
@@ -1867,7 +1867,7 @@ export default function RecipeLabsPage() {
                               <div className="form-group">
                                 <label className="form-label">Voice Persona / Model</label>
                                 <select className="form-select" value={voicePersona} onChange={e => setVoicePersona(e.target.value)}>
-                                  {voiceProvider === 'gemini' 
+                                  {voiceProvider === 'gemini'
                                     ? GEMINI_VOICES.map(v => <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>)
                                     : (targetLanguage === 'en-US' ? MINIMAX_ENGLISH_VOICES : MINIMAX_VOICES).map(v => <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>)
                                   }
@@ -1894,26 +1894,26 @@ export default function RecipeLabsPage() {
                           )}
 
                           {/* G-Labs Video Render Switcher */}
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)', marginTop: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: '1px solid var(--surface-interactive)', marginTop: '8px' }}>
                             <div>
                               <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '600' }}>Aktifkan Rendering Video G-Labs</div>
                               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Memicu render visual video Google Veo di latar belakang.</div>
                             </div>
                             <label style={{ position: 'relative', display: 'inline-block', width: '50px', height: '26px', cursor: 'pointer' }}>
                               <input type="checkbox" checked={enableGlabsVideo} onChange={e => setEnableGlabsVideo(e.target.checked)} style={{ opacity: 0, width: 0, height: 0 }} />
-                              <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: enableGlabsVideo ? 'var(--accent)' : '#3a3a50', transition: 'var(--transition)', borderRadius: '34px' }}>
+                              <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: enableGlabsVideo ? 'var(--accent)' : 'var(--surface-interactive)', transition: 'var(--transition)', borderRadius: '34px' }}>
                                 <span style={{ position: 'absolute', content: '""', height: '20px', width: '20px', left: enableGlabsVideo ? '26px' : '3px', bottom: '3px', backgroundColor: 'white', transition: 'var(--transition)', borderRadius: '50%' }} />
                               </span>
                             </label>
                           </div>
 
                           {/* FFmpeg Video Sync Switcher */}
-                          <div style={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'space-between', 
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
                             paddingBottom: '12px',
-                            borderBottom: '1px solid rgba(255,255,255,0.05)',
+                            borderBottom: '1px solid var(--surface-interactive)',
                             marginTop: '8px',
                             opacity: (!enableTts || !enableGlabsVideo) ? 0.5 : 1
                           }}>
@@ -1922,23 +1922,23 @@ export default function RecipeLabsPage() {
                               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Gabungkan trek audio TTS dengan klip visual video secara otomatis.</div>
                             </div>
                             <label style={{ position: 'relative', display: 'inline-block', width: '50px', height: '26px', cursor: 'pointer' }}>
-                              <input 
-                                type="checkbox" 
-                                checked={enableFfmpeg} 
-                                onChange={e => setEnableFfmpeg(e.target.checked)} 
-                                disabled={!enableTts || !enableGlabsVideo} 
-                                style={{ opacity: 0, width: 0, height: 0 }} 
+                              <input
+                                type="checkbox"
+                                checked={enableFfmpeg}
+                                onChange={e => setEnableFfmpeg(e.target.checked)}
+                                disabled={!enableTts || !enableGlabsVideo}
+                                style={{ opacity: 0, width: 0, height: 0 }}
                               />
-                              <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: enableFfmpeg ? 'var(--accent)' : '#3a3a50', transition: 'var(--transition)', borderRadius: '34px' }}>
+                              <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: enableFfmpeg ? 'var(--accent)' : 'var(--surface-interactive)', transition: 'var(--transition)', borderRadius: '34px' }}>
                                 <span style={{ position: 'absolute', content: '""', height: '20px', width: '20px', left: enableFfmpeg ? '26px' : '3px', bottom: '3px', backgroundColor: 'white', transition: 'var(--transition)', borderRadius: '50%' }} />
                               </span>
                             </label>
                           </div>
 
                           {enableFfmpeg && enableTts && enableGlabsVideo && (
-                            <div style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 16, background: 'rgba(255,255,255,0.02)', display: 'flex', flexDirection: 'column', gap: 16, paddingLeft: '12px', borderLeft: '2px solid var(--accent)' }}>
+                            <div style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 16, background: 'var(--surface-interactive)', display: 'flex', flexDirection: 'column', gap: 16, paddingLeft: '12px', borderLeft: '2px solid var(--accent)' }}>
                               <strong style={{ fontSize: '0.9rem', display: 'block' }}>🎬 FFmpeg Video Studio Settings</strong>
-                              
+
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                                 <label className="form-label" style={{ fontSize: '0.8rem' }}>Mode Sinkronisasi Audio-Video</label>
                                 <div style={{ display: 'flex', gap: 24, marginTop: 4 }}>
@@ -1991,15 +1991,15 @@ export default function RecipeLabsPage() {
                                   <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{Math.round(ffmpegVideoScale * 100)}%</span>
                                 </label>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                  <input 
-                                    type="range" 
-                                    min="1.0" 
-                                    max="2.0" 
-                                    step="0.05" 
-                                    className="form-input" 
-                                    value={ffmpegVideoScale} 
-                                    onChange={e => setFfmpegVideoScale(Number(e.target.value))} 
-                                    style={{ width: '100%', accentColor: 'var(--accent)' }} 
+                                  <input
+                                    type="range"
+                                    min="1.0"
+                                    max="2.0"
+                                    step="0.05"
+                                    className="form-input"
+                                    value={ffmpegVideoScale}
+                                    onChange={e => setFfmpegVideoScale(Number(e.target.value))}
+                                    style={{ width: '100%', accentColor: 'var(--accent)' }}
                                   />
                                 </div>
                                 <small style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Skala pembesaran video untuk menghindari deteksi hak cipta (100% sd 200%)</small>
@@ -2011,15 +2011,15 @@ export default function RecipeLabsPage() {
                                     <span>SFX Volume:</span>
                                     <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{Math.round(ffmpegSfxVolume * 100)}%</span>
                                   </label>
-                                  <input 
-                                    type="range" 
-                                    min="0.0" 
-                                    max="1.0" 
-                                    step="0.05" 
-                                    className="form-input" 
-                                    value={ffmpegSfxVolume} 
-                                    onChange={e => setFfmpegSfxVolume(Number(e.target.value))} 
-                                    style={{ width: '100%', accentColor: 'var(--accent)' }} 
+                                  <input
+                                    type="range"
+                                    min="0.0"
+                                    max="1.0"
+                                    step="0.05"
+                                    className="form-input"
+                                    value={ffmpegSfxVolume}
+                                    onChange={e => setFfmpegSfxVolume(Number(e.target.value))}
+                                    style={{ width: '100%', accentColor: 'var(--accent)' }}
                                   />
                                   <small style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Volume suara efek sekunder (0% sd 100%)</small>
                                 </div>
@@ -2028,15 +2028,15 @@ export default function RecipeLabsPage() {
                                     <span>BGM Volume:</span>
                                     <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{Math.round(ffmpegBgmVolume * 100)}%</span>
                                   </label>
-                                  <input 
-                                    type="range" 
-                                    min="0.0" 
-                                    max="1.0" 
-                                    step="0.05" 
-                                    className="form-input" 
-                                    value={ffmpegBgmVolume} 
-                                    onChange={e => setFfmpegBgmVolume(Number(e.target.value))} 
-                                    style={{ width: '100%', accentColor: 'var(--accent)' }} 
+                                  <input
+                                    type="range"
+                                    min="0.0"
+                                    max="1.0"
+                                    step="0.05"
+                                    className="form-input"
+                                    value={ffmpegBgmVolume}
+                                    onChange={e => setFfmpegBgmVolume(Number(e.target.value))}
+                                    style={{ width: '100%', accentColor: 'var(--accent)' }}
                                   />
                                   <small style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Volume musik latar belakang BGM (0% sd 100%)</small>
                                 </div>
@@ -2045,14 +2045,14 @@ export default function RecipeLabsPage() {
                           )}
 
                           {/* Social Posting & FB settings */}
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)', marginTop: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: '1px solid var(--surface-interactive)', marginTop: '8px' }}>
                             <div>
                               <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '600' }}>Post Draft ke Sosial Media (Facebook Page)</div>
                               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Kirimkan draf takarir dan teks otomatis setelah naskah video jadi.</div>
                             </div>
                             <label style={{ position: 'relative', display: 'inline-block', width: '50px', height: '26px', cursor: 'pointer' }}>
                               <input type="checkbox" checked={enableSocialPost} onChange={e => setEnableSocialPost(e.target.checked)} style={{ opacity: 0, width: 0, height: 0 }} />
-                              <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: enableSocialPost ? 'var(--accent)' : '#3a3a50', transition: 'var(--transition)', borderRadius: '34px' }}>
+                              <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: enableSocialPost ? 'var(--accent)' : 'var(--surface-interactive)', transition: 'var(--transition)', borderRadius: '34px' }}>
                                 <span style={{ position: 'absolute', content: '""', height: '20px', width: '20px', left: enableSocialPost ? '26px' : '3px', bottom: '3px', backgroundColor: 'white', transition: 'var(--transition)', borderRadius: '50%' }} />
                               </span>
                             </label>
@@ -2061,11 +2061,11 @@ export default function RecipeLabsPage() {
                           {enableSocialPost && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingLeft: '12px', borderLeft: '2px solid var(--accent)' }}>
                               <strong style={{ fontSize: '0.9rem', display: 'block' }}>📘 Konfigurasi Draf Facebook Page</strong>
-                              
+
                               <div className="form-group" style={{ margin: 0 }}>
                                 <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '6px' }}>Halaman Facebook Target</label>
                                 {facebookPages.length === 0 ? (
-                                  <div style={{ fontSize: '0.8rem', color: '#ef4444', padding: '8px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '4px' }}>
+                                  <div style={{ fontSize: '0.8rem', color: 'var(--status-danger)', padding: '8px', background: 'var(--status-danger-soft)', borderRadius: '4px' }}>
                                     ⚠️ Belum ada Halaman Facebook yang terhubung. Hubungkan akun di menu Pengaturan.
                                   </div>
                                 ) : (
@@ -2103,7 +2103,7 @@ export default function RecipeLabsPage() {
                     </div>
 
                     {/* Submit Bar */}
-                    <div style={{ padding: '20px', background: 'rgba(255,255,255,0.02)', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end' }}>
+                    <div style={{ padding: '20px', background: 'var(--surface-interactive)', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end' }}>
                       <button type="submit" className="btn btn-primary" disabled={submitting} style={{ padding: '12px 30px', fontWeight: 'bold' }}>
                         {submitting ? 'Sedang Memproses Kampanye...' : '🚀 Mulai Generate Storyboard Video'}
                       </button>
@@ -2171,7 +2171,7 @@ export default function RecipeLabsPage() {
                             borderRadius: '4px',
                             fontSize: '0.75rem',
                             fontWeight: 600,
-                            background: glabsOn ? 'var(--accent-glow)' : 'rgba(255,255,255,0.05)',
+                            background: glabsOn ? 'var(--accent-glow)' : 'var(--surface-interactive)',
                             color: glabsOn ? 'var(--accent-light)' : 'var(--text-muted)'
                           }}>
                             {glabsOn ? '🎥 ON' : '⏸️ OFF (Teks Only)'}
@@ -2192,7 +2192,7 @@ export default function RecipeLabsPage() {
                                 fontSize: '0.7rem',
                                 fontWeight: 700,
                                 background: 'rgba(52,211,153,0.15)',
-                                color: '#34d399',
+                                color: 'var(--status-success)',
                                 border: '1px solid rgba(52,211,153,0.3)',
                                 textTransform: 'uppercase',
                                 display: 'inline-flex',
@@ -2253,7 +2253,7 @@ export default function RecipeLabsPage() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                       {campaignDetail.items?.map((item, idx) => {
                         const isVideo = campaignDetail.campaign_type === 'video';
-                        
+
                         let promptsObj = {};
                         let storyboardObj = {};
                         let dnaObj = {};
@@ -2273,7 +2273,7 @@ export default function RecipeLabsPage() {
                                 </h4>
                                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                   {item.fb_post_id && (
-                                    <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(52, 152, 219, 0.15)', color: '#3498db', border: '1px solid rgba(52, 152, 219, 0.4)' }}>
+                                    <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '4px', background: 'var(--status-info-soft)', color: 'var(--status-info)', border: '1px solid var(--status-info-soft)' }}>
                                       📘 FB Draft #{item.fb_post_id}
                                     </span>
                                   )}
@@ -2310,7 +2310,7 @@ export default function RecipeLabsPage() {
                                               {isCopied ? '✓ Tersalin!' : '📋 Copy Veo Prompt'}
                                             </button>
                                           </div>
-                                          
+
                                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '10px' }}>
                                             <div>
                                               <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Tujuan & Skenario:</div>
@@ -2326,10 +2326,10 @@ export default function RecipeLabsPage() {
 
                                           <div style={{ background: 'var(--accent-glow)', padding: '8px 12px', borderRadius: 4, borderLeft: '3px solid var(--accent)', marginBottom: '8px' }}>
                                             <div style={{ fontSize: '0.72rem', color: 'var(--accent-light)', fontWeight: 600 }}>🎙️ Naskah Voice Over (Indonesia):</div>
-                                            <div style={{ fontSize: '0.85rem', color: '#fff', fontStyle: 'italic', fontWeight: 500 }}>"{mVal.voice_over || '-'}"</div>
+                                            <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontStyle: 'italic', fontWeight: 500 }}>"{mVal.voice_over || '-'}"</div>
                                           </div>
 
-                                          <div style={{ background: 'rgba(255,255,255,0.02)', padding: '8px 12px', borderRadius: 4, border: '1px solid rgba(255,255,255,0.05)' }}>
+                                          <div style={{ background: 'var(--surface-interactive)', padding: '8px 12px', borderRadius: 4, border: '1px solid var(--surface-interactive)' }}>
                                             <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Veo Prompt:</div>
                                             <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', whiteSpace: 'pre-wrap' }}>{mVal.veo_prompt || '-'}</div>
                                           </div>
@@ -2349,9 +2349,9 @@ export default function RecipeLabsPage() {
                                     <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>🌐 Copywriting & Sosial Media:</div>
                                     <div style={{ background: 'var(--bg-primary)', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
                                       <div style={{ fontWeight: 600, fontSize: '0.8rem', color: 'var(--accent-light)' }}>FB Draft Caption:</div>
-                                      <div style={{ fontSize: '0.8rem', color: '#fff', fontWeight: 600, marginTop: '4px' }}>Judul: {seoObj.facebook_copy.title || '-'}</div>
+                                      <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600, marginTop: '4px' }}>Judul: {seoObj.facebook_copy.title || '-'}</div>
                                       <pre style={{
-                                        background: 'rgba(0,0,0,0.2)',
+                                        background: 'var(--overlay-subtle)',
                                         padding: '8px',
                                         borderRadius: 4,
                                         fontSize: '0.75rem',
@@ -2385,16 +2385,16 @@ export default function RecipeLabsPage() {
                                         <table style={{ width: '100%', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                                           <tbody>
                                             {Object.entries(dnaObj).map(([k, v]) => (
-                                              <tr key={k} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                              <tr key={k} style={{ borderBottom: '1px solid var(--surface-interactive)' }}>
                                                 <td style={{ padding: '3px 0', fontWeight: 600, color: 'var(--text-muted)' }}>{k}</td>
-                                                <td style={{ padding: '3px 0', textAlign: 'right', color: '#fff' }}>{String(v)}</td>
+                                                <td style={{ padding: '3px 0', textAlign: 'right', color: 'var(--text-primary)' }}>{String(v)}</td>
                                               </tr>
                                             ))}
                                           </tbody>
                                         </table>
                                       </div>
                                     )}
-                                    
+
                                     {seoObj.performance_hypothesis && (
                                       <div style={{ background: 'var(--bg-primary)', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', marginTop: '10px' }}>
                                         <div style={{ fontWeight: 600, fontSize: '0.8rem', color: 'var(--accent-light)' }}>🧪 Hipotesis Performa:</div>
@@ -2441,7 +2441,7 @@ export default function RecipeLabsPage() {
                                   <button
                                     type="button"
                                     className="btn btn-sm"
-                                    style={{ background: '#1877f2', borderColor: '#1877f2', color: '#fff', fontSize: '0.78rem', padding: '6px 14px', fontWeight: 600, borderRadius: '4px', cursor: 'pointer' }}
+                                    style={{ background: '#1877f2', borderColor: '#1877f2', color: 'var(--text-primary)', fontSize: '0.78rem', padding: '6px 14px', fontWeight: 600, borderRadius: '4px', cursor: 'pointer' }}
                                     disabled={postingFbId === item.id || !item.recipe_markdown_text}
                                     onClick={() => handleManualFbPost(item.id, (campaignDetail?.enable_glabs === 1 && campaignDetail?.nextcloud_folder_url) ? 'photo' : 'text_only')}
                                   >
@@ -2462,7 +2462,7 @@ export default function RecipeLabsPage() {
                               </h4>
                               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                 {item.fb_post_id && (
-                                  <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(52, 152, 219, 0.15)', color: '#3498db', border: '1px solid rgba(52, 152, 219, 0.4)' }}>
+                                  <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '4px', background: 'var(--status-info-soft)', color: 'var(--status-info)', border: '1px solid var(--status-info-soft)' }}>
                                     📘 FB Draft #{item.fb_post_id}
                                   </span>
                                 )}
@@ -2559,7 +2559,7 @@ export default function RecipeLabsPage() {
                                 <button
                                   type="button"
                                   className="btn btn-sm"
-                                  style={{ background: '#1877f2', borderColor: '#1877f2', color: '#fff', fontSize: '0.78rem', padding: '6px 14px', fontWeight: 600, borderRadius: '4px', cursor: 'pointer' }}
+                                  style={{ background: '#1877f2', borderColor: '#1877f2', color: 'var(--text-primary)', fontSize: '0.78rem', padding: '6px 14px', fontWeight: 600, borderRadius: '4px', cursor: 'pointer' }}
                                   disabled={postingFbId === item.id || !item.recipe_markdown_text}
                                   onClick={() => handleManualFbPost(item.id, (campaignDetail?.enable_glabs === 1 && campaignDetail?.nextcloud_folder_url) ? 'photo' : 'text_only')}
                                 >

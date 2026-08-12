@@ -10,7 +10,7 @@ export default function ProductBridgeInjectPage() {
   const [loadingSetup, setLoadingSetup] = useState(false);
   const [isSchedulerActive, setIsSchedulerActive] = useState(true);
   const [terminalLogs, setTerminalLogs] = useState('');
-  
+
   // Accordion form visibility
   const [showConfigForm, setShowConfigForm] = useState(false);
   const [submitStatus, setSubmitStatus] = useState('active'); // 'active' or 'draft'
@@ -21,7 +21,7 @@ export default function ProductBridgeInjectPage() {
   const [brandProfiles, setBrandProfiles] = useState([]);
   const [selectedBrandId, setSelectedBrandId] = useState('');
   const [filterBrandId, setFilterBrandId] = useState('all');
-  
+
   // Bulk Campaign State
   const [formMode, setFormMode] = useState('single'); // 'single' or 'bulk'
   const [parsedRows, setParsedRows] = useState([]);
@@ -334,7 +334,7 @@ export default function ProductBridgeInjectPage() {
       if (data.success) {
         setExpandedCampaignId(campaignId);
         setActiveOutput(data.data.output);
-        
+
         if (data.data.output) {
           setVo1(data.data.output.injected_vo_1 || '');
           setVo2(data.data.output.injected_vo_2 || '');
@@ -428,7 +428,7 @@ export default function ProductBridgeInjectPage() {
         setProductUrl('');
         setCustomInstruction('');
         setShowConfigForm(false);
-        
+
         await fetchCampaigns();
       } else {
         showToast(data.error, 'error');
@@ -582,26 +582,26 @@ export default function ProductBridgeInjectPage() {
 
   function getStatusBadgeStyle(status) {
     const styles = {
-      draft: { color: '#9ca3af', bg: 'rgba(156, 163, 175, 0.12)' },
-      paused: { color: '#fdcb6e', bg: 'rgba(253, 203, 110, 0.12)' },
-      pending_storyboard: { color: 'var(--text-muted)', bg: 'rgba(255,255,255,0.06)' },
-      waiting_t2i: { color: '#fdcb6e', bg: 'rgba(253, 203, 110, 0.12)' },
+      draft: { color: 'var(--text-muted)', bg: 'rgba(156, 163, 175, 0.12)' },
+      paused: { color: 'var(--status-warning)', bg: 'rgba(253, 203, 110, 0.12)' },
+      pending_storyboard: { color: 'var(--text-muted)', bg: 'var(--surface-interactive)' },
+      waiting_t2i: { color: 'var(--status-warning)', bg: 'rgba(253, 203, 110, 0.12)' },
       polling_t2i: { color: '#0984e3', bg: 'rgba(9, 132, 227, 0.12)' },
-      waiting_user: { color: '#e17055', bg: 'rgba(225, 112, 85, 0.12)' },
-      generating_i2v: { color: '#a29bfe', bg: 'rgba(162, 155, 254, 0.12)' },
-      completed: { color: '#2ecc71', bg: 'rgba(46, 204, 113, 0.15)' },
-      failed: { color: '#e74c3c', bg: 'rgba(231, 76, 60, 0.15)' }
+      waiting_user: { color: 'var(--status-warning)', bg: 'rgba(225, 112, 85, 0.12)' },
+      generating_i2v: { color: 'var(--status-neutral)', bg: 'rgba(162, 155, 254, 0.12)' },
+      completed: { color: 'var(--status-success)', bg: 'var(--status-success-soft)' },
+      failed: { color: 'var(--status-danger)', bg: 'var(--status-danger-soft)' }
     };
-    return styles[status] || { color: 'var(--text-primary)', bg: 'rgba(255,255,255,0.1)' };
+    return styles[status] || { color: 'var(--text-primary)', bg: 'var(--border-subtle)' };
   }
 
   return (
     <div className="app-container" style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-app)' }}>
       <Sidebar />
-      
+
       <main className="main-content" style={{ flex: 1, padding: '24px 32px', overflowY: 'auto' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          
+
           {toast && (
             <div style={{
               position: 'fixed',
@@ -614,7 +614,7 @@ export default function ProductBridgeInjectPage() {
               fontWeight: 500,
               boxShadow: 'var(--shadow-lg)',
               background: toast.type === 'error' ? 'var(--danger)' : (toast.type === 'info' ? 'var(--accent)' : 'var(--success)'),
-              color: '#fff',
+              color: 'var(--text-primary)',
               transition: 'all 0.3s ease'
             }}>
               {toast.type === 'error' ? '❌ ' : (toast.type === 'info' ? 'ℹ️ ' : '✅ ')} {toast.message}
@@ -629,7 +629,7 @@ export default function ProductBridgeInjectPage() {
               left: 0,
               width: '100vw',
               height: '100vh',
-              background: 'rgba(0, 0, 0, 0.75)',
+              background: 'var(--overlay-backdrop)',
               backdropFilter: 'blur(5px)',
               zIndex: 9998,
               display: 'flex',
@@ -650,10 +650,10 @@ export default function ProductBridgeInjectPage() {
               }}>
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', padding: '16px 24px' }}>
-                  <h3 style={{ margin: 0, color: '#fff', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     🔍 Verifikasi Manual Produk (Bulk Matcher)
                   </h3>
-                  <button 
+                  <button
                     onClick={() => setShowVerificationModal(false)}
                     style={{ border: 'none', background: 'none', color: 'var(--text-muted)', fontSize: '1.2rem', cursor: 'pointer' }}
                   >
@@ -679,34 +679,34 @@ export default function ProductBridgeInjectPage() {
                     </thead>
                     <tbody>
                       {verifiedRows.map((row, idx) => (
-                        <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                          <td style={{ padding: '12px 10px', color: '#fff', fontWeight: 600 }}>{row.row_number}</td>
+                        <tr key={idx} style={{ borderBottom: '1px solid var(--surface-interactive)' }}>
+                          <td style={{ padding: '12px 10px', color: 'var(--text-primary)', fontWeight: 600 }}>{row.row_number}</td>
                           <td style={{ padding: '12px 10px', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>
                             {row.product_url ? (row.product_url.length > 40 ? row.product_url.substring(0, 40) + '...' : row.product_url) : '-'}
                           </td>
                           <td style={{ padding: '12px 10px' }}>
                             {row.is_matched ? (
-                              <span style={{ background: 'rgba(46, 204, 113, 0.15)', color: '#2ecc71', padding: '3px 8px', borderRadius: '4px', fontWeight: 700, fontSize: '0.7rem' }}>
+                              <span style={{ background: 'var(--status-success-soft)', color: 'var(--status-success)', padding: '3px 8px', borderRadius: '4px', fontWeight: 700, fontSize: '0.7rem' }}>
                                 MATCHED
                               </span>
                             ) : (
-                              <span style={{ background: 'rgba(241, 196, 15, 0.15)', color: '#f1c40f', padding: '3px 8px', borderRadius: '4px', fontWeight: 700, fontSize: '0.7rem' }}>
+                              <span style={{ background: 'rgba(241, 196, 15, 0.15)', color: 'var(--status-warning)', padding: '3px 8px', borderRadius: '4px', fontWeight: 700, fontSize: '0.7rem' }}>
                                 UNMATCHED (JIT)
                               </span>
                             )}
                           </td>
-                          <td style={{ padding: '12px 10px', color: row.is_matched ? '#fff' : 'var(--text-muted)', fontWeight: row.is_matched ? 600 : 400 }}>
+                          <td style={{ padding: '12px 10px', color: row.is_matched ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: row.is_matched ? 600 : 400 }}>
                             {row.matched_product_name}
                           </td>
                           <td style={{ padding: '12px 10px', textAlign: 'center' }}>
                             {row.matched_product_image ? (
-                              <img 
-                                src={row.matched_product_image} 
-                                alt={row.matched_product_name} 
-                                style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--border)' }} 
+                              <img
+                                src={row.matched_product_image}
+                                alt={row.matched_product_name}
+                                style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--border)' }}
                               />
                             ) : (
-                              <div style={{ width: '40px', height: '40px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', fontSize: '1rem', color: 'var(--text-muted)' }}>
+                              <div style={{ width: '40px', height: '40px', borderRadius: '4px', background: 'var(--surface-interactive)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', fontSize: '1rem', color: 'var(--text-muted)' }}>
                                 📦
                               </div>
                             )}
@@ -719,23 +719,23 @@ export default function ProductBridgeInjectPage() {
 
                 {/* Footer Buttons */}
                 <div style={{ borderTop: '1px solid var(--border)', padding: '16px 24px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => setShowVerificationModal(false)}
                     className="btn btn-secondary"
                     style={{ padding: '8px 18px', fontSize: '0.8rem' }}
                   >
                     Batal
                   </button>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => {
                       setIsVerificationComplete(true);
                       setShowVerificationModal(false);
                       showToast('Kesesuaian produk berhasil diverifikasi secara manual.');
                     }}
                     className="btn btn-success"
-                    style={{ padding: '8px 24px', fontSize: '0.8rem', background: '#2ecc71', border: 'none', color: '#fff', fontWeight: 700 }}
+                    style={{ padding: '8px 24px', fontSize: '0.8rem', background: 'var(--status-success)', border: 'none', color: 'var(--text-primary)', fontWeight: 700 }}
                   >
                     💾 Simpan Verifikasi & Lanjutkan
                   </button>
@@ -747,7 +747,7 @@ export default function ProductBridgeInjectPage() {
           {/* 1. Header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
             <div>
-              <h1 style={{ margin: 0, fontSize: '1.6rem', display: 'flex', alignItems: 'center', gap: '10px', color: '#fff' }}>
+              <h1 style={{ margin: 0, fontSize: '1.6rem', display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-primary)' }}>
                 🎯 Product Bridging Injector Lab
               </h1>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginTop: '4px' }}>
@@ -755,19 +755,19 @@ export default function ProductBridgeInjectPage() {
               </p>
             </div>
             <div style={{ display: 'flex', gap: '10px' }}>
-              <button 
-                type="button" 
-                onClick={() => fetchCampaigns()} 
+              <button
+                type="button"
+                onClick={() => fetchCampaigns()}
                 className="btn btn-secondary"
                 style={{ fontSize: '0.78rem', padding: '8px 14px' }}
               >
                 🔄 Refresh Antrean
               </button>
-              <button 
-                type="button" 
-                onClick={() => setShowConfigForm(v => !v)} 
+              <button
+                type="button"
+                onClick={() => setShowConfigForm(v => !v)}
                 className="btn btn-primary"
-                style={{ fontSize: '0.78rem', padding: '8px 14px', background: showConfigForm ? '#e74c3c' : 'var(--accent)', border: 'none' }}
+                style={{ fontSize: '0.78rem', padding: '8px 14px', background: showConfigForm ? 'var(--status-danger)' : 'var(--accent)', border: 'none' }}
               >
                 {showConfigForm ? '✕ Tutup Form' : '➕ New Bridging Campaign'}
               </button>
@@ -788,7 +788,7 @@ export default function ProductBridgeInjectPage() {
             gap: '12px'
           }}>
             <div>
-              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '6px', color: '#fff' }}>
+              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-primary)' }}>
                 ⚙️ Status Skeduler Bridging Injector
               </h3>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '4px 0 0' }}>
@@ -802,9 +802,9 @@ export default function ProductBridgeInjectPage() {
                 textTransform: 'uppercase',
                 padding: '4px 10px',
                 borderRadius: '12px',
-                background: isSchedulerActive ? 'rgba(46, 204, 113, 0.15)' : 'rgba(235, 77, 75, 0.15)',
+                background: isSchedulerActive ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
                 color: isSchedulerActive ? 'var(--success)' : 'var(--danger)',
-                border: `1px solid ${isSchedulerActive ? 'rgba(46, 204, 113, 0.3)' : 'rgba(235, 77, 75, 0.3)'}`
+                border: `1px solid ${isSchedulerActive ? 'var(--status-success-soft)' : 'var(--status-danger-soft)'}`
               }}>
                 {isSchedulerActive ? '🟢 SKEDULER AKTIF' : '🔴 SKEDULER MATI'}
               </span>
@@ -816,8 +816,8 @@ export default function ProductBridgeInjectPage() {
                   fontSize: '0.8rem',
                   padding: '6px 16px',
                   fontWeight: 600,
-                  boxShadow: isSchedulerActive ? '0 0 15px rgba(235, 77, 75, 0.4)' : '0 0 15px rgba(46, 204, 113, 0.4)',
-                  border: isSchedulerActive ? '1px solid rgba(235, 77, 75, 0.6)' : '1px solid rgba(46, 204, 113, 0.6)'
+                  boxShadow: isSchedulerActive ? '0 0 15px var(--status-danger-soft)' : '0 0 15px var(--status-success-soft)',
+                  border: isSchedulerActive ? '1px solid var(--status-danger-soft)' : '1px solid var(--status-success-soft)'
                 }}
               >
                 {isSchedulerActive ? '🛑 STOP SKEDULER' : '▶️ START SKEDULER'}
@@ -826,30 +826,30 @@ export default function ProductBridgeInjectPage() {
           </div>
 
           {/* 3. Activity Terminal (System Poller Logger) */}
-          <div className="card" style={{ padding: '0', background: '#07070a', border: '1px solid var(--border)', marginBottom: '24px' }}>
-            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0b0b12' }}>
+          <div className="card" style={{ padding: '0', background: 'var(--surface)', border: '1px solid var(--border)', marginBottom: '24px' }}>
+            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#00b894', display: 'inline-block', boxShadow: '0 0 8px #00b894' }}></span>
+                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--status-success)', display: 'inline-block', boxShadow: '0 0 8px var(--status-success)' }}></span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>SYSTEM POLLER LOGGER</span>
               </div>
-              <button 
-                onClick={pollLogs} 
+              <button
+                onClick={pollLogs}
                 style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.75rem', cursor: 'pointer', fontFamily: 'var(--font-mono)' }}
               >
                 [Refresh Log]
               </button>
             </div>
-            <pre 
+            <pre
               ref={terminalRef}
-              style={{ 
-                margin: 0, 
-                padding: '20px', 
-                background: '#07070a', 
-                color: '#20c20e', 
-                fontFamily: 'var(--font-mono)', 
-                fontSize: '0.82rem', 
-                maxHeight: '180px', 
-                overflowY: 'auto', 
+              style={{
+                margin: 0,
+                padding: '20px',
+                background: 'var(--surface)',
+                color: '#20c20e',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.82rem',
+                maxHeight: '180px',
+                overflowY: 'auto',
                 lineHeight: '1.5',
                 whiteSpace: 'pre-wrap'
               }}
@@ -861,7 +861,7 @@ export default function ProductBridgeInjectPage() {
           {showConfigForm && (
             <div className="card" style={{ marginBottom: '24px', background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: '14px', marginBottom: '18px' }}>
-                <strong style={{ fontSize: '0.95rem', color: '#fff' }}>⚙️ Form Konfigurasi Bridging Baru</strong>
+                <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>⚙️ Form Konfigurasi Bridging Baru</strong>
               </div>
 
               {/* Form Mode Tabs */}
@@ -875,7 +875,7 @@ export default function ProductBridgeInjectPage() {
                     borderRadius: '4px',
                     border: '1px solid var(--border)',
                     background: formMode === 'single' ? 'var(--accent)' : 'transparent',
-                    color: '#fff',
+                    color: 'var(--text-primary)',
                     fontWeight: 600,
                     cursor: 'pointer',
                     transition: 'all 0.2s'
@@ -892,7 +892,7 @@ export default function ProductBridgeInjectPage() {
                     borderRadius: '4px',
                     border: '1px solid var(--border)',
                     background: formMode === 'bulk' ? 'var(--accent)' : 'transparent',
-                    color: '#fff',
+                    color: 'var(--text-primary)',
                     fontWeight: 600,
                     cursor: 'pointer',
                     transition: 'all 0.2s'
@@ -1027,8 +1027,8 @@ export default function ProductBridgeInjectPage() {
                             const img = sel.photo_url || sel.clean_photo_url || sel.generated_photo_url || sel.raw_photo_url;
                             const fname = sel.filename_declare || (sel.product_name ? `${sel.product_name.toLowerCase().replace(/[^a-z0-9]/g, '_')}_ref.jpg` : 'product_ref.jpg');
                             return (
-                              <div style={{ marginTop: 8, background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: 10, borderRadius: 8 }}>
-                                <div style={{ color: '#10b981', fontWeight: 600, fontSize: '0.8rem' }}>
+                              <div style={{ marginTop: 8, background: 'var(--status-success-soft)', border: '1px solid var(--status-success-soft)', padding: 10, borderRadius: 8 }}>
+                                <div style={{ color: 'var(--status-success)', fontWeight: 600, fontSize: '0.8rem' }}>
                                   ✨ Foto Produk & Deklarasi Mandate 88 Otomatis Terhubung dari Database
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6 }}>
@@ -1044,7 +1044,7 @@ export default function ProductBridgeInjectPage() {
                       )}
 
                       {sourceMode === 'manual_input' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: 'rgba(255,255,255,0.01)', padding: '16px', borderRadius: '4px', border: '1px solid var(--border)' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: 'var(--surface-interactive)', padding: '16px', borderRadius: '4px', border: '1px solid var(--border)' }}>
                           <div className="form-group">
                             <label className="form-label">Nama Produk</label>
                             <input
@@ -1149,20 +1149,20 @@ export default function ProductBridgeInjectPage() {
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-                    <button 
-                      type="submit" 
-                      onClick={() => setSubmitStatus('draft')} 
-                      className="btn" 
-                      style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.25)', padding: '10px 24px' }} 
+                    <button
+                      type="submit"
+                      onClick={() => setSubmitStatus('draft')}
+                      className="btn"
+                      style={{ background: 'var(--status-info-soft)', color: 'var(--status-info)', border: '1px solid var(--status-info-soft)', padding: '10px 24px' }}
                       disabled={loadingSetup}
                     >
                       💾 Save as Draft
                     </button>
-                    <button 
-                      type="submit" 
-                      onClick={() => setSubmitStatus('active')} 
-                      className="btn btn-primary" 
-                      style={{ padding: '10px 24px' }} 
+                    <button
+                      type="submit"
+                      onClick={() => setSubmitStatus('active')}
+                      className="btn btn-primary"
+                      style={{ padding: '10px 24px' }}
                       disabled={loadingSetup}
                     >
                       {loadingSetup ? '⏳ Sedang Merajut Naskah...' : '⚡ Proses Injeksi Awal'}
@@ -1243,17 +1243,17 @@ export default function ProductBridgeInjectPage() {
                     </div>
                   )}
 
-                  <div className="form-group" style={{ 
-                    border: '2px dashed var(--border)', 
-                    borderRadius: 'var(--radius-sm)', 
-                    padding: '24px', 
+                  <div className="form-group" style={{
+                    border: '2px dashed var(--border)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '24px',
                     textAlign: 'center',
-                    background: 'rgba(255,255,255,0.01)',
+                    background: 'var(--surface-interactive)',
                     position: 'relative'
                   }}>
-                    <input 
-                      type="file" 
-                      accept=".csv,.xlsx" 
+                    <input
+                      type="file"
+                      accept=".csv,.xlsx"
                       onChange={handleBulkFileUpload}
                       style={{
                         position: 'absolute',
@@ -1267,15 +1267,15 @@ export default function ProductBridgeInjectPage() {
                       }}
                     />
                     <div style={{ fontSize: '1.8rem', marginBottom: '8px' }}>📥</div>
-                    <div style={{ fontWeight: 500, color: '#fff', marginBottom: '4px' }}>
+                    <div style={{ fontWeight: 500, color: 'var(--text-primary)', marginBottom: '4px' }}>
                       {bulkCsvFileName ? `File terpilih: ${bulkCsvFileName}` : 'Seret & Lepas file .csv atau .xlsx Anda di sini'}
                     </div>
                     <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                       Atau klik untuk menelusuri berkas dari komputer Anda
                     </div>
                     <div style={{ marginTop: '12px', position: 'relative', zIndex: 3 }}>
-                      <a 
-                        href="/bridge_bulk_template.csv" 
+                      <a
+                        href="/bridge_bulk_template.csv"
                         download
                         style={{ fontSize: '0.78rem', color: 'var(--accent-light)', textDecoration: 'underline' }}
                         onClick={(e) => e.stopPropagation()}
@@ -1286,7 +1286,7 @@ export default function ProductBridgeInjectPage() {
                   </div>
 
                   {parsedRows.length > 0 && (
-                    <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: '4px', background: 'rgba(0,0,0,0.2)' }}>
+                    <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: '4px', background: 'var(--overlay-subtle)' }}>
                       <table style={{ width: '100%', fontSize: '0.8rem', borderCollapse: 'collapse', textAlign: 'left' }}>
                         <thead>
                           <tr style={{ background: 'var(--bg-primary)', borderBottom: '1px solid var(--border)' }}>
@@ -1299,7 +1299,7 @@ export default function ProductBridgeInjectPage() {
                         </thead>
                         <tbody>
                           {parsedRows.map((row, index) => (
-                            <tr key={index} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                            <tr key={index} style={{ borderBottom: '1px solid var(--surface-interactive)' }}>
                               <td style={{ padding: '6px 12px' }}>{row.row_number}</td>
                               <td style={{ padding: '6px 12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>{row.original_script_url}</td>
                               <td style={{ padding: '6px 12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>{row.product_url}</td>
@@ -1338,20 +1338,20 @@ export default function ProductBridgeInjectPage() {
                   )}
 
                   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-                    <button 
-                      type="submit" 
-                      onClick={() => setSubmitStatus('draft')} 
-                      className="btn" 
-                      style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.25)', padding: '10px 24px', opacity: isVerificationComplete ? 1 : 0.4 }} 
+                    <button
+                      type="submit"
+                      onClick={() => setSubmitStatus('draft')}
+                      className="btn"
+                      style={{ background: 'var(--status-info-soft)', color: 'var(--status-info)', border: '1px solid var(--status-info-soft)', padding: '10px 24px', opacity: isVerificationComplete ? 1 : 0.4 }}
                       disabled={loadingSetup || !isVerificationComplete}
                     >
                       💾 Save as Draft
                     </button>
-                    <button 
-                      type="submit" 
-                      onClick={() => setSubmitStatus('active')} 
-                      className="btn btn-primary" 
-                      style={{ padding: '10px 24px', opacity: isVerificationComplete ? 1 : 0.4 }} 
+                    <button
+                      type="submit"
+                      onClick={() => setSubmitStatus('active')}
+                      className="btn btn-primary"
+                      style={{ padding: '10px 24px', opacity: isVerificationComplete ? 1 : 0.4 }}
                       disabled={loadingSetup || !isVerificationComplete}
                     >
                       {loadingSetup ? '⏳ Sedang Mengimpor...' : '⚡ Luncurkan Kampanye Massal'}
@@ -1375,14 +1375,14 @@ export default function ProductBridgeInjectPage() {
               flexWrap: 'wrap',
               gap: 12
             }}>
-              <h3 style={{ margin: 0, fontSize: '1rem', color: '#fff' }}>📁 Daftar Antrean & Status Kampanye</h3>
+              <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)' }}>📁 Daftar Antrean & Status Kampanye</h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>🔍 FILTER BRAND:</span>
                 <select
                   value={filterBrandId}
                   onChange={e => setFilterBrandId(e.target.value)}
                   style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
+                    background: 'var(--surface-interactive)',
                     border: '1px solid var(--border-color)',
                     color: 'var(--text-primary)',
                     padding: '6px 12px',
@@ -1399,7 +1399,7 @@ export default function ProductBridgeInjectPage() {
                 </select>
               </div>
             </div>
-            
+
             {loadingList && campaigns.length === 0 ? (
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>Memuat daftar kampanye...</p>
             ) : campaigns.filter(c => filterBrandId === 'all' || c.brand_profile_id === filterBrandId).length === 0 ? (
@@ -1410,10 +1410,10 @@ export default function ProductBridgeInjectPage() {
                 .map(c => {
                 const isExpanded = expandedCampaignId === c.id;
                 const badge = getStatusBadgeStyle(c.status);
-                
+
                 return (
-                  <div 
-                    key={c.id} 
+                  <div
+                    key={c.id}
                     style={{
                       background: 'var(--bg-card)',
                       border: `1px solid ${isExpanded ? 'var(--accent)' : 'var(--border)'}`,
@@ -1422,9 +1422,9 @@ export default function ProductBridgeInjectPage() {
                       transition: 'all 0.25s ease'
                     }}
                   >
-                    
+
                     {/* Header Row */}
-                    <div 
+                    <div
                       onClick={() => {
                         if (c.campaign_type === 'bulk') {
                           window.location.href = `/product-bridge-inject/${c.id}`;
@@ -1451,8 +1451,8 @@ export default function ProductBridgeInjectPage() {
                             <span style={{
                               fontSize: '0.68rem',
                               fontWeight: 700,
-                              background: c.brand_name ? 'rgba(168, 85, 247, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                              border: c.brand_name ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)',
+                              background: c.brand_name ? 'rgba(168, 85, 247, 0.15)' : 'var(--surface-interactive)',
+                              border: c.brand_name ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid var(--border-subtle)',
                               color: c.brand_name ? '#d8b4fe' : 'var(--text-muted)',
                               padding: '2px 8px',
                               borderRadius: '4px',
@@ -1462,13 +1462,13 @@ export default function ProductBridgeInjectPage() {
                               🏷️ Brand: {c.brand_name || 'Tidak Ditentukan'}
                             </span>
                           </div>
-                          <strong style={{ fontSize: '0.95rem', color: '#fff' }}>{c.campaign_name}</strong>
+                          <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>{c.campaign_name}</strong>
                           {c.campaign_type === 'bulk' ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
                               <span style={{
                                 fontSize: '0.65rem',
                                 fontWeight: 700,
-                                background: 'rgba(108, 92, 231, 0.2)',
+                                background: 'var(--status-neutral-soft)',
                                 border: '1px solid var(--accent)',
                                 color: 'var(--accent-light)',
                                 padding: '1px 5px',
@@ -1496,9 +1496,9 @@ export default function ProductBridgeInjectPage() {
                               padding: '4px 10px',
                               borderRadius: '4px',
                               fontWeight: 700,
-                              background: '#2ecc71',
+                              background: 'var(--status-success)',
                               border: 'none',
-                              color: '#fff',
+                              color: 'var(--text-primary)',
                               cursor: 'pointer'
                             }}
                           >
@@ -1513,7 +1513,7 @@ export default function ProductBridgeInjectPage() {
                               padding: '4px 10px',
                               borderRadius: '4px',
                               fontWeight: 700,
-                              background: c.status === 'paused' ? '#2ecc71' : '#f1c40f',
+                              background: c.status === 'paused' ? 'var(--status-success)' : 'var(--status-warning)',
                               border: 'none',
                               color: '#000',
                               cursor: 'pointer'
@@ -1542,7 +1542,7 @@ export default function ProductBridgeInjectPage() {
                             padding: '4px 10px',
                             borderRadius: '12px',
                             background: 'rgba(52,211,153,0.15)',
-                            color: '#34d399',
+                            color: 'var(--status-success)',
                             border: '1px solid rgba(52,211,153,0.3)',
                             marginLeft: '6px',
                             display: 'inline-flex',
@@ -1554,11 +1554,11 @@ export default function ProductBridgeInjectPage() {
                         ) : null}
 
                         {(c.status === 'completed' || c.campaign_type === 'bulk') && (
-                          <button 
+                          <button
                             onClick={(e) => { e.stopPropagation(); handleSyncContentFlow(c.id); }}
                             title="Push ke Content Flow"
                             style={{
-                              background: 'rgba(52, 152, 219, 0.1)',
+                              background: 'var(--status-info-soft)',
                               border: '1px solid var(--accent-light)',
                               color: 'var(--accent-light)',
                               fontSize: '0.72rem',
@@ -1572,7 +1572,7 @@ export default function ProductBridgeInjectPage() {
                           </button>
                         )}
 
-                        <button 
+                        <button
                           onClick={(e) => { e.stopPropagation(); handleDeleteCampaign(c.id); }}
                           style={{
                             background: 'none',
@@ -1593,15 +1593,15 @@ export default function ProductBridgeInjectPage() {
                       <div style={{
                         padding: '24px',
                         borderTop: '1px solid var(--border)',
-                        background: 'rgba(0, 0, 0, 0.15)',
+                        background: 'var(--overlay-subtle)',
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '20px'
                       }}>
-                        
+
                         {/* 4 Storyboard Clips in a clean grid */}
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                          
+
                           {/* Klip 1 */}
                           <div style={{ background: 'var(--bg-primary)', padding: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
                             <div style={{ fontWeight: 600, fontSize: '0.8rem', color: 'var(--accent-light)', marginBottom: '8px' }}>
@@ -1621,10 +1621,10 @@ export default function ProductBridgeInjectPage() {
                             background: 'var(--bg-primary)',
                             padding: '16px',
                             borderRadius: 'var(--radius-sm)',
-                            border: '2px solid #2ecc71',
-                            boxShadow: '0 0 12px rgba(46, 204, 113, 0.08)'
+                            border: '2px solid var(--status-success)',
+                            boxShadow: '0 0 12px var(--status-success-soft)'
                           }}>
-                            <div style={{ fontWeight: 700, fontSize: '0.8rem', color: '#2ecc71', marginBottom: '8px' }}>
+                            <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--status-success)', marginBottom: '8px' }}>
                               ✨ KLIP 2: PRODUCT INSERTION (NEW)
                             </div>
 
@@ -1729,7 +1729,7 @@ export default function ProductBridgeInjectPage() {
                           flexWrap: 'wrap',
                           gap: '16px'
                         }}>
-                          
+
                           <div style={{ display: 'flex', gap: '8px' }}>
                             <button
                               type="button"
@@ -1739,7 +1739,7 @@ export default function ProductBridgeInjectPage() {
                             >
                               {savingTexts ? '⏳ Menyimpan...' : '💾 Simpan Perubahan Teks'}
                             </button>
-                            
+
                             {activeOutput.injected_script_md_path && (
                               <a
                                 href={activeOutput.injected_script_md_path}
@@ -1790,8 +1790,8 @@ export default function ProductBridgeInjectPage() {
                           <div style={{
                             padding: '16px',
                             borderRadius: 'var(--radius-sm)',
-                            background: 'rgba(46, 204, 113, 0.06)',
-                            border: '1px solid rgba(46, 204, 113, 0.2)',
+                            background: 'var(--status-success-soft)',
+                            border: '1px solid var(--status-success-soft)',
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
@@ -1799,12 +1799,12 @@ export default function ProductBridgeInjectPage() {
                             gap: '16px'
                           }}>
                             <div>
-                              <h4 style={{ margin: '0 0 4px 0', color: '#2ecc71' }}>🎉 Klip 2 Baru Berhasil Dirender!</h4>
+                              <h4 style={{ margin: '0 0 4px 0', color: 'var(--status-success)' }}>🎉 Klip 2 Baru Berhasil Dirender!</h4>
                               <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
                                 Unduh file video berkualitas HD ini dan sisipkan ke posisi track ke-2 di timeline CapCut Anda.
                               </p>
                             </div>
-                            
+
                             <a
                               href={activeOutput.clip2_video_path}
                               download="clip2_video.mp4"
@@ -1831,7 +1831,7 @@ export default function ProductBridgeInjectPage() {
       {/* Embedded Spinner CSS */}
       <style jsx global>{`
         .spinner {
-          border: 3px solid rgba(255,255,255,0.1);
+          border: 3px solid var(--border-subtle);
           border-top: 3px solid var(--accent);
           borderRadius: 50%;
           width: 30px;

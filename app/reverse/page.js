@@ -410,8 +410,8 @@ export default function ReversePage() {
           <div className="card" style={{ marginBottom: '24px' }}>
             <div className="card-title"><span className="icon">📐</span> Aspect Ratio (T2V)</div>
             <div className="form-group">
-              <select 
-                className="form-input" 
+              <select
+                className="form-input"
                 value={aspectRatio}
                 onChange={e => setAspectRatio(e.target.value)}
               >
@@ -427,8 +427,8 @@ export default function ReversePage() {
           <div className="card" style={{ marginBottom: '24px' }}>
             <div className="card-title"><span className="icon">🤖</span> Target AI Engine (Micro-pacing)</div>
             <div className="form-group">
-              <select 
-                className="form-input" 
+              <select
+                className="form-input"
                 value={targetAi}
                 onChange={e => setTargetAi(e.target.value)}
               >
@@ -588,12 +588,12 @@ export default function ReversePage() {
                       <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border)', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                         <button className="btn btn-sm" onClick={() => generateAsset(i, 'image', p.prompt)}
                           disabled={!!imgGen}
-                          style={{ background: 'linear-gradient(135deg, #e17055, #d63031)', color: '#fff', fontSize: '0.72rem', padding: '4px 10px' }}>
+                          style={{ background: 'linear-gradient(135deg, var(--status-warning), var(--status-danger))', color: 'var(--text-primary)', fontSize: '0.72rem', padding: '4px 10px' }}>
                           {imgGen ? `⏳ ${imgGen}` : '🖼️ Image'}
                         </button>
                         <button className="btn btn-sm" onClick={() => generateAsset(i, 'video', p.prompt)}
                           disabled={!!vidGen}
-                          style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)', color: '#fff', fontSize: '0.72rem', padding: '4px 10px' }}>
+                          style={{ background: 'linear-gradient(135deg, var(--status-neutral), var(--status-neutral))', color: 'var(--text-primary)', fontSize: '0.72rem', padding: '4px 10px' }}>
                           {vidGen ? `⏳ ${vidGen}` : '🎬 Video'}
                         </button>
                         {imgResult?.status === 'done' && imgResult.urls?.map((url, ui) => (
@@ -625,11 +625,11 @@ export default function ReversePage() {
                       📋 Copy All T2V Prompts
                     </button>
                     <button className="btn btn-sm" onClick={() => generateAllAssets('image')}
-                      style={{ background: 'linear-gradient(135deg, #e17055, #d63031)', color: '#fff' }}>
+                      style={{ background: 'linear-gradient(135deg, var(--status-warning), var(--status-danger))', color: 'var(--text-primary)' }}>
                       🖼️ Generate All Images
                     </button>
                     <button className="btn btn-sm" onClick={() => generateAllAssets('video')}
-                      style={{ background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)', color: '#fff' }}>
+                      style={{ background: 'linear-gradient(135deg, var(--status-neutral), var(--status-neutral))', color: 'var(--text-primary)' }}>
                       🎬 Generate All Videos
                     </button>
                   </div>
@@ -699,7 +699,7 @@ export default function ReversePage() {
                       className="btn btn-sm btn-primary"
                       onClick={syncToPipeline}
                       disabled={!!syncing}
-                      style={{ background: 'linear-gradient(135deg, var(--accent), #6c5ce7)' }}
+                      style={{ background: 'linear-gradient(135deg, var(--accent), var(--status-neutral))' }}
                     >{syncing ? '⏳ Syncing...' : '📌 Sync to RE Sheet'}</button>
                     {pipelineUrl && (
                       <a href={pipelineUrl} target="_blank" rel="noopener" style={{ fontSize: '0.72rem', color: 'var(--accent-light)' }}>

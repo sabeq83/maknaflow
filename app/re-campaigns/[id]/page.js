@@ -159,29 +159,29 @@ function renderPipelineStatus(item, triggerManualStep, triggering = {}) {
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
       {stages.map((stage, sIdx) => {
         let color = 'var(--text-muted)';
-        let bg = 'rgba(255, 255, 255, 0.05)';
-        let border = '1px solid rgba(255, 255, 255, 0.1)';
+        let bg = 'var(--surface-interactive)';
+        let border = '1px solid var(--border-subtle)';
         let labelText = stage.label;
         let anim = 'none';
 
         if (stage.status === 'success') {
-          color = '#fff';
-          bg = 'rgba(46, 204, 113, 0.15)';
-          border = '1px solid rgba(46, 204, 113, 0.5)';
+          color = 'var(--text-primary)';
+          bg = 'var(--status-success-soft)';
+          border = '1px solid var(--status-success-soft)';
           labelText = `✓ ${stage.label}`;
         } else if (stage.status === 'skipped') {
           color = 'rgba(255, 255, 255, 0.3)';
-          bg = 'rgba(255, 255, 255, 0.02)';
-          border = '1px dashed rgba(255, 255, 255, 0.15)';
+          bg = 'var(--surface-interactive)';
+          border = '1px dashed var(--border-subtle)';
           labelText = `⚡ ${stage.label}`;
         } else if (stage.status === 'danger') {
-          color = '#fff';
-          bg = 'rgba(231, 76, 60, 0.15)';
-          border = '1px solid rgba(231, 76, 60, 0.5)';
+          color = 'var(--text-primary)';
+          bg = 'var(--status-danger-soft)';
+          border = '1px solid var(--status-danger-soft)';
           labelText = `✗ ${stage.label}`;
         } else if (stage.status === 'active') {
-          color = '#fff';
-          bg = 'rgba(52, 152, 219, 0.25)';
+          color = 'var(--text-primary)';
+          bg = 'var(--status-info-soft)';
           border = '1px solid var(--accent-light)';
           labelText = `⏳ ${stage.label}`;
           anim = 'active-pulse 1.5s infinite alternate';
@@ -215,8 +215,8 @@ function renderPipelineStatus(item, triggerManualStep, triggering = {}) {
                 onClick={() => triggerManualStep(item.id, stepName)}
                 disabled={!!triggering[`${item.id}-${stepName}`]}
                 style={{
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  background: 'var(--surface-interactive)',
+                  border: '1px solid var(--border-subtle)',
                   borderRadius: '3px',
                   color: 'var(--text-muted)',
                   cursor: 'pointer',
@@ -229,21 +229,21 @@ function renderPipelineStatus(item, triggerManualStep, triggering = {}) {
                   outline: 'none'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = '#fff';
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.background = 'var(--border-subtle)';
                   e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.color = 'var(--text-muted)';
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.background = 'var(--surface-interactive)';
+                  e.currentTarget.style.borderColor = 'var(--border-subtle)';
                 }}
                 title={`Retry langkah ${stage.label} (akan mereset langkah sesudahnya)`}
               >
                 {triggering[`${item.id}-${stepName}`] ? '⏳' : '🔄'}
               </button>
             )}
-            {sIdx < stages.length - 1 && <span style={{ color: 'rgba(255, 255, 255, 0.15)', fontSize: '0.75rem', marginLeft: 2 }}>➔</span>}
+            {sIdx < stages.length - 1 && <span style={{ color: 'var(--border-subtle)', fontSize: '0.75rem', marginLeft: 2 }}>➔</span>}
           </div>
         );
       })}
@@ -254,48 +254,48 @@ function renderPipelineStatus(item, triggerManualStep, triggering = {}) {
 function renderItemStatus(item, campaign) {
   let text = 'Fase 1 : Pending';
   let color = 'var(--text-muted)';
-  let bg = 'rgba(255, 255, 255, 0.05)';
+  let bg = 'var(--surface-interactive)';
   let pulse = false;
 
   const pauseAt = campaign?.scheduler_pause_at;
 
   // 1. Errors
   if (
-    item.scrape_status === 'failed' || 
-    item.analyze_status === 'failed' || 
-    item.tts_status === 'failed' || 
-    item.visual_status === 'failed' || 
-    item.ffmpeg_status === 'failed' || 
-    item.upload_status === 'failed' || 
+    item.scrape_status === 'failed' ||
+    item.analyze_status === 'failed' ||
+    item.tts_status === 'failed' ||
+    item.visual_status === 'failed' ||
+    item.ffmpeg_status === 'failed' ||
+    item.upload_status === 'failed' ||
     item.social_post_status === 'failed'
   ) {
     text = '⚠️ Error / Failed';
-    color = '#e74c3c';
-    bg = 'rgba(231, 76, 60, 0.1)';
+    color = 'var(--status-danger)';
+    bg = 'var(--status-danger-soft)';
   }
   // 2. Pause states
   else if (pauseAt === 'tts' && item.analyze_status === 'analyzed' && item.tts_status === 'pending') {
     text = '⏸️ Fase 2 : Paused (Review Script)';
-    color = '#f39c12';
+    color = 'var(--status-warning)';
     bg = 'rgba(243, 156, 18, 0.1)';
   } else if (pauseAt === 'visuals' && item.tts_status === 'completed' && item.visual_status === 'pending') {
     text = '⏸️ Fase 2 : Paused (Review Prompts)';
-    color = '#f39c12';
+    color = 'var(--status-warning)';
     bg = 'rgba(243, 156, 18, 0.1)';
   } else if (pauseAt === 'ffmpeg' && item.visual_status === 'completed' && item.ffmpeg_status === 'pending') {
     text = '⏸️ Fase 2 : Paused (Review Clips)';
-    color = '#f39c12';
+    color = 'var(--status-warning)';
     bg = 'rgba(243, 156, 18, 0.1)';
   } else if (pauseAt === 'social' && item.ffmpeg_status === 'completed' && item.social_post_status === 'pending') {
     text = '⏸️ Fase 2 : Paused (Ready to Post)';
-    color = '#f39c12';
+    color = 'var(--status-warning)';
     bg = 'rgba(243, 156, 18, 0.1)';
   }
   // 3. Active processing states
   else if (item.scrape_status === 'processing') {
     text = '⚡ Fase 1 : Downloading';
     color = 'var(--accent-light)';
-    bg = 'rgba(59, 130, 246, 0.1)';
+    bg = 'var(--status-info-soft)';
     pulse = true;
   } else if (item.scrape_status === 'pending') {
     text = '⏳ Fase 1 : Queue for Download';
@@ -303,11 +303,11 @@ function renderItemStatus(item, campaign) {
   } else if (item.analyze_status === 'processing') {
     text = '⚡ Fase 1 : AI Analyze';
     color = 'var(--accent-light)';
-    bg = 'rgba(59, 130, 246, 0.1)';
+    bg = 'var(--status-info-soft)';
     pulse = true;
   } else if (item.analyze_status === 'generating_t2i') {
     text = '⚡ Fase 1 : Generate Start Frame T2I';
-    color = '#9b59b6';
+    color = 'var(--status-neutral)';
     bg = 'rgba(155, 89, 182, 0.1)';
     pulse = true;
   } else if (item.analyze_status === 'pending' && item.scrape_status === 'downloaded') {
@@ -316,14 +316,14 @@ function renderItemStatus(item, campaign) {
   } else if (item.tts_status === 'processing') {
     text = '⚡ Fase 2 : Generate TTS';
     color = 'var(--accent-light)';
-    bg = 'rgba(59, 130, 246, 0.1)';
+    bg = 'var(--status-info-soft)';
     pulse = true;
   } else if (item.tts_status === 'pending' && item.analyze_status === 'analyzed' && item.workflow_status === 'production_processing') {
     text = '⏳ Fase 2 : Queue for TTS';
     color = 'var(--text-muted)';
   } else if (item.visual_status === 'processing') {
     text = '⚡ Fase 2 : Generate Video';
-    color = '#9b59b6';
+    color = 'var(--status-neutral)';
     bg = 'rgba(155, 89, 182, 0.1)';
     pulse = true;
   } else if (item.visual_status === 'pending' && item.tts_status === 'completed') {
@@ -331,38 +331,38 @@ function renderItemStatus(item, campaign) {
     color = 'var(--text-muted)';
   } else if (item.ffmpeg_status === 'processing') {
     text = '⚡ Fase 2 : FFMPEG Process';
-    color = '#3498db';
-    bg = 'rgba(52, 152, 219, 0.1)';
+    color = 'var(--status-info)';
+    bg = 'var(--status-info-soft)';
     pulse = true;
   } else if (item.ffmpeg_status === 'pending' && item.visual_status === 'completed') {
     text = '⏳ Fase 2 : Queue for FFmpeg';
     color = 'var(--text-muted)';
   } else if (item.upload_status === 'uploading') {
     text = '⚡ Fase 2 : Uploading Assets';
-    color = '#3498db';
-    bg = 'rgba(52, 152, 219, 0.1)';
+    color = 'var(--status-info)';
+    bg = 'var(--status-info-soft)';
     pulse = true;
   } else if (item.social_post_status === 'processing') {
     text = '⚡ Fase 2 : Social Posting';
-    color = '#e67e22';
+    color = 'var(--status-warning)';
     bg = 'rgba(230, 126, 34, 0.1)';
     pulse = true;
   }
   // 3.5 Paused Review
   else if (item.workflow_status === 'ready_for_review') {
     text = '⏸️ Fase 2 : Paused (Ready for Review)';
-    color = '#f39c12';
+    color = 'var(--status-warning)';
     bg = 'rgba(243, 156, 18, 0.1)';
   }
   // 4. Completed states
   else if (item.social_post_status === 'completed' || item.upload_status === 'completed') {
     text = '✅ Fase 2 : Completed';
     color = 'var(--success)';
-    bg = 'rgba(46, 204, 113, 0.1)';
+    bg = 'var(--status-success-soft)';
   } else if (item.analyze_status === 'analyzed') {
     text = '✅ Fase 1 : Completed';
     color = 'var(--success)';
-    bg = 'rgba(46, 204, 113, 0.1)';
+    bg = 'var(--status-success-soft)';
   }
 
   return (
@@ -406,17 +406,17 @@ function renderSocialLinks(item) {
   return (
     <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
       {links.youtube && (
-        <a href={links.youtube} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.7rem', textDecoration: 'none', background: '#FF0000', color: '#fff', padding: '3px 8px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
+        <a href={links.youtube} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.7rem', textDecoration: 'none', background: '#FF0000', color: 'var(--text-primary)', padding: '3px 8px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
           🎥 YouTube Draft
         </a>
       )}
       {links.tiktok && (
-        <a href={links.tiktok} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.7rem', textDecoration: 'none', background: '#000000', color: '#fff', padding: '3px 8px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 4, fontWeight: 600, border: '1px solid rgba(255, 255, 255, 0.2)' }}>
+        <a href={links.tiktok} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.7rem', textDecoration: 'none', background: '#000000', color: 'var(--text-primary)', padding: '3px 8px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 4, fontWeight: 600, border: '1px solid rgba(255, 255, 255, 0.2)' }}>
           🎵 TikTok Draft
         </a>
       )}
       {links.facebook && (
-        <a href={links.facebook} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.7rem', textDecoration: 'none', background: '#1877F2', color: '#fff', padding: '3px 8px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
+        <a href={links.facebook} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.7rem', textDecoration: 'none', background: '#1877F2', color: 'var(--text-primary)', padding: '3px 8px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
           👥 Facebook Draft
         </a>
       )}
@@ -444,29 +444,29 @@ function renderVariantPipelineStatus(variant) {
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
       {stages.map((stage, sIdx) => {
         let color = 'var(--text-muted)';
-        let bg = 'rgba(255, 255, 255, 0.05)';
-        let border = '1px solid rgba(255, 255, 255, 0.1)';
+        let bg = 'var(--surface-interactive)';
+        let border = '1px solid var(--border-subtle)';
         let labelText = stage.label;
         let anim = 'none';
 
         if (stage.status === 'success') {
-          color = '#fff';
-          bg = 'rgba(46, 204, 113, 0.15)';
-          border = '1px solid rgba(46, 204, 113, 0.5)';
+          color = 'var(--text-primary)';
+          bg = 'var(--status-success-soft)';
+          border = '1px solid var(--status-success-soft)';
           labelText = `✓ ${stage.label}`;
         } else if (stage.status === 'skipped') {
           color = 'rgba(255, 255, 255, 0.3)';
-          bg = 'rgba(255, 255, 255, 0.02)';
-          border = '1px dashed rgba(255, 255, 255, 0.15)';
+          bg = 'var(--surface-interactive)';
+          border = '1px dashed var(--border-subtle)';
           labelText = `⚡ ${stage.label}`;
         } else if (stage.status === 'danger') {
-          color = '#fff';
-          bg = 'rgba(231, 76, 60, 0.15)';
-          border = '1px solid rgba(231, 76, 60, 0.5)';
+          color = 'var(--text-primary)';
+          bg = 'var(--status-danger-soft)';
+          border = '1px solid var(--status-danger-soft)';
           labelText = `✗ ${stage.label}`;
         } else if (stage.status === 'active') {
-          color = '#fff';
-          bg = 'rgba(52, 152, 219, 0.25)';
+          color = 'var(--text-primary)';
+          bg = 'var(--status-info-soft)';
           border = '1px solid var(--accent-light)';
           labelText = `⏳ ${stage.label}`;
           anim = 'active-pulse 1.5s infinite alternate';
@@ -491,7 +491,7 @@ function renderVariantPipelineStatus(variant) {
             }}>
               {labelText}
             </span>
-            {sIdx < stages.length - 1 && <span style={{ color: 'rgba(255, 255, 255, 0.15)', fontSize: '0.75rem', marginLeft: 2 }}>➔</span>}
+            {sIdx < stages.length - 1 && <span style={{ color: 'var(--border-subtle)', fontSize: '0.75rem', marginLeft: 2 }}>➔</span>}
           </div>
         );
       })}
@@ -502,18 +502,18 @@ function renderVariantPipelineStatus(variant) {
 function renderMiniPipeline(v) {
   const getDotStyle = (status) => {
     if (status === 'completed' || status === 'success') {
-      return { color: '#2ecc71', label: '✓' };
+      return { color: 'var(--status-success)', label: '✓' };
     }
     if (status === 'failed') {
-      return { color: '#e74c3c', label: '✗' };
+      return { color: 'var(--status-danger)', label: '✗' };
     }
     if (status === 'processing' || status === 'uploading') {
-      return { color: '#3498db', label: '⏳', pulse: true };
+      return { color: 'var(--status-info)', label: '⏳', pulse: true };
     }
     if (status === 'skipped') {
       return { color: 'rgba(255,255,255,0.25)', label: '⚡' };
     }
-    return { color: 'rgba(255,255,255,0.1)', label: '●' };
+    return { color: 'var(--border-subtle)', label: '●' };
   };
 
   const tts = getDotStyle(v.tts_status);
@@ -531,14 +531,14 @@ function renderMiniPipeline(v) {
   return (
     <div style={{ display: 'flex', gap: '3px', alignItems: 'center' }}>
       {stages.map(s => (
-        <span 
-          key={s.name} 
-          style={{ 
-            fontSize: '0.58rem', 
-            background: 'rgba(0,0,0,0.3)', 
-            padding: '1px 4px', 
-            borderRadius: '3px', 
-            border: `1px solid ${s.pulse ? '#3498db' : 'rgba(255,255,255,0.03)'}`,
+        <span
+          key={s.name}
+          style={{
+            fontSize: '0.58rem',
+            background: 'var(--overlay-subtle)',
+            padding: '1px 4px',
+            borderRadius: '3px',
+            border: `1px solid ${s.pulse ? 'var(--status-info)' : 'var(--surface-interactive)'}`,
             color: s.color,
             fontWeight: '700',
             display: 'inline-flex',
@@ -567,38 +567,38 @@ function renderClipGlabsStatusAndPreview(item, clipIdx) {
     }
   } catch {}
 
-  const task = item.glabs_tasks?.find(t => t.task_id === activeTaskId) || 
+  const task = item.glabs_tasks?.find(t => t.task_id === activeTaskId) ||
                item.glabs_tasks?.find(t => t.clip_index === clipIdx);
 
   let badgeText = '💤 Antre (Queue)';
   let badgeColor = 'var(--text-muted)';
-  let badgeBg = 'rgba(255,255,255,0.05)';
-  let badgeBorder = '1px solid rgba(255,255,255,0.1)';
+  let badgeBg = 'var(--surface-interactive)';
+  let badgeBorder = '1px solid var(--border-subtle)';
   let anim = 'none';
 
   if (task) {
     if (task.status === 'completed') {
       badgeText = '✅ Selesai (Completed)';
-      badgeColor = '#2ecc71';
-      badgeBg = 'rgba(46, 204, 113, 0.1)';
-      badgeBorder = '1px solid rgba(46, 204, 113, 0.3)';
+      badgeColor = 'var(--status-success)';
+      badgeBg = 'var(--status-success-soft)';
+      badgeBorder = '1px solid var(--status-success-soft)';
     } else if (task.status === 'failed') {
       badgeText = '❌ Gagal (Failed)';
-      badgeColor = '#e74c3c';
-      badgeBg = 'rgba(231, 76, 60, 0.1)';
-      badgeBorder = '1px solid rgba(231, 76, 60, 0.3)';
+      badgeColor = 'var(--status-danger)';
+      badgeBg = 'var(--status-danger-soft)';
+      badgeBorder = '1px solid var(--status-danger-soft)';
     } else if (task.status === 'processing') {
       badgeText = '⏳ Sedang Diproses (Processing)...';
-      badgeColor = '#3498db';
-      badgeBg = 'rgba(52, 152, 219, 0.1)';
-      badgeBorder = '1px solid rgba(52, 152, 219, 0.3)';
+      badgeColor = 'var(--status-info)';
+      badgeBg = 'var(--status-info-soft)';
+      badgeBorder = '1px solid var(--status-info-soft)';
       anim = 'active-pulse 1.5s infinite alternate';
     }
   } else if (item.visual_status === 'processing') {
     badgeText = '⏳ Sedang Diproses (Processing)...';
-    badgeColor = '#3498db';
-    badgeBg = 'rgba(52, 152, 219, 0.1)';
-    badgeBorder = '1px solid rgba(52, 152, 219, 0.3)';
+    badgeColor = 'var(--status-info)';
+    badgeBg = 'var(--status-info-soft)';
+    badgeBorder = '1px solid var(--status-info-soft)';
     anim = 'active-pulse 1.5s infinite alternate';
   }
 
@@ -622,21 +622,21 @@ function renderClipGlabsStatusAndPreview(item, clipIdx) {
           {badgeText}
         </span>
       </div>
-      
+
       {task && task.status === 'completed' && task.video_url && (
         <div style={{ marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600 }}>🎬 Preview Klip (G-Labs)</span>
-          <video 
-            src={task.video_url} 
-            controls 
+          <video
+            src={task.video_url}
+            controls
             preload="metadata"
-            style={{ 
-              width: '100%', 
-              maxHeight: '220px', 
-              borderRadius: '6px', 
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+            style={{
+              width: '100%',
+              maxHeight: '220px',
+              borderRadius: '6px',
+              border: '1px solid var(--border-subtle)',
               background: '#000'
-            }} 
+            }}
           />
         </div>
       )}
@@ -655,38 +655,38 @@ function renderVariantClipGlabsStatusAndPreview(variant, clipIdx) {
     }
   } catch {}
 
-  const task = variant.glabs_tasks?.find(t => t.task_id === activeTaskId) || 
+  const task = variant.glabs_tasks?.find(t => t.task_id === activeTaskId) ||
                variant.glabs_tasks?.find(t => t.clip_index === clipIdx);
 
   let badgeText = '💤 Antre (Queue)';
   let badgeColor = 'var(--text-muted)';
-  let badgeBg = 'rgba(255,255,255,0.05)';
-  let badgeBorder = '1px solid rgba(255,255,255,0.1)';
+  let badgeBg = 'var(--surface-interactive)';
+  let badgeBorder = '1px solid var(--border-subtle)';
   let anim = 'none';
 
   if (task) {
     if (task.status === 'completed') {
       badgeText = '✅ Selesai (Completed)';
-      badgeColor = '#2ecc71';
-      badgeBg = 'rgba(46, 204, 113, 0.1)';
-      badgeBorder = '1px solid rgba(46, 204, 113, 0.3)';
+      badgeColor = 'var(--status-success)';
+      badgeBg = 'var(--status-success-soft)';
+      badgeBorder = '1px solid var(--status-success-soft)';
     } else if (task.status === 'failed') {
       badgeText = '❌ Gagal (Failed)';
-      badgeColor = '#e74c3c';
-      badgeBg = 'rgba(231, 76, 60, 0.1)';
-      badgeBorder = '1px solid rgba(231, 76, 60, 0.3)';
+      badgeColor = 'var(--status-danger)';
+      badgeBg = 'var(--status-danger-soft)';
+      badgeBorder = '1px solid var(--status-danger-soft)';
     } else if (task.status === 'processing') {
       badgeText = '⏳ Sedang Diproses (Processing)...';
-      badgeColor = '#3498db';
-      badgeBg = 'rgba(52, 152, 219, 0.1)';
-      badgeBorder = '1px solid rgba(52, 152, 219, 0.3)';
+      badgeColor = 'var(--status-info)';
+      badgeBg = 'var(--status-info-soft)';
+      badgeBorder = '1px solid var(--status-info-soft)';
       anim = 'active-pulse 1.5s infinite alternate';
     }
   } else if (variant.visual_status === 'processing') {
     badgeText = '⏳ Sedang Diproses (Processing)...';
-    badgeColor = '#3498db';
-    badgeBg = 'rgba(52, 152, 219, 0.1)';
-    badgeBorder = '1px solid rgba(52, 152, 219, 0.3)';
+    badgeColor = 'var(--status-info)';
+    badgeBg = 'var(--status-info-soft)';
+    badgeBorder = '1px solid var(--status-info-soft)';
     anim = 'active-pulse 1.5s infinite alternate';
   }
 
@@ -720,37 +720,37 @@ function renderVariantClipGlabsStatusAndPreview(variant, clipIdx) {
           {badgeText}
         </span>
       </div>
-      
+
       {localClipPath ? (
         <div style={{ marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600 }}>🎬 Preview Klip (Lokal)</span>
-          <video 
-            src={localClipPath} 
-            controls 
+          <video
+            src={localClipPath}
+            controls
             preload="metadata"
-            style={{ 
-              width: '100%', 
-              maxHeight: '220px', 
-              borderRadius: '6px', 
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+            style={{
+              width: '100%',
+              maxHeight: '220px',
+              borderRadius: '6px',
+              border: '1px solid var(--border-subtle)',
               background: '#000'
-            }} 
+            }}
           />
         </div>
       ) : (task && task.status === 'completed' && task.video_url && (
         <div style={{ marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600 }}>🎬 Preview Klip (G-Labs)</span>
-          <video 
-            src={task.video_url} 
-            controls 
+          <video
+            src={task.video_url}
+            controls
             preload="metadata"
-            style={{ 
-              width: '100%', 
-              maxHeight: '220px', 
-              borderRadius: '6px', 
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+            style={{
+              width: '100%',
+              maxHeight: '220px',
+              borderRadius: '6px',
+              border: '1px solid var(--border-subtle)',
               background: '#000'
-            }} 
+            }}
           />
         </div>
       ))}
@@ -761,13 +761,13 @@ function renderVariantClipGlabsStatusAndPreview(variant, clipIdx) {
 function renderVariantTimelineBanner(variant) {
   const getStageInfo = (currentStatus, activeText, pendingText, completedText, failedText) => {
     if (currentStatus === 'completed' || currentStatus === 'analyzed') {
-      return { status: 'success', text: completedText, color: '#2ecc71', icon: '✓' };
+      return { status: 'success', text: completedText, color: 'var(--status-success)', icon: '✓' };
     }
     if (currentStatus === 'failed') {
-      return { status: 'danger', text: failedText, color: '#e74c3c', icon: '✗' };
+      return { status: 'danger', text: failedText, color: 'var(--status-danger)', icon: '✗' };
     }
     if (currentStatus === 'processing' || currentStatus === 'uploading') {
-      return { status: 'active', text: activeText, color: '#3498db', icon: '⏳', pulse: true };
+      return { status: 'active', text: activeText, color: 'var(--status-info)', icon: '⏳', pulse: true };
     }
     if (currentStatus === 'skipped') {
       return { status: 'skipped', text: 'Dilewati (Skipped)', color: 'rgba(255, 255, 255, 0.3)', icon: '⚡' };
@@ -788,11 +788,11 @@ function renderVariantTimelineBanner(variant) {
   ];
 
   return (
-    <div style={{ 
-      background: 'var(--bg-glass)', 
-      border: '1px solid var(--border)', 
-      borderRadius: '10px', 
-      padding: '16px 20px', 
+    <div style={{
+      background: 'var(--bg-glass)',
+      border: '1px solid var(--border)',
+      borderRadius: '10px',
+      padding: '16px 20px',
       marginBottom: '20px',
       display: 'flex',
       flexDirection: 'column',
@@ -803,30 +803,30 @@ function renderVariantTimelineBanner(variant) {
           🚀 Pipeline Rendering Status
         </span>
         {variant.visual_status === 'processing' && (
-          <span style={{ fontSize: '0.72rem', color: '#9b59b6', animation: 'pulse-glow 1.5s infinite', fontWeight: '600' }}>
+          <span style={{ fontSize: '0.72rem', color: 'var(--status-neutral)', animation: 'pulse-glow 1.5s infinite', fontWeight: '600' }}>
             🎨 Sedang Menghasilkan Visual Klip...
           </span>
         )}
       </div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'nowrap', overflowX: 'auto', padding: '4px 0' }}>
         {stages.map((s, idx) => {
-          let bg = 'rgba(255,255,255,0.01)';
-          let border = '1px solid rgba(255,255,255,0.05)';
+          let bg = 'var(--surface-interactive)';
+          let border = '1px solid var(--surface-interactive)';
           let shadow = 'none';
 
           if (s.status === 'success') {
-            bg = 'rgba(46, 204, 113, 0.08)';
-            border = '1px solid rgba(46, 204, 113, 0.3)';
+            bg = 'var(--status-success-soft)';
+            border = '1px solid var(--status-success-soft)';
           } else if (s.status === 'active') {
             bg = 'rgba(52, 152, 219, 0.12)';
             border = '1px solid var(--accent-light)';
-            shadow = '0 0 10px rgba(52, 152, 219, 0.15)';
+            shadow = '0 0 10px var(--status-info-soft)';
           } else if (s.status === 'danger') {
-            bg = 'rgba(231, 76, 60, 0.08)';
-            border = '1px solid rgba(231, 76, 60, 0.3)';
+            bg = 'var(--status-danger-soft)';
+            border = '1px solid var(--status-danger-soft)';
           } else if (s.status === 'skipped') {
             bg = 'rgba(255,255,255,0.005)';
-            border = '1px dashed rgba(255,255,255,0.1)';
+            border = '1px dashed var(--border-subtle)';
           }
 
           return (
@@ -849,22 +849,22 @@ function renderVariantTimelineBanner(variant) {
                   {s.label}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                  <span style={{ 
-                    color: s.color, 
-                    fontWeight: 'bold', 
+                  <span style={{
+                    color: s.color,
+                    fontWeight: 'bold',
                     fontSize: '0.85rem',
                     animation: s.pulse ? 'pulse-glow 1s infinite' : 'none'
                   }}>
                     {s.icon}
                   </span>
-                  <span style={{ fontSize: '0.78rem', fontWeight: '600', color: s.status === 'pending' ? 'var(--text-muted)' : '#fff' }}>
+                  <span style={{ fontSize: '0.78rem', fontWeight: '600', color: s.status === 'pending' ? 'var(--text-muted)' : 'var(--text-primary)' }}>
                     {s.text}
                   </span>
                 </div>
               </div>
               {idx < stages.length - 1 && (
-                <span style={{ 
-                  color: s.status === 'success' ? '#2ecc71' : 'rgba(255,255,255,0.1)', 
+                <span style={{
+                  color: s.status === 'success' ? 'var(--status-success)' : 'var(--border-subtle)',
                   fontSize: '1rem',
                   fontWeight: 'bold'
                 }}>
@@ -888,7 +888,7 @@ export default function RECampaignDetailPage() {
   const [loading, setLoading] = useState(true);
   const [storageProvider, setStorageProvider] = useState('gdrive');
   const [nextcloudUrl, setNextcloudUrl] = useState('');
-  
+
   const [toast, setToast] = useState(null);
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
@@ -911,15 +911,15 @@ export default function RECampaignDetailPage() {
   function renderLogs(item) {
     const getBadgeStyle = (status) => {
       if (status === 'completed' || status === 'success') {
-        return { color: '#2ecc71', background: 'rgba(46, 204, 113, 0.1)', border: '1px solid rgba(46, 204, 113, 0.3)' };
+        return { color: 'var(--status-success)', background: 'var(--status-success-soft)', border: '1px solid var(--status-success-soft)' };
       }
       if (status === 'failed') {
-        return { color: '#e74c3c', background: 'rgba(231, 76, 60, 0.1)', border: '1px solid rgba(231, 76, 60, 0.3)' };
+        return { color: 'var(--status-danger)', background: 'var(--status-danger-soft)', border: '1px solid var(--status-danger-soft)' };
       }
       if (status === 'processing' || status === 'uploading') {
-        return { color: '#3498db', background: 'rgba(52, 152, 219, 0.1)', border: '1px solid rgba(52, 152, 219, 0.3)' };
+        return { color: 'var(--status-info)', background: 'var(--status-info-soft)', border: '1px solid var(--status-info-soft)' };
       }
-      return { color: 'var(--text-muted)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' };
+      return { color: 'var(--text-muted)', background: 'var(--surface-interactive)', border: '1px solid var(--border-subtle)' };
     };
 
     return (
@@ -971,7 +971,7 @@ export default function RECampaignDetailPage() {
             <div style={{ fontWeight: 600, fontSize: '0.85rem', marginBottom: 8, color: 'var(--text-primary)' }}>Antrean Video Task (GLabs):</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {item.glabs_tasks.map(task => (
-                <div key={task.task_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.2)', padding: '8px 12px', borderRadius: 6, fontSize: '0.75rem' }}>
+                <div key={task.task_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--overlay-subtle)', padding: '8px 12px', borderRadius: 6, fontSize: '0.75rem' }}>
                   <div>
                     <div style={{ fontWeight: 600 }}>Task ID: {task.task_id}</div>
                     <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Klip {Number(task.clip_index) + 1} | Prompt: {task.prompt.slice(0, 50)}...</div>
@@ -1285,12 +1285,12 @@ export default function RECampaignDetailPage() {
             lines.push(`- **Drive Link:** [Google Drive](${v.drive_link})`);
           }
           lines.push('');
-          
+
           let clips = [];
           try {
             clips = JSON.parse(v.visual_tasks_json || '[]');
           } catch(e) {}
-          
+
           lines.push('##### Storyboard & Naskah');
           lines.push('| Clip | Voiceover Narration | Visual T2V Prompt |');
           lines.push('|---|---|---|');
@@ -1524,7 +1524,7 @@ export default function RECampaignDetailPage() {
 
     // Determine category styling
     let catColor = 'var(--accent-light)';
-    let catBg = 'rgba(108, 92, 231, 0.1)';
+    let catBg = 'var(--status-neutral-soft)';
     if (variant.angle_category === 'Ego') {
       catColor = '#ff6b81';
       catBg = 'rgba(255, 107, 129, 0.1)';
@@ -1532,13 +1532,13 @@ export default function RECampaignDetailPage() {
       catColor = '#70a1ff';
       catBg = 'rgba(112, 161, 255, 0.1)';
     } else if (variant.angle_category === 'Gut') {
-      catColor = '#2ecc71';
-      catBg = 'rgba(46, 204, 113, 0.1)';
+      catColor = 'var(--status-success)';
+      catBg = 'var(--status-success-soft)';
     }
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', color: 'var(--text-primary)', textAlign: 'left' }}>
-        
+
         {/* 1. Pipeline Status (Timeline Banner) */}
         {renderVariantTimelineBanner(variant)}
 
@@ -1549,7 +1549,7 @@ export default function RECampaignDetailPage() {
               📦 Foto Produk Referensi (Pixel Lock)
             </h4>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-              <div style={{ position: 'relative', width: '120px', height: '120px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', background: 'rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ position: 'relative', width: '120px', height: '120px', borderRadius: '6px', border: '1px solid var(--border-subtle)', overflow: 'hidden', background: 'var(--overlay-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {campaign.product_ref_image_path ? (
                   <img
                     src={campaign.product_ref_image_path}
@@ -1570,16 +1570,16 @@ export default function RECampaignDetailPage() {
                   Foto produk ini akan di-blend bersama prompt T2I pada klip ke-N untuk menjaga konsistensi produk. Pastikan foto sudah sesuai dengan keinginan Anda.
                 </p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                  <label 
-                    className="btn btn-secondary" 
-                    style={{ 
-                      padding: '6px 12px', 
-                      fontSize: '0.75rem', 
+                  <label
+                    className="btn btn-secondary"
+                    style={{
+                      padding: '6px 12px',
+                      fontSize: '0.75rem',
                       cursor: 'pointer',
-                      background: 'rgba(255, 255, 255, 0.08)',
-                      border: '1px solid rgba(255, 255, 255, 0.15)',
+                      background: 'var(--border-subtle)',
+                      border: '1px solid var(--border-subtle)',
                       borderRadius: '4px',
-                      color: '#fff',
+                      color: 'var(--text-primary)',
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '4px'
@@ -1606,23 +1606,23 @@ export default function RECampaignDetailPage() {
             🧠 Strategic Metadata
           </h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.8rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '6px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--surface-interactive)', paddingBottom: '6px' }}>
               <span style={{ color: 'var(--text-muted)' }}>Kategori Value:</span>
               <span style={{ color: catColor, background: catBg, padding: '2px 6px', borderRadius: '4px', fontWeight: '600', fontSize: '0.72rem' }}>
                 {variant.angle_category}
               </span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '6px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--surface-interactive)', paddingBottom: '6px' }}>
               <span style={{ color: 'var(--text-muted)' }}>Strategi Matriks:</span>
               <span style={{ fontWeight: '600' }}>{variant.matrix_strategy_used}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '6px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--surface-interactive)', paddingBottom: '6px' }}>
               <span style={{ color: 'var(--text-muted)' }}>Target Kognitif:</span>
               <span style={{ fontWeight: '600', color: variant.system_targeting === 'System 1' ? '#ff4757' : '#2ed573' }}>
                 {variant.system_targeting}
               </span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '6px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--surface-interactive)', paddingBottom: '6px' }}>
               <span style={{ color: 'var(--text-muted)' }}>Nusa Voice Persona:</span>
               <span style={{ fontWeight: '600', color: 'var(--accent-light)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                 🎙️ {variant.voice_persona_assigned}
@@ -1630,7 +1630,7 @@ export default function RECampaignDetailPage() {
             </div>
             <div style={{ marginTop: '8px' }}>
               <span style={{ color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Taktik Kognitif:</span>
-              <p style={{ margin: 0, fontSize: '0.78rem', lineHeight: '1.4', background: 'rgba(0,0,0,0.15)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.02)' }}>
+              <p style={{ margin: 0, fontSize: '0.78rem', lineHeight: '1.4', background: 'var(--overlay-subtle)', padding: '8px', borderRadius: '6px', border: '1px solid var(--surface-interactive)' }}>
                 {variant.angle_description}
               </p>
             </div>
@@ -1653,7 +1653,7 @@ export default function RECampaignDetailPage() {
                   padding: '6px 14px',
                   fontSize: '0.78rem',
                   fontWeight: '600',
-                  boxShadow: '0 4px 10px rgba(108, 92, 231, 0.3)'
+                  boxShadow: '0 4px 10px var(--status-neutral-soft)'
                 }}
               >
                 {isSaving ? '⏳ Menyimpan...' : '💾 Simpan Perubahan Naskah & Prompt'}
@@ -1682,7 +1682,7 @@ export default function RECampaignDetailPage() {
                       Klip #{idx + 1}
                     </span>
                     {ttsClip && ttsClip.status === 'completed' && (
-                      <span style={{ fontSize: '0.65rem', color: '#2ecc71', background: 'rgba(46,204,113,0.1)', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--status-success)', background: 'var(--status-success-soft)', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>
                         🎙️ Audio Ready
                       </span>
                     )}
@@ -1700,10 +1700,10 @@ export default function RECampaignDetailPage() {
                         style={{
                           width: '100%',
                           minHeight: '60px',
-                          background: 'rgba(0, 0, 0, 0.2)',
+                          background: 'var(--overlay-subtle)',
                           border: '1px solid var(--border)',
                           borderRadius: '6px',
-                          color: '#fff',
+                          color: 'var(--text-primary)',
                           padding: '8px',
                           fontSize: '0.78rem',
                           fontFamily: 'var(--font-sans)',
@@ -1727,10 +1727,10 @@ export default function RECampaignDetailPage() {
                               style={{
                                 width: '100%',
                                 minHeight: '60px',
-                                background: 'rgba(0, 0, 0, 0.2)',
+                                background: 'var(--overlay-subtle)',
                                 border: '1px solid var(--border)',
                                 borderRadius: '6px',
-                                color: '#dfe4ea',
+                                color: 'var(--text-secondary)',
                                 padding: '8px',
                                 fontSize: '0.74rem',
                                 fontFamily: 'var(--font-mono)',
@@ -1750,10 +1750,10 @@ export default function RECampaignDetailPage() {
                               style={{
                                 width: '100%',
                                 minHeight: '60px',
-                                background: 'rgba(0, 0, 0, 0.2)',
+                                background: 'var(--overlay-subtle)',
                                 border: '1px solid var(--border)',
                                 borderRadius: '6px',
-                                color: '#dfe4ea',
+                                color: 'var(--text-secondary)',
                                 padding: '8px',
                                 fontSize: '0.74rem',
                                 fontFamily: 'var(--font-mono)',
@@ -1768,10 +1768,10 @@ export default function RECampaignDetailPage() {
                         {variant.t2i_start_frame_paths?.[idx + 1] && (
                           <div style={{ marginTop: 8 }}>
                             <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2 }}>T2I Start Frame (Pixel Lock):</div>
-                            <img 
-                              src={variant.t2i_start_frame_paths[idx + 1]} 
-                              alt="Pixel Lock Start Frame" 
-                              style={{ maxWidth: '160px', borderRadius: '4px', border: '1px solid var(--border)' }} 
+                            <img
+                              src={variant.t2i_start_frame_paths[idx + 1]}
+                              alt="Pixel Lock Start Frame"
+                              style={{ maxWidth: '160px', borderRadius: '4px', border: '1px solid var(--border)' }}
                             />
                           </div>
                         )}
@@ -1788,10 +1788,10 @@ export default function RECampaignDetailPage() {
                             style={{
                               width: '100%',
                               minHeight: '60px',
-                              background: 'rgba(0, 0, 0, 0.2)',
+                              background: 'var(--overlay-subtle)',
                               border: '1px solid var(--border)',
                               borderRadius: '6px',
-                              color: '#dfe4ea',
+                              color: 'var(--text-secondary)',
                               padding: '8px',
                               fontSize: '0.74rem',
                               fontFamily: 'var(--font-mono)',
@@ -1825,7 +1825,7 @@ export default function RECampaignDetailPage() {
                         src={visualClipPaths[idx]}
                         controls
                         preload="metadata"
-                        style={{ width: '100%', maxHeight: '360px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', background: '#000' }}
+                        style={{ width: '100%', maxHeight: '360px', borderRadius: '6px', border: '1px solid var(--border-subtle)', background: '#000' }}
                       />
                     </div>
                   ) : (
@@ -1840,7 +1840,7 @@ export default function RECampaignDetailPage() {
 
         {/* 4. Konfigurasi Render & Output Section */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          
+
           <div style={{ background: 'var(--bg-glass)', border: '1px solid var(--border)', borderRadius: '8px', padding: '16px' }}>
             <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: 'var(--accent-light)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               ⚙️ Konfigurasi Render
@@ -1857,22 +1857,22 @@ export default function RECampaignDetailPage() {
                 </label>
                 <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Aktifkan TTS Voiceover</span>
               </div>
-              
+
               {opts.enable_tts && (
                 campaign.enable_tts === 1 ? (
-                  <div style={{ background: 'rgba(255,255,255,0.03)', padding: '10px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.78rem', marginTop: '-4px', marginBottom: '4px' }}>
+                  <div style={{ background: 'var(--surface-interactive)', padding: '10px', borderRadius: '6px', border: '1px solid var(--surface-interactive)', fontSize: '0.78rem', marginTop: '-4px', marginBottom: '4px' }}>
                     🎙️ <b>TTS Dikonfigurasi (Awal):</b> {campaign.voice_provider === 'gemini' ? 'Gemini Audio' : 'MiniMax TTS'} ({campaign.voice_persona}) | Speed: {campaign.voice_speed}x | Vol: {campaign.voice_volume}
                   </div>
                 ) : (
-                  <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '-4px', marginBottom: '4px' }}>
+                  <div style={{ background: 'var(--surface-interactive)', padding: '12px', borderRadius: '6px', border: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '-4px', marginBottom: '4px' }}>
                     <strong style={{ fontSize: '0.8rem', color: 'var(--accent-light)' }}>🎙️ Konfigurasi TTS Voiceover (Kustom)</strong>
                     <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                       <div style={{ flex: '1 1 120px' }}>
                         <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>TTS Provider</label>
-                        <select 
-                          value={campaign.voice_provider || 'gemini'} 
+                        <select
+                          value={campaign.voice_provider || 'gemini'}
                           onChange={(e) => updateCampaignSettings({ voice_provider: e.target.value })}
-                          style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '4px 8px', color: '#fff', fontSize: '0.75rem', outline: 'none' }}
+                          style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '4px 8px', color: 'var(--text-primary)', fontSize: '0.75rem', outline: 'none' }}
                         >
                           <option value="gemini">Gemini Audio</option>
                           <option value="minimax">MiniMax TTS</option>
@@ -1880,10 +1880,10 @@ export default function RECampaignDetailPage() {
                       </div>
                       <div style={{ flex: '1 1 120px' }}>
                         <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Voice Persona</label>
-                        <select 
-                          value={campaign.voice_persona || 'Kore'} 
+                        <select
+                          value={campaign.voice_persona || 'Kore'}
                           onChange={(e) => updateCampaignSettings({ voice_persona: e.target.value })}
-                          style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '4px 8px', color: '#fff', fontSize: '0.75rem', outline: 'none' }}
+                          style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '4px 8px', color: 'var(--text-primary)', fontSize: '0.75rem', outline: 'none' }}
                         >
                           {((campaign.voice_provider || 'gemini') === 'gemini'
                             ? GEMINI_VOICES
@@ -1902,14 +1902,14 @@ export default function RECampaignDetailPage() {
                           <span>Speed</span>
                           <span>{campaign.voice_speed || 1.0}x</span>
                         </label>
-                        <input 
-                          type="range" 
-                          min="0.5" 
-                          max="2.0" 
-                          step="0.1" 
-                          value={campaign.voice_speed || 1.0} 
+                        <input
+                          type="range"
+                          min="0.5"
+                          max="2.0"
+                          step="0.1"
+                          value={campaign.voice_speed || 1.0}
                           onChange={(e) => updateCampaignSettings({ voice_speed: Number(e.target.value) })}
-                          style={{ width: '100%', accentColor: 'var(--accent)' }} 
+                          style={{ width: '100%', accentColor: 'var(--accent)' }}
                         />
                       </div>
                       <div style={{ flex: '1 1 120px' }}>
@@ -1917,24 +1917,24 @@ export default function RECampaignDetailPage() {
                           <span>Volume</span>
                           <span>{campaign.voice_volume || 1.0}</span>
                         </label>
-                        <input 
-                          type="range" 
-                          min="0.1" 
-                          max="2.0" 
-                          step="0.1" 
-                          value={campaign.voice_volume || 1.0} 
+                        <input
+                          type="range"
+                          min="0.1"
+                          max="2.0"
+                          step="0.1"
+                          value={campaign.voice_volume || 1.0}
                           onChange={(e) => updateCampaignSettings({ voice_volume: Number(e.target.value) })}
-                          style={{ width: '100%', accentColor: 'var(--accent)' }} 
+                          style={{ width: '100%', accentColor: 'var(--accent)' }}
                         />
                       </div>
                     </div>
                     {(campaign.voice_provider || 'gemini') === 'minimax' && (
                       <div style={{ marginTop: '4px' }}>
                         <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>MiniMax Model Quality</label>
-                        <select 
-                          value={campaign.tts_model_quality || 'speech-2.8-turbo'} 
+                        <select
+                          value={campaign.tts_model_quality || 'speech-2.8-turbo'}
                           onChange={(e) => updateCampaignSettings({ tts_model_quality: e.target.value })}
-                          style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '4px 8px', color: '#fff', fontSize: '0.75rem', outline: 'none' }}
+                          style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '4px 8px', color: 'var(--text-primary)', fontSize: '0.75rem', outline: 'none' }}
                         >
                           <option value="speech-2.8-turbo">Turbo (speech-2.8-turbo)</option>
                           <option value="speech-2.8-hd">HD (speech-2.8-hd)</option>
@@ -1959,19 +1959,19 @@ export default function RECampaignDetailPage() {
 
               {opts.enable_ffmpeg && (
                 campaign.enable_ffmpeg === 1 ? (
-                  <div style={{ background: 'rgba(255,255,255,0.03)', padding: '10px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '0.78rem', marginTop: '-4px', marginBottom: '4px' }}>
+                  <div style={{ background: 'var(--surface-interactive)', padding: '10px', borderRadius: '6px', border: '1px solid var(--surface-interactive)', fontSize: '0.78rem', marginTop: '-4px', marginBottom: '4px' }}>
                     🎬 <b>FFmpeg Dikonfigurasi (Awal):</b> {campaign.ffmpeg_sync_option} | Scale: {campaign.ffmpeg_video_scale}x | SFX: {campaign.ffmpeg_sfx_volume} | BGM: {campaign.ffmpeg_bgm_volume}
                   </div>
                 ) : (
-                  <div style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '-4px', marginBottom: '4px' }}>
+                  <div style={{ background: 'var(--surface-interactive)', padding: '12px', borderRadius: '6px', border: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '-4px', marginBottom: '4px' }}>
                     <strong style={{ fontSize: '0.8rem', color: 'var(--accent-light)' }}>🎬 Konfigurasi FFmpeg Video Studio (Kustom)</strong>
-                    
+
                     <div>
                       <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Metode Sinkronisasi Audio-Video</label>
-                      <select 
-                        value={campaign.ffmpeg_sync_option || 'smart_sync'} 
+                      <select
+                        value={campaign.ffmpeg_sync_option || 'smart_sync'}
                         onChange={(e) => updateCampaignSettings({ ffmpeg_sync_option: e.target.value })}
-                        style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '4px 8px', color: '#fff', fontSize: '0.75rem', outline: 'none' }}
+                        style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '4px 8px', color: 'var(--text-primary)', fontSize: '0.75rem', outline: 'none' }}
                       >
                         <option value="smart_sync">Auto-Pilot Smart Sync (Sangat Direkomendasikan)</option>
                         <option value="shortest">Shortest (Potong video mengikuti audio)</option>
@@ -1986,14 +1986,14 @@ export default function RECampaignDetailPage() {
                         <span>Video Scale (Zoom):</span>
                         <span>{Math.round((campaign.ffmpeg_video_scale || 1.0) * 100)}%</span>
                       </label>
-                      <input 
-                        type="range" 
-                        min="1.0" 
-                        max="2.0" 
-                        step="0.05" 
-                        value={campaign.ffmpeg_video_scale || 1.0} 
+                      <input
+                        type="range"
+                        min="1.0"
+                        max="2.0"
+                        step="0.05"
+                        value={campaign.ffmpeg_video_scale || 1.0}
                         onChange={(e) => updateCampaignSettings({ ffmpeg_video_scale: Number(e.target.value) })}
-                        style={{ width: '100%', accentColor: 'var(--accent)' }} 
+                        style={{ width: '100%', accentColor: 'var(--accent)' }}
                       />
                     </div>
 
@@ -2003,14 +2003,14 @@ export default function RECampaignDetailPage() {
                           <span>SFX Volume:</span>
                           <span>{Math.round((campaign.ffmpeg_sfx_volume || 0.0) * 100)}%</span>
                         </label>
-                        <input 
-                          type="range" 
-                          min="0.0" 
-                          max="1.0" 
-                          step="0.05" 
-                          value={campaign.ffmpeg_sfx_volume || 0.0} 
+                        <input
+                          type="range"
+                          min="0.0"
+                          max="1.0"
+                          step="0.05"
+                          value={campaign.ffmpeg_sfx_volume || 0.0}
                           onChange={(e) => updateCampaignSettings({ ffmpeg_sfx_volume: Number(e.target.value) })}
-                          style={{ width: '100%', accentColor: 'var(--accent)' }} 
+                          style={{ width: '100%', accentColor: 'var(--accent)' }}
                         />
                       </div>
                       <div style={{ flex: '1 1 120px' }}>
@@ -2018,14 +2018,14 @@ export default function RECampaignDetailPage() {
                           <span>BGM Volume:</span>
                           <span>{Math.round((campaign.ffmpeg_bgm_volume !== undefined && campaign.ffmpeg_bgm_volume !== null ? campaign.ffmpeg_bgm_volume : 0.0) * 100)}%</span>
                         </label>
-                        <input 
-                          type="range" 
-                          min="0.0" 
-                          max="1.0" 
-                          step="0.05" 
-                          value={campaign.ffmpeg_bgm_volume !== undefined && campaign.ffmpeg_bgm_volume !== null ? campaign.ffmpeg_bgm_volume : 0.0} 
+                        <input
+                          type="range"
+                          min="0.0"
+                          max="1.0"
+                          step="0.05"
+                          value={campaign.ffmpeg_bgm_volume !== undefined && campaign.ffmpeg_bgm_volume !== null ? campaign.ffmpeg_bgm_volume : 0.0}
                           onChange={(e) => updateCampaignSettings({ ffmpeg_bgm_volume: Number(e.target.value) })}
-                          style={{ width: '100%', accentColor: 'var(--accent)' }} 
+                          style={{ width: '100%', accentColor: 'var(--accent)' }}
                         />
                       </div>
                     </div>
@@ -2035,7 +2035,7 @@ export default function RECampaignDetailPage() {
             </div>
 
             {campaign.is_bridging_active === 1 && (
-              <div style={{ marginTop: '12px', background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+              <div style={{ marginTop: '12px', background: 'var(--surface-interactive)', padding: '12px', borderRadius: '6px', border: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
                 <strong style={{ fontSize: '0.8rem', color: 'var(--accent-light)' }}>🔌 Konfigurasi Bridging Produk</strong>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                   <div style={{ flex: '1 1 120px' }}>
@@ -2049,7 +2049,7 @@ export default function RECampaignDetailPage() {
                         const val = parseInt(e.target.value) || 3;
                         updateCampaignSettings({ bridge_at_clip: val });
                       }}
-                      style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '4px 8px', color: '#fff', fontSize: '0.75rem', outline: 'none' }}
+                      style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '4px 8px', color: 'var(--text-primary)', fontSize: '0.75rem', outline: 'none' }}
                     />
                   </div>
                   <div style={{ flex: '1 1 120px' }}>
@@ -2057,7 +2057,7 @@ export default function RECampaignDetailPage() {
                     <select
                       value={campaign.bridge_duration_clips || 0}
                       onChange={(e) => updateCampaignSettings({ bridge_duration_clips: parseInt(e.target.value) || 0 })}
-                      style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '4px 8px', color: '#fff', fontSize: '0.75rem', outline: 'none' }}
+                      style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '4px 8px', color: 'var(--text-primary)', fontSize: '0.75rem', outline: 'none' }}
                     >
                       <option value="0">0 (Sisa seluruh klip)</option>
                       <option value="1">1 Klip</option>
@@ -2092,7 +2092,7 @@ export default function RECampaignDetailPage() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  boxShadow: '0 4px 12px rgba(46, 204, 113, 0.2)'
+                  boxShadow: '0 4px 12px var(--status-success-soft)'
                 }}
               >
                 {isRendering || variant.visual_status === 'processing' ? (
@@ -2106,15 +2106,15 @@ export default function RECampaignDetailPage() {
 
           {/* Muxed Final Video Card */}
           {variant.ffmpeg_status === 'completed' && variant.ffmpeg_output_path && (
-            <div style={{ background: 'rgba(46, 204, 113, 0.05)', border: '1px solid rgba(46, 204, 113, 0.3)', borderRadius: '8px', padding: '16px' }}>
-              <div style={{ fontWeight: '700', marginBottom: '8px', color: '#2ecc71', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ background: 'var(--status-success-soft)', border: '1px solid var(--status-success-soft)', borderRadius: '8px', padding: '16px' }}>
+              <div style={{ fontWeight: '700', marginBottom: '8px', color: 'var(--status-success)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 🎬 Video Final (Muxed)
               </div>
               <video
                 src={variant.ffmpeg_output_path}
                 controls
                 preload="metadata"
-                style={{ width: '100%', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', background: '#000' }}
+                style={{ width: '100%', borderRadius: '6px', border: '1px solid var(--border-subtle)', background: '#000' }}
               />
               {variant.drive_link && (
                 <a
@@ -2131,9 +2131,9 @@ export default function RECampaignDetailPage() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '4px',
-                    background: 'rgba(46, 204, 113, 0.1)',
-                    borderColor: 'rgba(46, 204, 113, 0.3)',
-                    color: '#2ecc71'
+                    background: 'var(--status-success-soft)',
+                    borderColor: 'var(--status-success-soft)',
+                    color: 'var(--status-success)'
                   }}
                 >
                   💾 Buka di Google Drive
@@ -2161,9 +2161,9 @@ export default function RECampaignDetailPage() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '4px',
-                  background: 'rgba(46, 204, 113, 0.1)',
-                  borderColor: 'rgba(46, 204, 113, 0.3)',
-                  color: '#2ecc71'
+                  background: 'var(--status-success-soft)',
+                  borderColor: 'var(--status-success-soft)',
+                  color: 'var(--status-success)'
                 }}
               >
                 💾 Buka Folder GDrive
@@ -2241,7 +2241,7 @@ export default function RECampaignDetailPage() {
         <div style={{ color: 'var(--text-primary)', fontSize: '0.82rem', textAlign: 'left' }}>
           {/* Deconstruction Summary */}
           {parsed.analysis_summary && (
-            <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '12px 16px', borderRadius: '6px', border: '1px solid rgba(255, 255, 255, 0.05)', marginBottom: '14px' }}>
+            <div style={{ background: 'var(--surface-interactive)', padding: '12px 16px', borderRadius: '6px', border: '1px solid var(--surface-interactive)', marginBottom: '14px' }}>
               <div style={{ fontWeight: '700', marginBottom: '8px', color: 'var(--accent-light)', fontSize: '0.88rem' }}>💡 Analisis & Strategi Upgrade</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div>
@@ -2253,14 +2253,14 @@ export default function RECampaignDetailPage() {
                 </div>
                 <div>
                   <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: 600 }}>Strategi Peningkatan (Upgrade)</span>
-                  <p style={{ margin: '4px 0 0 0', lineHeight: '1.4', color: '#f1c40f' }}>{parsed.analysis_summary.the_upgrade_strategy || '-'}</p>
+                  <p style={{ margin: '4px 0 0 0', lineHeight: '1.4', color: 'var(--status-warning)' }}>{parsed.analysis_summary.the_upgrade_strategy || '-'}</p>
                 </div>
               </div>
             </div>
           )}
 
           {/* Dynamic Navigation Tabs */}
-          <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.08)', marginBottom: '14px', gap: '6px', flexWrap: 'wrap', overflowX: 'auto' }}>
+          <div style={{ display: 'flex', borderBottom: '1px solid var(--border-subtle)', marginBottom: '14px', gap: '6px', flexWrap: 'wrap', overflowX: 'auto' }}>
             {[
               { id: 'storyboard', label: '📖 Storyboard', count: storyboard.length },
               { id: 'voiceover', label: '🎤 Voiceover', count: voiceover.length },
@@ -2277,7 +2277,7 @@ export default function RECampaignDetailPage() {
                   type="button"
                   style={{
                     padding: '8px 14px',
-                    background: isActive ? 'rgba(255,255,255,0.04)' : 'transparent',
+                    background: isActive ? 'var(--surface-interactive)' : 'transparent',
                     color: isActive ? 'var(--accent-light)' : 'var(--text-muted)',
                     border: 'none',
                     borderBottom: isActive ? '2px solid var(--accent-light)' : '2px solid transparent',
@@ -2303,11 +2303,11 @@ export default function RECampaignDetailPage() {
                   <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Tidak ada data storyboard.</div>
                 ) : (
                   storyboard.map((s, idx) => (
-                    <div key={idx} style={{ display: 'flex', gap: '14px', background: 'rgba(255,255,255,0.01)', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.03)' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '60px', borderRight: '1px solid rgba(255,255,255,0.05)', paddingRight: '12px' }}>
+                    <div key={idx} style={{ display: 'flex', gap: '14px', background: 'var(--surface-interactive)', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--surface-interactive)' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '60px', borderRight: '1px solid var(--surface-interactive)', paddingRight: '12px' }}>
                         <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Scene</span>
                         <span style={{ fontSize: '1.15rem', fontWeight: 'bold', color: 'var(--accent-light)' }}>{s.scene || idx + 1}</span>
-                        <span style={{ fontSize: '0.65rem', background: 'rgba(255,255,255,0.05)', padding: '2px 5px', borderRadius: '4px', marginTop: '4px', fontWeight: 600 }}>{s.duration || '-'}</span>
+                        <span style={{ fontSize: '0.65rem', background: 'var(--surface-interactive)', padding: '2px 5px', borderRadius: '4px', marginTop: '4px', fontWeight: 600 }}>{s.duration || '-'}</span>
                       </div>
                       <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '12px' }}>
                         <div>
@@ -2337,26 +2337,26 @@ export default function RECampaignDetailPage() {
                   voiceover.map((v, idx) => {
                     const ttsClip = item.tts_clips?.find(c => c.clip_index === idx);
                     return (
-                      <div key={idx} style={{ display: 'flex', gap: '14px', background: 'rgba(255,255,255,0.01)', padding: '10px 12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.03)', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '60px', borderRight: '1px solid rgba(255,255,255,0.05)', paddingRight: '12px' }}>
+                      <div key={idx} style={{ display: 'flex', gap: '14px', background: 'var(--surface-interactive)', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--surface-interactive)', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '60px', borderRight: '1px solid var(--surface-interactive)', paddingRight: '12px' }}>
                           <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Scene</span>
                           <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--accent-light)' }}>{v.scene || idx + 1}</span>
-                          <span style={{ fontSize: '0.65rem', background: 'rgba(255,255,255,0.05)', padding: '2px 5px', borderRadius: '4px', marginTop: '4px', fontWeight: 600 }}>{v.duration || '-'}</span>
+                          <span style={{ fontSize: '0.65rem', background: 'var(--surface-interactive)', padding: '2px 5px', borderRadius: '4px', marginTop: '4px', fontWeight: 600 }}>{v.duration || '-'}</span>
                         </div>
-                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', padding: '8px 12px', borderRadius: '6px', borderLeft: '3px solid var(--accent)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <div style={{ flex: 1, background: 'var(--surface-interactive)', padding: '8px 12px', borderRadius: '6px', borderLeft: '3px solid var(--accent)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                           <p style={{ margin: 0, fontStyle: 'italic', fontSize: '0.85rem', lineHeight: '1.5', color: '#ecf0f1' }}>
                             "{v.narration || '-'}"
                           </p>
                           {item.tts_status === 'completed' && ttsClip && ttsClip.status === 'completed' && (
                             <div style={{ marginTop: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <audio 
-                                src={ttsClip.audio_path} 
-                                controls 
-                                style={{ 
-                                  width: '100%', 
+                              <audio
+                                src={ttsClip.audio_path}
+                                controls
+                                style={{
+                                  width: '100%',
                                   height: '32px',
                                   borderRadius: '4px'
-                                }} 
+                                }}
                               />
                             </div>
                           )}
@@ -2378,14 +2378,14 @@ export default function RECampaignDetailPage() {
                     const copyKey = `t2v_${item.id}_${idx}`;
                     const isCopied = copySuccess[copyKey];
                     return (
-                      <div key={idx} style={{ background: 'rgba(0,0,0,0.15)', padding: '14px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.04)' }}>
+                      <div key={idx} style={{ background: 'var(--overlay-subtle)', padding: '14px', borderRadius: '6px', border: '1px solid var(--surface-interactive)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                           <span style={{ fontWeight: 'bold', color: 'var(--accent-light)', fontSize: '0.85rem' }}>🤖 Clip {p.clip || idx + 1} ({p.duration || 'Estimated Duration'})</span>
                           <button
                             type="button"
                             onClick={() => handleCopy(p.prompt, copyKey)}
                             className="btn btn-secondary btn-sm"
-                            style={{ fontSize: '0.65rem', padding: '2px 6px', background: isCopied ? '#2ed573' : 'rgba(255,255,255,0.08)', color: '#fff', border: 'none' }}
+                            style={{ fontSize: '0.65rem', padding: '2px 6px', background: isCopied ? '#2ed573' : 'var(--border-subtle)', color: 'var(--text-primary)', border: 'none' }}
                           >
                             {isCopied ? '✅ Terkopi!' : '📋 Salin Prompt'}
                           </button>
@@ -2409,8 +2409,8 @@ export default function RECampaignDetailPage() {
                           wordBreak: 'break-all',
                           fontSize: '0.75rem',
                           fontFamily: 'var(--font-mono)',
-                          color: '#dfe4ea',
-                          border: '1px solid rgba(255,255,255,0.03)',
+                          color: 'var(--text-secondary)',
+                          border: '1px solid var(--surface-interactive)',
                           margin: 0,
                           lineHeight: 1.4
                         }}>
@@ -2419,17 +2419,17 @@ export default function RECampaignDetailPage() {
                         {item.visual_status === 'completed' && visualClipPaths && visualClipPaths[clipIdx] ? (
                           <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                             <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>🎬 Generated Visual Clip (Local)</span>
-                            <video 
-                              src={visualClipPaths[clipIdx]} 
-                              controls 
+                            <video
+                              src={visualClipPaths[clipIdx]}
+                              controls
                               preload="metadata"
-                              style={{ 
-                                width: '100%', 
-                                maxHeight: '260px', 
-                                borderRadius: '6px', 
-                                border: '1px solid rgba(255, 255, 255, 0.08)',
+                              style={{
+                                width: '100%',
+                                maxHeight: '260px',
+                                borderRadius: '6px',
+                                border: '1px solid var(--border-subtle)',
                                 background: '#000'
-                              }} 
+                              }}
                             />
                           </div>
                         ) : (
@@ -2451,14 +2451,14 @@ export default function RECampaignDetailPage() {
                     const copyKey = `t2i_${item.id}_${idx}`;
                     const isCopied = copySuccess[copyKey];
                     return (
-                      <div key={idx} style={{ background: 'rgba(0,0,0,0.15)', padding: '14px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.04)' }}>
+                      <div key={idx} style={{ background: 'var(--overlay-subtle)', padding: '14px', borderRadius: '6px', border: '1px solid var(--surface-interactive)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                           <span style={{ fontWeight: 'bold', color: 'var(--accent-light)', fontSize: '0.85rem' }}>📸 Clip {p.clip || idx + 1} (T2I Start Frame)</span>
                           <button
                             type="button"
                             onClick={() => handleCopy(p.prompt, copyKey)}
                             className="btn btn-secondary btn-sm"
-                            style={{ fontSize: '0.65rem', padding: '2px 6px', background: isCopied ? '#2ed573' : 'rgba(255,255,255,0.08)', color: '#fff', border: 'none' }}
+                            style={{ fontSize: '0.65rem', padding: '2px 6px', background: isCopied ? '#2ed573' : 'var(--border-subtle)', color: 'var(--text-primary)', border: 'none' }}
                           >
                             {isCopied ? '✅ Terkopi!' : '📋 Salin Prompt'}
                           </button>
@@ -2473,8 +2473,8 @@ export default function RECampaignDetailPage() {
                           wordBreak: 'break-all',
                           fontSize: '0.75rem',
                           fontFamily: 'var(--font-mono)',
-                          color: '#dfe4ea',
-                          border: '1px solid rgba(255,255,255,0.03)',
+                          color: 'var(--text-secondary)',
+                          border: '1px solid var(--surface-interactive)',
                           margin: 0,
                           lineHeight: 1.4
                         }}>
@@ -2484,17 +2484,17 @@ export default function RECampaignDetailPage() {
                         {item.t2i_start_frame_path && (
                           <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                             <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>🖼️ Generated Start Frame Image</span>
-                            <img 
-                              src={item.t2i_start_frame_path} 
+                            <img
+                              src={item.t2i_start_frame_path}
                               alt={`Clip ${p.clip || idx + 1} Start Frame`}
-                              style={{ 
-                                maxWidth: '100%', 
-                                maxHeight: '300px', 
-                                borderRadius: '6px', 
-                                border: '1px solid rgba(255, 255, 255, 0.08)',
+                              style={{
+                                maxWidth: '100%',
+                                maxHeight: '300px',
+                                borderRadius: '6px',
+                                border: '1px solid var(--border-subtle)',
                                 objectFit: 'contain',
                                 background: '#111'
-                              }} 
+                              }}
                             />
                           </div>
                         )}
@@ -2515,14 +2515,14 @@ export default function RECampaignDetailPage() {
                     const copyKey = `i2v_${item.id}_${idx}`;
                     const isCopied = copySuccess[copyKey];
                     return (
-                      <div key={idx} style={{ background: 'rgba(0,0,0,0.15)', padding: '14px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.04)' }}>
+                      <div key={idx} style={{ background: 'var(--overlay-subtle)', padding: '14px', borderRadius: '6px', border: '1px solid var(--surface-interactive)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                           <span style={{ fontWeight: 'bold', color: 'var(--accent-light)', fontSize: '0.85rem' }}>🎥 Clip {p.clip || idx + 1} (I2V Animation)</span>
                           <button
                             type="button"
                             onClick={() => handleCopy(p.prompt, copyKey)}
                             className="btn btn-secondary btn-sm"
-                            style={{ fontSize: '0.65rem', padding: '2px 6px', background: isCopied ? '#2ed573' : 'rgba(255,255,255,0.08)', color: '#fff', border: 'none' }}
+                            style={{ fontSize: '0.65rem', padding: '2px 6px', background: isCopied ? '#2ed573' : 'var(--border-subtle)', color: 'var(--text-primary)', border: 'none' }}
                           >
                             {isCopied ? '✅ Terkopi!' : '📋 Salin Prompt'}
                           </button>
@@ -2537,8 +2537,8 @@ export default function RECampaignDetailPage() {
                           wordBreak: 'break-all',
                           fontSize: '0.75rem',
                           fontFamily: 'var(--font-mono)',
-                          color: '#dfe4ea',
-                          border: '1px solid rgba(255,255,255,0.03)',
+                          color: 'var(--text-secondary)',
+                          border: '1px solid var(--surface-interactive)',
                           margin: 0,
                           lineHeight: 1.4
                         }}>
@@ -2548,17 +2548,17 @@ export default function RECampaignDetailPage() {
                         {item.visual_status === 'completed' && visualClipPaths && visualClipPaths[clipIdx] ? (
                           <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                             <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>🎬 Generated Visual Clip (Local)</span>
-                            <video 
-                              src={visualClipPaths[clipIdx]} 
-                              controls 
+                            <video
+                              src={visualClipPaths[clipIdx]}
+                              controls
                               preload="metadata"
-                              style={{ 
-                                width: '100%', 
-                                maxHeight: '260px', 
-                                borderRadius: '6px', 
-                                border: '1px solid rgba(255, 255, 255, 0.08)',
+                              style={{
+                                width: '100%',
+                                maxHeight: '260px',
+                                borderRadius: '6px',
+                                border: '1px solid var(--border-subtle)',
                                 background: '#000'
-                              }} 
+                              }}
                             />
                           </div>
                         ) : (
@@ -2579,7 +2579,7 @@ export default function RECampaignDetailPage() {
                   const universalCap = parsed.caption || parsed.universal_caption || (typeof parsed.social_media_package === 'object' ? parsed.social_media_package?.caption : '') || parsed.tiktok_caption || parsed.ig_caption || '';
                   const isCopied = copySuccess[capKey];
                   return (
-                    <div style={{ background: 'rgba(255,255,255,0.01)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.04)' }}>
+                    <div style={{ background: 'var(--surface-interactive)', padding: '16px', borderRadius: '8px', border: '1px solid var(--surface-interactive)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                         <span style={{ fontWeight: 'bold', color: 'var(--accent-light)', fontSize: '0.85rem' }}>📱 Universal Social Media Caption</span>
                         <button
@@ -2587,7 +2587,7 @@ export default function RECampaignDetailPage() {
                           disabled={!universalCap}
                           onClick={() => handleCopy(universalCap, capKey)}
                           className="btn btn-secondary btn-sm"
-                          style={{ fontSize: '0.7rem', padding: '4px 10px', background: isCopied ? '#2ed573' : 'rgba(255,255,255,0.08)', color: '#fff', border: 'none' }}
+                          style={{ fontSize: '0.7rem', padding: '4px 10px', background: isCopied ? '#2ed573' : 'var(--border-subtle)', color: 'var(--text-primary)', border: 'none' }}
                         >
                           {isCopied ? '✅ Terkopi!' : '📋 Salin Caption'}
                         </button>
@@ -2595,7 +2595,7 @@ export default function RECampaignDetailPage() {
                       <textarea
                         readOnly={true}
                         className="form-textarea"
-                        style={{ width: '100%', minHeight: '120px', fontSize: '0.82rem', background: '#09090b', color: '#fff', borderRadius: '6px', padding: '10px', lineHeight: 1.4 }}
+                        style={{ width: '100%', minHeight: '120px', fontSize: '0.82rem', background: 'var(--surface)', color: 'var(--text-primary)', borderRadius: '6px', padding: '10px', lineHeight: 1.4 }}
                         value={universalCap}
                         placeholder="Naskah caption universal media sosial (TikTok, Instagram, Facebook, Shorts)..."
                       />
@@ -2698,7 +2698,7 @@ export default function RECampaignDetailPage() {
       const plan = editedVideoPlans[item.id] || [];
       const dna = editedVideoDnas[item.id] || {};
       const settings = workflowSettings[item.id] || {};
-      const isProductionFailed = 
+      const isProductionFailed =
         item.visual_status === 'failed' ||
         item.tts_status === 'failed' ||
         item.ffmpeg_status === 'failed' ||
@@ -2829,7 +2829,7 @@ export default function RECampaignDetailPage() {
         if (!file) return;
         const taskKey = `${item.id}_${clipIdx}`;
         setReplacingSF(prev => ({ ...prev, [taskKey]: true }));
-        
+
         const formData = new FormData();
         formData.append('file', file);
         formData.append('clipIndex', clipIdx);
@@ -2981,7 +2981,7 @@ export default function RECampaignDetailPage() {
             <div style={{
               background: 'rgba(230, 126, 34, 0.08)',
               border: '1px solid rgba(230, 126, 34, 0.3)',
-              color: '#f39c12',
+              color: 'var(--status-warning)',
               padding: '16px 20px',
               borderRadius: '8px',
               marginBottom: '20px',
@@ -2992,7 +2992,7 @@ export default function RECampaignDetailPage() {
             }}>
               <span style={{ fontSize: '1.4rem' }}>⏳</span>
               <div>
-                <strong style={{ display: 'block', marginBottom: '2px', color: '#fff' }}>Menunggu Review Kreatif (Human-in-the-Loop)</strong>
+                <strong style={{ display: 'block', marginBottom: '2px', color: 'var(--text-primary)' }}>Menunggu Review Kreatif (Human-in-the-Loop)</strong>
                 Gemini telah merancang Dekonstruksi Asli & Rencana Video baru di bawah ini. Harap tinjau voiceover, prompt gambar T2I, dan prompt pergerakan I2V. Anda bisa mengedit teksnya secara bebas, meregenerasi gambar T2I, dan menyesuaikan tahapan pipa produksi sebelum klik tombol <strong>"Approve & Proceed to Production"</strong>.
               </div>
             </div>
@@ -3000,9 +3000,9 @@ export default function RECampaignDetailPage() {
 
           {item.workflow_status === 'production_processing' && (
             <div style={{
-              background: 'rgba(52, 152, 219, 0.08)',
-              border: '1px solid rgba(52, 152, 219, 0.3)',
-              color: '#3498db',
+              background: 'var(--status-info-soft)',
+              border: '1px solid var(--status-info-soft)',
+              color: 'var(--status-info)',
               padding: '16px 20px',
               borderRadius: '8px',
               marginBottom: '20px',
@@ -3013,7 +3013,7 @@ export default function RECampaignDetailPage() {
             }}>
               <span style={{ fontSize: '1.4rem' }}>⚙️</span>
               <div>
-                <strong style={{ display: 'block', marginBottom: '2px', color: '#fff' }}>Sedang Memproses Produksi...</strong>
+                <strong style={{ display: 'block', marginBottom: '2px', color: 'var(--text-primary)' }}>Sedang Memproses Produksi...</strong>
                 Antrean produksi sedang berjalan. Mesin sedang melakukan render audio TTS, visual G-Labs (Veo/Kling), dan penggabungan FFmpeg. Antarmuka ini dikunci sementara (Read-Only) hingga produksi selesai.
               </div>
             </div>
@@ -3021,9 +3021,9 @@ export default function RECampaignDetailPage() {
 
           {item.workflow_status === 'completed' && !isProductionFailed && (
             <div style={{
-              background: 'rgba(46, 204, 113, 0.08)',
-              border: '1px solid rgba(46, 204, 113, 0.3)',
-              color: '#2ecc71',
+              background: 'var(--status-success-soft)',
+              border: '1px solid var(--status-success-soft)',
+              color: 'var(--status-success)',
               padding: '16px 20px',
               borderRadius: '8px',
               marginBottom: '20px',
@@ -3034,7 +3034,7 @@ export default function RECampaignDetailPage() {
             }}>
               <span style={{ fontSize: '1.4rem' }}>✅</span>
               <div>
-                <strong style={{ display: 'block', marginBottom: '2px', color: '#fff' }}>Produksi Selesai</strong>
+                <strong style={{ display: 'block', marginBottom: '2px', color: 'var(--text-primary)' }}>Produksi Selesai</strong>
                 Tahapan produksi (TTS, Video G-Labs, dan Muxing FFmpeg) telah selesai dieksekusi sepenuhnya! Video akhir siap diunduh atau diposting.
               </div>
             </div>
@@ -3042,9 +3042,9 @@ export default function RECampaignDetailPage() {
 
           {isProductionFailed && (
             <div style={{
-              background: 'rgba(231, 76, 60, 0.08)',
-              border: '1px solid rgba(231, 76, 60, 0.3)',
-              color: '#e74c3c',
+              background: 'var(--status-danger-soft)',
+              border: '1px solid var(--status-danger-soft)',
+              color: 'var(--status-danger)',
               padding: '16px 20px',
               borderRadius: '8px',
               marginBottom: '20px',
@@ -3055,7 +3055,7 @@ export default function RECampaignDetailPage() {
             }}>
               <span style={{ fontSize: '1.4rem' }}>❌</span>
               <div>
-                <strong style={{ display: 'block', marginBottom: '2px', color: '#fff' }}>Produksi Gagal / Terhenti</strong>
+                <strong style={{ display: 'block', marginBottom: '2px', color: 'var(--text-primary)' }}>Produksi Gagal / Terhenti</strong>
                 Terjadi kegagalan saat memproses tahapan produksi (TTS, Video G-Labs, atau FFmpeg). Anda dapat mengedit storyboard di bawah ini, mengunggah Start Frame pengganti, lalu klik tombol <strong>"Approve & Proceed to Production"</strong> untuk merender ulang video.
               </div>
             </div>
@@ -3076,9 +3076,9 @@ export default function RECampaignDetailPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ fontSize: '1.2rem' }}>🛡️</span>
-                  <span style={{ fontWeight: '700', fontSize: '0.9rem', color: '#fff' }}>TikTok Shop Compliance Audit</span>
+                  <span style={{ fontWeight: '700', fontSize: '0.9rem', color: 'var(--text-primary)' }}>TikTok Shop Compliance Audit</span>
                 </div>
-                
+
                 {/* Verdict Badge */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Status:</span>
@@ -3088,27 +3088,27 @@ export default function RECampaignDetailPage() {
                     textTransform: 'uppercase',
                     padding: '4px 10px',
                     borderRadius: '20px',
-                    background: item.compliance_status === 'PASS' 
-                      ? 'rgba(46, 204, 113, 0.15)' 
-                      : item.compliance_status === 'REVISE' 
-                        ? 'rgba(241, 196, 15, 0.15)' 
-                        : 'rgba(231, 76, 60, 0.15)',
-                    color: item.compliance_status === 'PASS' 
-                      ? '#2ecc71' 
-                      : item.compliance_status === 'REVISE' 
-                        ? '#f1c40f' 
-                        : '#e74c3c',
+                    background: item.compliance_status === 'PASS'
+                      ? 'var(--status-success-soft)'
+                      : item.compliance_status === 'REVISE'
+                        ? 'rgba(241, 196, 15, 0.15)'
+                        : 'var(--status-danger-soft)',
+                    color: item.compliance_status === 'PASS'
+                      ? 'var(--status-success)'
+                      : item.compliance_status === 'REVISE'
+                        ? 'var(--status-warning)'
+                        : 'var(--status-danger)',
                     border: `1px solid ${
-                      item.compliance_status === 'PASS' 
-                        ? '#2ecc71' 
-                        : item.compliance_status === 'REVISE' 
-                          ? '#f1c40f' 
-                          : '#e74c3c'
+                      item.compliance_status === 'PASS'
+                        ? 'var(--status-success)'
+                        : item.compliance_status === 'REVISE'
+                          ? 'var(--status-warning)'
+                          : 'var(--status-danger)'
                     }`
                   }}>
                     {item.compliance_status}
                   </span>
-                  
+
                   {/* Risk Score */}
                   {item.compliance_score !== undefined && (
                     <span style={{
@@ -3116,9 +3116,9 @@ export default function RECampaignDetailPage() {
                       fontWeight: '700',
                       padding: '4px 10px',
                       borderRadius: '20px',
-                      background: 'rgba(255,255,255,0.05)',
+                      background: 'var(--surface-interactive)',
                       border: '1px solid var(--border)',
-                      color: item.compliance_score < 30 ? '#2ecc71' : item.compliance_score < 70 ? '#f1c40f' : '#e74c3c'
+                      color: item.compliance_score < 30 ? 'var(--status-success)' : item.compliance_score < 70 ? 'var(--status-warning)' : 'var(--status-danger)'
                     }}>
                       Skor Risiko: {item.compliance_score}/100
                     </span>
@@ -3134,12 +3134,12 @@ export default function RECampaignDetailPage() {
                 if (issues.length === 0) return null;
                 return (
                   <div style={{
-                    background: 'rgba(0,0,0,0.2)',
+                    background: 'var(--overlay-subtle)',
                     borderRadius: '8px',
                     padding: '12px 16px',
-                    borderLeft: '4px solid #f1c40f'
+                    borderLeft: '4px solid var(--status-warning)'
                   }}>
-                    <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#f1c40f', display: 'block', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--status-warning)', display: 'block', marginBottom: '6px' }}>
                       Peringatan Kepatuhan Kebijakan:
                     </span>
                     <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -3165,9 +3165,9 @@ export default function RECampaignDetailPage() {
                       flex: 1,
                       padding: '10px 14px',
                       borderRadius: '8px',
-                      background: activeVoVersion === 'original' ? 'rgba(255,255,255,0.08)' : 'transparent',
+                      background: activeVoVersion === 'original' ? 'var(--border-subtle)' : 'transparent',
                       border: `1px solid ${activeVoVersion === 'original' ? 'var(--accent)' : 'var(--border)'}`,
-                      color: activeVoVersion === 'original' ? '#fff' : 'var(--text-muted)',
+                      color: activeVoVersion === 'original' ? 'var(--text-primary)' : 'var(--text-muted)',
                       cursor: isReadOnly ? 'not-allowed' : 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -3192,9 +3192,9 @@ export default function RECampaignDetailPage() {
                       flex: 1,
                       padding: '10px 14px',
                       borderRadius: '8px',
-                      background: activeVoVersion === 'safe' ? 'rgba(46, 204, 113, 0.08)' : 'transparent',
-                      border: `1px solid ${activeVoVersion === 'safe' ? '#2ecc71' : 'var(--border)'}`,
-                      color: activeVoVersion === 'safe' ? '#2ecc71' : 'var(--text-muted)',
+                      background: activeVoVersion === 'safe' ? 'var(--status-success-soft)' : 'transparent',
+                      border: `1px solid ${activeVoVersion === 'safe' ? 'var(--status-success)' : 'var(--border)'}`,
+                      color: activeVoVersion === 'safe' ? 'var(--status-success)' : 'var(--text-muted)',
                       cursor: isReadOnly ? 'not-allowed' : 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -3216,12 +3216,12 @@ export default function RECampaignDetailPage() {
           )}
 
           {/* Sub-tab Navigation */}
-          <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '10px', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '10px', marginBottom: '20px' }}>
             <button
               type="button"
               onClick={() => setSubTab('decon')}
               style={{
-                background: subTab === 'decon' ? 'rgba(108, 92, 231, 0.15)' : 'transparent',
+                background: subTab === 'decon' ? 'var(--status-neutral-soft)' : 'transparent',
                 border: subTab === 'decon' ? '1px solid var(--accent)' : '1px solid transparent',
                 color: subTab === 'decon' ? 'var(--accent-light)' : 'var(--text-muted)',
                 padding: '8px 16px',
@@ -3238,7 +3238,7 @@ export default function RECampaignDetailPage() {
               type="button"
               onClick={() => setSubTab('storyboard')}
               style={{
-                background: subTab === 'storyboard' ? 'rgba(108, 92, 231, 0.15)' : 'transparent',
+                background: subTab === 'storyboard' ? 'var(--status-neutral-soft)' : 'transparent',
                 border: subTab === 'storyboard' ? '1px solid var(--accent)' : '1px solid transparent',
                 color: subTab === 'storyboard' ? 'var(--accent-light)' : 'var(--text-muted)',
                 padding: '8px 16px',
@@ -3255,7 +3255,7 @@ export default function RECampaignDetailPage() {
               type="button"
               onClick={() => setSubTab('assets')}
               style={{
-                background: subTab === 'assets' ? 'rgba(108, 92, 231, 0.15)' : 'transparent',
+                background: subTab === 'assets' ? 'var(--status-neutral-soft)' : 'transparent',
                 border: subTab === 'assets' ? '1px solid var(--accent)' : '1px solid transparent',
                 color: subTab === 'assets' ? 'var(--accent-light)' : 'var(--text-muted)',
                 padding: '8px 16px',
@@ -3272,7 +3272,7 @@ export default function RECampaignDetailPage() {
               type="button"
               onClick={() => setSubTab('dna')}
               style={{
-                background: subTab === 'dna' ? 'rgba(108, 92, 231, 0.15)' : 'transparent',
+                background: subTab === 'dna' ? 'var(--status-neutral-soft)' : 'transparent',
                 border: subTab === 'dna' ? '1px solid var(--accent)' : '1px solid transparent',
                 color: subTab === 'dna' ? 'var(--accent-light)' : 'var(--text-muted)',
                 padding: '8px 16px',
@@ -3289,7 +3289,7 @@ export default function RECampaignDetailPage() {
               type="button"
               onClick={() => setSubTab('logs')}
               style={{
-                background: subTab === 'logs' ? 'rgba(108, 92, 231, 0.15)' : 'transparent',
+                background: subTab === 'logs' ? 'var(--status-neutral-soft)' : 'transparent',
                 border: subTab === 'logs' ? '1px solid var(--accent)' : '1px solid transparent',
                 color: subTab === 'logs' ? 'var(--accent-light)' : 'var(--text-muted)',
                 padding: '8px 16px',
@@ -3307,13 +3307,13 @@ export default function RECampaignDetailPage() {
           {/* Sub-tab Content Panels */}
           {subTab === 'decon' && (
             <div style={{
-              background: 'rgba(255, 255, 255, 0.02)',
+              background: 'var(--surface-interactive)',
               padding: '20px',
               borderRadius: '8px',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
+              border: '1px solid var(--surface-interactive)',
               marginBottom: '20px'
             }}>
-              <h4 style={{ margin: '0 0 16px 0', color: '#fff', fontSize: '0.9rem', fontWeight: 700 }}>🔍 Dekonstruksi Asli Kompetitor</h4>
+              <h4 style={{ margin: '0 0 16px 0', color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 700 }}>🔍 Dekonstruksi Asli Kompetitor</h4>
               {(() => {
                 let deconList = [];
                 try { deconList = JSON.parse(item.original_deconstruction_json || '[]'); } catch {}
@@ -3324,7 +3324,7 @@ export default function RECampaignDetailPage() {
                   <div style={{ overflowX: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', textAlign: 'left' }}>
                       <thead>
-                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                        <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                           <th style={{ padding: '10px 8px', color: 'var(--text-muted)' }}>Klip</th>
                           <th style={{ padding: '10px 8px', color: 'var(--text-muted)' }}>Audio Asli (Verbatim)</th>
                           <th style={{ padding: '10px 8px', color: 'var(--text-muted)' }}>Terjemahan (ID)</th>
@@ -3333,7 +3333,7 @@ export default function RECampaignDetailPage() {
                       </thead>
                       <tbody>
                         {deconList.map((d, index) => (
-                          <tr key={index} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                          <tr key={index} style={{ borderBottom: '1px solid var(--surface-interactive)' }}>
                             <td style={{ padding: '10px 8px', fontWeight: 600 }}>{d.scene_number || (index + 1)}</td>
                             <td style={{ padding: '10px 8px', verticalAlign: 'top', fontStyle: 'italic' }}>{d.verbatim_audio_ori || '-'}</td>
                             <td style={{ padding: '10px 8px', verticalAlign: 'top' }}>{d.translated_audio_id || '-'}</td>
@@ -3350,25 +3350,25 @@ export default function RECampaignDetailPage() {
 
           {subTab === 'storyboard' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginBottom: '24px' }}>
-              <h4 style={{ margin: 0, fontWeight: '700', fontSize: '0.9rem', color: '#fff' }}>📖 Storyboard & Rencana Visual Baru</h4>
-              
+              <h4 style={{ margin: 0, fontWeight: '700', fontSize: '0.9rem', color: 'var(--text-primary)' }}>📖 Storyboard & Rencana Visual Baru</h4>
+
               {/* 1. CSS Grid of Start Frame images */}
               {campaign?.visual_mode === 'hybrid_lock' && (
                 <div style={{
-                  background: 'rgba(255, 255, 255, 0.02)',
-                  border: '1px solid rgba(255, 255, 255, 0.05)',
+                  background: 'var(--surface-interactive)',
+                  border: '1px solid var(--surface-interactive)',
                   borderRadius: '8px',
                   padding: '20px',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '12px'
                 }}>
-                  <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center', 
-                    borderBottom: '1px solid rgba(255,255,255,0.04)', 
-                    paddingBottom: '6px' 
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    borderBottom: '1px solid var(--surface-interactive)',
+                    paddingBottom: '6px'
                   }}>
                     <span style={{ fontWeight: '600', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                       🖼️ Grid Preview Start Frame Gambar (T2I)
@@ -3383,7 +3383,7 @@ export default function RECampaignDetailPage() {
                         padding: '4px 10px',
                         background: item.regenerate_start_frames_status === 'running' ? 'rgba(155, 89, 182, 0.4)' : 'rgba(155, 89, 182, 0.15)',
                         borderColor: 'rgba(155, 89, 182, 0.3)',
-                        color: '#fff',
+                        color: 'var(--text-primary)',
                         cursor: item.regenerate_start_frames_status === 'running' ? 'not-allowed' : 'pointer'
                       }}
                     >
@@ -3410,15 +3410,15 @@ export default function RECampaignDetailPage() {
                           flexDirection: 'column',
                           gap: '8px',
                           alignItems: 'center',
-                          background: 'rgba(0,0,0,0.1)',
+                          background: 'var(--overlay-subtle)',
                           padding: '10px',
                           borderRadius: '6px',
-                          border: '1px solid rgba(255,255,255,0.03)'
+                          border: '1px solid var(--surface-interactive)'
                         }}>
                           <div style={{ fontWeight: '700', fontSize: '0.72rem', color: 'var(--accent-light)' }}>
                             Klip #{p.clip_index || (idx + 1)}
                           </div>
-                          <div style={{ width: '100%', height: '180px', position: 'relative', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)' }}>
+                          <div style={{ width: '100%', height: '180px', position: 'relative', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
                             {clipImgPath ? (
                               <img
                                 src={clipImgPath.includes('?') ? `${clipImgPath}&t=${cacheBuster}` : `${clipImgPath}?t=${cacheBuster}`}
@@ -3429,7 +3429,7 @@ export default function RECampaignDetailPage() {
                               <div style={{
                                 width: '100%',
                                 height: '100%',
-                                background: 'rgba(255,255,255,0.01)',
+                                background: 'var(--surface-interactive)',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
@@ -3443,10 +3443,10 @@ export default function RECampaignDetailPage() {
                               </div>
                             )}
                           </div>
-                          <input 
-                            type="file" 
-                            accept="image/*" 
-                            style={{ display: 'none' }} 
+                          <input
+                            type="file"
+                            accept="image/*"
+                            style={{ display: 'none' }}
                             id={`replace-sf-${item.id}-${p.clip_index || (idx + 1)}`}
                             onChange={(e) => {
                               handleUploadStartFrame(p.clip_index || (idx + 1), e.target.files[0]);
@@ -3463,9 +3463,9 @@ export default function RECampaignDetailPage() {
                                 flex: 1,
                                 fontSize: '0.62rem',
                                 padding: '4px 2px',
-                                background: 'rgba(255,255,255,0.05)',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                color: '#fff',
+                                background: 'var(--surface-interactive)',
+                                border: '1px solid var(--border-subtle)',
+                                color: 'var(--text-primary)',
                                 borderRadius: '4px',
                                 cursor: 'pointer',
                                 textAlign: 'center',
@@ -3483,9 +3483,9 @@ export default function RECampaignDetailPage() {
                                 flex: 1,
                                 fontSize: '0.62rem',
                                 padding: '4px 2px',
-                                background: 'rgba(255,255,255,0.05)',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                color: '#fff',
+                                background: 'var(--surface-interactive)',
+                                border: '1px solid var(--border-subtle)',
+                                color: 'var(--text-primary)',
                                 borderRadius: '4px',
                                 cursor: 'pointer',
                                 textAlign: 'center',
@@ -3508,21 +3508,21 @@ export default function RECampaignDetailPage() {
 
                 return (
                   <div key={idx} style={{
-                    background: 'rgba(255, 255, 255, 0.02)',
+                    background: 'var(--surface-interactive)',
                     borderRadius: '8px',
-                    border: '1px solid rgba(255, 255, 255, 0.05)',
+                    border: '1px solid var(--surface-interactive)',
                     padding: '20px',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '14px'
                   }}>
-                    <div 
+                    <div
                       onClick={() => toggleClip(item.id, idx)}
-                      style={{ 
-                        fontWeight: 700, 
-                        fontSize: '0.82rem', 
-                        color: 'var(--accent-light)', 
-                        borderBottom: isExpanded ? '1px solid rgba(255,255,255,0.04)' : 'none', 
+                      style={{
+                        fontWeight: 700,
+                        fontSize: '0.82rem',
+                        color: 'var(--accent-light)',
+                        borderBottom: isExpanded ? '1px solid var(--surface-interactive)' : 'none',
                         paddingBottom: '8px',
                         display: 'flex',
                         justifyContent: 'space-between',
@@ -3558,7 +3558,7 @@ export default function RECampaignDetailPage() {
                         </div>
                         <textarea
                           disabled={isReadOnly}
-                          style={{ width: '100%', minHeight: '45px', background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '8px', color: '#fff', fontSize: '0.78rem', resize: 'vertical', lineHeight: 1.4 }}
+                          style={{ width: '100%', minHeight: '45px', background: 'var(--overlay-subtle)', border: '1px solid var(--surface-interactive)', borderRadius: '4px', padding: '8px', color: 'var(--text-primary)', fontSize: '0.78rem', resize: 'vertical', lineHeight: 1.4 }}
                           value={p.new_vo || ''}
                           onChange={(e) => updatePlanField(idx, 'new_vo', e.target.value)}
                         />
@@ -3583,7 +3583,7 @@ export default function RECampaignDetailPage() {
                         </div>
                         <textarea
                           disabled={isReadOnly}
-                          style={{ width: '100%', minHeight: '45px', background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '8px', color: '#fff', fontSize: '0.78rem', resize: 'vertical', lineHeight: 1.4 }}
+                          style={{ width: '100%', minHeight: '45px', background: 'var(--overlay-subtle)', border: '1px solid var(--surface-interactive)', borderRadius: '4px', padding: '8px', color: 'var(--text-primary)', fontSize: '0.78rem', resize: 'vertical', lineHeight: 1.4 }}
                           value={p.visual_action || ''}
                           onChange={(e) => updatePlanField(idx, 'visual_action', e.target.value)}
                           placeholder="Deskripsi aksi visual versi baru..."
@@ -3610,7 +3610,7 @@ export default function RECampaignDetailPage() {
                           </div>
                           <textarea
                             disabled={isReadOnly}
-                            style={{ width: '100%', minHeight: '45px', background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '8px', color: '#fff', fontSize: '0.74rem', fontFamily: 'monospace', resize: 'vertical', lineHeight: 1.4 }}
+                            style={{ width: '100%', minHeight: '45px', background: 'var(--overlay-subtle)', border: '1px solid var(--surface-interactive)', borderRadius: '4px', padding: '8px', color: 'var(--text-primary)', fontSize: '0.74rem', fontFamily: 'monospace', resize: 'vertical', lineHeight: 1.4 }}
                             value={p.t2v_prompt || ''}
                             onChange={(e) => updatePlanField(idx, 't2v_prompt', e.target.value)}
                             placeholder="Prompt Text-to-Video..."
@@ -3638,7 +3638,7 @@ export default function RECampaignDetailPage() {
                           </div>
                           <textarea
                             disabled={isReadOnly}
-                            style={{ width: '100%', minHeight: '45px', background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '8px', color: '#fff', fontSize: '0.74rem', fontFamily: 'monospace', resize: 'vertical', lineHeight: 1.4 }}
+                            style={{ width: '100%', minHeight: '45px', background: 'var(--overlay-subtle)', border: '1px solid var(--surface-interactive)', borderRadius: '4px', padding: '8px', color: 'var(--text-primary)', fontSize: '0.74rem', fontFamily: 'monospace', resize: 'vertical', lineHeight: 1.4 }}
                             value={p.t2i_prompt || ''}
                             onChange={(e) => updatePlanField(idx, 't2i_prompt', e.target.value)}
                             placeholder="Prompt Text-to-Image..."
@@ -3666,7 +3666,7 @@ export default function RECampaignDetailPage() {
                           </div>
                           <textarea
                             disabled={isReadOnly}
-                            style={{ width: '100%', minHeight: '120px', background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '8px', color: '#fff', fontSize: '0.74rem', fontFamily: 'monospace', resize: 'vertical', lineHeight: 1.4 }}
+                            style={{ width: '100%', minHeight: '120px', background: 'var(--overlay-subtle)', border: '1px solid var(--surface-interactive)', borderRadius: '4px', padding: '8px', color: 'var(--text-primary)', fontSize: '0.74rem', fontFamily: 'monospace', resize: 'vertical', lineHeight: 1.4 }}
                             value={getFormattedPrompt(p.i2v_prompt || '')}
                             onChange={(e) => updatePlanField(idx, 'i2v_prompt', e.target.value)}
                             placeholder="Prompt Image-to-Video..."
@@ -3690,15 +3690,15 @@ export default function RECampaignDetailPage() {
                 const universalCap = socialCaptions[item.id] || '';
                 const isCopied = copySuccess[capKey];
                 return (
-                  <div style={{ background: 'rgba(255, 255, 255, 0.02)', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.05)', padding: '20px', marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '8px' }}>
+                  <div style={{ background: 'var(--surface-interactive)', borderRadius: '8px', border: '1px solid var(--surface-interactive)', padding: '20px', marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--surface-interactive)', paddingBottom: '8px' }}>
                       <span style={{ fontWeight: '700', fontSize: '0.85rem', color: 'var(--accent-light)' }}>📲 Social Media Package & Caption</span>
                       <button
                         type="button"
                         disabled={!universalCap}
                         onClick={() => handleCopy(universalCap, capKey)}
                         className="btn btn-secondary btn-sm"
-                        style={{ fontSize: '0.7rem', padding: '4px 10px', background: isCopied ? '#2ed573' : 'rgba(255,255,255,0.08)', color: '#fff', border: 'none' }}
+                        style={{ fontSize: '0.7rem', padding: '4px 10px', background: isCopied ? '#2ed573' : 'var(--border-subtle)', color: 'var(--text-primary)', border: 'none' }}
                       >
                         {isCopied ? '✅ Terkopi!' : '📋 Salin Caption'}
                       </button>
@@ -3706,7 +3706,7 @@ export default function RECampaignDetailPage() {
                     <textarea
                       disabled={isReadOnly}
                       className="form-textarea"
-                      style={{ width: '100%', minHeight: '140px', fontSize: '0.82rem', background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '6px', padding: '12px', color: '#fff', lineHeight: 1.5, resize: 'vertical' }}
+                      style={{ width: '100%', minHeight: '140px', fontSize: '0.82rem', background: 'var(--overlay-subtle)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '12px', color: 'var(--text-primary)', lineHeight: 1.5, resize: 'vertical' }}
                       value={universalCap}
                       onChange={(e) => updateSocialField(item.id, 'caption', e.target.value)}
                       placeholder="Naskah caption media sosial lengkap..."
@@ -3719,18 +3719,18 @@ export default function RECampaignDetailPage() {
 
           {subTab === 'assets' && (
             <div style={{
-              background: 'rgba(255, 255, 255, 0.02)',
+              background: 'var(--surface-interactive)',
               padding: '20px',
               borderRadius: '8px',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
+              border: '1px solid var(--surface-interactive)',
               marginBottom: '20px',
               display: 'flex',
               flexDirection: 'column',
               gap: '20px'
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--surface-interactive)', paddingBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
                 <div>
-                  <h4 style={{ margin: '0 0 4px 0', color: '#fff', fontSize: '0.95rem', fontWeight: 700 }}>☁️ Asset Vault & Cloud Recovery Panel</h4>
+                  <h4 style={{ margin: '0 0 4px 0', color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: 700 }}>☁️ Asset Vault & Cloud Recovery Panel</h4>
                   <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
                     Kelola aset lokal (T2I, I2V, TTS, MD) dan unggah manual ke Nextcloud / Drive meskipun pipeline belum komplit.
                   </span>
@@ -3742,7 +3742,7 @@ export default function RECampaignDetailPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn btn-secondary btn-sm"
-                      style={{ fontSize: '0.72rem', padding: '6px 12px', background: 'rgba(52, 152, 219, 0.2)', borderColor: 'rgba(52, 152, 219, 0.4)', color: '#3498db' }}
+                      style={{ fontSize: '0.72rem', padding: '6px 12px', background: 'var(--status-info-soft)', borderColor: 'var(--status-info-soft)', color: 'var(--status-info)' }}
                     >
                       🔗 Buka Folder Nextcloud
                     </a>
@@ -3766,7 +3766,7 @@ export default function RECampaignDetailPage() {
                 <div style={{ overflowX: 'auto' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', textAlign: 'left' }}>
                     <thead>
-                      <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', color: 'var(--text-muted)' }}>
+                      <tr style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}>
                         <th style={{ padding: '8px' }}>Klip</th>
                         <th style={{ padding: '8px' }}>🖼️ Start Frame (T2I)</th>
                         <th style={{ padding: '8px' }}>🎥 Motion Video (I2V)</th>
@@ -3785,26 +3785,26 @@ export default function RECampaignDetailPage() {
                         const taskKey = `${item.id}_${cIdx}`;
 
                         return (
-                          <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                            <td style={{ padding: '10px 8px', fontWeight: 700, color: '#fff' }}>Klip #{cIdx}</td>
+                          <tr key={idx} style={{ borderBottom: '1px solid var(--surface-interactive)' }}>
+                            <td style={{ padding: '10px 8px', fontWeight: 700, color: 'var(--text-primary)' }}>Klip #{cIdx}</td>
                             <td style={{ padding: '10px 8px' }}>
                               {clipImgPath ? (
-                                <span style={{ color: '#2ecc71', fontWeight: 600 }}>✅ Ready</span>
+                                <span style={{ color: 'var(--status-success)', fontWeight: 600 }}>✅ Ready</span>
                               ) : (
                                 <span style={{ color: 'var(--text-muted)' }}>❌ Missing</span>
                               )}
                             </td>
                             <td style={{ padding: '10px 8px' }}>
                               {clipVidPath ? (
-                                <span style={{ color: '#2ecc71', fontWeight: 600 }}>✅ Ready</span>
+                                <span style={{ color: 'var(--status-success)', fontWeight: 600 }}>✅ Ready</span>
                               ) : item.status === 'failed' || item.workflow_status === 'failed' ? (
-                                <span style={{ color: '#e74c3c', fontWeight: 600 }}>❌ Failed</span>
+                                <span style={{ color: 'var(--status-danger)', fontWeight: 600 }}>❌ Failed</span>
                               ) : (
-                                <span style={{ color: '#f1c40f', fontWeight: 600 }}>⏳ Pending</span>
+                                <span style={{ color: 'var(--status-warning)', fontWeight: 600 }}>⏳ Pending</span>
                               )}
                             </td>
                             <td style={{ padding: '10px 8px' }}>
-                              <span style={{ color: '#2ecc71', fontWeight: 600 }}>✅ Script Ready</span>
+                              <span style={{ color: 'var(--status-success)', fontWeight: 600 }}>✅ Script Ready</span>
                             </td>
                             <td style={{ padding: '10px 8px', textAlign: 'right' }}>
                               <button
@@ -3816,7 +3816,7 @@ export default function RECampaignDetailPage() {
                                   padding: '4px 8px',
                                   background: 'rgba(230, 126, 34, 0.2)',
                                   border: '1px solid rgba(230, 126, 34, 0.4)',
-                                  color: '#e67e22',
+                                  color: 'var(--status-warning)',
                                   borderRadius: '4px',
                                   cursor: 'pointer',
                                   fontWeight: 600
@@ -3837,13 +3837,13 @@ export default function RECampaignDetailPage() {
 
           {subTab === 'dna' && (
             <div style={{
-              background: 'rgba(255, 255, 255, 0.02)',
+              background: 'var(--surface-interactive)',
               padding: '20px',
               borderRadius: '8px',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
+              border: '1px solid var(--surface-interactive)',
               marginBottom: '20px'
             }}>
-              <h4 style={{ margin: '0 0 16px 0', color: '#fff', fontSize: '0.9rem', fontWeight: 700 }}>🧬 Metadata Video DNA</h4>
+              <h4 style={{ margin: '0 0 16px 0', color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 700 }}>🧬 Metadata Video DNA</h4>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
                 {[
                   { field: 'pilar_konten', label: 'Pilar Konten' },
@@ -3866,10 +3866,10 @@ export default function RECampaignDetailPage() {
                       style={{
                         fontSize: '0.8rem',
                         padding: '8px 12px',
-                        background: 'rgba(255,255,255,0.01)',
-                        border: '1px solid rgba(255,255,255,0.08)',
+                        background: 'var(--surface-interactive)',
+                        border: '1px solid var(--border-subtle)',
                         borderRadius: '4px',
-                        color: '#fff',
+                        color: 'var(--text-primary)',
                         width: '100%'
                       }}
                       value={dna[field] ?? ''}
@@ -3888,8 +3888,8 @@ export default function RECampaignDetailPage() {
 
           {/* Workflow & Production Settings */}
           <div style={{
-            background: 'rgba(255,255,255,0.01)',
-            border: '1px solid rgba(255,255,255,0.04)',
+            background: 'var(--surface-interactive)',
+            border: '1px solid var(--surface-interactive)',
             borderRadius: '8px',
             padding: '16px 20px',
             marginBottom: '24px',
@@ -3898,9 +3898,9 @@ export default function RECampaignDetailPage() {
             gap: '16px'
           }}>
             <div style={{ fontWeight: '700', fontSize: '0.8rem', color: 'var(--accent-light)' }}>⚙️ Workflow & Production Settings</div>
-            
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              
+
               {/* Column 1: TTS Switch & Settings */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -3917,8 +3917,8 @@ export default function RECampaignDetailPage() {
                 </div>
                 {settings.enable_tts && (
                   <div style={{
-                    background: 'rgba(0,0,0,0.15)',
-                    border: '1px solid rgba(255,255,255,0.05)',
+                    background: 'var(--overlay-subtle)',
+                    border: '1px solid var(--surface-interactive)',
                     borderRadius: '6px',
                     padding: '12px 14px',
                     display: 'flex',
@@ -3944,7 +3944,7 @@ export default function RECampaignDetailPage() {
                             }
                           }
                         }}
-                        style={{ width: '100%', padding: '6px 8px', background: '#1c1c1e', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '4px', fontSize: '0.75rem' }}
+                        style={{ width: '100%', padding: '6px 8px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.75rem' }}
                       >
                         <option value="gemini">Google Gemini TTS</option>
                         <option value="minimax">MiniMax Speech</option>
@@ -3963,7 +3963,7 @@ export default function RECampaignDetailPage() {
                           disabled={isReadOnly}
                           value={settings.voice_persona || 'Kore'}
                           onChange={(e) => updateSettingField('voice_persona', e.target.value)}
-                          style={{ width: '100%', padding: '6px 8px', background: '#1c1c1e', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '4px', fontSize: '0.75rem' }}
+                          style={{ width: '100%', padding: '6px 8px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.75rem' }}
                         >
                           {settings.voice_provider === 'gemini' ? (
                             GEMINI_VOICES.map(v => (
@@ -3977,7 +3977,7 @@ export default function RECampaignDetailPage() {
                         </select>
                       </div>
                     ) : (
-                      <div style={{ marginTop: '4px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '10px' }}>
+                      <div style={{ marginTop: '4px', borderTop: '1px solid var(--surface-interactive)', paddingTop: '10px' }}>
                         <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: '8px' }}>🎭 Voice Cast Configuration</span>
                         {voiceCast.length === 0 ? (
                           <div style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '0.72rem', padding: '4px 0' }}>
@@ -3986,7 +3986,7 @@ export default function RECampaignDetailPage() {
                         ) : (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             {voiceCast.map((ch, idx) => (
-                              <div key={idx} style={{ background: 'rgba(0,0,0,0.2)', padding: '8px', borderRadius: '4px' }}>
+                              <div key={idx} style={{ background: 'var(--overlay-subtle)', padding: '8px', borderRadius: '4px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                                   <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--accent-light)' }}>{ch.name}</span>
                                   <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>ID: {ch.id}</span>
@@ -3994,7 +3994,7 @@ export default function RECampaignDetailPage() {
                                 <select
                                   disabled={isReadOnly}
                                   value={settings.voice_provider === 'gemini' ? (ch.gemini_voice_id || 'Kore') : (ch.minimax_voice_id || 'Indonesian_casual_reporter_vv2')}
-                                  style={{ width: '100%', padding: '4px 6px', background: '#1c1c1e', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '4px', fontSize: '0.7rem' }}
+                                  style={{ width: '100%', padding: '4px 6px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.7rem' }}
                                   onChange={e => {
                                     const a = [...voiceCast];
                                     if (settings.voice_provider === 'gemini') {
@@ -4073,8 +4073,8 @@ export default function RECampaignDetailPage() {
                 </div>
                 {settings.enable_glabs && (
                   <div style={{
-                    background: 'rgba(0,0,0,0.15)',
-                    border: '1px solid rgba(255,255,255,0.05)',
+                    background: 'var(--overlay-subtle)',
+                    border: '1px solid var(--surface-interactive)',
                     borderRadius: '6px',
                     padding: '12px 14px',
                     fontSize: '0.7rem',
@@ -4102,8 +4102,8 @@ export default function RECampaignDetailPage() {
                 </div>
                 {settings.enable_ffmpeg && (
                   <div style={{
-                    background: 'rgba(0,0,0,0.15)',
-                    border: '1px solid rgba(255,255,255,0.05)',
+                    background: 'var(--overlay-subtle)',
+                    border: '1px solid var(--surface-interactive)',
                     borderRadius: '6px',
                     padding: '12px 14px',
                     display: 'flex',
@@ -4117,7 +4117,7 @@ export default function RECampaignDetailPage() {
                           disabled={isReadOnly}
                           value={settings.ffmpeg_sync_option || 'smart_sync'}
                           onChange={(e) => updateSettingField('ffmpeg_sync_option', e.target.value)}
-                          style={{ width: '100%', padding: '6px 8px', background: '#1c1c1e', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '4px', fontSize: '0.72rem' }}
+                          style={{ width: '100%', padding: '6px 8px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.72rem' }}
                         >
                           <option value="smart_sync">Auto-Pilot Smart Sync</option>
                           <option value="shortest">Shortest Clip</option>
@@ -4130,7 +4130,7 @@ export default function RECampaignDetailPage() {
                           disabled={isReadOnly}
                           value={settings.sync_mode || 'auto'}
                           onChange={(e) => updateSettingField('sync_mode', e.target.value)}
-                          style={{ width: '100%', padding: '6px 8px', background: '#1c1c1e', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '4px', fontSize: '0.72rem' }}
+                          style={{ width: '100%', padding: '6px 8px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '4px', fontSize: '0.72rem' }}
                         >
                           <option value="auto">Auto-Pilot</option>
                           <option value="manual">Manual Adjust</option>
@@ -4220,10 +4220,10 @@ export default function RECampaignDetailPage() {
                   alignItems: 'center',
                   gap: '8px',
                   background: 'var(--accent)',
-                  color: '#fff',
+                  color: 'var(--text-primary)',
                   border: 'none',
                   borderRadius: '6px',
-                  boxShadow: '0 4px 15px rgba(108, 92, 231, 0.3)',
+                  boxShadow: '0 4px 15px var(--status-neutral-soft)',
                   cursor: 'pointer'
                 }}
               >
@@ -4240,8 +4240,8 @@ export default function RECampaignDetailPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {/* Pipeline Status Header */}
           <div style={{
-            background: 'rgba(255, 255, 255, 0.01)',
-            border: '1px solid rgba(255, 255, 255, 0.04)',
+            background: 'var(--surface-interactive)',
+            border: '1px solid var(--surface-interactive)',
             borderRadius: '8px',
             padding: '16px 20px'
           }}>
@@ -4269,8 +4269,8 @@ export default function RECampaignDetailPage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         {/* Pipeline Status Header */}
         <div style={{
-          background: 'rgba(255, 255, 255, 0.01)',
-          border: '1px solid rgba(255, 255, 255, 0.04)',
+          background: 'var(--surface-interactive)',
+          border: '1px solid var(--surface-interactive)',
           borderRadius: '8px',
           padding: '16px 20px'
         }}>
@@ -4290,19 +4290,19 @@ export default function RECampaignDetailPage() {
             display: 'flex',
             flexDirection: 'column',
             gap: '10px',
-            borderRight: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRight: '1px solid var(--border-subtle)',
             paddingRight: '20px'
           }}>
             {angleTabs.map(tab => {
               const isActive = activeAngleTab === tab.id;
               const isOriginal = tab.id === 'original';
               const variant = !isOriginal ? item.angle_variants.find(v => v.id === tab.id) : null;
-              
+
               // Determine styling based on category
               let catColor = 'var(--text-muted)';
-              let catBg = 'rgba(255,255,255,0.02)';
-              let catBorder = 'rgba(255,255,255,0.05)';
-              
+              let catBg = 'var(--surface-interactive)';
+              let catBorder = 'var(--surface-interactive)';
+
               if (variant) {
                 if (variant.angle_category === 'Ego') {
                   catColor = '#ff6b81';
@@ -4313,9 +4313,9 @@ export default function RECampaignDetailPage() {
                   catBg = 'rgba(112, 161, 255, 0.06)';
                   catBorder = 'rgba(112, 161, 255, 0.2)';
                 } else if (variant.angle_category === 'Gut') {
-                  catColor = '#2ecc71';
-                  catBg = 'rgba(46, 204, 113, 0.06)';
-                  catBorder = 'rgba(46, 204, 113, 0.2)';
+                  catColor = 'var(--status-success)';
+                  catBg = 'var(--status-success-soft)';
+                  catBorder = 'var(--status-success-soft)';
                 }
               }
 
@@ -4327,9 +4327,9 @@ export default function RECampaignDetailPage() {
                   style={{
                     width: '100%',
                     padding: '12px 16px',
-                    background: isActive ? 'rgba(108, 92, 231, 0.12)' : 'rgba(255, 255, 255, 0.02)',
-                    color: isActive ? '#fff' : 'var(--text-secondary)',
-                    border: isActive ? '1px solid var(--accent)' : '1px solid rgba(255, 255, 255, 0.05)',
+                    background: isActive ? 'var(--status-neutral-soft)' : 'var(--surface-interactive)',
+                    color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                    border: isActive ? '1px solid var(--accent)' : '1px solid var(--surface-interactive)',
                     cursor: 'pointer',
                     borderRadius: '8px',
                     display: 'flex',
@@ -4338,25 +4338,25 @@ export default function RECampaignDetailPage() {
                     textAlign: 'left',
                     transition: 'all 0.2s ease',
                     outline: 'none',
-                    boxShadow: isActive ? '0 4px 15px rgba(108, 92, 231, 0.15)' : 'none'
+                    boxShadow: isActive ? '0 4px 15px var(--status-neutral-soft)' : 'none'
                   }}
                   onMouseEnter={(e) => {
                     if (!isActive) {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                      e.currentTarget.style.background = 'var(--surface-interactive)';
+                      e.currentTarget.style.borderColor = 'var(--border-subtle)';
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!isActive) {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.05)';
+                      e.currentTarget.style.background = 'var(--surface-interactive)';
+                      e.currentTarget.style.borderColor = 'var(--surface-interactive)';
                     }
                   }}
                 >
-                  <div style={{ 
-                    fontWeight: '700', 
-                    fontSize: '0.82rem', 
-                    color: isActive ? 'var(--accent-light)' : '#fff',
+                  <div style={{
+                    fontWeight: '700',
+                    fontSize: '0.82rem',
+                    color: isActive ? 'var(--accent-light)' : 'var(--text-primary)',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
@@ -4367,17 +4367,17 @@ export default function RECampaignDetailPage() {
                   }}>
                     {tab.label}
                   </div>
-                  
+
                   {variant ? (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginTop: '2px' }}>
-                      <span style={{ 
-                        fontSize: '0.62rem', 
-                        background: catBg, 
-                        color: catColor, 
+                      <span style={{
+                        fontSize: '0.62rem',
+                        background: catBg,
+                        color: catColor,
                         border: `1px solid ${catBorder}`,
-                        padding: '1px 5px', 
-                        borderRadius: '3px', 
-                        fontWeight: '700' 
+                        padding: '1px 5px',
+                        borderRadius: '3px',
+                        fontWeight: '700'
                       }}>
                         {variant.angle_category}
                       </span>
@@ -4467,7 +4467,7 @@ export default function RECampaignDetailPage() {
     <div className="app-layout">
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes active-pulse {
-          from { box-shadow: 0 0 4px rgba(52, 152, 219, 0.4); border-color: rgba(52, 152, 219, 0.5); }
+          from { box-shadow: 0 0 4px var(--status-info-soft); border-color: rgba(52, 152, 219, 0.5); }
           to { box-shadow: 0 0 12px rgba(52, 152, 219, 0.8); border-color: var(--accent-light); }
         }
         @keyframes pulse-glow {
@@ -4493,8 +4493,8 @@ export default function RECampaignDetailPage() {
                     fontWeight: 700,
                     padding: '4px 12px',
                     borderRadius: '20px',
-                    background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(59, 130, 246, 0.2))',
-                    color: '#10b981',
+                    background: 'linear-gradient(135deg, var(--status-success-soft), var(--status-info-soft))',
+                    color: 'var(--status-success)',
                     border: '1px solid rgba(16, 185, 129, 0.4)',
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -4508,8 +4508,8 @@ export default function RECampaignDetailPage() {
                     fontWeight: 700,
                     padding: '4px 12px',
                     borderRadius: '20px',
-                    background: 'rgba(245, 158, 11, 0.15)',
-                    color: '#f59e0b',
+                    background: 'var(--status-warning-soft)',
+                    color: 'var(--status-warning)',
                     border: '1px solid rgba(245, 158, 11, 0.4)',
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -4519,10 +4519,10 @@ export default function RECampaignDetailPage() {
                   </span>
                 )}
               </div>
-              
+
               {/* 2. ID Kampanye | Nama Akun Brand | Created Date */}
               <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 8, fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                <span>🔑 ID: <code style={{ background: 'rgba(255,255,255,0.05)', padding: '3px 8px', borderRadius: '4px', color: 'var(--accent-light)', fontFamily: 'monospace' }}>{campaign.id}</code></span>
+                <span>🔑 ID: <code style={{ background: 'var(--surface-interactive)', padding: '3px 8px', borderRadius: '4px', color: 'var(--accent-light)', fontFamily: 'monospace' }}>{campaign.id}</code></span>
                 <span style={{ opacity: 0.3 }}>|</span>
                 <span>🏷️ Brand: <strong>{campaign.brand_name || 'Tidak Ditentukan'}</strong></span>
                 <span style={{ opacity: 0.3 }}>|</span>
@@ -4549,8 +4549,8 @@ export default function RECampaignDetailPage() {
                   }}
                   className="btn"
                   style={{
-                    background: 'linear-gradient(135deg, #e67e22 0%, #d35400 100%)',
-                    color: '#fff', border: 'none', padding: '10px 16px', fontWeight: 600, borderRadius: '6px', cursor: 'pointer',
+                    background: 'linear-gradient(135deg, var(--status-warning) 0%, #d35400 100%)',
+                    color: 'var(--text-primary)', border: 'none', padding: '10px 16px', fontWeight: 600, borderRadius: '6px', cursor: 'pointer',
                     boxShadow: '0 4px 12px rgba(230, 126, 34, 0.3)'
                   }}
                 >
@@ -4573,9 +4573,9 @@ export default function RECampaignDetailPage() {
                   }}
                   className="btn"
                   style={{
-                    background: 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)',
-                    color: '#fff', border: 'none', padding: '10px 16px', fontWeight: 600, borderRadius: '6px', cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(46, 204, 113, 0.3)'
+                    background: 'linear-gradient(135deg, var(--status-success) 0%, #27ae60 100%)',
+                    color: 'var(--text-primary)', border: 'none', padding: '10px 16px', fontWeight: 600, borderRadius: '6px', cursor: 'pointer',
+                    boxShadow: '0 4px 12px var(--status-success-soft)'
                   }}
                 >
                   🟢 Start Campaign
@@ -4594,9 +4594,9 @@ export default function RECampaignDetailPage() {
                 }}
                 className="btn"
                 style={{
-                  background: 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)',
-                  color: '#fff', border: 'none', padding: '10px 16px', fontWeight: 600, borderRadius: '6px', cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(52, 152, 219, 0.3)'
+                  background: 'linear-gradient(135deg, var(--status-info) 0%, #2980b9 100%)',
+                  color: 'var(--text-primary)', border: 'none', padding: '10px 16px', fontWeight: 600, borderRadius: '6px', cursor: 'pointer',
+                  boxShadow: '0 4px 12px var(--status-info-soft)'
                 }}
               >
                 🚀 Push to Content Flow
@@ -4608,7 +4608,7 @@ export default function RECampaignDetailPage() {
                 className="btn"
                 style={{
                   background: 'linear-gradient(135deg, #1abc9c 0%, #16a085 100%)',
-                  color: '#fff', border: 'none', padding: '10px 16px', fontWeight: 600, borderRadius: '6px', cursor: 'pointer',
+                  color: 'var(--text-primary)', border: 'none', padding: '10px 16px', fontWeight: 600, borderRadius: '6px', cursor: 'pointer',
                   boxShadow: '0 4px 12px rgba(26, 188, 156, 0.3)'
                 }}
               >
@@ -4618,13 +4618,13 @@ export default function RECampaignDetailPage() {
 
             {/* 4. Accordion Info Konfigurasi */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px', width: '100%' }}>
-              
+
               {/* Accordion 1: Info Konfigurasi Basic Creative Strategy */}
-              <details open style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-color)', borderRadius: '8px', overflow: 'hidden' }}>
-                <summary style={{ padding: '16px 20px', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.01)' }}>
+              <details open style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-color)', borderRadius: '8px', overflow: 'hidden' }}>
+                <summary style={{ padding: '16px 20px', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)' }}>
                   <span>📂 Info Konfigurasi Basic Creative Strategy</span>
                 </summary>
-                <div style={{ padding: '20px', borderTop: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.2)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                <div style={{ padding: '20px', borderTop: '1px solid var(--border-color)', background: 'var(--overlay-subtle)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>🏷️ Nama Akun (Brand Account)</span>
                     <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{campaign.brand_name || 'Tidak Ditentukan'}</span>
@@ -4656,7 +4656,7 @@ export default function RECampaignDetailPage() {
                   {campaign.custom_instruction && (
                     <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>Custom Instruction (Opsional)</span>
-                      <pre style={{ margin: 0, padding: '12px', background: 'rgba(0,0,0,0.3)', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.04)', fontSize: '0.82rem', fontFamily: 'monospace', whiteSpace: 'pre-wrap', color: 'var(--text-primary)' }}>
+                      <pre style={{ margin: 0, padding: '12px', background: 'var(--overlay-subtle)', borderRadius: '6px', border: '1px solid var(--surface-interactive)', fontSize: '0.82rem', fontFamily: 'monospace', whiteSpace: 'pre-wrap', color: 'var(--text-primary)' }}>
                         {campaign.custom_instruction}
                       </pre>
                     </div>
@@ -4671,11 +4671,11 @@ export default function RECampaignDetailPage() {
               </details>
 
               {/* Accordion 2: Info Konfigurasi Aesthetics & Visual Settings */}
-              <details style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-color)', borderRadius: '8px', overflow: 'hidden' }}>
-                <summary style={{ padding: '16px 20px', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.01)' }}>
+              <details style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-color)', borderRadius: '8px', overflow: 'hidden' }}>
+                <summary style={{ padding: '16px 20px', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)' }}>
                   <span>🎬 Info Konfigurasi Aesthetics & Visual Settings</span>
                 </summary>
-                <div style={{ padding: '20px', borderTop: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.2)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                <div style={{ padding: '20px', borderTop: '1px solid var(--border-color)', background: 'var(--overlay-subtle)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>Narrative Mode</span>
                     <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{campaign.narrative_mode || 'Storytelling / Casual'}</span>
@@ -4716,11 +4716,11 @@ export default function RECampaignDetailPage() {
               </details>
 
               {/* Accordion 3: Info Konfigurasi Product Bridging Settings */}
-              <details style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-color)', borderRadius: '8px', overflow: 'hidden' }}>
-                <summary style={{ padding: '16px 20px', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.01)' }}>
+              <details style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-color)', borderRadius: '8px', overflow: 'hidden' }}>
+                <summary style={{ padding: '16px 20px', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)' }}>
                   <span>🌉 Info Konfigurasi Product Bridging Settings</span>
                 </summary>
-                <div style={{ padding: '20px', borderTop: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.2)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                <div style={{ padding: '20px', borderTop: '1px solid var(--border-color)', background: 'var(--overlay-subtle)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>Bridging Promosi Produk</span>
                     <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{campaign.is_bridging_active === 1 ? 'Aktif' : 'Nonaktif'}</span>
@@ -4741,11 +4741,11 @@ export default function RECampaignDetailPage() {
               </details>
 
               {/* Accordion 4: Info Konfigurasi Visual Swap Overrides */}
-              <details style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-color)', borderRadius: '8px', overflow: 'hidden' }}>
-                <summary style={{ padding: '16px 20px', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.01)' }}>
+              <details style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-color)', borderRadius: '8px', overflow: 'hidden' }}>
+                <summary style={{ padding: '16px 20px', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)' }}>
                   <span>🎭 Info Konfigurasi Visual Swap Overrides</span>
                 </summary>
-                <div style={{ padding: '20px', borderTop: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.2)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                <div style={{ padding: '20px', borderTop: '1px solid var(--border-color)', background: 'var(--overlay-subtle)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>Konsep Karakter (Framing)</span>
                     <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{campaign.face_visibility || 'Faceless Close-Up Shot'}</span>
@@ -4760,7 +4760,7 @@ export default function RECampaignDetailPage() {
                   </div>
                 </div>
               </details>
-              
+
             </div>
           </div>
 
@@ -4799,21 +4799,21 @@ export default function RECampaignDetailPage() {
                             style={{
                               fontSize: '0.7rem',
                               padding: '3px 8px',
-                              background: expandedItemId === item.id ? 'var(--accent)' : 'rgba(255,255,255,0.08)',
-                              color: '#fff',
-                              border: '1px solid rgba(255,255,255,0.1)'
+                              background: expandedItemId === item.id ? 'var(--accent)' : 'var(--border-subtle)',
+                              color: 'var(--text-primary)',
+                              border: '1px solid var(--border-subtle)'
                             }}
                           >
                             {expandedItemId === item.id ? '📖 Tutup' : (item.angle_variants && item.angle_variants.length > 0 ? '📖 Workspace Angle' : '📖 Detail')}
                           </button>
                         )}
                         {(
-                          item.scrape_status === 'failed' || 
-                          item.analyze_status === 'failed' || 
-                          item.tts_status === 'failed' || 
-                          item.visual_status === 'failed' || 
-                          item.ffmpeg_status === 'failed' || 
-                          item.upload_status === 'failed' || 
+                          item.scrape_status === 'failed' ||
+                          item.analyze_status === 'failed' ||
+                          item.tts_status === 'failed' ||
+                          item.visual_status === 'failed' ||
+                          item.ffmpeg_status === 'failed' ||
+                          item.upload_status === 'failed' ||
                           item.social_post_status === 'failed'
                         ) && (
                           <>
@@ -4825,8 +4825,8 @@ export default function RECampaignDetailPage() {
                                 fontSize: '0.7rem',
                                 padding: '3px 8px',
                                 background: '#2980b9',
-                                color: '#fff',
-                                border: '1px solid rgba(255,255,255,0.1)'
+                                color: 'var(--text-primary)',
+                                border: '1px solid var(--border-subtle)'
                               }}
                             >
                               🔄 Retry
@@ -4839,8 +4839,8 @@ export default function RECampaignDetailPage() {
                                 fontSize: '0.7rem',
                                 padding: '3px 8px',
                                 background: '#c0392b',
-                                color: '#fff',
-                                border: '1px solid rgba(255,255,255,0.1)'
+                                color: 'var(--text-primary)',
+                                border: '1px solid var(--border-subtle)'
                               }}
                             >
                               💥 Reset

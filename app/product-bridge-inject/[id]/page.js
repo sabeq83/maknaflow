@@ -30,7 +30,7 @@ export default function BridgeBulkCampaignDetailPage() {
   const [items, setItems] = useState([]);
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   // Selected Item Sub-tabs: 'original_script' | 'storyboard' | 'dna' | 'logs'
   const [activeTab, setActiveTab] = useState('storyboard');
 
@@ -90,7 +90,7 @@ export default function BridgeBulkCampaignDetailPage() {
         setCampaign(data.data.campaign);
         const fetchedItems = data.data.items || [];
         setItems(fetchedItems);
-        
+
         // Auto select first item if none is selected
         if (fetchedItems.length > 0 && !selectedItemIdRef.current) {
           selectItem(fetchedItems[0]);
@@ -133,12 +133,12 @@ export default function BridgeBulkCampaignDetailPage() {
       if (res.ok) {
         const text = await res.text();
         const lines = text.split('\n');
-        
+
         // Filter lines containing the campaignId OR selectedItemId
         const filterKeyCampaign = campaignId;
         const filterKeyItem = selectedItemId ? `[BULK Item #${selectedItemId}]` : null;
         const filterKeyBulkItem = selectedItemId ? `bulk_${campaignId}_${selectedItemId}` : null;
-        
+
         const filteredLines = lines.filter(line => {
           const hasCampaign = line.includes(filterKeyCampaign);
           const hasItem = filterKeyItem && line.includes(filterKeyItem);
@@ -345,13 +345,13 @@ export default function BridgeBulkCampaignDetailPage() {
       const data = await res.json();
       if (data.success) {
         showToast('Baris berhasil di-reset ke antrean awal!');
-        
+
         // Clear active selection if the reset item was the selected one
         if (selectedItemIdRef.current === itemId) {
           setSelectedItemId(null);
           selectedItemIdRef.current = null;
         }
-        
+
         fetchCampaignDetails(true);
       } else {
         showToast(data.error || 'Gagal mereset baris.', 'error');
@@ -389,15 +389,15 @@ export default function BridgeBulkCampaignDetailPage() {
     switch (status) {
       case 'pending': return { text: 'Antrean (Pending)', color: 'var(--text-muted)' };
       case 'processing': return { text: 'Sedang Proses (Phase 1)', color: '#0984e3' };
-      case 'ready_for_review': return { text: 'Siap Review', color: '#fdcb6e' };
-      case 'approved': return { text: 'Disetujui', color: '#e17055' };
-      case 'generating_video': return { text: 'Render Video (Phase 2)', color: '#a29bfe' };
+      case 'ready_for_review': return { text: 'Siap Review', color: 'var(--status-warning)' };
+      case 'approved': return { text: 'Disetujui', color: 'var(--status-warning)' };
+      case 'generating_video': return { text: 'Render Video (Phase 2)', color: 'var(--status-neutral)' };
       case 'rendering_tts': return { text: 'Rendering TTS', color: '#1abc9c' };
-      case 'muxing_ffmpeg': return { text: 'Muxing FFmpeg', color: '#9b59b6' };
+      case 'muxing_ffmpeg': return { text: 'Muxing FFmpeg', color: 'var(--status-neutral)' };
       case 'uploading': return { text: 'Mengunggah Aset', color: '#2980b9' };
-      case 'completed': return { text: 'Selesai (Completed)', color: '#2ecc71' };
-      case 'failed': return { text: 'Gagal (Failed)', color: '#e74c3c' };
-      default: return { text: status, color: '#fff' };
+      case 'completed': return { text: 'Selesai (Completed)', color: 'var(--status-success)' };
+      case 'failed': return { text: 'Gagal (Failed)', color: 'var(--status-danger)' };
+      default: return { text: status, color: 'var(--text-primary)' };
     }
   }
 
@@ -414,7 +414,7 @@ export default function BridgeBulkCampaignDetailPage() {
       }}>
         {/* Error message banner */}
         {item.error_message && (
-          <div style={{ background: 'rgba(231, 76, 60, 0.12)', border: '1px solid rgba(231, 76, 60, 0.3)', borderRadius: '4px', padding: '12px 16px', color: '#e74c3c', fontSize: '0.8rem' }}>
+          <div style={{ background: 'rgba(231, 76, 60, 0.12)', border: '1px solid var(--status-danger-soft)', borderRadius: '4px', padding: '12px 16px', color: 'var(--status-danger)', fontSize: '0.8rem' }}>
             ⚠️ Error: {item.error_message}
           </div>
         )}
@@ -425,7 +425,7 @@ export default function BridgeBulkCampaignDetailPage() {
             type="button"
             onClick={(e) => { e.stopPropagation(); setActiveTab('original_script'); }}
             style={{
-              background: activeTab === 'original_script' ? 'rgba(108, 92, 231, 0.15)' : 'transparent',
+              background: activeTab === 'original_script' ? 'var(--status-neutral-soft)' : 'transparent',
               border: activeTab === 'original_script' ? '1px solid var(--accent)' : '1px solid transparent',
               color: activeTab === 'original_script' ? 'var(--accent-light)' : 'var(--text-muted)',
               padding: '8px 16px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s'
@@ -437,7 +437,7 @@ export default function BridgeBulkCampaignDetailPage() {
             type="button"
             onClick={(e) => { e.stopPropagation(); setActiveTab('storyboard'); }}
             style={{
-              background: activeTab === 'storyboard' ? 'rgba(108, 92, 231, 0.15)' : 'transparent',
+              background: activeTab === 'storyboard' ? 'var(--status-neutral-soft)' : 'transparent',
               border: activeTab === 'storyboard' ? '1px solid var(--accent)' : '1px solid transparent',
               color: activeTab === 'storyboard' ? 'var(--accent-light)' : 'var(--text-muted)',
               padding: '8px 16px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s'
@@ -449,7 +449,7 @@ export default function BridgeBulkCampaignDetailPage() {
             type="button"
             onClick={(e) => { e.stopPropagation(); setActiveTab('dna'); }}
             style={{
-              background: activeTab === 'dna' ? 'rgba(108, 92, 231, 0.15)' : 'transparent',
+              background: activeTab === 'dna' ? 'var(--status-neutral-soft)' : 'transparent',
               border: activeTab === 'dna' ? '1px solid var(--accent)' : '1px solid transparent',
               color: activeTab === 'dna' ? 'var(--accent-light)' : 'var(--text-muted)',
               padding: '8px 16px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s'
@@ -461,7 +461,7 @@ export default function BridgeBulkCampaignDetailPage() {
             type="button"
             onClick={(e) => { e.stopPropagation(); setActiveTab('logs'); }}
             style={{
-              background: activeTab === 'logs' ? 'rgba(108, 92, 231, 0.15)' : 'transparent',
+              background: activeTab === 'logs' ? 'var(--status-neutral-soft)' : 'transparent',
               border: activeTab === 'logs' ? '1px solid var(--accent)' : '1px solid transparent',
               color: activeTab === 'logs' ? 'var(--accent-light)' : 'var(--text-muted)',
               padding: '8px 16px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s'
@@ -474,11 +474,11 @@ export default function BridgeBulkCampaignDetailPage() {
         {/* Panels */}
         {activeTab === 'original_script' && (
           <div className="card" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', padding: '20px' }}>
-            <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#fff' }}>📄 Naskah Markdown Asli (Diunduh)</h4>
+            <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: 'var(--text-primary)' }}>📄 Naskah Markdown Asli (Diunduh)</h4>
             {item.original_script_content ? (
               <pre style={{
                 margin: 0, padding: '16px', borderRadius: '4px',
-                background: '#07070a', color: 'var(--text-secondary)',
+                background: 'var(--surface)', color: 'var(--text-secondary)',
                 fontSize: '0.82rem', fontFamily: 'var(--font-mono)',
                 maxHeight: '400px', overflowY: 'auto', whiteSpace: 'pre-wrap',
                 lineHeight: '1.5', border: '1px solid var(--border)'
@@ -511,7 +511,7 @@ export default function BridgeBulkCampaignDetailPage() {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ fontSize: '1.1rem' }}>🛡️</span>
-                  <span style={{ fontWeight: '700', fontSize: '0.85rem', color: '#fff' }}>TikTok Shop Compliance Audit Status</span>
+                  <span style={{ fontWeight: '700', fontSize: '0.85rem', color: 'var(--text-primary)' }}>TikTok Shop Compliance Audit Status</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <span style={{
@@ -521,12 +521,12 @@ export default function BridgeBulkCampaignDetailPage() {
                     padding: '4px 12px',
                     borderRadius: '20px',
                     background: (item.compliance_status === 'PASS' || item.compliance_status === 'pass')
-                      ? 'rgba(46, 204, 113, 0.15)' 
+                      ? 'var(--status-success-soft)'
                       : 'rgba(241, 196, 15, 0.15)',
-                    color: (item.compliance_status === 'PASS' || item.compliance_status === 'pass') 
-                      ? '#2ecc71' 
-                      : '#f1c40f',
-                    border: `1px solid ${(item.compliance_status === 'PASS' || item.compliance_status === 'pass') ? '#2ecc71' : '#f1c40f'}`
+                    color: (item.compliance_status === 'PASS' || item.compliance_status === 'pass')
+                      ? 'var(--status-success)'
+                      : 'var(--status-warning)',
+                    border: `1px solid ${(item.compliance_status === 'PASS' || item.compliance_status === 'pass') ? 'var(--status-success)' : 'var(--status-warning)'}`
                   }}>
                     {item.compliance_status || 'PASS'}
                   </span>
@@ -544,7 +544,7 @@ export default function BridgeBulkCampaignDetailPage() {
             )}
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              
+
               {/* Left Panel: VO Text Editor */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div style={{ background: 'var(--bg-card)', padding: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
@@ -561,14 +561,14 @@ export default function BridgeBulkCampaignDetailPage() {
                   />
                 </div>
 
-                <div style={{ 
-                  background: 'var(--bg-card)', 
-                  padding: '16px', 
-                  borderRadius: 'var(--radius-sm)', 
-                  border: '2px solid #2ecc71',
-                  boxShadow: '0 0 12px rgba(46, 204, 113, 0.05)'
+                <div style={{
+                  background: 'var(--bg-card)',
+                  padding: '16px',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '2px solid var(--status-success)',
+                  boxShadow: '0 0 12px var(--status-success-soft)'
                 }}>
-                  <span style={{ fontWeight: 700, fontSize: '0.75rem', color: '#2ecc71', display: 'block', marginBottom: '8px' }}>
+                  <span style={{ fontWeight: 700, fontSize: '0.75rem', color: 'var(--status-success)', display: 'block', marginBottom: '8px' }}>
                     KLIP 2: PRODUCT INJECTED (NEW)
                   </span>
                   <textarea
@@ -613,17 +613,17 @@ export default function BridgeBulkCampaignDetailPage() {
               {/* Right Panel: Previews */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div style={{ background: 'var(--bg-card)', padding: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-                  <span style={{ fontWeight: 600, fontSize: '0.75rem', color: '#fff', display: 'block', marginBottom: '10px' }}>
+                  <span style={{ fontWeight: 600, fontSize: '0.75rem', color: 'var(--text-primary)', display: 'block', marginBottom: '10px' }}>
                     🖼️ INJECTION START FRAME PREVIEW (T2I)
                   </span>
                   <div style={{
-                    width: '100%', height: '220px', background: '#07070a',
+                    width: '100%', height: '220px', background: 'var(--surface)',
                     borderRadius: '4px', border: '1px solid var(--border)',
                     display: 'flex', justifyContent: 'center', alignItems: 'center',
                     overflow: 'hidden', position: 'relative', marginBottom: '12px'
                   }}>
                     {item.clip2_t2i_image_path ? (
-                      <img 
+                      <img
                         src={`${item.clip2_t2i_image_path}`}
                         alt="Start Frame"
                         style={{ width: '100%', height: '100%', objectFit: 'contain' }}
@@ -658,11 +658,11 @@ export default function BridgeBulkCampaignDetailPage() {
                       >
                         📤 Upload SF Kustom
                       </button>
-                      <input 
-                        type="file" 
-                        ref={fileInputRef} 
-                        accept="image/*" 
-                        onChange={handleReplaceStartFrame} 
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        accept="image/*"
+                        onChange={handleReplaceStartFrame}
                         style={{ display: 'none' }}
                       />
                     </div>
@@ -670,17 +670,17 @@ export default function BridgeBulkCampaignDetailPage() {
                 </div>
 
                 <div style={{ background: 'var(--bg-card)', padding: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-                  <span style={{ fontWeight: 600, fontSize: '0.75rem', color: '#fff', display: 'block', marginBottom: '10px' }}>
+                  <span style={{ fontWeight: 600, fontSize: '0.75rem', color: 'var(--text-primary)', display: 'block', marginBottom: '10px' }}>
                     🎥 INJECTION VIDEO PREVIEW (I2V)
                   </span>
                   <div style={{
-                    width: '100%', height: '220px', background: '#07070a',
+                    width: '100%', height: '220px', background: 'var(--surface)',
                     borderRadius: '4px', border: '1px solid var(--border)',
                     display: 'flex', justifyContent: 'center', alignItems: 'center',
                     overflow: 'hidden', position: 'relative', marginBottom: '12px'
                   }}>
                     {item.clip2_video_path ? (
-                      <video 
+                      <video
                         src={`${item.clip2_video_path}`}
                         controls
                         style={{ width: '100%', height: '100%', objectFit: 'contain' }}
@@ -726,12 +726,12 @@ export default function BridgeBulkCampaignDetailPage() {
               </div>
 
             {/* Row-level Render Configuration Card */}
-            <div style={{ background: 'rgba(255, 255, 255, 0.01)', border: '1px solid var(--border)', borderRadius: '6px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: '6px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <span style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--accent-light)', display: 'block' }}>
                 ⚙️ Konfigurasi Render & TTS untuk Baris Ini
               </span>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-                
+
                 {/* TTS Section */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -749,11 +749,11 @@ export default function BridgeBulkCampaignDetailPage() {
                         borderRadius: '20px', transition: '0.4s'
                       }}></span>
                     </label>
-                    <span style={{ fontSize: '0.8rem', color: '#fff', fontWeight: 600 }}>Aktifkan TTS Voiceover</span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600 }}>Aktifkan TTS Voiceover</span>
                   </div>
 
                   {enableTts === 1 && (
-                    <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ background: 'var(--overlay-subtle)', padding: '12px', borderRadius: '4px', border: '1px solid var(--surface-interactive)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div style={{ display: 'flex', gap: '10px' }}>
                         <div style={{ flex: 1 }}>
                           <label style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>TTS Provider</label>
@@ -761,7 +761,7 @@ export default function BridgeBulkCampaignDetailPage() {
                             value={voiceProvider}
                             onChange={(e) => setVoiceProvider(e.target.value)}
                             disabled={['pending', 'processing'].includes(item.workflow_status)}
-                            style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '6px', color: '#fff', fontSize: '0.78rem', outline: 'none' }}
+                            style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '6px', color: 'var(--text-primary)', fontSize: '0.78rem', outline: 'none' }}
                           >
                             <option value="gemini">Gemini Audio</option>
                             <option value="minimax">MiniMax TTS</option>
@@ -773,7 +773,7 @@ export default function BridgeBulkCampaignDetailPage() {
                             value={voicePersona}
                             onChange={(e) => setVoicePersona(e.target.value)}
                             disabled={['pending', 'processing'].includes(item.workflow_status)}
-                            style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '6px', color: '#fff', fontSize: '0.78rem', outline: 'none' }}
+                            style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '6px', color: 'var(--text-primary)', fontSize: '0.78rem', outline: 'none' }}
                           >
                             {(voiceProvider === 'minimax' ? MINIMAX_VOICES : GEMINI_VOICES).map(voice => (
                               <option key={voice.id} value={voice.id}>
@@ -839,11 +839,11 @@ export default function BridgeBulkCampaignDetailPage() {
                         borderRadius: '20px', transition: '0.4s'
                       }}></span>
                     </label>
-                    <span style={{ fontSize: '0.8rem', color: '#fff', fontWeight: 600 }}>Aktifkan FFmpeg Muxing</span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600 }}>Aktifkan FFmpeg Muxing</span>
                   </div>
 
                   {enableFfmpeg === 1 && (
-                    <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ background: 'var(--overlay-subtle)', padding: '12px', borderRadius: '4px', border: '1px solid var(--surface-interactive)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         <div>
                           <label style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Sync Option</label>
@@ -851,7 +851,7 @@ export default function BridgeBulkCampaignDetailPage() {
                             value={ffmpegSyncOption}
                             onChange={(e) => setFfmpegSyncOption(e.target.value)}
                             disabled={['pending', 'processing'].includes(item.workflow_status)}
-                            style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '6px', color: '#fff', fontSize: '0.78rem', outline: 'none' }}
+                            style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '6px', color: 'var(--text-primary)', fontSize: '0.78rem', outline: 'none' }}
                           >
                             <option value="smart_sync">Autopilot Smart Sync</option>
                             <option value="stretch">Stretch (Symmetrical Speed)</option>
@@ -885,22 +885,22 @@ export default function BridgeBulkCampaignDetailPage() {
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
-              <button 
+              <button
                 type="button"
-                onClick={(e) => { e.stopPropagation(); handleSaveChanges(); }} 
-                className="btn btn-secondary" 
+                onClick={(e) => { e.stopPropagation(); handleSaveChanges(); }}
+                className="btn btn-secondary"
                 disabled={saving}
                 style={{ padding: '10px 20px', fontSize: '0.82rem' }}
               >
                 {saving ? '⏳ Menyimpan...' : '💾 Simpan Perubahan'}
               </button>
               {item.workflow_status === 'ready_for_review' && (
-                <button 
+                <button
                   type="button"
-                  onClick={(e) => { e.stopPropagation(); handleApproveAndProceed(); }} 
-                  className="btn btn-success" 
+                  onClick={(e) => { e.stopPropagation(); handleApproveAndProceed(); }}
+                  className="btn btn-success"
                   disabled={actionLoading}
-                  style={{ padding: '10px 24px', fontSize: '0.82rem', fontWeight: 'bold', boxShadow: '0 0 15px rgba(46, 204, 113, 0.2)' }}
+                  style={{ padding: '10px 24px', fontSize: '0.82rem', fontWeight: 'bold', boxShadow: '0 0 15px var(--status-success-soft)' }}
                 >
                   ✅ Approve & Proceed Video
                 </button>
@@ -912,7 +912,7 @@ export default function BridgeBulkCampaignDetailPage() {
 
         {activeTab === 'dna' && (
           <div className="card" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', padding: '20px' }}>
-            <h4 style={{ margin: '0 0 14px 0', fontSize: '0.9rem', color: '#fff' }}>🧬 Detail Informasi & Metadata DNA</h4>
+            <h4 style={{ margin: '0 0 14px 0', fontSize: '0.9rem', color: 'var(--text-primary)' }}>🧬 Detail Informasi & Metadata DNA</h4>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
               <tbody>
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
@@ -966,14 +966,14 @@ export default function BridgeBulkCampaignDetailPage() {
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
                   <th style={{ padding: '10px', color: 'var(--text-muted)' }}>1. Unduh Aset</th>
                   <td style={{ padding: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ fontWeight: 600, color: item.download_status === 'completed' ? '#2ecc71' : 'var(--text-muted)' }}>
+                    <span style={{ fontWeight: 600, color: item.download_status === 'completed' ? 'var(--status-success)' : 'var(--text-muted)' }}>
                       {item.download_status || 'pending'}
                     </span>
                     <button
                       type="button"
                       onClick={() => handleRetryStep('download')}
                       className="btn btn-secondary"
-                      style={{ padding: '2px 8px', fontSize: '0.68rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}
+                      style={{ padding: '2px 8px', fontSize: '0.68rem', background: 'var(--surface-interactive)', border: '1px solid var(--border)' }}
                       disabled={actionLoading}
                     >
                       🔄 Retry
@@ -983,14 +983,14 @@ export default function BridgeBulkCampaignDetailPage() {
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
                   <th style={{ padding: '10px', color: 'var(--text-muted)' }}>2. AI Scripting Planning</th>
                   <td style={{ padding: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ fontWeight: 600, color: item.gemini_status === 'completed' ? '#2ecc71' : 'var(--text-muted)' }}>
+                    <span style={{ fontWeight: 600, color: item.gemini_status === 'completed' ? 'var(--status-success)' : 'var(--text-muted)' }}>
                       {item.gemini_status || 'pending'}
                     </span>
                     <button
                       type="button"
                       onClick={() => handleRetryStep('gemini')}
                       className="btn btn-secondary"
-                      style={{ padding: '2px 8px', fontSize: '0.68rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}
+                      style={{ padding: '2px 8px', fontSize: '0.68rem', background: 'var(--surface-interactive)', border: '1px solid var(--border)' }}
                       disabled={actionLoading}
                     >
                       🔄 Retry
@@ -1000,14 +1000,14 @@ export default function BridgeBulkCampaignDetailPage() {
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
                   <th style={{ padding: '10px', color: 'var(--text-muted)' }}>3. Start Frame T2I</th>
                   <td style={{ padding: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ fontWeight: 600, color: item.t2i_status === 'completed' ? '#2ecc71' : 'var(--text-muted)' }}>
+                    <span style={{ fontWeight: 600, color: item.t2i_status === 'completed' ? 'var(--status-success)' : 'var(--text-muted)' }}>
                       {item.t2i_status || 'pending'}
                     </span>
                     <button
                       type="button"
                       onClick={() => handleRetryStep('t2i')}
                       className="btn btn-secondary"
-                      style={{ padding: '2px 8px', fontSize: '0.68rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}
+                      style={{ padding: '2px 8px', fontSize: '0.68rem', background: 'var(--surface-interactive)', border: '1px solid var(--border)' }}
                       disabled={actionLoading}
                     >
                       🔄 Retry
@@ -1017,14 +1017,14 @@ export default function BridgeBulkCampaignDetailPage() {
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
                   <th style={{ padding: '10px', color: 'var(--text-muted)' }}>4. Video Klip G-Labs I2V</th>
                   <td style={{ padding: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ fontWeight: 600, color: item.i2v_status === 'completed' ? '#2ecc71' : 'var(--text-muted)' }}>
+                    <span style={{ fontWeight: 600, color: item.i2v_status === 'completed' ? 'var(--status-success)' : 'var(--text-muted)' }}>
                       {item.i2v_status || 'pending'}
                     </span>
                     <button
                       type="button"
                       onClick={() => handleRetryStep('i2v')}
                       className="btn btn-secondary"
-                      style={{ padding: '2px 8px', fontSize: '0.68rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}
+                      style={{ padding: '2px 8px', fontSize: '0.68rem', background: 'var(--surface-interactive)', border: '1px solid var(--border)' }}
                       disabled={actionLoading}
                     >
                       🔄 Retry
@@ -1034,14 +1034,14 @@ export default function BridgeBulkCampaignDetailPage() {
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
                   <th style={{ padding: '10px', color: 'var(--text-muted)' }}>5. TTS Voiceover</th>
                   <td style={{ padding: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ fontWeight: 600, color: item.tts_status === 'completed' ? '#2ecc71' : 'var(--text-muted)' }}>
+                    <span style={{ fontWeight: 600, color: item.tts_status === 'completed' ? 'var(--status-success)' : 'var(--text-muted)' }}>
                       {item.tts_status || 'pending'}
                     </span>
                     <button
                       type="button"
                       onClick={() => handleRetryStep('tts')}
                       className="btn btn-secondary"
-                      style={{ padding: '2px 8px', fontSize: '0.68rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}
+                      style={{ padding: '2px 8px', fontSize: '0.68rem', background: 'var(--surface-interactive)', border: '1px solid var(--border)' }}
                       disabled={actionLoading}
                     >
                       🔄 Retry
@@ -1051,14 +1051,14 @@ export default function BridgeBulkCampaignDetailPage() {
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
                   <th style={{ padding: '10px', color: 'var(--text-muted)' }}>6. FFmpeg Muxing</th>
                   <td style={{ padding: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ fontWeight: 600, color: item.ffmpeg_status === 'completed' ? '#2ecc71' : 'var(--text-muted)' }}>
+                    <span style={{ fontWeight: 600, color: item.ffmpeg_status === 'completed' ? 'var(--status-success)' : 'var(--text-muted)' }}>
                       {item.ffmpeg_status || 'pending'}
                     </span>
                     <button
                       type="button"
                       onClick={() => handleRetryStep('ffmpeg')}
                       className="btn btn-secondary"
-                      style={{ padding: '2px 8px', fontSize: '0.68rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}
+                      style={{ padding: '2px 8px', fontSize: '0.68rem', background: 'var(--surface-interactive)', border: '1px solid var(--border)' }}
                       disabled={actionLoading}
                     >
                       🔄 Retry
@@ -1068,14 +1068,14 @@ export default function BridgeBulkCampaignDetailPage() {
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
                   <th style={{ padding: '10px', color: 'var(--text-muted)' }}>7. Sync Nextcloud</th>
                   <td style={{ padding: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ fontWeight: 600, color: item.sync_status === 'completed' ? '#2ecc71' : 'var(--text-muted)' }}>
+                    <span style={{ fontWeight: 600, color: item.sync_status === 'completed' ? 'var(--status-success)' : 'var(--text-muted)' }}>
                       {item.sync_status || 'pending'}
                     </span>
                     <button
                       type="button"
                       onClick={() => handleRetryStep('sync')}
                       className="btn btn-secondary"
-                      style={{ padding: '2px 8px', fontSize: '0.68rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}
+                      style={{ padding: '2px 8px', fontSize: '0.68rem', background: 'var(--surface-interactive)', border: '1px solid var(--border)' }}
                       disabled={actionLoading}
                     >
                       🔄 Retry
@@ -1093,7 +1093,7 @@ export default function BridgeBulkCampaignDetailPage() {
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: '600', color: '#ffb86c' }}>
                 🖥 SYSTEM ACTIVITY TERMINAL (FILTERED)
               </span>
-              <button 
+              <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); pollLogs(); }}
                 style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.72rem', cursor: 'pointer', fontFamily: 'var(--font-mono)' }}
@@ -1120,14 +1120,14 @@ export default function BridgeBulkCampaignDetailPage() {
 
       <main className="main-content" style={{ flex: 1, padding: '24px 32px', overflowY: 'auto' }}>
         <div style={{ maxWidth: '1250px', margin: '0 auto' }}>
-          
+
           {toast && (
             <div style={{
               position: 'fixed', top: '20px', right: '20px', zIndex: 9999,
               padding: '12px 24px', borderRadius: 'var(--radius-sm)',
               fontSize: '0.88rem', fontWeight: 500, boxShadow: 'var(--shadow-lg)',
               background: toast.type === 'error' ? 'var(--danger)' : (toast.type === 'info' ? 'var(--accent)' : 'var(--success)'),
-              color: '#fff', transition: 'all 0.3s ease'
+              color: 'var(--text-primary)', transition: 'all 0.3s ease'
             }}>
               {toast.type === 'error' ? '❌ ' : (toast.type === 'info' ? 'ℹ️ ' : '✅ ')} {toast.message}
             </div>
@@ -1139,16 +1139,16 @@ export default function BridgeBulkCampaignDetailPage() {
               <a href="/product-bridge-inject" style={{ color: 'var(--accent-light)', fontSize: '0.82rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '6px' }}>
                 ⬅️ Kembali ke Dashboard Lab
               </a>
-              <h1 style={{ margin: 0, fontSize: '1.5rem', color: '#fff' }}>
+              <h1 style={{ margin: 0, fontSize: '1.5rem', color: 'var(--text-primary)' }}>
                 🛠️ Workbench Massal: {campaign?.campaign_name || 'Memuat...'}
               </h1>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: '4px' }}>
                 Review baris demi baris, edit naskah, setujui start-frame, dan unggah video secara massal.
               </p>
             </div>
-            <button 
-              type="button" 
-              onClick={() => fetchCampaignDetails()} 
+            <button
+              type="button"
+              onClick={() => fetchCampaignDetails()}
               className="btn btn-secondary"
               style={{ fontSize: '0.78rem', padding: '8px 14px' }}
             >
@@ -1181,12 +1181,12 @@ export default function BridgeBulkCampaignDetailPage() {
             </div>
           ) : (
             <div className="card" style={{ padding: '0px', background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-              <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', color: '#fff', fontWeight: 700, fontSize: '0.95rem' }}>
+              <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', color: 'var(--text-primary)', fontWeight: 700, fontSize: '0.95rem' }}>
                 📋 Daftar Baris Import ({items.length})
               </div>
               <table className="ideas-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', margin: 0 }}>
                 <thead>
-                  <tr style={{ background: 'rgba(255, 255, 255, 0.02)', borderBottom: '1px solid var(--border)' }}>
+                  <tr style={{ background: 'var(--surface-interactive)', borderBottom: '1px solid var(--border)' }}>
                     <th style={{ width: '5%', padding: '12px 20px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)' }}>#</th>
                     <th style={{ width: '55%', padding: '12px 20px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Target URL / Nextcloud</th>
                     <th style={{ width: '20%', padding: '12px 20px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Status</th>
@@ -1197,13 +1197,13 @@ export default function BridgeBulkCampaignDetailPage() {
                   {items.map((item, idx) => {
                     const isExpanded = item.id === selectedItemId;
                     const statusInfo = getStatusLabel(item.workflow_status);
-                    
+
                     return (
                       <React.Fragment key={item.id}>
                         <tr style={{ borderBottom: '1px solid var(--border)', background: isExpanded ? 'rgba(108, 92, 231, 0.04)' : 'transparent', transition: 'background 0.2s' }}>
                           <td style={{ padding: '16px 20px', fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{idx + 1}</td>
                           <td style={{ padding: '16px 20px' }}>
-                            <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#fff' }}>
+                            <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-primary)' }}>
                               {item.product_name || 'Menunggu Sourcing Produk...'}
                             </div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
@@ -1244,9 +1244,9 @@ export default function BridgeBulkCampaignDetailPage() {
                                 style={{
                                   fontSize: '0.72rem',
                                   padding: '6px 12px',
-                                  background: isExpanded ? 'var(--accent)' : 'rgba(255,255,255,0.08)',
-                                  color: '#fff',
-                                  border: '1px solid rgba(255,255,255,0.1)'
+                                  background: isExpanded ? 'var(--accent)' : 'var(--border-subtle)',
+                                  color: 'var(--text-primary)',
+                                  border: '1px solid var(--border-subtle)'
                                 }}
                               >
                                 {isExpanded ? '📖 Tutup' : '📖 Detail'}
@@ -1266,8 +1266,8 @@ export default function BridgeBulkCampaignDetailPage() {
                                     fontSize: '0.72rem',
                                     padding: '6px 12px',
                                     background: '#c0392b',
-                                    color: '#fff',
-                                    border: '1px solid rgba(255,255,255,0.1)'
+                                    color: 'var(--text-primary)',
+                                    border: '1px solid var(--border-subtle)'
                                   }}
                                 >
                                   💥 Reset

@@ -10,15 +10,15 @@ export default function ProductDatabasePage() {
   const [viewTabs, setViewTabs] = useState({}); // productId -> 'raw' | 'cleaned'
   const [zoomedImage, setZoomedImage] = useState(null);
   const [uploadingProductId, setUploadingProductId] = useState(null);
-  
+
   // Search & Filter
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
-  
+
   // Modals visibility
   const [showAddEditModal, setShowAddEditModal] = useState(false);
   const [showScraperModal, setShowScraperModal] = useState(false);
-  
+
   // Editing state
   const [editingProduct, setEditingProduct] = useState(null);
   const [inlineAffiliateLinks, setInlineAffiliateLinks] = useState({});
@@ -26,7 +26,7 @@ export default function ProductDatabasePage() {
   const [copiedId, setCopiedId] = useState(null);
   const [productBrandLinks, setProductBrandLinks] = useState([]);
   const [brandProfiles, setBrandProfiles] = useState([]);
-  
+
   // Form fields for Add/Edit full product
   const [formData, setFormData] = useState({
     product_name: '',
@@ -95,7 +95,7 @@ export default function ProductDatabasePage() {
       if (data.success) {
         setProducts(data.data || []);
         setScrapingCount(data.scraping_count || 0);
-        
+
         // Populate inline affiliate links map
         const linksMap = {};
         data.data.forEach(p => {
@@ -313,12 +313,12 @@ export default function ProductDatabasePage() {
     const colName = tabType === 'raw' ? 'raw_photo_url' : (tabType === 'cleaned' ? 'cleaned_photo_url' : 'generated_photo_url');
     const product = products.find(p => p.id === productId);
     if (!product) return;
-    
+
     let relativePath = '';
-    const rawUrl = tabType === 'raw' 
-      ? product.raw_photo_url 
+    const rawUrl = tabType === 'raw'
+      ? product.raw_photo_url
       : (tabType === 'cleaned' ? (product.cleaned_photo_url || product.clean_photo_url) : product.generated_photo_url);
-    
+
     if (rawUrl && rawUrl.includes('path=')) {
       const match = rawUrl.match(/path=([^&]+)/);
       if (match) {
@@ -332,7 +332,7 @@ export default function ProductDatabasePage() {
       const res = await fetch(`/api/v2/products/${productId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           active_photo: colName,
           photo_url: relativePath
         })
@@ -673,7 +673,7 @@ export default function ProductDatabasePage() {
     e.preventDefault();
     if (!csvImportFile) return;
     setCsvImporting(true);
-    
+
     const formData = new FormData();
     formData.append('file', csvImportFile);
 
@@ -785,14 +785,14 @@ export default function ProductDatabasePage() {
           <div className="page-header" style={{ marginBottom: '24px' }}>
             <h1 className="page-title">📦 Product Database</h1>
             <p className="page-subtitle" style={{ marginBottom: '16px' }}>Manage single source of truth for products.</p>
-            
+
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-              <button 
-                className="btn" 
-                style={{ 
-                  background: 'rgba(14, 165, 233, 0.15)', 
-                  border: '1px solid rgba(14, 165, 233, 0.4)', 
-                  color: '#38bdf8',
+              <button
+                className="btn"
+                style={{
+                  background: 'rgba(14, 165, 233, 0.15)',
+                  border: '1px solid rgba(14, 165, 233, 0.4)',
+                  color: 'var(--link)',
                   padding: '10px 16px',
                   borderRadius: '10px',
                   fontWeight: 600,
@@ -808,13 +808,13 @@ export default function ProductDatabasePage() {
               >
                 📥 Import CSV Raw
               </button>
-              
-              <button 
-                className="btn" 
-                style={{ 
-                  background: 'rgba(14, 165, 233, 0.15)', 
-                  border: '1px solid rgba(14, 165, 233, 0.4)', 
-                  color: '#38bdf8',
+
+              <button
+                className="btn"
+                style={{
+                  background: 'rgba(14, 165, 233, 0.15)',
+                  border: '1px solid rgba(14, 165, 233, 0.4)',
+                  color: 'var(--link)',
                   padding: '10px 16px',
                   borderRadius: '10px',
                   fontWeight: 600,
@@ -830,13 +830,13 @@ export default function ProductDatabasePage() {
                 📥 Import ZIP
               </button>
 
-              <a 
-                href={selectedIds.length > 0 ? `/api/v2/products/export?ids=${selectedIds.join(',')}` : `/api/v2/products/export`} 
-                className="btn" 
-                style={{ 
-                  background: selectedIds.length > 0 ? 'linear-gradient(135deg, rgba(14, 165, 233, 0.3) 0%, rgba(2, 132, 199, 0.4) 100%)' : 'rgba(14, 165, 233, 0.1)', 
-                  border: selectedIds.length > 0 ? '1px solid #0284c7' : '1px solid rgba(14, 165, 233, 0.3)', 
-                  color: selectedIds.length > 0 ? '#38bdf8' : '#7dd3fc', 
+              <a
+                href={selectedIds.length > 0 ? `/api/v2/products/export?ids=${selectedIds.join(',')}` : `/api/v2/products/export`}
+                className="btn"
+                style={{
+                  background: selectedIds.length > 0 ? 'linear-gradient(135deg, rgba(14, 165, 233, 0.3) 0%, rgba(2, 132, 199, 0.4) 100%)' : 'rgba(14, 165, 233, 0.1)',
+                  border: selectedIds.length > 0 ? '1px solid var(--status-info)' : '1px solid rgba(14, 165, 233, 0.3)',
+                  color: selectedIds.length > 0 ? 'var(--link)' : '#7dd3fc',
                   padding: '10px 16px',
                   borderRadius: '10px',
                   fontWeight: 600,
@@ -852,12 +852,12 @@ export default function ProductDatabasePage() {
                 📤 Export ZIP {selectedIds.length > 0 ? `(${selectedIds.length})` : ''}
               </a>
 
-              <button 
-                className="btn" 
-                style={{ 
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
-                  border: 'none', 
-                  color: '#ffffff',
+              <button
+                className="btn"
+                style={{
+                  background: 'linear-gradient(135deg, var(--status-success) 0%, var(--status-success) 100%)',
+                  border: 'none',
+                  color: 'var(--text-primary)',
                   padding: '10px 18px',
                   borderRadius: '10px',
                   fontWeight: 700,
@@ -874,13 +874,13 @@ export default function ProductDatabasePage() {
                 ➕ Add Product
               </button>
 
-              <button 
-                className="btn" 
+              <button
+                className="btn"
                 disabled
-                style={{ 
-                  background: 'rgba(30, 41, 59, 0.5)', 
-                  border: '1px solid #334155', 
-                  color: '#64748b',
+                style={{
+                  background: 'rgba(30, 41, 59, 0.5)',
+                  border: '1px solid #334155',
+                  color: 'var(--text-muted)',
                   padding: '10px 16px',
                   borderRadius: '10px',
                   fontWeight: 600,
@@ -907,7 +907,7 @@ export default function ProductDatabasePage() {
           {/* Background Scraping Status banner */}
           {scrapingCount > 0 && (
             <div className="card" style={{
-              background: 'linear-gradient(135deg, rgba(108, 92, 231, 0.15), rgba(0, 184, 148, 0.15))',
+              background: 'linear-gradient(135deg, var(--status-neutral-soft), rgba(0, 184, 148, 0.15))',
               border: '1px solid var(--accent)',
               borderRadius: 'var(--radius)',
               padding: '16px 20px',
@@ -932,7 +932,7 @@ export default function ProductDatabasePage() {
           {/* Export Sheets Loading Banner */}
           {exportingSheets && (
             <div className="card" style={{
-              background: 'rgba(255, 255, 255, 0.05)',
+              background: 'var(--surface-interactive)',
               border: '1px solid var(--border)',
               borderRadius: 'var(--radius)',
               padding: '16px 20px',
@@ -974,8 +974,8 @@ export default function ProductDatabasePage() {
 
           {/* System Poller Log Console (v10.14.0) */}
           <div className="card" style={{ marginBottom: '24px', padding: '14px 18px', background: 'var(--bg-panel)', border: '1px solid var(--border)' }}>
-            <div 
-              onClick={() => setShowLogConsole(!showLogConsole)} 
+            <div
+              onClick={() => setShowLogConsole(!showLogConsole)}
               style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>
@@ -995,7 +995,7 @@ export default function ProductDatabasePage() {
                 {showLogConsole ? '▲ Sembunyikan' : '▼ Tampilkan'}
               </span>
             </div>
-            
+
             {showLogConsole && (
               <div style={{ marginTop: '14px' }}>
                 <pre style={{
@@ -1077,7 +1077,7 @@ export default function ProductDatabasePage() {
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 marginBottom: '16px',
-                background: 'rgba(255, 255, 255, 0.02)',
+                background: 'var(--surface-interactive)',
                 border: '1px solid var(--border)',
                 borderRadius: 'var(--radius-sm)',
                 padding: '10px 16px',
@@ -1111,7 +1111,7 @@ export default function ProductDatabasePage() {
                       style={{
                         fontSize: '0.72rem',
                         padding: '4px 10px',
-                        background: 'rgba(255, 255, 255, 0.05)',
+                        background: 'var(--surface-interactive)',
                         border: '1px solid var(--border)',
                         color: 'var(--text-muted)'
                       }}
@@ -1132,7 +1132,7 @@ export default function ProductDatabasePage() {
                       style={{
                         background: 'linear-gradient(135deg, #0984e3 0%, #74b9ff 100%)',
                         border: 'none',
-                        color: '#fff',
+                        color: 'var(--text-primary)',
                         fontSize: '0.75rem',
                         fontWeight: 600,
                         padding: '6px 12px',
@@ -1146,7 +1146,7 @@ export default function ProductDatabasePage() {
                     >
                       {regeneratingTruths ? (
                         <>
-                          <div className="spinner" style={{ width: '12px', height: '12px', borderTopColor: '#fff' }} />
+                          <div className="spinner" style={{ width: '12px', height: '12px', borderTopColor: 'var(--text-primary)' }} />
                           Enriching...
                         </>
                       ) : (
@@ -1160,7 +1160,7 @@ export default function ProductDatabasePage() {
                       style={{
                         background: 'linear-gradient(135deg, #ffa502 0%, #ff7f50 100%)',
                         border: 'none',
-                        color: '#fff',
+                        color: 'var(--text-primary)',
                         fontSize: '0.75rem',
                         fontWeight: 600,
                         padding: '6px 12px',
@@ -1174,7 +1174,7 @@ export default function ProductDatabasePage() {
                     >
                       {regeneratingPhotos ? (
                         <>
-                          <div className="spinner" style={{ width: '12px', height: '12px', borderTopColor: '#fff' }} />
+                          <div className="spinner" style={{ width: '12px', height: '12px', borderTopColor: 'var(--text-primary)' }} />
                           Rendering...
                         </>
                       ) : (
@@ -1192,10 +1192,10 @@ export default function ProductDatabasePage() {
               }}>
                 {products.map(p => {
                 // Parse tags
-                const tagsList = p.tags 
+                const tagsList = p.tags
                   ? p.tags.split(',').map(t => t.trim()).filter(Boolean)
                   : [];
-                
+
                 // Parse USP points
                 let uspPoints = [];
                 if (p.unique_selling_point) {
@@ -1215,8 +1215,8 @@ export default function ProductDatabasePage() {
                 // Resolve active tab and display URL
                 // Resolve active tab and display URL (Hanya Raw & Clean)
                 const activeTab = viewTabs[p.id] || (p.active_photo === 'raw_photo_url' ? 'raw' : 'cleaned');
-                const displayPhotoUrl = activeTab === 'raw' 
-                  ? p.raw_photo_url 
+                const displayPhotoUrl = activeTab === 'raw'
+                  ? p.raw_photo_url
                   : (p.cleaned_photo_url || p.clean_photo_url);
                 const isTabAvailable = (tab) => tab === 'raw' ? !!p.raw_photo_url : (!!p.cleaned_photo_url || !!p.clean_photo_url);
                 const isCurrentlyActive = (tab) => p.active_photo === (tab === 'raw' ? 'raw_photo_url' : 'cleaned_photo_url') || (tab === 'cleaned' && p.active_photo === 'clean_photo_url');
@@ -1236,7 +1236,7 @@ export default function ProductDatabasePage() {
                       {/* Image Header */}
                       <div style={{
                         height: '180px',
-                        background: 'rgba(0,0,0,0.3)',
+                        background: 'var(--overlay-subtle)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -1272,7 +1272,7 @@ export default function ProductDatabasePage() {
                               )}
                               {!isEnriching && isPhotoGenerating && (
                                 <>
-                                  <div className="spinner" style={{ width: '22px', height: '22px', marginBottom: '8px', borderTopColor: '#e17055' }}></div>
+                                  <div className="spinner" style={{ width: '22px', height: '22px', marginBottom: '8px', borderTopColor: 'var(--status-warning)' }}></div>
                                   <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#ff7675' }}>
                                     🎨 Visual Rendering {p.photo_status === 'processing' ? 'Active' : 'Queued'}
                                   </div>
@@ -1295,8 +1295,8 @@ export default function ProductDatabasePage() {
                         })()}
 
                         {displayPhotoUrl ? (
-                          <div 
-                            style={{ width: '100%', height: '100%', position: 'relative', cursor: 'zoom-in' }} 
+                          <div
+                            style={{ width: '100%', height: '100%', position: 'relative', cursor: 'zoom-in' }}
                             className="thumbnail-container"
                             onClick={() => {
                               console.log("Zooming product photo:", displayPhotoUrl);
@@ -1310,26 +1310,26 @@ export default function ProductDatabasePage() {
                             />
                             <div className="zoom-overlay" style={{
                               position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                              background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center',
+                              background: 'var(--overlay-subtle)', display: 'flex', alignItems: 'center',
                               justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s', pointerEvents: 'none'
                             }}>
-                              <span style={{ fontSize: '1.5rem', color: '#fff' }}>🔍 Zoom</span>
+                              <span style={{ fontSize: '1.5rem', color: 'var(--text-primary)' }}>🔍 Zoom</span>
                             </div>
                           </div>
                         ) : (
-                          <div 
+                          <div
                             onClick={() => document.getElementById(`upload-${p.id}-${activeTab}`).click()}
-                            style={{ 
-                              display: 'flex', 
-                              flexDirection: 'column', 
-                              alignItems: 'center', 
-                              gap: '6px', 
-                              cursor: 'pointer', 
-                              width: '100%', 
-                              height: '100%', 
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              gap: '6px',
+                              cursor: 'pointer',
+                              width: '100%',
+                              height: '100%',
                               justifyContent: 'center',
-                              background: 'rgba(255,255,255,0.02)',
-                              border: '2px dashed rgba(255,255,255,0.1)',
+                              background: 'var(--surface-interactive)',
+                              border: '2px dashed var(--border-subtle)',
                               padding: '12px',
                               textAlign: 'center'
                             }}
@@ -1369,7 +1369,7 @@ export default function ProductDatabasePage() {
                               top: '12px',
                               right: '12px',
                               background: 'var(--accent)',
-                              color: '#fff',
+                              color: 'var(--text-primary)',
                               border: 'none',
                               borderRadius: '4px',
                               padding: '4px 8px',
@@ -1395,7 +1395,7 @@ export default function ProductDatabasePage() {
                               right: isTabAvailable(activeTab) && !isCurrentlyActive(activeTab) ? '95px' : '12px',
                               background: 'rgba(0, 0, 0, 0.65)',
                               border: '1px solid rgba(255,255,255,0.2)',
-                              color: '#fff',
+                              color: 'var(--text-primary)',
                               borderRadius: '4px',
                               padding: '4px 8px',
                               fontSize: '0.62rem',
@@ -1419,13 +1419,13 @@ export default function ProductDatabasePage() {
                           bottom: '0',
                           left: '0',
                           right: '0',
-                          background: 'rgba(0, 0, 0, 0.75)',
+                          background: 'var(--overlay-backdrop)',
                           display: 'flex',
                           justifyContent: 'space-around',
                           padding: '4px 0',
                           zIndex: 10,
                           backdropFilter: 'blur(4px)',
-                          borderTop: '1px solid rgba(255,255,255,0.08)'
+                          borderTop: '1px solid var(--border-subtle)'
                         }}>
                           {['raw', 'cleaned'].map(tab => {
                             const avail = isTabAvailable(tab);
@@ -1437,7 +1437,7 @@ export default function ProductDatabasePage() {
                                 type="button"
                                 onClick={() => setViewTabs(prev => ({ ...prev, [p.id]: tab }))}
                                 style={{
-                                  background: selected ? 'rgba(108, 92, 231, 0.3)' : 'transparent',
+                                  background: selected ? 'var(--status-neutral-soft)' : 'transparent',
                                   color: selected ? 'var(--accent-light)' : avail ? 'var(--text-secondary)' : 'rgba(255,255,255,0.4)',
                                   border: selected ? '1px solid var(--accent)' : 'none',
                                   borderRadius: '3px',
@@ -1457,7 +1457,7 @@ export default function ProductDatabasePage() {
                             );
                           })}
                         </div>
-                        
+
                         {/* Selection Checkbox */}
                         <div style={{
                           position: 'absolute',
@@ -1501,7 +1501,7 @@ export default function ProductDatabasePage() {
                             top: '12px',
                             left: '42px',
                             background: 'rgba(108, 92, 231, 0.85)',
-                            color: '#fff',
+                            color: 'var(--text-primary)',
                             fontSize: '0.7rem',
                             fontWeight: 600,
                             padding: '3px 8px',
@@ -1545,8 +1545,8 @@ export default function ProductDatabasePage() {
                           marginBottom: '10px',
                           fontSize: '0.68rem',
                           fontFamily: 'var(--font-mono)',
-                          background: 'rgba(255, 255, 255, 0.04)',
-                          border: '1px solid rgba(255, 255, 255, 0.08)',
+                          background: 'var(--surface-interactive)',
+                          border: '1px solid var(--border-subtle)',
                           padding: '2px 8px',
                           borderRadius: '4px',
                           color: 'var(--text-muted)'
@@ -1581,8 +1581,8 @@ export default function ProductDatabasePage() {
                             {tagsList.map((t, idx) => (
                               <span key={idx} style={{
                                 fontSize: '0.62rem',
-                                background: 'rgba(255,255,255,0.06)',
-                                border: '1px solid rgba(255,255,255,0.1)',
+                                background: 'var(--surface-interactive)',
+                                border: '1px solid var(--border-subtle)',
                                 color: 'var(--text-muted)',
                                 padding: '2px 6px',
                                 borderRadius: '10px'
@@ -1614,9 +1614,9 @@ export default function ProductDatabasePage() {
                               📦 {p.packaging_type || 'Tanpa Kemasan'}
                             </span>
                             <span style={{
-                              background: (p.is_in_packaging === 1 || p.is_in_packaging === true) ? 'rgba(46, 204, 113, 0.1)' : 'rgba(231, 76, 60, 0.1)',
-                              border: (p.is_in_packaging === 1 || p.is_in_packaging === true) ? '1px solid rgba(46, 204, 113, 0.2)' : '1px solid rgba(231, 76, 60, 0.2)',
-                              color: (p.is_in_packaging === 1 || p.is_in_packaging === true) ? '#2ecc71' : '#e74c3c',
+                              background: (p.is_in_packaging === 1 || p.is_in_packaging === true) ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
+                              border: (p.is_in_packaging === 1 || p.is_in_packaging === true) ? '1px solid var(--status-success-soft)' : '1px solid var(--status-danger-soft)',
+                              color: (p.is_in_packaging === 1 || p.is_in_packaging === true) ? 'var(--status-success)' : 'var(--status-danger)',
                               padding: '2px 6px',
                               borderRadius: '4px',
                               fontWeight: 600
@@ -1634,9 +1634,9 @@ export default function ProductDatabasePage() {
                           fontSize: '0.68rem'
                         }}>
                           <span style={{
-                            background: p.product_truth ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255, 255, 255, 0.03)',
-                            border: p.product_truth ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(255, 255, 255, 0.08)',
-                            color: p.product_truth ? '#10b981' : 'var(--text-muted)',
+                            background: p.product_truth ? 'var(--status-success-soft)' : 'var(--surface-interactive)',
+                            border: p.product_truth ? '1px solid var(--status-success-soft)' : '1px solid var(--border-subtle)',
+                            color: p.product_truth ? 'var(--status-success)' : 'var(--text-muted)',
                             padding: '2px 6px',
                             borderRadius: '4px',
                             fontWeight: 600
@@ -1644,9 +1644,9 @@ export default function ProductDatabasePage() {
                             🛡️ {p.product_truth ? 'Product Truth OK' : 'No Product Truth'}
                           </span>
                           <span style={{
-                            background: p.geometric_truth ? 'rgba(168, 85, 247, 0.1)' : 'rgba(255, 255, 255, 0.03)',
-                            border: p.geometric_truth ? '1px solid rgba(168, 85, 247, 0.2)' : '1px solid rgba(255, 255, 255, 0.08)',
-                            color: p.geometric_truth ? '#a855f7' : 'var(--text-muted)',
+                            background: p.geometric_truth ? 'rgba(168, 85, 247, 0.1)' : 'var(--surface-interactive)',
+                            border: p.geometric_truth ? '1px solid rgba(168, 85, 247, 0.2)' : '1px solid var(--border-subtle)',
+                            color: p.geometric_truth ? 'var(--status-neutral)' : 'var(--text-muted)',
                             padding: '2px 6px',
                             borderRadius: '4px',
                             fontWeight: 600
@@ -1674,8 +1674,8 @@ export default function ProductDatabasePage() {
                         {/* USP Points */}
                         {uspPoints.length > 0 && (
                           <div style={{
-                            background: 'rgba(255,255,255,0.02)',
-                            border: '1px solid rgba(255,255,255,0.04)',
+                            background: 'var(--surface-interactive)',
+                            border: '1px solid var(--surface-interactive)',
                             borderRadius: 'var(--radius-sm)',
                             padding: '10px 14px',
                             marginBottom: '8px'
@@ -1764,7 +1764,7 @@ export default function ProductDatabasePage() {
                       borderTop: '1px solid var(--border)',
                       display: 'flex',
                       gap: '8px',
-                      background: 'rgba(255, 255, 255, 0.01)'
+                      background: 'var(--surface-interactive)'
                     }}>
                       <button
                         type="button"
@@ -1774,13 +1774,13 @@ export default function ProductDatabasePage() {
                           flex: 1,
                           background: (p.clean_photo_url || p.cleaned_photo_url)
                             ? 'linear-gradient(135deg, rgba(255, 127, 80, 0.2) 0%, rgba(255, 165, 0, 0.2) 100%)'
-                            : 'linear-gradient(135deg, rgba(108, 92, 231, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%)',
+                            : 'linear-gradient(135deg, var(--status-neutral-soft) 0%, rgba(168, 85, 247, 0.2) 100%)',
                           border: (p.clean_photo_url || p.cleaned_photo_url)
                             ? '1px solid rgba(255, 127, 80, 0.4)'
-                            : '1px solid rgba(108, 92, 231, 0.4)',
+                            : '1px solid var(--status-neutral-soft)',
                           color: (p.clean_photo_url || p.cleaned_photo_url)
-                            ? 'var(--btn-clean-photo-text, #ffffff)'
-                            : 'var(--btn-gen-photo-text, #ffffff)',
+                            ? 'var(--btn-clean-photo-text, var(--text-primary))'
+                            : 'var(--btn-gen-photo-text, var(--text-primary))',
                           fontSize: '0.7rem',
                           fontWeight: 600,
                           padding: '6px 8px',
@@ -1795,7 +1795,7 @@ export default function ProductDatabasePage() {
                       >
                         {regeneratingPhotoId === p.id || (p.photo_status && ['pending', 'processing'].includes(p.photo_status)) ? (
                           <>
-                            <div className="spinner" style={{ width: '10px', height: '10px', borderTopColor: '#fff' }} />
+                            <div className="spinner" style={{ width: '10px', height: '10px', borderTopColor: 'var(--text-primary)' }} />
                             Rendering...
                           </>
                         ) : (
@@ -1811,7 +1811,7 @@ export default function ProductDatabasePage() {
                           flex: 1,
                           background: 'linear-gradient(135deg, rgba(9, 132, 227, 0.2) 0%, rgba(116, 185, 255, 0.2) 100%)',
                           border: '1px solid rgba(9, 132, 227, 0.4)',
-                          color: 'var(--btn-enrich-text, #ffffff)',
+                          color: 'var(--btn-enrich-text, var(--text-primary))',
                           fontSize: '0.7rem',
                           fontWeight: 600,
                           padding: '6px 8px',
@@ -1826,7 +1826,7 @@ export default function ProductDatabasePage() {
                       >
                         {reEnrichingId === p.id || (p.enrichment_status && ['pending', 'processing'].includes(p.enrichment_status)) ? (
                           <>
-                            <div className="spinner" style={{ width: '10px', height: '10px', borderTopColor: '#fff' }} />
+                            <div className="spinner" style={{ width: '10px', height: '10px', borderTopColor: 'var(--text-primary)' }} />
                             Enriching...
                           </>
                         ) : (
@@ -1868,7 +1868,7 @@ export default function ProductDatabasePage() {
       {showScraperModal && (
         <div className="modal-backdrop" style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          background: 'rgba(0,0,0,0.8)', zIndex: 1000,
+          background: 'var(--overlay-backdrop)', zIndex: 1000,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           backdropFilter: 'blur(6px)',
         }} onClick={() => setShowScraperModal(false)}>
@@ -1964,19 +1964,19 @@ export default function ProductDatabasePage() {
               </div>
 
               {/* Repair Mode Checkbox Toggle */}
-              <div style={{ 
-                background: 'rgba(255, 255, 255, 0.03)', 
-                border: '1px solid var(--border)', 
-                borderRadius: '8px', 
-                padding: '12px 16px', 
-                marginBottom: '20px' 
+              <div style={{
+                background: 'var(--surface-interactive)',
+                border: '1px solid var(--border)',
+                borderRadius: '8px',
+                padding: '12px 16px',
+                marginBottom: '20px'
               }}>
-                <label style={{ 
-                  display: 'flex', 
-                  alignItems: 'flex-start', 
-                  gap: '10px', 
-                  cursor: 'pointer', 
-                  fontSize: '0.85rem', 
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '10px',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
                   color: 'var(--text-primary)',
                   userSelect: 'none'
                 }}>
@@ -2012,7 +2012,7 @@ export default function ProductDatabasePage() {
       {showAddEditModal && (
         <div className="modal-backdrop" style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          background: 'rgba(0,0,0,0.8)', zIndex: 1000,
+          background: 'var(--overlay-backdrop)', zIndex: 1000,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           backdropFilter: 'blur(6px)',
         }} onClick={() => { setShowAddEditModal(false); setEditingProduct(null); }}>
@@ -2035,7 +2035,7 @@ export default function ProductDatabasePage() {
             <form onSubmit={handleSaveProduct}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label" style={{ color: formErrors.product_name ? '#ef4444' : undefined }}>Nama Produk *</label>
+                  <label className="form-label" style={{ color: formErrors.product_name ? 'var(--status-danger)' : undefined }}>Nama Produk *</label>
                   <input
                     type="text"
                     className="form-input"
@@ -2044,7 +2044,7 @@ export default function ProductDatabasePage() {
                     placeholder="Nama produk..."
                     required
                   />
-                  {formErrors.product_name && <span style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '4px', display: 'block' }}>{formErrors.product_name}</span>}
+                  {formErrors.product_name && <span style={{ fontSize: '0.75rem', color: 'var(--status-danger)', marginTop: '4px', display: 'block' }}>{formErrors.product_name}</span>}
                 </div>
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="form-label">Kategori</label>
@@ -2082,7 +2082,7 @@ export default function ProductDatabasePage() {
               </div>
 
               <div className="form-group" style={{ marginBottom: '12px' }}>
-                <label className="form-label" style={{ color: formErrors.product_description ? '#ef4444' : undefined }}>Deskripsi Produk *</label>
+                <label className="form-label" style={{ color: formErrors.product_description ? 'var(--status-danger)' : undefined }}>Deskripsi Produk *</label>
                 <textarea
                   className="form-textarea"
                   value={formData.product_description}
@@ -2090,7 +2090,7 @@ export default function ProductDatabasePage() {
                   placeholder="Deskripsi singkat mengenai produk (min 10 karakter)..."
                   style={{ minHeight: '60px' }}
                 />
-                {formErrors.product_description && <span style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '4px', display: 'block' }}>{formErrors.product_description}</span>}
+                {formErrors.product_description && <span style={{ fontSize: '0.75rem', color: 'var(--status-danger)', marginTop: '4px', display: 'block' }}>{formErrors.product_description}</span>}
               </div>
 
               <div className="form-group" style={{ marginBottom: '12px' }}>
@@ -2106,7 +2106,7 @@ export default function ProductDatabasePage() {
 
               {/* Seksi Pengaturan Kemasan & Prompts AI */}
               <div style={{
-                background: 'rgba(255, 255, 255, 0.02)',
+                background: 'var(--surface-interactive)',
                 border: '1px solid var(--border)',
                 borderRadius: 'var(--radius-sm)',
                 padding: '16px',
@@ -2115,10 +2115,10 @@ export default function ProductDatabasePage() {
                 <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-light)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   📦 Kemasan & Prompt AI
                 </div>
-                
+
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px', alignItems: 'start' }}>
                   <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label" style={{ color: formErrors.packaging_status ? '#ef4444' : undefined }}>
+                    <label className="form-label" style={{ color: formErrors.packaging_status ? 'var(--status-danger)' : undefined }}>
                       Status Kemasan *
                     </label>
                     <div style={{ display: 'flex', gap: '16px', marginTop: '6px' }}>
@@ -2147,10 +2147,10 @@ export default function ProductDatabasePage() {
                         🔓 Tidak Dikemas
                       </label>
                     </div>
-                    {formErrors.packaging_status && <span style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '4px', display: 'block' }}>{formErrors.packaging_status}</span>}
+                    {formErrors.packaging_status && <span style={{ fontSize: '0.75rem', color: 'var(--status-danger)', marginTop: '4px', display: 'block' }}>{formErrors.packaging_status}</span>}
                   </div>
                   <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label" style={{ color: formErrors.packaging_type ? '#ef4444' : undefined }}>
+                    <label className="form-label" style={{ color: formErrors.packaging_type ? 'var(--status-danger)' : undefined }}>
                       Jenis Kemasan {formData.packaging_status === 'packaged' ? '*' : ''}
                     </label>
                     <input
@@ -2162,23 +2162,23 @@ export default function ProductDatabasePage() {
                       disabled={formData.packaging_status !== 'packaged'}
                       style={{ opacity: formData.packaging_status === 'packaged' ? 1 : 0.4 }}
                     />
-                    {formErrors.packaging_type && <span style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '4px', display: 'block' }}>{formErrors.packaging_type}</span>}
+                    {formErrors.packaging_type && <span style={{ fontSize: '0.75rem', color: 'var(--status-danger)', marginTop: '4px', display: 'block' }}>{formErrors.packaging_type}</span>}
                   </div>
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '12px' }}>
-                  <label className="form-label" style={{ color: '#10b981', fontWeight: 600 }}>🛡️ Product Truth (T2I Physics & Packaging Lock)</label>
+                  <label className="form-label" style={{ color: 'var(--status-success)', fontWeight: 600 }}>🛡️ Product Truth (T2I Physics & Packaging Lock)</label>
                   <textarea
                     className="form-textarea"
                     value={formData.product_truth}
                     onChange={e => setFormData({ ...formData, product_truth: e.target.value })}
                     placeholder="Deskripsi fisik kemasan resmi (misal: Official Omura Premium Cocoa Powder in an authentic standing aluminium foil sachet packaging...)"
-                    style={{ minHeight: '60px', fontSize: '0.82rem', borderColor: 'rgba(16, 185, 129, 0.3)' }}
+                    style={{ minHeight: '60px', fontSize: '0.82rem', borderColor: 'var(--status-success-soft)' }}
                   />
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '12px' }}>
-                  <label className="form-label" style={{ color: '#a855f7', fontWeight: 600 }}>📐 Geometric Truth (I2V Geometry & Material Lock)</label>
+                  <label className="form-label" style={{ color: 'var(--status-neutral)', fontWeight: 600 }}>📐 Geometric Truth (I2V Geometry & Material Lock)</label>
                   <textarea
                     className="form-textarea"
                     value={formData.geometric_truth}
@@ -2189,7 +2189,7 @@ export default function ProductDatabasePage() {
                 </div>
 
                 <div className="form-group" style={{ marginBottom: '12px' }}>
-                  <label className="form-label" style={{ fontWeight: 600, color: '#60a5fa' }}>✨ Prompt Foto Clean (Clean Photo T2I Prompt)</label>
+                  <label className="form-label" style={{ fontWeight: 600, color: 'var(--link)' }}>✨ Prompt Foto Clean (Clean Photo T2I Prompt)</label>
                   <textarea
                     className="form-textarea"
                     value={formData.clean_photo_t2i_prompt}
@@ -2201,7 +2201,7 @@ export default function ProductDatabasePage() {
 
                 {/* Upload Foto Produk Raw */}
                 <div className="form-group" style={{ marginTop: '12px' }}>
-                  <label className="form-label" style={{ fontWeight: 600, color: formErrors.raw_photo ? '#ef4444' : '#60a5fa' }}>
+                  <label className="form-label" style={{ fontWeight: 600, color: formErrors.raw_photo ? 'var(--status-danger)' : 'var(--link)' }}>
                     📷 Foto Produk Raw {!editingProduct ? '*' : '(Ganti Foto)'}
                   </label>
                   <input
@@ -2213,20 +2213,20 @@ export default function ProductDatabasePage() {
                       width: '100%',
                       padding: '8px',
                       background: '#0d1527',
-                      border: `1px dashed ${formErrors.raw_photo ? '#ef4444' : '#3b82f6'}`,
+                      border: `1px dashed ${formErrors.raw_photo ? 'var(--status-danger)' : 'var(--status-info)'}`,
                       borderRadius: '8px',
-                      color: '#cbd5e1',
+                      color: 'var(--text-secondary)',
                       cursor: 'pointer',
                       fontSize: '0.82rem'
                     }}
                   />
                   {rawPhotoPreview && (
                     <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <img src={rawPhotoPreview} alt="Preview" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #3b82f6' }} />
-                      <span style={{ fontSize: '0.75rem', color: '#60a5fa' }}>✅ {rawPhotoFile?.name}</span>
+                      <img src={rawPhotoPreview} alt="Preview" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--status-info)' }} />
+                      <span style={{ fontSize: '0.75rem', color: 'var(--link)' }}>✅ {rawPhotoFile?.name}</span>
                     </div>
                   )}
-                  {formErrors.raw_photo && <span style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '4px', display: 'block' }}>{formErrors.raw_photo}</span>}
+                  {formErrors.raw_photo && <span style={{ fontSize: '0.75rem', color: 'var(--status-danger)', marginTop: '4px', display: 'block' }}>{formErrors.raw_photo}</span>}
                   {editingProduct && !rawPhotoPreview && editingProduct.raw_photo_url && (
                     <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>Foto raw saat ini sudah ada. Biarkan kosong untuk mempertahankan.</p>
                   )}
@@ -2252,9 +2252,9 @@ export default function ProductDatabasePage() {
 
               {/* Brand Profile Affiliate Links Section (Hanya untuk Edit) */}
               {editingProduct && (
-                <div style={{ marginTop: '20px', padding: '16px', border: '1px solid var(--border)', borderRadius: '6px', background: 'rgba(255,255,255,0.01)', marginBottom: '16px' }}>
+                <div style={{ marginTop: '20px', padding: '16px', border: '1px solid var(--border)', borderRadius: '6px', background: 'var(--surface-interactive)', marginBottom: '16px' }}>
                   <h4 style={{ margin: '0 0 12px 0', color: 'var(--accent-light)' }}>🔗 Affiliate Links per Brand Profile</h4>
-                  
+
                   {/* Daftar link aktif per brand */}
                   {productBrandLinks.length === 0 ? (
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '12px' }}>
@@ -2263,7 +2263,7 @@ export default function ProductDatabasePage() {
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
                       {productBrandLinks.map(link => (
-                        <div key={link.brand_product_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '8px 12px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div key={link.brand_product_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)', padding: '8px 12px', borderRadius: '4px', border: '1px solid var(--surface-interactive)' }}>
                           <div>
                             <div style={{ fontSize: '0.82rem', fontWeight: 600 }}>{link.brand_name}</div>
                             <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', wordBreak: 'break-all' }}>{link.affiliate_link}</div>
@@ -2295,7 +2295,7 @@ export default function ProductDatabasePage() {
                   )}
 
                   {/* Form tambah/update link brand */}
-                  <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div style={{ background: 'var(--overlay-subtle)', padding: '12px', borderRadius: '6px', border: '1px solid var(--surface-interactive)' }}>
                     <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '8px' }}>Tambah / Update Link Brand</div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
                       <select
@@ -2396,7 +2396,7 @@ export default function ProductDatabasePage() {
       {showImportModal && (
         <div className="modal-backdrop" style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          background: 'rgba(0,0,0,0.8)', zIndex: 1000,
+          background: 'var(--overlay-backdrop)', zIndex: 1000,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           backdropFilter: 'blur(6px)',
         }} onClick={() => setShowImportModal(false)}>
@@ -2446,7 +2446,7 @@ export default function ProductDatabasePage() {
       {showCsvImportModal && (
         <div className="modal-backdrop" style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          background: 'rgba(0,0,0,0.8)', zIndex: 1000,
+          background: 'var(--overlay-backdrop)', zIndex: 1000,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           backdropFilter: 'blur(6px)',
         }} onClick={() => setShowCsvImportModal(false)}>
@@ -2466,7 +2466,7 @@ export default function ProductDatabasePage() {
               Unggah berkas CSV atau Excel mentah. Kolom yang wajib diisi adalah <b>Nama Produk Raw</b>. Kolom opsional: <b>Deskripsi Produk Raw</b>, <b>Link Produk</b>, dan <b>URL Foto Produk Raw</b>.
             </p>
 
-            <div style={{ padding: '8px 12px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '4px', marginBottom: '20px', fontSize: '0.74rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+            <div style={{ padding: '8px 12px', background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: '4px', marginBottom: '20px', fontSize: '0.74rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
               💡 <b>Tips Kolom CSV/Excel:</b>
               <ul style={{ paddingLeft: '16px', margin: '4px 0 0 0' }}>
                 <li><b>Nama Produk Raw</b> (nama_produk, product_name)</li>
@@ -2506,7 +2506,7 @@ export default function ProductDatabasePage() {
       {zoomedImage && (
         <div className="modal-backdrop" style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          background: 'rgba(0,0,0,0.85)', zIndex: 1050,
+          background: 'var(--overlay-backdrop)', zIndex: 1050,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           backdropFilter: 'blur(10px)',
         }} onClick={() => setZoomedImage(null)}>
@@ -2522,15 +2522,15 @@ export default function ProductDatabasePage() {
             alignItems: 'center',
             gap: '12px'
           }} onClick={e => e.stopPropagation()}>
-            <button 
-              onClick={() => setZoomedImage(null)} 
-              style={{ 
+            <button
+              onClick={() => setZoomedImage(null)}
+              style={{
                 position: 'absolute',
                 top: '-15px',
                 right: '-15px',
                 background: 'var(--accent)',
                 border: 'none',
-                color: '#fff',
+                color: 'var(--text-primary)',
                 width: '32px',
                 height: '32px',
                 borderRadius: '50%',
@@ -2539,7 +2539,7 @@ export default function ProductDatabasePage() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.4)',
+                boxShadow: '0 2px 10px var(--overlay-subtle)',
                 zIndex: 10
               }}
             >
@@ -2555,11 +2555,11 @@ export default function ProductDatabasePage() {
               justifyContent: 'center',
               overflow: 'hidden',
               borderRadius: 'var(--radius-sm)',
-              background: 'rgba(0,0,0,0.4)'
+              background: 'var(--overlay-subtle)'
             }}>
-              <img 
-                src={zoomedImage} 
-                alt="Product Preview" 
+              <img
+                src={zoomedImage}
+                alt="Product Preview"
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               />
             </div>
@@ -2574,8 +2574,8 @@ export default function ProductDatabasePage() {
       <style jsx global>{`
         .product-card:hover {
           transform: translateY(-4px);
-          box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-          border-color: rgba(108, 92, 231, 0.4) !important;
+          box-shadow: 0 10px 20px var(--overlay-subtle);
+          border-color: var(--status-neutral-soft) !important;
         }
         .thumbnail-container:hover .zoom-overlay {
           opacity: 1 !important;

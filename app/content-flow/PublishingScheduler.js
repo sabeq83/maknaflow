@@ -572,24 +572,24 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
     }
     switch (status) {
       case 'published':
-        return <span style={{ background: '#123828', color: '#4ade80', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4ade80' }}></span>PUBLISHED</span>;
+        return <span style={{ background: '#123828', color: 'var(--status-success)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-success)' }}></span>PUBLISHED</span>;
       case 'scheduled':
-        return <span style={{ background: '#182b47', color: '#60a5fa', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: '#60a5fa' }}></span>SCHEDULED</span>;
+        return <span style={{ background: '#182b47', color: 'var(--link)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--link)' }}></span>SCHEDULED</span>;
       case 'processing':
       case 'publishing':
       case 'creating_container':
       case 'waiting_media':
-        return <span style={{ background: '#2e2640', color: '#c084fc', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: '#c084fc' }}></span>PROCESSING</span>;
+        return <span style={{ background: '#2e2640', color: 'var(--status-neutral)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-neutral)' }}></span>PROCESSING</span>;
       case 'verifying':
-        return <span style={{ background: '#3b2d18', color: '#fbbf24', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fbbf24' }}></span>VERIFYING</span>;
+        return <span style={{ background: '#3b2d18', color: 'var(--status-warning)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-warning)' }}></span>VERIFYING</span>;
       case 'retry_wait':
-        return <span style={{ background: '#453314', color: '#fbbf24', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fbbf24' }}></span>RETRY WAIT</span>;
+        return <span style={{ background: '#453314', color: 'var(--status-warning)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-warning)' }}></span>RETRY WAIT</span>;
       case 'failed':
         return <span style={{ background: '#481d29', color: '#fb7185', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fb7185' }}></span>FAILED</span>;
       case 'cancelled':
-        return <span style={{ background: '#27272a', color: '#a1a1aa', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: '#a1a1aa' }}></span>CANCELLED</span>;
+        return <span style={{ background: 'var(--surface)', color: 'var(--text-muted)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--text-muted)' }}></span>CANCELLED</span>;
       default:
-        return <span style={{ background: '#27272a', color: '#a1a1aa', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800 }}>{status}</span>;
+        return <span style={{ background: 'var(--surface)', color: 'var(--text-muted)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800 }}>{status}</span>;
     }
   };
 
@@ -620,12 +620,12 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
   }, [jobs]);
 
   return (
-    <div style={{ color: '#e5e7eb', fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div style={{ color: 'var(--text-primary)', fontFamily: 'Inter, system-ui, sans-serif' }}>
       {/* Toast */}
       {toastMsg && (
         <div style={{
           position: 'fixed', bottom: 24, right: 24, zIndex: 9999,
-          background: '#101725', border: '1px solid #3b82f6', color: '#93c5fd',
+          background: 'var(--surface)', border: '1px solid var(--status-info)', color: '#93c5fd',
           padding: '12px 20px', borderRadius: 10, fontSize: 13, fontWeight: 700,
           boxShadow: '0 10px 25px rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', gap: 8
         }}>
@@ -637,7 +637,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
       {/* Top Headline & Actions */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h2 style={{ fontSize: 22, fontWeight: 850, margin: '0 0 4px', color: '#fff', letterSpacing: '-0.5px' }}>
+          <h2 style={{ fontSize: 22, fontWeight: 850, margin: '0 0 4px', color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>
             Publishing Scheduler
           </h2>
           <p style={{ margin: 0, color: '#748198', fontSize: 13 }}>
@@ -650,7 +650,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
               onClick={onBackToLibrary}
               style={{
                 padding: '9px 15px', background: '#141d2e', border: '1px solid #334155',
-                borderRadius: 8, color: '#cbd5e1', fontSize: 12, fontWeight: 750, cursor: 'pointer'
+                borderRadius: 8, color: 'var(--text-secondary)', fontSize: 12, fontWeight: 750, cursor: 'pointer'
               }}
             >
               ← Kembali ke Library
@@ -662,9 +662,9 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
             style={{
               padding: '9px 15px',
               background: isPaused ? '#371923' : '#141d2e',
-              border: `1px solid ${isPaused ? '#ef4444' : '#334155'}`,
+              border: `1px solid ${isPaused ? 'var(--status-danger)' : '#334155'}`,
               borderRadius: 8,
-              color: isPaused ? '#fca5a5' : '#cbd5e1',
+              color: isPaused ? '#fca5a5' : 'var(--text-secondary)',
               fontSize: 12,
               fontWeight: 750,
               cursor: 'pointer',
@@ -678,8 +678,8 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
           <button
             onClick={() => setShowScheduleModal(true)}
             style={{
-              padding: '9px 18px', background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
-              border: '1px solid #c084fc', borderRadius: 8, color: '#fff', fontSize: 12, fontWeight: 800,
+              padding: '9px 18px', background: 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)',
+              border: '1px solid var(--status-neutral)', borderRadius: 8, color: 'var(--text-primary)', fontSize: 12, fontWeight: 800,
               cursor: 'pointer', boxShadow: '0 4px 14px rgba(168, 85, 247, 0.35)', display: 'flex', alignItems: 'center', gap: 6
             }}
           >
@@ -690,25 +690,25 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
 
       {/* 4 Card Metrics */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 12, marginBottom: 20 }}>
-        <div style={{ background: '#111827', border: '1px solid #253046', borderRadius: 12, padding: 14 }}>
-          <div style={{ fontSize: 11, color: '#728097', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Terjadwal</div>
-          <div style={{ fontSize: 24, fontWeight: 850, color: '#60a5fa', marginTop: 4 }}>{metrics.scheduled}</div>
-          <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>Antrean aktif</div>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--surface-interactive)', borderRadius: 12, padding: 14 }}>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Terjadwal</div>
+          <div style={{ fontSize: 24, fontWeight: 850, color: 'var(--link)', marginTop: 4 }}>{metrics.scheduled}</div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>Antrean aktif</div>
         </div>
-        <div style={{ background: '#111827', border: '1px solid #253046', borderRadius: 12, padding: 14 }}>
-          <div style={{ fontSize: 11, color: '#728097', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Published Hari Ini</div>
-          <div style={{ fontSize: 24, fontWeight: 850, color: '#4ade80', marginTop: 4 }}>{metrics.publishedToday}</div>
-          <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>Facebook & Instagram</div>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--surface-interactive)', borderRadius: 12, padding: 14 }}>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Published Hari Ini</div>
+          <div style={{ fontSize: 24, fontWeight: 850, color: 'var(--status-success)', marginTop: 4 }}>{metrics.publishedToday}</div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>Facebook & Instagram</div>
         </div>
-        <div style={{ background: '#111827', border: '1px solid #253046', borderRadius: 12, padding: 14 }}>
-          <div style={{ fontSize: 11, color: '#728097', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Menunggu Retry</div>
-          <div style={{ fontSize: 24, fontWeight: 850, color: '#fbbf24', marginTop: 4 }}>{metrics.retryWait}</div>
-          <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>Percobaan otomatis</div>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--surface-interactive)', borderRadius: 12, padding: 14 }}>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Menunggu Retry</div>
+          <div style={{ fontSize: 24, fontWeight: 850, color: 'var(--status-warning)', marginTop: 4 }}>{metrics.retryWait}</div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>Percobaan otomatis</div>
         </div>
-        <div style={{ background: '#111827', border: '1px solid #253046', borderRadius: 12, padding: 14 }}>
-          <div style={{ fontSize: 11, color: '#728097', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Perlu Tindakan</div>
-          <div style={{ fontSize: 24, fontWeight: 850, color: metrics.needsAction > 0 ? '#fb7185' : '#9ca3af', marginTop: 4 }}>{metrics.needsAction}</div>
-          <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>Failed / Needs review</div>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--surface-interactive)', borderRadius: 12, padding: 14 }}>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Perlu Tindakan</div>
+          <div style={{ fontSize: 24, fontWeight: 850, color: metrics.needsAction > 0 ? '#fb7185' : 'var(--text-muted)', marginTop: 4 }}>{metrics.needsAction}</div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>Failed / Needs review</div>
         </div>
       </div>
 
@@ -718,7 +718,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
           onClick={() => setActiveTab('queue')}
           style={{
             background: 'transparent', border: 'none',
-            borderBottom: activeTab === 'queue' ? '2px solid #8b5cf6' : '2px solid transparent',
+            borderBottom: activeTab === 'queue' ? '2px solid var(--status-neutral)' : '2px solid transparent',
             color: activeTab === 'queue' ? '#c4b5fd' : '#718097',
             padding: '10px 16px', fontSize: 13, fontWeight: 800, cursor: 'pointer'
           }}
@@ -729,7 +729,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
           onClick={() => setActiveTab('calendar')}
           style={{
             background: 'transparent', border: 'none',
-            borderBottom: activeTab === 'calendar' ? '2px solid #8b5cf6' : '2px solid transparent',
+            borderBottom: activeTab === 'calendar' ? '2px solid var(--status-neutral)' : '2px solid transparent',
             color: activeTab === 'calendar' ? '#c4b5fd' : '#718097',
             padding: '10px 16px', fontSize: 13, fontWeight: 800, cursor: 'pointer'
           }}
@@ -740,7 +740,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
           onClick={() => setActiveTab('history')}
           style={{
             background: 'transparent', border: 'none',
-            borderBottom: activeTab === 'history' ? '2px solid #8b5cf6' : '2px solid transparent',
+            borderBottom: activeTab === 'history' ? '2px solid var(--status-neutral)' : '2px solid transparent',
             color: activeTab === 'history' ? '#c4b5fd' : '#718097',
             padding: '10px 16px', fontSize: 13, fontWeight: 800, cursor: 'pointer'
           }}
@@ -753,7 +753,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
           <select
             value={filterAccount}
             onChange={(e) => setFilterAccount(e.target.value)}
-            style={{ background: '#111827', border: '1px solid #2a354b', color: '#9eabc0', padding: '6px 10px', borderRadius: 7, fontSize: 12 }}
+            style={{ background: 'var(--surface)', border: '1px solid #2a354b', color: '#9eabc0', padding: '6px 10px', borderRadius: 7, fontSize: 12 }}
           >
             <option value="all">Semua Akun</option>
             {accounts.map(acc => (
@@ -764,7 +764,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
           <select
             value={filterPlatform}
             onChange={(e) => setFilterPlatform(e.target.value)}
-            style={{ background: '#111827', border: '1px solid #2a354b', color: '#9eabc0', padding: '6px 10px', borderRadius: 7, fontSize: 12 }}
+            style={{ background: 'var(--surface)', border: '1px solid #2a354b', color: '#9eabc0', padding: '6px 10px', borderRadius: 7, fontSize: 12 }}
           >
             <option value="all">Semua Platform</option>
             <option value="facebook">Facebook Page</option>
@@ -774,7 +774,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            style={{ background: '#111827', border: '1px solid #2a354b', color: '#9eabc0', padding: '6px 10px', borderRadius: 7, fontSize: 12 }}
+            style={{ background: 'var(--surface)', border: '1px solid #2a354b', color: '#9eabc0', padding: '6px 10px', borderRadius: 7, fontSize: 12 }}
           >
             <option value="all">Semua Status</option>
             <option value="scheduled">Scheduled</option>
@@ -787,7 +787,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
 
           <button
             onClick={fetchJobs}
-            style={{ background: '#111827', border: '1px solid #2a354b', color: '#9eabc0', padding: '6px 10px', borderRadius: 7, cursor: 'pointer' }}
+            style={{ background: 'var(--surface)', border: '1px solid #2a354b', color: '#9eabc0', padding: '6px 10px', borderRadius: 7, cursor: 'pointer' }}
             title="Refresh antrean"
           >
             <RefreshCwIcon style={{ width: 14, height: 14 }} />
@@ -798,28 +798,28 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
       {/* Tab 1: Queue & History Layout (Table + Drawer) */}
       {(activeTab === 'queue' || activeTab === 'history') && (
         <div style={{ display: 'grid', gridTemplateColumns: selectedJobDetail ? 'minmax(0, 1fr) 320px' : '1fr', gap: 14 }}>
-          <div style={{ background: '#101725', border: '1px solid #253046', borderRadius: 12, overflow: 'hidden' }}>
-            <div style={{ height: 46, borderBottom: '1px solid #253046', display: 'flex', alignItems: 'center', padding: '0 16px', color: '#e5e7eb', fontSize: 12, fontWeight: 800 }}>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--surface-interactive)', borderRadius: 12, overflow: 'hidden' }}>
+            <div style={{ height: 46, borderBottom: '1px solid var(--surface-interactive)', display: 'flex', alignItems: 'center', padding: '0 16px', color: 'var(--text-primary)', fontSize: 12, fontWeight: 800 }}>
               {activeTab === 'queue' ? 'Daftar Antrean Terjadwal' : 'Riwayat Hasil Publikasi'}
               <span style={{ color: '#68768c', fontWeight: 500, marginLeft: 8 }}>({jobs.length} item)</span>
             </div>
 
             {loading ? (
-              <div style={{ padding: 40, textAlign: 'center', color: '#64748b' }}>Memuat jadwal...</div>
+              <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>Memuat jadwal...</div>
             ) : jobs.length === 0 ? (
-              <div style={{ padding: 50, textAlign: 'center', color: '#64748b' }}>
+              <div style={{ padding: 50, textAlign: 'center', color: 'var(--text-muted)' }}>
                 Tidak ada data jadwal publikasi yang cocok dengan filter.
               </div>
             ) : (
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
                   <thead>
-                    <tr style={{ background: '#0b101b' }}>
-                      <th style={{ textAlign: 'left', padding: '10px 14px', color: '#65738a', fontSize: 10, textTransform: 'uppercase' }}>Konten</th>
-                      <th style={{ textAlign: 'left', padding: '10px 14px', color: '#65738a', fontSize: 10, textTransform: 'uppercase' }}>Tujuan</th>
-                      <th style={{ textAlign: 'left', padding: '10px 14px', color: '#65738a', fontSize: 10, textTransform: 'uppercase' }}>Jadwal / Waktu</th>
-                      <th style={{ textAlign: 'left', padding: '10px 14px', color: '#65738a', fontSize: 10, textTransform: 'uppercase' }}>Status</th>
-                      <th style={{ textAlign: 'right', padding: '10px 14px', color: '#65738a', fontSize: 10, textTransform: 'uppercase' }}>Aksi</th>
+                    <tr style={{ background: 'var(--surface)' }}>
+                      <th style={{ textAlign: 'left', padding: '10px 14px', color: 'var(--text-muted)', fontSize: 10, textTransform: 'uppercase' }}>Konten</th>
+                      <th style={{ textAlign: 'left', padding: '10px 14px', color: 'var(--text-muted)', fontSize: 10, textTransform: 'uppercase' }}>Tujuan</th>
+                      <th style={{ textAlign: 'left', padding: '10px 14px', color: 'var(--text-muted)', fontSize: 10, textTransform: 'uppercase' }}>Jadwal / Waktu</th>
+                      <th style={{ textAlign: 'left', padding: '10px 14px', color: 'var(--text-muted)', fontSize: 10, textTransform: 'uppercase' }}>Status</th>
+                      <th style={{ textAlign: 'right', padding: '10px 14px', color: 'var(--text-muted)', fontSize: 10, textTransform: 'uppercase' }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -833,22 +833,22 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                             cursor: 'pointer',
                             background: isSelected ? '#1a233a' : 'transparent',
                             borderBottom: '1px solid #1c2638',
-                            boxShadow: isSelected ? 'inset 3px 0 #8b5cf6' : 'none'
+                            boxShadow: isSelected ? 'inset 3px 0 var(--status-neutral)' : 'none'
                           }}
                         >
                           <td style={{ padding: '12px 14px' }}>
                             <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                               <div style={{
-                                width: 40, height: 40, borderRadius: 8, background: '#1e293b',
+                                width: 40, height: 40, borderRadius: 8, background: 'var(--surface)',
                                 display: 'grid', placeItems: 'center', color: '#a78bfa', fontWeight: 800, flexShrink: 0
                               }}>
                                 {job.platform === 'facebook' ? 'f' : '◎'}
                               </div>
                               <div>
-                                <div style={{ color: '#f3f4f6', fontWeight: 750, maxWidth: 220, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                <div style={{ color: 'var(--text-primary)', fontWeight: 750, maxWidth: 220, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                   {job.content_title || job.content_id}
                                 </div>
-                                <div style={{ color: '#64748b', fontSize: 11, marginTop: 2 }}>
+                                <div style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 2 }}>
                                   {job.content_id} · Mode: {job.publish_mode.toUpperCase()}
                                 </div>
                               </div>
@@ -856,14 +856,14 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                           </td>
                           <td style={{ padding: '12px 14px' }}>
                             <div style={{ fontWeight: 700, color: '#d1d5db' }}>{job.account_name || 'Meta Account'}</div>
-                            <div style={{ color: '#64748b', fontSize: 11 }}>{job.platform.toUpperCase()} ({job.media_type})</div>
+                            <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>{job.platform.toUpperCase()} ({job.media_type})</div>
                           </td>
                           <td style={{ padding: '12px 14px' }}>
-                            <div style={{ color: '#f3f4f6', fontWeight: 700 }}>
+                            <div style={{ color: 'var(--text-primary)', fontWeight: 700 }}>
                               {formatScheduleTime(job.scheduled_at, job.account_timezone)}
                             </div>
                             {job.next_attempt_at && job.status === 'retry_wait' && (
-                              <div style={{ color: '#fbbf24', fontSize: 10, marginTop: 2 }}>
+                              <div style={{ color: 'var(--status-warning)', fontSize: 10, marginTop: 2 }}>
                                 Retry: {formatScheduleTime(job.next_attempt_at, job.account_timezone)}
                               </div>
                             )}
@@ -885,7 +885,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                                 <>
                                   <button
                                     onClick={() => { setRescheduleModalJob(job); setNewScheduleTime(job.scheduled_at.slice(0, 16)); }}
-                                    style={{ background: '#19243a', border: '1px solid #36445f', color: '#cbd5e1', padding: '5px 9px', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontWeight: 700 }}
+                                    style={{ background: '#19243a', border: '1px solid #36445f', color: 'var(--text-secondary)', padding: '5px 9px', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontWeight: 700 }}
                                   >
                                     Ubah
                                   </button>
@@ -900,7 +900,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                               {(job.status === 'failed' || job.status === 'cancelled') && (
                                 <button
                                   onClick={() => handleRetryJob(job.id)}
-                                  style={{ background: '#1e3a8a', border: '1px solid #3b82f6', color: '#93c5fd', padding: '5px 9px', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontWeight: 700 }}
+                                  style={{ background: '#1e3a8a', border: '1px solid var(--status-info)', color: '#93c5fd', padding: '5px 9px', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontWeight: 700 }}
                                 >
                                   Retry
                                 </button>
@@ -910,7 +910,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                                   disabled={syncingJobId === job.id}
                                   onClick={() => handleSyncMetaPost(job.id)}
                                   title="Sinkronkan status dan URL postingan dari Meta Graph API"
-                                  style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid #3b82f6', color: '#93c5fd', padding: '5px 8px', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontWeight: 600 }}
+                                  style={{ background: 'var(--status-info-soft)', border: '1px solid var(--status-info)', color: '#93c5fd', padding: '5px 8px', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontWeight: 600 }}
                                 >
                                   {syncingJobId === job.id ? '⏳' : '🔄 Sync'}
                                 </button>
@@ -923,7 +923,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                                   title={`Buka postingan di ${job.platform === 'instagram' ? 'Instagram' : 'Facebook'}`}
                                   style={{
                                     background: job.platform === 'instagram' ? 'rgba(236,72,153,0.2)' : 'rgba(37,99,235,0.2)',
-                                    border: `1px solid ${job.platform === 'instagram' ? '#ec4899' : '#3b82f6'}`,
+                                    border: `1px solid ${job.platform === 'instagram' ? '#ec4899' : 'var(--status-info)'}`,
                                     color: job.platform === 'instagram' ? '#f472b6' : '#93c5fd',
                                     padding: '5px 8px', borderRadius: 6, fontSize: 11, textDecoration: 'none', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 2
                                   }}
@@ -944,33 +944,33 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
 
           {/* Drawer Detail Panel */}
           {selectedJobDetail && (
-            <aside style={{ background: '#101725', border: '1px solid #253046', borderRadius: 12, padding: 16 }}>
+            <aside style={{ background: 'var(--surface)', border: '1px solid var(--surface-interactive)', borderRadius: 12, padding: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <h3 style={{ margin: 0, fontSize: 14, color: '#fff', fontWeight: 800 }}>Detail Publikasi</h3>
+                <h3 style={{ margin: 0, fontSize: 14, color: 'var(--text-primary)', fontWeight: 800 }}>Detail Publikasi</h3>
                 <button
                   onClick={() => setSelectedJobDetail(null)}
-                  style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+                  style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
                 >
                   <XIcon style={{ width: 16, height: 16 }} />
                 </button>
               </div>
 
               <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 11, color: '#637087', fontWeight: 800, textTransform: 'uppercase' }}>Konten</div>
-                <div style={{ color: '#fff', fontWeight: 750, fontSize: 13, marginTop: 2 }}>{selectedJobDetail.content_title}</div>
-                <div style={{ color: '#64748b', fontSize: 11 }}>ID: {selectedJobDetail.content_id}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase' }}>Konten</div>
+                <div style={{ color: 'var(--text-primary)', fontWeight: 750, fontSize: 13, marginTop: 2 }}>{selectedJobDetail.content_title}</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>ID: {selectedJobDetail.content_id}</div>
               </div>
 
               <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 11, color: '#637087', fontWeight: 800, textTransform: 'uppercase' }}>Akun & Platform</div>
-                <div style={{ color: '#cbd5e1', fontSize: 12, marginTop: 2 }}>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase' }}>Akun & Platform</div>
+                <div style={{ color: 'var(--text-secondary)', fontSize: 12, marginTop: 2 }}>
                   {selectedJobDetail.account_name} ({selectedJobDetail.platform.toUpperCase()})
                 </div>
-                <div style={{ color: '#64748b', fontSize: 11 }}>Mode: {selectedJobDetail.publish_mode.toUpperCase()} · Tipe: {selectedJobDetail.media_type}</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>Mode: {selectedJobDetail.publish_mode.toUpperCase()} · Tipe: {selectedJobDetail.media_type}</div>
               </div>
 
               <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 11, color: '#637087', fontWeight: 800, textTransform: 'uppercase' }}>Status & Jadwal</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase' }}>Status & Jadwal</div>
                 <div style={{ marginTop: 4 }}>{getStatusBadge(selectedJobDetail.status, selectedJobDetail.approval_status)}</div>
                 {selectedJobDetail.approval_status === 'pending_approval' && (
                   <div style={{ marginTop: 8 }}>
@@ -993,7 +993,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                     </button>
                   </div>
                 )}
-                <div style={{ color: '#cbd5e1', fontSize: 11, marginTop: 4 }}>
+                <div style={{ color: 'var(--text-secondary)', fontSize: 11, marginTop: 4 }}>
                   {formatScheduleTime(selectedJobDetail.scheduled_at, selectedJobDetail.account_timezone)}
                 </div>
               </div>
@@ -1001,20 +1001,20 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
               {selectedJobDetail.external_post_id && (
                 <div style={{ marginBottom: 12, padding: 10, background: '#0b111d', border: '1px solid #1e293b', borderRadius: 8 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ fontSize: 11, color: '#637087', fontWeight: 800, textTransform: 'uppercase' }}>External Meta Post</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase' }}>External Meta Post</div>
                     <button
                       type="button"
                       disabled={syncingJobId === selectedJobDetail.id}
                       onClick={() => handleSyncMetaPost(selectedJobDetail.id)}
                       style={{
-                        background: 'rgba(59,130,246,0.2)', border: '1px solid #3b82f6', color: '#93c5fd',
+                        background: 'var(--status-info-soft)', border: '1px solid var(--status-info)', color: '#93c5fd',
                         fontSize: 10, fontWeight: 700, padding: '3px 7px', borderRadius: 4, cursor: 'pointer'
                       }}
                     >
                       {syncingJobId === selectedJobDetail.id ? '⏳ Sinkronkan...' : '🔄 Sinkronkan URL'}
                     </button>
                   </div>
-                  <div style={{ color: '#60a5fa', fontSize: 11, wordBreak: 'break-all', marginTop: 4 }}>
+                  <div style={{ color: 'var(--link)', fontSize: 11, wordBreak: 'break-all', marginTop: 4 }}>
                     ID: #{selectedJobDetail.external_post_id}
                   </div>
                   {selectedJobDetail.external_permalink ? (
@@ -1024,14 +1024,14 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                       rel="noopener noreferrer"
                       style={{
                         display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 8,
-                        background: selectedJobDetail.platform === 'instagram' ? 'linear-gradient(135deg, #ec4899, #8b5cf6)' : '#2563eb',
-                        color: '#fff', fontSize: 11, fontWeight: 700, padding: '6px 12px', borderRadius: 6, textDecoration: 'none'
+                        background: selectedJobDetail.platform === 'instagram' ? 'linear-gradient(135deg, #ec4899, var(--status-neutral))' : '#2563eb',
+                        color: 'var(--text-primary)', fontSize: 11, fontWeight: 700, padding: '6px 12px', borderRadius: 6, textDecoration: 'none'
                       }}
                     >
                       <span>↗️ Buka di {selectedJobDetail.platform === 'instagram' ? 'Instagram' : 'Facebook'}</span>
                     </a>
                   ) : (
-                    <div style={{ color: '#94a3b8', fontSize: 10, marginTop: 4 }}>
+                    <div style={{ color: 'var(--text-muted)', fontSize: 10, marginTop: 4 }}>
                       Klik "Sinkronkan URL" untuk memuat link kanonikal postingan.
                     </div>
                   )}
@@ -1046,10 +1046,10 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
               )}
 
               <div style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: '#637087', fontWeight: 800, textTransform: 'uppercase', marginBottom: 4 }}>Caption Snapshot</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', marginBottom: 4 }}>Caption Snapshot</div>
                 <div style={{
                   background: '#0b111d', border: '1px solid #222d41', padding: 10, borderRadius: 8,
-                  color: '#94a3b8', fontSize: 11, maxHeight: 100, overflowY: 'auto', whiteSpace: 'pre-wrap'
+                  color: 'var(--text-muted)', fontSize: 11, maxHeight: 100, overflowY: 'auto', whiteSpace: 'pre-wrap'
                 }}>
                   {selectedJobDetail.caption_snapshot || '(Tanpa caption)'}
                 </div>
@@ -1057,23 +1057,23 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
 
               {/* Timeline attempts */}
               <div>
-                <div style={{ fontSize: 11, color: '#637087', fontWeight: 800, textTransform: 'uppercase', marginBottom: 6 }}>Log Percobaan</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', marginBottom: 6 }}>Log Percobaan</div>
                 {selectedJobDetail.attempts && selectedJobDetail.attempts.length > 0 ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     {selectedJobDetail.attempts.map((att, idx) => (
                       <div key={att.id || idx} style={{ background: '#0b111d', padding: 8, borderRadius: 6, fontSize: 10 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#cbd5e1', fontWeight: 700 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontWeight: 700 }}>
                           <span>Percobaan #{att.attempt_number} · {att.stage}</span>
-                          <span style={{ color: att.outcome === 'success' ? '#4ade80' : '#fb7185' }}>{att.outcome.toUpperCase()}</span>
+                          <span style={{ color: att.outcome === 'success' ? 'var(--status-success)' : '#fb7185' }}>{att.outcome.toUpperCase()}</span>
                         </div>
                         {att.sanitized_message && (
-                          <div style={{ color: '#94a3b8', marginTop: 2 }}>{att.sanitized_message}</div>
+                          <div style={{ color: 'var(--text-muted)', marginTop: 2 }}>{att.sanitized_message}</div>
                         )}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div style={{ color: '#64748b', fontSize: 11 }}>Belum ada riwayat percobaan.</div>
+                  <div style={{ color: 'var(--text-muted)', fontSize: 11 }}>Belum ada riwayat percobaan.</div>
                 )}
               </div>
             </aside>
@@ -1083,15 +1083,15 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
 
       {/* Tab 2: Weekly Calendar */}
       {activeTab === 'calendar' && (
-        <div style={{ background: '#101725', border: '1px solid #253046', borderRadius: 12, overflow: 'hidden' }}>
-          <div style={{ height: 46, borderBottom: '1px solid #253046', display: 'flex', alignItems: 'center', padding: '0 16px', color: '#e5e7eb', fontSize: 12, fontWeight: 800 }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--surface-interactive)', borderRadius: 12, overflow: 'hidden' }}>
+          <div style={{ height: 46, borderBottom: '1px solid var(--surface-interactive)', display: 'flex', alignItems: 'center', padding: '0 16px', color: 'var(--text-primary)', fontSize: 12, fontWeight: 800 }}>
             <span>Kalender Jadwal Mingguan</span>
             <span style={{ color: '#68768c', fontWeight: 500, marginLeft: 8 }}>({calendarWeek[0].dateStr} s.d. {calendarWeek[6].dateStr})</span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1, background: '#263044' }}>
             {calendarWeek.map((day) => (
               <div key={day.dateStr} style={{ minHeight: 280, background: day.isToday ? '#141d2f' : '#101725', padding: 10 }}>
-                <div style={{ fontSize: 10, color: day.isToday ? '#60a5fa' : '#64748b', textTransform: 'uppercase', fontWeight: 800 }}>
+                <div style={{ fontSize: 10, color: day.isToday ? 'var(--link)' : 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800 }}>
                   {day.dayName} {day.isToday && '· HARI INI'}
                 </div>
                 <div style={{ fontSize: 16, color: '#dbe2ee', fontWeight: 800, margin: '4px 0 10px' }}>
@@ -1108,11 +1108,11 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                         style={{
                           padding: 7, borderRadius: 6,
                           background: j.platform === 'instagram' ? '#2e1c3a' : '#16253d',
-                          borderLeft: `3px solid ${j.status === 'published' ? '#4ade80' : (j.platform === 'instagram' ? '#c084fc' : '#3b82f6')}`,
-                          fontSize: 10, color: '#cbd5e1', cursor: 'pointer'
+                          borderLeft: `3px solid ${j.status === 'published' ? 'var(--status-success)' : (j.platform === 'instagram' ? 'var(--status-neutral)' : 'var(--status-info)')}`,
+                          fontSize: 10, color: 'var(--text-secondary)', cursor: 'pointer'
                         }}
                       >
-                        <div style={{ fontWeight: 800, color: '#f3f4f6', marginBottom: 2 }}>
+                        <div style={{ fontWeight: 800, color: 'var(--text-primary)', marginBottom: 2 }}>
                           {j.platform === 'facebook' ? 'f' : '◎'} {j.scheduled_at ? new Date(j.scheduled_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : ''}
                         </div>
                         <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -1131,18 +1131,18 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
       {/* Modal: Schedule Content Dialog */}
       {showScheduleModal && (
         <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
+          position: 'fixed', inset: 0, background: 'var(--overlay-backdrop)',
           display: 'grid', placeItems: 'center', zIndex: 9999, padding: 16
         }}>
           <div style={{
-            background: '#101727', border: '1px solid #253046', borderRadius: 14,
-            width: '100%', maxWidth: 540, padding: 22, color: '#fff', boxShadow: '0 20px 40px rgba(0,0,0,0.6)'
+            background: 'var(--surface)', border: '1px solid var(--surface-interactive)', borderRadius: 14,
+            width: '100%', maxWidth: 540, padding: 22, color: 'var(--text-primary)', boxShadow: '0 20px 40px rgba(0,0,0,0.6)'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Jadwalkan Publikasi Konten</h3>
               <button
                 onClick={() => setShowScheduleModal(false)}
-                style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
               >
                 <XIcon style={{ width: 18, height: 18 }} />
               </button>
@@ -1151,9 +1151,9 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
             <form onSubmit={handleScheduleSubmit}>
               {/* 1. Searchable Video ID Combobox */}
               <div style={{ marginBottom: 12, position: 'relative' }}>
-                <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#94a3b8', fontWeight: 700, marginBottom: 4 }}>
-                  <span>ID Konten / Video ID <span style={{ color: '#ef4444' }}>*</span></span>
-                  <span style={{ color: '#60a5fa', fontWeight: 400, fontSize: 10 }}>Ketik untuk mencari di Video Library</span>
+                <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>
+                  <span>ID Konten / Video ID <span style={{ color: 'var(--status-danger)' }}>*</span></span>
+                  <span style={{ color: 'var(--link)', fontWeight: 400, fontSize: 10 }}>Ketik untuk mencari di Video Library</span>
                 </label>
                 <div style={{ position: 'relative' }}>
                   <input
@@ -1167,10 +1167,10 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                     onFocus={() => { if (videoSearchResults.length > 0) setShowVideoDropdown(true); }}
                     placeholder="🔍 Cari Video ID, Judul Resep, atau Nama Produk..."
                     required
-                    style={{ width: '100%', background: '#0b101b', border: '1px solid #28354d', padding: '8px 10px', borderRadius: 6, color: '#fff', fontSize: 12 }}
+                    style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}
                   />
                   {searchingVideos && (
-                    <span style={{ position: 'absolute', right: 10, top: 8, fontSize: 11, color: '#60a5fa' }}>⏳</span>
+                    <span style={{ position: 'absolute', right: 10, top: 8, fontSize: 11, color: 'var(--link)' }}>⏳</span>
                   )}
                 </div>
 
@@ -1178,8 +1178,8 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                 {showVideoDropdown && videoSearchResults.length > 0 && (
                   <div style={{
                     position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 100,
-                    background: '#0e1626', border: '1px solid #3b82f6', borderRadius: 8,
-                    marginTop: 4, maxHeight: 220, overflowY: 'auto', boxShadow: '0 10px 25px rgba(0,0,0,0.8)'
+                    background: 'var(--surface)', border: '1px solid var(--status-info)', borderRadius: 8,
+                    marginTop: 4, maxHeight: 220, overflowY: 'auto', boxShadow: '0 10px 25px var(--overlay-backdrop)'
                   }}>
                     {videoSearchResults.map(item => (
                       <div
@@ -1193,16 +1193,16 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                         onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 700, fontSize: 12, color: '#60a5fa' }}>🎬 {item.video_id}</span>
-                          <span style={{ fontSize: 10, color: '#94a3b8', background: '#1e293b', padding: '1px 6px', borderRadius: 4 }}>
+                          <span style={{ fontWeight: 700, fontSize: 12, color: 'var(--link)' }}>🎬 {item.video_id}</span>
+                          <span style={{ fontSize: 10, color: 'var(--text-muted)', background: 'var(--surface)', padding: '1px 6px', borderRadius: 4 }}>
                             {item.account_name || 'Umum'}
                           </span>
                         </div>
-                        <div style={{ fontSize: 11, color: '#e2e8f0', fontWeight: 600 }}>
+                        <div style={{ fontSize: 11, color: 'var(--text-primary)', fontWeight: 600 }}>
                           {item.campaign_title || item.hook || item.nama_produk || 'Konten Video'}
                         </div>
                         {item.nama_produk && (
-                          <div style={{ fontSize: 10, color: '#94a3b8' }}>Produk: {item.nama_produk}</div>
+                          <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>Produk: {item.nama_produk}</div>
                         )}
                       </div>
                     ))}
@@ -1213,15 +1213,15 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
               {/* 2. Pilih Akun Publikasi */}
               <div style={{ marginBottom: 12 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                  <label style={{ fontSize: 11, color: '#94a3b8', fontWeight: 700 }}>
-                    Pilih Akun Publikasi <span style={{ color: '#ef4444' }}>*</span>
+                  <label style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700 }}>
+                    Pilih Akun Publikasi <span style={{ color: 'var(--status-danger)' }}>*</span>
                   </label>
                   <button
                     type="button"
                     onClick={() => fetchAccounts(true)}
                     disabled={syncingAccounts}
                     style={{
-                      background: 'transparent', border: 'none', color: '#60a5fa',
+                      background: 'transparent', border: 'none', color: 'var(--link)',
                       fontSize: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, padding: 0
                     }}
                   >
@@ -1229,16 +1229,16 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                     <span>{syncingAccounts ? 'Menyinkronkan...' : 'Sinkronkan Akun'}</span>
                   </button>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 130, overflowY: 'auto', background: '#0b101b', padding: 8, borderRadius: 6, border: '1px solid #28354d' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 130, overflowY: 'auto', background: 'var(--surface)', padding: 8, borderRadius: 6, border: '1px solid var(--surface-interactive)' }}>
                   {accounts.length === 0 ? (
-                    <div style={{ color: '#64748b', fontSize: 11, padding: 6, textAlign: 'center' }}>
-                      Belum ada akun Meta terdeteksi. <button type="button" onClick={() => fetchAccounts(true)} style={{ color: '#60a5fa', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>Klik untuk menyinkronkan dari Pengaturan</button>.
+                    <div style={{ color: 'var(--text-muted)', fontSize: 11, padding: 6, textAlign: 'center' }}>
+                      Belum ada akun Meta terdeteksi. <button type="button" onClick={() => fetchAccounts(true)} style={{ color: 'var(--link)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>Klik untuk menyinkronkan dari Pengaturan</button>.
                     </div>
                   ) : (
                     accounts.map(acc => (
                       <label key={acc.id} style={{
                         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: '4px 8px', borderRadius: 4, background: scheduleForm.account_ids.includes(acc.id) ? 'rgba(59,130,246,0.1)' : 'transparent',
+                        padding: '4px 8px', borderRadius: 4, background: scheduleForm.account_ids.includes(acc.id) ? 'var(--status-info-soft)' : 'transparent',
                         fontSize: 12, cursor: 'pointer'
                       }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -1252,13 +1252,13 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                               setScheduleForm({ ...scheduleForm, account_ids: next, platform: acc.platform });
                             }}
                           />
-                          <span style={{ fontWeight: 600, color: '#f3f4f6' }}>{acc.display_name}</span>
+                          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{acc.display_name}</span>
                         </div>
                         <span style={{
                           fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 10,
-                          background: acc.platform === 'instagram' ? 'rgba(236, 72, 153, 0.2)' : 'rgba(59, 130, 246, 0.2)',
+                          background: acc.platform === 'instagram' ? 'rgba(236, 72, 153, 0.2)' : 'var(--status-info-soft)',
                           color: acc.platform === 'instagram' ? '#f472b6' : '#93c5fd',
-                          border: `1px solid ${acc.platform === 'instagram' ? '#ec4899' : '#3b82f6'}`
+                          border: `1px solid ${acc.platform === 'instagram' ? '#ec4899' : 'var(--status-info)'}`
                         }}>
                           {acc.platform === 'instagram' ? '📸 INSTAGRAM' : '📘 FACEBOOK'}
                         </span>
@@ -1271,24 +1271,24 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
               {/* 3. Mode Publikasi & Tipe Media */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: 11, color: '#94a3b8', fontWeight: 700, marginBottom: 4 }}>Mode Publikasi</label>
+                  <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>Mode Publikasi</label>
                   <select
                     value={scheduleForm.publish_mode}
                     onChange={(e) => setScheduleForm({ ...scheduleForm, publish_mode: e.target.value })}
-                    style={{ width: '100%', background: '#0b101b', border: '1px solid #28354d', padding: '8px 10px', borderRadius: 6, color: '#fff', fontSize: 12 }}
+                    style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}
                   >
                     <option value="draft">Scheduled Draft (Aman - Meta Draft)</option>
                     <option value="live">Live (Memerlukan Approval)</option>
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 11, color: '#94a3b8', fontWeight: 700, marginBottom: 4 }}>
-                    Tipe Media <span style={{ color: '#60a5fa', fontWeight: 400 }}>(Autoload)</span>
+                  <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>
+                    Tipe Media <span style={{ color: 'var(--link)', fontWeight: 400 }}>(Autoload)</span>
                   </label>
                   <select
                     value={scheduleForm.media_type}
                     onChange={(e) => setScheduleForm({ ...scheduleForm, media_type: e.target.value })}
-                    style={{ width: '100%', background: '#0b101b', border: '1px solid #28354d', padding: '8px 10px', borderRadius: 6, color: '#fff', fontSize: 12 }}
+                    style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}
                   >
                     <option value="video">🎬 Video (MP4 / Reels)</option>
                     <option value="image">🖼️ Gambar / Foto (JPEG/PNG)</option>
@@ -1299,18 +1299,18 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
 
               {/* 3.5. File Media di Folder Cloud (Auto-Scan) */}
               {loadingMediaFiles ? (
-                <div style={{ marginBottom: 12, padding: '8px 12px', background: 'rgba(59,130,246,0.08)', borderRadius: 6, border: '1px dashed #3b82f6', fontSize: 11, color: '#93c5fd', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ marginBottom: 12, padding: '8px 12px', background: 'var(--status-info-soft)', borderRadius: 6, border: '1px dashed var(--status-info)', fontSize: 11, color: '#93c5fd', display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span>⏳</span>
                   <span>Memindai file media di folder Cloud...</span>
                 </div>
               ) : folderMediaFiles.length > 0 ? (
-                <div style={{ marginBottom: 12, padding: '10px', background: 'rgba(59,130,246,0.1)', borderRadius: 6, border: '1px solid rgba(59,130,246,0.35)' }}>
+                <div style={{ marginBottom: 12, padding: '10px', background: 'var(--status-info-soft)', borderRadius: 6, border: '1px solid rgba(59,130,246,0.35)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                    <label style={{ fontSize: 11, color: '#60a5fa', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <label style={{ fontSize: 11, color: 'var(--link)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span>📁</span>
                       <span>Pilih File Media di Folder Cloud (Facebook Downloadable):</span>
                     </label>
-                    <span style={{ fontSize: 10, color: '#38bdf8', background: 'rgba(56,189,248,0.15)', padding: '2px 6px', borderRadius: 4 }}>
+                    <span style={{ fontSize: 10, color: 'var(--link)', background: 'rgba(56,189,248,0.15)', padding: '2px 6px', borderRadius: 4 }}>
                       {folderMediaFiles.length} file terdeteksi
                     </span>
                   </div>
@@ -1318,8 +1318,8 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                     value={selectedMediaFileName}
                     onChange={(e) => handleSelectMediaFile(e.target.value)}
                     style={{
-                      width: '100%', background: '#0b101b', border: '1px solid #3b82f6', padding: '8px 10px',
-                      borderRadius: 6, color: '#fff', fontSize: 12, fontWeight: 500, outline: 'none'
+                      width: '100%', background: 'var(--surface)', border: '1px solid var(--status-info)', padding: '8px 10px',
+                      borderRadius: 6, color: 'var(--text-primary)', fontSize: 12, fontWeight: 500, outline: 'none'
                     }}
                   >
                     {folderMediaFiles.map(file => (
@@ -1335,7 +1335,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
               {/* 4. URL Media Publik (Direct Downloadable .MP4) */}
               <div style={{ marginBottom: 12 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                  <label style={{ fontSize: 11, color: '#94a3b8', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <label style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span>URL Media Publik</span>
                     <span style={{ color: '#22c55e', fontSize: 10, fontWeight: 600 }}>⚡ Direct Downloadable .MP4</span>
                   </label>
@@ -1345,9 +1345,9 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                         type="button"
                         onClick={() => setShowVideoPreview(!showVideoPreview)}
                         style={{
-                          background: showVideoPreview ? 'rgba(239,68,68,0.2)' : 'rgba(59,130,246,0.2)',
-                          border: `1px solid ${showVideoPreview ? '#ef4444' : '#3b82f6'}`,
-                          color: showVideoPreview ? '#f87171' : '#60a5fa',
+                          background: showVideoPreview ? 'var(--status-danger-soft)' : 'var(--status-info-soft)',
+                          border: `1px solid ${showVideoPreview ? 'var(--status-danger)' : 'var(--status-info)'}`,
+                          color: showVideoPreview ? 'var(--status-danger)' : 'var(--link)',
                           fontSize: 10, cursor: 'pointer', padding: '2px 8px', borderRadius: 4
                         }}
                       >
@@ -1368,7 +1368,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                           }
                         }}
                         style={{
-                          background: 'transparent', border: 'none', color: '#60a5fa',
+                          background: 'transparent', border: 'none', color: 'var(--link)',
                           fontSize: 10, cursor: 'pointer', textDecoration: 'underline', padding: 0
                         }}
                       >
@@ -1382,12 +1382,12 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                   value={scheduleForm.media_url}
                   onChange={(e) => setScheduleForm({ ...scheduleForm, media_url: e.target.value })}
                   placeholder="https://cloud.ast402.my.id/index.php/s/TOKEN/download?files=video_final.mp4"
-                  style={{ width: '100%', background: '#0b101b', border: '1px solid #28354d', padding: '8px 10px', borderRadius: 6, color: '#fff', fontSize: 12 }}
+                  style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}
                 />
 
                 {/* Mini Player Preview */}
                 {showVideoPreview && scheduleForm.media_url && (
-                  <div style={{ marginTop: 8, padding: 8, background: '#080d1a', borderRadius: 6, border: '1px solid #1e293b', textAlign: 'center' }}>
+                  <div style={{ marginTop: 8, padding: 8, background: 'var(--surface)', borderRadius: 6, border: '1px solid #1e293b', textAlign: 'center' }}>
                     {scheduleForm.media_type === 'image' ? (
                       <img src={scheduleForm.media_url} alt="Preview" style={{ maxHeight: 200, maxWidth: '100%', borderRadius: 4, objectFit: 'contain' }} />
                     ) : (
@@ -1404,43 +1404,43 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
 
               {/* 5. Caption & Tag */}
               <div style={{ marginBottom: 12 }}>
-                <label style={{ display: 'block', fontSize: 11, color: '#94a3b8', fontWeight: 700, marginBottom: 4 }}>
-                  Caption & Tag <span style={{ color: '#60a5fa', fontWeight: 400 }}>(Autoload dari Video)</span>
+                <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>
+                  Caption & Tag <span style={{ color: 'var(--link)', fontWeight: 400 }}>(Autoload dari Video)</span>
                 </label>
                 <textarea
                   rows={4}
                   value={scheduleForm.caption}
                   onChange={(e) => setScheduleForm({ ...scheduleForm, caption: e.target.value })}
                   placeholder="Tulis caption lengkap beserta hashtag..."
-                  style={{ width: '100%', background: '#0b101b', border: '1px solid #28354d', padding: '8px 10px', borderRadius: 6, color: '#fff', fontSize: 12, resize: 'vertical' }}
+                  style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12, resize: 'vertical' }}
                 />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: 11, color: '#94a3b8', fontWeight: 700, marginBottom: 4 }}>Waktu Tayang</label>
+                  <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>Waktu Tayang</label>
                   <input
                     type="datetime-local"
                     value={scheduleForm.scheduled_at}
                     onChange={(e) => setScheduleForm({ ...scheduleForm, scheduled_at: e.target.value })}
                     required
-                    style={{ width: '100%', background: '#0b101b', border: '1px solid #28354d', padding: '8px 10px', borderRadius: 6, color: '#fff', fontSize: 12 }}
+                    style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 11, color: '#94a3b8', fontWeight: 700, marginBottom: 4 }}>Zona Waktu</label>
+                  <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>Zona Waktu</label>
                   <input
                     type="text"
                     value={scheduleForm.timezone}
                     readOnly
-                    style={{ width: '100%', background: '#0b101b', border: '1px solid #28354d', padding: '8px 10px', borderRadius: 6, color: '#9ca3af', fontSize: 12 }}
+                    style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-muted)', fontSize: 12 }}
                   />
                 </div>
               </div>
 
               {/* Preflight warning summary */}
               {preflightResult && (
-                <div style={{ marginBottom: 14, padding: 10, background: preflightResult.isValid ? '#0f291e' : '#27171d', border: `1px solid ${preflightResult.isValid ? '#10b981' : '#ef4444'}`, borderRadius: 6, fontSize: 11 }}>
+                <div style={{ marginBottom: 14, padding: 10, background: preflightResult.isValid ? '#0f291e' : '#27171d', border: `1px solid ${preflightResult.isValid ? 'var(--status-success)' : 'var(--status-danger)'}`, borderRadius: 6, fontSize: 11 }}>
                   {preflightResult.warnings.map((w, i) => <div key={i} style={{ color: '#fcd34d' }}>⚠️ {w}</div>)}
                   {preflightResult.errors.map((err, i) => <div key={i} style={{ color: '#fca5a5' }}>❌ {err}</div>)}
                 </div>
@@ -1451,21 +1451,21 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                   type="button"
                   onClick={runPreflight}
                   disabled={runningPreflight}
-                  style={{ padding: '9px 14px', background: '#1e293b', border: '1px solid #334155', color: '#cbd5e1', borderRadius: 6, fontSize: 12, cursor: 'pointer', fontWeight: 700 }}
+                  style={{ padding: '9px 14px', background: 'var(--surface)', border: '1px solid #334155', color: 'var(--text-secondary)', borderRadius: 6, fontSize: 12, cursor: 'pointer', fontWeight: 700 }}
                 >
                   {runningPreflight ? 'Memeriksa...' : '🔍 Preflight Check'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowScheduleModal(false)}
-                  style={{ padding: '9px 14px', background: 'transparent', border: '1px solid #334155', color: '#94a3b8', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}
+                  style={{ padding: '9px 14px', background: 'transparent', border: '1px solid #334155', color: 'var(--text-muted)', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={submittingSchedule}
-                  style={{ padding: '9px 18px', background: '#7c3aed', border: '1px solid #a855f7', color: '#fff', borderRadius: 6, fontSize: 12, fontWeight: 800, cursor: 'pointer' }}
+                  style={{ padding: '9px 18px', background: 'var(--status-neutral)', border: '1px solid var(--status-neutral)', color: 'var(--text-primary)', borderRadius: 6, fontSize: 12, fontWeight: 800, cursor: 'pointer' }}
                 >
                   {submittingSchedule ? 'Menyimpan...' : 'Simpan Jadwal'}
                 </button>
@@ -1478,28 +1478,28 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
       {/* Modal: Reschedule Dialog */}
       {rescheduleModalJob && (
         <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
+          position: 'fixed', inset: 0, background: 'var(--overlay-backdrop)',
           display: 'grid', placeItems: 'center', zIndex: 9999, padding: 16
         }}>
           <div style={{
-            background: '#101727', border: '1px solid #253046', borderRadius: 14,
-            width: '100%', maxWidth: 400, padding: 20, color: '#fff'
+            background: 'var(--surface)', border: '1px solid var(--surface-interactive)', borderRadius: 14,
+            width: '100%', maxWidth: 400, padding: 20, color: 'var(--text-primary)'
           }}>
             <h3 style={{ margin: '0 0 12px', fontSize: 15, fontWeight: 800 }}>Ubah Jadwal Publikasi</h3>
-            <p style={{ fontSize: 12, color: '#94a3b8', margin: '0 0 14px' }}>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 14px' }}>
               Pilih tanggal dan jam baru untuk job #{rescheduleModalJob.id}:
             </p>
             <input
               type="datetime-local"
               value={newScheduleTime}
               onChange={(e) => setNewScheduleTime(e.target.value)}
-              style={{ width: '100%', background: '#0b101b', border: '1px solid #28354d', padding: '8px 10px', borderRadius: 6, color: '#fff', fontSize: 12, marginBottom: 16 }}
+              style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12, marginBottom: 16 }}
             />
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button
                 type="button"
                 onClick={() => setRescheduleModalJob(null)}
-                style={{ padding: '8px 14px', background: 'transparent', border: '1px solid #334155', color: '#94a3b8', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}
+                style={{ padding: '8px 14px', background: 'transparent', border: '1px solid #334155', color: 'var(--text-muted)', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}
               >
                 Batal
               </button>
@@ -1507,7 +1507,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                 type="button"
                 onClick={handleExecuteReschedule}
                 disabled={submittingReschedule}
-                style={{ padding: '8px 16px', background: '#7c3aed', border: '1px solid #a855f7', color: '#fff', borderRadius: 6, fontSize: 12, fontWeight: 800, cursor: 'pointer' }}
+                style={{ padding: '8px 16px', background: 'var(--status-neutral)', border: '1px solid var(--status-neutral)', color: 'var(--text-primary)', borderRadius: 6, fontSize: 12, fontWeight: 800, cursor: 'pointer' }}
               >
                 {submittingReschedule ? 'Menyimpan...' : 'Simpan'}
               </button>

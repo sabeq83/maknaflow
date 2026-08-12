@@ -49,7 +49,7 @@ export default function InstantCampaignDetailPage() {
       formData.append('product_usp', editForm.product_usp);
       formData.append('product_image_url', editForm.product_image_url);
       formData.append('reset_status', editForm.reset_status ? 'true' : 'false');
-      
+
       if (editForm.product_image_file) {
         formData.append('product_image_file', editForm.product_image_file);
       }
@@ -374,37 +374,37 @@ export default function InstantCampaignDetailPage() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
         {stages.map((stage, idx) => {
           let color = 'var(--text-muted)';
-          let bg = 'rgba(255, 255, 255, 0.05)';
-          let border = '1px solid rgba(255, 255, 255, 0.1)';
+          let bg = 'var(--surface-interactive)';
+          let border = '1px solid var(--border-subtle)';
           let labelText = stage.label;
           let anim = 'none';
 
           if (stage.status === 'success') {
-            color = '#fff';
-            bg = 'rgba(16, 185, 129, 0.15)';
+            color = 'var(--text-primary)';
+            bg = 'var(--status-success-soft)';
             border = '1px solid rgba(16, 185, 129, 0.5)';
             labelText = `✓ ${stage.label}`;
           } else if (stage.status === 'skipped') {
             color = 'rgba(255, 255, 255, 0.4)';
-            bg = 'rgba(255, 255, 255, 0.03)';
-            border = '1px dashed rgba(255, 255, 255, 0.15)';
+            bg = 'var(--surface-interactive)';
+            border = '1px dashed var(--border-subtle)';
             labelText = `⚡ ${stage.label}`;
           } else if (stage.status === 'danger') {
-            color = '#fff';
-            bg = 'rgba(239, 68, 68, 0.15)';
+            color = 'var(--text-primary)';
+            bg = 'var(--status-danger-soft)';
             border = '1px solid rgba(239, 68, 68, 0.5)';
             labelText = `✗ ${stage.label}`;
           } else if (stage.status === 'active') {
-            color = '#fff';
-            bg = 'rgba(59, 130, 246, 0.2)';
+            color = 'var(--text-primary)';
+            bg = 'var(--status-info-soft)';
             border = '1px solid rgba(59, 130, 246, 0.5)';
             labelText = `⏳ ${stage.label}`;
             anim = 'active-pulse 1.5s infinite alternate';
           }
 
           return (
-            <span 
-              key={idx} 
+            <span
+              key={idx}
               style={{
                 padding: '3px 8px',
                 borderRadius: 4,
@@ -458,29 +458,29 @@ export default function InstantCampaignDetailPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
           {stages.map((stage, idx) => {
             let color = 'var(--text-muted)';
-            let bg = 'rgba(255, 255, 255, 0.05)';
-            let border = '1px solid rgba(255, 255, 255, 0.1)';
+            let bg = 'var(--surface-interactive)';
+            let border = '1px solid var(--border-subtle)';
             let label = stage.label;
             let anim = 'none';
 
             if (stage.status === 'success') {
-              color = '#fff';
-              bg = 'rgba(16, 185, 129, 0.15)';
+              color = 'var(--text-primary)';
+              bg = 'var(--status-success-soft)';
               border = '1px solid rgba(16, 185, 129, 0.5)';
               label = `✓ ${stage.label}`;
             } else if (stage.status === 'skipped') {
               color = 'rgba(255, 255, 255, 0.4)';
-              bg = 'rgba(255, 255, 255, 0.03)';
-              border = '1px dashed rgba(255, 255, 255, 0.15)';
+              bg = 'var(--surface-interactive)';
+              border = '1px dashed var(--border-subtle)';
               label = `⚡ ${stage.label}`;
             } else if (stage.status === 'danger') {
-              color = '#fff';
-              bg = 'rgba(239, 68, 68, 0.15)';
+              color = 'var(--text-primary)';
+              bg = 'var(--status-danger-soft)';
               border = '1px solid rgba(239, 68, 68, 0.5)';
               label = `✗ ${stage.label}`;
             } else if (stage.status === 'active') {
-              color = '#fff';
-              bg = 'rgba(59, 130, 246, 0.2)';
+              color = 'var(--text-primary)';
+              bg = 'var(--status-info-soft)';
               border = '1px solid rgba(59, 130, 246, 0.5)';
               label = `⏳ ${stage.label}`;
               anim = 'active-pulse 1.5s infinite alternate';
@@ -582,51 +582,51 @@ export default function InstantCampaignDetailPage() {
 
     if (editingItemId === item.id) {
       return (
-        <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', borderRadius: 8, padding: 20 }}>
+        <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-color)', borderRadius: 8, padding: 20 }}>
           <h4 style={{ margin: '0 0 16px 0', fontSize: '1rem', fontWeight: 600, color: 'var(--accent-color)' }}>
             ✏️ Edit Detail & Konsep Produk (Video #{items.indexOf(item) + 1})
           </h4>
-          
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
             {/* Kolom Kiri: Konsep Iklan */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 6 }}>🎯 PILAR KONTEN UTAMA</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={editForm.content_pillar}
                   onChange={(e) => setEditForm(prev => ({ ...prev, content_pillar: e.target.value }))}
-                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: '#fff', outline: 'none' }}
+                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: 'var(--text-primary)', outline: 'none' }}
                 />
               </div>
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 6 }}>🪝 NASKAH HOOK UTAMA (KLIP 1)</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={editForm.custom_hook}
                   onChange={(e) => setEditForm(prev => ({ ...prev, custom_hook: e.target.value }))}
-                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: '#fff', outline: 'none' }}
+                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: 'var(--text-primary)', outline: 'none' }}
                 />
               </div>
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 6 }}>🎬 PANDUAN AKSI VISUAL (MACRO)</label>
-                <textarea 
+                <textarea
                   rows={3}
                   value={editForm.visual_action_guideline}
                   onChange={(e) => setEditForm(prev => ({ ...prev, visual_action_guideline: e.target.value }))}
-                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: '#fff', outline: 'none', resize: 'vertical' }}
+                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: 'var(--text-primary)', outline: 'none', resize: 'vertical' }}
                 />
               </div>
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 6 }}>🔗 TAUTAN GAMBAR PRODUK</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={editForm.product_image_url}
                   onChange={(e) => setEditForm(prev => ({ ...prev, product_image_url: e.target.value }))}
-                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: '#fff', outline: 'none' }}
+                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: 'var(--text-primary)', outline: 'none' }}
                 />
               </div>
             </div>
@@ -635,38 +635,38 @@ export default function InstantCampaignDetailPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 6 }}>📦 NAMA PRODUK</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={editForm.product_name}
                   onChange={(e) => setEditForm(prev => ({ ...prev, product_name: e.target.value }))}
-                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: '#fff', outline: 'none' }}
+                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: 'var(--text-primary)', outline: 'none' }}
                 />
               </div>
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 6 }}>📝 DESKRIPSI PRODUK</label>
-                <textarea 
+                <textarea
                   rows={3}
                   value={editForm.product_desc}
                   onChange={(e) => setEditForm(prev => ({ ...prev, product_desc: e.target.value }))}
-                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: '#fff', outline: 'none', resize: 'vertical' }}
+                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: 'var(--text-primary)', outline: 'none', resize: 'vertical' }}
                 />
               </div>
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 6 }}>✨ UNIQUE SELLING POINT (USP)</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={editForm.product_usp}
                   onChange={(e) => setEditForm(prev => ({ ...prev, product_usp: e.target.value }))}
-                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: '#fff', outline: 'none' }}
+                  style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: 10, borderRadius: 6, color: 'var(--text-primary)', outline: 'none' }}
                 />
               </div>
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 6 }}>🖼️ UNGGAH FOTO PRODUK (MANUAL)</label>
-                <input 
-                  type="file" 
+                <input
+                  type="file"
                   accept="image/*"
                   onChange={(e) => {
                     const file = e.target.files[0];
@@ -686,8 +686,8 @@ export default function InstantCampaignDetailPage() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--border-color)', flexWrap: 'wrap', gap: 12 }}>
-            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: '0.82rem', color: '#f39c12', cursor: 'pointer', fontWeight: 600 }}>
-              <input 
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: '0.82rem', color: 'var(--status-warning)', cursor: 'pointer', fontWeight: 600 }}>
+              <input
                 type="checkbox"
                 checked={editForm.reset_status}
                 onChange={(e) => setEditForm(prev => ({ ...prev, reset_status: e.target.checked }))}
@@ -697,16 +697,16 @@ export default function InstantCampaignDetailPage() {
             </label>
 
             <div style={{ display: 'flex', gap: 12 }}>
-              <button 
-                className="btn btn-secondary" 
+              <button
+                className="btn btn-secondary"
                 onClick={() => setEditingItemId(null)}
                 disabled={savingEdit}
                 style={{ padding: '8px 16px', fontSize: '0.85rem' }}
               >
                 Batal
               </button>
-              <button 
-                className="btn btn-primary" 
+              <button
+                className="btn btn-primary"
                 onClick={() => handleSaveCreative(item.id)}
                 disabled={savingEdit}
                 style={{ padding: '8px 20px', fontSize: '0.85rem', fontWeight: 600 }}
@@ -724,14 +724,14 @@ export default function InstantCampaignDetailPage() {
     return (
       <div style={{ width: '100%' }}>
         {hasNoScrapeData && item.generation_status === 'failed' && (
-          <div style={{ 
-            background: 'rgba(239, 68, 68, 0.1)', 
-            border: '1px solid rgba(239, 68, 68, 0.3)', 
-            borderRadius: 8, 
-            padding: '12px 16px', 
-            marginBottom: 16, 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <div style={{
+            background: 'var(--status-danger-soft)',
+            border: '1px solid var(--status-danger-soft)',
+            borderRadius: 8,
+            padding: '12px 16px',
+            marginBottom: 16,
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
             gap: 12
@@ -739,9 +739,9 @@ export default function InstantCampaignDetailPage() {
             <span style={{ fontSize: '0.85rem', color: '#ff4a4a', fontWeight: 600 }}>
               ⚠️ JIT Sourcing produk dari Shopee gagal karena diblokir anti-bot. Silakan isi detail produk secara manual.
             </span>
-            <button 
-              className="btn btn-primary" 
-              style={{ background: '#ef4444', padding: '6px 12px', fontSize: '0.78rem' }}
+            <button
+              className="btn btn-primary"
+              style={{ background: 'var(--status-danger)', padding: '6px 12px', fontSize: '0.78rem' }}
               onClick={() => {
                 setEditForm({
                   content_pillar: pillar === '-' ? '' : pillar,
@@ -764,7 +764,7 @@ export default function InstantCampaignDetailPage() {
         )}
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
-          <button 
+          <button
             className="btn btn-secondary"
             onClick={() => {
               setEditForm({
@@ -789,10 +789,10 @@ export default function InstantCampaignDetailPage() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
           {/* Kolom 1: Konsep Ide & Naskah Kreatif */}
-          <div style={{ 
-            background: 'rgba(255, 255, 255, 0.01)', 
-            border: '1px solid var(--border-color)', 
-            borderRadius: 8, 
+          <div style={{
+            background: 'var(--surface-interactive)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 8,
             padding: 16,
             display: 'flex',
             flexDirection: 'column',
@@ -801,7 +801,7 @@ export default function InstantCampaignDetailPage() {
             <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: 'var(--accent-color)', borderBottom: '1px solid var(--border-color)', paddingBottom: 8 }}>
               💡 Konsep Ide & Naskah Kreatif
             </h4>
-            
+
             <div>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 4, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
                 🎯 Pilar Konten Utama
@@ -831,10 +831,10 @@ export default function InstantCampaignDetailPage() {
           </div>
 
           {/* Kolom 2: Detail Produk & Strategi USP */}
-          <div style={{ 
-            background: 'rgba(255, 255, 255, 0.01)', 
-            border: '1px solid var(--border-color)', 
-            borderRadius: 8, 
+          <div style={{
+            background: 'var(--surface-interactive)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 8,
             padding: 16,
             display: 'flex',
             flexDirection: 'column',
@@ -877,16 +877,16 @@ export default function InstantCampaignDetailPage() {
                   🖼️ Gambar Produk
                 </div>
                 <div style={{ background: 'var(--bg-secondary)', padding: 12, borderRadius: 6, display: 'inline-block' }}>
-                  <img 
-                    src={prodImage} 
-                    alt={prodName} 
-                    style={{ 
-                      maxWidth: '100%', 
-                      maxHeight: '180px', 
-                      borderRadius: 4, 
+                  <img
+                    src={prodImage}
+                    alt={prodName}
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '180px',
+                      borderRadius: 4,
                       border: '1px solid var(--border-color)',
                       display: 'block'
-                    }} 
+                    }}
                   />
                 </div>
               </div>
@@ -897,16 +897,16 @@ export default function InstantCampaignDetailPage() {
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 4, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
                   🔗 Gambar Produk (URL)
                 </div>
-                <a 
-                  href={prodUrl} 
-                  target="_blank" 
-                  rel="noreferrer" 
+                <a
+                  href={prodUrl}
+                  target="_blank"
+                  rel="noreferrer"
                   className="btn btn-secondary"
-                  style={{ 
-                    fontSize: '0.8rem', 
-                    padding: '8px 12px', 
-                    display: 'inline-flex', 
-                    alignItems: 'center', 
+                  style={{
+                    fontSize: '0.8rem',
+                    padding: '8px 12px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
                     gap: 6,
                     textDecoration: 'none',
                     wordBreak: 'break-all'
@@ -952,7 +952,7 @@ export default function InstantCampaignDetailPage() {
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: '1.1rem' }}>🛡️</span>
-              <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#fff' }}>TikTok Shop Compliance Audit Status</span>
+              <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)' }}>TikTok Shop Compliance Audit Status</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{
@@ -961,13 +961,13 @@ export default function InstantCampaignDetailPage() {
                 textTransform: 'uppercase',
                 padding: '4px 12px',
                 borderRadius: 20,
-                background: (item.compliance_status === 'PASS' || item.compliance_status === 'pass') 
-                  ? 'rgba(46, 204, 113, 0.15)' 
+                background: (item.compliance_status === 'PASS' || item.compliance_status === 'pass')
+                  ? 'var(--status-success-soft)'
                   : 'rgba(241, 196, 15, 0.15)',
-                color: (item.compliance_status === 'PASS' || item.compliance_status === 'pass') 
-                  ? '#2ecc71' 
-                  : '#f1c40f',
-                border: `1px solid ${(item.compliance_status === 'PASS' || item.compliance_status === 'pass') ? '#2ecc71' : '#f1c40f'}`
+                color: (item.compliance_status === 'PASS' || item.compliance_status === 'pass')
+                  ? 'var(--status-success)'
+                  : 'var(--status-warning)',
+                border: `1px solid ${(item.compliance_status === 'PASS' || item.compliance_status === 'pass') ? 'var(--status-success)' : 'var(--status-warning)'}`
               }}>
                 {item.compliance_status || 'PASS'}
               </span>
@@ -981,7 +981,7 @@ export default function InstantCampaignDetailPage() {
         )}
 
         {parsed.analysis_summary && (
-          <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-color)', padding: 16, borderRadius: 8, fontSize: '0.85rem' }}>
+          <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-color)', padding: 16, borderRadius: 8, fontSize: '0.85rem' }}>
             <div style={{ fontWeight: 600, marginBottom: 4, color: 'var(--accent-color)' }}>Ringkasan Strategi Konten Organik:</div>
             <div style={{ marginBottom: 8 }}><span style={{ color: 'var(--text-muted)' }}>Pilar Strategy:</span> {parsed.analysis_summary.pillar_strategy}</div>
             <div><span style={{ color: 'var(--text-muted)' }}>Rencana Transisi Sandwich:</span> {parsed.analysis_summary.sandwich_transition_plan}</div>
@@ -994,21 +994,21 @@ export default function InstantCampaignDetailPage() {
             const isBridge = campaign?.is_bridging_active && scene.scene === campaign.bridge_at_clip;
 
             return (
-              <div 
-                key={index} 
-                style={{ 
-                  background: isBridge ? 'rgba(59, 130, 246, 0.04)' : 'rgba(255,255,255,0.01)', 
-                  border: isBridge ? '1px solid rgba(59, 130, 246, 0.25)' : '1px solid var(--border-color)',
-                  borderRadius: 8, 
-                  padding: 16 
+              <div
+                key={index}
+                style={{
+                  background: isBridge ? 'rgba(59, 130, 246, 0.04)' : 'var(--surface-interactive)',
+                  border: isBridge ? '1px solid var(--status-info-soft)' : '1px solid var(--border-color)',
+                  borderRadius: 8,
+                  padding: 16
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                   <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ background: isBridge ? '#3b82f6' : 'var(--bg-secondary)', color: isBridge ? '#fff' : 'var(--text-primary)', padding: '2px 8px', borderRadius: 4, fontSize: '0.75rem' }}>
+                    <span style={{ background: isBridge ? 'var(--status-info)' : 'var(--bg-secondary)', color: isBridge ? 'var(--text-primary)' : 'var(--text-primary)', padding: '2px 8px', borderRadius: 4, fontSize: '0.75rem' }}>
                       Scene {scene.scene}
                     </span>
-                    {isBridge && <span style={{ color: '#3b82f6', fontSize: '0.75rem', fontWeight: 'bold' }}>[🌉 TITIK BRIDGE PRODUK]</span>}
+                    {isBridge && <span style={{ color: 'var(--status-info)', fontSize: '0.75rem', fontWeight: 'bold' }}>[🌉 TITIK BRIDGE PRODUK]</span>}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                     Durasi: {scene.duration}
@@ -1063,7 +1063,7 @@ export default function InstantCampaignDetailPage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {clipsList.map(cNum => {
           const isHybridBridge = campaign?.is_bridging_active && campaign?.visual_mode === 'hybrid_lock' && cNum === campaign.bridge_at_clip;
-          
+
           let displayPrompts = [];
           if (isHybridBridge) {
             const promptT2i = t2i.find(p => Number(p.clip) === cNum)?.prompt || '';
@@ -1090,13 +1090,13 @@ export default function InstantCampaignDetailPage() {
           }
 
           return (
-            <div 
-              key={cNum} 
-              style={{ 
-                background: 'rgba(255,255,255,0.01)', 
-                border: '1px solid var(--border-color)', 
-                borderRadius: 8, 
-                padding: 16 
+            <div
+              key={cNum}
+              style={{
+                background: 'var(--surface-interactive)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 8,
+                padding: 16
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -1111,8 +1111,8 @@ export default function InstantCampaignDetailPage() {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                         <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)' }}>{p.type}</span>
                         {p.text && (
-                          <button 
-                            className="btn btn-secondary" 
+                          <button
+                            className="btn btn-secondary"
                             style={{ padding: '2px 6px', fontSize: '0.65rem' }}
                             onClick={() => handleCopy(p.text, p.key)}
                           >
@@ -1136,18 +1136,18 @@ export default function InstantCampaignDetailPage() {
                 {localClipPath && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>🎬 Generated Visual Clip (Local)</span>
-                    <video 
-                      src={localClipPath} 
-                      controls 
+                    <video
+                      src={localClipPath}
+                      controls
                       preload="metadata"
-                      style={{ 
-                        width: '100%', 
-                        maxHeight: '260px', 
-                        borderRadius: 6, 
-                        border: '1px solid rgba(255,255,255,0.08)', 
+                      style={{
+                        width: '100%',
+                        maxHeight: '260px',
+                        borderRadius: 6,
+                        border: '1px solid var(--border-subtle)',
                         background: '#000',
                         display: 'block'
-                      }} 
+                      }}
                     />
                   </div>
                 )}
@@ -1173,7 +1173,7 @@ export default function InstantCampaignDetailPage() {
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-color)', borderRadius: 8, padding: 16 }}>
+        <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-color)', borderRadius: 8, padding: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>📱 Universal Social Media Caption</span>
             <button className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '0.75rem' }} onClick={() => handleCopy(universalCap, capKey)}>
@@ -1182,7 +1182,7 @@ export default function InstantCampaignDetailPage() {
           </div>
           <textarea
             className="form-textarea"
-            style={{ width: '100%', minHeight: 120, fontSize: '0.85rem', background: '#09090b', color: '#fff', borderRadius: 6, padding: 10 }}
+            style={{ width: '100%', minHeight: 120, fontSize: '0.85rem', background: 'var(--surface)', color: 'var(--text-primary)', borderRadius: 6, padding: 10 }}
             value={universalCap}
             onChange={(e) => updateSocialField('caption', e.target.value)}
             placeholder="Naskah caption universal media sosial (TikTok, Instagram, Facebook, Shorts)..."
@@ -1190,8 +1190,8 @@ export default function InstantCampaignDetailPage() {
         </div>
 
         {item.social_post_status === 'completed' && item.social_links_json && (
-          <div style={{ marginTop: 12, background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: 16, borderRadius: 8 }}>
-            <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#10b981', marginBottom: 8 }}>Link Publish Draft Sosmed:</div>
+          <div style={{ marginTop: 12, background: 'rgba(16, 185, 129, 0.05)', border: '1px solid var(--status-success-soft)', padding: 16, borderRadius: 8 }}>
+            <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--status-success)', marginBottom: 8 }}>Link Publish Draft Sosmed:</div>
             {(() => {
               try {
                 const links = JSON.parse(item.social_links_json);
@@ -1242,7 +1242,7 @@ export default function InstantCampaignDetailPage() {
             <div style={{ fontWeight: 600, fontSize: '0.85rem', marginBottom: 8, color: 'var(--text-primary)' }}>Antrean Video Task (GLabs):</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {item.glabs_tasks.map(task => (
-                <div key={task.task_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.2)', padding: '8px 12px', borderRadius: 6, fontSize: '0.75rem' }}>
+                <div key={task.task_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--overlay-subtle)', padding: '8px 12px', borderRadius: 6, fontSize: '0.75rem' }}>
                   <div>
                     <div style={{ fontWeight: 600 }}>Task ID: {task.task_id}</div>
                     <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Klip {Number(task.clip_index) + 1} | Prompt: {task.prompt.slice(0, 50)}...</div>
@@ -1275,7 +1275,7 @@ export default function InstantCampaignDetailPage() {
       <Sidebar />
       <main className="main-content">
         <div style={{ padding: '24px 32px', maxWidth: '1200px', margin: '0 auto' }}>
-          
+
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
             <Link href="/instant-factory" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.85rem' }}>
               ← Kembali ke Dashboard
@@ -1300,21 +1300,21 @@ export default function InstantCampaignDetailPage() {
               </div>
               <div style={{ display: 'flex', gap: 12 }}>
                 {campaign.status !== 'completed' && (
-                  <button 
+                  <button
                     className={`btn btn-${campaign.status === 'running' ? 'warning' : 'success'}`}
                     onClick={toggleStatus}
                   >
                     {campaign.status === 'draft' ? '▶️ Run Campaign' : (campaign.status === 'running' ? '⏸ Pause Scheduler' : '▶️ Resume Scheduler')}
                   </button>
                 )}
-                <button 
+                <button
                   className="btn btn-secondary"
                   onClick={handleDownloadMarkdown}
                   disabled={downloading}
                 >
                   {downloading ? '⏳ Downloading...' : '📝 Export Markdown'}
                 </button>
-                <button 
+                <button
                   className="btn btn-primary"
                   onClick={handleSyncDrive}
                   disabled={syncing}
@@ -1464,7 +1464,7 @@ export default function InstantCampaignDetailPage() {
                   📲 Sosmed: {campaign.enable_social_post === 1 ? 'Aktif' : 'Nonaktif'}
                 </span>
               </div>
-              
+
               {campaign.local_scheduler === 1 && (
                 <select
                   value={campaign.scheduler_pause_at || ''}
@@ -1483,12 +1483,12 @@ export default function InstantCampaignDetailPage() {
                     }
                   }}
                   style={{
-                    background: 'rgba(0,0,0,0.2)',
+                    background: 'var(--overlay-subtle)',
                     border: `1px solid ${campaign.scheduler_pause_at ? 'rgba(243,156,18,0.6)' : 'var(--border-color)'}`,
                     borderRadius: 16,
                     padding: '6px 12px',
                     fontSize: '0.78rem',
-                    color: campaign.scheduler_pause_at ? '#f39c12' : 'var(--text-muted)',
+                    color: campaign.scheduler_pause_at ? 'var(--status-warning)' : 'var(--text-muted)',
                     cursor: 'pointer',
                     outline: 'none',
                     transition: 'all 0.2s ease',
@@ -1512,12 +1512,12 @@ export default function InstantCampaignDetailPage() {
               <span className="badge badge-secondary">Face: {campaign.face_visibility}</span>
               <span className="badge badge-secondary">G-Labs: {campaign.enable_glabs === 1 ? 'Aktif' : 'Nonaktif'}</span>
               {campaign.is_bridging_active === 1 && (
-                <span className="badge badge-primary" style={{ background: '#3b82f6', color: '#fff' }}>
+                <span className="badge badge-primary" style={{ background: 'var(--status-info)', color: 'var(--text-primary)' }}>
                   🌉 Bridge Aktif (Klip {campaign.bridge_at_clip})
                 </span>
               )}
               {isVsoActive && (
-                <span className="badge badge-primary" style={{ background: '#ec4899', color: '#fff' }}>
+                <span className="badge badge-primary" style={{ background: '#ec4899', color: 'var(--text-primary)' }}>
                   🎭 VSO Aktif
                 </span>
               )}
@@ -1528,10 +1528,10 @@ export default function InstantCampaignDetailPage() {
               <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--border-color)', display: 'flex', gap: 16, alignItems: 'center' }}>
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>📁 Google Drive Assets:</span>
                 {campaign.target_spreadsheet_id && (
-                  <a 
-                    href={`https://docs.google.com/spreadsheets/d/${campaign.target_spreadsheet_id}`} 
-                    target="_blank" 
-                    rel="noreferrer" 
+                  <a
+                    href={`https://docs.google.com/spreadsheets/d/${campaign.target_spreadsheet_id}`}
+                    target="_blank"
+                    rel="noreferrer"
                     className="btn btn-secondary"
                     style={{ fontSize: '0.8rem', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: 6 }}
                   >
@@ -1539,10 +1539,10 @@ export default function InstantCampaignDetailPage() {
                   </a>
                 )}
                 {campaign.target_markdown_url && (
-                  <a 
-                    href={campaign.target_markdown_url} 
-                    target="_blank" 
-                    rel="noreferrer" 
+                  <a
+                    href={campaign.target_markdown_url}
+                    target="_blank"
+                    rel="noreferrer"
                     className="btn btn-secondary"
                     style={{ fontSize: '0.8rem', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: 6 }}
                   >
@@ -1649,10 +1649,10 @@ export default function InstantCampaignDetailPage() {
                           <td style={{ padding: '14px 16px' }}>
                             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
                               {hasFinalVideo && (
-                                <a 
-                                  href={item.ffmpeg_output_path} 
-                                  download 
-                                  className="btn btn-primary btn-sm" 
+                                <a
+                                  href={item.ffmpeg_output_path}
+                                  download
+                                  className="btn btn-primary btn-sm"
                                   style={{ fontSize: '0.7rem', padding: '3px 8px', textDecoration: 'none' }}
                                   onClick={e => e.stopPropagation()}
                                 >
@@ -1660,12 +1660,12 @@ export default function InstantCampaignDetailPage() {
                                 </a>
                               )}
                               {item.drive_link && (
-                                <a 
-                                  href={item.drive_link} 
-                                  target="_blank" 
-                                  rel="noreferrer" 
-                                  className="btn btn-secondary btn-sm" 
-                                  style={{ fontSize: '0.7rem', padding: '3px 8px', background: 'rgba(46, 204, 113, 0.15)', color: '#2ecc71', border: '1px solid rgba(46, 204, 113, 0.4)', textDecoration: 'none' }}
+                                <a
+                                  href={item.drive_link}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="btn btn-secondary btn-sm"
+                                  style={{ fontSize: '0.7rem', padding: '3px 8px', background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success-soft)', textDecoration: 'none' }}
                                   onClick={e => e.stopPropagation()}
                                 >
                                   GDrive
@@ -1678,9 +1678,9 @@ export default function InstantCampaignDetailPage() {
                                 style={{
                                   fontSize: '0.7rem',
                                   padding: '3px 8px',
-                                  background: expandedItemId === item.id ? 'var(--accent)' : 'rgba(255,255,255,0.08)',
-                                  color: '#fff',
-                                  border: '1px solid rgba(255,255,255,0.1)'
+                                  background: expandedItemId === item.id ? 'var(--accent)' : 'var(--border-subtle)',
+                                  color: 'var(--text-primary)',
+                                  border: '1px solid var(--border-subtle)'
                                 }}
                               >
                                 {expandedItemId === item.id ? '📖 Tutup' : '📖 Detail'}
@@ -1723,8 +1723,8 @@ export default function InstantCampaignDetailPage() {
                                         key={t.id}
                                         className={`btn ${activeTab === t.id ? 'btn-primary' : 'btn-secondary'}`}
                                         onClick={() => setActiveTabs(prev => ({ ...prev, [item.id]: t.id }))}
-                                        style={{ 
-                                          padding: '6px 12px', 
+                                        style={{
+                                          padding: '6px 12px',
                                           fontSize: '0.8rem',
                                           borderBottom: activeTab === t.id ? '2px solid var(--accent-color)' : 'none',
                                           background: activeTab === t.id ? 'var(--btn-primary-bg)' : 'transparent',

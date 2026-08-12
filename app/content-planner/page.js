@@ -362,13 +362,13 @@ export default function ContentPlannerDashboard() {
     <div className="layout-with-sidebar">
       <Sidebar />
 
-      <main className="main-content" style={{ padding: '32px', background: 'var(--bg-primary)', minHeight: '100vh', color: '#f3f4f6' }}>
+      <main className="main-content" style={{ padding: '32px', background: 'var(--bg-primary)', minHeight: '100vh', color: 'var(--text-primary)' }}>
         {toast && (
           <div style={{
             position: 'fixed', top: '24px', right: '24px', zIndex: 9999,
             padding: '12px 24px', borderRadius: '8px',
-            background: toast.type === 'error' ? '#ef4444' : '#10b981',
-            color: '#fff', fontWeight: 600, boxShadow: '0 10px 25px rgba(0,0,0,0.3)'
+            background: toast.type === 'error' ? 'var(--status-danger)' : 'var(--status-success)',
+            color: 'var(--text-primary)', fontWeight: 600, boxShadow: '0 10px 25px var(--overlay-subtle)'
           }}>
             {toast.msg}
           </div>
@@ -377,20 +377,20 @@ export default function ContentPlannerDashboard() {
         {/* Header Section */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
           <div>
-            <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <h1 style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span>🗓️</span> Content Planner Web App
             </h1>
-            <p style={{ color: '#9ca3af', marginTop: '6px', fontSize: '14px' }}>
+            <p style={{ color: 'var(--text-muted)', marginTop: '6px', fontSize: '14px' }}>
               Mesin perencanaan konten strategis 9-kolom berbasis Strategic Frameworks & Decision Tree AI (VFO, CEP, W'S Matrix, Strategic Angle).
             </p>
           </div>
           <button
             onClick={() => setShowModal(true)}
             style={{
-              padding: '12px 24px', background: 'linear-[#6366f1, #4f46e5]',
-              backgroundImage: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-              color: '#ffffff', border: 'none', borderRadius: '10px', fontWeight: 700,
-              cursor: 'pointer', boxShadow: '0 4px 14px rgba(99, 102, 241, 0.4)',
+              padding: '12px 24px',
+              background: 'var(--action-primary)',
+              color: 'var(--on-action-primary)', border: 'none', borderRadius: '10px', fontWeight: 700,
+              cursor: 'pointer', boxShadow: '0 4px 14px var(--status-neutral-soft)',
               display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px'
             }}
           >
@@ -400,21 +400,21 @@ export default function ContentPlannerDashboard() {
 
         {/* Planner List Grid */}
         {loading ? (
-          <div style={{ padding: '48px', textAlign: 'center', color: '#9ca3af' }}>Memuat daftar planner...</div>
+          <div style={{ padding: '48px', textAlign: 'center', color: 'var(--text-muted)' }}>Memuat daftar planner...</div>
         ) : planners.length === 0 ? (
           <div style={{
             padding: '64px 24px', textAlign: 'center', background: 'var(--bg-secondary)',
-            borderRadius: '16px', border: '1px stroke #1e2029'
+            borderRadius: '16px', border: '1px solid var(--border-subtle)'
           }}>
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>🗓️</div>
-            <h3 style={{ fontSize: '20px', color: '#f3f4f6', marginBottom: '8px' }}>Belum ada Content Planner</h3>
-            <p style={{ color: '#9ca3af', maxWidth: '480px', margin: '0 auto 24px' }}>
+            <h3 style={{ fontSize: '20px', color: 'var(--text-primary)', marginBottom: '8px' }}>Belum ada Content Planner</h3>
+            <p style={{ color: 'var(--text-muted)', maxWidth: '480px', margin: '0 auto 24px' }}>
               Mulai buat perencanaan konten terstruktur 9 kolom untuk produk Anda dalam hitungan detik.
             </p>
             <button
               onClick={() => setShowModal(true)}
               style={{
-                padding: '10px 20px', background: '#4f46e5', color: '#fff',
+                padding: '10px 20px', background: 'var(--status-neutral)', color: 'var(--text-primary)',
                 border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer'
               }}
             >
@@ -432,25 +432,25 @@ export default function ContentPlannerDashboard() {
                   key={p.id}
                   onClick={() => router.push(`/content-planner/${p.id}`)}
                   style={{
-                    background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '14px',
+                    background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '14px',
                     padding: '20px', cursor: 'pointer', transition: 'all 0.2s ease',
                     position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'
                   }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = '#6366f1'}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = '#27272a'}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--status-neutral)'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-subtle)'}
                 >
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                      <h4 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: '#fff' }}>{p.title}</h4>
+                      <h4 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{p.title}</h4>
                       <span style={{
                         fontSize: '11px', fontWeight: 700, padding: '4px 8px', borderRadius: '6px',
-                        background: isDraft ? 'rgba(245, 158, 11, 0.15)' : 'rgba(16, 185, 129, 0.15)',
-                        color: isDraft ? '#f59e0b' : '#10b981'
+                        background: isDraft ? 'var(--status-warning-soft)' : 'var(--status-success-soft)',
+                        color: isDraft ? 'var(--status-warning)' : 'var(--status-success)'
                       }}>
                         {isDraft ? 'Draft' : `${p.row_count || 0} Baris`}
                       </span>
                     </div>
-                    <p style={{ fontSize: '13px', color: '#9ca3af', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       {p.planner_focus === 'brand_editorial' ? '🧩 Brand Editorial' : `📦 ${p.product_name}`}
                     </p>
                   </div>
@@ -463,11 +463,11 @@ export default function ContentPlannerDashboard() {
                         disabled={isExecuting}
                         style={{
                           width: '100%', padding: '10px', marginBottom: '12px',
-                          background: isExecuting ? '#312e81' : 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                          color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 700,
+                          background: isExecuting ? 'var(--status-neutral-soft)' : 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)',
+                          color: 'var(--text-primary)', border: 'none', borderRadius: '8px', fontWeight: 700,
                           cursor: isExecuting ? 'not-allowed' : 'pointer', fontSize: '13px',
                           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                          boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
+                          boxShadow: '0 4px 12px var(--status-neutral-soft)'
                         }}
                       >
                         {isExecuting ? '⏳ Memproses 3-Fase AI...' : '🚀 Eksekusi AI Pipeline'}
@@ -480,8 +480,8 @@ export default function ContentPlannerDashboard() {
                           disabled={syncingIds[p.id]}
                           style={{
                             width: '100%', padding: '8px 12px', marginBottom: '12px',
-                            background: syncingIds[p.id] ? '#064e3b' : '#065f46',
-                            color: '#34d399', border: '1px solid #059669', borderRadius: '8px', fontWeight: 600,
+                            background: syncingIds[p.id] ? 'var(--status-success-soft)' : 'var(--status-success-soft)',
+                            color: 'var(--status-success)', border: '1px solid var(--status-success)', borderRadius: '8px', fontWeight: 600,
                             cursor: syncingIds[p.id] ? 'not-allowed' : 'pointer', fontSize: '12px',
                             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
                           }}
@@ -491,7 +491,7 @@ export default function ContentPlannerDashboard() {
                       ) : null
                     )}
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid #1f2937', fontSize: '12px', color: '#6b7280' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid #1f2937', fontSize: '12px', color: 'var(--text-muted)' }}>
                       <span>📊 {p.row_count || 0} / {p.planner_count || 12} Baris Plan</span>
                       <span>{new Date(p.created_at).toLocaleDateString('id-ID')}</span>
                     </div>
@@ -505,23 +505,23 @@ export default function ContentPlannerDashboard() {
         {/* Modal Generator */}
         {showModal && (
           <div style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)',
+            position: 'fixed', inset: 0, background: 'var(--overlay-backdrop)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999
           }}>
             <div style={{
-              background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '16px',
+              background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '16px',
               width: '100%', maxWidth: '640px', maxHeight: '90vh', overflowY: 'auto', padding: '28px'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h2 style={{ fontSize: '20px', fontWeight: 700, margin: 0, color: '#fff' }}>
+                <h2 style={{ fontSize: '20px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
                   ✨ Generator Content Planner Baru
                 </h2>
-                <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', color: '#9ca3af', fontSize: '20px', cursor: 'pointer' }}>✕</button>
+                <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '20px', cursor: 'pointer' }}>✕</button>
               </div>
 
               <form onSubmit={handleGenerate}>
                 <div style={{ marginBottom: '20px' }}>
-                  <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '8px', fontWeight: 600 }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 600 }}>
                     🧭 Fokus Planner:
                   </label>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
@@ -531,11 +531,11 @@ export default function ContentPlannerDashboard() {
                     ].map(([value, label, desc]) => (
                       <button key={value} type="button" onClick={() => setPlannerFocus(value)} style={{
                         padding: '12px', textAlign: 'left', borderRadius: '10px', cursor: 'pointer',
-                        border: plannerFocus === value ? '1px solid #6366f1' : '1px solid #27272a',
-                        background: plannerFocus === value ? '#312e81' : 'var(--bg-secondary)', color: '#fff'
+                        border: plannerFocus === value ? '1px solid var(--status-neutral)' : '1px solid var(--border-subtle)',
+                        background: plannerFocus === value ? 'var(--status-neutral-soft)' : 'var(--bg-secondary)', color: 'var(--text-primary)'
                       }}>
                         <div style={{ fontWeight: 700, marginBottom: '4px' }}>{label}</div>
-                        <div style={{ fontSize: '11px', color: '#a1a1aa', lineHeight: 1.4 }}>{desc}</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.4 }}>{desc}</div>
                       </button>
                     ))}
                   </div>
@@ -543,7 +543,7 @@ export default function ContentPlannerDashboard() {
 
                 {/* === Content World Selector (Tahap 1) === */}
                 <div style={{ marginBottom: '20px' }}>
-                  <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '8px', fontWeight: 600 }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 600 }}>
                     🌍 Dunia Konten:
                   </label>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -564,11 +564,11 @@ export default function ContentPlannerDashboard() {
                         }
                       }} style={{
                         padding: '10px 8px', textAlign: 'left', borderRadius: '10px', cursor: 'pointer',
-                        border: contentWorld === value ? '1px solid #6366f1' : '1px solid #27272a',
-                        background: contentWorld === value ? '#312e81' : 'var(--bg-secondary)', color: '#fff'
+                        border: contentWorld === value ? '1px solid var(--status-neutral)' : '1px solid var(--border-subtle)',
+                        background: contentWorld === value ? 'var(--status-neutral-soft)' : 'var(--bg-secondary)', color: 'var(--text-primary)'
                       }}>
                         <div style={{ fontWeight: 700, fontSize: '13px', marginBottom: '3px' }}>{label}</div>
-                        <div style={{ fontSize: '10px', color: '#a1a1aa', lineHeight: 1.3 }}>{desc}</div>
+                        <div style={{ fontSize: '10px', color: 'var(--text-muted)', lineHeight: 1.3 }}>{desc}</div>
                       </button>
                     ))}
                   </div>
@@ -576,7 +576,7 @@ export default function ContentPlannerDashboard() {
 
                 {/* Knowledge Domain Selector */}
                 <div style={{ marginBottom: '20px' }}>
-                  <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '8px', fontWeight: 600 }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 600 }}>
                     📚 Domain Pengetahuan:
                   </label>
                   <select
@@ -584,7 +584,7 @@ export default function ContentPlannerDashboard() {
                     onChange={e => setKnowledgeDomain(e.target.value)}
                     style={{
                       width: '100%', padding: '10px 12px', borderRadius: '10px',
-                      background: 'var(--bg-secondary)', border: '1px solid #27272a', color: '#fff', fontSize: '14px'
+                      background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '14px'
                     }}
                   >
                     <option value="general">General</option>
@@ -601,10 +601,10 @@ export default function ContentPlannerDashboard() {
                 {/* Universe Profile (conditional - only for cartoon_universe) */}
                 {contentWorld === 'cartoon_universe' && (
                   <div style={{
-                    marginBottom: '20px', background: '#1e1b4b', border: '1px solid #4338ca',
+                    marginBottom: '20px', background: 'var(--status-neutral-soft)', border: '1px solid var(--status-neutral)',
                     borderRadius: '12px', padding: '16px'
                   }}>
-                    <label style={{ display: 'block', fontSize: '13px', color: '#c7d2fe', marginBottom: '8px', fontWeight: 600 }}>
+                    <label style={{ display: 'block', fontSize: '13px', color: 'var(--status-neutral)', marginBottom: '8px', fontWeight: 600 }}>
                       🏰 Universe Profile:
                     </label>
                     <select
@@ -620,7 +620,7 @@ export default function ContentPlannerDashboard() {
                       }}
                       style={{
                         width: '100%', padding: '10px 12px', borderRadius: '10px',
-                        background: '#312e81', border: '1px solid #4338ca', color: '#fff', fontSize: '14px'
+                        background: 'var(--status-neutral-soft)', border: '1px solid var(--status-neutral)', color: 'var(--text-primary)', fontSize: '14px'
                       }}
                     >
                       {availableUniverses.length === 0 && (
@@ -633,13 +633,13 @@ export default function ContentPlannerDashboard() {
                       ))}
                     </select>
                     {selectedUniverseInfo && (
-                      <div style={{ marginTop: '10px', fontSize: '11px', color: '#a5b4fc', lineHeight: 1.5 }}>
+                      <div style={{ marginTop: '10px', fontSize: '11px', color: 'var(--status-neutral)', lineHeight: 1.5 }}>
                         <strong>Preset:</strong> {selectedUniverseInfo.default_visual_style || 'cinematic_3d_clay'} • {selectedUniverseInfo.default_scene_count || 7} Scene × {selectedUniverseInfo.default_scene_duration || 8}s • {selectedUniverseInfo.human_presence === 'none' ? 'No Human' : selectedUniverseInfo.human_presence}<br/>
                         {selectedUniverseInfo.tone && <><strong>Tone:</strong> {selectedUniverseInfo.tone}<br/></>}
                       </div>
                     )}
                     {!selectedUniverseInfo && (
-                      <div style={{ marginTop: '10px', fontSize: '11px', color: '#a5b4fc', lineHeight: 1.5 }}>
+                      <div style={{ marginTop: '10px', fontSize: '11px', color: 'var(--status-neutral)', lineHeight: 1.5 }}>
                         <strong>Preset:</strong> 3D Clay Style • 7 Scene × 8s • No Human<br/>
                         <strong>Karakter:</strong> Mochi (British Shorthair) • Dr. Paw (Shiba Inu) • Coco (Corgi) • Boba (Hamster) • Tofu (Rabbit)
                       </div>
@@ -654,8 +654,8 @@ export default function ContentPlannerDashboard() {
                     onClick={() => setInputMode('manual')}
                     style={{
                       flex: 1, padding: '10px', borderRadius: '8px', border: 'none', fontWeight: 600, cursor: 'pointer',
-                      background: inputMode === 'manual' ? '#4f46e5' : 'transparent',
-                      color: inputMode === 'manual' ? '#fff' : '#9ca3af'
+                      background: inputMode === 'manual' ? 'var(--status-neutral)' : 'transparent',
+                      color: inputMode === 'manual' ? 'var(--text-primary)' : 'var(--text-muted)'
                     }}
                   >
                     ✏️ Direct Manual Input (Instan)
@@ -665,8 +665,8 @@ export default function ContentPlannerDashboard() {
                     onClick={() => setInputMode('existing')}
                     style={{
                       flex: 1, padding: '10px', borderRadius: '8px', border: 'none', fontWeight: 600, cursor: 'pointer',
-                      background: inputMode === 'existing' ? '#4f46e5' : 'transparent',
-                      color: inputMode === 'existing' ? '#fff' : '#9ca3af'
+                      background: inputMode === 'existing' ? 'var(--status-neutral)' : 'transparent',
+                      color: inputMode === 'existing' ? 'var(--text-primary)' : 'var(--text-muted)'
                     }}
                   >
                     📦 Pilih dari Database Produk
@@ -674,8 +674,8 @@ export default function ContentPlannerDashboard() {
                 </div>}
 
                 {plannerFocus === 'product_campaign' && inputMode === 'existing' && (
-                  <div style={{ marginBottom: '16px', background: 'var(--bg-secondary)', padding: '14px', borderRadius: '10px', border: '1px solid #27272a' }}>
-                    <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '8px', fontWeight: 600 }}>
+                  <div style={{ marginBottom: '16px', background: 'var(--bg-secondary)', padding: '14px', borderRadius: '10px', border: '1px solid var(--border-subtle)' }}>
+                    <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 600 }}>
                       🔍 Cari & Pilih Produk dari Database:
                     </label>
                     <div style={{ position: 'relative', marginBottom: '8px' }}>
@@ -686,7 +686,7 @@ export default function ContentPlannerDashboard() {
                         onChange={(e) => setProductSearchQuery(e.target.value)}
                         style={{
                           width: '100%', padding: '10px 36px 10px 12px', background: 'var(--bg-secondary)',
-                          border: '1px solid #3f3f46', borderRadius: '8px', color: '#fff', fontSize: '13px'
+                          border: '1px solid var(--border-strong)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '13px'
                         }}
                       />
                       {productSearchQuery && (
@@ -695,7 +695,7 @@ export default function ContentPlannerDashboard() {
                           onClick={() => setProductSearchQuery('')}
                           style={{
                             position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
-                            background: 'none', border: 'none', color: '#a1a1aa', cursor: 'pointer', fontSize: '14px'
+                            background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '14px'
                           }}
                         >
                           ✕
@@ -704,9 +704,9 @@ export default function ContentPlannerDashboard() {
                     </div>
 
                     {/* Filtered Product Selection List */}
-                    <div style={{ maxHeight: '160px', overflowY: 'auto', borderRadius: '8px', border: '1px solid #27272a', background: 'var(--bg-secondary)' }}>
+                    <div style={{ maxHeight: '160px', overflowY: 'auto', borderRadius: '8px', border: '1px solid var(--border-subtle)', background: 'var(--bg-secondary)' }}>
                       {existingProducts.filter(p => (p.product_name || '').toLowerCase().includes(productSearchQuery.toLowerCase())).length === 0 ? (
-                        <div style={{ padding: '12px', fontSize: '13px', color: '#71717a', textAlign: 'center' }}>
+                        <div style={{ padding: '12px', fontSize: '13px', color: 'var(--text-muted)', textAlign: 'center' }}>
                           Tidak ada produk ditemukan
                         </div>
                       ) : (
@@ -720,18 +720,18 @@ export default function ContentPlannerDashboard() {
                                 onClick={() => handleSelectExistingProduct(p.id)}
                                 style={{
                                   padding: '10px 12px', cursor: 'pointer', borderBottom: '1px solid #18181b',
-                                  background: isSelected ? '#312e81' : 'transparent',
-                                  color: isSelected ? '#818cf8' : '#e4e4e7',
+                                  background: isSelected ? 'var(--status-neutral-soft)' : 'transparent',
+                                  color: isSelected ? 'var(--status-neutral)' : 'var(--text-primary)',
                                   fontSize: '13px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                                   transition: 'background 0.15s ease'
                                 }}
-                                onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = '#27272a'; }}
+                                onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--border-subtle)'; }}
                                 onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
                               >
                                 <div>
                                   <div style={{ fontWeight: isSelected ? 700 : 500 }}>{p.product_name}</div>
                                   {p.unique_selling_point && (
-                                    <div style={{ fontSize: '11px', color: isSelected ? '#a5b4fc' : '#71717a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '380px' }}>
+                                    <div style={{ fontSize: '11px', color: isSelected ? 'var(--status-neutral)' : 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '380px' }}>
                                       {p.unique_selling_point}
                                     </div>
                                   )}
@@ -749,12 +749,12 @@ export default function ContentPlannerDashboard() {
                 {plannerFocus === 'product_campaign' && selectedProductId && (
                   <div style={{
                     marginBottom: '16px', padding: '12px 14px', borderRadius: '10px',
-                    background: 'rgba(6, 78, 59, 0.25)', border: '1px solid rgba(16, 185, 129, 0.4)',
+                    background: 'rgba(6, 78, 59, 0.25)', border: '1px solid var(--status-success-soft)',
                     display: 'flex', gap: '12px', alignItems: 'center'
                   }}>
                     <div style={{
                       width: '72px', height: '72px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0,
-                      background: 'var(--bg-secondary)', border: '1px solid #27272a', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                      background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center'
                     }}>
                       {productPhotoUrl ? (
                         <img
@@ -771,18 +771,18 @@ export default function ContentPlannerDashboard() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
                         <span style={{
                           fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '4px',
-                          background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.4)'
+                          background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success-soft)'
                         }}>
                           ✓ Product Image Verified
                         </span>
-                        <span style={{ fontSize: '11px', color: '#9ca3af', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {productPhotoUrl ? productPhotoUrl.split('/').pop() : 'Tanpa foto clean'}
                         </span>
                       </div>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {productName || 'Tanpa Nama Produk'}
                       </div>
-                      <div style={{ fontSize: '11px', color: '#cbd5e1', marginTop: '2px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                         {productUsp || productDesc || 'Visual produk siap digunakan untuk ideasi & kampanye.'}
                       </div>
                     </div>
@@ -792,34 +792,34 @@ export default function ContentPlannerDashboard() {
                 {/* Brand Profile Dropdown (Taruh di atas Judul Planner) */}
                 {plannerFocus === 'brand_editorial' && <>
                   <div style={{ marginBottom: '16px' }}>
-                    <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px', fontWeight: 600 }}>🧬 Brand Profile (Akun Brand) *:</label>
-                    <select value={selectedBrandId} required onChange={e => handleBrandSelection(e.target.value)} style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}>
+                    <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>🧬 Brand Profile (Akun Brand) *:</label>
+                    <select value={selectedBrandId} required onChange={e => handleBrandSelection(e.target.value)} style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}>
                       <option value="">-- Pilih Brand Profile --</option>
                       {brandProfiles.map(b => <option key={b.id} value={b.id}>{b.brand_name} {b.niche ? `(${b.niche})` : ''}</option>)}
                     </select>
                   </div>
                   {pendingEditorialBrandId && (
-                    <div style={{ marginBottom: '16px', padding: '10px 12px', borderRadius: '8px', border: '1px solid #92400e', background: '#451a03', color: '#fde68a', fontSize: '12px' }}>
+                    <div style={{ marginBottom: '16px', padding: '10px 12px', borderRadius: '8px', border: '1px solid #92400e', background: 'var(--status-warning-soft)', color: 'var(--status-warning)', fontSize: '12px' }}>
                       Isian editorial sudah Anda ubah. Nilai tidak ditimpa otomatis.
-                      <button type="button" onClick={() => applyBrandEditorialDefaults(brandProfiles.find(item => item.id === pendingEditorialBrandId))} style={{ marginLeft: '8px', padding: '5px 8px', borderRadius: '6px', border: '1px solid #f59e0b', background: 'transparent', color: '#fcd34d', cursor: 'pointer' }}>Muat default brand terpilih</button>
+                      <button type="button" onClick={() => applyBrandEditorialDefaults(brandProfiles.find(item => item.id === pendingEditorialBrandId))} style={{ marginLeft: '8px', padding: '5px 8px', borderRadius: '6px', border: '1px solid var(--status-warning)', background: 'transparent', color: 'var(--status-warning)', cursor: 'pointer' }}>Muat default brand terpilih</button>
                     </div>
                   )}
                   {selectedBrandId && !pendingEditorialBrandId && (
-                    <div style={{ marginBottom: '12px', color: editorialSource === 'profile' && !editorialDirty ? '#86efac' : '#c4b5fd', fontSize: '12px' }}>
+                    <div style={{ marginBottom: '12px', color: editorialSource === 'profile' && !editorialDirty ? 'var(--status-success)' : 'var(--status-neutral)', fontSize: '12px' }}>
                       {editorialSource === 'profile' && !editorialDirty ? '✓ Default dari Brand Profile' : '✎ Disesuaikan untuk planner ini'}
-                      {editorialDirty && <button type="button" onClick={() => applyBrandEditorialDefaults(brandProfiles.find(item => item.id === selectedBrandId))} style={{ marginLeft: '8px', border: 0, background: 'none', color: '#a5b4fc', textDecoration: 'underline', cursor: 'pointer' }}>Muat ulang default</button>}
+                      {editorialDirty && <button type="button" onClick={() => applyBrandEditorialDefaults(brandProfiles.find(item => item.id === selectedBrandId))} style={{ marginLeft: '8px', border: 0, background: 'none', color: 'var(--status-neutral)', textDecoration: 'underline', cursor: 'pointer' }}>Muat ulang default</button>}
                     </div>
                   )}
                   <div style={{ marginBottom: '16px' }}>
-                    <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px', fontWeight: 600 }}>Konteks Brand *:</label>
-                    <textarea required rows={3} maxLength={4000} placeholder="Jelaskan niche, positioning, dan nilai akun..." value={brandContext} onChange={e => { setBrandContext(e.target.value); setEditorialDirty(true); setEditorialSource('custom'); }} style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }} />
+                    <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>Konteks Brand *:</label>
+                    <textarea required rows={3} maxLength={4000} placeholder="Jelaskan niche, positioning, dan nilai akun..." value={brandContext} onChange={e => { setBrandContext(e.target.value); setEditorialDirty(true); setEditorialSource('custom'); }} style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }} />
                   </div>
                   <div style={{ marginBottom: '16px' }}>
-                    <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px', fontWeight: 600 }}>Tujuan Konten:</label>
-                    <textarea rows={2} maxLength={2000} placeholder="misal: Bangun authority, save, share, dan follow" value={contentGoal} onChange={e => { setContentGoal(e.target.value); setEditorialDirty(true); setEditorialSource('custom'); }} style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }} />
+                    <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>Tujuan Konten:</label>
+                    <textarea rows={2} maxLength={2000} placeholder="misal: Bangun authority, save, share, dan follow" value={contentGoal} onChange={e => { setContentGoal(e.target.value); setEditorialDirty(true); setEditorialSource('custom'); }} style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }} />
                   </div>
                   <div style={{ marginBottom: '16px' }}>
-                    <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px', fontWeight: 600 }}>Pilar Konten *:</label>
+                    <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>Pilar Konten *:</label>
                     <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
                       <input value={pillarDraft} maxLength={120} onChange={e => setPillarDraft(e.target.value)} onKeyDown={e => {
                         if (e.key === 'Enter') {
@@ -828,38 +828,38 @@ export default function ContentPlannerDashboard() {
                           if (value && pillars.length < 12 && !pillars.some(p => p.toLowerCase() === value.toLowerCase())) { setPillars([...pillars, value]); setEditorialDirty(true); setEditorialSource('custom'); }
                           setPillarDraft('');
                         }
-                      }} placeholder="misal: Healthy Breakfast" style={{ flex: 1, padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }} />
+                      }} placeholder="misal: Healthy Breakfast" style={{ flex: 1, padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }} />
                       <button type="button" onClick={() => {
                         const value = pillarDraft.trim();
                         if (value && pillars.length < 12 && !pillars.some(p => p.toLowerCase() === value.toLowerCase())) { setPillars([...pillars, value]); setEditorialDirty(true); setEditorialSource('custom'); }
                         setPillarDraft('');
-                      }} style={{ padding: '10px 14px', border: 0, borderRadius: '8px', background: '#4f46e5', color: '#fff', cursor: 'pointer' }}>+ Tambah</button>
+                      }} style={{ padding: '10px 14px', border: 0, borderRadius: '8px', background: 'var(--status-neutral)', color: 'var(--text-primary)', cursor: 'pointer' }}>+ Tambah</button>
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px' }}>
-                      {pillars.map((pillar, index) => <span key={pillar} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 9px', borderRadius: '999px', background: '#27272a', color: '#e4e4e7', fontSize: '12px' }}>
-                        {pillar}<button type="button" aria-label={`Hapus ${pillar}`} onClick={() => { setPillars(pillars.filter((_, i) => i !== index)); setEditorialDirty(true); setEditorialSource('custom'); }} style={{ border: 0, background: 'none', color: '#a1a1aa', cursor: 'pointer', padding: 0 }}>✕</button>
+                      {pillars.map((pillar, index) => <span key={pillar} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 9px', borderRadius: '999px', background: 'var(--surface)', color: 'var(--text-primary)', fontSize: '12px' }}>
+                        {pillar}<button type="button" aria-label={`Hapus ${pillar}`} onClick={() => { setPillars(pillars.filter((_, i) => i !== index)); setEditorialDirty(true); setEditorialSource('custom'); }} style={{ border: 0, background: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0 }}>✕</button>
                       </span>)}
-                      {pillars.length === 0 && <span style={{ color: '#71717a', fontSize: '12px' }}>Belum ada pilar.</span>}
+                      {pillars.length === 0 && <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>Belum ada pilar.</span>}
                     </div>
-                    <select value={pillarDistributionMode} onChange={e => setPillarDistributionMode(e.target.value)} style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}>
+                    <select value={pillarDistributionMode} onChange={e => setPillarDistributionMode(e.target.value)} style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}>
                       <option value="balanced">Balanced — dibagi merata</option>
                       <option value="custom" disabled>Custom Weight — Segera Hadir</option>
                       <option value="growth" disabled>Growth Priority — Segera Hadir</option>
                     </select>
                   </div>
-                  <div style={{ marginBottom: '16px', padding: '10px 12px', border: '1px solid #164e63', borderRadius: '8px', background: '#083344', color: '#bae6fd', fontSize: '12px' }}>
+                  <div style={{ marginBottom: '16px', padding: '10px 12px', border: '1px solid var(--status-info)', borderRadius: '8px', background: 'var(--status-info-soft)', color: 'var(--status-info)', fontSize: '12px' }}>
                     🛡️ Produk tidak akan dikarang. CTA default diarahkan ke save, share, follow, atau comment.
                   </div>
                 </>}
 
                 {plannerFocus === 'product_campaign' && <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px', fontWeight: 600 }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>
                     🧬 Brand Profile (Akun Brand):
                   </label>
                   <select
                     value={selectedBrandId}
                     onChange={e => handleBrandSelection(e.target.value)}
-                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
                   >
                     <option value="">-- Pilih Brand Profile (Opsional) --</option>
                     {brandProfiles.map(b => (
@@ -872,7 +872,7 @@ export default function ContentPlannerDashboard() {
 
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <label style={{ fontSize: '13px', color: '#9ca3af', fontWeight: 600 }}>Judul Planner (Opsional):</label>
+                    <label style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 600 }}>Judul Planner (Opsional):</label>
                     <button
                       type="button"
                       onClick={() => {
@@ -887,7 +887,7 @@ export default function ContentPlannerDashboard() {
                           showToast('Silakan isi Nama Produk atau Brand terlebih dahulu', 'error');
                         }
                       }}
-                      style={{ background: 'none', border: 'none', color: '#818cf8', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}
+                      style={{ background: 'none', border: 'none', color: 'var(--status-neutral)', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}
                     >
                       ✨ Auto-fill
                     </button>
@@ -900,43 +900,43 @@ export default function ContentPlannerDashboard() {
                       setTitle(e.target.value);
                       setIsTitleManuallyEdited(true);
                     }}
-                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
                   />
                 </div>
 
                 {plannerFocus === 'product_campaign' && <>
                 <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px' }}>Nama Produk *:</label>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>Nama Produk *:</label>
                   <input
                     type="text"
                     required
                     placeholder="misal: Premium Cocoa Powder / Ceramide Moisturizer"
                     value={productName}
                     onChange={e => setProductName(e.target.value)}
-                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
                   />
                 </div>
 
                 <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px' }}>Deskripsi Produk & Manfaat *:</label>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>Deskripsi Produk & Manfaat *:</label>
                   <textarea
                     required
                     rows={3}
                     placeholder="Jelaskan fungsi utama, bahan, dan manfaat produk untuk pengguna..."
                     value={productDesc}
                     onChange={e => setProductDesc(e.target.value)}
-                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
                   />
                 </div>
 
                 <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px' }}>USP / Unique Selling Point:</label>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>USP / Unique Selling Point:</label>
                   <input
                     type="text"
                     placeholder="misal: 5X Ceramide, Halal MUI, Tekstur gel dingin instan"
                     value={productUsp}
                     onChange={e => setProductUsp(e.target.value)}
-                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
                   />
                 </div>
 
@@ -945,41 +945,41 @@ export default function ContentPlannerDashboard() {
                   <>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                       <div>
-                        <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px' }}>URL Produk:</label>
+                        <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>URL Produk:</label>
                         <input
                           type="text"
                           placeholder="https://shopee.co.id/product/..."
                           value={productUrl}
                           onChange={e => setProductUrl(e.target.value)}
-                          style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                          style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
                         />
                       </div>
                       <div>
-                        <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px' }}>URL Affiliate:</label>
+                        <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>URL Affiliate:</label>
                         <input
                           type="text"
                           placeholder="https://shope.ee/..."
                           value={affiliateUrl}
                           onChange={e => setAffiliateUrl(e.target.value)}
-                          style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                          style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
                         />
                       </div>
                     </div>
                     <div style={{ marginBottom: '16px' }}>
-                      <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px' }}>URL Foto Produk:</label>
+                      <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>URL Foto Produk:</label>
                       <input
                         type="text"
                         placeholder="https://images.shopee.co.id/..."
                         value={productPhotoUrl}
                         onChange={e => setProductPhotoUrl(e.target.value)}
-                        style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                        style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
                       />
                     </div>
                   </>
                 ) : (
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                     <div>
-                      <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px' }}>
+                      <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>
                         🔗 URL Produk (Otomatis Ditarik):
                       </label>
                       <input
@@ -987,11 +987,11 @@ export default function ContentPlannerDashboard() {
                         placeholder="https://..."
                         value={productUrl}
                         onChange={e => setProductUrl(e.target.value)}
-                        style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                        style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
                       />
                     </div>
                     <div>
-                      <label style={{ display: 'block', fontSize: '13px', color: '#818cf8', marginBottom: '6px', fontWeight: 700 }}>
+                      <label style={{ display: 'block', fontSize: '13px', color: 'var(--status-neutral)', marginBottom: '6px', fontWeight: 700 }}>
                         🛍️ URL Affiliate Kampanye (Isi Di Sini):
                       </label>
                       <input
@@ -999,7 +999,7 @@ export default function ContentPlannerDashboard() {
                         placeholder="https://shope.ee/..."
                         value={affiliateUrl}
                         onChange={e => setAffiliateUrl(e.target.value)}
-                        style={{ width: '100%', padding: '10px', background: '#1e1b4b', border: '1px solid #6366f1', borderRadius: '8px', color: '#fff', fontWeight: 600 }}
+                        style={{ width: '100%', padding: '10px', background: 'var(--status-neutral-soft)', border: '1px solid var(--status-neutral)', borderRadius: '8px', color: 'var(--text-primary)', fontWeight: 600 }}
                       />
                     </div>
                   </div>
@@ -1008,13 +1008,13 @@ export default function ContentPlannerDashboard() {
 
                 {/* Target Demografi Audiens (Preset Prompt Builder) */}
                 <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px', fontWeight: 600 }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>
                     🎯 Target Demografi Audiens (Personalitas Hook):
                   </label>
                   <select
                     value={targetAudience}
                     onChange={e => setTargetAudience(e.target.value)}
-                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
                   >
                     <option value="genz_casual">🔥 Gen-Z & Milenial Muda (Gaul, Santai, Relatable)</option>
                     <option value="ibu_rumah_tangga">🏡 Ibu Rumah Tangga & Keluarga (Hangat, Ramah, Solutif)</option>
@@ -1030,18 +1030,18 @@ export default function ContentPlannerDashboard() {
                       placeholder="Ketik deskripsi target audiens kustom (misal: Gamers 18-24th)..."
                       value={customTargetAudience}
                       onChange={e => setCustomTargetAudience(e.target.value)}
-                      style={{ width: '100%', padding: '10px', marginTop: '8px', background: 'var(--bg-secondary)', border: '1px solid #6366f1', borderRadius: '8px', color: '#fff' }}
+                      style={{ width: '100%', padding: '10px', marginTop: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--status-neutral)', borderRadius: '8px', color: 'var(--text-primary)' }}
                     />
                   )}
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px' }}>Platform Target:</label>
+                    <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>Platform Target:</label>
                     <select
                       value={platform}
                       onChange={e => setPlatform(e.target.value)}
-                      style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                      style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
                     >
                       <option value="tiktok">TikTok (Short Form)</option>
                       <option value="reels">Instagram Reels</option>
@@ -1049,7 +1049,7 @@ export default function ContentPlannerDashboard() {
                     </select>
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px' }}>Jumlah Baris Planner:</label>
+                    <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>Jumlah Baris Planner:</label>
                     <select
                       disabled={plannerFocus === 'brand_editorial' && pillars.length === 0}
                       value={plannerFocus === 'brand_editorial' ? effectiveEditorialRowsPerPillar : productPlannerCount}
@@ -1061,7 +1061,7 @@ export default function ContentPlannerDashboard() {
                           setProductPlannerCount(Number(e.target.value));
                         }
                       }}
-                      style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                      style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
                     >
                       {plannerFocus === 'brand_editorial' ? (
                         pillars.length === 0
@@ -1080,7 +1080,7 @@ export default function ContentPlannerDashboard() {
                       </>}
                     </select>
                     {plannerFocus === 'brand_editorial' && editorialCountNotice && (
-                      <div style={{ marginTop: '6px', color: '#fcd34d', fontSize: '11px', lineHeight: 1.4 }}>
+                      <div style={{ marginTop: '6px', color: 'var(--status-warning)', fontSize: '11px', lineHeight: 1.4 }}>
                         {editorialCountNotice}
                       </div>
                     )}
@@ -1091,8 +1091,8 @@ export default function ContentPlannerDashboard() {
                   type="submit"
                   disabled={generating}
                   style={{
-                    width: '100%', padding: '14px', background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                    color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 700, cursor: 'pointer',
+                    width: '100%', padding: '14px', background: 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)',
+                    color: 'var(--text-primary)', border: 'none', borderRadius: '10px', fontWeight: 700, cursor: 'pointer',
                     fontSize: '15px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px'
                   }}
                 >

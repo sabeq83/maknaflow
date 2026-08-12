@@ -50,7 +50,7 @@ export default function SheetsAutopilotDashboard() {
   const [submitStatus, setSubmitStatus] = useState('active');
   const [brandProfiles, setBrandProfiles] = useState([]);
   const [products, setProducts] = useState([]);
-  
+
   // Terminal log state
   const [terminalLogs, setTerminalLogs] = useState('Menginisialisasi log terminal autopilot...\n');
   const [isSyncing, setIsSyncing] = useState(false);
@@ -146,7 +146,7 @@ export default function SheetsAutopilotDashboard() {
     fetchProducts();
     pollLogs();
     fetchSettings();
-    
+
     // Auto-poll terminal logs every 3 seconds
     const interval = setInterval(pollLogs, 3000);
     return () => clearInterval(interval);
@@ -479,12 +479,12 @@ export default function SheetsAutopilotDashboard() {
               <h2>🤖 Google Sheets Autopilot</h2>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px' }}>
                 <p style={{ margin: 0 }}>MAKNA v10.5.5 — Asynchronous Batch Poller, JIT Sourcing, & G-Drive Sync</p>
-                <span style={{ 
-                  fontSize: '0.7rem', 
-                  background: isSchedulerActive ? 'rgba(46, 204, 113, 0.15)' : 'rgba(235, 77, 75, 0.15)', 
-                  color: isSchedulerActive ? 'var(--success)' : 'var(--danger)', 
-                  border: `1px solid ${isSchedulerActive ? 'rgba(46, 204, 113, 0.3)' : 'rgba(235, 77, 75, 0.3)'}`,
-                  padding: '2px 8px', 
+                <span style={{
+                  fontSize: '0.7rem',
+                  background: isSchedulerActive ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
+                  color: isSchedulerActive ? 'var(--success)' : 'var(--danger)',
+                  border: `1px solid ${isSchedulerActive ? 'var(--status-success-soft)' : 'var(--status-danger-soft)'}`,
+                  padding: '2px 8px',
                   borderRadius: '4px',
                   fontWeight: 'bold'
                 }}>
@@ -493,18 +493,18 @@ export default function SheetsAutopilotDashboard() {
               </div>
             </div>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <button 
+              <button
                 onClick={toggleGlobalScheduler}
                 className={`btn ${isSchedulerActive ? 'btn-danger' : 'btn-success'}`}
                 style={{
-                  boxShadow: isSchedulerActive ? '0 0 15px rgba(235, 77, 75, 0.4)' : '0 0 15px rgba(46, 204, 113, 0.4)',
-                  border: isSchedulerActive ? '1px solid rgba(235, 77, 75, 0.6)' : '1px solid rgba(46, 204, 113, 0.6)'
+                  boxShadow: isSchedulerActive ? '0 0 15px var(--status-danger-soft)' : '0 0 15px var(--status-success-soft)',
+                  border: isSchedulerActive ? '1px solid var(--status-danger-soft)' : '1px solid var(--status-success-soft)'
                 }}
               >
                 {isSchedulerActive ? '🛑 STOP SKEDULER' : '▶️ START SKEDULER'}
               </button>
 
-              <button 
+              <button
                 className={`btn ${isSyncing ? 'btn-secondary' : 'btn-primary'}`}
                 onClick={triggerSync}
                 disabled={isSyncing}
@@ -519,30 +519,30 @@ export default function SheetsAutopilotDashboard() {
           </div>
 
           {/* Activity Terminal */}
-          <div className="card" style={{ padding: '0', background: '#07070a', border: '1px solid var(--border)', marginBottom: '24px' }}>
-            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0b0b12' }}>
+          <div className="card" style={{ padding: '0', background: 'var(--surface)', border: '1px solid var(--border)', marginBottom: '24px' }}>
+            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#00b894', display: 'inline-block', boxShadow: '0 0 8px #00b894' }}></span>
+                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--status-success)', display: 'inline-block', boxShadow: '0 0 8px var(--status-success)' }}></span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>SYSTEM POLLER LOGGER</span>
               </div>
-              <button 
-                onClick={pollLogs} 
+              <button
+                onClick={pollLogs}
                 style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.75rem', cursor: 'pointer', fontFamily: 'var(--font-mono)' }}
               >
                 [Refresh Log]
               </button>
             </div>
-            <pre 
+            <pre
               ref={terminalRef}
-              style={{ 
-                margin: 0, 
-                padding: '20px', 
-                background: '#07070a', 
-                color: '#20c20e', 
-                fontFamily: 'var(--font-mono)', 
-                fontSize: '0.82rem', 
-                maxHeight: '220px', 
-                overflowY: 'auto', 
+              style={{
+                margin: 0,
+                padding: '20px',
+                background: 'var(--surface)',
+                color: '#20c20e',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.82rem',
+                maxHeight: '220px',
+                overflowY: 'auto',
                 lineHeight: '1.5',
                 whiteSpace: 'pre-wrap'
               }}
@@ -553,24 +553,24 @@ export default function SheetsAutopilotDashboard() {
 
           {/* Full Page Vertical Stack */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            
+
             {/* Form Setup Kampanye Baru (Full Width) */}
             <div className="card" style={{ width: '100%' }}>
               <div className="card-title" style={{ borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginBottom: '20px' }}>
                 <span>🎯 Setup Kampanye Autopilot Baru</span>
               </div>
-              
+
               <form onSubmit={handleCreateCampaign}>
-                
+
                 {/* 3 Side-by-side Selector Cards (Hidden when selection is active) */}
                 <div style={{ marginBottom: '24px' }}>
                   <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '10px', fontWeight: '500' }}>
                     Pilih Fitur / Tipe Autopilot
                   </label>
-                  
+
                   {campaignType === null ? (
                     <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                      <div 
+                      <div
                         className="campaign-card"
                         onClick={() => setCampaignType('RE')}
                         style={{ cursor: 'pointer' }}
@@ -580,7 +580,7 @@ export default function SheetsAutopilotDashboard() {
                         <div className="desc" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>Klon & modifikasi video kompetitor</div>
                       </div>
 
-                      <div 
+                      <div
                         className="campaign-card"
                         onClick={() => setCampaignType('OPC')}
                         style={{ cursor: 'pointer' }}
@@ -590,7 +590,7 @@ export default function SheetsAutopilotDashboard() {
                         <div className="desc" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>Generasi pilar konten & visual JIT</div>
                       </div>
 
-                      <div 
+                      <div
                         className="campaign-card"
                         onClick={() => setCampaignType('IFC')}
                         style={{ cursor: 'pointer' }}
@@ -603,13 +603,13 @@ export default function SheetsAutopilotDashboard() {
                   ) : (
                     <div>
                       {/* Only Show the Selected Card with a Switcher Button */}
-                      <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center', 
-                        background: 'rgba(255,255,255,0.02)', 
-                        border: '1px solid var(--accent)', 
-                        borderRadius: '12px', 
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        background: 'var(--surface-interactive)',
+                        border: '1px solid var(--accent)',
+                        borderRadius: '12px',
                         padding: '16px 20px',
                         boxShadow: '0 0 15px var(--accent-glow)'
                       }}>
@@ -626,8 +626,8 @@ export default function SheetsAutopilotDashboard() {
                             </p>
                           </div>
                         </div>
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           onClick={() => setCampaignType(null)}
                           className="btn btn-secondary"
                           style={{ padding: '8px 16px', fontSize: '0.78rem', border: '1px solid var(--border)' }}
@@ -640,11 +640,11 @@ export default function SheetsAutopilotDashboard() {
 
                   {/* Spreadsheet Header Reminder (only shown after selection) */}
                   {campaignType !== null && (
-                    <div style={{ 
-                      marginTop: '16px', 
-                      padding: '12px 16px', 
-                      background: 'rgba(255,255,255,0.02)', 
-                      borderRadius: '8px', 
+                    <div style={{
+                      marginTop: '16px',
+                      padding: '12px 16px',
+                      background: 'var(--surface-interactive)',
+                      borderRadius: '8px',
                       border: '1px dashed var(--border)',
                       fontSize: '0.8rem'
                     }}>
@@ -673,11 +673,11 @@ export default function SheetsAutopilotDashboard() {
                 {/* Form fields appear dynamically after campaignType is chosen */}
                 {campaignType !== null && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    
+
                     {/* Accordion 1: Basic Creative Strategy */}
                     <div className="accordion-item" style={{ border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
-                      <div 
-                        className="accordion-header" 
+                      <div
+                        className="accordion-header"
                         onClick={() => toggleAccordion('basic')}
                         style={{ padding: '14px 18px', background: 'var(--bg-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', fontWeight: '600', fontSize: '0.88rem' }}
                       >
@@ -685,7 +685,7 @@ export default function SheetsAutopilotDashboard() {
                         <span>{openAccordions.basic ? '▲' : '▼'}</span>
                       </div>
                       {openAccordions.basic && (
-                        <div className="accordion-content" style={{ padding: '18px', borderTop: '1px solid var(--border)', background: 'rgba(0,0,0,0.15)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div className="accordion-content" style={{ padding: '18px', borderTop: '1px solid var(--border)', background: 'var(--overlay-subtle)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                           <div>
                             <label className="form-label">🏷️ Nama Akun (Brand Account)</label>
                             <select
@@ -711,23 +711,23 @@ export default function SheetsAutopilotDashboard() {
                           </div>
                           <div>
                             <label className="form-label">Nama Kampanye</label>
-                            <input 
-                              type="text" 
-                              className="form-input" 
+                            <input
+                              type="text"
+                              className="form-input"
                               placeholder="e.g. Campaign Serum Brightening"
-                              value={campaignName} 
-                              onChange={e => setCampaignName(e.target.value)} 
+                              value={campaignName}
+                              onChange={e => setCampaignName(e.target.value)}
                               required
                             />
                           </div>
                           <div>
                             <label className="form-label">Google Spreadsheet ID</label>
-                            <input 
-                              type="text" 
-                              className="form-input" 
+                            <input
+                              type="text"
+                              className="form-input"
                               placeholder="e.g. 1aBcDeFgHiJkLmNoP..."
-                              value={spreadsheetId} 
-                              onChange={e => setSpreadsheetId(e.target.value)} 
+                              value={spreadsheetId}
+                              onChange={e => setSpreadsheetId(e.target.value)}
                               required
                             />
                           </div>
@@ -735,12 +735,12 @@ export default function SheetsAutopilotDashboard() {
                             <label className="form-label">
                               {storageProvider === 'nextcloud' ? 'Parent Folder Nextcloud (Opsional)' : 'Parent Folder ID Google Drive (Opsional)'}
                             </label>
-                            <input 
-                              type="text" 
-                              className="form-input" 
+                            <input
+                              type="text"
+                              className="form-input"
                               placeholder={storageProvider === 'nextcloud' ? "e.g. /MAKNA_Video_Generations" : "Biarkan kosong untuk membuat folder otomatis di root"}
-                              value={gdriveFolderId} 
-                              onChange={e => setGdriveFolderId(e.target.value)} 
+                              value={gdriveFolderId}
+                              onChange={e => setGdriveFolderId(e.target.value)}
                             />
                             {storageProvider === 'nextcloud' && (
                               <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '4px' }}>
@@ -797,8 +797,8 @@ export default function SheetsAutopilotDashboard() {
 
                     {/* Accordion 2: Aesthetics & Visual Settings */}
                     <div className="accordion-item" style={{ border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
-                      <div 
-                        className="accordion-header" 
+                      <div
+                        className="accordion-header"
                         onClick={() => toggleAccordion('aesthetics')}
                         style={{ padding: '14px 18px', background: 'var(--bg-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', fontWeight: '600', fontSize: '0.88rem' }}
                       >
@@ -806,7 +806,7 @@ export default function SheetsAutopilotDashboard() {
                         <span>{openAccordions.aesthetics ? '▲' : '▼'}</span>
                       </div>
                       {openAccordions.aesthetics && (
-                        <div className="accordion-content" style={{ padding: '18px', borderTop: '1px solid var(--border)', background: 'rgba(0,0,0,0.15)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div className="accordion-content" style={{ padding: '18px', borderTop: '1px solid var(--border)', background: 'var(--overlay-subtle)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                             <div>
                               <label className="form-label">Aspect Ratio</label>
@@ -863,9 +863,9 @@ export default function SheetsAutopilotDashboard() {
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                             <div>
                               <label className="form-label">Total Clips Target</label>
-                              <input 
-                                type="number" 
-                                className="form-input" 
+                              <input
+                                type="number"
+                                className="form-input"
                                 value={targetClipsCount}
                                 onChange={e => setTargetClipsCount(e.target.value)}
                                 min="1"
@@ -901,9 +901,9 @@ export default function SheetsAutopilotDashboard() {
                           </div>
                           <div>
                             <label className="form-label">Custom Instruction</label>
-                            <textarea 
-                              className="form-input" 
-                              rows="2" 
+                            <textarea
+                              className="form-input"
+                              rows="2"
                               placeholder="e.g. Masukkan kata 'Viral' di hook adegan"
                               value={customInstruction}
                               onChange={e => setCustomInstruction(e.target.value)}
@@ -915,19 +915,19 @@ export default function SheetsAutopilotDashboard() {
 
                     {/* Accordion 3: Product Reveal / Bridging Settings */}
                     <div className="accordion-item" style={{ border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
-                      <div 
-                        className="accordion-header" 
+                      <div
+                        className="accordion-header"
                         onClick={() => toggleAccordion('bridging')}
                         style={{ padding: '14px 18px', background: 'var(--bg-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', fontWeight: '600', fontSize: '0.88rem' }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <span>{campaignType === 'IFC' ? '🔗 3. IFC Product Reveal Settings' : '🔗 3. Product Bridging Settings'}</span>
-                          <span style={{ 
-                            fontSize: '0.75rem', 
-                            background: (campaignType === 'IFC' ? parseInt(bridgeDurationClips) > 0 : isBridgingActive) ? 'var(--success-glow)' : 'var(--border)', 
-                            color: (campaignType === 'IFC' ? parseInt(bridgeDurationClips) > 0 : isBridgingActive) ? 'var(--success)' : 'var(--text-muted)', 
-                            padding: '2px 6px', 
-                            borderRadius: '4px' 
+                          <span style={{
+                            fontSize: '0.75rem',
+                            background: (campaignType === 'IFC' ? parseInt(bridgeDurationClips) > 0 : isBridgingActive) ? 'var(--success-glow)' : 'var(--border)',
+                            color: (campaignType === 'IFC' ? parseInt(bridgeDurationClips) > 0 : isBridgingActive) ? 'var(--success)' : 'var(--text-muted)',
+                            padding: '2px 6px',
+                            borderRadius: '4px'
                           }}>
                             {(campaignType === 'IFC' ? parseInt(bridgeDurationClips) > 0 : isBridgingActive) ? 'Active' : 'Inactive'}
                           </span>
@@ -935,15 +935,15 @@ export default function SheetsAutopilotDashboard() {
                         <span>{openAccordions.bridging ? '▲' : '▼'}</span>
                       </div>
                       {openAccordions.bridging && (
-                        <div className="accordion-content" style={{ padding: '18px', borderTop: '1px solid var(--border)', background: 'rgba(0,0,0,0.15)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div className="accordion-content" style={{ padding: '18px', borderTop: '1px solid var(--border)', background: 'var(--overlay-subtle)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                           {campaignType !== 'IFC' && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
                               <label className="switch">
-                                <input 
-                                  type="checkbox" 
+                                <input
+                                  type="checkbox"
                                   id="is_bridging_active"
-                                  checked={isBridgingActive} 
-                                  onChange={e => setIsBridgingActive(e.target.checked)} 
+                                  checked={isBridgingActive}
+                                  onChange={e => setIsBridgingActive(e.target.checked)}
                                 />
                                 <span className="slider round"></span>
                               </label>
@@ -960,9 +960,9 @@ export default function SheetsAutopilotDashboard() {
                                   <label className="form-label">
                                     {campaignType === 'IFC' ? 'Product Reveal Klip Ke (N)' : 'Bridge at Clip'}
                                   </label>
-                                  <input 
-                                    type="number" 
-                                    className="form-input" 
+                                  <input
+                                    type="number"
+                                    className="form-input"
                                     value={bridgeAtClip}
                                     onChange={e => setBridgeAtClip(e.target.value)}
                                     min="1"
@@ -972,9 +972,9 @@ export default function SheetsAutopilotDashboard() {
                                   <label className="form-label">
                                     {campaignType === 'IFC' ? 'Jumlah Durasi Klip (X)' : 'Bridge Duration (Clips)'}
                                   </label>
-                                  <input 
-                                    type="number" 
-                                    className="form-input" 
+                                  <input
+                                    type="number"
+                                    className="form-input"
                                     value={bridgeDurationClips}
                                     onChange={e => setBridgeDurationClips(e.target.value)}
                                     min="0"
@@ -999,8 +999,8 @@ export default function SheetsAutopilotDashboard() {
 
                     {/* Accordion 4: Visual Swap Overrides (Default Inactive) */}
                     <div className="accordion-item" style={{ border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
-                      <div 
-                        className="accordion-header" 
+                      <div
+                        className="accordion-header"
                         onClick={() => toggleAccordion('overrides')}
                         style={{ padding: '14px 18px', background: 'var(--bg-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', fontWeight: '600', fontSize: '0.88rem' }}
                       >
@@ -1013,8 +1013,8 @@ export default function SheetsAutopilotDashboard() {
                         <span>{openAccordions.overrides ? '▲' : '▼'}</span>
                       </div>
                       {openAccordions.overrides && (
-                        <div className="accordion-content" style={{ padding: '18px', borderTop: '1px solid var(--border)', background: 'rgba(0,0,0,0.15)', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                          
+                        <div className="accordion-content" style={{ padding: '18px', borderTop: '1px solid var(--border)', background: 'var(--overlay-subtle)', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+
                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
                             <label className="switch">
                               <input
@@ -1037,9 +1037,9 @@ export default function SheetsAutopilotDashboard() {
                               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                                 <div>
                                   <label className="form-label">Konsep Karakter (Framing)</label>
-                                  <select 
-                                    className="form-input" 
-                                    value={characterConcept} 
+                                  <select
+                                    className="form-input"
+                                    value={characterConcept}
                                     onChange={e => setCharacterConcept(e.target.value)}
                                   >
                                     <option value="faceless">Faceless (Wajah Terpotong - Mandate 67)</option>
@@ -1052,9 +1052,9 @@ export default function SheetsAutopilotDashboard() {
 
                                 <div>
                                   <label className="form-label">Demografi Subjek / Model</label>
-                                  <select 
-                                     className="form-input" 
-                                     value={subjectDemographic} 
+                                  <select
+                                     className="form-input"
+                                     value={subjectDemographic}
                                      onChange={e => {
                                        const val = e.target.value;
                                        setSubjectDemographic(val);
@@ -1104,9 +1104,9 @@ export default function SheetsAutopilotDashboard() {
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                                   <div>
                                     <label className="form-label">Pakaian / Wardrobe</label>
-                                    <select 
-                                      className="form-input" 
-                                      value={wardrobeStyle} 
+                                    <select
+                                      className="form-input"
+                                      value={wardrobeStyle}
                                       onChange={e => setWardrobeStyle(e.target.value)}
                                     >
                                       <option value="random">🎲 Random (Acak)</option>
@@ -1176,10 +1176,10 @@ export default function SheetsAutopilotDashboard() {
                                         className="form-input"
                                         style={{ marginTop: '8px' }}
                                         placeholder={
-                                          subjectDemographic.startsWith('stylized_3d_') 
-                                            ? "Ketik pakaian 3D kustom..." 
-                                            : subjectDemographic === 'caucasian_male' 
-                                              ? "Ketik pakaian kustom..." 
+                                          subjectDemographic.startsWith('stylized_3d_')
+                                            ? "Ketik pakaian 3D kustom..."
+                                            : subjectDemographic === 'caucasian_male'
+                                              ? "Ketik pakaian kustom..."
                                               : "Ketik warna hijab kustom..."
                                         }
                                         value={wardrobeStyleCustom}
@@ -1194,9 +1194,9 @@ export default function SheetsAutopilotDashboard() {
                               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                                 <div>
                                   <label className="form-label">Pencahayaan & Gaya Sinematik (Lighting Ambiance)</label>
-                                  <select 
-                                    className="form-input" 
-                                    value={lightingStyle} 
+                                  <select
+                                    className="form-input"
+                                    value={lightingStyle}
                                     onChange={e => setLightingStyle(e.target.value)}
                                   >
                                     <option value="random">🎲 Random (Acak)</option>
@@ -1230,8 +1230,8 @@ export default function SheetsAutopilotDashboard() {
 
                     {/* Accordion 5: Workflow & Audio Settings (Default Inactive) */}
                     <div className="accordion-item" style={{ border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
-                      <div 
-                        className="accordion-header" 
+                      <div
+                        className="accordion-header"
                         onClick={() => toggleAccordion('workflow')}
                         style={{ padding: '14px 18px', background: 'var(--bg-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', fontWeight: '600', fontSize: '0.88rem' }}
                       >
@@ -1244,14 +1244,14 @@ export default function SheetsAutopilotDashboard() {
                         <span>{openAccordions.workflow ? '▲' : '▼'}</span>
                       </div>
                       {openAccordions.workflow && (
-                        <div className="accordion-content" style={{ padding: '18px', borderTop: '1px solid var(--border)', background: 'rgba(0,0,0,0.15)', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                          
+                        <div className="accordion-content" style={{ padding: '18px', borderTop: '1px solid var(--border)', background: 'var(--overlay-subtle)', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+
                           {/* Active Stages Checklist */}
                           <div>
                             <label className="form-label" style={{ marginBottom: '10px' }}>Tahapan Workflow Aktif</label>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
-                              
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-interactive)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)' }}>
                                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '500' }}>Enable TTS (Voiceover)</span>
                                 <label className="switch">
                                   <input type="checkbox" checked={enableTts} onChange={e => setEnableTts(e.target.checked)} />
@@ -1259,7 +1259,7 @@ export default function SheetsAutopilotDashboard() {
                                 </label>
                               </div>
 
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-interactive)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)' }}>
                                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '500' }}>Enable G-Labs (AI Video)</span>
                                 <label className="switch">
                                   <input type="checkbox" checked={enableGlabs} onChange={e => setEnableGlabs(e.target.checked)} />
@@ -1267,7 +1267,7 @@ export default function SheetsAutopilotDashboard() {
                                 </label>
                               </div>
 
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-interactive)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)' }}>
                                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '500' }}>Enable FFmpeg Muxing</span>
                                 <label className="switch">
                                   <input type="checkbox" checked={enableFfmpeg} onChange={e => setEnableFfmpeg(e.target.checked)} />
@@ -1275,7 +1275,7 @@ export default function SheetsAutopilotDashboard() {
                                 </label>
                               </div>
 
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-interactive)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)' }}>
                                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '500' }}>Enable Social Draft Post</span>
                                 <label className="switch">
                                   <input type="checkbox" checked={enableSocialPost} onChange={e => setEnableSocialPost(e.target.checked)} />
@@ -1300,12 +1300,12 @@ export default function SheetsAutopilotDashboard() {
                                 </div>
                                 <div>
                                   <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Voice Persona</label>
-                                  <select 
-                                    className="form-input" 
-                                    value={voicePersona} 
+                                  <select
+                                    className="form-input"
+                                    value={voicePersona}
                                     onChange={e => setVoicePersona(e.target.value)}
                                   >
-                                    {voiceProvider === 'gemini' 
+                                    {voiceProvider === 'gemini'
                                       ? GEMINI_VOICES.map(v => <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>)
                                       : (targetLanguage === 'en-US' ? MINIMAX_ENGLISH_VOICES : MINIMAX_VOICES).map(v => <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>)
                                     }
@@ -1329,7 +1329,7 @@ export default function SheetsAutopilotDashboard() {
                           {enableFfmpeg && (
                             <div style={{ borderTop: '1px solid var(--border)', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                               <label className="form-label">FFmpeg Video Studio Settings</label>
-                              
+
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                                 <label className="form-label" style={{ fontSize: '0.75rem' }}>Mode Sinkronisasi Audio-Video</label>
                                 <div style={{ display: 'flex', gap: 24, marginTop: 2 }}>
@@ -1382,15 +1382,15 @@ export default function SheetsAutopilotDashboard() {
                                     <span>Video Scale:</span>
                                     <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{Math.round(ffmpegVideoScale * 100)}%</span>
                                   </label>
-                                  <input 
-                                    type="range" 
-                                    min="1.0" 
-                                    max="2.0" 
-                                    step="0.05" 
-                                    className="form-input" 
-                                    value={ffmpegVideoScale} 
-                                    onChange={e => setFfmpegVideoScale(Number(e.target.value))} 
-                                    style={{ width: '100%', accentColor: 'var(--accent)' }} 
+                                  <input
+                                    type="range"
+                                    min="1.0"
+                                    max="2.0"
+                                    step="0.05"
+                                    className="form-input"
+                                    value={ffmpegVideoScale}
+                                    onChange={e => setFfmpegVideoScale(Number(e.target.value))}
+                                    style={{ width: '100%', accentColor: 'var(--accent)' }}
                                   />
                                 </div>
                                 <div>
@@ -1398,15 +1398,15 @@ export default function SheetsAutopilotDashboard() {
                                     <span>SFX Volume:</span>
                                     <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{Math.round(ffmpegSfxVolume * 100)}%</span>
                                   </label>
-                                  <input 
-                                    type="range" 
-                                    min="0.0" 
-                                    max="1.0" 
-                                    step="0.05" 
-                                    className="form-input" 
-                                    value={ffmpegSfxVolume} 
-                                    onChange={e => setFfmpegSfxVolume(Number(e.target.value))} 
-                                    style={{ width: '100%', accentColor: 'var(--accent)' }} 
+                                  <input
+                                    type="range"
+                                    min="0.0"
+                                    max="1.0"
+                                    step="0.05"
+                                    className="form-input"
+                                    value={ffmpegSfxVolume}
+                                    onChange={e => setFfmpegSfxVolume(Number(e.target.value))}
+                                    style={{ width: '100%', accentColor: 'var(--accent)' }}
                                   />
                                 </div>
                               </div>
@@ -1416,15 +1416,15 @@ export default function SheetsAutopilotDashboard() {
                                   <span>BGM Volume:</span>
                                   <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{Math.round(ffmpegBgmVolume * 100)}%</span>
                                 </label>
-                                <input 
-                                  type="range" 
-                                  min="0.0" 
-                                  max="1.0" 
-                                  step="0.05" 
-                                  className="form-input" 
-                                  value={ffmpegBgmVolume} 
-                                  onChange={e => setFfmpegBgmVolume(Number(e.target.value))} 
-                                  style={{ width: '100%', accentColor: 'var(--accent)' }} 
+                                <input
+                                  type="range"
+                                  min="0.0"
+                                  max="1.0"
+                                  step="0.05"
+                                  className="form-input"
+                                  value={ffmpegBgmVolume}
+                                  onChange={e => setFfmpegBgmVolume(Number(e.target.value))}
+                                  style={{ width: '100%', accentColor: 'var(--accent)' }}
                                 />
                               </div>
                             </div>
@@ -1475,10 +1475,10 @@ export default function SheetsAutopilotDashboard() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {campaigns.map(c => {
                     let statusColor = 'var(--text-muted)';
-                    let statusBg = 'rgba(255,255,255,0.06)';
-                    let statusBorder = 'rgba(255,255,255,0.1)';
-                    if (c.status === 'active') { statusColor = 'var(--success)'; statusBg = 'rgba(46,204,113,0.15)'; statusBorder = 'rgba(46,204,113,0.3)'; }
-                    else if (c.status === 'paused') { statusColor = '#fdcb6e'; statusBg = 'rgba(253,203,110,0.15)'; statusBorder = 'rgba(253,203,110,0.3)'; }
+                    let statusBg = 'var(--surface-interactive)';
+                    let statusBorder = 'var(--border-subtle)';
+                    if (c.status === 'active') { statusColor = 'var(--success)'; statusBg = 'var(--status-success-soft)'; statusBorder = 'var(--status-success-soft)'; }
+                    else if (c.status === 'paused') { statusColor = 'var(--status-warning)'; statusBg = 'rgba(253,203,110,0.15)'; statusBorder = 'rgba(253,203,110,0.3)'; }
 
                     const typeIcon = c.campaign_type === 'RE' ? '🎬' : (c.campaign_type === 'OPC' ? '🌱' : '🚀');
 
@@ -1489,7 +1489,7 @@ export default function SheetsAutopilotDashboard() {
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                             <span style={{ fontSize: '1.1rem' }}>{typeIcon}</span>
                             <strong style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>{c.campaign_name}</strong>
-                            <span style={{ fontSize: '0.65rem', background: 'rgba(255,255,255,0.08)', color: 'var(--text-muted)', padding: '2px 6px', borderRadius: 4 }}>{c.campaign_type}</span>
+                            <span style={{ fontSize: '0.65rem', background: 'var(--border-subtle)', color: 'var(--text-muted)', padding: '2px 6px', borderRadius: 4 }}>{c.campaign_type}</span>
                             <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', padding: '3px 8px', borderRadius: 8, background: statusBg, color: statusColor, border: `1px solid ${statusBorder}` }}>
                               {c.status === 'active' ? 'RUNNING' : (c.status === 'draft' ? 'DRAFT' : 'PAUSED')}
                             </span>
@@ -1516,9 +1516,9 @@ export default function SheetsAutopilotDashboard() {
                           ].map((st, idx) => (
                             <span key={idx} style={{
                               padding: '3px 8px', borderRadius: 4, fontSize: '0.68rem', fontWeight: 600,
-                              background: idx === 1 && st.val > 0 ? 'rgba(16,185,129,0.15)' : idx === 2 && st.val > 0 ? 'rgba(235,77,75,0.15)' : 'rgba(255,255,255,0.05)',
-                              color: idx === 1 && st.val > 0 ? '#10b981' : idx === 2 && st.val > 0 ? 'var(--danger)' : 'var(--text-muted)',
-                              border: '1px solid rgba(255,255,255,0.08)'
+                              background: idx === 1 && st.val > 0 ? 'var(--status-success-soft)' : idx === 2 && st.val > 0 ? 'var(--status-danger-soft)' : 'var(--surface-interactive)',
+                              color: idx === 1 && st.val > 0 ? 'var(--status-success)' : idx === 2 && st.val > 0 ? 'var(--danger)' : 'var(--text-muted)',
+                              border: '1px solid var(--border-subtle)'
                             }}>
                               {st.label}: {st.val}
                             </span>
@@ -1526,12 +1526,12 @@ export default function SheetsAutopilotDashboard() {
                         </div>
 
                         {/* Action Buttons — rata KIRI, selalu terlihat */}
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-start', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 12 }}>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-start', borderTop: '1px solid var(--surface-interactive)', paddingTop: 12 }}>
                           <a href={`/sheets-autopilot/${c.id}`} className="btn btn-primary btn-sm" style={{ textDecoration: 'none', fontSize: '0.75rem', padding: '6px 12px' }}>
                             🔍 Detail
                           </a>
 
-                          <button onClick={() => handleToggleCampaignStatus(c.id, c.status)} className="btn btn-sm" style={{ color: c.status === 'active' ? 'var(--danger)' : 'var(--success)', background: c.status === 'active' ? 'rgba(235,77,75,0.1)' : 'rgba(46,204,113,0.1)', borderColor: c.status === 'active' ? 'rgba(235, 77, 75, 0.2)' : 'rgba(46, 204, 113, 0.2)', fontSize: '0.75rem', padding: '6px 12px' }}>
+                          <button onClick={() => handleToggleCampaignStatus(c.id, c.status)} className="btn btn-sm" style={{ color: c.status === 'active' ? 'var(--danger)' : 'var(--success)', background: c.status === 'active' ? 'var(--status-danger-soft)' : 'var(--status-success-soft)', borderColor: c.status === 'active' ? 'var(--status-danger-soft)' : 'var(--status-success-soft)', fontSize: '0.75rem', padding: '6px 12px' }}>
                             {c.status === 'active' ? '⏸ Pause' : '▶ Resume'}
                           </button>
 
@@ -1543,7 +1543,7 @@ export default function SheetsAutopilotDashboard() {
                             📋 Copy
                           </button>
 
-                          <button onClick={() => handleDeleteCampaign(c.id)} className="btn btn-danger btn-sm" style={{ background: '#dc2626', color: '#fff', borderColor: '#dc2626', fontSize: '0.75rem', padding: '6px 12px' }}>
+                          <button onClick={() => handleDeleteCampaign(c.id)} className="btn btn-danger btn-sm" style={{ background: '#dc2626', color: 'var(--text-primary)', borderColor: '#dc2626', fontSize: '0.75rem', padding: '6px 12px' }}>
                             🗑 Hapus
                           </button>
                         </div>
@@ -1590,7 +1590,7 @@ export default function SheetsAutopilotDashboard() {
         }
         .form-input {
           width: 100%;
-          background: rgba(255,255,255,0.03);
+          background: var(--surface-interactive);
           border: 1px solid var(--border);
           border-radius: var(--radius-sm);
           padding: 8px 12px;
@@ -1600,10 +1600,10 @@ export default function SheetsAutopilotDashboard() {
         }
         .form-input:focus {
           border-color: var(--accent);
-          background: rgba(255,255,255,0.05);
+          background: var(--surface-interactive);
           outline: none;
         }
-        
+
         /* Premium Toggle Switch Styles */
         .switch {
           position: relative;
@@ -1621,7 +1621,7 @@ export default function SheetsAutopilotDashboard() {
           position: absolute;
           cursor: pointer;
           top: 0; left: 0; right: 0; bottom: 0;
-          background-color: rgba(255, 255, 255, 0.08);
+          background-color: var(--border-subtle);
           transition: 0.3s;
           border: 1px solid var(--border);
         }
@@ -1641,7 +1641,7 @@ export default function SheetsAutopilotDashboard() {
         }
         input:checked + .slider:before {
           transform: translateX(18px);
-          background-color: #fff;
+          background-color: var(--text-primary);
         }
         .slider.round {
           border-radius: 20px;

@@ -123,10 +123,10 @@ export default function ScraperPage() {
   }
 
   const statusColors = {
-    ready: { bg: '#00b89420', color: '#00b894', label: 'Ready' },
-    downloading: { bg: '#fdcb6e30', color: '#fdcb6e', label: 'Downloading...' },
-    failed: { bg: '#d6303120', color: '#d63031', label: 'Failed' },
-    analyzed: { bg: '#6c5ce720', color: '#a29bfe', label: 'Analyzed ✓' },
+    ready: { bg: '#00b89420', color: 'var(--status-success)', label: 'Ready' },
+    downloading: { bg: 'var(--status-warning-soft)', color: 'var(--status-warning)', label: 'Downloading...' },
+    failed: { bg: '#d6303120', color: 'var(--status-danger)', label: 'Failed' },
+    analyzed: { bg: 'var(--status-neutral-soft)', color: 'var(--status-neutral)', label: 'Analyzed ✓' },
   };
 
   return (
@@ -142,17 +142,17 @@ export default function ScraperPage() {
           {/* Storage Banner */}
           {storage && (
             <div style={{
-              background: storage.warning ? 'linear-gradient(135deg, #d6303120, #e1705520)' : 'var(--bg-glass)',
-              border: `1px solid ${storage.warning ? '#d63031' : 'var(--border)'}`,
+              background: storage.warning ? 'linear-gradient(135deg, var(--status-danger-soft), var(--status-warning-soft))' : 'var(--bg-glass)',
+              border: `1px solid ${storage.warning ? 'var(--status-danger)' : 'var(--border)'}`,
               borderRadius: 'var(--radius)', padding: '12px 20px', marginBottom: '20px',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             }}>
               <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                💾 Penyimpanan: <strong style={{ color: storage.warning ? '#d63031' : 'var(--accent-light)' }}>{storage.used_gb} GB</strong> / {storage.limit_gb} GB
+                💾 Penyimpanan: <strong style={{ color: storage.warning ? 'var(--status-danger)' : 'var(--accent-light)' }}>{storage.used_gb} GB</strong> / {storage.limit_gb} GB
                 &nbsp;·&nbsp; {storage.total_files} video
               </div>
               {storage.warning && (
-                <span style={{ fontSize: '0.75rem', color: '#d63031', fontWeight: 600 }}>⚠ Batas penyimpanan hampir penuh!</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--status-danger)', fontWeight: 600 }}>⚠ Batas penyimpanan hampir penuh!</span>
               )}
             </div>
           )}
@@ -180,7 +180,7 @@ export default function ScraperPage() {
               style={{
                 border: `2px dashed ${dragOver ? 'var(--accent)' : 'var(--border)'}`,
                 borderRadius: 'var(--radius)', padding: '24px', textAlign: 'center',
-                background: dragOver ? 'var(--accent)10' : 'transparent',
+                background: dragOver ? 'var(--accent-glow)' : 'transparent',
                 transition: 'all 0.2s ease', cursor: 'pointer',
               }}
               onClick={() => fileRef.current?.click()}
@@ -230,7 +230,7 @@ export default function ScraperPage() {
                 return (
                   <div key={video.id} className="card" style={{ padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                     {/* Thumbnail */}
-                    <div 
+                    <div
                       onClick={() => canPlay && setPlayingVideo(video)}
                       style={{
                         height: '160px', background: '#111',
@@ -248,17 +248,17 @@ export default function ScraperPage() {
                       ) : (
                         <span style={{ fontSize: '3rem', opacity: 0.3 }}>🎬</span>
                       )}
-                      
+
                       {/* Play overlay on hover */}
                       {canPlay && (
                         <div style={{
                           position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-                          background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          background: 'var(--overlay-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center',
                           opacity: 0, transition: 'opacity 0.2s',
                         }} className="play-overlay">
                           <span style={{
-                            fontSize: '2.5rem', color: '#fff', 
-                            background: 'rgba(0,0,0,0.6)', width: '60px', height: '60px', 
+                            fontSize: '2.5rem', color: 'var(--text-primary)',
+                            background: 'rgba(0,0,0,0.6)', width: '60px', height: '60px',
                             borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                             paddingLeft: '5px',
                           }}>▶</span>
@@ -277,7 +277,7 @@ export default function ScraperPage() {
                       <span style={{
                         position: 'absolute', bottom: '8px', left: '8px',
                         fontSize: '0.65rem', padding: '2px 6px', borderRadius: '3px',
-                        background: 'rgba(0,0,0,0.7)', color: '#ccc',
+                        background: 'var(--overlay-backdrop)', color: '#ccc',
                         zIndex: 2,
                       }}>{video.source_type === 'url' ? '🔗 URL' : '📁 Upload'}</span>
                     </div>
@@ -298,7 +298,7 @@ export default function ScraperPage() {
                         </div>
                       )}
                       {video.error_note && (
-                        <div style={{ fontSize: '0.72rem', color: '#d63031', marginTop: '2px' }}>❌ {video.error_note}</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--status-danger)', marginTop: '2px' }}>❌ {video.error_note}</div>
                       )}
                     </div>
 
@@ -360,7 +360,7 @@ export default function ScraperPage() {
       {playingVideo && (
         <div style={{
           position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          background: 'rgba(0,0,0,0.85)', zIndex: 1000,
+          background: 'var(--overlay-backdrop)', zIndex: 1000,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           backdropFilter: 'blur(8px)',
         }} onClick={() => setPlayingVideo(null)}>
@@ -379,16 +379,16 @@ export default function ScraperPage() {
               <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '320px' }}>
                 {playingVideo.filename}
               </strong>
-              <button 
+              <button
                 onClick={() => setPlayingVideo(null)}
                 style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '1.2rem', cursor: 'pointer' }}
               >✕</button>
             </div>
             <div style={{ background: '#000', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <video 
+              <video
                 src={`/api/scraper/video?id=${playingVideo.id}`}
-                controls 
-                autoPlay 
+                controls
+                autoPlay
                 style={{ width: '100%', maxHeight: '70vh', objectFit: 'contain' }}
               />
             </div>
@@ -397,7 +397,7 @@ export default function ScraperPage() {
       )}
 
       {toast && <div className={`toast toast-${toast.type}`}>{toast.msg}</div>}
-      
+
       {/* Dynamic CSS styles for the hover overlay */}
       <style jsx global>{`
         .card:hover .play-overlay {

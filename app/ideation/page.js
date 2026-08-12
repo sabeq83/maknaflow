@@ -370,7 +370,7 @@ export default function IdeationPage() {
                       className="btn btn-sm btn-primary"
                       onClick={syncIdeationToPipeline}
                       disabled={!!syncing}
-                      style={{ background: 'linear-gradient(135deg, var(--accent), #6c5ce7)' }}
+                      style={{ background: 'linear-gradient(135deg, var(--accent), var(--status-neutral))' }}
                     >{syncing ? '⏳ Syncing...' : '📌 Sync to Pipeline'}</button>
                     {pipelineUrl && (
                       <a href={pipelineUrl} target="_blank" rel="noopener" style={{ fontSize: '0.72rem', color: 'var(--accent-light)' }}>

@@ -11,10 +11,10 @@ function renderMarkdown(md) {
   return lines.map((line, idx) => {
     const trimmed = line.trim();
     if (!trimmed) return <div key={idx} style={{ height: '8px' }} />;
-    
+
     if (trimmed.startsWith('# ')) {
       return (
-        <h1 key={idx} style={{ fontSize: '1.3rem', borderBottom: '1px solid var(--border)', paddingBottom: '6px', margin: '20px 0 10px 0', color: '#fff', fontWeight: 700 }}>
+        <h1 key={idx} style={{ fontSize: '1.3rem', borderBottom: '1px solid var(--border)', paddingBottom: '6px', margin: '20px 0 10px 0', color: 'var(--text-primary)', fontWeight: 700 }}>
           {trimmed.replace('# ', '')}
         </h1>
       );
@@ -177,7 +177,7 @@ export default function SystemHealthPage() {
       <Sidebar />
       <main className="main-content">
         <div style={{ padding: '24px 32px', maxWidth: '1200px', margin: '0 auto' }}>
-          
+
           {toast && (
             <div className={`toast ${toast.type === 'error' ? 'toast-error' : 'toast-success'}`}>
               {toast.msg}
@@ -192,32 +192,32 @@ export default function SystemHealthPage() {
                 🩺 System Health & Troubleshooting
               </h1>
             </div>
-            
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 8, 
-              background: 'rgba(16, 185, 129, 0.1)', 
-              border: '1px solid rgba(16, 185, 129, 0.25)', 
-              padding: '8px 16px', 
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              background: 'var(--status-success-soft)',
+              border: '1px solid var(--status-success-soft)',
+              padding: '8px 16px',
               borderRadius: '24px',
               fontSize: '0.82rem',
               fontWeight: 600,
-              color: '#10b981'
+              color: 'var(--status-success)'
             }}>
-              <span className="pulse-dot" style={{ width: 8, height: 8, background: '#10b981', borderRadius: '50%', display: 'inline-block', boxShadow: '0 0 8px #10b981' }}></span>
+              <span className="pulse-dot" style={{ width: 8, height: 8, background: 'var(--status-success)', borderRadius: '50%', display: 'inline-block', boxShadow: '0 0 8px var(--status-success)' }}></span>
               Core Scheduler: ACTIVE
             </div>
           </div>
 
           {/* METRICS PANEL */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, marginBottom: 24 }}>
-            
+
             {/* Google Drive Status */}
             <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: 20 }}>
               <div>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Google OAuth Token</span>
-                <h3 style={{ margin: '8px 0', fontSize: '1.4rem', fontWeight: 700, color: google.connected ? '#10b981' : '#ef4444' }}>
+                <h3 style={{ margin: '8px 0', fontSize: '1.4rem', fontWeight: 700, color: google.connected ? 'var(--status-success)' : 'var(--status-danger)' }}>
                   {google.connected ? 'Connected' : google.credentialsSet ? 'Session Expired' : 'Not Configured'}
                 </h3>
                 <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: 0 }}>
@@ -235,7 +235,7 @@ export default function SystemHealthPage() {
             <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: 20 }}>
               <div>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Gemini Key Pool</span>
-                <h3 style={{ margin: '8px 0', fontSize: '1.4rem', fontWeight: 700, color: gemini.active > 0 ? '#10b981' : '#ef4444' }}>
+                <h3 style={{ margin: '8px 0', fontSize: '1.4rem', fontWeight: 700, color: gemini.active > 0 ? 'var(--status-success)' : 'var(--status-danger)' }}>
                   {gemini.active} / {gemini.total} Active
                 </h3>
                 <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: 0 }}>
@@ -259,7 +259,7 @@ export default function SystemHealthPage() {
                 <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 8 }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Pending: <strong>{queue.stats.pending || 0}</strong></span>
                   <span style={{ fontSize: '0.75rem', color: 'var(--accent-light)' }}>Running: <strong>{queue.stats.processing || 0}</strong></span>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Failed: <strong style={{ color: '#ef4444' }}>{queue.stats.failed || 0}</strong></span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Failed: <strong style={{ color: 'var(--status-danger)' }}>{queue.stats.failed || 0}</strong></span>
                 </div>
               </div>
             </div>
@@ -268,12 +268,12 @@ export default function SystemHealthPage() {
 
           {/* TAB BUTTONS */}
           <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
-            <button 
+            <button
               onClick={() => setActiveTab('status')}
               className="btn"
               style={{
-                background: activeTab === 'status' ? 'var(--accent)' : 'rgba(255,255,255,0.02)',
-                color: activeTab === 'status' ? '#fff' : 'var(--text-secondary)',
+                background: activeTab === 'status' ? 'var(--accent)' : 'var(--surface-interactive)',
+                color: activeTab === 'status' ? 'var(--text-primary)' : 'var(--text-secondary)',
                 border: activeTab === 'status' ? '1px solid var(--accent)' : '1px solid var(--border)',
                 padding: '8px 16px',
                 fontSize: '0.82rem',
@@ -283,12 +283,12 @@ export default function SystemHealthPage() {
             >
               🩺 Status & Insiden Sistem
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('changelog')}
               className="btn"
               style={{
-                background: activeTab === 'changelog' ? 'var(--accent)' : 'rgba(255,255,255,0.02)',
-                color: activeTab === 'changelog' ? '#fff' : 'var(--text-secondary)',
+                background: activeTab === 'changelog' ? 'var(--accent)' : 'var(--surface-interactive)',
+                color: activeTab === 'changelog' ? 'var(--text-primary)' : 'var(--text-secondary)',
                 border: activeTab === 'changelog' ? '1px solid var(--accent)' : '1px solid var(--border)',
                 padding: '8px 16px',
                 fontSize: '0.82rem',
@@ -310,7 +310,7 @@ export default function SystemHealthPage() {
                     Menampilkan kegagalan asinkron pada modul MAKNA Engine yang membutuhkan troubleshooting operator.
                   </p>
                 </div>
-                <button 
+                <button
                   className="btn btn-secondary"
                   onClick={handleClearAllResolved}
                   disabled={clearing}
@@ -321,15 +321,15 @@ export default function SystemHealthPage() {
               </div>
 
               {logs.length === 0 ? (
-                <div style={{ 
-                  padding: '40px 0', 
-                  textAlign: 'center', 
-                  background: 'rgba(255, 255, 255, 0.01)', 
-                  border: '1px dashed var(--border)', 
-                  borderRadius: 8 
+                <div style={{
+                  padding: '40px 0',
+                  textAlign: 'center',
+                  background: 'var(--surface-interactive)',
+                  border: '1px dashed var(--border)',
+                  borderRadius: 8
                 }}>
                   <span style={{ fontSize: '2rem' }}>🎉</span>
-                  <h4 style={{ margin: '12px 0 4px 0', fontSize: '0.95rem', fontWeight: 600, color: '#10b981' }}>Sistem Sangat Sehat</h4>
+                  <h4 style={{ margin: '12px 0 4px 0', fontSize: '0.95rem', fontWeight: 600, color: 'var(--status-success)' }}>Sistem Sangat Sehat</h4>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', margin: 0 }}>Tidak ada insiden kegagalan yang tercatat atau belum diselesaikan.</p>
                 </div>
               ) : (
@@ -348,15 +348,15 @@ export default function SystemHealthPage() {
                     <tbody>
                       {logs.map((log) => {
                         const isCritical = log.severity_level === 'CRITICAL';
-                        const badgeBg = isCritical ? 'rgba(239, 68, 68, 0.15)' : 'rgba(243, 156, 18, 0.15)';
+                        const badgeBg = isCritical ? 'var(--status-danger-soft)' : 'rgba(243, 156, 18, 0.15)';
                         const badgeBorder = isCritical ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid rgba(243, 156, 18, 0.4)';
-                        const badgeColor = isCritical ? '#ef4444' : '#f39c12';
+                        const badgeColor = isCritical ? 'var(--status-danger)' : 'var(--status-warning)';
 
                         return (
-                          <tr 
-                            key={log.id} 
-                            style={{ 
-                              borderBottom: '1px solid var(--border)', 
+                          <tr
+                            key={log.id}
+                            style={{
+                              borderBottom: '1px solid var(--border)',
                               background: isCritical ? 'rgba(239, 68, 68, 0.01)' : 'transparent',
                               verticalAlign: 'top'
                             }}
@@ -396,14 +396,14 @@ export default function SystemHealthPage() {
 
                             {/* Error Message */}
                             <td style={{ padding: '16px 8px', maxWidth: '320px' }}>
-                              <div style={{ 
-                                background: 'rgba(0,0,0,0.15)', 
-                                border: '1px solid var(--border)', 
-                                padding: 8, 
-                                borderRadius: 6, 
-                                fontSize: '0.78rem', 
+                              <div style={{
+                                background: 'var(--overlay-subtle)',
+                                border: '1px solid var(--border)',
+                                padding: 8,
+                                borderRadius: 6,
+                                fontSize: '0.78rem',
                                 fontFamily: 'monospace',
-                                color: '#fff',
+                                color: 'var(--text-primary)',
                                 maxHeight: '120px',
                                 overflowY: 'auto',
                                 wordBreak: 'break-all',
@@ -415,7 +415,7 @@ export default function SystemHealthPage() {
 
                             {/* Human Hint */}
                             <td style={{ padding: '16px 8px', color: 'var(--text-primary)', lineHeight: 1.45, maxWidth: '300px' }}>
-                              <strong style={{ color: isCritical ? '#fff' : 'var(--text-primary)' }}>
+                              <strong style={{ color: isCritical ? 'var(--text-primary)' : 'var(--text-primary)' }}>
                                 {log.human_resolution_hint}
                               </strong>
                             </td>
@@ -426,12 +426,12 @@ export default function SystemHealthPage() {
                                 className="btn btn-secondary"
                                 onClick={() => handleResolve(log.id)}
                                 disabled={resolvingId === log.id}
-                                style={{ 
-                                  padding: '4px 10px', 
-                                  fontSize: '0.75rem', 
-                                  background: 'rgba(16, 185, 129, 0.1)', 
-                                  border: '1px solid rgba(16, 185, 129, 0.3)',
-                                  color: '#10b981',
+                                style={{
+                                  padding: '4px 10px',
+                                  fontSize: '0.75rem',
+                                  background: 'var(--status-success-soft)',
+                                  border: '1px solid var(--status-success-soft)',
+                                  color: 'var(--status-success)',
                                   cursor: 'pointer'
                                 }}
                               >
@@ -452,24 +452,24 @@ export default function SystemHealthPage() {
           {/* TAB CONTENT: VERSION & CHANGELOG */}
           {activeTab === 'changelog' && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: 24 }}>
-              
+
               {/* Milestone Changelog */}
               <div className="card" style={{ padding: 24 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                   <h2 style={{ fontSize: '1.15rem', fontWeight: 600, margin: 0 }}>📋 Riwayat Milestone Fitur</h2>
-                  <span style={{ 
-                    background: 'rgba(108, 92, 231, 0.15)', 
-                    border: '1px solid var(--accent)', 
-                    color: 'var(--accent-light)', 
-                    padding: '4px 10px', 
-                    borderRadius: 12, 
-                    fontSize: '0.78rem', 
-                    fontWeight: 700 
+                  <span style={{
+                    background: 'var(--status-neutral-soft)',
+                    border: '1px solid var(--accent)',
+                    color: 'var(--accent-light)',
+                    padding: '4px 10px',
+                    borderRadius: 12,
+                    fontSize: '0.78rem',
+                    fontWeight: 700
                   }}>
                     Versi: v{version}
                   </span>
                 </div>
-                
+
                 {loadingChangelog ? (
                   <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Memuat log perubahan...</div>
                 ) : (
@@ -482,16 +482,16 @@ export default function SystemHealthPage() {
               {/* Git Commit Timeline */}
               <div className="card" style={{ padding: 24 }}>
                 <h2 style={{ fontSize: '1.15rem', fontWeight: 600, margin: 0, marginBottom: 20 }}>🌿 Lini Masa Commit Git (Kode Terkini)</h2>
-                
+
                 {loadingChangelog ? (
                   <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Memuat riwayat Git...</div>
                 ) : commits.length === 0 ? (
                   <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Tidak ada riwayat Git ditemukan.</div>
                 ) : (
-                  <div style={{ 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    gap: 16, 
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 16,
                     position: 'relative',
                     maxHeight: '550px',
                     overflowY: 'auto',
@@ -499,40 +499,40 @@ export default function SystemHealthPage() {
                     paddingRight: '8px'
                   }}>
                     {/* Vertical line */}
-                    <div style={{ 
-                      position: 'absolute', 
-                      left: '15px', 
-                      top: '12px', 
-                      bottom: '12px', 
-                      width: '2px', 
-                      background: 'var(--border)' 
+                    <div style={{
+                      position: 'absolute',
+                      left: '15px',
+                      top: '12px',
+                      bottom: '12px',
+                      width: '2px',
+                      background: 'var(--border)'
                     }}></div>
-                    
+
                     {commits.map((commit, idx) => (
                       <div key={idx} style={{ display: 'flex', gap: 16, position: 'relative', zIndex: 1 }}>
-                        
+
                         {/* Dot */}
-                        <div style={{ 
-                          width: '24px', 
-                          height: '24px', 
-                          borderRadius: '50%', 
-                          background: idx === 0 ? 'var(--accent)' : 'var(--bg-secondary)', 
-                          border: idx === 0 ? '4px solid rgba(108, 92, 231, 0.3)' : '2px solid var(--border)',
+                        <div style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: idx === 0 ? 'var(--accent)' : 'var(--bg-secondary)',
+                          border: idx === 0 ? '4px solid var(--status-neutral-soft)' : '2px solid var(--border)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           flexShrink: 0
                         }}>
-                          {idx === 0 && <span style={{ width: 6, height: 6, background: '#fff', borderRadius: '50%' }}></span>}
+                          {idx === 0 && <span style={{ width: 6, height: 6, background: 'var(--text-primary)', borderRadius: '50%' }}></span>}
                         </div>
-                        
+
                         {/* Commit text */}
                         <div style={{ flexGrow: 1 }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4, flexWrap: 'wrap', gap: 4 }}>
-                            <span style={{ 
-                              fontWeight: 600, 
-                              fontSize: '0.82rem', 
-                              color: idx === 0 ? 'var(--text-primary)' : 'var(--text-secondary)' 
+                            <span style={{
+                              fontWeight: 600,
+                              fontSize: '0.82rem',
+                              color: idx === 0 ? 'var(--text-primary)' : 'var(--text-secondary)'
                             }}>
                               {commit.message}
                             </span>
@@ -573,7 +573,7 @@ export default function SystemHealthPage() {
           to {
             transform: scale(1.1);
             opacity: 1;
-            box-shadow: 0 0 12px #10b981;
+            box-shadow: 0 0 12px var(--status-success);
           }
         }
       `}</style>

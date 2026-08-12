@@ -202,8 +202,8 @@ export default function BrandProfilesPage() {
             {/* Input Mode Toggle */}
             {!editingId && (
               <div style={{ display: 'flex', gap: '4px', marginBottom: '20px', background: 'var(--bg-glass)', padding: '4px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-                <button type="button" onClick={() => setInputMode('manual')} style={{ flex: 1, padding: '8px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-sans)', background: inputMode === 'manual' ? 'var(--accent)' : 'none', color: inputMode === 'manual' ? '#fff' : 'var(--text-secondary)' }}>📝 Input Manual</button>
-                <button type="button" onClick={() => setInputMode('upload')} style={{ flex: 1, padding: '8px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-sans)', background: inputMode === 'upload' ? 'var(--accent)' : 'none', color: inputMode === 'upload' ? '#fff' : 'var(--text-secondary)' }}>📄 Upload Guideline</button>
+                <button type="button" onClick={() => setInputMode('manual')} style={{ flex: 1, padding: '8px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-sans)', background: inputMode === 'manual' ? 'var(--accent)' : 'none', color: inputMode === 'manual' ? 'var(--text-primary)' : 'var(--text-secondary)' }}>📝 Input Manual</button>
+                <button type="button" onClick={() => setInputMode('upload')} style={{ flex: 1, padding: '8px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-sans)', background: inputMode === 'upload' ? 'var(--accent)' : 'none', color: inputMode === 'upload' ? 'var(--text-primary)' : 'var(--text-secondary)' }}>📄 Upload Guideline</button>
               </div>
             )}
 
@@ -290,9 +290,9 @@ export default function BrandProfilesPage() {
                 {/* AI WEBHOOK & STORAGE DESTINATIONS SECTION */}
                 <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px', marginTop: '8px' }}>
                   <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--accent-light)', marginBottom: '16px' }}>🌐 AI Webhook & Storage Destinations</h3>
-                  
+
                   {/* AI Webhook Config */}
-                  <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border)', marginBottom: '16px' }}>
+                  <div style={{ background: 'var(--surface-interactive)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border)', marginBottom: '16px' }}>
                     <h4 style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '12px' }}>AI Webhook Config (G-Labs GPU Override)</h4>
                     <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 2fr', gap: '12px' }}>
                       <div className="form-group">
@@ -311,9 +311,9 @@ export default function BrandProfilesPage() {
                   </div>
 
                   {/* Storage Destination Config */}
-                  <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                  <div style={{ background: 'var(--surface-interactive)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border)' }}>
                     <h4 style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '12px' }}>Cloud Storage Destination Override</h4>
-                    
+
                     <div className="form-group" style={{ marginBottom: '12px' }}>
                       <label className="form-label" style={{ fontSize: '0.75rem' }}>Storage Provider</label>
                       <select className="form-select" name="storage_provider" value={formData.storage_provider} onChange={handleChange} style={{ padding: '8px' }}>
@@ -386,7 +386,7 @@ export default function BrandProfilesPage() {
                   <tr key={p.id}>
                     <td style={{ fontWeight: 600 }}>{p.brand_name}</td>
                     <td>
-                      <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '4px', background: 'rgba(108,92,231,0.12)', color: 'var(--accent-light)' }}>
+                      <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '4px', background: 'var(--status-neutral-soft)', color: 'var(--accent-light)' }}>
                         {p.tone_of_voice}
                       </span>
                     </td>

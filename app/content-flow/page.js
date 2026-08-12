@@ -142,22 +142,22 @@ function ContentFlowHubPageContent() {
 
   const getStatusSelectStyle = (statusVal) => {
     if (statusVal === 'Published') {
-      return { background: 'rgba(16, 185, 129, 0.2)', border: '1px solid #10b981', color: '#34d399', fontWeight: 700 };
+      return { background: 'var(--status-success-soft)', border: '1px solid var(--status-success)', color: 'var(--status-success)', fontWeight: 700 };
     }
     if (statusVal === 'Scheduled') {
-      return { background: 'rgba(245, 158, 11, 0.2)', border: '1px solid #fbbf24', color: '#fcd34d', fontWeight: 700 };
+      return { background: 'var(--status-warning-soft)', border: '1px solid var(--status-warning)', color: 'var(--status-warning)', fontWeight: 700 };
     }
     if (statusVal === 'Skipped') {
-      return { background: 'rgba(168, 85, 247, 0.2)', border: '1px solid #a855f7', color: '#e9d5ff', fontWeight: 700 };
+      return { background: 'rgba(168, 85, 247, 0.2)', border: '1px solid var(--status-neutral)', color: '#e9d5ff', fontWeight: 700 };
     }
-    return { background: 'var(--bg-secondary)', border: '1px solid #334155', color: '#a1a1aa' };
+    return { background: 'var(--bg-secondary)', border: '1px solid var(--surface-interactive)', color: 'var(--text-muted)' };
   };
 
   const getDateInputStyle = (dateVal) => {
     if (dateVal && dateVal.trim() !== '') {
-      return { background: 'rgba(59, 130, 246, 0.18)', border: '1px solid #60a5fa', color: '#93c5fd', fontWeight: 700 };
+      return { background: 'rgba(59, 130, 246, 0.18)', border: '1px solid var(--link)', color: '#93c5fd', fontWeight: 700 };
     }
-    return { background: 'var(--bg-secondary)', border: '1px solid #334155', color: '#71717a' };
+    return { background: 'var(--bg-secondary)', border: '1px solid var(--surface-interactive)', color: 'var(--text-muted)' };
   };
 
   useEffect(() => {
@@ -477,11 +477,11 @@ function ContentFlowHubPageContent() {
       const data = await res.json();
       if (data.success) {
         showToast('Data & status publishing berhasil diperbarui! ✨');
-        
+
         // Update local items state secara instan
-        setItems(prevItems => prevItems.map(it => 
-          String(it.id) === String(activeItem.id) 
-            ? { ...it, ...editStatusForm } 
+        setItems(prevItems => prevItems.map(it =>
+          String(it.id) === String(activeItem.id)
+            ? { ...it, ...editStatusForm }
             : it
         ));
 
@@ -594,20 +594,20 @@ function ContentFlowHubPageContent() {
         return (
           <span style={{
             display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 8px', borderRadius: '12px',
-            background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.3)',
+            background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success-soft)',
             fontSize: '11px', fontWeight: 600
           }}>
-            <CheckCircleIcon style={{ width: 12, height: 12, color: '#34d399' }} /> Published
+            <CheckCircleIcon style={{ width: 12, height: 12, color: 'var(--status-success)' }} /> Published
           </span>
         );
       case 'Scheduled':
         return (
           <span style={{
             display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 8px', borderRadius: '12px',
-            background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.3)',
+            background: 'var(--status-warning-soft)', color: 'var(--status-warning)', border: '1px solid var(--status-warning-soft)',
             fontSize: '11px', fontWeight: 600
           }}>
-            <ClockIcon style={{ width: 12, height: 12, color: '#fbbf24' }} /> Scheduled
+            <ClockIcon style={{ width: 12, height: 12, color: 'var(--status-warning)' }} /> Scheduled
           </span>
         );
       default:
@@ -625,12 +625,12 @@ function ContentFlowHubPageContent() {
 
   const getSourceBadge = (sourceType) => {
     const badges = {
-      opc: { label: 'OPC Pillar', bg: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: 'rgba(16, 185, 129, 0.3)' },
-      strategic: { label: 'Strategic (SC)', bg: 'rgba(99, 102, 241, 0.15)', color: '#818cf8', border: 'rgba(99, 102, 241, 0.35)' },
-      re: { label: 'Reverse Eng (RE)', bg: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', border: 'rgba(245, 158, 11, 0.3)' },
+      opc: { label: 'OPC Pillar', bg: 'var(--status-success-soft)', color: 'var(--status-success)', border: 'var(--status-success-soft)' },
+      strategic: { label: 'Strategic (SC)', bg: 'var(--status-neutral-soft)', color: 'var(--status-neutral)', border: 'var(--status-neutral-soft)' },
+      re: { label: 'Reverse Eng (RE)', bg: 'var(--status-warning-soft)', color: 'var(--status-warning)', border: 'var(--status-warning-soft)' },
       instant: { label: 'Instant Factory', bg: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', border: 'rgba(236, 72, 153, 0.3)' },
       recipe: { label: 'Recipe Labs', bg: 'rgba(139, 92, 246, 0.15)', color: '#a78bfa', border: 'rgba(139, 92, 246, 0.3)' },
-      bridge: { label: 'Bridge Injector', bg: 'rgba(6, 182, 212, 0.15)', color: '#38bdf8', border: 'rgba(6, 182, 212, 0.3)' }
+      bridge: { label: 'Bridge Injector', bg: 'rgba(6, 182, 212, 0.15)', color: 'var(--link)', border: 'rgba(6, 182, 212, 0.3)' }
     };
     const b = badges[sourceType] || badges.opc;
     return (
@@ -654,7 +654,7 @@ function ContentFlowHubPageContent() {
     <div className="layout-with-sidebar">
       <Sidebar />
 
-      <main className="main-content" style={{ padding: '28px 32px', background: 'var(--bg-primary)', minHeight: '100vh', color: '#f3f4f6' }}>
+      <main className="main-content" style={{ padding: '28px 32px', background: 'var(--bg-primary)', minHeight: '100vh', color: 'var(--text-primary)' }}>
         {/* Centered Main Container (1050px) setara OPC / RE */}
         <div style={{ maxWidth: '1050px', margin: '0 auto' }}>
           {/* Toast Notification */}
@@ -662,7 +662,7 @@ function ContentFlowHubPageContent() {
             <div style={{
               position: 'fixed', top: '24px', right: '24px', zIndex: 9999,
               padding: '12px 24px', borderRadius: '12px', background: '#2563eb',
-              color: '#fff', fontWeight: 600, fontSize: '14px', boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
+              color: 'var(--text-primary)', fontWeight: 600, fontSize: '14px', boxShadow: '0 10px 25px var(--overlay-subtle)',
               display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid rgba(96, 165, 250, 0.4)'
             }}>
               <CheckCircleIcon style={{ width: 16, height: 16 }} />
@@ -674,7 +674,7 @@ function ContentFlowHubPageContent() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ padding: '10px', borderRadius: '14px', background: 'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)', color: '#fff' }}>
+                <div style={{ padding: '10px', borderRadius: '14px', background: 'linear-gradient(135deg, #2563eb 0%, var(--status-neutral) 100%)', color: 'var(--text-primary)' }}>
                   <LayersIcon style={{ width: 24, height: 24 }} />
                 </div>
                 <div>
@@ -693,8 +693,8 @@ function ContentFlowHubPageContent() {
                 <button
                   onClick={openAdminScheduleModal}
                   style={{
-                    padding: '10px 18px', background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
-                    color: '#fff', border: '1px solid #c084fc', borderRadius: '10px', fontWeight: 700, cursor: 'pointer',
+                    padding: '10px 18px', background: 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)',
+                    color: 'var(--text-primary)', border: '1px solid var(--status-neutral)', borderRadius: '10px', fontWeight: 700, cursor: 'pointer',
                     fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(168, 85, 247, 0.35)'
                   }}
                   title="Atur 5 Produk Aktif & Target Posting (Admin Only)"
@@ -706,9 +706,9 @@ function ContentFlowHubPageContent() {
                 onClick={handleTriggerRetroSync}
                 disabled={syncing}
                 style={{
-                  padding: '10px 18px', background: syncing ? 'var(--bg-secondary)' : 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-                  color: '#fff', border: '1px solid #10b981', borderRadius: '10px', fontWeight: 700, cursor: syncing ? 'not-allowed' : 'pointer',
-                  fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)'
+                  padding: '10px 18px', background: syncing ? 'var(--bg-secondary)' : 'linear-gradient(135deg, var(--status-success) 0%, var(--status-success) 100%)',
+                  color: 'var(--text-primary)', border: '1px solid var(--status-success)', borderRadius: '10px', fontWeight: 700, cursor: syncing ? 'not-allowed' : 'pointer',
+                  fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 14px var(--status-success-soft)'
                 }}
               >
                 <RefreshCwIcon style={{ width: 14, height: 14, animation: syncing ? 'spin 1s linear infinite' : 'none' }} />
@@ -725,8 +725,8 @@ function ContentFlowHubPageContent() {
                 padding: '9px 18px',
                 borderRadius: '10px',
                 background: mainView === 'library' ? '#2563eb' : 'var(--bg-secondary)',
-                border: `1px solid ${mainView === 'library' ? '#60a5fa' : '#27272a'}`,
-                color: '#fff',
+                border: `1px solid ${mainView === 'library' ? 'var(--link)' : 'var(--border-subtle)'}`,
+                color: 'var(--text-primary)',
                 fontSize: '13px',
                 fontWeight: 750,
                 cursor: 'pointer',
@@ -744,9 +744,9 @@ function ContentFlowHubPageContent() {
               style={{
                 padding: '9px 18px',
                 borderRadius: '10px',
-                background: mainView === 'publishing' ? 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)' : 'var(--bg-secondary)',
-                border: `1px solid ${mainView === 'publishing' ? '#c084fc' : '#27272a'}`,
-                color: '#fff',
+                background: mainView === 'publishing' ? 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)' : 'var(--bg-secondary)',
+                border: `1px solid ${mainView === 'publishing' ? 'var(--status-neutral)' : 'var(--border-subtle)'}`,
+                color: 'var(--text-primary)',
                 fontSize: '13px',
                 fontWeight: 750,
                 cursor: 'pointer',
@@ -774,22 +774,22 @@ function ContentFlowHubPageContent() {
               <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600, display: 'block' }}>Total Konten Terindeks</span>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '6px' }}>
                 <span style={{ fontSize: '26px', fontWeight: 800, color: 'var(--text-primary)' }}>{totalItems}</span>
-                <span style={{ fontSize: '11px', color: '#6b7280' }}>Video Items</span>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Video Items</span>
               </div>
             </div>
 
-            <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-              <span style={{ fontSize: '12px', color: '#34d399', fontWeight: 600, display: 'block' }}>Telah Publish</span>
+            <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid var(--status-success-soft)' }}>
+              <span style={{ fontSize: '12px', color: 'var(--status-success)', fontWeight: 600, display: 'block' }}>Telah Publish</span>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '6px' }}>
-                <span style={{ fontSize: '26px', fontWeight: 800, color: '#34d399' }}>{publishedCount}</span>
-                <span style={{ fontSize: '11px', color: '#059669', fontFamily: 'monospace' }}>Completed</span>
+                <span style={{ fontSize: '26px', fontWeight: 800, color: 'var(--status-success)' }}>{publishedCount}</span>
+                <span style={{ fontSize: '11px', color: 'var(--status-success)', fontFamily: 'monospace' }}>Completed</span>
               </div>
             </div>
 
-            <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(245, 158, 11, 0.05)', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
-              <span style={{ fontSize: '12px', color: '#fbbf24', fontWeight: 600, display: 'block' }}>Terjadwal (Scheduled)</span>
+            <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(245, 158, 11, 0.05)', border: '1px solid var(--status-warning-soft)' }}>
+              <span style={{ fontSize: '12px', color: 'var(--status-warning)', fontWeight: 600, display: 'block' }}>Terjadwal (Scheduled)</span>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '6px' }}>
-                <span style={{ fontSize: '26px', fontWeight: 800, color: '#fbbf24' }}>{scheduledCount}</span>
+                <span style={{ fontSize: '26px', fontWeight: 800, color: 'var(--status-warning)' }}>{scheduledCount}</span>
                 <span style={{ fontSize: '11px', color: '#d97706', fontFamily: 'monospace' }}>Queue</span>
               </div>
             </div>
@@ -797,8 +797,8 @@ function ContentFlowHubPageContent() {
             <div style={{ padding: '16px', borderRadius: '16px', background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
               <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600, display: 'block' }}>Produk Aktif</span>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '6px' }}>
-                <span style={{ fontSize: '26px', fontWeight: 800, color: '#60a5fa' }}>{availableProducts.length}</span>
-                <span style={{ fontSize: '11px', color: '#6b7280' }}>Skus</span>
+                <span style={{ fontSize: '26px', fontWeight: 800, color: 'var(--link)' }}>{availableProducts.length}</span>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Skus</span>
               </div>
             </div>
           </div>
@@ -813,13 +813,13 @@ function ContentFlowHubPageContent() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ fontSize: '16px' }}>📊</span>
                   <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
-                    Target Posting Hari Ini — <span style={{ color: '#34d399' }}>@{accountFilter}</span>
+                    Target Posting Hari Ini — <span style={{ color: 'var(--status-success)' }}>@{accountFilter}</span>
                   </span>
                 </div>
                 {(!currentUser || currentUser.role === 'admin') && (
                   <button
                     onClick={openAdminScheduleModal}
-                    style={{ background: 'none', border: 'none', color: '#a855f7', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                    style={{ background: 'none', border: 'none', color: 'var(--status-neutral)', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
                   >
                     ✏️ Edit Skedul (5 Produk)
                   </button>
@@ -842,22 +842,22 @@ function ContentFlowHubPageContent() {
                       .product-schedule-card:hover {
                         transform: translateY(-4px);
                         border-color: rgba(16, 185, 129, 0.5) !important;
-                        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4), 0 0 15px rgba(16, 185, 129, 0.25) !important;
+                        box-shadow: 0 12px 24px var(--overlay-subtle), 0 0 15px var(--status-success-soft) !important;
                       }
                       .product-schedule-card-pending:hover {
                         transform: translateY(-4px);
                         border-color: rgba(245, 158, 11, 0.5) !important;
-                        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4), 0 0 15px rgba(245, 158, 11, 0.25) !important;
+                        box-shadow: 0 12px 24px var(--overlay-subtle), 0 0 15px var(--status-warning-soft) !important;
                       }
                       .custom-schedule-scroll::-webkit-scrollbar {
                         height: 6px;
                       }
                       .custom-schedule-scroll::-webkit-scrollbar-track {
-                        background: rgba(255, 255, 255, 0.02);
+                        background: var(--surface-interactive);
                         border-radius: 10px;
                       }
                       .custom-schedule-scroll::-webkit-scrollbar-thumb {
-                        background: rgba(255, 255, 255, 0.08);
+                        background: var(--border-subtle);
                         border-radius: 10px;
                       }
                       .custom-schedule-scroll::-webkit-scrollbar-thumb:hover {
@@ -876,10 +876,10 @@ function ContentFlowHubPageContent() {
                       const isCompleted = publishedToday >= targetCount;
                       const isActive = productFilter.toLowerCase() === prodName.toLowerCase();
 
-                      const accentColor = isCompleted ? '#10b981' : '#f59e0b';
-                      const glowShadow = isActive 
-                        ? 'rgba(16, 185, 129, 0.55)' 
-                        : (isCompleted ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.2)');
+                      const accentColor = isCompleted ? 'var(--status-success)' : 'var(--status-warning)';
+                      const glowShadow = isActive
+                        ? 'rgba(16, 185, 129, 0.55)'
+                        : (isCompleted ? 'var(--status-success-soft)' : 'var(--status-warning-soft)');
 
                       // Get active product image path
                       const activeField = slot.active_photo || 'cleaned_photo_url';
@@ -901,16 +901,16 @@ function ContentFlowHubPageContent() {
                             flexGrow: 1, flexShrink: 1, minWidth: '144px', maxWidth: '200px',
                             height: '215px', padding: '12px 10px', borderRadius: '16px',
                             background: isActive
-                              ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(15, 23, 42, 0.95) 100%)'
+                              ? 'linear-gradient(135deg, var(--status-success-soft) 0%, rgba(15, 23, 42, 0.95) 100%)'
                               : (isCompleted
                                   ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, rgba(15, 23, 42, 0.9) 100%)'
                                   : 'linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.5) 100%)'),
-                            border: isActive 
-                              ? '2px solid #10b981' 
-                              : `1px solid ${isCompleted ? '#10b981' : 'rgba(255, 255, 255, 0.08)'}`,
+                            border: isActive
+                              ? '2px solid var(--status-success)'
+                              : `1px solid ${isCompleted ? 'var(--status-success)' : 'var(--border-subtle)'}`,
                             boxShadow: isActive
-                              ? '0 8px 32px rgba(16, 185, 129, 0.4), 0 0 20px rgba(16, 185, 129, 0.35)'
-                              : `0 4px 16px rgba(0,0,0,0.2), 0 0 12px ${glowShadow}`,
+                              ? '0 8px 32px var(--status-success-soft), 0 0 20px rgba(16, 185, 129, 0.35)'
+                              : `0 4px 16px var(--overlay-subtle), 0 0 12px ${glowShadow}`,
                             transform: isActive ? 'translateY(-6px)' : 'none',
                             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', cursor: 'pointer'
                           }}
@@ -927,8 +927,8 @@ function ContentFlowHubPageContent() {
                           {/* Large Product Image (Middle - Square 1:1) */}
                           <div style={{
                             width: '90px', height: '90px', position: 'relative', borderRadius: '12px',
-                            overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', margin: '8px 0',
-                            background: 'rgba(255,255,255,0.02)', display: 'flex', justifyContent: 'center', alignItems: 'center'
+                            overflow: 'hidden', border: '1px solid var(--border-subtle)', margin: '8px 0',
+                            background: 'var(--surface-interactive)', display: 'flex', justifyContent: 'center', alignItems: 'center'
                           }}>
                             {prodImageUrl ? (
                               <img
@@ -942,7 +942,7 @@ function ContentFlowHubPageContent() {
                                   const fb = document.createElement('div');
                                   fb.style.width = '100%';
                                   fb.style.height = '100%';
-                                  fb.style.background = 'rgba(255,255,255,0.03)';
+                                  fb.style.background = 'var(--surface-interactive)';
                                   fb.style.display = 'flex';
                                   fb.style.justifyContent = 'center';
                                   fb.style.alignItems = 'center';
@@ -953,7 +953,7 @@ function ContentFlowHubPageContent() {
                               />
                             ) : (
                               <div style={{
-                                width: '100%', height: '100%', background: 'rgba(255,255,255,0.03)',
+                                width: '100%', height: '100%', background: 'var(--surface-interactive)',
                                 display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '24px'
                               }}>
                                 📦
@@ -967,7 +967,7 @@ function ContentFlowHubPageContent() {
                               <span>Progress:</span>
                               <span style={{ fontWeight: 800, color: accentColor }}>{publishedToday}/{targetCount}</span>
                             </div>
-                            <div style={{ width: '100%', height: '4px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '2px', overflow: 'hidden' }}>
+                            <div style={{ width: '100%', height: '4px', background: 'var(--border-subtle)', borderRadius: '2px', overflow: 'hidden' }}>
                               <div style={{ width: `${percent}%`, height: '100%', background: accentColor, borderRadius: '2px', transition: 'width 0.4s ease' }} />
                             </div>
                           </div>
@@ -1010,8 +1010,8 @@ function ContentFlowHubPageContent() {
                   fontSize: '12px',
                   fontWeight: 600,
                   cursor: 'pointer',
-                  border: accountFilter === 'all' ? '1px solid #10b981' : '1px solid var(--border)',
-                  background: accountFilter === 'all' ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-secondary)',
+                  border: accountFilter === 'all' ? '1px solid var(--status-success)' : '1px solid var(--border)',
+                  background: accountFilter === 'all' ? 'var(--status-success-soft)' : 'var(--bg-secondary)',
                   transition: 'all 0.2s ease',
                   display: 'flex',
                   alignItems: 'center',
@@ -1042,9 +1042,9 @@ function ContentFlowHubPageContent() {
                         fontSize: '12px',
                         fontWeight: 600,
                         cursor: 'pointer',
-                        border: isSelected ? '1px solid #10b981' : '1px solid var(--border)',
-                        background: isSelected ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-secondary)',
-                        color: isSelected ? '#34d399' : '#e4e4e7',
+                        border: isSelected ? '1px solid var(--status-success)' : '1px solid var(--border)',
+                        background: isSelected ? 'var(--status-success-soft)' : 'var(--bg-secondary)',
+                        color: isSelected ? 'var(--status-success)' : 'var(--text-primary)',
                         transition: 'all 0.2s ease',
                         whiteSpace: 'nowrap',
                         display: 'flex',
@@ -1071,9 +1071,9 @@ function ContentFlowHubPageContent() {
                     fontSize: '12px',
                     fontWeight: 600,
                     cursor: 'pointer',
-                    border: '1px solid rgba(239, 68, 68, 0.4)',
+                    border: '1px solid var(--status-danger-soft)',
                     background: 'rgba(239, 68, 68, 0.12)',
-                    color: '#f87171',
+                    color: 'var(--status-danger)',
                     marginLeft: 'auto',
                     whiteSpace: 'nowrap',
                     display: 'flex',
@@ -1089,7 +1089,7 @@ function ContentFlowHubPageContent() {
           )}
 
           {/* Multi-level Search & Filter Panel */}
-          <div style={{ padding: '20px', borderRadius: '16px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', marginBottom: '24px', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}>
+          <div style={{ padding: '20px', borderRadius: '16px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', marginBottom: '24px', boxShadow: '0 8px 24px var(--overlay-subtle)' }}>
             {/* Row 1: Universal Search & Metadata Filters (4 Columns) */}
             <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr 1fr', gap: '12px', marginBottom: '14px' }}>
               {/* Universal Search */}
@@ -1102,7 +1102,7 @@ function ContentFlowHubPageContent() {
                   placeholder="Cari ID Video, Hook, Produk, Caption..."
                   style={{
                     width: '100%', padding: '9px 12px 9px 36px', borderRadius: '10px', background: 'var(--bg-secondary)',
-                    border: '1px solid #3f3f46', color: '#fff', fontSize: '12px', outline: 'none'
+                    border: '1px solid var(--border-strong)', color: 'var(--text-primary)', fontSize: '12px', outline: 'none'
                   }}
                 />
               </div>
@@ -1112,7 +1112,7 @@ function ContentFlowHubPageContent() {
                 <select
                   value={sourceFilter}
                   onChange={(e) => setSourceFilter(e.target.value)}
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '10px', background: 'var(--bg-secondary)', border: '1px solid #3f3f46', color: '#e4e4e7', fontSize: '12px', outline: 'none' }}
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)', fontSize: '12px', outline: 'none' }}
                 >
                   <option value="all">Semua Sumber Kampanye (All)</option>
                   <option value="opc">🌱 OPC (Organic Pillar)</option>
@@ -1129,7 +1129,7 @@ function ContentFlowHubPageContent() {
                 <select
                   value={pipelineFilter}
                   onChange={(e) => setPipelineFilter(e.target.value)}
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '10px', background: 'var(--bg-secondary)', border: '1px solid #3f3f46', color: '#e4e4e7', fontSize: '12px', outline: 'none' }}
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)', fontSize: '12px', outline: 'none' }}
                 >
                   <option value="all">Semua Status Produksi (All)</option>
                   <option value="Completed">🎬 Completed (Siap Publish)</option>
@@ -1146,13 +1146,13 @@ function ContentFlowHubPageContent() {
                   placeholder="🔎 Filter SKU Produk..."
                   style={{
                     width: '100%', padding: '5px 9px', borderRadius: '6px', background: 'var(--bg-secondary)',
-                    border: '1px solid #3f3f46', color: '#34d399', fontSize: '11px', outline: 'none'
+                    border: '1px solid var(--border-strong)', color: 'var(--status-success)', fontSize: '11px', outline: 'none'
                   }}
                 />
                 <select
                   value={productFilter}
                   onChange={(e) => setProductFilter(e.target.value)}
-                  style={{ width: '100%', padding: '6px 9px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid #3f3f46', color: '#e4e4e7', fontSize: '11px', outline: 'none' }}
+                  style={{ width: '100%', padding: '6px 9px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)', fontSize: '11px', outline: 'none' }}
                 >
                   <option value="all">Semua Produk ({availableProducts.length})</option>
                   {availableProducts
@@ -1170,7 +1170,7 @@ function ContentFlowHubPageContent() {
                 <select
                   value={tiktokFilter}
                   onChange={(e) => setTiktokFilter(e.target.value)}
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid #3f3f46', color: '#d4d4d8', fontSize: '12px', outline: 'none' }}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--border-strong)', color: '#d4d4d8', fontSize: '12px', outline: 'none' }}
                 >
                   <option value="Semua">🎵 Semua TikTok Status</option>
                   <option value="Not Published">Not Published</option>
@@ -1183,7 +1183,7 @@ function ContentFlowHubPageContent() {
                 <select
                   value={fbFilter}
                   onChange={(e) => setFbFilter(e.target.value)}
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid #3f3f46', color: '#d4d4d8', fontSize: '12px', outline: 'none' }}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--border-strong)', color: '#d4d4d8', fontSize: '12px', outline: 'none' }}
                 >
                   <option value="Semua">📘 Semua Facebook Status</option>
                   <option value="Not Published">Not Published</option>
@@ -1196,7 +1196,7 @@ function ContentFlowHubPageContent() {
                 <select
                   value={igFilter}
                   onChange={(e) => setIgFilter(e.target.value)}
-                  style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid #3f3f46', color: '#d4d4d8', fontSize: '12px', outline: 'none' }}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--border-strong)', color: '#d4d4d8', fontSize: '12px', outline: 'none' }}
                 >
                   <option value="Semua">📷 Semua Instagram Status</option>
                   <option value="Not Published">Not Published</option>
@@ -1211,7 +1211,7 @@ function ContentFlowHubPageContent() {
                   onClick={resetFilters}
                   style={{
                     width: '100%', padding: '8px 12px', borderRadius: '8px',
-                    background: 'var(--bg-secondary)', border: '1px solid #334155', color: 'var(--text-secondary)',
+                    background: 'var(--bg-secondary)', border: '1px solid var(--surface-interactive)', color: 'var(--text-secondary)',
                     fontSize: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex',
                     alignItems: 'center', justifyContent: 'center', gap: '6px', transition: 'all 0.2s ease'
                   }}
@@ -1225,19 +1225,19 @@ function ContentFlowHubPageContent() {
           {/* Content Items 1-Column Feed */}
           {loading ? (
             <div style={{ padding: '64px', textAlign: 'center', color: 'var(--text-muted)' }}>
-              <div style={{ width: 32, height: 32, border: '3px solid #3b82f6', borderTopColor: 'transparent', borderRadius: '50%', margin: '0 auto 12px', animation: 'spin 1s linear infinite' }}></div>
+              <div style={{ width: 32, height: 32, border: '3px solid var(--status-info)', borderTopColor: 'transparent', borderRadius: '50%', margin: '0 auto 12px', animation: 'spin 1s linear infinite' }}></div>
               <p>Memuat item konten dari SQLite Database...</p>
             </div>
           ) : items.length === 0 ? (
             <div style={{ padding: '64px 24px', textAlign: 'center', background: 'var(--bg-secondary)', borderRadius: '16px', border: '1px solid var(--border)' }}>
               <div style={{ fontSize: '48px', marginBottom: '12px' }}>🔍</div>
-              <h3 style={{ fontSize: '18px', color: '#fff', margin: '0 0 8px' }}>Tidak Ada Konten Ditemukan</h3>
+              <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', margin: '0 0 8px' }}>Tidak Ada Konten Ditemukan</h3>
               <p style={{ color: 'var(--text-muted)', fontSize: '13px', maxWidth: '420px', margin: '0 auto 20px' }}>
                 Tidak ada konten yang sesuai dengan filter atau pencarian Anda. Klik tombol Sync untuk menyinkronkan seluruh kampanye.
               </p>
               <button
                 onClick={handleTriggerRetroSync}
-                style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '13px' }}
+                style={{ padding: '8px 16px', background: '#2563eb', color: 'var(--text-primary)', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '13px' }}
               >
                 🔄 Refresh & Sync Database
               </button>
@@ -1256,37 +1256,37 @@ function ContentFlowHubPageContent() {
                     key={item.id}
                     style={{
                       background: 'var(--bg-secondary)',
-                      border: isAll3Published ? '1px solid #10b981' : '1px solid var(--border)',
+                      border: isAll3Published ? '1px solid var(--status-success)' : '1px solid var(--border)',
                       borderRadius: '16px',
                       padding: isAll3Published ? '22px 20px 16px' : '16px 20px',
                       display: 'grid',
                       gridTemplateColumns: '200px 1fr 240px',
                       gap: '20px',
                       alignItems: 'center',
-                      boxShadow: isAll3Published ? '0 0 20px rgba(16, 185, 129, 0.25)' : '0 4px 16px rgba(0,0,0,0.3)',
+                      boxShadow: isAll3Published ? '0 0 20px var(--status-success-soft)' : '0 4px 16px var(--overlay-subtle)',
                       transition: 'all 0.2s ease',
                       position: 'relative'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.borderColor = isAll3Published ? '#10b981' : 'rgba(59, 130, 246, 0.45)'}
-                    onMouseLeave={(e) => e.currentTarget.style.borderColor = isAll3Published ? '#10b981' : 'var(--bg-secondary)'}
+                    onMouseEnter={(e) => e.currentTarget.style.borderColor = isAll3Published ? 'var(--status-success)' : 'rgba(59, 130, 246, 0.45)'}
+                    onMouseLeave={(e) => e.currentTarget.style.borderColor = isAll3Published ? 'var(--status-success)' : 'var(--bg-secondary)'}
                   >
                     {/* Top Status Badge Banner */}
                     {isAll3Published ? (
                       <div style={{
                         position: 'absolute', top: '-11px', left: '24px',
-                        background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+                        background: 'linear-gradient(135deg, var(--status-success) 0%, var(--status-success) 100%)',
                         color: 'var(--text-primary)', fontSize: '10px', fontWeight: 800,
                         padding: '2px 12px', borderRadius: '12px',
-                        boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)',
-                        letterSpacing: '0.04em', border: '1px solid #34d399'
+                        boxShadow: '0 4px 12px var(--status-success-soft)',
+                        letterSpacing: '0.04em', border: '1px solid var(--status-success)'
                       }}>
                         🎉 3/3 PUBLISHED (ALL PLATFORMS)
                       </div>
                     ) : publishedPlatformCount > 0 ? (
                       <div style={{
                         position: 'absolute', top: '-11px', left: '24px',
-                        background: 'rgba(245, 158, 11, 0.15)',
-                        border: '1px solid #f59e0b', color: '#fbbf24', fontSize: '10px', fontWeight: 800,
+                        background: 'var(--status-warning-soft)',
+                        border: '1px solid var(--status-warning)', color: 'var(--status-warning)', fontSize: '10px', fontWeight: 800,
                         padding: '2px 10px', borderRadius: '12px', letterSpacing: '0.04em'
                       }}>
                         ⏳ {publishedPlatformCount}/3 TERPUBLIKASI
@@ -1297,22 +1297,22 @@ function ContentFlowHubPageContent() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div style={{
                         position: 'relative', width: '100%', height: '110px', borderRadius: '12px',
-                        background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', border: '1px solid #334155',
+                        background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', border: '1px solid var(--surface-interactive)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden'
                       }}>
-                        <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa' }}>
+                        <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'var(--status-info-soft)', border: '1px solid var(--status-info-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--link)' }}>
                           <FilmIcon style={{ width: 20, height: 20 }} />
                         </div>
 
                         <div style={{ position: 'absolute', top: '8px', left: '8px', zIndex: 2 }}>
-                          <span style={{ padding: '3px 8px', borderRadius: '6px', background: 'rgba(15, 23, 42, 0.9)', border: '1px solid #3b82f6', color: '#60a5fa', fontSize: '10px', fontWeight: 700, fontFamily: 'monospace' }}>
+                          <span style={{ padding: '3px 8px', borderRadius: '6px', background: 'rgba(15, 23, 42, 0.9)', border: '1px solid var(--status-info)', color: 'var(--link)', fontSize: '10px', fontWeight: 700, fontFamily: 'monospace' }}>
                             {item.video_id}
                           </span>
                         </div>
 
                         {item.production_date && (
                           <div style={{ position: 'absolute', bottom: '8px', right: '8px', zIndex: 2 }}>
-                            <span style={{ padding: '3px 6px', borderRadius: '4px', background: 'rgba(15, 23, 42, 0.95)', border: '1px solid #334155', color: 'var(--text-muted)', fontSize: '8px', fontWeight: 700 }}>
+                            <span style={{ padding: '3px 6px', borderRadius: '4px', background: 'rgba(15, 23, 42, 0.95)', border: '1px solid var(--surface-interactive)', color: 'var(--text-muted)', fontSize: '8px', fontWeight: 700 }}>
                               📅 Selesai: {formatDate(item.production_date)}
                             </span>
                           </div>
@@ -1331,7 +1331,7 @@ function ContentFlowHubPageContent() {
 
                           if (!targetUrl) {
                             return (
-                              <span style={{ display: 'block', width: '100%', textAlign: 'center', padding: '6px 10px', borderRadius: '8px', background: 'rgba(30, 41, 59, 0.5)', color: '#64748b', fontSize: '11px', fontWeight: 600 }}>
+                              <span style={{ display: 'block', width: '100%', textAlign: 'center', padding: '6px 10px', borderRadius: '8px', background: 'rgba(30, 41, 59, 0.5)', color: 'var(--text-muted)', fontSize: '11px', fontWeight: 600 }}>
                                 ⏳ Asset Belum Tersedia
                               </span>
                             );
@@ -1342,7 +1342,7 @@ function ContentFlowHubPageContent() {
                             const isCardLoading = loadingUrls[item.id];
                             return (
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                <a href={targetUrl} target="_blank" rel="noreferrer" style={{ display: 'block', width: '100%', textAlign: 'center', padding: '6px 10px', borderRadius: '8px', background: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)', color: 'var(--text-primary)', fontSize: '11px', fontWeight: 700, textDecoration: 'none', boxShadow: '0 2px 8px rgba(56, 189, 248, 0.25)' }} title="Buka Link Nextcloud">
+                                <a href={targetUrl} target="_blank" rel="noreferrer" style={{ display: 'block', width: '100%', textAlign: 'center', padding: '6px 10px', borderRadius: '8px', background: 'linear-gradient(135deg, var(--status-info) 0%, var(--link) 100%)', color: 'var(--text-primary)', fontSize: '11px', fontWeight: 700, textDecoration: 'none', boxShadow: '0 2px 8px rgba(56, 189, 248, 0.25)' }} title="Buka Link Nextcloud">
                                   ☁️ Nextcloud
                                 </a>
                                 <button
@@ -1360,9 +1360,9 @@ function ContentFlowHubPageContent() {
                                     borderRadius: '8px',
                                     background: (isCardCooldown || isCardLoading)
                                       ? 'rgba(74, 85, 104, 0.5)'
-                                      : 'linear-gradient(135deg, #a855f7 0%, #c084fc 100%)',
-                                    border: (isCardCooldown || isCardLoading) ? '1px solid #4a5568' : '1px solid #c084fc',
-                                    color: (isCardCooldown || isCardLoading) ? '#a0aec0' : '#ffffff',
+                                      : 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)',
+                                    border: (isCardCooldown || isCardLoading) ? '1px solid #4a5568' : '1px solid var(--status-neutral)',
+                                    color: (isCardCooldown || isCardLoading) ? 'var(--text-muted)' : 'var(--text-primary)',
                                     fontSize: '11px',
                                     fontWeight: 700,
                                     cursor: (isCardCooldown || isCardLoading) ? 'not-allowed' : 'pointer',
@@ -1377,7 +1377,7 @@ function ContentFlowHubPageContent() {
                           }
 
                           return (
-                            <a href={targetUrl} target="_blank" rel="noreferrer" style={{ display: 'block', width: '100%', textAlign: 'center', padding: '6px 10px', borderRadius: '8px', background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)', color: 'var(--text-primary)', fontSize: '11px', fontWeight: 700, textDecoration: 'none', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.25)' }} title="Buka Link Google Drive">
+                            <a href={targetUrl} target="_blank" rel="noreferrer" style={{ display: 'block', width: '100%', textAlign: 'center', padding: '6px 10px', borderRadius: '8px', background: 'linear-gradient(135deg, var(--status-success) 0%, var(--status-success) 100%)', color: 'var(--text-primary)', fontSize: '11px', fontWeight: 700, textDecoration: 'none', boxShadow: '0 2px 8px var(--status-success-soft)' }} title="Buka Link Google Drive">
                               📁 Google Drive
                             </a>
                           );
@@ -1389,16 +1389,16 @@ function ContentFlowHubPageContent() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: 0 }}>
                       {/* 1. Nama Produk SKU */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '12px', fontWeight: 800, color: '#34d399', background: 'rgba(16, 185, 129, 0.12)', padding: '3px 10px', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--status-success)', background: 'rgba(16, 185, 129, 0.12)', padding: '3px 10px', borderRadius: '8px', border: '1px solid var(--status-success-soft)' }}>
                           📦 {item.nama_produk || 'Umum'}
                         </span>
                         {item.link_produk && (
-                          <a href={item.link_produk} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: '#38bdf8', background: 'rgba(2, 132, 199, 0.15)', padding: '2px 8px', borderRadius: '6px', border: '1px solid #0284c7', textDecoration: 'none', fontWeight: 600 }}>
+                          <a href={item.link_produk} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: 'var(--link)', background: 'rgba(2, 132, 199, 0.15)', padding: '2px 8px', borderRadius: '6px', border: '1px solid var(--status-info)', textDecoration: 'none', fontWeight: 600 }}>
                             🔗 Link Produk
                           </a>
                         )}
                         {item.link_affiliate && (
-                          <button type="button" onClick={(e) => { e.stopPropagation(); copyToClipboard(item.link_affiliate, 'Link Affiliate', `card_affiliate_${item.id}`); }} style={{ fontSize: '11px', color: '#c084fc', background: 'rgba(168, 85, 247, 0.15)', padding: '2px 8px', borderRadius: '6px', border: '1px solid #a855f7', cursor: 'pointer', fontWeight: 600 }}>
+                          <button type="button" onClick={(e) => { e.stopPropagation(); copyToClipboard(item.link_affiliate, 'Link Affiliate', `card_affiliate_${item.id}`); }} style={{ fontSize: '11px', color: 'var(--status-neutral)', background: 'rgba(168, 85, 247, 0.15)', padding: '2px 8px', borderRadius: '6px', border: '1px solid var(--status-neutral)', cursor: 'pointer', fontWeight: 600 }}>
                             {copiedKeys[`card_affiliate_${item.id}`] ? '✓ Copied!' : '🛒 Affiliate Link'}
                           </button>
                         )}
@@ -1415,8 +1415,8 @@ function ContentFlowHubPageContent() {
                             style={{
                               position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
                               padding: '3px 8px', borderRadius: '6px',
-                              background: copiedKeys[`card_caption_${item.id}`] ? 'linear-gradient(135deg, #059669 0%, #10b981 100%)' : 'var(--bg-secondary)',
-                              border: `1px solid ${copiedKeys[`card_caption_${item.id}`] ? '#10b981' : '#334155'}`,
+                              background: copiedKeys[`card_caption_${item.id}`] ? 'linear-gradient(135deg, var(--status-success) 0%, var(--status-success) 100%)' : 'var(--bg-secondary)',
+                              border: `1px solid ${copiedKeys[`card_caption_${item.id}`] ? 'var(--status-success)' : 'var(--surface-interactive)'}`,
                               color: 'var(--text-primary)', fontSize: '10px', cursor: 'pointer', fontWeight: 600
                             }}
                           >
@@ -1430,9 +1430,9 @@ function ContentFlowHubPageContent() {
                         {/* TikTok Chip */}
                         <div style={{
                           padding: '3px 9px', borderRadius: '6px', fontSize: '11px', fontWeight: 700,
-                          background: isTkPub ? 'rgba(16, 185, 129, 0.15)' : 'rgba(15, 23, 42, 0.8)',
-                          border: isTkPub ? '1px solid #10b981' : '1px solid #334155',
-                          color: isTkPub ? '#34d399' : '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px'
+                          background: isTkPub ? 'var(--status-success-soft)' : 'rgba(15, 23, 42, 0.8)',
+                          border: isTkPub ? '1px solid var(--status-success)' : '1px solid var(--surface-interactive)',
+                          color: isTkPub ? 'var(--status-success)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px'
                         }}>
                           <span>🎵 TikTok</span>
                           <span>{item.tiktok_status === 'Published' ? `✓ Published (${formatDate(item.tiktok_publish_date)})` : item.tiktok_status === 'Skipped' ? '⏭️ Skipped' : item.tiktok_status}</span>
@@ -1441,9 +1441,9 @@ function ContentFlowHubPageContent() {
                         {/* FB Chip */}
                         <div style={{
                           padding: '3px 9px', borderRadius: '6px', fontSize: '11px', fontWeight: 700,
-                          background: isFbPub ? 'rgba(59, 130, 246, 0.15)' : 'rgba(15, 23, 42, 0.8)',
-                          border: isFbPub ? '1px solid #3b82f6' : '1px solid #334155',
-                          color: isFbPub ? '#60a5fa' : '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px'
+                          background: isFbPub ? 'var(--status-info-soft)' : 'rgba(15, 23, 42, 0.8)',
+                          border: isFbPub ? '1px solid var(--status-info)' : '1px solid var(--surface-interactive)',
+                          color: isFbPub ? 'var(--link)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px'
                         }}>
                           <span>📘 FB</span>
                           <span>{item.facebook_status === 'Published' ? `✓ Published (${formatDate(item.facebook_publish_date)})` : item.facebook_status === 'Skipped' ? '⏭️ Skipped' : item.facebook_status}</span>
@@ -1452,9 +1452,9 @@ function ContentFlowHubPageContent() {
                         {/* IG Chip */}
                         <div style={{
                           padding: '3px 9px', borderRadius: '6px', fontSize: '11px', fontWeight: 700,
-                          background: isIgPub ? 'rgba(239, 68, 68, 0.15)' : 'rgba(15, 23, 42, 0.8)',
-                          border: isIgPub ? '1px solid #ef4444' : '1px solid #334155',
-                          color: isIgPub ? '#f87171' : '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px'
+                          background: isIgPub ? 'var(--status-danger-soft)' : 'rgba(15, 23, 42, 0.8)',
+                          border: isIgPub ? '1px solid var(--status-danger)' : '1px solid var(--surface-interactive)',
+                          color: isIgPub ? 'var(--status-danger)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px'
                         }}>
                           <span>📸 IG</span>
                           <span>{item.instagram_status === 'Published' ? `✓ Published (${formatDate(item.instagram_publish_date)})` : item.instagram_status === 'Skipped' ? '⏭️ Skipped' : item.instagram_status}</span>
@@ -1484,7 +1484,7 @@ function ContentFlowHubPageContent() {
                         onClick={() => openDetailModal(item)}
                         style={{
                           width: '100%', padding: '9px 14px', borderRadius: '10px',
-                          background: 'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)',
+                          background: 'linear-gradient(135deg, #2563eb 0%, var(--status-neutral) 100%)',
                           color: 'var(--text-primary)', fontSize: '12px', fontWeight: 700, border: 'none', cursor: 'pointer',
                           boxShadow: '0 4px 12px rgba(37, 99, 235, 0.35)', transition: 'all 0.2s ease'
                         }}
@@ -1501,7 +1501,7 @@ function ContentFlowHubPageContent() {
           {/* Modal Detail & Update Status */}
           {activeItem && (
             <div style={{
-              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)',
+              position: 'fixed', inset: 0, background: 'var(--overlay-backdrop)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '16px'
             }}>
               <div style={{
@@ -1513,8 +1513,8 @@ function ContentFlowHubPageContent() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid var(--border)', gap: '12px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
                     <span style={{
-                      padding: '5px 12px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid #3b82f6',
-                      color: '#60a5fa', fontFamily: 'monospace', fontSize: '13px', fontWeight: 700, flexShrink: 0
+                      padding: '5px 12px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--status-info)',
+                      color: 'var(--link)', fontFamily: 'monospace', fontSize: '13px', fontWeight: 700, flexShrink: 0
                     }}>
                       {activeItem.video_id}
                     </span>
@@ -1533,8 +1533,8 @@ function ContentFlowHubPageContent() {
                       }}
                       style={{
                         padding: '6px 12px', borderRadius: '8px',
-                        background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
-                        border: '1px solid #c084fc', color: '#fff', fontSize: '11px',
+                        background: 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)',
+                        border: '1px solid var(--status-neutral)', color: 'var(--text-primary)', fontSize: '11px',
                         fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
                       }}
                       title="Jadwalkan publikasi Facebook / Instagram untuk konten ini"
@@ -1546,8 +1546,8 @@ function ContentFlowHubPageContent() {
                         type="button"
                         onClick={() => handleDeleteItem(activeItem.id)}
                         style={{
-                          padding: '5px 10px', borderRadius: '6px', background: 'rgba(239, 68, 68, 0.15)',
-                          border: '1px solid rgba(239, 68, 68, 0.4)', color: '#f87171', fontSize: '11px',
+                          padding: '5px 10px', borderRadius: '6px', background: 'var(--status-danger-soft)',
+                          border: '1px solid var(--status-danger-soft)', color: 'var(--status-danger)', fontSize: '11px',
                           fontWeight: 600, cursor: 'pointer'
                         }}
                         title="Hapus item konten ini (Admin Only)"
@@ -1585,16 +1585,16 @@ function ContentFlowHubPageContent() {
                           style={{
                             padding: '10px 14px', borderRadius: '10px',
                             background: copiedKeys[`modal_caption_${activeItem.id}`]
-                              ? 'linear-gradient(135deg, #059669 0%, #10b981 100%)'
+                              ? 'linear-gradient(135deg, var(--status-success) 0%, var(--status-success) 100%)'
                               : activeItem.caption
-                                ? 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)'
+                                ? 'linear-gradient(135deg, var(--status-neutral) 0%, #6d28d9 100%)'
                                 : 'rgba(30, 41, 59, 0.5)',
                             border: copiedKeys[`modal_caption_${activeItem.id}`]
-                              ? '1px solid #10b981'
+                              ? '1px solid var(--status-success)'
                               : activeItem.caption
-                                ? '1px solid #8b5cf6'
-                                : '1px solid #334155',
-                            color: activeItem.caption ? '#ffffff' : '#64748b', fontWeight: 600, fontSize: '13px',
+                                ? '1px solid var(--status-neutral)'
+                                : '1px solid var(--surface-interactive)',
+                            color: activeItem.caption ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: 600, fontSize: '13px',
                             cursor: activeItem.caption ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
                             boxShadow: activeItem.caption && !copiedKeys[`modal_caption_${activeItem.id}`] ? '0 4px 12px rgba(139, 92, 246, 0.3)' : 'none',
                             transition: 'all 0.2s ease'
@@ -1609,11 +1609,11 @@ function ContentFlowHubPageContent() {
                           disabled={!activeItem.link_affiliate}
                           style={{
                             padding: '10px 14px', borderRadius: '10px',
-                            background: copiedKeys[`modal_affiliate_${activeItem.id}`] ? 'linear-gradient(135deg, #059669 0%, #10b981 100%)' : activeItem.link_affiliate ? 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' : 'rgba(30, 41, 59, 0.5)',
-                            border: copiedKeys[`modal_affiliate_${activeItem.id}`] ? '1px solid #10b981' : activeItem.link_affiliate ? '1px solid #818cf8' : '1px solid #334155',
-                            color: activeItem.link_affiliate ? '#ffffff' : '#64748b', fontWeight: 700, fontSize: '13px',
+                            background: copiedKeys[`modal_affiliate_${activeItem.id}`] ? 'linear-gradient(135deg, var(--status-success) 0%, var(--status-success) 100%)' : activeItem.link_affiliate ? 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)' : 'rgba(30, 41, 59, 0.5)',
+                            border: copiedKeys[`modal_affiliate_${activeItem.id}`] ? '1px solid var(--status-success)' : activeItem.link_affiliate ? '1px solid var(--status-neutral)' : '1px solid var(--surface-interactive)',
+                            color: activeItem.link_affiliate ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: 700, fontSize: '13px',
                             cursor: activeItem.link_affiliate ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                            boxShadow: activeItem.link_affiliate ? '0 4px 14px rgba(99, 102, 241, 0.35)' : 'none',
+                            boxShadow: activeItem.link_affiliate ? '0 4px 14px var(--status-neutral-soft)' : 'none',
                             transition: 'all 0.2s ease'
                           }}
                         >
@@ -1629,7 +1629,7 @@ function ContentFlowHubPageContent() {
 
                         const targetUrl = ncUrl || activeItem.nextcloud_url || gdUrl || activeItem.drive_link || activeItem.url_asset;
                         const isNextcloud = Boolean(ncUrl || (activeItem.nextcloud_url && !gdUrl) || (targetUrl && (targetUrl.includes('100.78.186.123') || targetUrl.includes('index.php/s/'))));
-                        
+
                         const showDownloadButton = isNextcloud && targetUrl;
                         const gridCols = showDownloadButton ? '1fr 1fr 1fr' : '1fr 1fr';
 
@@ -1643,8 +1643,8 @@ function ContentFlowHubPageContent() {
                                 rel="noreferrer"
                                 style={{
                                   padding: '10px 14px', borderRadius: '10px',
-                                  background: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)',
-                                  border: '1px solid #38bdf8', color: 'var(--text-primary)', fontWeight: 700, fontSize: '13px',
+                                  background: 'linear-gradient(135deg, var(--status-info) 0%, var(--link) 100%)',
+                                  border: '1px solid var(--link)', color: 'var(--text-primary)', fontWeight: 700, fontSize: '13px',
                                   textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
                                   boxShadow: '0 4px 14px rgba(56, 189, 248, 0.3)'
                                 }}
@@ -1656,7 +1656,7 @@ function ContentFlowHubPageContent() {
                                 disabled
                                 style={{
                                   padding: '10px 14px', borderRadius: '10px', background: 'rgba(30, 41, 59, 0.5)',
-                                  border: '1px solid #334155', color: '#64748b', fontWeight: 600, fontSize: '13px',
+                                  border: '1px solid var(--surface-interactive)', color: 'var(--text-muted)', fontWeight: 600, fontSize: '13px',
                                   cursor: 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
                                 }}
                               >
@@ -1670,7 +1670,7 @@ function ContentFlowHubPageContent() {
                                 disabled
                                 style={{
                                   padding: '10px 14px', borderRadius: '10px', background: 'rgba(30, 41, 59, 0.5)',
-                                  border: '1px solid #334155', color: '#64748b', fontWeight: 600, fontSize: '13px',
+                                  border: '1px solid var(--surface-interactive)', color: 'var(--text-muted)', fontWeight: 600, fontSize: '13px',
                                   cursor: 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
                                 }}
                               >
@@ -1683,10 +1683,10 @@ function ContentFlowHubPageContent() {
                                 rel="noreferrer"
                                 style={{
                                   padding: '10px 14px', borderRadius: '10px',
-                                  background: isNextcloud ? 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)' : 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-                                  border: isNextcloud ? '1px solid #38bdf8' : '1px solid #10b981', color: 'var(--text-primary)', fontWeight: 700, fontSize: '13px',
+                                  background: isNextcloud ? 'linear-gradient(135deg, var(--status-info) 0%, var(--link) 100%)' : 'linear-gradient(135deg, var(--status-success) 0%, var(--status-success) 100%)',
+                                  border: isNextcloud ? '1px solid var(--link)' : '1px solid var(--status-success)', color: 'var(--text-primary)', fontWeight: 700, fontSize: '13px',
                                   textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                                  boxShadow: isNextcloud ? '0 4px 14px rgba(56, 189, 248, 0.3)' : '0 4px 14px rgba(16, 185, 129, 0.3)'
+                                  boxShadow: isNextcloud ? '0 4px 14px rgba(56, 189, 248, 0.3)' : '0 4px 14px var(--status-success-soft)'
                                 }}
                               >
                                 {isNextcloud ? '☁️ Nextcloud Asset' : '📁 Drive Asset'}
@@ -1703,11 +1703,11 @@ function ContentFlowHubPageContent() {
                                   disabled={loadingDownloadUrl || !directDownloadUrl || isCooldown}
                                   style={{
                                     padding: '10px 14px', borderRadius: '10px',
-                                    background: isCooldown 
-                                      ? 'rgba(74, 85, 104, 0.5)' 
-                                      : 'linear-gradient(135deg, #a855f7 0%, #c084fc 100%)',
-                                    border: isCooldown ? '1px solid #4a5568' : '1px solid #c084fc',
-                                    color: isCooldown ? '#a0aec0' : '#ffffff',
+                                    background: isCooldown
+                                      ? 'rgba(74, 85, 104, 0.5)'
+                                      : 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)',
+                                    border: isCooldown ? '1px solid #4a5568' : '1px solid var(--status-neutral)',
+                                    color: isCooldown ? 'var(--text-muted)' : 'var(--text-primary)',
                                     fontWeight: 700, fontSize: '13px',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
                                     cursor: (loadingDownloadUrl || !directDownloadUrl || isCooldown) ? 'not-allowed' : 'pointer',
@@ -1727,11 +1727,11 @@ function ContentFlowHubPageContent() {
                       {/* Field Catatan Konten */}
                       <div style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: '14px', border: '1px solid var(--border)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                          <span style={{ fontSize: '12px', fontWeight: 800, color: '#60a5fa', letterSpacing: '0.05em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--link)', letterSpacing: '0.05em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
                             📝 CATATAN KONTEN
                           </span>
                           {activeItem.catatan && (
-                            <span style={{ fontSize: '10px', color: '#34d399', fontWeight: 700 }}>✓ Tersimpan</span>
+                            <span style={{ fontSize: '10px', color: 'var(--status-success)', fontWeight: 700 }}>✓ Tersimpan</span>
                           )}
                         </div>
                         <textarea
@@ -1739,8 +1739,8 @@ function ContentFlowHubPageContent() {
                           onChange={(e) => setEditStatusForm({ ...editStatusForm, catatan: e.target.value })}
                           placeholder="Tambahkan catatan khusus untuk item konten ini (misal: Revisi caption, Jadwal tayang, dsb)..."
                           style={{
-                            width: '100%', padding: '10px 12px', background: 'var(--bg-secondary)', border: '1px solid #334155',
-                            borderRadius: '8px', color: '#e2e8f0', fontSize: '12px', outline: 'none', resize: 'vertical', minHeight: '65px',
+                            width: '100%', padding: '10px 12px', background: 'var(--bg-secondary)', border: '1px solid var(--surface-interactive)',
+                            borderRadius: '8px', color: 'var(--text-primary)', fontSize: '12px', outline: 'none', resize: 'vertical', minHeight: '65px',
                             lineHeight: '1.5', fontFamily: 'inherit'
                           }}
                         />
@@ -1752,16 +1752,16 @@ function ContentFlowHubPageContent() {
                           onClick={() => setIsProductSectionOpen(!isProductSectionOpen)}
                           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }}
                         >
-                          <span style={{ fontSize: '13px', fontWeight: 800, color: '#c084fc', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--status-neutral)', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             📦 DATA PRODUK & LINK
                           </span>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ fontSize: '11px', color: '#64748b' }}>
+                            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                               {isProductSectionOpen ? 'Tutup Panel 🔼' : 'Buka Panel 🔽'}
                             </span>
                             <button
                               type="button"
-                              style={{ padding: '2px 8px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid #334155', color: 'var(--text-secondary)', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
+                              style={{ padding: '2px 8px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid var(--surface-interactive)', color: 'var(--text-secondary)', fontSize: '10px', fontWeight: 700, cursor: 'pointer' }}
                             >
                               {isProductSectionOpen ? '▲' : '▼'}
                             </button>
@@ -1782,26 +1782,26 @@ function ContentFlowHubPageContent() {
                                       onChange={(e) => setInlineValue(e.target.value)}
                                       autoFocus
                                       placeholder="Masukkan nama produk..."
-                                      style={{ flex: 1, padding: '6px 10px', background: 'var(--bg-secondary)', border: '1px solid #38bdf8', borderRadius: '6px', color: '#fff', fontSize: '12px', outline: 'none' }}
+                                      style={{ flex: 1, padding: '6px 10px', background: 'var(--bg-secondary)', border: '1px solid var(--link)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '12px', outline: 'none' }}
                                     />
                                     <button
                                       type="button"
                                       onClick={() => handleSaveInlineField('nama_produk')}
                                       disabled={savingStatus}
-                                      style={{ padding: '6px 12px', borderRadius: '6px', background: '#10b981', border: 'none', color: '#fff', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
+                                      style={{ padding: '6px 12px', borderRadius: '6px', background: 'var(--status-success)', border: 'none', color: 'var(--text-primary)', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
                                     >
                                       ✔️ Simpan
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() => setEditingInlineField(null)}
-                                      style={{ padding: '6px 10px', borderRadius: '6px', background: '#334155', border: 'none', color: 'var(--text-secondary)', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
+                                      style={{ padding: '6px 10px', borderRadius: '6px', background: 'var(--surface)', border: 'none', color: 'var(--text-secondary)', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
                                     >
                                       ❌
                                     </button>
                                   </div>
                                 ) : (
-                                  <strong style={{ fontSize: '13px', color: activeItem.nama_produk ? '#ffffff' : '#64748b' }}>
+                                  <strong style={{ fontSize: '13px', color: activeItem.nama_produk ? 'var(--text-primary)' : 'var(--text-muted)' }}>
                                     {activeItem.nama_produk || '(Belum diisi)'}
                                   </strong>
                                 )}
@@ -1812,12 +1812,12 @@ function ContentFlowHubPageContent() {
                                     type="button"
                                     onClick={() => { setEditingInlineField('nama_produk'); setInlineValue(activeItem.nama_produk || ''); }}
                                     title="Edit Nama Produk"
-                                    style={{ padding: '6px 10px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.4)', color: '#38bdf8', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                    style={{ padding: '6px 10px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.4)', color: 'var(--link)', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
                                   >
                                     ✏️ Edit
                                   </button>
                                 ) : (
-                                  <span style={{ fontSize: '11px', color: '#ef4444', fontWeight: 600 }} title="Terkunci (Edit Nama Product Permission)">🔒 Terkunci</span>
+                                  <span style={{ fontSize: '11px', color: 'var(--status-danger)', fontWeight: 600 }} title="Terkunci (Edit Nama Product Permission)">🔒 Terkunci</span>
                                 )
                               )}
                             </div>
@@ -1834,30 +1834,30 @@ function ContentFlowHubPageContent() {
                                       onChange={(e) => setInlineValue(e.target.value)}
                                       autoFocus
                                       placeholder="https://..."
-                                      style={{ flex: 1, padding: '6px 10px', background: 'var(--bg-secondary)', border: '1px solid #38bdf8', borderRadius: '6px', color: '#fff', fontSize: '12px', outline: 'none' }}
+                                      style={{ flex: 1, padding: '6px 10px', background: 'var(--bg-secondary)', border: '1px solid var(--link)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '12px', outline: 'none' }}
                                     />
                                     <button
                                       type="button"
                                       onClick={() => handleSaveInlineField('link_produk')}
                                       disabled={savingStatus}
-                                      style={{ padding: '6px 12px', borderRadius: '6px', background: '#10b981', border: 'none', color: '#fff', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
+                                      style={{ padding: '6px 12px', borderRadius: '6px', background: 'var(--status-success)', border: 'none', color: 'var(--text-primary)', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
                                     >
                                       ✔️ Simpan
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() => setEditingInlineField(null)}
-                                      style={{ padding: '6px 10px', borderRadius: '6px', background: '#334155', border: 'none', color: 'var(--text-secondary)', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
+                                      style={{ padding: '6px 10px', borderRadius: '6px', background: 'var(--surface)', border: 'none', color: 'var(--text-secondary)', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
                                     >
                                       ❌
                                     </button>
                                   </div>
                                 ) : activeItem.link_produk ? (
-                                  <a href={activeItem.link_produk} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#38bdf8', fontWeight: 600, textDecoration: 'none' }}>
+                                  <a href={activeItem.link_produk} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: 'var(--link)', fontWeight: 600, textDecoration: 'none' }}>
                                     🔗 Buka Link Produk ↗
                                   </a>
                                 ) : (
-                                  <span style={{ fontSize: '12px', color: '#64748b' }}>(Belum diisi)</span>
+                                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>(Belum diisi)</span>
                                 )}
                               </div>
                               {editingInlineField !== 'link_produk' && (
@@ -1866,12 +1866,12 @@ function ContentFlowHubPageContent() {
                                     type="button"
                                     onClick={() => { setEditingInlineField('link_produk'); setInlineValue(activeItem.link_produk || ''); }}
                                     title="Edit Link Produk"
-                                    style={{ padding: '6px 10px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.4)', color: '#38bdf8', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                    style={{ padding: '6px 10px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.4)', color: 'var(--link)', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
                                   >
                                     ✏️ Edit
                                   </button>
                                 ) : (
-                                  <span style={{ fontSize: '11px', color: '#ef4444', fontWeight: 600 }} title="Terkunci (Edit Link Product Permission)">🔒 Terkunci</span>
+                                  <span style={{ fontSize: '11px', color: 'var(--status-danger)', fontWeight: 600 }} title="Terkunci (Edit Link Product Permission)">🔒 Terkunci</span>
                                 )
                               )}
                             </div>
@@ -1888,20 +1888,20 @@ function ContentFlowHubPageContent() {
                                       onChange={(e) => setInlineValue(e.target.value)}
                                       autoFocus
                                       placeholder="https://..."
-                                      style={{ flex: 1, padding: '6px 10px', background: 'var(--bg-secondary)', border: '1px solid #38bdf8', borderRadius: '6px', color: '#fff', fontSize: '12px', outline: 'none' }}
+                                      style={{ flex: 1, padding: '6px 10px', background: 'var(--bg-secondary)', border: '1px solid var(--link)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '12px', outline: 'none' }}
                                     />
                                     <button
                                       type="button"
                                       onClick={() => handleSaveInlineField('link_affiliate')}
                                       disabled={savingStatus}
-                                      style={{ padding: '6px 12px', borderRadius: '6px', background: '#10b981', border: 'none', color: '#fff', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
+                                      style={{ padding: '6px 12px', borderRadius: '6px', background: 'var(--status-success)', border: 'none', color: 'var(--text-primary)', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
                                     >
                                       ✔️ Simpan
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() => setEditingInlineField(null)}
-                                      style={{ padding: '6px 10px', borderRadius: '6px', background: '#334155', border: 'none', color: 'var(--text-secondary)', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
+                                      style={{ padding: '6px 10px', borderRadius: '6px', background: 'var(--surface)', border: 'none', color: 'var(--text-secondary)', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
                                     >
                                       ❌
                                     </button>
@@ -1910,12 +1910,12 @@ function ContentFlowHubPageContent() {
                                   <button
                                     type="button"
                                     onClick={() => copyToClipboard(activeItem.link_affiliate, 'Link Affiliate')}
-                                    style={{ padding: '4px 10px', borderRadius: '6px', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.4)', color: '#fbbf24', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
+                                    style={{ padding: '4px 10px', borderRadius: '6px', background: 'var(--status-warning-soft)', border: '1px solid rgba(245, 158, 11, 0.4)', color: 'var(--status-warning)', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
                                   >
                                     🛒 Copy Affiliate Link 📋
                                   </button>
                                 ) : (
-                                  <span style={{ fontSize: '12px', color: '#64748b' }}>(Belum diisi)</span>
+                                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>(Belum diisi)</span>
                                 )}
                               </div>
                               {editingInlineField !== 'link_affiliate' && (
@@ -1924,40 +1924,40 @@ function ContentFlowHubPageContent() {
                                     type="button"
                                     onClick={() => { setEditingInlineField('link_affiliate'); setInlineValue(activeItem.link_affiliate || ''); }}
                                     title="Edit Link Affiliate"
-                                    style={{ padding: '6px 10px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.4)', color: '#38bdf8', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                    style={{ padding: '6px 10px', borderRadius: '8px', background: 'rgba(56, 189, 248, 0.15)', border: '1px solid rgba(56, 189, 248, 0.4)', color: 'var(--link)', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
                                   >
                                     ✏️ Edit
                                   </button>
                                 ) : (
-                                  <span style={{ fontSize: '11px', color: '#ef4444', fontWeight: 600 }} title="Terkunci (Edit Link Affiliate Permission)">🔒 Terkunci</span>
+                                  <span style={{ fontSize: '11px', color: 'var(--status-danger)', fontWeight: 600 }} title="Terkunci (Edit Link Affiliate Permission)">🔒 Terkunci</span>
                                 )
                               )}
                             </div>
 
                             {/* Lineage & Affiliate Source info */}
                             <div style={{ background: 'var(--bg-secondary)', padding: '12px 14px', borderRadius: '10px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '11px', color: 'var(--text-muted)', marginTop: '12px' }}>
-                              <span style={{ fontSize: '11px', color: '#38bdf8', fontWeight: 700, display: 'block' }}>🛡️ Lineage & Affiliate Source Info:</span>
+                              <span style={{ fontSize: '11px', color: 'var(--link)', fontWeight: 700, display: 'block' }}>🛡️ Lineage & Affiliate Source Info:</span>
                               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                                 <div>
-                                  <span style={{ display: 'block', color: '#64748b', fontSize: '10px' }}>Affiliate Source:</span>
-                                  <strong style={{ color: '#e2e8f0', textTransform: 'uppercase' }}>{activeItem.affiliate_source || 'legacy'}</strong>
+                                  <span style={{ display: 'block', color: 'var(--text-muted)', fontSize: '10px' }}>Affiliate Source:</span>
+                                  <strong style={{ color: 'var(--text-primary)', textTransform: 'uppercase' }}>{activeItem.affiliate_source || 'legacy'}</strong>
                                 </div>
                                 <div>
-                                  <span style={{ display: 'block', color: '#64748b', fontSize: '10px' }}>Affiliate Status:</span>
-                                  <strong style={{ color: '#e2e8f0', textTransform: 'uppercase' }}>{activeItem.affiliate_status || 'missing'}</strong>
+                                  <span style={{ display: 'block', color: 'var(--text-muted)', fontSize: '10px' }}>Affiliate Status:</span>
+                                  <strong style={{ color: 'var(--text-primary)', textTransform: 'uppercase' }}>{activeItem.affiliate_status || 'missing'}</strong>
                                 </div>
                                 <div>
-                                  <span style={{ display: 'block', color: '#64748b', fontSize: '10px' }}>Product ID:</span>
-                                  <strong style={{ color: '#e2e8f0' }}>{activeItem.product_id || '-'}</strong>
+                                  <span style={{ display: 'block', color: 'var(--text-muted)', fontSize: '10px' }}>Product ID:</span>
+                                  <strong style={{ color: 'var(--text-primary)' }}>{activeItem.product_id || '-'}</strong>
                                 </div>
                                 <div>
-                                  <span style={{ display: 'block', color: '#64748b', fontSize: '10px' }}>Brand Profile ID:</span>
-                                  <strong style={{ color: '#e2e8f0' }}>{activeItem.brand_profile_id || '-'}</strong>
+                                  <span style={{ display: 'block', color: 'var(--text-muted)', fontSize: '10px' }}>Brand Profile ID:</span>
+                                  <strong style={{ color: 'var(--text-primary)' }}>{activeItem.brand_profile_id || '-'}</strong>
                                 </div>
                                 {activeItem.affiliate_resolved_at && (
                                   <div style={{ gridColumn: 'span 2' }}>
-                                    <span style={{ display: 'block', color: '#64748b', fontSize: '10px' }}>Resolved At:</span>
-                                    <strong style={{ color: '#e2e8f0' }}>{new Date(activeItem.affiliate_resolved_at).toLocaleString('id-ID')}</strong>
+                                    <span style={{ display: 'block', color: 'var(--text-muted)', fontSize: '10px' }}>Resolved At:</span>
+                                    <strong style={{ color: 'var(--text-primary)' }}>{new Date(activeItem.affiliate_resolved_at).toLocaleString('id-ID')}</strong>
                                   </div>
                                 )}
                               </div>
@@ -1989,7 +1989,7 @@ function ContentFlowHubPageContent() {
 
                   {/* TikTok Controls */}
                   <div style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <span style={{ fontSize: '13px', fontWeight: 800, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--link)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       📱 TIKTOK
                     </span>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -2010,12 +2010,12 @@ function ContentFlowHubPageContent() {
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                           <label style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600 }}>
-                            Tanggal Rilis {editStatusForm.tiktok_publish_date ? <span style={{ color: '#60a5fa', fontWeight: 700 }}>✓ Terisi</span> : null}
+                            Tanggal Rilis {editStatusForm.tiktok_publish_date ? <span style={{ color: 'var(--link)', fontWeight: 700 }}>✓ Terisi</span> : null}
                           </label>
                           <button
                             type="button"
                             onClick={() => setEditStatusForm({ ...editStatusForm, tiktok_publish_date: new Date().toISOString().split('T')[0] })}
-                            style={{ background: 'none', border: 'none', color: '#38bdf8', fontSize: '10px', fontWeight: 700, cursor: 'pointer', padding: 0 }}
+                            style={{ background: 'none', border: 'none', color: 'var(--link)', fontSize: '10px', fontWeight: 700, cursor: 'pointer', padding: 0 }}
                           >
                             Hari Ini
                           </button>
@@ -2035,7 +2035,7 @@ function ContentFlowHubPageContent() {
                           value={editStatusForm.permalink_tiktok}
                           onChange={(e) => setEditStatusForm({ ...editStatusForm, permalink_tiktok: e.target.value })}
                           placeholder="https://tiktok.com/@..."
-                          style={{ width: '100%', padding: '8px 10px', background: 'var(--bg-secondary)', border: '1px solid #334155', borderRadius: '8px', color: '#fff', fontSize: '12px', outline: 'none' }}
+                          style={{ width: '100%', padding: '8px 10px', background: 'var(--bg-secondary)', border: '1px solid var(--surface-interactive)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '12px', outline: 'none' }}
                         />
                       </div>
                     </div>
@@ -2043,7 +2043,7 @@ function ContentFlowHubPageContent() {
 
                   {/* Facebook Controls */}
                   <div style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <span style={{ fontSize: '13px', fontWeight: 800, color: '#60a5fa', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--link)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       📘 FACEBOOK
                     </span>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -2064,12 +2064,12 @@ function ContentFlowHubPageContent() {
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                           <label style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600 }}>
-                            Tanggal Rilis {editStatusForm.facebook_publish_date ? <span style={{ color: '#60a5fa', fontWeight: 700 }}>✓ Terisi</span> : null}
+                            Tanggal Rilis {editStatusForm.facebook_publish_date ? <span style={{ color: 'var(--link)', fontWeight: 700 }}>✓ Terisi</span> : null}
                           </label>
                           <button
                             type="button"
                             onClick={() => setEditStatusForm({ ...editStatusForm, facebook_publish_date: new Date().toISOString().split('T')[0] })}
-                            style={{ background: 'none', border: 'none', color: '#60a5fa', fontSize: '10px', fontWeight: 700, cursor: 'pointer', padding: 0 }}
+                            style={{ background: 'none', border: 'none', color: 'var(--link)', fontSize: '10px', fontWeight: 700, cursor: 'pointer', padding: 0 }}
                           >
                             Hari Ini
                           </button>
@@ -2089,7 +2089,7 @@ function ContentFlowHubPageContent() {
                           value={editStatusForm.permalink_facebook}
                           onChange={(e) => setEditStatusForm({ ...editStatusForm, permalink_facebook: e.target.value })}
                           placeholder="https://facebook.com/..."
-                          style={{ width: '100%', padding: '8px 10px', background: 'var(--bg-secondary)', border: '1px solid #334155', borderRadius: '8px', color: '#fff', fontSize: '12px', outline: 'none' }}
+                          style={{ width: '100%', padding: '8px 10px', background: 'var(--bg-secondary)', border: '1px solid var(--surface-interactive)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '12px', outline: 'none' }}
                         />
                       </div>
                     </div>
@@ -2118,7 +2118,7 @@ function ContentFlowHubPageContent() {
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                           <label style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600 }}>
-                            Tanggal Rilis {editStatusForm.instagram_publish_date ? <span style={{ color: '#60a5fa', fontWeight: 700 }}>✓ Terisi</span> : null}
+                            Tanggal Rilis {editStatusForm.instagram_publish_date ? <span style={{ color: 'var(--link)', fontWeight: 700 }}>✓ Terisi</span> : null}
                           </label>
                           <button
                             type="button"
@@ -2143,7 +2143,7 @@ function ContentFlowHubPageContent() {
                           value={editStatusForm.permalink_instagram}
                           onChange={(e) => setEditStatusForm({ ...editStatusForm, permalink_instagram: e.target.value })}
                           placeholder="https://instagram.com/p/..."
-                          style={{ width: '100%', padding: '8px 10px', background: 'var(--bg-secondary)', border: '1px solid #334155', borderRadius: '8px', color: '#fff', fontSize: '12px', outline: 'none' }}
+                          style={{ width: '100%', padding: '8px 10px', background: 'var(--bg-secondary)', border: '1px solid var(--surface-interactive)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '12px', outline: 'none' }}
                         />
                       </div>
                     </div>
@@ -2156,7 +2156,7 @@ function ContentFlowHubPageContent() {
                     <button
                       type="button"
                       onClick={() => setActiveItem(null)}
-                      style={{ padding: '10px 18px', background: 'var(--bg-secondary)', border: '1px solid #334155', color: 'var(--text-secondary)', borderRadius: '10px', fontWeight: 600, cursor: 'pointer', fontSize: '13px' }}
+                      style={{ padding: '10px 18px', background: 'var(--bg-secondary)', border: '1px solid var(--surface-interactive)', color: 'var(--text-secondary)', borderRadius: '10px', fontWeight: 600, cursor: 'pointer', fontSize: '13px' }}
                     >
                       Batal
                     </button>
@@ -2164,7 +2164,7 @@ function ContentFlowHubPageContent() {
                       type="submit"
                       disabled={savingStatus}
                       style={{
-                        padding: '10px 22px', background: 'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)',
+                        padding: '10px 22px', background: 'linear-gradient(135deg, #2563eb 0%, var(--status-neutral) 100%)',
                         border: 'none', color: 'var(--text-primary)', borderRadius: '10px', fontWeight: 700,
                         cursor: savingStatus ? 'not-allowed' : 'pointer', fontSize: '13px',
                         boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)'
@@ -2182,29 +2182,29 @@ function ContentFlowHubPageContent() {
           {deleteBrandTarget && (
             <div style={{
               position: 'fixed', inset: 0, zIndex: 9999,
-              background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
+              background: 'var(--overlay-backdrop)', backdropFilter: 'blur(8px)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
             }}>
               <div style={{
                 width: '100%', maxWidth: '480px', borderRadius: '16px',
-                background: '#18181b', border: '1px solid rgba(239, 68, 68, 0.5)',
-                boxShadow: '0 20px 50px rgba(239, 68, 68, 0.3)', padding: '24px'
+                background: 'var(--surface)', border: '1px solid rgba(239, 68, 68, 0.5)',
+                boxShadow: '0 20px 50px var(--status-danger-soft)', padding: '24px'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#ef4444', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--status-danger)', marginBottom: '16px' }}>
                   <span style={{ fontSize: '28px' }}>⚠️</span>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#f87171' }}>Strict Brand Deletion Warning</h3>
-                    <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#a1a1aa' }}>Tindakan ini permanen & tidak dapat dibatalkan</p>
+                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--status-danger)' }}>Strict Brand Deletion Warning</h3>
+                    <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: 'var(--text-muted)' }}>Tindakan ini permanen & tidak dapat dibatalkan</p>
                   </div>
                 </div>
 
-                <p style={{ fontSize: '13px', color: '#e4e4e7', lineHeight: '1.5', marginBottom: '16px' }}>
-                  Anda akan menghapus <strong style={{ color: '#f87171' }}>SELURUH KONTEN VIDEO</strong> milik akun brand <strong style={{ color: '#f87171' }}>@{deleteBrandTarget}</strong> secara permanen dari SQLite Node 1 & PostgreSQL Node 3 Storage Database.
+                <p style={{ fontSize: '13px', color: 'var(--text-primary)', lineHeight: '1.5', marginBottom: '16px' }}>
+                  Anda akan menghapus <strong style={{ color: 'var(--status-danger)' }}>SELURUH KONTEN VIDEO</strong> milik akun brand <strong style={{ color: 'var(--status-danger)' }}>@{deleteBrandTarget}</strong> secara permanen dari SQLite Node 1 & PostgreSQL Node 3 Storage Database.
                 </p>
 
-                <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '12px', borderRadius: '10px', marginBottom: '16px' }}>
+                <div style={{ background: 'var(--status-danger-soft)', border: '1px solid var(--status-danger-soft)', padding: '12px', borderRadius: '10px', marginBottom: '16px' }}>
                   <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#fca5a5', marginBottom: '6px' }}>
-                    Ketik ulang nama brand di bawah ini untuk mengonfirmasi: <span style={{ fontFamily: 'monospace', color: '#fff', background: '#000', padding: '2px 6px', borderRadius: '4px' }}>{deleteBrandTarget}</span>
+                    Ketik ulang nama brand di bawah ini untuk mengonfirmasi: <span style={{ fontFamily: 'monospace', color: 'var(--text-primary)', background: '#000', padding: '2px 6px', borderRadius: '4px' }}>{deleteBrandTarget}</span>
                   </label>
                   <input
                     type="text"
@@ -2213,7 +2213,7 @@ function ContentFlowHubPageContent() {
                     placeholder={`Ketik "${deleteBrandTarget}"...`}
                     style={{
                       width: '100%', padding: '10px 12px', borderRadius: '8px',
-                      background: 'var(--bg-secondary)', border: '1px solid #71717a', color: '#fff', fontSize: '13px', outline: 'none'
+                      background: 'var(--bg-secondary)', border: '1px solid var(--text-muted)', color: 'var(--text-primary)', fontSize: '13px', outline: 'none'
                     }}
                   />
                 </div>
@@ -2225,8 +2225,8 @@ function ContentFlowHubPageContent() {
                       setDeleteBrandConfirmInput('');
                     }}
                     style={{
-                      padding: '10px 18px', borderRadius: '10px', background: '#27272a',
-                      border: '1px solid #3f3f46', color: '#e4e4e7', cursor: 'pointer', fontSize: '12px', fontWeight: 600
+                      padding: '10px 18px', borderRadius: '10px', background: 'var(--surface)',
+                      border: '1px solid var(--border-strong)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '12px', fontWeight: 600
                     }}
                   >
                     Batal
@@ -2237,10 +2237,10 @@ function ContentFlowHubPageContent() {
                     style={{
                       padding: '10px 18px', borderRadius: '10px',
                       background: (deleteBrandConfirmInput.trim().toLowerCase() === deleteBrandTarget.trim().toLowerCase() && !deletingBrand)
-                        ? 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)'
-                        : '#3f3f46',
-                      color: '#fff', border: 'none', cursor: (deleteBrandConfirmInput.trim().toLowerCase() === deleteBrandTarget.trim().toLowerCase() && !deletingBrand) ? 'pointer' : 'not-allowed',
-                      fontSize: '12px', fontWeight: 700, boxShadow: '0 4px 14px rgba(239, 68, 68, 0.4)'
+                        ? 'linear-gradient(135deg, #dc2626 0%, var(--status-danger) 100%)'
+                        : 'var(--border-strong)',
+                      color: 'var(--text-primary)', border: 'none', cursor: (deleteBrandConfirmInput.trim().toLowerCase() === deleteBrandTarget.trim().toLowerCase() && !deletingBrand) ? 'pointer' : 'not-allowed',
+                      fontSize: '12px', fontWeight: 700, boxShadow: '0 4px 14px var(--status-danger-soft)'
                     }}
                   >
                     {deletingBrand ? 'Memusnahkan...' : '🔥 Hapus Permanen Akun Brand'}
@@ -2264,7 +2264,7 @@ function ContentFlowHubPageContent() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                   <div>
                     <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      📅 Skedul Controller — <span style={{ color: '#c084fc' }}>@{accountFilter}</span>
+                      📅 Skedul Controller — <span style={{ color: 'var(--status-neutral)' }}>@{accountFilter}</span>
                     </h3>
                     <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0' }}>
                       Atur 5 Produk Aktif & Target Posting Harian (1 s/d 6 video/hari) untuk dikelola tim posting.
@@ -2285,10 +2285,10 @@ function ContentFlowHubPageContent() {
                         key={slot.slot_index}
                         style={{
                           display: 'grid', gridTemplateColumns: 'auto 1fr 140px', gap: '12px', alignItems: 'center',
-                          padding: '12px 14px', borderRadius: '12px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255, 255, 255, 0.08)'
+                          padding: '12px 14px', borderRadius: '12px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid var(--border-subtle)'
                         }}
                       >
-                        <span style={{ fontSize: '12px', fontWeight: 800, color: '#c084fc', width: '60px' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--status-neutral)', width: '60px' }}>
                           Slot #{slot.slot_index}
                         </span>
 
@@ -2303,7 +2303,7 @@ function ContentFlowHubPageContent() {
                                 updated[i].product_id = e.target.value;
                                 setAdminSlotsForm(updated);
                               }}
-                              style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid #3f3f46', color: '#fff', fontSize: '12px', outline: 'none' }}
+                              style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)', fontSize: '12px', outline: 'none' }}
                             >
                               <option value="">-- (Kosong / Tidak Digunakan) --</option>
                               {availableProducts.map(p => (
@@ -2321,7 +2321,7 @@ function ContentFlowHubPageContent() {
                                 setAdminSlotsForm(updated);
                               }}
                               placeholder="Nama Produk..."
-                              style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid #3f3f46', color: '#fff', fontSize: '12px', outline: 'none' }}
+                              style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)', fontSize: '12px', outline: 'none' }}
                             />
                           )}
                         </div>
@@ -2335,7 +2335,7 @@ function ContentFlowHubPageContent() {
                               updated[i].target_daily_posts = parseInt(e.target.value) || 1;
                               setAdminSlotsForm(updated);
                             }}
-                            style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid #c084fc', color: '#e9d5ff', fontWeight: 700, fontSize: '12px', outline: 'none' }}
+                            style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--status-neutral)', color: '#e9d5ff', fontWeight: 700, fontSize: '12px', outline: 'none' }}
                           >
                             {[1, 2, 3, 4, 5, 6].map(num => (
                               <option key={num} value={num}>{num} / Hari</option>
@@ -2350,7 +2350,7 @@ function ContentFlowHubPageContent() {
                     <button
                       type="button"
                       onClick={() => setShowAdminScheduleModal(false)}
-                      style={{ padding: '10px 18px', borderRadius: '10px', background: '#27272a', border: '1px solid #3f3f46', color: '#e4e4e7', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}
+                      style={{ padding: '10px 18px', borderRadius: '10px', background: 'var(--surface)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}
                     >
                       Batal
                     </button>
@@ -2358,8 +2358,8 @@ function ContentFlowHubPageContent() {
                       type="submit"
                       disabled={savingSchedule}
                       style={{
-                        padding: '10px 22px', borderRadius: '10px', background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
-                        color: '#fff', border: 'none', cursor: savingSchedule ? 'not-allowed' : 'pointer', fontSize: '12px', fontWeight: 700,
+                        padding: '10px 22px', borderRadius: '10px', background: 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)',
+                        color: 'var(--text-primary)', border: 'none', cursor: savingSchedule ? 'not-allowed' : 'pointer', fontSize: '12px', fontWeight: 700,
                         boxShadow: '0 4px 14px rgba(168, 85, 247, 0.4)'
                       }}
                     >
@@ -2380,7 +2380,7 @@ function ContentFlowHubPageContent() {
 
 export default function ContentFlowHubPage() {
   return (
-    <Suspense fallback={<div style={{ padding: '2rem', color: '#34d399', background: '#0b0f17', minHeight: '100vh' }}>Loading ContentFlow...</div>}>
+    <Suspense fallback={<div style={{ padding: '2rem', color: 'var(--status-success)', background: '#0b0f17', minHeight: '100vh' }}>Loading ContentFlow...</div>}>
       <ContentFlowHubPageContent />
     </Suspense>
   );

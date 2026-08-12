@@ -286,7 +286,7 @@ function MultiplierLabPageContent() {
     const isPaused = currentStatus === 'paused';
     const isFailed = currentStatus === 'failed';
     const newStatus = (isPaused || isFailed) ? 'pending_resolution' : 'paused';
-    
+
     try {
       const res = await fetch(`/api/v2/multiplier/${id}`, {
         method: 'PATCH',
@@ -484,7 +484,7 @@ function MultiplierLabPageContent() {
 
   function getStatusStyle(status) {
     const map = {
-      pending_resolution: { color: 'var(--text-muted)', bg: 'rgba(255,255,255,0.06)' },
+      pending_resolution: { color: 'var(--text-muted)', bg: 'var(--surface-interactive)' },
       resolving_product: { color: 'var(--info)', bg: 'rgba(116,185,255,0.15)' },
       remaking: { color: 'var(--info)', bg: 'rgba(116,185,255,0.15)' },
       generating_audio: { color: 'var(--info)', bg: 'rgba(116,185,255,0.15)' },
@@ -492,18 +492,18 @@ function MultiplierLabPageContent() {
       ffmpeg_muxing: { color: 'var(--info)', bg: 'rgba(116,185,255,0.15)' },
       completed: { color: 'var(--success)', bg: 'var(--success-glow)' },
       failed: { color: 'var(--danger)', bg: 'var(--danger-glow)' },
-      paused: { color: '#fdcb6e', bg: 'rgba(253, 203, 110, 0.15)' }
+      paused: { color: 'var(--status-warning)', bg: 'rgba(253, 203, 110, 0.15)' }
     };
-    return map[status] || { color: 'var(--text-primary)', bg: 'rgba(255,255,255,0.1)' };
+    return map[status] || { color: 'var(--text-primary)', bg: 'var(--border-subtle)' };
   }
 
   return (
     <div className="app-container">
       <Sidebar />
-      
+
       <main className="main-content">
         <div style={{ padding: '24px 32px', maxWidth: '1200px', margin: '0 auto' }}>
-          
+
           {/* Header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
             <div>
@@ -515,9 +515,9 @@ function MultiplierLabPageContent() {
               </p>
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
-              <button 
-                type="button" 
-                onClick={() => fetchTasks()} 
+              <button
+                type="button"
+                onClick={() => fetchTasks()}
                 className="btn btn-secondary"
                 style={{ fontSize: '0.78rem', padding: '8px 14px' }}
               >
@@ -554,9 +554,9 @@ function MultiplierLabPageContent() {
                 textTransform: 'uppercase',
                 padding: '4px 10px',
                 borderRadius: 12,
-                background: isSchedulerActive ? 'rgba(46, 204, 113, 0.15)' : 'rgba(235, 77, 75, 0.15)',
+                background: isSchedulerActive ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
                 color: isSchedulerActive ? 'var(--success)' : 'var(--danger)',
-                border: `1px solid ${isSchedulerActive ? 'rgba(46, 204, 113, 0.3)' : 'rgba(235, 77, 75, 0.3)'}`
+                border: `1px solid ${isSchedulerActive ? 'var(--status-success-soft)' : 'var(--status-danger-soft)'}`
               }}>
                 {isSchedulerActive ? '🟢 SKEDULER AKTIF' : '🔴 SKEDULER MATI'}
               </span>
@@ -568,8 +568,8 @@ function MultiplierLabPageContent() {
                   fontSize: '0.8rem',
                   padding: '6px 16px',
                   fontWeight: 600,
-                  boxShadow: isSchedulerActive ? '0 0 15px rgba(235, 77, 75, 0.4)' : '0 0 15px rgba(46, 204, 113, 0.4)',
-                  border: isSchedulerActive ? '1px solid rgba(235, 77, 75, 0.6)' : '1px solid rgba(46, 204, 113, 0.6)'
+                  boxShadow: isSchedulerActive ? '0 0 15px var(--status-danger-soft)' : '0 0 15px var(--status-success-soft)',
+                  border: isSchedulerActive ? '1px solid var(--status-danger-soft)' : '1px solid var(--status-success-soft)'
                 }}
               >
                 {isSchedulerActive ? '🛑 STOP SKEDULER' : '▶️ START SKEDULER'}
@@ -578,30 +578,30 @@ function MultiplierLabPageContent() {
           </div>
 
           {/* Activity Terminal */}
-          <div className="card" style={{ padding: '0', background: '#07070a', border: '1px solid var(--border)', marginBottom: '24px' }}>
-            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0b0b12' }}>
+          <div className="card" style={{ padding: '0', background: 'var(--surface)', border: '1px solid var(--border)', marginBottom: '24px' }}>
+            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#00b894', display: 'inline-block', boxShadow: '0 0 8px #00b894' }}></span>
+                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--status-success)', display: 'inline-block', boxShadow: '0 0 8px var(--status-success)' }}></span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>SYSTEM POLLER LOGGER</span>
               </div>
-              <button 
-                onClick={pollLogs} 
+              <button
+                onClick={pollLogs}
                 style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.75rem', cursor: 'pointer', fontFamily: 'var(--font-mono)' }}
               >
                 [Refresh Log]
               </button>
             </div>
-            <pre 
+            <pre
               ref={terminalRef}
-              style={{ 
-                margin: 0, 
-                padding: '20px', 
-                background: '#07070a', 
-                color: '#20c20e', 
-                fontFamily: 'var(--font-mono)', 
-                fontSize: '0.82rem', 
-                maxHeight: '220px', 
-                overflowY: 'auto', 
+              style={{
+                margin: 0,
+                padding: '20px',
+                background: 'var(--surface)',
+                color: '#20c20e',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.82rem',
+                maxHeight: '220px',
+                overflowY: 'auto',
                 lineHeight: '1.5',
                 whiteSpace: 'pre-wrap'
               }}
@@ -612,7 +612,7 @@ function MultiplierLabPageContent() {
 
           {/* Stacked Layout: Config Form & Antrean */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            
+
             {/* Config Form Settings */}
             {!showConfigForm ? (
               <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 0 }}>
@@ -636,15 +636,15 @@ function MultiplierLabPageContent() {
             ) : (
               <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 0 }}>
                 <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <strong style={{ fontSize: '0.95rem', color: '#fff' }}>⚙️ Konfigurasi Remake Video</strong>
+                  <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>⚙️ Konfigurasi Remake Video</strong>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ display: 'flex', gap: 6, background: 'rgba(0,0,0,0.2)', padding: 3, borderRadius: 6 }}>
+                    <div style={{ display: 'flex', gap: 6, background: 'var(--overlay-subtle)', padding: 3, borderRadius: 6 }}>
                       <button
                         type="button"
                         onClick={() => setProductionMode('single')}
                         style={{
                           border: 'none', background: productionMode === 'single' ? 'var(--accent)' : 'transparent',
-                          color: '#fff', fontSize: '0.72rem', fontWeight: 600, padding: '5px 10px', borderRadius: 4, cursor: 'pointer'
+                          color: 'var(--text-primary)', fontSize: '0.72rem', fontWeight: 600, padding: '5px 10px', borderRadius: 4, cursor: 'pointer'
                         }}
                       >
                         Single Product
@@ -654,7 +654,7 @@ function MultiplierLabPageContent() {
                         onClick={() => setProductionMode('mass')}
                         style={{
                           border: 'none', background: productionMode === 'mass' ? 'var(--accent)' : 'transparent',
-                          color: '#fff', fontSize: '0.72rem', fontWeight: 600, padding: '5px 10px', borderRadius: 4, cursor: 'pointer'
+                          color: 'var(--text-primary)', fontSize: '0.72rem', fontWeight: 600, padding: '5px 10px', borderRadius: 4, cursor: 'pointer'
                         }}
                       >
                         Mass Remake
@@ -665,7 +665,7 @@ function MultiplierLabPageContent() {
                       onClick={() => setShowConfigForm(false)}
                       style={{
                         border: 'none',
-                        background: 'rgba(255, 255, 255, 0.05)',
+                        background: 'var(--surface-interactive)',
                         color: 'var(--text-muted)',
                         fontSize: '0.75rem',
                         padding: '5px 10px',
@@ -680,7 +680,7 @@ function MultiplierLabPageContent() {
                 </div>
 
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
-                
+
                 {/* 0. Brand Account & Campaign Identity */}
                 <div style={{ padding: 24, borderBottom: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 16 }}>
                   <div className="form-group" style={{ marginBottom: 0 }}>
@@ -752,9 +752,9 @@ function MultiplierLabPageContent() {
                     {loadingAssets ? (
                       <div style={{ padding: 12, color: 'var(--text-muted)', fontSize: '0.8rem' }}>Loading blueprint video...</div>
                     ) : (
-                      <select 
-                        className="form-input" 
-                        value={selectedAssetId} 
+                      <select
+                        className="form-input"
+                        value={selectedAssetId}
                         onChange={e => setSelectedAssetId(e.target.value)}
                         required
                       >
@@ -795,18 +795,18 @@ function MultiplierLabPageContent() {
                 </div>
 
                 {/* ACCORDION SECTIONS */}
-                
+
                 {/* Section 1: Aesthetics & Visual Settings */}
                 <div style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <div 
-                    onClick={() => setActiveAccordion(0)} 
-                    style={{ padding: '16px 24px', background: activeAccordion === 0 ? 'rgba(59, 130, 246, 0.05)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  <div
+                    onClick={() => setActiveAccordion(0)}
+                    style={{ padding: '16px 24px', background: activeAccordion === 0 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                   >
                     <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>1. Aesthetics & Visual Settings</span>
                     <span>{activeAccordion === 0 ? '▲' : '▼'}</span>
                   </div>
                   {activeAccordion === 0 && (
-                    <div style={{ padding: 24, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, background: 'rgba(0,0,0,0.1)' }}>
+                    <div style={{ padding: 24, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, background: 'var(--overlay-subtle)' }}>
                       <div className="form-group">
                         <label className="form-label">Narrative Mode</label>
                         <select className="form-input" value={narrativeMode} onChange={e => setNarrativeMode(e.target.value)}>
@@ -865,15 +865,15 @@ function MultiplierLabPageContent() {
 
                 {/* Section 2: Product Bridging Settings */}
                 <div style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <div 
-                    onClick={() => setActiveAccordion(1)} 
-                    style={{ padding: '16px 24px', background: activeAccordion === 1 ? 'rgba(59, 130, 246, 0.05)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  <div
+                    onClick={() => setActiveAccordion(1)}
+                    style={{ padding: '16px 24px', background: activeAccordion === 1 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                   >
                     <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>2. Product Bridging Settings</span>
                     <span>{activeAccordion === 1 ? '▲' : '▼'}</span>
                   </div>
                   {activeAccordion === 1 && (
-                    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16, background: 'rgba(0,0,0,0.1)' }}>
+                    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16, background: 'var(--overlay-subtle)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <label className="switch">
                           <input
@@ -989,7 +989,7 @@ function MultiplierLabPageContent() {
                             <div className="form-group" style={{ background: 'var(--bg-secondary)', padding: 16, borderRadius: 8, display: 'flex', flexDirection: 'column', gap: 12 }}>
                               <div>
                                 <label className="form-label">Pilih Produk</label>
-                                
+
                                 {/* Search Input for Product Selection */}
                                 <input
                                   type="text"
@@ -1017,7 +1017,7 @@ function MultiplierLabPageContent() {
                                 }}>
                                   <option value="">-- Pilih Produk Terdaftar --</option>
                                   {products
-                                    .filter(p => 
+                                    .filter(p =>
                                       (p.product_name || '').toLowerCase().includes(productSearchQuery.toLowerCase()) ||
                                       (p.brand_name || '').toLowerCase().includes(productSearchQuery.toLowerCase())
                                     )
@@ -1027,8 +1027,8 @@ function MultiplierLabPageContent() {
                                   }
                                 </select>
                                 {targetProductId && productRefImage && (
-                                  <div style={{ marginTop: 10, background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: 12, borderRadius: 8 }}>
-                                    <div style={{ color: '#10b981', fontWeight: 600, fontSize: '0.85rem' }}>
+                                  <div style={{ marginTop: 10, background: 'var(--status-success-soft)', border: '1px solid var(--status-success-soft)', padding: 12, borderRadius: 8 }}>
+                                    <div style={{ color: 'var(--status-success)', fontWeight: 600, fontSize: '0.85rem' }}>
                                       ✨ Foto Produk & Deklarasi Mandate 88 Otomatis Terhubung dari Database Produk
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
@@ -1079,20 +1079,20 @@ function MultiplierLabPageContent() {
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                               <div className="form-group" style={{ marginBottom: 0 }}>
                                 <label className="form-label">Foto Referensi Produk</label>
-                                <input 
-                                  type="file" 
-                                  className="form-input" 
-                                  accept="image/*" 
+                                <input
+                                  type="file"
+                                  className="form-input"
+                                  accept="image/*"
                                   onChange={e => setProductRefImage(e.target.files[0])}
                                 />
                               </div>
                               <div className="form-group" style={{ marginBottom: 0 }}>
                                 <label className="form-label">Deklarasi Nama Berkas (Filename)</label>
-                                <input 
-                                  type="text" 
-                                  className="form-input" 
-                                  placeholder="Contoh: botol_serum.png" 
-                                  value={productFilenameDeclare} 
+                                <input
+                                  type="text"
+                                  className="form-input"
+                                  placeholder="Contoh: botol_serum.png"
+                                  value={productFilenameDeclare}
                                   onChange={e => setProductFilenameDeclare(e.target.value)}
                                 />
                               </div>
@@ -1106,15 +1106,15 @@ function MultiplierLabPageContent() {
 
                 {/* Section 3: Visual Swap Overrides */}
                 <div style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <div 
-                    onClick={() => setActiveAccordion(2)} 
-                    style={{ padding: '16px 24px', background: activeAccordion === 2 ? 'rgba(59, 130, 246, 0.05)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  <div
+                    onClick={() => setActiveAccordion(2)}
+                    style={{ padding: '16px 24px', background: activeAccordion === 2 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                   >
                     <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>3. Visual Swap Overrides (VSO)</span>
                     <span>{activeAccordion === 2 ? '▲' : '▼'}</span>
                   </div>
                   {activeAccordion === 2 && (
-                    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16, background: 'rgba(0,0,0,0.1)' }}>
+                    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16, background: 'var(--overlay-subtle)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <label className="switch">
                           <input
@@ -1140,9 +1140,9 @@ function MultiplierLabPageContent() {
                           </div>
                           <div className="form-group">
                             <label className="form-label">Demografi Subjek / Model</label>
-                            <select 
-                              className="form-input" 
-                              value={subjectDemographic} 
+                            <select
+                              className="form-input"
+                              value={subjectDemographic}
                               onChange={e => {
                                 const val = e.target.value;
                                 setSubjectDemographic(val);
@@ -1226,19 +1226,19 @@ function MultiplierLabPageContent() {
                               <option value="custom">-- Tulis Custom --</option>
                             </select>
                             {wardrobeStyle === 'custom' && (
-                              <input 
-                                type="text" 
-                                className="form-input" 
-                                style={{ marginTop: 8 }} 
+                              <input
+                                type="text"
+                                className="form-input"
+                                style={{ marginTop: 8 }}
                                 placeholder={
-                                  subjectDemographic.startsWith('stylized_3d_') 
-                                    ? "Ketik pakaian 3D kustom..." 
-                                    : subjectDemographic === 'caucasian_male' 
-                                      ? "Ketik pakaian kustom..." 
+                                  subjectDemographic.startsWith('stylized_3d_')
+                                    ? "Ketik pakaian 3D kustom..."
+                                    : subjectDemographic === 'caucasian_male'
+                                      ? "Ketik pakaian kustom..."
                                       : "Ketik warna kustom..."
                                 }
-                                value={wardrobeStyleCustom} 
-                                onChange={e => setWardrobeStyleCustom(e.target.value)} 
+                                value={wardrobeStyleCustom}
+                                onChange={e => setWardrobeStyleCustom(e.target.value)}
                               />
                             )}
                           </div>
@@ -1267,16 +1267,16 @@ function MultiplierLabPageContent() {
 
                 {/* Section 4: Workflow & Audio Settings */}
                 <div style={{ borderBottom: 'none' }}>
-                  <div 
-                    onClick={() => setActiveAccordion(3)} 
-                    style={{ padding: '16px 24px', background: activeAccordion === 3 ? 'rgba(59, 130, 246, 0.05)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  <div
+                    onClick={() => setActiveAccordion(3)}
+                    style={{ padding: '16px 24px', background: activeAccordion === 3 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                   >
                     <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>4. Workflow & Audio Settings</span>
                     <span>{activeAccordion === 3 ? '▲' : '▼'}</span>
                   </div>
                   {activeAccordion === 3 && (
-                    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16, background: 'rgba(0,0,0,0.1)' }}>
-                      
+                    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16, background: 'var(--overlay-subtle)' }}>
+
                       {/* TTS Voiceover toggle */}
                       <div style={{ background: 'var(--bg-secondary)', padding: 16, borderRadius: 8, display: 'flex', flexDirection: 'column', gap: 12 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -1300,7 +1300,7 @@ function MultiplierLabPageContent() {
                               <div className="form-group">
                                 <label className="form-label">Voice Persona</label>
                                 <select className="form-input" value={voicePersona} onChange={e => setVoicePersona(e.target.value)}>
-                                  {voiceProvider === 'gemini' 
+                                  {voiceProvider === 'gemini'
                                     ? GEMINI_VOICES.map(v => <option key={v.id} value={v.id}>{v.name}</option>)
                                     : MINIMAX_VOICES.map(v => <option key={v.id} value={v.id}>{v.name}</option>)
                                   }
@@ -1347,9 +1347,9 @@ function MultiplierLabPageContent() {
                       <div style={{ background: 'var(--bg-secondary)', padding: 16, borderRadius: 8, display: 'flex', flexDirection: 'column', gap: 12, opacity: (!enableTts || !enableGlabs) ? 0.5 : 1 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                           <label className="switch">
-                            <input 
-                              type="checkbox" 
-                              checked={enableFfmpeg} 
+                            <input
+                              type="checkbox"
+                              checked={enableFfmpeg}
                               onChange={e => setEnableFfmpeg(e.target.checked)}
                               disabled={!enableTts || !enableGlabs}
                             />
@@ -1380,7 +1380,7 @@ function MultiplierLabPageContent() {
                 </div>
 
                 {/* Submit Action */}
-                <div style={{ padding: 24, borderTop: '1px solid var(--border)', background: 'rgba(0,0,0,0.15)', display: 'flex', justifyContent: 'flex-end' }}>
+                <div style={{ padding: 24, borderTop: '1px solid var(--border)', background: 'var(--overlay-subtle)', display: 'flex', justifyContent: 'flex-end' }}>
                   <button
                     type="submit"
                     className="btn btn-primary"
@@ -1389,7 +1389,7 @@ function MultiplierLabPageContent() {
                   >
                     {submitting ? (
                       <>
-                        <div className="spinner" style={{ width: 14, height: 14, border: '2px solid #fff', borderTopColor: 'transparent' }}></div>
+                        <div className="spinner" style={{ width: 14, height: 14, border: '2px solid var(--text-primary)', borderTopColor: 'transparent' }}></div>
                         Mengirim...
                       </>
                     ) : (
@@ -1404,7 +1404,7 @@ function MultiplierLabPageContent() {
             {/* Queue Section: Active Task Queue */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '16px 20px' }}>
-                <strong style={{ fontSize: '0.92rem', color: '#fff', display: 'block', marginBottom: 2 }}>
+                <strong style={{ fontSize: '0.92rem', color: 'var(--text-primary)', display: 'block', marginBottom: 2 }}>
                   📋 Antrean Render Multiplier
                 </strong>
                 <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
@@ -1421,25 +1421,25 @@ function MultiplierLabPageContent() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {tasks.map((t, idx) => {
                     const isExpanded = expandedTaskId === t.id;
-                    
+
                     let statusLabel = 'PENDING';
-                    let badgeStyle = { background: 'rgba(108, 117, 125, 0.15)', color: '#a0aec0', border: '1px solid rgba(108, 117, 125, 0.3)' };
+                    let badgeStyle = { background: 'rgba(108, 117, 125, 0.15)', color: 'var(--text-muted)', border: '1px solid rgba(108, 117, 125, 0.3)' };
 
                     if (t.status === 'completed') {
                       statusLabel = 'COMPLETED';
-                      badgeStyle = { background: 'rgba(46, 204, 113, 0.15)', color: 'var(--success)', border: '1px solid rgba(46, 204, 113, 0.3)' };
+                      badgeStyle = { background: 'var(--status-success-soft)', color: 'var(--success)', border: '1px solid var(--status-success-soft)' };
                     } else if (t.status === 'failed') {
                       statusLabel = 'FAILED';
-                      badgeStyle = { background: 'rgba(231, 76, 60, 0.15)', color: 'var(--danger)', border: '1px solid rgba(231, 76, 60, 0.3)' };
+                      badgeStyle = { background: 'var(--status-danger-soft)', color: 'var(--danger)', border: '1px solid var(--status-danger-soft)' };
                     } else if (t.status === 'paused') {
                       statusLabel = 'STOPPED';
-                      badgeStyle = { background: 'rgba(253, 203, 110, 0.15)', color: '#fdcb6e', border: '1px solid rgba(253, 203, 110, 0.3)' };
+                      badgeStyle = { background: 'rgba(253, 203, 110, 0.15)', color: 'var(--status-warning)', border: '1px solid rgba(253, 203, 110, 0.3)' };
                     } else if (t.status === 'pending_resolution') {
                       statusLabel = 'PENDING';
-                      badgeStyle = { background: 'rgba(108, 117, 125, 0.15)', color: '#a0aec0', border: '1px solid rgba(108, 117, 125, 0.3)' };
+                      badgeStyle = { background: 'rgba(108, 117, 125, 0.15)', color: 'var(--text-muted)', border: '1px solid rgba(108, 117, 125, 0.3)' };
                     } else {
                       statusLabel = 'RUNNING';
-                      badgeStyle = { background: 'rgba(52, 152, 219, 0.15)', color: 'var(--info)', border: '1px solid rgba(52, 152, 219, 0.3)' };
+                      badgeStyle = { background: 'var(--status-info-soft)', color: 'var(--info)', border: '1px solid var(--status-info-soft)' };
                     }
 
                     let bridgingData = {};
@@ -1456,11 +1456,11 @@ function MultiplierLabPageContent() {
                     try {
                       audioData = JSON.parse(t.audio_config_json || '{}');
                     } catch (e) {}
-                    
+
                     return (
-                      <div 
-                        key={t.id} 
-                        className="card" 
+                      <div
+                        key={t.id}
+                        className="card"
                         style={{ cursor: 'pointer', transition: 'all 0.2s ease', border: '1px solid var(--border)', background: 'var(--bg-card)', padding: '20px', borderRadius: 'var(--radius-sm)' }}
                         onClick={() => setExpandedTaskId(isExpanded ? null : t.id)}
                       >
@@ -1490,7 +1490,7 @@ function MultiplierLabPageContent() {
                                   fontWeight: 'bold',
                                   textTransform: 'uppercase',
                                   background: 'rgba(52,211,153,0.15)',
-                                  color: '#34d399',
+                                  color: 'var(--status-success)',
                                   border: '1px solid rgba(52,211,153,0.3)',
                                   display: 'inline-flex',
                                   alignItems: 'center',
@@ -1502,7 +1502,7 @@ function MultiplierLabPageContent() {
                             </div>
                             <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>ID: {t.id}</span>
                           </div>
-                          
+
                           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                             {t.created_at ? new Date(t.created_at).toLocaleString('id-ID') : ''}
                           </div>
@@ -1537,10 +1537,10 @@ function MultiplierLabPageContent() {
                         </div>
 
                         {/* Action Buttons — rata KIRI */}
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-start', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '12px' }} onClick={e => e.stopPropagation()}>
-                          <button 
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-start', borderTop: '1px solid var(--surface-interactive)', paddingTop: '12px' }} onClick={e => e.stopPropagation()}>
+                          <button
                             type="button"
-                            className="btn btn-primary btn-sm" 
+                            className="btn btn-primary btn-sm"
                             onClick={() => setExpandedTaskId(isExpanded ? null : t.id)}
                             style={{ fontSize: '0.75rem', padding: '6px 12px' }}
                           >
@@ -1552,8 +1552,8 @@ function MultiplierLabPageContent() {
                             className="btn btn-sm"
                             style={{
                               color: (t.status === 'paused' || t.status === 'failed') ? 'var(--success)' : 'var(--danger)',
-                              background: (t.status === 'paused' || t.status === 'failed') ? 'rgba(46,204,113,0.1)' : 'rgba(235,77,75,0.1)',
-                              borderColor: (t.status === 'paused' || t.status === 'failed') ? 'rgba(46, 204, 113, 0.2)' : 'rgba(235, 77, 75, 0.2)',
+                              background: (t.status === 'paused' || t.status === 'failed') ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
+                              borderColor: (t.status === 'paused' || t.status === 'failed') ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
                               fontSize: '0.75rem',
                               padding: '6px 12px'
                             }}
@@ -1562,7 +1562,7 @@ function MultiplierLabPageContent() {
                           </button>
 
                           {t.asset_source_url && (
-                            <a 
+                            <a
                               href={t.asset_source_url}
                               target="_blank"
                               rel="noreferrer"
@@ -1572,8 +1572,8 @@ function MultiplierLabPageContent() {
                               📊 Template
                             </a>
                           )}
-                          
-                          <button 
+
+                          <button
                             type="button"
                             className="btn btn-secondary btn-sm"
                             onClick={() => handleCopyTaskSettings(t)}
@@ -1582,10 +1582,10 @@ function MultiplierLabPageContent() {
                             📋 Copy
                           </button>
 
-                          <button 
-                            onClick={() => handleDelete(t.id)} 
-                            className="btn btn-danger btn-sm" 
-                            style={{ background: '#dc2626', color: '#fff', borderColor: '#dc2626', fontSize: '0.75rem', padding: '6px 12px' }}
+                          <button
+                            onClick={() => handleDelete(t.id)}
+                            className="btn btn-danger btn-sm"
+                            style={{ background: '#dc2626', color: 'var(--text-primary)', borderColor: '#dc2626', fontSize: '0.75rem', padding: '6px 12px' }}
                           >
                             🗑 Hapus
                           </button>
@@ -1600,19 +1600,19 @@ function MultiplierLabPageContent() {
 
                           return (
                             <div style={{ padding: '16px 0 0 0', borderTop: '1px solid var(--border)', background: 'transparent', marginTop: '16px' }} onClick={e => e.stopPropagation()}>
-                              
+
                               {/* Visual Player if finished */}
                               {t.status === 'completed' && t.ffmpeg_output_path && (
                                 <div style={{ marginBottom: 16 }}>
-                                  <video 
-                                    src={t.ffmpeg_output_path} 
-                                    controls 
+                                  <video
+                                    src={t.ffmpeg_output_path}
+                                    controls
                                     style={{ width: '100%', borderRadius: 'var(--radius-sm)', background: '#000', maxHeight: 320 }}
                                   />
                                   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 8 }}>
                                     {t.nextcloud_video_url && (
-                                      <a 
-                                        href={t.nextcloud_video_url} 
+                                      <a
+                                        href={t.nextcloud_video_url}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="btn btn-secondary"
@@ -1622,8 +1622,8 @@ function MultiplierLabPageContent() {
                                       </a>
                                     )}
                                     {t.nextcloud_md_url && (
-                                      <a 
-                                        href={t.nextcloud_md_url} 
+                                      <a
+                                        href={t.nextcloud_md_url}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="btn btn-secondary"
@@ -1632,9 +1632,9 @@ function MultiplierLabPageContent() {
                                         📝 Nextcloud Narrative (.md)
                                       </a>
                                     )}
-                                    <a 
-                                      href={t.ffmpeg_output_path} 
-                                      download 
+                                    <a
+                                      href={t.ffmpeg_output_path}
+                                      download
                                       className="btn btn-primary"
                                       style={{ fontSize: '0.78rem', padding: '6px 12px' }}
                                     >
@@ -1679,10 +1679,10 @@ function MultiplierLabPageContent() {
                               {/* Tab Content 1: concept */}
                               {activeTab === 'concept' && (
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-                                  
+
                                   {/* Left Column: Template Blueprint details */}
-                                  <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                    <strong style={{ fontSize: '0.85rem', color: 'var(--accent-light)', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: 6 }}>
+                                  <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                    <strong style={{ fontSize: '0.85rem', color: 'var(--accent-light)', borderBottom: '1px solid var(--surface-interactive)', paddingBottom: 6 }}>
                                       📹 Detail Template Blueprint
                                     </strong>
                                     <div>
@@ -1702,7 +1702,7 @@ function MultiplierLabPageContent() {
                                           const matchingAsset = assets.find(a => a.id === t.deconstruct_asset_id);
                                           if (matchingAsset && matchingAsset.tags) {
                                             return matchingAsset.tags.split(',').map((tag, tIdx) => (
-                                              <span key={tIdx} style={{ display: 'inline-block', background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: 4, marginRight: 6, fontSize: '0.7rem' }}>
+                                              <span key={tIdx} style={{ display: 'inline-block', background: 'var(--surface-interactive)', padding: '2px 6px', borderRadius: 4, marginRight: 6, fontSize: '0.7rem' }}>
                                                 #{tag.trim()}
                                               </span>
                                             ));
@@ -1726,8 +1726,8 @@ function MultiplierLabPageContent() {
                                   </div>
 
                                   {/* Right Column: Target Product & Bridging details */}
-                                  <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                    <strong style={{ fontSize: '0.85rem', color: 'var(--accent-light)', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: 6 }}>
+                                  <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                    <strong style={{ fontSize: '0.85rem', color: 'var(--accent-light)', borderBottom: '1px solid var(--surface-interactive)', paddingBottom: 6 }}>
                                       🛍️ Target Produk & Bridging
                                     </strong>
                                     <div>
@@ -1758,7 +1758,7 @@ function MultiplierLabPageContent() {
                                         {bridgingData.isBridgingActive ? `${bridgingData.promotionStyle || 'Softselling'} (Klip ${bridgingData.bridgeAtClip || 2} durasi ${bridgingData.bridgeDurationClips || 1} klip)` : 'Nonaktif'}
                                       </span>
                                     </div>
-                                    
+
                                     {/* Ref Image if present */}
                                     {bridgingData.productRefImagePath && (
                                       <div>
@@ -1779,11 +1779,11 @@ function MultiplierLabPageContent() {
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                                   {t.remake_storyboard_json ? (
                                     JSON.parse(t.remake_storyboard_json).map((scene, sIdx) => (
-                                      <div key={sIdx} style={{ background: 'var(--bg-secondary)', padding: 12, borderRadius: 6, border: '1px solid rgba(255,255,255,0.03)' }}>
+                                      <div key={sIdx} style={{ background: 'var(--bg-secondary)', padding: 12, borderRadius: 6, border: '1px solid var(--surface-interactive)' }}>
                                         <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6 }}>
                                           Adegan {scene.scene || sIdx + 1}
                                         </div>
-                                        <div style={{ fontSize: '0.8rem', color: '#fff', marginBottom: 6, lineHeight: 1.4 }}>
+                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', marginBottom: 6, lineHeight: 1.4 }}>
                                           <b>Visual:</b> {scene.visual_description}
                                         </div>
                                         <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontStyle: 'italic', lineHeight: 1.4 }}>
@@ -1806,11 +1806,11 @@ function MultiplierLabPageContent() {
                                     const aConfig = JSON.parse(t.audio_config_json || '{}');
                                     return (
                                       <>
-                                        <div style={{ background: 'var(--bg-secondary)', padding: 14, borderRadius: 6, border: '1px solid rgba(255,255,255,0.03)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                        <div style={{ background: 'var(--bg-secondary)', padding: 14, borderRadius: 6, border: '1px solid var(--surface-interactive)', display: 'flex', flexDirection: 'column', gap: 8 }}>
                                           <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>
                                             🎙️ Voiceover & Sound Settings
                                           </div>
-                                          <div style={{ fontSize: '0.8rem', color: '#fff', display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+                                          <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', display: 'flex', flexWrap: 'wrap', gap: 16 }}>
                                             <div><b>Status TTS:</b> {aConfig.enableTts ? '⚡ Aktif' : '❌ Nonaktif'}</div>
                                             <div><b>Provider:</b> {aConfig.voiceProvider || 'minimax'}</div>
                                             <div><b>Persona:</b> {aConfig.voicePersona || 'Indonesian_SweetGirl'}</div>
@@ -1829,11 +1829,11 @@ function MultiplierLabPageContent() {
                                         </div>
                                         {t.remake_storyboard_json ? (
                                           JSON.parse(t.remake_storyboard_json).map((scene, sIdx) => (
-                                            <div key={sIdx} style={{ background: 'var(--bg-secondary)', padding: 12, borderRadius: 6, border: '1px solid rgba(255,255,255,0.03)' }}>
+                                            <div key={sIdx} style={{ background: 'var(--bg-secondary)', padding: 12, borderRadius: 6, border: '1px solid var(--surface-interactive)' }}>
                                               <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--info)', marginBottom: 4 }}>
                                                 Adegan {scene.scene || sIdx + 1}
                                               </div>
-                                              <div style={{ fontSize: '0.82rem', color: '#fff', fontStyle: 'italic', lineHeight: 1.4 }}>
+                                              <div style={{ fontSize: '0.82rem', color: 'var(--text-primary)', fontStyle: 'italic', lineHeight: 1.4 }}>
                                                 "{scene.narration_transcript || scene.voiceover || '-'}"
                                               </div>
                                             </div>
@@ -1854,14 +1854,14 @@ function MultiplierLabPageContent() {
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                                   {t.t2i_i2v_prompts_json ? (
                                     JSON.parse(t.t2i_i2v_prompts_json).map((pObj, pIdx) => (
-                                      <div key={pIdx} style={{ background: 'var(--bg-secondary)', padding: 12, borderRadius: 6, border: '1px solid rgba(255,255,255,0.03)' }}>
+                                      <div key={pIdx} style={{ background: 'var(--bg-secondary)', padding: 12, borderRadius: 6, border: '1px solid var(--surface-interactive)' }}>
                                         <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6 }}>
                                           Klip {pObj.scene || pIdx + 1}
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                                          {pObj.t2v_prompt && <div><b>T2V Prompt:</b> <span style={{ color: '#fff' }}>{pObj.t2v_prompt}</span></div>}
-                                          {pObj.t2i_prompt && <div><b>T2I Prompt:</b> <span style={{ color: '#fff' }}>{pObj.t2i_prompt}</span></div>}
-                                          {pObj.i2v_prompt && <div><b>I2V Motion:</b> <span style={{ color: '#fff' }}>{pObj.i2v_prompt}</span></div>}
+                                          {pObj.t2v_prompt && <div><b>T2V Prompt:</b> <span style={{ color: 'var(--text-primary)' }}>{pObj.t2v_prompt}</span></div>}
+                                          {pObj.t2i_prompt && <div><b>T2I Prompt:</b> <span style={{ color: 'var(--text-primary)' }}>{pObj.t2i_prompt}</span></div>}
+                                          {pObj.i2v_prompt && <div><b>I2V Motion:</b> <span style={{ color: 'var(--text-primary)' }}>{pObj.i2v_prompt}</span></div>}
                                           {!pObj.t2v_prompt && !pObj.t2i_prompt && !pObj.i2v_prompt && <div style={{ color: 'var(--text-muted)' }}>Tidak ada prompt visual untuk klip ini.</div>}
                                         </div>
                                       </div>
@@ -1881,7 +1881,7 @@ function MultiplierLabPageContent() {
                                     <pre style={{
                                       background: 'var(--bg-secondary)', padding: 16, borderRadius: 6, fontSize: '0.8rem',
                                       color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', fontFamily: 'inherit', margin: 0,
-                                      border: '1px solid rgba(255,255,255,0.03)', lineHeight: 1.5
+                                      border: '1px solid var(--surface-interactive)', lineHeight: 1.5
                                     }}>
                                       {t.new_caption}
                                     </pre>
@@ -1896,7 +1896,7 @@ function MultiplierLabPageContent() {
                               {/* Tab Content 5: logs */}
                               {activeTab === 'logs' && (
                                 <pre style={{
-                                  background: '#07070a', padding: '16px', borderRadius: 6, fontSize: '0.78rem',
+                                  background: 'var(--surface)', padding: '16px', borderRadius: 6, fontSize: '0.78rem',
                                   color: '#20c20e', fontFamily: 'var(--font-mono)', margin: 0,
                                   border: '1px solid var(--border)', maxHeight: '250px', overflowY: 'auto',
                                   lineHeight: 1.5, whiteSpace: 'pre-wrap'
@@ -1939,7 +1939,7 @@ function MultiplierLabPageContent() {
                 </div>
               )}
             </div>
-            
+
           </div>
 
         </div>
@@ -1950,8 +1950,8 @@ function MultiplierLabPageContent() {
         <div style={{
           position: 'fixed', bottom: 24, right: 24, zIndex: 1000,
           background: toast.type === 'error' ? 'var(--danger)' : 'var(--success)',
-          color: '#fff', padding: '12px 24px', borderRadius: 8, fontSize: '0.85rem', fontWeight: 600,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', gap: 8
+          color: 'var(--text-primary)', padding: '12px 24px', borderRadius: 8, fontSize: '0.85rem', fontWeight: 600,
+          boxShadow: '0 4px 12px var(--overlay-subtle)', display: 'flex', alignItems: 'center', gap: 8
         }}>
           <span>{toast.type === 'error' ? '⚠️' : '✓'}</span>
           <span>{toast.msg}</span>
@@ -1966,7 +1966,7 @@ export default function MultiplierLabPage() {
     <Suspense fallback={
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--bg-main)', color: 'var(--text-primary)' }}>
         <div style={{ textAlign: 'center' }}>
-          <div className="spinner" style={{ width: 40, height: 40, border: '4px solid rgba(255,255,255,0.1)', borderTopColor: 'var(--accent)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+          <div className="spinner" style={{ width: 40, height: 40, border: '4px solid var(--border-subtle)', borderTopColor: 'var(--accent)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
           <p style={{ marginTop: 16, fontSize: '0.9rem', color: 'var(--text-muted)' }}>Memuat Multiplier Lab...</p>
         </div>
       </div>

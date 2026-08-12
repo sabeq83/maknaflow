@@ -318,7 +318,7 @@ export default function VideoStudio() {
       }
 
       setStatusMessage('Sukses! Render job ditambahkan ke antrean.');
-      
+
       // Reset upload states
       setVideoFiles([]);
       setVideoDbIds([]);
@@ -403,7 +403,7 @@ export default function VideoStudio() {
             {/* PANEL KIRI: CONTROL & CONFIG */}
             <div className="studio-control-panel">
               <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                
+
                 {/* 1. Sumber Video */}
                 <div className="media-section">
                   <h3>1. Sumber Video (Visual)</h3>
@@ -460,18 +460,18 @@ export default function VideoStudio() {
                       />
                       {videoFiles.length > 0 ? (
                         <div style={{ textAlign: 'left', width: '100%' }}>
-                          <p style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#e2e8f0', marginBottom: '6px' }}>
+                          <p style={{ fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '6px' }}>
                             Klip Terpilih ({videoFiles.length}):
                           </p>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxHeight: '150px', overflowY: 'auto' }}>
                             {videoFiles.map((file, idx) => (
-                              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.04)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
-                                <span style={{ color: '#38bdf8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '80%' }}>
+                              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
+                                <span style={{ color: 'var(--link)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '80%' }}>
                                   {idx + 1}. {file.name} ({(file.size / (1024 * 1024)).toFixed(2)} MB)
                                 </span>
                                 <button
                                   type="button"
-                                  style={{ background: 'transparent', border: 'none', color: '#f87171', cursor: 'pointer' }}
+                                  style={{ background: 'transparent', border: 'none', color: 'var(--status-danger)', cursor: 'pointer' }}
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setVideoFiles(prev => prev.filter((_, i) => i !== idx));
@@ -482,7 +482,7 @@ export default function VideoStudio() {
                               </div>
                             ))}
                           </div>
-                          <p style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '6px', textAlign: 'center' }}>
+                          <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '6px', textAlign: 'center' }}>
                             (Klik/seret lagi untuk menambah klip)
                           </p>
                         </div>
@@ -506,9 +506,9 @@ export default function VideoStudio() {
                           <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#a5b4fc', marginBottom: '4px' }}>✅ Terpilih ({selectedCampaignVideos.length}):</p>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', maxHeight: '100px', overflowY: 'auto' }}>
                             {selectedCampaignVideos.map((v, idx) => (
-                              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.04)', padding: '3px 6px', borderRadius: '4px', fontSize: '0.7rem' }}>
+                              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)', padding: '3px 6px', borderRadius: '4px', fontSize: '0.7rem' }}>
                                 <span style={{ color: '#a5b4fc', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '85%' }}>{idx + 1}. {v.label}</span>
-                                <button type="button" style={{ background: 'transparent', border: 'none', color: '#f87171', cursor: 'pointer' }} onClick={() => setSelectedCampaignVideos(prev => prev.filter((_, i) => i !== idx))}>×</button>
+                                <button type="button" style={{ background: 'transparent', border: 'none', color: 'var(--status-danger)', cursor: 'pointer' }} onClick={() => setSelectedCampaignVideos(prev => prev.filter((_, i) => i !== idx))}>×</button>
                               </div>
                             ))}
                           </div>
@@ -533,7 +533,7 @@ export default function VideoStudio() {
                               if (filtered.length === 0) {
                                 return <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', padding: '8px', margin: 0, textAlign: 'center' }}>Tidak ada hasil pencarian.</p>;
                               }
-                              
+
                               // Group by campaign_name → item_id
                               const byCampaign = {};
                               filtered.forEach(v => {
@@ -542,7 +542,7 @@ export default function VideoStudio() {
                                 if (!byCampaign[v.campaign_name][itemKey]) byCampaign[v.campaign_name][itemKey] = [];
                                 byCampaign[v.campaign_name][itemKey].push(v);
                               });
-                              
+
                               return Object.entries(byCampaign).map(([campaignName, items]) => (
                                 <div key={campaignName} style={{ display: 'flex', flexDirection: 'column' }}>
                                   <div className="multi-select-group-header">📁 {campaignName}</div>
@@ -595,12 +595,12 @@ export default function VideoStudio() {
 
                       {selectedCampaignVideos.length > 0 && (
                         <div style={{ background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.25)', borderRadius: '8px', padding: '8px', marginBottom: '8px' }}>
-                          <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#fbbf24', marginBottom: '4px' }}>✅ Terpilih ({selectedCampaignVideos.length}):</p>
+                          <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--status-warning)', marginBottom: '4px' }}>✅ Terpilih ({selectedCampaignVideos.length}):</p>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', maxHeight: '100px', overflowY: 'auto' }}>
                             {selectedCampaignVideos.map((v, idx) => (
-                              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.04)', padding: '3px 6px', borderRadius: '4px', fontSize: '0.7rem' }}>
-                                <span style={{ color: '#fbbf24', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '85%' }}>{idx + 1}. {v.label}</span>
-                                <button type="button" style={{ background: 'transparent', border: 'none', color: '#f87171', cursor: 'pointer' }} onClick={() => setSelectedCampaignVideos(prev => prev.filter((_, i) => i !== idx))}>×</button>
+                              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)', padding: '3px 6px', borderRadius: '4px', fontSize: '0.7rem' }}>
+                                <span style={{ color: 'var(--status-warning)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '85%' }}>{idx + 1}. {v.label}</span>
+                                <button type="button" style={{ background: 'transparent', border: 'none', color: 'var(--status-danger)', cursor: 'pointer' }} onClick={() => setSelectedCampaignVideos(prev => prev.filter((_, i) => i !== idx))}>×</button>
                               </div>
                             ))}
                           </div>
@@ -625,13 +625,13 @@ export default function VideoStudio() {
                               if (filtered.length === 0) {
                                 return <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', padding: '8px', margin: 0, textAlign: 'center' }}>Tidak ada hasil pencarian.</p>;
                               }
-                              
+
                               const groups = {};
                               filtered.forEach(v => {
                                 if (!groups[v.campaign_name]) groups[v.campaign_name] = [];
                                 groups[v.campaign_name].push(v);
                               });
-                              
+
                               return Object.entries(groups).map(([name, items]) => (
                                 <div key={name} style={{ display: 'flex', flexDirection: 'column' }}>
                                   <div className="multi-select-group-header">⚡ {name}</div>
@@ -672,21 +672,21 @@ export default function VideoStudio() {
                       />
 
                       {videoDbIds.length > 0 && (
-                        <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '8px', padding: '8px', marginBottom: '8px' }}>
-                          <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#e2e8f0', marginBottom: '4px' }}>
+                        <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--surface-interactive)', borderRadius: '8px', padding: '8px', marginBottom: '8px' }}>
+                          <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '4px' }}>
                             Daftar Klip DB Terpilih ({videoDbIds.length}):
                           </p>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', maxHeight: '120px', overflowY: 'auto' }}>
                             {videoDbIds.map((id, idx) => {
                               const vid = dbVideos.find(v => v.id === id) || { filename: id };
                               return (
-                                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.04)', padding: '3px 6px', borderRadius: '4px', fontSize: '0.7rem' }}>
-                                  <span style={{ color: '#38bdf8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '80%' }}>
+                                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)', padding: '3px 6px', borderRadius: '4px', fontSize: '0.7rem' }}>
+                                  <span style={{ color: 'var(--link)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '80%' }}>
                                     {idx + 1}. {vid.filename}
                                   </span>
                                   <button
                                     type="button"
-                                    style={{ background: 'transparent', border: 'none', color: '#f87171', cursor: 'pointer' }}
+                                    style={{ background: 'transparent', border: 'none', color: 'var(--status-danger)', cursor: 'pointer' }}
                                     onClick={() => setVideoDbIds(prev => prev.filter((_, i) => i !== idx))}
                                   >
                                     &times;
@@ -819,7 +819,7 @@ export default function VideoStudio() {
                 {/* 3. Sinkronisasi & BGM */}
                 <div className="media-section">
                   <h3>3. Strategi Sinkronisasi & BGM</h3>
-                  
+
                   <label className="form-label">Sinkronisasi Audio-Video</label>
                   <select
                     className="form-select"
@@ -841,7 +841,7 @@ export default function VideoStudio() {
                     step="0.05"
                     value={sfxVolume}
                     onChange={(e) => setSfxVolume(parseFloat(e.target.value))}
-                    style={{ width: '100%', accentColor: '#6366f1', marginBottom: '12px' }}
+                    style={{ width: '100%', accentColor: 'var(--status-neutral)', marginBottom: '12px' }}
                   />
 
                   <label className="form-label">Skala Zoom Video: {(videoScale * 100).toFixed(0)}%</label>
@@ -852,7 +852,7 @@ export default function VideoStudio() {
                     step="0.01"
                     value={videoScale}
                     onChange={(e) => setVideoScale(parseFloat(e.target.value))}
-                    style={{ width: '100%', accentColor: '#6366f1', marginBottom: '12px' }}
+                    style={{ width: '100%', accentColor: 'var(--status-neutral)', marginBottom: '12px' }}
                   />
 
                   <label className="form-label">Musik Latar BGM (Opsional)</label>
@@ -877,7 +877,7 @@ export default function VideoStudio() {
                         step="0.05"
                         value={bgmVolume}
                         onChange={(e) => setBgmVolume(parseFloat(e.target.value))}
-                        style={{ width: '100%', accentColor: '#6366f1' }}
+                        style={{ width: '100%', accentColor: 'var(--status-neutral)' }}
                       />
                     </>
                   )}
@@ -919,8 +919,8 @@ export default function VideoStudio() {
                   </div>
                 ) : selectedJob && selectedJob.status === 'failed' ? (
                   <div className="no-preview" style={{ padding: '20px', textAlign: 'center' }}>
-                    <p style={{ color: '#f87171', fontWeight: 'bold' }}>⚠️ Render Gagal</p>
-                    <p style={{ fontSize: '0.8rem', color: '#94a3b8', wordBreak: 'break-all', marginTop: '4px' }}>
+                    <p style={{ color: 'var(--status-danger)', fontWeight: 'bold' }}>⚠️ Render Gagal</p>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', wordBreak: 'break-all', marginTop: '4px' }}>
                       {selectedJob.error_log}
                     </p>
                   </div>
@@ -959,7 +959,7 @@ export default function VideoStudio() {
                               <span>{formatDate(job.created_at)}</span>
                             </div>
                           </div>
-                          
+
                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <span className={`status-badge ${job.status}`}>
                               {job.status}

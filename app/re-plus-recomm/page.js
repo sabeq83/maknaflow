@@ -326,7 +326,7 @@ export default function REPlusRecommPage() {
     }
 
     return (
-      <div className="card" style={{ marginBottom: 24, background: 'rgba(108,92,231,0.04)', borderColor: 'rgba(108,92,231,0.2)' }}>
+      <div className="card" style={{ marginBottom: 24, background: 'rgba(108,92,231,0.04)', borderColor: 'var(--status-neutral-soft)' }}>
         <div className="card-title" style={{ color: 'var(--accent-light)', marginBottom: 12 }}>
           <span className="icon">🧠</span> Analisis Kompetitor (Video Deconstruction)
         </div>
@@ -348,7 +348,7 @@ export default function REPlusRecommPage() {
     <div className="app-layout">
       <Sidebar />
       <main className="main-content" style={{ display: 'flex', padding: 0 }}>
-        
+
         {/* LEFT PANEL: Jobs & Controls */}
         <div style={{
           width: 380,
@@ -441,7 +441,7 @@ export default function REPlusRecommPage() {
                 {jobs.map(j => {
                   const isSelected = selectedJob?.id === j.id;
                   let statusColor = 'var(--text-muted)';
-                  let statusBg = 'rgba(255,255,255,0.06)';
+                  let statusBg = 'var(--surface-interactive)';
                   if (j.status === 'completed') {
                     statusColor = 'var(--success)';
                     statusBg = 'var(--success-glow)';
@@ -461,7 +461,7 @@ export default function REPlusRecommPage() {
                         padding: 14,
                         borderRadius: 'var(--radius-sm)',
                         border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`,
-                        background: isSelected ? 'var(--bg-glass)' : 'rgba(255,255,255,0.01)',
+                        background: isSelected ? 'var(--bg-glass)' : 'var(--surface-interactive)',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                         position: 'relative'
@@ -542,7 +542,7 @@ export default function REPlusRecommPage() {
                     textTransform: 'uppercase',
                     padding: '6px 14px',
                     borderRadius: 20,
-                    background: selectedJob.status === 'completed' ? 'var(--success-glow)' : 'rgba(255,255,255,0.06)',
+                    background: selectedJob.status === 'completed' ? 'var(--success-glow)' : 'var(--surface-interactive)',
                     color: selectedJob.status === 'completed' ? 'var(--success)' : 'var(--text-secondary)'
                   }}>
                     {selectedJob.status}
@@ -596,7 +596,7 @@ export default function REPlusRecommPage() {
 
                         return (
                           <div key={out.id} className="card" style={{ display: 'flex', gap: 24, position: 'relative' }}>
-                            
+
                             {/* Product Reference Image Frame */}
                             <div style={{ width: 140, display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}>
                               <div style={{
@@ -691,11 +691,11 @@ export default function REPlusRecommPage() {
                                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginBottom: 12 }}>
                                     {out.short_description}
                                   </p>
-                                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.05)', padding: '6px 12px', borderRadius: 6, fontSize: '0.8rem' }}>
+                                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--surface-interactive)', padding: '6px 12px', borderRadius: 6, fontSize: '0.8rem' }}>
                                     <span style={{ color: 'var(--warning)' }}>★ USP:</span>
                                     <span style={{ color: 'var(--text-primary)', fontWeight: 550 }}>{out.unique_selling_point}</span>
                                   </div>
-                                  
+
                                   {/* Comp URL source */}
                                   <div style={{ marginTop: 12, fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                                     Di-grounding dari kompetitor: <a href={out.source_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'underline' }}>{out.source_url}</a>
@@ -981,7 +981,7 @@ export default function REPlusRecommPage() {
               {/* FFmpeg Studio & Social settings */}
               <div style={{ border: '1px solid var(--border)', padding: 16, borderRadius: 8, background: 'var(--bg-primary)' }}>
                 <strong style={{ fontSize: '0.9rem', display: 'block', marginBottom: 12 }}>⚡ Alur Kerja & Rendering Muxer (FFmpeg)</strong>
-                
+
                 <div style={{ display: 'flex', gap: 20, marginBottom: 12 }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
                     <input

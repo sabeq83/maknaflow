@@ -63,8 +63,8 @@ export default function TenantManagementPage() {
     setMenuModalTenant(tenant);
     let disabled = [];
     if (tenant.disabled_menus) {
-      disabled = Array.isArray(tenant.disabled_menus) 
-        ? tenant.disabled_menus 
+      disabled = Array.isArray(tenant.disabled_menus)
+        ? tenant.disabled_menus
         : (typeof tenant.disabled_menus === 'string' ? JSON.parse(tenant.disabled_menus) : []);
     }
     setCurrentDisabledMenus(disabled);
@@ -103,7 +103,7 @@ export default function TenantManagementPage() {
 
   const field = (name, label, type = 'text') => (
     <label style={{ display: 'grid', gap: 6 }}>
-      <span style={{ fontSize: 12, color: '#a1a1aa' }}>{label}</span>
+      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{label}</span>
       <input className="form-input" type={type} value={form[name]} onChange={event => setForm({ ...form, [name]: event.target.value })} required={['name', 'admin_username', 'admin_password'].includes(name)} />
     </label>
   );
@@ -118,7 +118,7 @@ export default function TenantManagementPage() {
         <div className="page-header">
           <div><h1>Tenant Management</h1><p>Control-plane untuk tenant, modul sidebar, dan admin organisasi.</p></div>
         </div>
-        {message && <div className="card" style={{ marginBottom: 16, padding: 14, background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)' }}>{message}</div>}
+        {message && <div className="card" style={{ marginBottom: 16, padding: 14, background: 'var(--status-info-soft)', border: '1px solid var(--status-info-soft)' }}>{message}</div>}
         <form className="card" onSubmit={createTenant} style={{ padding: 20, marginBottom: 20 }}>
           <h2 style={{ marginTop: 0 }}>Buat Tenant Baru</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 14 }}>
@@ -147,15 +147,15 @@ export default function TenantManagementPage() {
                 <tr key={tenant.id} style={{ borderTop: '1px solid rgba(255,255,255,.08)' }}>
                   <td style={{ padding: 10 }}>
                     <strong>{tenant.name}</strong>
-                    <div style={{ fontSize: 11, color: '#a1a1aa' }}>{tenant.slug} · {tenant.id}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{tenant.slug} · {tenant.id}</div>
                   </td>
                   <td style={{ padding: 10 }}>
                     <span style={{
                       fontSize: '0.75rem',
                       padding: '2px 8px',
                       borderRadius: '12px',
-                      background: tenant.status === 'active' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                      color: tenant.status === 'active' ? '#10b981' : '#ef4444',
+                      background: tenant.status === 'active' ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
+                      color: tenant.status === 'active' ? 'var(--status-success)' : 'var(--status-danger)',
                       fontWeight: 600
                     }}>
                       {tenant.status}
@@ -166,26 +166,26 @@ export default function TenantManagementPage() {
                   <td style={{ padding: 10 }}>{tenant.brand_count}</td>
                   <td style={{ padding: 10 }}>
                     {disabledCount > 0 ? (
-                      <span style={{ fontSize: '0.8rem', color: '#f59e0b', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--status-warning)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                         🔒 {disabledCount} modul terkunci
                       </span>
                     ) : (
-                      <span style={{ fontSize: '0.8rem', color: '#10b981' }}>✓ Semua Aktif</span>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--status-success)' }}>✓ Semua Aktif</span>
                     )}
                   </td>
                   <td style={{ padding: 10 }}>
                     <div style={{ display: 'flex', gap: 8 }}>
-                      <button 
-                        type="button" 
-                        className="btn" 
-                        style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '6px 12px', fontSize: '0.82rem' }}
+                      <button
+                        type="button"
+                        className="btn"
+                        style={{ background: 'var(--status-info-soft)', color: 'var(--status-info)', border: '1px solid var(--status-info-soft)', padding: '6px 12px', fontSize: '0.82rem' }}
                         onClick={() => openMenuModal(tenant)}
                       >
                         ⚙️ Modul Menu
                       </button>
-                      <button 
-                        type="button" 
-                        className="btn btn-secondary" 
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
                         style={{ padding: '6px 12px', fontSize: '0.82rem' }}
                         onClick={() => setStatus(tenant, tenant.status === 'active' ? 'suspended' : 'active')}
                       >
@@ -207,7 +207,7 @@ export default function TenantManagementPage() {
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(0, 0, 0, 0.75)',
+            background: 'var(--overlay-backdrop)',
             backdropFilter: 'blur(4px)',
             display: 'flex',
             justifyContent: 'center',
@@ -216,7 +216,7 @@ export default function TenantManagementPage() {
             padding: 20
           }}>
             <div className="card" style={{ width: '100%', maxWidth: '750px', maxHeight: '90vh', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
-              
+
               {/* Modal Header */}
               <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
@@ -229,20 +229,20 @@ export default function TenantManagementPage() {
               </div>
 
               {/* Quick Actions Bar */}
-              <div style={{ padding: '12px 24px', borderBottom: '1px solid var(--border-color)', background: 'rgba(255, 255, 255, 0.02)', display: 'flex', gap: 12, alignItems: 'center' }}>
+              <div style={{ padding: '12px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-interactive)', display: 'flex', gap: 12, alignItems: 'center' }}>
                 <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Pintas:</span>
-                <button 
-                  type="button" 
-                  className="btn" 
-                  style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '4px 10px', fontSize: '0.78rem' }}
+                <button
+                  type="button"
+                  className="btn"
+                  style={{ background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success-soft)', padding: '4px 10px', fontSize: '0.78rem' }}
                   onClick={() => setCurrentDisabledMenus([])}
                 >
                   ✓ Aktifkan Semua Modul
                 </button>
-                <button 
-                  type="button" 
-                  className="btn" 
-                  style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '4px 10px', fontSize: '0.78rem' }}
+                <button
+                  type="button"
+                  className="btn"
+                  style={{ background: 'var(--status-danger-soft)', color: 'var(--status-danger)', border: '1px solid var(--status-danger-soft)', padding: '4px 10px', fontSize: '0.78rem' }}
                   onClick={() => setCurrentDisabledMenus(ALL_MENU_KEYS.map(m => m.key))}
                 >
                   🔒 Kunci Semua Modul
@@ -254,14 +254,14 @@ export default function TenantManagementPage() {
                 {categories.map(category => {
                   const categoryMenus = ALL_MENU_KEYS.filter(m => m.category === category);
                   return (
-                    <div key={category} style={{ border: '1px solid var(--border-color)', borderRadius: 8, padding: '14px 18px', background: 'rgba(255, 255, 255, 0.015)' }}>
+                    <div key={category} style={{ border: '1px solid var(--border-color)', borderRadius: 8, padding: '14px 18px', background: 'var(--surface-interactive)' }}>
                       <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: 'var(--accent-color)' }}>{category}</h4>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 10 }}>
                         {categoryMenus.map(menu => {
                           const isDisabled = currentDisabledMenus.includes(menu.key);
                           return (
-                            <div 
-                              key={menu.key} 
+                            <div
+                              key={menu.key}
                               onClick={() => toggleMenu(menu.key)}
                               style={{
                                 display: 'flex',
@@ -269,7 +269,7 @@ export default function TenantManagementPage() {
                                 justifyContent: 'space-between',
                                 padding: '8px 12px',
                                 borderRadius: 6,
-                                border: `1px solid ${isDisabled ? 'rgba(239, 68, 68, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`,
+                                border: `1px solid ${isDisabled ? 'var(--status-danger-soft)' : 'var(--status-success-soft)'}`,
                                 background: isDisabled ? 'rgba(239, 68, 68, 0.05)' : 'rgba(16, 185, 129, 0.05)',
                                 cursor: 'pointer',
                                 transition: 'all 0.15s ease'
@@ -277,14 +277,14 @@ export default function TenantManagementPage() {
                             >
                               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <span style={{ fontSize: '0.85rem' }}>{isDisabled ? '🔒' : '✅'}</span>
-                                <span style={{ fontSize: '0.82rem', fontWeight: 600, color: isDisabled ? '#ef4444' : '#fff' }}>{menu.label}</span>
+                                <span style={{ fontSize: '0.82rem', fontWeight: 600, color: isDisabled ? 'var(--status-danger)' : 'var(--text-primary)' }}>{menu.label}</span>
                               </div>
                               <span style={{
                                 fontSize: '0.72rem',
                                 padding: '2px 6px',
                                 borderRadius: 4,
-                                background: isDisabled ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)',
-                                color: isDisabled ? '#ef4444' : '#10b981',
+                                background: isDisabled ? 'var(--status-danger-soft)' : 'var(--status-success-soft)',
+                                color: isDisabled ? 'var(--status-danger)' : 'var(--status-success)',
                                 fontWeight: 700
                               }}>
                                 {isDisabled ? 'TERKUNCI' : 'AKTIF'}

@@ -153,7 +153,7 @@ export default function ImportPlannerModal({
               };
             });
             setCharacterStatuses(statuses);
-            
+
             // Force visual_mode to hybrid_lock
             setVisualMode('hybrid_lock');
           }
@@ -198,7 +198,7 @@ export default function ImportPlannerModal({
     formData.append('file', file);
     formData.append('universe_profile', planner.universe_profile || 'pawville');
     formData.append('character_id', charKey);
-    
+
     try {
       const res = await fetch('/api/v2/cartoon-universe/manifest', {
         method: 'POST',
@@ -617,45 +617,45 @@ export default function ImportPlannerModal({
 
   return (
     <div style={{
-      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)',
+      position: 'fixed', inset: 0, background: 'var(--overlay-backdrop)',
       display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999
     }}>
       <div style={{
-        background: '#121318', border: '1px solid #27272a', borderRadius: '16px',
+        background: 'var(--surface)', border: '1px solid var(--border-subtle)', borderRadius: '16px',
         width: '100%', maxWidth: '820px', maxHeight: '92vh', overflowY: 'auto', padding: '28px',
-        boxShadow: '0 20px 50px rgba(0,0,0,0.5)', color: '#f3f4f6'
+        boxShadow: '0 20px 50px var(--overlay-backdrop)', color: 'var(--text-primary)'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 700, margin: 0, color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span>🌱</span> Impor Content Planner ke Organic Pillar (OPC)
           </h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#9ca3af', fontSize: '20px', cursor: 'pointer' }}>✕</button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '20px', cursor: 'pointer' }}>✕</button>
         </div>
 
         <form onSubmit={handleSubmit}>
           {/* Top Mode Header Banner */}
           <div style={{
-            padding: '12px 16px', background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.3)',
-            borderRadius: '10px', marginBottom: '16px', color: '#818cf8', fontWeight: 700, fontSize: '13px',
+            padding: '12px 16px', background: 'var(--status-neutral-soft)', border: '1px solid var(--status-neutral-soft)',
+            borderRadius: '10px', marginBottom: '16px', color: 'var(--status-neutral)', fontWeight: 700, fontSize: '13px',
             display: 'flex', alignItems: 'center', gap: '8px'
           }}>
             <span>📊 Mode Impor Content Planner Master ke Engine Produksi Autopilot OPC</span>
           </div>
 
           {/* EXECUTION MODE SWITCHER (Full Auto Pilot vs Manual Review) */}
-          <div style={{ padding: '16px 20px', border: '1px solid #27272a', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.015)', marginBottom: '20px' }}>
-            <label style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85rem', color: '#f3f4f6', fontWeight: 700 }}>
+          <div style={{ padding: '16px 20px', border: '1px solid var(--border-subtle)', borderRadius: '10px', background: 'var(--surface-interactive)', marginBottom: '20px' }}>
+            <label style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 700 }}>
               <span>🚀 Mode Eksekusi Pipeline:</span>
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
-              <div 
+              <div
                 onClick={() => {
                   setExecutionMode('full_autopilot');
                   setVisualMode('pure_t2v');
                 }}
                 style={{
-                  border: `1px solid ${executionMode === 'full_autopilot' ? '#10b981' : '#27272a'}`,
-                  background: executionMode === 'full_autopilot' ? 'rgba(16, 185, 129, 0.08)' : '#18181b',
+                  border: `1px solid ${executionMode === 'full_autopilot' ? 'var(--status-success)' : 'var(--surface)'}`,
+                  background: executionMode === 'full_autopilot' ? 'var(--status-success-soft)' : 'var(--surface)',
                   borderRadius: 8,
                   padding: '12px 16px',
                   cursor: 'pointer',
@@ -663,21 +663,21 @@ export default function ImportPlannerModal({
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ fontWeight: 700, fontSize: '0.9rem', color: executionMode === 'full_autopilot' ? '#10b981' : '#fff' }}>
+                  <span style={{ fontWeight: 700, fontSize: '0.9rem', color: executionMode === 'full_autopilot' ? 'var(--status-success)' : 'var(--text-primary)' }}>
                     🤖 Mode Full Auto Pilot
                   </span>
-                  {executionMode === 'full_autopilot' && <span style={{ fontSize: '0.75rem', background: '#10b981', color: '#fff', padding: '2px 8px', borderRadius: 12, fontWeight: 700 }}>Aktif</span>}
+                  {executionMode === 'full_autopilot' && <span style={{ fontSize: '0.75rem', background: 'var(--status-success)', color: 'var(--text-primary)', padding: '2px 8px', borderRadius: 12, fontWeight: 700 }}>Aktif</span>}
                 </div>
-                <p style={{ fontSize: '0.78rem', color: '#9ca3af', margin: 0, lineHeight: 1.4 }}>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
                   Otomatis jalan penuh dari Storyboard ➔ TTS ➔ G-Labs Video ➔ FFmpeg tanpa jeda review. Visual mode dikunci ke Pure Text-to-Video.
                 </p>
               </div>
 
-              <div 
+              <div
                 onClick={() => setExecutionMode('manual_review')}
                 style={{
-                  border: `1px solid ${executionMode === 'manual_review' ? '#f59e0b' : '#27272a'}`,
-                  background: executionMode === 'manual_review' ? 'rgba(245, 158, 11, 0.08)' : '#18181b',
+                  border: `1px solid ${executionMode === 'manual_review' ? 'var(--status-warning)' : 'var(--surface)'}`,
+                  background: executionMode === 'manual_review' ? 'var(--status-warning-soft)' : 'var(--surface)',
                   borderRadius: 8,
                   padding: '12px 16px',
                   cursor: 'pointer',
@@ -685,12 +685,12 @@ export default function ImportPlannerModal({
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ fontWeight: 700, fontSize: '0.9rem', color: executionMode === 'manual_review' ? '#f59e0b' : '#fff' }}>
+                  <span style={{ fontWeight: 700, fontSize: '0.9rem', color: executionMode === 'manual_review' ? 'var(--status-warning)' : 'var(--text-primary)' }}>
                     👁️ Mode Manual Review (Fase 1 & 2)
                   </span>
-                  {executionMode === 'manual_review' && <span style={{ fontSize: '0.75rem', background: '#f59e0b', color: '#000', padding: '2px 8px', borderRadius: 12 }}>Aktif</span>}
+                  {executionMode === 'manual_review' && <span style={{ fontSize: '0.75rem', background: 'var(--status-warning)', color: '#000', padding: '2px 8px', borderRadius: 12 }}>Aktif</span>}
                 </div>
-                <p style={{ fontSize: '0.78rem', color: '#9ca3af', margin: 0, lineHeight: 1.4 }}>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
                   Fase 1 Discovery berhenti untuk review storyboard & naskah. Fase 2 produksi dijalankan manual setelah persetujuan.
                 </p>
               </div>
@@ -698,18 +698,18 @@ export default function ImportPlannerModal({
           </div>
 
           {/* PRESET SELECTOR */}
-          <div style={{ padding: '16px 24px', background: 'rgba(99, 102, 241, 0.05)', border: '1px solid rgba(99, 102, 241, 0.2)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: '20px' }}>
+          <div style={{ padding: '16px 24px', background: 'var(--status-neutral-soft)', border: '1px solid var(--status-neutral-soft)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: '20px' }}>
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: '#818cf8' }}>📋 Gunakan Preset:</span>
-              <select 
-                value={selectedPresetKey} 
+              <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--status-neutral)' }}>📋 Gunakan Preset:</span>
+              <select
+                value={selectedPresetKey}
                 onChange={(e) => {
                   const key = e.target.value;
                   setSelectedPresetKey(key);
                   const preset = presets.find(p => p.key === key);
                   if (preset) applyPresetToForm(preset);
                 }}
-                style={{ maxWidth: 300, background: '#09090b', color: '#fff', border: '1px solid #27272a', borderRadius: 8, padding: '8px 12px', fontSize: '13px', outline: 'none', cursor: 'pointer' }}
+                style={{ maxWidth: 300, background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '8px 12px', fontSize: '13px', outline: 'none', cursor: 'pointer' }}
               >
                 <option value="">-- Buat dari Awal (Tanpa Preset) --</option>
                 {presets.map(p => (
@@ -725,7 +725,7 @@ export default function ImportPlannerModal({
                   setNewPresetKey('');
                   setShowPresetSaveModal(true);
                 }}
-                style={{ padding: '8px 12px', fontSize: '12px', background: 'rgba(255, 255, 255, 0.05)', color: '#fff', border: '1px solid #27272a', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
+                style={{ padding: '8px 12px', fontSize: '12px', background: 'var(--surface-interactive)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
               >
                 💾 Simpan Form sebagai Preset
               </button>
@@ -734,14 +734,14 @@ export default function ImportPlannerModal({
 
           {/* Structured 4 Accordions Stack */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
-            
+
             {/* ACCORDION 1: Basic Creative Strategy & Planner Master */}
-            <div style={{ background: '#18181b', borderRadius: '10px', border: '1px solid #27272a', overflow: 'hidden' }}>
+            <div style={{ background: 'var(--surface)', borderRadius: '10px', border: '1px solid var(--border-subtle)', overflow: 'hidden' }}>
               <div
                 onClick={() => setActiveAccordion(0)}
                 style={{
-                  padding: '14px 18px', background: activeAccordion === 0 ? 'rgba(99, 102, 241, 0.12)' : '#18181b',
-                  color: activeAccordion === 0 ? '#818cf8' : '#f3f4f6', fontWeight: 700, fontSize: '14px',
+                  padding: '14px 18px', background: activeAccordion === 0 ? 'var(--status-neutral-soft)' : 'var(--surface)',
+                  color: activeAccordion === 0 ? 'var(--status-neutral)' : 'var(--text-primary)', fontWeight: 700, fontSize: '14px',
                   cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                 }}
               >
@@ -753,13 +753,13 @@ export default function ImportPlannerModal({
                 <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   {!initialPlannerId && (
                     <div>
-                      <label style={{ fontSize: '12px', fontWeight: 700, color: '#818cf8', display: 'block', marginBottom: '6px' }}>
+                      <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--status-neutral)', display: 'block', marginBottom: '6px' }}>
                         📊 Pilih Content Planner Master:
                       </label>
                       <select
                         value={selectedPlannerId}
                         onChange={(e) => handleSelectPlanner(e.target.value)}
-                        style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px', fontSize: '13px' }}
+                        style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px', fontSize: '13px' }}
                       >
                         <option value="">-- Pilih Content Planner --</option>
                         {planners.map(p => (
@@ -769,18 +769,18 @@ export default function ImportPlannerModal({
                     </div>
                   )}
                   {loading ? (
-                    <div style={{ fontSize: '13px', color: '#9ca3af', textAlign: 'center', padding: '12px' }}>Memuat detail planner...</div>
+                    <div style={{ fontSize: '13px', color: 'var(--text-muted)', textAlign: 'center', padding: '12px' }}>Memuat detail planner...</div>
                   ) : planner && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       {/* Product Visual Verification Card */}
                       <div style={{
                         padding: '12px 14px', borderRadius: '10px',
-                        background: 'rgba(6, 78, 59, 0.25)', border: '1px solid rgba(16, 185, 129, 0.4)',
+                        background: 'rgba(6, 78, 59, 0.25)', border: '1px solid var(--status-success-soft)',
                         display: 'flex', gap: '12px', alignItems: 'center'
                       }}>
                         <div style={{
                           width: '72px', height: '72px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0,
-                          background: '#18181b', border: '1px solid #27272a', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                          background: 'var(--surface)', border: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center'
                         }}>
                           {productRefImage ? (
                             <img
@@ -797,47 +797,47 @@ export default function ImportPlannerModal({
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
                             <span style={{
                               fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '4px',
-                              background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.4)'
+                              background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success-soft)'
                             }}>
                               ✓ Verified Clean Photo
                             </span>
-                            <span style={{ fontSize: '11px', color: '#9ca3af', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            <span style={{ fontSize: '11px', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {productRefImage ? productRefImage.split('/').pop() : 'Tanpa foto clean'}
                             </span>
                           </div>
-                          <div style={{ fontSize: '14px', fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {planner.planner_focus === 'brand_editorial' ? 'Brand Editorial — produk tidak wajib' : (productName || planner.product_name || 'Tanpa Nama Produk')}
                           </div>
-                          <div style={{ fontSize: '11px', color: '#cbd5e1', marginTop: '2px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                             {productUsp || productDesc || planner.product_description || 'Visual produk terverifikasi untuk proses pembuatan kampanye.'}
                           </div>
                         </div>
                       </div>
 
                       {/* Selected Planner Rows List */}
-                      <div style={{ background: 'rgba(99, 102, 241, 0.08)', padding: '14px', borderRadius: '8px', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
+                      <div style={{ background: 'var(--status-neutral-soft)', padding: '14px', borderRadius: '8px', border: '1px solid var(--status-neutral-soft)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                          <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>
                             📋 Baris Planner ({selectedRowIds.length} dari {rows.length} terpilih) | Platform: {planner.platform?.toUpperCase()}
                           </span>
                           <button
                             type="button"
                             onClick={toggleAllRows}
-                            style={{ background: '#334155', border: 'none', color: '#38bdf8', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', cursor: 'pointer', fontWeight: 600 }}
+                            style={{ background: 'var(--surface-interactive)', border: 'none', color: 'var(--link)', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', cursor: 'pointer', fontWeight: 600 }}
                           >
                             {selectedRowIds.length === rows.length ? 'Batal Pilih Semua' : 'Pilih Semua Row'}
                           </button>
                         </div>
 
-                        <div style={{ maxHeight: '140px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px', background: '#09090b', padding: '8px', borderRadius: '6px', border: '1px solid #27272a' }}>
+                        <div style={{ maxHeight: '140px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px', background: 'var(--surface)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
                           {rows.map(r => (
-                            <label key={r.id} style={{ fontSize: '12px', color: '#d1d5db', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                            <label key={r.id} style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                               <input
                                 type="checkbox"
                                 checked={selectedRowIds.includes(r.id)}
                                 onChange={() => toggleRowSelection(r.id)}
                               />
-                              <span style={{ fontWeight: 600, color: '#818cf8' }}>#{r.sequence} [{r.pillar}]</span>
+                              <span style={{ fontWeight: 600, color: 'var(--status-neutral)' }}>#{r.sequence} [{r.pillar}]</span>
                               <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>{r.hook}</span>
                             </label>
                           ))}
@@ -846,17 +846,17 @@ export default function ImportPlannerModal({
 
                       {/* Character Reference Lock Section */}
                       {manifest && (
-                        <div style={{ background: 'rgba(245, 158, 11, 0.08)', padding: '16px', borderRadius: '10px', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div style={{ background: 'var(--status-warning-soft)', padding: '16px', borderRadius: '10px', border: '1px solid var(--status-warning-soft)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '13px', fontWeight: 700, color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--status-warning)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                               <span>🔒</span> Character Reference Lock (v{manifest.version})
                             </span>
-                            <span style={{ fontSize: '10px', background: 'rgba(245, 158, 11, 0.2)', color: '#f59e0b', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>
+                            <span style={{ fontSize: '10px', background: 'var(--status-warning-soft)', color: 'var(--status-warning)', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>
                               Wajib Aktif
                             </span>
                           </div>
-                          
-                          <p style={{ fontSize: '11px', color: '#cbd5e1', margin: 0, lineHeight: 1.4 }}>
+
+                          <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4 }}>
                             Reference karakter digunakan untuk membuat start frame setiap klip. Reference ini bukan start frame final.
                           </p>
 
@@ -869,8 +869,8 @@ export default function ImportPlannerModal({
                               const previewUrl = status?.previewUrl;
 
                               return (
-                                <div key={charKey} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#09090b', padding: '10px', borderRadius: '8px', border: '1px solid #27272a' }}>
-                                  <div style={{ width: '48px', height: '48px', borderRadius: '6px', overflow: 'hidden', background: '#18181b', border: '1px solid #27272a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                <div key={charKey} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--surface)', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                                  <div style={{ width: '48px', height: '48px', borderRadius: '6px', overflow: 'hidden', background: 'var(--surface)', border: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                     {isAvailable && previewUrl ? (
                                       <img src={previewUrl.startsWith('http') || previewUrl.startsWith('/universe-assets/') ? previewUrl : `/universe-assets/${previewUrl}`} alt={char.display_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     ) : (
@@ -879,23 +879,23 @@ export default function ImportPlannerModal({
                                   </div>
                                   <div style={{ flex: 1, minWidth: 0 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>{char.display_name}</span>
-                                      <span style={{ fontSize: '10px', color: '#9ca3af' }}>v{char.version}</span>
+                                      <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>{char.display_name}</span>
+                                      <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>v{char.version}</span>
                                       <span style={{
                                         fontSize: '10px', fontWeight: 700, padding: '1px 6px', borderRadius: '4px',
-                                        background: isAvailable ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                                        color: isAvailable ? '#34d399' : '#f87171',
-                                        border: isAvailable ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid rgba(239, 68, 68, 0.4)'
+                                        background: isAvailable ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
+                                        color: isAvailable ? 'var(--status-success)' : 'var(--status-danger)',
+                                        border: isAvailable ? '1px solid var(--status-success-soft)' : '1px solid var(--status-danger-soft)'
                                       }}>
                                         {isAvailable ? 'Tersedia kanonis ✅' : 'Belum Tersedia ⚠️'}
                                       </span>
                                     </div>
-                                    <div style={{ fontSize: '10px', color: '#9ca3af', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                       {char.canonical_description}
                                     </div>
                                   </div>
                                   <div>
-                                    <label style={{ display: 'inline-block', background: '#27272a', color: '#fff', fontSize: '11px', fontWeight: 600, padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', border: '1px solid #3f3f46' }}>
+                                    <label style={{ display: 'inline-block', background: 'var(--surface)', color: 'var(--text-primary)', fontSize: '11px', fontWeight: 600, padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', border: '1px solid var(--border-strong)' }}>
                                       📤 {isAvailable ? 'Ganti Foto' : 'Unggah Foto'}
                                       <input
                                         type="file"
@@ -915,9 +915,9 @@ export default function ImportPlannerModal({
                   )}
 
                   <div>
-                    <label style={{ fontSize: '12px', color: '#9ca3af', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                       <span>🏷️ Nama Akun (Brand Account):</span>
-                      <span style={{ fontSize: '11px', color: '#818cf8', fontWeight: 600 }}>💡 Terisi Otomatis dari Planner</span>
+                      <span style={{ fontSize: '11px', color: 'var(--status-neutral)', fontWeight: 600 }}>💡 Terisi Otomatis dari Planner</span>
                     </label>
                     <select
                       value={selectedBrandId}
@@ -931,8 +931,8 @@ export default function ImportPlannerModal({
                         setCampaignName(`[ OPC ${dateStr} ] - ${newAcc ? newAcc + ' - ' : ''}`);
                       }}
                       style={{
-                        width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a',
-                        color: '#fff', borderRadius: '8px'
+                        width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)',
+                        color: 'var(--text-primary)', borderRadius: '8px'
                       }}
                     >
                       <option value="">-- Pilih Nama Akun Brand --</option>
@@ -945,23 +945,23 @@ export default function ImportPlannerModal({
                   </div>
 
                   <div>
-                    <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Nama Kampanye OPC:</label>
+                    <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Nama Kampanye OPC:</label>
                     <input
                       type="text"
                       value={campaignName}
                       onChange={e => setCampaignName(e.target.value)}
                       placeholder="cth: [OPC Planner] Kampanye Produk"
-                      style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
+                      style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                       required
                     />
                   </div>
 
                   <div>
-                    <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Mode Narasi:</label>
+                    <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Mode Narasi:</label>
                     <select
                       value={narrativeMode}
                       onChange={e => setNarrativeMode(e.target.value)}
-                      style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
+                      style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                     >
                       <option value="auto">✨ Auto-Detect dari Content Planner (Rekomendasi)</option>
                       <option value="Storytelling">Storytelling (Bercerita / Vlog)</option>
@@ -971,45 +971,45 @@ export default function ImportPlannerModal({
                   </div>
 
                   <div>
-                    <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>AI Directive / Guardrail (Staging Override):</label>
+                    <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>AI Directive / Guardrail (Staging Override):</label>
                     <textarea
                       value={aiDirective}
                       onChange={e => setAiDirective(e.target.value)}
                       rows={2}
                       placeholder="Instruksi kontrol AI internal..."
-                      style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px', fontSize: '12px', resize: 'vertical' }}
+                      style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px', fontSize: '12px', resize: 'vertical' }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Mandatory Outro Line (Staging Override):</label>
+                    <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Mandatory Outro Line (Staging Override):</label>
                     <input
                       type="text"
                       value={mandatoryOutroLine}
                       onChange={e => setMandatoryOutroLine(e.target.value)}
                       placeholder="Kalimat wajib di akhir klip voiceover..."
-                      style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px', fontSize: '12px' }}
+                      style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px', fontSize: '12px' }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Custom Instruction (Instruksi Tambahan AI):</label>
+                    <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Custom Instruction (Instruksi Tambahan AI):</label>
                     <textarea
                       value={customInstruction}
                       onChange={e => setCustomInstruction(e.target.value)}
                       rows={3}
                       placeholder="Instruksi tambahan untuk prompt generator AI..."
-                      style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px', fontSize: '12px', resize: 'vertical' }}
+                      style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px', fontSize: '12px', resize: 'vertical' }}
                     />
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
                     <div>
-                      <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>TTS Voice Provider:</label>
+                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>TTS Voice Provider:</label>
                       <select
                         value={voiceProvider}
                         onChange={e => setVoiceProvider(e.target.value)}
-                        style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
+                        style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                       >
                         <option value="minimax">MiniMax AI Voice (Indonesian)</option>
                         <option value="gemini">Gemini Live TTS</option>
@@ -1017,11 +1017,11 @@ export default function ImportPlannerModal({
                     </div>
 
                     <div>
-                      <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Bahasa Naskah Voiceover:</label>
+                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Bahasa Naskah Voiceover:</label>
                       <select
                         value={targetLanguage}
                         onChange={e => setTargetLanguage(e.target.value)}
-                        style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
+                        style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                       >
                         <option value="id-ID">Bahasa Indonesia (id-ID)</option>
                         <option value="en-US">English (en-US)</option>
@@ -1029,11 +1029,11 @@ export default function ImportPlannerModal({
                     </div>
 
                     <div>
-                      <label style={{ fontSize: '12px', color: '#818cf8', fontWeight: 700, display: 'block', marginBottom: '6px' }}>🎯 Target Demografi & Tone Bahasa:</label>
+                      <label style={{ fontSize: '12px', color: 'var(--status-neutral)', fontWeight: 700, display: 'block', marginBottom: '6px' }}>🎯 Target Demografi & Tone Bahasa:</label>
                       <select
                         value={targetDemographic}
                         onChange={e => setTargetDemographic(e.target.value)}
-                        style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
+                        style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                       >
                         <option value="genz_casual">Gen-Z & Milenial Muda (Santai, Gaul, Akrab "Kamu/Lo")</option>
                         <option value="ibu_rumah_tangga">Ibu Rumah Tangga & Keluarga (Ramah, Mengayomi "Bunda/Moms")</option>
@@ -1048,17 +1048,17 @@ export default function ImportPlannerModal({
                           placeholder="Contoh: Mahasiswa Rantau yang Hemat"
                           value={targetDemographicCustom}
                           onChange={e => setTargetDemographicCustom(e.target.value)}
-                          style={{ width: '100%', marginTop: '6px', padding: '8px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px', fontSize: '12px' }}
+                          style={{ width: '100%', marginTop: '6px', padding: '8px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px', fontSize: '12px' }}
                         />
                       )}
                     </div>
 
                     <div>
-                      <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Audio Segmenting:</label>
+                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Audio Segmenting:</label>
                       <select
                         value={enableAudioSegment ? 'enabled' : 'disabled'}
                         onChange={e => setEnableAudioSegment(e.target.value === 'enabled')}
-                        style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
+                        style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                       >
                         <option value="disabled">Disabled (Single VO File)</option>
                         <option value="enabled">Enabled (Segment Per Clip)</option>
@@ -1068,11 +1068,11 @@ export default function ImportPlannerModal({
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                     <div>
-                      <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>SFX Setting:</label>
+                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>SFX Setting:</label>
                       <select
                         value={sfxSetting}
                         onChange={e => setSfxSetting(e.target.value)}
-                        style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
+                        style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                       >
                         <option value="without_sfx">🔇 Without SFX (Default)</option>
                         <option value="with_sfx">🔊 With SFX</option>
@@ -1080,11 +1080,11 @@ export default function ImportPlannerModal({
                     </div>
 
                     <div>
-                      <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Audit Kepatuhan TikTok Safe:</label>
+                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Audit Kepatuhan TikTok Safe:</label>
                       <select
                         value={enableVoAudit}
                         onChange={e => setEnableVoAudit(Number(e.target.value))}
-                        style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
+                        style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                       >
                         <option value={1}>✅ Yes (Audit Compliance & Render 2 Versi VO)</option>
                         <option value={0}>❌ No (Tanpa Audit Compliance)</option>
@@ -1094,20 +1094,20 @@ export default function ImportPlannerModal({
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                     <div>
-                      <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>📁 Parent Folder Nextcloud:</label>
+                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>📁 Parent Folder Nextcloud:</label>
                       <input
                         type="text"
                         value={nextcloudParentFolder}
                         onChange={e => setNextcloudParentFolder(e.target.value)}
                         placeholder="cth: /MAKNA_Assets"
-                        style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
+                        style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                       />
                     </div>
                   </div>
 
                   {brandProfiles.length > 0 && (
                     <div>
-                      <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>🧬 Brand Profile (Opsional):</label>
+                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>🧬 Brand Profile (Opsional):</label>
                       <select
                         value={selectedBrandId}
                         onChange={e => {
@@ -1118,7 +1118,7 @@ export default function ImportPlannerModal({
                             setNextcloudParentFolder(profile.nextcloud_target_folder);
                           }
                         }}
-                        style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
+                        style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                       >
                         <option value="">-- Tanpa Brand (Generik) --</option>
                         {brandProfiles.map(bp => (
@@ -1132,12 +1132,12 @@ export default function ImportPlannerModal({
             </div>
 
             {/* ACCORDION 2: Aesthetics & Visual Engine Settings */}
-            <div style={{ background: '#18181b', borderRadius: '10px', border: '1px solid #27272a', overflow: 'hidden' }}>
+            <div style={{ background: 'var(--surface)', borderRadius: '10px', border: '1px solid var(--border-subtle)', overflow: 'hidden' }}>
               <div
                 onClick={() => setActiveAccordion(1)}
                 style={{
-                  padding: '14px 18px', background: activeAccordion === 1 ? 'rgba(99, 102, 241, 0.12)' : '#18181b',
-                  color: activeAccordion === 1 ? '#818cf8' : '#f3f4f6', fontWeight: 700, fontSize: '14px',
+                  padding: '14px 18px', background: activeAccordion === 1 ? 'var(--status-neutral-soft)' : 'var(--surface)',
+                  color: activeAccordion === 1 ? 'var(--status-neutral)' : 'var(--text-primary)', fontWeight: 700, fontSize: '14px',
                   cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                 }}
               >
@@ -1149,8 +1149,8 @@ export default function ImportPlannerModal({
                 <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                     <div>
-                      <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Visual Style (Gaya Visual):</label>
-                      <select value={visualStyle} onChange={e => setVisualStyle(e.target.value)} style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}>
+                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Visual Style (Gaya Visual):</label>
+                      <select value={visualStyle} onChange={e => setVisualStyle(e.target.value)} style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}>
                         <option value="Cinematic">Cinematic</option>
                         <option value="UGC">UGC</option>
                         <option value="Macrophotography">Macrophotography</option>
@@ -1158,28 +1158,28 @@ export default function ImportPlannerModal({
                     </div>
 
                     <div>
-                      <label style={{ fontSize: '12px', color: '#9ca3af', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                         <span>Visual Mode (Metode Generasi):</span>
                         {planner?.content_world === 'cartoon_universe' ? (
-                          <span style={{ fontSize: '11px', color: '#f59e0b', fontWeight: 700 }}>
+                          <span style={{ fontSize: '11px', color: 'var(--status-warning)', fontWeight: 700 }}>
                             🔒 Terkunci Hybrid Lock (Wajib Cartoon)
                           </span>
                         ) : executionMode === 'full_autopilot' && (
-                          <span style={{ fontSize: '11px', color: '#10b981', fontWeight: 700 }}>
+                          <span style={{ fontSize: '11px', color: 'var(--status-success)', fontWeight: 700 }}>
                             🔒 Terkunci Pure T2V
                           </span>
                         )}
                       </label>
-                      <select 
-                        value={planner?.content_world === 'cartoon_universe' ? 'hybrid_lock' : (executionMode === 'full_autopilot' ? 'pure_t2v' : visualMode)} 
-                        onChange={e => setVisualMode(e.target.value)} 
+                      <select
+                        value={planner?.content_world === 'cartoon_universe' ? 'hybrid_lock' : (executionMode === 'full_autopilot' ? 'pure_t2v' : visualMode)}
+                        onChange={e => setVisualMode(e.target.value)}
                         disabled={executionMode === 'full_autopilot' || planner?.content_world === 'cartoon_universe'}
-                        style={{ 
-                          width: '100%', 
-                          padding: '10px', 
-                          background: '#09090b', 
-                          border: '1px solid #27272a', 
-                          color: '#fff', 
+                        style={{
+                          width: '100%',
+                          padding: '10px',
+                          background: 'var(--surface)',
+                          border: '1px solid var(--border-subtle)',
+                          color: 'var(--text-primary)',
                           borderRadius: '8px',
                           opacity: executionMode === 'full_autopilot' ? 0.7 : 1,
                           cursor: executionMode === 'full_autopilot' ? 'not-allowed' : 'pointer'
@@ -1193,7 +1193,7 @@ export default function ImportPlannerModal({
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                     <div>
-                      <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Model Video Veo:</label>
+                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Model Video Veo:</label>
                       <select
                         value={videoModel}
                         onChange={e => {
@@ -1201,7 +1201,7 @@ export default function ImportPlannerModal({
                           setVideoModel(mod);
                           if (mod !== 'omni_flash' && clipDuration === 10) setClipDuration(8);
                         }}
-                        style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
+                        style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                       >
                         <option value="veo_31_lite">Google Veo 3.1 Lite (Standar Cepat)</option>
                         <option value="veo_31_fast">Google Veo 3.1 Fast</option>
@@ -1212,11 +1212,11 @@ export default function ImportPlannerModal({
                     </div>
 
                     <div>
-                      <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Durasi per Klip Video:</label>
+                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Durasi per Klip Video:</label>
                       <select
                         value={clipDuration}
                         onChange={e => setClipDuration(Number(e.target.value))}
-                        style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
+                        style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                       >
                         <option value={4}>4s per klip</option>
                         <option value={6}>6s per klip</option>
@@ -1230,8 +1230,8 @@ export default function ImportPlannerModal({
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '14px' }}>
                     <div>
-                      <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Face Visibility:</label>
-                      <select value={faceVisibility} onChange={e => setFaceVisibility(e.target.value)} style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}>
+                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Face Visibility:</label>
+                      <select value={faceVisibility} onChange={e => setFaceVisibility(e.target.value)} style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}>
                         <option value="Faceless">Faceless (Tanpa Wajah - Fokus Aksi Tangan)</option>
                         <option value="POV">POV (Sudut Pandang Utama)</option>
                         <option value="Silhouette">Silhouette (Siluet Estetik)</option>
@@ -1240,21 +1240,21 @@ export default function ImportPlannerModal({
                     </div>
 
                     <div>
-                      <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Jumlah Klip Video (N):</label>
+                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Jumlah Klip Video (N):</label>
                       <input
                         type="number"
                         min="1"
                         max="12"
                         value={targetClipsCount}
                         onChange={e => setTargetClipsCount(Number(e.target.value))}
-                        style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
+                        style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                         required
                       />
                     </div>
 
                     <div>
-                      <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Batasan Kata per Klip:</label>
-                      <select value={wordsPerClip} onChange={e => setWordsPerClip(e.target.value)} style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}>
+                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Batasan Kata per Klip:</label>
+                      <select value={wordsPerClip} onChange={e => setWordsPerClip(e.target.value)} style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}>
                         <option value="20-22 kata">20-22 kata (Default)</option>
                         <option value="17-19 kata">17-19 kata</option>
                         <option value="15-16 kata">15-16 kata</option>
@@ -1262,8 +1262,8 @@ export default function ImportPlannerModal({
                     </div>
 
                     <div>
-                      <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Aspect Ratio:</label>
-                      <select value={aspectRatio} onChange={e => setAspectRatio(e.target.value)} style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}>
+                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Aspect Ratio:</label>
+                      <select value={aspectRatio} onChange={e => setAspectRatio(e.target.value)} style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}>
                         <option value="9:16">9:16 (Vertical TikTok/Reels)</option>
                         <option value="16:9">16:9 (Horizontal YouTube)</option>
                         <option value="1:1">1:1 (Square Feed)</option>
@@ -1275,12 +1275,12 @@ export default function ImportPlannerModal({
             </div>
 
             {/* ACCORDION 3: Product Bridging Settings */}
-            <div style={{ background: '#18181b', borderRadius: '10px', border: '1px solid #27272a', overflow: 'hidden' }}>
+            <div style={{ background: 'var(--surface)', borderRadius: '10px', border: '1px solid var(--border-subtle)', overflow: 'hidden' }}>
               <div
                 onClick={() => setActiveAccordion(2)}
                 style={{
-                  padding: '14px 18px', background: activeAccordion === 2 ? 'rgba(99, 102, 241, 0.12)' : '#18181b',
-                  color: activeAccordion === 2 ? '#818cf8' : '#f3f4f6', fontWeight: 700, fontSize: '14px',
+                  padding: '14px 18px', background: activeAccordion === 2 ? 'var(--status-neutral-soft)' : 'var(--surface)',
+                  color: activeAccordion === 2 ? 'var(--status-neutral)' : 'var(--text-primary)', fontWeight: 700, fontSize: '14px',
                   cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                 }}
               >
@@ -1290,7 +1290,7 @@ export default function ImportPlannerModal({
 
               {activeAccordion === 2 && (
                 <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#f3f4f6', fontWeight: 600 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: 'var(--text-primary)', fontWeight: 600 }}>
                     <input type="checkbox" checked={isBridgingActive} onChange={e => setIsBridgingActive(e.target.checked)} />
                     Aktifkan Product Bridging (Sisipkan Transisi Produk Softselling)
                   </label>
@@ -1299,21 +1299,21 @@ export default function ImportPlannerModal({
                     <>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
                         <div>
-                          <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Mulai Bridging Klip Ke:</label>
+                          <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Mulai Bridging Klip Ke:</label>
                           <input
                             type="number"
                             min="1"
                             max="10"
                             value={bridgeAtClip}
                             onChange={e => setBridgeAtClip(Number(e.target.value))}
-                            style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
+                            style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                             required
                           />
                         </div>
 
                         <div>
-                          <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Durasi Bridging:</label>
-                          <select value={bridgeDurationClips} onChange={e => setBridgeDurationClips(Number(e.target.value))} style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}>
+                          <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Durasi Bridging:</label>
+                          <select value={bridgeDurationClips} onChange={e => setBridgeDurationClips(Number(e.target.value))} style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}>
                             <option value={1}>1 Klip</option>
                             <option value={2}>2 Klip</option>
                             <option value={0}>0 (Sisa Seluruh Klip)</option>
@@ -1321,8 +1321,8 @@ export default function ImportPlannerModal({
                         </div>
 
                         <div>
-                          <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Metode Penyertaan Produk:</label>
-                          <select value={bridgingMode} onChange={e => setBridgingMode(e.target.value)} style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}>
+                          <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Metode Penyertaan Produk:</label>
+                          <select value={bridgingMode} onChange={e => setBridgingMode(e.target.value)} style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}>
                             <option value="manual_input">📸 Autofetch dari Content Planner Master</option>
                             <option value="select_existing">📦 Pilih Produk Terdaftar</option>
                             <option value="url_extract">🔗 Extract dari URL Marketplace</option>
@@ -1331,7 +1331,7 @@ export default function ImportPlannerModal({
                       </div>
 
                       {/* Autofetch Visual Status Badge */}
-                      <div style={{ padding: '12px 14px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '8px', color: '#10b981', fontSize: '12px' }}>
+                      <div style={{ padding: '12px 14px', background: 'var(--status-success-soft)', border: '1px solid var(--status-success-soft)', borderRadius: '8px', color: 'var(--status-success)', fontSize: '12px' }}>
                         <div style={{ fontWeight: 700, marginBottom: '2px' }}>✓ Data & Foto Studio Produk Terhubung ke Content Planner:</div>
                         <div>• Produk: <b>{productName || 'Mengikuti Planner'}</b></div>
                         <div>• Foto Ref: <b>{productRefImage || 'Tersedia di Planner Master'}</b></div>
@@ -1343,12 +1343,12 @@ export default function ImportPlannerModal({
             </div>
 
             {/* ACCORDION 4: Visual Swap Overrides (100% Copy Persis dari Mass OPC app/pillar-campaigns/page.js) */}
-            <div style={{ background: '#18181b', borderRadius: '10px', border: '1px solid #27272a', overflow: 'hidden' }}>
+            <div style={{ background: 'var(--surface)', borderRadius: '10px', border: '1px solid var(--border-subtle)', overflow: 'hidden' }}>
               <div
                 onClick={() => setActiveAccordion(3)}
                 style={{
-                  padding: '14px 18px', background: activeAccordion === 3 ? 'rgba(99, 102, 241, 0.12)' : '#18181b',
-                  color: activeAccordion === 3 ? '#818cf8' : '#f3f4f6', fontWeight: 700, fontSize: '14px',
+                  padding: '14px 18px', background: activeAccordion === 3 ? 'var(--status-neutral-soft)' : 'var(--surface)',
+                  color: activeAccordion === 3 ? 'var(--status-neutral)' : 'var(--text-primary)', fontWeight: 700, fontSize: '14px',
                   cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                 }}
               >
@@ -1366,7 +1366,7 @@ export default function ImportPlannerModal({
                       onChange={e => setIsVsoActive(e.target.checked)}
                       style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                     />
-                    <label htmlFor="vsoToggleModal" style={{ cursor: 'pointer', fontSize: '14px', fontWeight: 700, color: '#fff' }}>
+                    <label htmlFor="vsoToggleModal" style={{ cursor: 'pointer', fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>
                       🎭 Aktifkan Visual Swap Overrides
                     </label>
                   </div>
@@ -1375,9 +1375,9 @@ export default function ImportPlannerModal({
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                         <div>
-                          <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Konsep Karakter (Framing)</label>
+                          <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Konsep Karakter (Framing)</label>
                           <select
-                            style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
+                            style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                             value={characterConcept}
                             onChange={e => setCharacterConcept(e.target.value)}
                           >
@@ -1390,9 +1390,9 @@ export default function ImportPlannerModal({
                         </div>
 
                         <div>
-                          <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Demografi Subjek / Model</label>
+                          <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Demografi Subjek / Model</label>
                           <select
-                            style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
+                            style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                             value={subjectDemographic}
                             onChange={e => {
                               const val = e.target.value;
@@ -1427,9 +1427,9 @@ export default function ImportPlannerModal({
                       {/* Gaya Animasi — hanya muncul saat mode Semesta Maskot */}
                       {subjectDemographic.startsWith('mascot_universe_') && (
                         <div>
-                          <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>🎨 Gaya Estetika Animasi Maskot</label>
+                          <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>🎨 Gaya Estetika Animasi Maskot</label>
                           <select
-                            style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
+                            style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                             value={visualStylePreset}
                             onChange={e => setVisualStylePreset(e.target.value)}
                           >
@@ -1443,9 +1443,9 @@ export default function ImportPlannerModal({
                       {/* Wardrobe — disembunyikan saat mode Semesta Maskot */}
                       {!subjectDemographic.startsWith('mascot_universe_') && (
                         <div>
-                          <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Pakaian / Wardrobe</label>
+                          <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Pakaian / Wardrobe</label>
                           <select
-                            style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
+                            style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                             value={wardrobeStyle}
                             onChange={e => setWardrobeStyle(e.target.value)}
                           >
@@ -1513,12 +1513,12 @@ export default function ImportPlannerModal({
                           {wardrobeStyle === 'custom' && (
                             <input
                               type="text"
-                              style={{ width: '100%', marginTop: '8px', padding: '8px 10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '6px', fontSize: '12px' }}
+                              style={{ width: '100%', marginTop: '8px', padding: '8px 10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '6px', fontSize: '12px' }}
                               placeholder={
-                                subjectDemographic.startsWith('stylized_3d_') 
-                                  ? "Ketik pakaian 3D kustom..." 
-                                  : subjectDemographic === 'caucasian_male' 
-                                    ? "Ketik pakaian kustom..." 
+                                subjectDemographic.startsWith('stylized_3d_')
+                                  ? "Ketik pakaian 3D kustom..."
+                                  : subjectDemographic === 'caucasian_male'
+                                    ? "Ketik pakaian kustom..."
                                     : "Ketik warna hijab kustom..."
                               }
                               value={wardrobeStyleCustom}
@@ -1529,9 +1529,9 @@ export default function ImportPlannerModal({
                       )}
 
                       <div>
-                        <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '6px' }}>Pencahayaan & Atmosfer (Lighting Ambiance)</label>
+                        <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Pencahayaan & Atmosfer (Lighting Ambiance)</label>
                         <select
-                          style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px' }}
+                          style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                           value={lightingStyle}
                           onChange={e => setLightingStyle(e.target.value)}
                         >
@@ -1545,7 +1545,7 @@ export default function ImportPlannerModal({
                         {lightingStyle === 'custom' && (
                           <input
                             type="text"
-                            style={{ width: '100%', marginTop: '8px', padding: '8px 10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '6px', fontSize: '12px' }}
+                            style={{ width: '100%', marginTop: '8px', padding: '8px 10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '6px', fontSize: '12px' }}
                             placeholder="Ketik pencahayaan kustom..."
                             value={lightingStyleCustom}
                             onChange={e => setLightingStyleCustom(e.target.value)}
@@ -1559,12 +1559,12 @@ export default function ImportPlannerModal({
             </div>
 
             {/* ACCORDION 5: Workflow & Video Studio Settings */}
-            <div style={{ background: '#18181b', borderRadius: '10px', border: '1px solid #27272a', overflow: 'hidden' }}>
+            <div style={{ background: 'var(--surface)', borderRadius: '10px', border: '1px solid var(--border-subtle)', overflow: 'hidden' }}>
               <div
                 onClick={() => setActiveAccordion(4)}
                 style={{
-                  padding: '14px 18px', background: activeAccordion === 4 ? 'rgba(99, 102, 241, 0.12)' : '#18181b',
-                  color: activeAccordion === 4 ? '#818cf8' : '#f3f4f6', fontWeight: 700, fontSize: '14px',
+                  padding: '14px 18px', background: activeAccordion === 4 ? 'var(--status-neutral-soft)' : 'var(--surface)',
+                  color: activeAccordion === 4 ? 'var(--status-neutral)' : 'var(--text-primary)', fontWeight: 700, fontSize: '14px',
                   cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                 }}
               >
@@ -1574,29 +1574,29 @@ export default function ImportPlannerModal({
 
               {activeAccordion === 4 && (
                 <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  
+
                   {/* Active Stages Checklist */}
                   <div>
-                    <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '8px' }}>Tahapan Workflow Aktif:</label>
+                    <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>Tahapan Workflow Aktif:</label>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
-                      
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#09090b', padding: '10px 12px', borderRadius: '8px', border: '1px solid #27272a' }}>
-                        <span style={{ fontSize: '12px', color: '#fff', fontWeight: 500 }}>Enable TTS (Voiceover)</span>
+
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                        <span style={{ fontSize: '12px', color: 'var(--text-primary)', fontWeight: 500 }}>Enable TTS (Voiceover)</span>
                         <input type="checkbox" checked={enableTts} onChange={e => setEnableTts(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#09090b', padding: '10px 12px', borderRadius: '8px', border: '1px solid #27272a' }}>
-                        <span style={{ fontSize: '12px', color: '#fff', fontWeight: 500 }}>Enable G-Labs (AI Video)</span>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                        <span style={{ fontSize: '12px', color: 'var(--text-primary)', fontWeight: 500 }}>Enable G-Labs (AI Video)</span>
                         <input type="checkbox" checked={enableGlabs} onChange={e => setEnableGlabs(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#09090b', padding: '10px 12px', borderRadius: '8px', border: '1px solid #27272a' }}>
-                        <span style={{ fontSize: '12px', color: '#fff', fontWeight: 500 }}>Enable FFmpeg Muxing</span>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                        <span style={{ fontSize: '12px', color: 'var(--text-primary)', fontWeight: 500 }}>Enable FFmpeg Muxing</span>
                         <input type="checkbox" checked={enableFfmpeg} onChange={e => setEnableFfmpeg(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#09090b', padding: '10px 12px', borderRadius: '8px', border: '1px solid #27272a' }}>
-                        <span style={{ fontSize: '12px', color: '#fff', fontWeight: 500 }}>Enable Social Draft Post</span>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                        <span style={{ fontSize: '12px', color: 'var(--text-primary)', fontWeight: 500 }}>Enable Social Draft Post</span>
                         <input type="checkbox" checked={enableSocialPost} onChange={e => setEnableSocialPost(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
                       </div>
 
@@ -1605,14 +1605,14 @@ export default function ImportPlannerModal({
 
                   {/* Audio settings */}
                   {enableTts && (
-                    <div style={{ borderTop: '1px solid #27272a', paddingTop: '14px' }}>
-                      <label style={{ fontSize: '13px', fontWeight: 700, color: '#818cf8', display: 'block', marginBottom: '8px' }}>🔊 TTS Audio Engine Settings</label>
+                    <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '14px' }}>
+                      <label style={{ fontSize: '13px', fontWeight: 700, color: 'var(--status-neutral)', display: 'block', marginBottom: '8px' }}>🔊 TTS Audio Engine Settings</label>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                         <div>
-                          <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '4px' }}>Voice Provider:</label>
-                          <select 
-                            style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px', fontSize: '13px' }}
-                            value={voiceProvider} 
+                          <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Voice Provider:</label>
+                          <select
+                            style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px', fontSize: '13px' }}
+                            value={voiceProvider}
                             onChange={e => setVoiceProvider(e.target.value)}
                           >
                             <option value="minimax">MiniMax VO Engine</option>
@@ -1620,13 +1620,13 @@ export default function ImportPlannerModal({
                           </select>
                         </div>
                         <div>
-                          <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '4px' }}>Voice Persona:</label>
-                          <select 
-                            style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px', fontSize: '13px' }}
-                            value={voicePersona} 
+                          <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Voice Persona:</label>
+                          <select
+                            style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px', fontSize: '13px' }}
+                            value={voicePersona}
                             onChange={e => setVoicePersona(e.target.value)}
                           >
-                            {voiceProvider === 'gemini' 
+                            {voiceProvider === 'gemini'
                               ? GEMINI_VOICES.map(v => <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>)
                               : (targetLanguage === 'en-US' ? MINIMAX_ENGLISH_VOICES : MINIMAX_VOICES).map(v => <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>)
                             }
@@ -1635,12 +1635,12 @@ export default function ImportPlannerModal({
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '10px' }}>
                         <div>
-                          <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '4px' }}>Speed ({voiceSpeed}x):</label>
-                          <input type="range" min="0.5" max="2.0" step="0.1" value={voiceSpeed} onChange={e => setVoiceSpeed(parseFloat(e.target.value))} style={{ width: '100%', accentColor: '#6366f1' }} />
+                          <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Speed ({voiceSpeed}x):</label>
+                          <input type="range" min="0.5" max="2.0" step="0.1" value={voiceSpeed} onChange={e => setVoiceSpeed(parseFloat(e.target.value))} style={{ width: '100%', accentColor: 'var(--status-neutral)' }} />
                         </div>
                         <div>
-                          <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '4px' }}>Volume ({voiceVolume}x):</label>
-                          <input type="range" min="0.0" max="1.0" step="0.1" value={voiceVolume} onChange={e => setVoiceVolume(parseFloat(e.target.value))} style={{ width: '100%', accentColor: '#6366f1' }} />
+                          <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Volume ({voiceVolume}x):</label>
+                          <input type="range" min="0.0" max="1.0" step="0.1" value={voiceVolume} onChange={e => setVoiceVolume(parseFloat(e.target.value))} style={{ width: '100%', accentColor: 'var(--status-neutral)' }} />
                         </div>
                       </div>
                     </div>
@@ -1648,13 +1648,13 @@ export default function ImportPlannerModal({
 
                   {/* FFmpeg Video Studio Settings */}
                   {enableFfmpeg && (
-                    <div style={{ borderTop: '1px solid #27272a', paddingTop: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                      <label style={{ fontSize: '13px', fontWeight: 700, color: '#818cf8' }}>🎬 FFmpeg Video Studio Settings</label>
-                      
+                    <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <label style={{ fontSize: '13px', fontWeight: 700, color: 'var(--status-neutral)' }}>🎬 FFmpeg Video Studio Settings</label>
+
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        <label style={{ fontSize: '12px', color: '#9ca3af' }}>Mode Sinkronisasi Audio-Video:</label>
+                        <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Mode Sinkronisasi Audio-Video:</label>
                         <div style={{ display: 'flex', gap: '20px', marginTop: '2px' }}>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#fff' }}>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: 'var(--text-primary)' }}>
                             <input
                               type="radio"
                               name="syncModePlanner"
@@ -1668,7 +1668,7 @@ export default function ImportPlannerModal({
                             />
                             <span><b>Auto-Pilot Smart Sync</b></span>
                           </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#fff' }}>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: 'var(--text-primary)' }}>
                             <input
                               type="radio"
                               name="syncModePlanner"
@@ -1686,10 +1686,10 @@ export default function ImportPlannerModal({
 
                         {syncMode === 'manual' && (
                           <div style={{ marginTop: '6px' }}>
-                            <label style={{ fontSize: '12px', color: '#9ca3af', display: 'block', marginBottom: '4px' }}>Metode Manual:</label>
-                            <select 
-                              style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px', fontSize: '13px' }}
-                              value={ffmpegSyncOption} 
+                            <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Metode Manual:</label>
+                            <select
+                              style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px', fontSize: '13px' }}
+                              value={ffmpegSyncOption}
                               onChange={e => setFfmpegSyncOption(e.target.value)}
                             >
                               <option value="shortest">shortest (Potong video - Default)</option>
@@ -1702,18 +1702,18 @@ export default function ImportPlannerModal({
                       </div>
 
                       <div>
-                        <label style={{ fontSize: '12px', color: '#9ca3af', display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                        <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                           <span>Video Scale:</span>
-                          <span style={{ color: '#818cf8', fontWeight: 'bold' }}>{Math.round(ffmpegVideoScale * 100)}%</span>
+                          <span style={{ color: 'var(--status-neutral)', fontWeight: 'bold' }}>{Math.round(ffmpegVideoScale * 100)}%</span>
                         </label>
-                        <input 
-                          type="range" 
-                          min="1.0" 
-                          max="2.0" 
-                          step="0.05" 
-                          value={ffmpegVideoScale} 
-                          onChange={e => setFfmpegVideoScale(parseFloat(e.target.value))} 
-                          style={{ width: '100%', accentColor: '#6366f1' }} 
+                        <input
+                          type="range"
+                          min="1.0"
+                          max="2.0"
+                          step="0.05"
+                          value={ffmpegVideoScale}
+                          onChange={e => setFfmpegVideoScale(parseFloat(e.target.value))}
+                          style={{ width: '100%', accentColor: 'var(--status-neutral)' }}
                         />
                       </div>
                     </div>
@@ -1732,9 +1732,9 @@ export default function ImportPlannerModal({
               onClick={onClose}
               style={{
                 padding: '10px 18px',
-                background: '#27272a',
-                color: '#9ca3af',
-                border: '1px solid #3f3f46',
+                background: 'var(--surface)',
+                color: 'var(--text-muted)',
+                border: '1px solid var(--border-strong)',
                 borderRadius: '8px',
                 cursor: 'pointer',
                 fontWeight: 600
@@ -1749,9 +1749,9 @@ export default function ImportPlannerModal({
               onClick={(e) => handleSubmit(e, 'draft')}
               style={{
                 padding: '10px 20px',
-                background: 'rgba(99, 102, 241, 0.15)',
-                color: '#818cf8',
-                border: '1px solid rgba(99, 102, 241, 0.35)',
+                background: 'var(--status-neutral-soft)',
+                color: 'var(--status-neutral)',
+                border: '1px solid var(--status-neutral-soft)',
                 borderRadius: '10px',
                 fontWeight: 700,
                 cursor: submitting ? 'not-allowed' : 'pointer'
@@ -1766,13 +1766,13 @@ export default function ImportPlannerModal({
               onClick={(e) => handleSubmit(e, 'running')}
               style={{
                 padding: '12px 24px',
-                backgroundImage: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                color: '#fff',
+                backgroundImage: 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)',
+                color: 'var(--text-primary)',
                 border: 'none',
                 borderRadius: '10px',
                 fontWeight: 700,
                 cursor: submitting ? 'not-allowed' : 'pointer',
-                boxShadow: '0 4px 14px rgba(99, 102, 241, 0.4)'
+                boxShadow: '0 4px 14px var(--status-neutral-soft)'
               }}
             >
               {submitting && submitStatusTarget === 'running' ? 'Memproses Ingest...' : '✨ Ingest & Launch OPC Campaign'}
@@ -1781,41 +1781,41 @@ export default function ImportPlannerModal({
         </form>
 
         {showPresetSaveModal && (
-          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-            <form onSubmit={handleSaveAsPreset} style={{ background: '#18181b', border: '1px solid #27272a', borderRadius: '12px', width: '100%', maxWidth: '400px', padding: '24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'var(--overlay-backdrop)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+            <form onSubmit={handleSaveAsPreset} style={{ background: 'var(--surface)', border: '1px solid var(--border-subtle)', borderRadius: '12px', width: '100%', maxWidth: '400px', padding: '24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#fff' }}>💾 Simpan sebagai Preset</h3>
-                <button type="button" onClick={() => setShowPresetSaveModal(false)} style={{ background: 'none', border: 'none', color: '#a1a1aa', cursor: 'pointer', fontSize: '1.2rem' }}>×</button>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>💾 Simpan sebagai Preset</h3>
+                <button type="button" onClick={() => setShowPresetSaveModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem' }}>×</button>
               </div>
               <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 0 }}>
-                <label style={{ fontSize: '13px', color: '#a1a1aa' }}>Nama Preset (Label)</label>
-                <input 
-                  type="text" 
-                  value={newPresetLabel} 
+                <label style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Nama Preset (Label)</label>
+                <input
+                  type="text"
+                  value={newPresetLabel}
                   onChange={(e) => {
                     const val = e.target.value;
                     setNewPresetLabel(val);
                     setNewPresetKey(val.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, ''));
-                  }} 
+                  }}
                   placeholder="Contoh: Wardah Brightening v1"
-                  style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px', fontSize: '13px' }}
-                  required 
+                  style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px', fontSize: '13px' }}
+                  required
                 />
               </div>
               <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 0 }}>
-                <label style={{ fontSize: '13px', color: '#a1a1aa' }}>Key Preset (Unique ID)</label>
-                <input 
-                  type="text" 
-                  value={newPresetKey} 
-                  onChange={(e) => setNewPresetKey(e.target.value.toLowerCase().replace(/[^a-z0-9_-]+/g, ''))} 
+                <label style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Key Preset (Unique ID)</label>
+                <input
+                  type="text"
+                  value={newPresetKey}
+                  onChange={(e) => setNewPresetKey(e.target.value.toLowerCase().replace(/[^a-z0-9_-]+/g, ''))}
                   placeholder="Contoh: wardah_brightening_v1"
-                  style={{ width: '100%', padding: '10px', background: '#09090b', border: '1px solid #27272a', color: '#fff', borderRadius: '8px', fontSize: '13px' }}
-                  required 
+                  style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px', fontSize: '13px' }}
+                  required
                 />
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 8 }}>
-                <button type="button" onClick={() => setShowPresetSaveModal(false)} style={{ background: '#27272a', color: '#9ca3af', border: '1px solid #3f3f46', borderRadius: '6px', padding: '8px 16px', fontWeight: 600, cursor: 'pointer' }}>Batal</button>
-                <button type="submit" style={{ background: '#4f46e5', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 16px', fontWeight: 600, cursor: 'pointer' }}>Simpan Preset</button>
+                <button type="button" onClick={() => setShowPresetSaveModal(false)} style={{ background: 'var(--surface)', color: 'var(--text-muted)', border: '1px solid var(--border-strong)', borderRadius: '6px', padding: '8px 16px', fontWeight: 600, cursor: 'pointer' }}>Batal</button>
+                <button type="submit" style={{ background: 'var(--status-neutral)', color: 'var(--text-primary)', border: 'none', borderRadius: '6px', padding: '8px 16px', fontWeight: 600, cursor: 'pointer' }}>Simpan Preset</button>
               </div>
             </form>
           </div>

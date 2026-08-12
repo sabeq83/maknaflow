@@ -245,7 +245,7 @@ export default function OrganicPillarPage() {
       setEnableSocialPost(config.workflow.enable_social_post || false);
       setUploadMarkdown(config.workflow.upload_markdown ?? true);
       setUploadSpreadsheet(config.workflow.upload_spreadsheet ?? true);
-      
+
       setFfmpegSyncOption(config.workflow.ffmpeg_sync_option || 'smart_sync');
       setFfmpegVideoScale(Number(config.workflow.ffmpeg_video_scale ?? 1.0));
       setFfmpegSfxVolume(Number(config.workflow.ffmpeg_sfx_volume ?? 0.0));
@@ -381,7 +381,7 @@ export default function OrganicPillarPage() {
     pollLogs();
     fetch('/api/v2/brand-profiles').then(r => r.json()).then(d => { if (d.success) setBrandProfiles(d.data || []); }).catch(() => {});
     fetch('/api/product-agent').then(r => r.json()).then(d => { if (d.success) setProducts(d.data || []); }).catch(() => {});
-    
+
     // Fetch user details & presets
     fetch('/api/auth/me')
       .then(r => r.json())
@@ -547,7 +547,7 @@ export default function OrganicPillarPage() {
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
         const data = XLSX.utils.sheet_to_json(ws, { defval: "" });
-        
+
         const getRowVal = (row, aliases) => {
           const normalizedRow = {};
           for (const key of Object.keys(row)) {
@@ -576,7 +576,7 @@ export default function OrganicPillarPage() {
             product_image_url: getRowVal(row, ['Tautan Gambar Produk (Opsional Manual)', 'product_image_url', 'image_url', 'tautan_gambar', 'tautan_gambar_produk', 'tautan gambar produk', 'tautan gambar', 'product image url', 'product_image_url'])
           };
         });
-        
+
         setParsedRows(mapped);
         showToast(`Berhasil membaca ${mapped.length} baris dari file.`);
       } catch (err) {
@@ -598,7 +598,7 @@ export default function OrganicPillarPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      
+
       setManualImages(prev => ({
         ...prev,
         [rowIndex]: {
@@ -627,11 +627,11 @@ export default function OrganicPillarPage() {
         showToast('Unggah file matriks konten terlebih dahulu.', 'error');
         return;
       }
-      
+
       if (isBridgingActive) {
         for (const row of parsedRows) {
           const hasUrl = row.source_product_url && row.source_product_url.trim() !== '';
-          
+
           if (!hasUrl) {
             // Manual input row: all fields must be complete, and image uploaded/linked if hybrid_lock
             const hasManualName = row.product_name && row.product_name.trim() !== '';
@@ -737,7 +737,7 @@ export default function OrganicPillarPage() {
         if (!res.ok) throw new Error(data.error);
 
         showToast(`OPC Mass Campaign "${campaignName}" dengan ${finalRows.length} video berhasil dibuat.`);
-        
+
         setCampaignName('');
         setParsedRows([]);
         setManualImages({});
@@ -892,7 +892,7 @@ export default function OrganicPillarPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       showToast(`OPC Campaign "${campaignName}" berhasil didaftarkan.`);
-      
+
       // Reset Form fields
       setCampaignName('');
       setNextcloudParentFolder('MAKNA_Production_Final');
@@ -906,7 +906,7 @@ export default function OrganicPillarPage() {
       setAiDirective('');
       setMandatoryOutroLine('');
       setSelectedBrandId('');
-      
+
       setIsBridgingActive(false);
       setProductRefImage(null);
       setProductRefImagePath(null);
@@ -930,7 +930,7 @@ export default function OrganicPillarPage() {
           }
         })
         .catch(() => {});
-      
+
       setShowForm(false);
       fetchCampaigns();
       pollLogs();
@@ -1000,7 +1000,7 @@ export default function OrganicPillarPage() {
       setPromotionStyle(c.promotion_style || 'Softselling');
       setBridgingMode(c.bridging_mode || 'select_existing');
       setTargetProductId(c.target_product_id || '');
-      
+
       setManualProductName(c.product_name || '');
       setManualProductDesc(c.product_desc || '');
       setManualProductUsp(c.product_usp || '');
@@ -1147,9 +1147,9 @@ export default function OrganicPillarPage() {
   function renderProgressBar(stats) {
     if (!stats || stats.total === 0) return null;
     const items = [
-      { name: 'Generated', count: stats.generated, color: '#3b82f6' },
+      { name: 'Generated', count: stats.generated, color: 'var(--status-info)' },
       { name: 'Audio', count: stats.tts_completed, color: '#ec4899' },
-      { name: 'Visual', count: stats.visual_completed, color: '#10b981' }
+      { name: 'Visual', count: stats.visual_completed, color: 'var(--status-success)' }
     ];
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: 180 }}>
@@ -1182,16 +1182,16 @@ export default function OrganicPillarPage() {
               <p className="page-subtitle">Rancang storyboard & video organik sandwich (Hook ➜ Product Bridge ➜ Educational Value)</p>
             </div>
             <div style={{ display: 'flex', gap: 12 }}>
-              <button 
-                className="btn" 
-                style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)', border: '1px solid #6366f1', color: '#ffffff', fontWeight: 600 }} 
+              <button
+                className="btn"
+                style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)', border: '1px solid var(--status-neutral)', color: 'var(--text-primary)', fontWeight: 600 }}
                 onClick={() => setShowPlannerModal(true)}
               >
                 📋 Import Content Planner
               </button>
-              <button 
-                className="btn" 
-                style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--border)', color: 'var(--text-primary)' }} 
+              <button
+                className="btn"
+                style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                 onClick={() => setShowImportModal(true)}
               >
                 📥 Import Campaign (.makna)
@@ -1218,36 +1218,36 @@ export default function OrganicPillarPage() {
               </div>
 
               <form onSubmit={handleCreate}>
-                
+
                 {/* Switcher Tab */}
-                <div style={{ display: 'flex', gap: 16, padding: '16px 24px', borderBottom: '1px solid var(--border-color)', background: 'rgba(255, 255, 255, 0.02)' }}>
-                  <button 
-                    type="button" 
-                    onClick={() => setProductionMode('single')} 
+                <div style={{ display: 'flex', gap: 16, padding: '16px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-interactive)' }}>
+                  <button
+                    type="button"
+                    onClick={() => setProductionMode('single')}
                     style={{
                       padding: '8px 16px',
                       borderRadius: 6,
                       border: 'none',
                       fontWeight: 600,
                       cursor: 'pointer',
-                      background: productionMode === 'single' ? 'var(--accent-color)' : 'rgba(255, 255, 255, 0.05)',
-                      color: productionMode === 'single' ? '#fff' : 'var(--text-muted)',
+                      background: productionMode === 'single' ? 'var(--accent-color)' : 'var(--surface-interactive)',
+                      color: productionMode === 'single' ? 'var(--text-primary)' : 'var(--text-muted)',
                       transition: 'all 0.2s ease'
                     }}
                   >
                     Single Video Campaign
                   </button>
-                  <button 
-                    type="button" 
-                    onClick={() => setProductionMode('mass')} 
+                  <button
+                    type="button"
+                    onClick={() => setProductionMode('mass')}
                     style={{
                       padding: '8px 16px',
                       borderRadius: 6,
                       border: 'none',
                       fontWeight: 600,
                       cursor: 'pointer',
-                      background: productionMode === 'mass' ? 'var(--accent-color)' : 'rgba(255, 255, 255, 0.05)',
-                      color: productionMode === 'mass' ? '#fff' : 'var(--text-muted)',
+                      background: productionMode === 'mass' ? 'var(--accent-color)' : 'var(--surface-interactive)',
+                      color: productionMode === 'mass' ? 'var(--text-primary)' : 'var(--text-muted)',
                       transition: 'all 0.2s ease'
                     }}
                   >
@@ -1256,12 +1256,12 @@ export default function OrganicPillarPage() {
                 </div>
 
                 {/* EXECUTION MODE SWITCHER (Full Auto Pilot vs Manual Review) */}
-                <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-color)', background: 'rgba(255, 255, 255, 0.015)' }}>
+                <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-interactive)' }}>
                   <label className="form-label" style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85rem' }}>
                     <span>🚀 Mode Eksekusi Pipeline:</span>
                   </label>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
-                    <div 
+                    <div
                       onClick={() => {
                         setExecutionMode('full_autopilot');
                         setVisualMode('pure_t2v');
@@ -1270,8 +1270,8 @@ export default function OrganicPillarPage() {
                         setEnableFfmpeg(true);
                       }}
                       style={{
-                        border: `1px solid ${executionMode === 'full_autopilot' ? '#10b981' : 'var(--border-color)'}`,
-                        background: executionMode === 'full_autopilot' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                        border: `1px solid ${executionMode === 'full_autopilot' ? 'var(--status-success)' : 'var(--border-color)'}`,
+                        background: executionMode === 'full_autopilot' ? 'rgba(16, 185, 129, 0.08)' : 'var(--surface-interactive)',
                         borderRadius: 8,
                         padding: '12px 16px',
                         cursor: 'pointer',
@@ -1279,21 +1279,21 @@ export default function OrganicPillarPage() {
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: executionMode === 'full_autopilot' ? '#10b981' : 'var(--text-color)' }}>
+                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: executionMode === 'full_autopilot' ? 'var(--status-success)' : 'var(--text-color)' }}>
                           🤖 Mode Full Auto Pilot
                         </span>
-                        {executionMode === 'full_autopilot' && <span style={{ fontSize: '0.75rem', background: '#10b981', color: '#fff', padding: '2px 8px', borderRadius: 12, fontWeight: 700 }}>Aktif</span>}
+                        {executionMode === 'full_autopilot' && <span style={{ fontSize: '0.75rem', background: 'var(--status-success)', color: 'var(--text-primary)', padding: '2px 8px', borderRadius: 12, fontWeight: 700 }}>Aktif</span>}
                       </div>
                       <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
                         Otomatis jalan penuh dari Storyboard ➔ TTS ➔ G-Labs Video ➔ FFmpeg tanpa jeda review. Visual mode dikunci ke Pure Text-to-Video.
                       </p>
                     </div>
 
-                    <div 
+                    <div
                       onClick={() => setExecutionMode('manual_review')}
                       style={{
-                        border: `1px solid ${executionMode === 'manual_review' ? '#f59e0b' : 'var(--border-color)'}`,
-                        background: executionMode === 'manual_review' ? 'rgba(245, 158, 11, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                        border: `1px solid ${executionMode === 'manual_review' ? 'var(--status-warning)' : 'var(--border-color)'}`,
+                        background: executionMode === 'manual_review' ? 'var(--status-warning-soft)' : 'var(--surface-interactive)',
                         borderRadius: 8,
                         padding: '12px 16px',
                         cursor: 'pointer',
@@ -1301,10 +1301,10 @@ export default function OrganicPillarPage() {
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: executionMode === 'manual_review' ? '#f59e0b' : 'var(--text-color)' }}>
+                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: executionMode === 'manual_review' ? 'var(--status-warning)' : 'var(--text-color)' }}>
                           👁️ Mode Manual Review (Fase 1 & 2)
                         </span>
-                        {executionMode === 'manual_review' && <span style={{ fontSize: '0.75rem', background: '#f59e0b', color: '#000', padding: '2px 8px', borderRadius: 12 }}>Aktif</span>}
+                        {executionMode === 'manual_review' && <span style={{ fontSize: '0.75rem', background: 'var(--status-warning)', color: '#000', padding: '2px 8px', borderRadius: 12 }}>Aktif</span>}
                       </div>
                       <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
                         Fase 1 Discovery berhenti untuk review storyboard & naskah. Fase 2 produksi dijalankan manual setelah persetujuan.
@@ -1317,8 +1317,8 @@ export default function OrganicPillarPage() {
                 <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-color)', background: 'rgba(59, 130, 246, 0.02)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
                   <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12 }}>
                     <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent-color)' }}>📋 Gunakan Preset:</span>
-                    <select 
-                      value={selectedPresetKey} 
+                    <select
+                      value={selectedPresetKey}
                       onChange={(e) => {
                         const key = e.target.value;
                         setSelectedPresetKey(key);
@@ -1326,7 +1326,7 @@ export default function OrganicPillarPage() {
                         if (preset) applyPresetToForm(preset);
                       }}
                       className="form-input"
-                      style={{ maxWidth: 300, background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: 6, padding: '6px 12px', outline: 'none' }}
+                      style={{ maxWidth: 300, background: 'var(--surface-interactive)', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: 6, padding: '6px 12px', outline: 'none' }}
                     >
                       <option value="">-- Buat dari Awal (Tanpa Preset) --</option>
                       {presets.map(p => (
@@ -1343,7 +1343,7 @@ export default function OrganicPillarPage() {
                         setShowPresetSaveModal(true);
                       }}
                       className="btn btn-secondary btn-sm"
-                      style={{ padding: '6px 12px', fontSize: '13px', background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: '6px', cursor: 'pointer' }}
+                      style={{ padding: '6px 12px', fontSize: '13px', background: 'var(--surface-interactive)', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: '6px', cursor: 'pointer' }}
                     >
                       💾 Simpan Form sebagai Preset
                     </button>
@@ -1352,9 +1352,9 @@ export default function OrganicPillarPage() {
 
                 {/* ACCORDION SECTION 1: Basic Creative Strategy */}
                 <div style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <div 
-                    onClick={() => setActiveAccordion(0)} 
-                    style={{ padding: '16px 24px', background: activeAccordion === 0 ? 'rgba(59, 130, 246, 0.05)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  <div
+                    onClick={() => setActiveAccordion(0)}
+                    style={{ padding: '16px 24px', background: activeAccordion === 0 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                   >
                     <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>1. Basic Creative Strategy</span>
                     <span>{activeAccordion === 0 ? '▲' : '▼'}</span>
@@ -1406,9 +1406,9 @@ export default function OrganicPillarPage() {
                       </div>
                       <div className="form-group" style={{ marginBottom: 0 }}>
                         <label className="form-label">Bahasa Naskah Voiceover (Script Language)</label>
-                        <select 
-                          className="form-input" 
-                          value={targetLanguage} 
+                        <select
+                          className="form-input"
+                          value={targetLanguage}
                           onChange={e => setTargetLanguage(e.target.value)}
                         >
                           <option value="id-ID">🇮🇩 Bahasa Indonesia (Lokal)</option>
@@ -1460,9 +1460,9 @@ export default function OrganicPillarPage() {
                       )}
                       <div className="form-group" style={{ marginBottom: 0 }}>
                         <label className="form-label">SFX Setting</label>
-                        <select 
-                          className="form-input" 
-                          value={sfxSetting} 
+                        <select
+                          className="form-input"
+                          value={sfxSetting}
                           onChange={e => setSfxSetting(e.target.value)}
                         >
                           <option value="without_sfx">🔇 Without SFX (Default)</option>
@@ -1471,9 +1471,9 @@ export default function OrganicPillarPage() {
                       </div>
                       <div className="form-group" style={{ marginBottom: 0 }}>
                         <label className="form-label">Audit Kepatuhan Voiceover (TikTok Safe)</label>
-                        <select 
-                          className="form-input" 
-                          value={enableVoAudit} 
+                        <select
+                          className="form-input"
+                          value={enableVoAudit}
                           onChange={e => setEnableVoAudit(Number(e.target.value))}
                         >
                           <option value={0}>❌ No (Tanpa Audit Kepatuhan)</option>
@@ -1510,7 +1510,7 @@ export default function OrganicPillarPage() {
                           onChange={e => setCustomInstruction(e.target.value)}
                         />
                       </div>
-                      
+
                       {productionMode === 'single' && (
                         <>
                           <div className="form-group">
@@ -1553,30 +1553,30 @@ export default function OrganicPillarPage() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>Upload Matriks Konten (.csv / .xlsx)</span>
-                            <button 
-                              type="button" 
+                            <button
+                              type="button"
                               onClick={downloadTemplate}
-                              className="btn" 
-                              style={{ 
-                                padding: '6px 12px', 
-                                fontSize: '0.8rem', 
-                                background: 'rgba(59, 130, 246, 0.1)', 
-                                color: 'var(--accent-color)', 
-                                border: '1px solid var(--accent-color)' 
+                              className="btn"
+                              style={{
+                                padding: '6px 12px',
+                                fontSize: '0.8rem',
+                                background: 'var(--status-info-soft)',
+                                color: 'var(--accent-color)',
+                                border: '1px solid var(--accent-color)'
                               }}
                             >
                               📥 Download Template .csv
                             </button>
                           </div>
-                          
+
                           {/* Drag & Drop Area */}
-                          <div 
+                          <div
                             style={{
                               border: '2px dashed var(--border-color)',
                               borderRadius: 8,
                               padding: '32px 24px',
                               textAlign: 'center',
-                              background: 'rgba(255, 255, 255, 0.01)',
+                              background: 'var(--surface-interactive)',
                               cursor: 'pointer',
                               transition: 'border-color 0.2s ease'
                             }}
@@ -1592,33 +1592,33 @@ export default function OrganicPillarPage() {
                           >
                             <span style={{ fontSize: '2rem' }}>📂</span>
                             <div style={{ marginTop: 8, fontWeight: 500 }}>Seret & Lepas file .csv atau .xlsx Anda di sini</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--accent-color)', marginTop: 12, padding: '6px 14px', background: 'rgba(255, 255, 255, 0.03)', borderRadius: 8, maxWidth: 650, display: 'inline-block', lineHeight: 1.4, textAlign: 'left', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--accent-color)', marginTop: 12, padding: '6px 14px', background: 'var(--surface-interactive)', borderRadius: 8, maxWidth: 650, display: 'inline-block', lineHeight: 1.4, textAlign: 'left', border: '1px solid var(--surface-interactive)' }}>
                                💡 <b>Petunjuk OPC Massal:</b> Setiap baris wajib memiliki kolom <b>Pilar Konten</b>, <b>Hook</b>, <b>Visual Action</b>, dan <b>link_product</b> (untuk JIT Sourcing otomatis, pengunduhan gambar produk, & optimasi AI). Format ini diselaraskan dengan Sheets Autopilot agar berkas dapat digunakan secara kompatibel.
-                               <a 
-                                 href="/opc_mass_template.csv" 
-                                 download 
-                                 onClick={(e) => e.stopPropagation()} 
+                               <a
+                                 href="/opc_mass_template.csv"
+                                 download
+                                 onClick={(e) => e.stopPropagation()}
                                  style={{ display: 'block', marginTop: 6, color: 'var(--accent-light)', textDecoration: 'underline', fontWeight: 'bold' }}
                                 >
                                  📥 Unduh Template CSV OPC Massal
                                </a>
                              </div>
-                            <input 
-                              id="massFileUploader" 
-                              type="file" 
-                              accept=".csv,.xlsx" 
-                              onChange={handleFileUpload} 
-                              style={{ display: 'none' }} 
+                            <input
+                              id="massFileUploader"
+                              type="file"
+                              accept=".csv,.xlsx"
+                              onChange={handleFileUpload}
+                              style={{ display: 'none' }}
                             />
                           </div>
 
                           {parsedRows.length > 0 && (
                             <div style={{ marginTop: 16 }}>
                               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#10b981' }}>✓ Terdeteksi {parsedRows.length} baris video</span>
-                                <button type="button" onClick={() => setParsedRows([])} style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.8rem', cursor: 'pointer' }}>Hapus Semua</button>
+                                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--status-success)' }}>✓ Terdeteksi {parsedRows.length} baris video</span>
+                                <button type="button" onClick={() => setParsedRows([])} style={{ background: 'transparent', border: 'none', color: 'var(--status-danger)', fontSize: '0.8rem', cursor: 'pointer' }}>Hapus Semua</button>
                               </div>
-                              
+
                               {/* Preview Table */}
                               <div className="table-responsive" style={{ maxHeight: 300, overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: 8 }}>
                                 <table className="table" style={{ width: '100%', fontSize: '0.8rem' }}>
@@ -1653,7 +1653,7 @@ export default function OrganicPillarPage() {
                                                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{row.product_desc.slice(0, 30)}...</div>
                                                 </div>
                                               ) : (
-                                                <span style={{ color: '#ef4444' }}>Tidak ada produk</span>
+                                                <span style={{ color: 'var(--status-danger)' }}>Tidak ada produk</span>
                                               )}
                                             </td>
                                           )}
@@ -1664,15 +1664,15 @@ export default function OrganicPillarPage() {
                                               ) : hasManual ? (
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                                                   {row.product_image_url && row.product_image_url.trim() !== '' ? (
-                                                    <span style={{ color: '#10b981', fontWeight: 600 }} title={row.product_image_url}>✓ Dari URL CSV</span>
+                                                    <span style={{ color: 'var(--status-success)', fontWeight: 600 }} title={row.product_image_url}>✓ Dari URL CSV</span>
                                                   ) : manualImg ? (
-                                                    <span style={{ color: '#10b981', fontWeight: 600 }}>✓ {manualImg.filename}</span>
+                                                    <span style={{ color: 'var(--status-success)', fontWeight: 600 }}>✓ {manualImg.filename}</span>
                                                   ) : (
-                                                    <input 
-                                                      type="file" 
-                                                      accept="image/*" 
+                                                    <input
+                                                      type="file"
+                                                      accept="image/*"
                                                       disabled={uploadingImages[idx]}
-                                                      onChange={e => handleRowImageChange(idx, e.target.files[0])} 
+                                                      onChange={e => handleRowImageChange(idx, e.target.files[0])}
                                                       style={{ width: 130, fontSize: '0.75rem' }}
                                                     />
                                                   )}
@@ -1700,9 +1700,9 @@ export default function OrganicPillarPage() {
 
                 {/* ACCORDION SECTION 2: Aesthetics & Visual Settings */}
                 <div style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <div 
-                    onClick={() => setActiveAccordion(1)} 
-                    style={{ padding: '16px 24px', background: activeAccordion === 1 ? 'rgba(59, 130, 246, 0.05)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  <div
+                    onClick={() => setActiveAccordion(1)}
+                    style={{ padding: '16px 24px', background: activeAccordion === 1 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                   >
                     <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>2. Aesthetics & Visual Settings</span>
                     <span>{activeAccordion === 1 ? '▲' : '▼'}</span>
@@ -1800,14 +1800,14 @@ export default function OrganicPillarPage() {
                         <label className="form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                           <span>Visual Mode</span>
                           {executionMode === 'full_autopilot' && (
-                            <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 600 }}>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--status-success)', fontWeight: 600 }}>
                               🔒 Terkunci Pure T2V (Mode Full Auto Pilot)
                             </span>
                           )}
                         </label>
-                        <select 
-                          className="form-input" 
-                          value={executionMode === 'full_autopilot' ? 'pure_t2v' : visualMode} 
+                        <select
+                          className="form-input"
+                          value={executionMode === 'full_autopilot' ? 'pure_t2v' : visualMode}
                           onChange={e => setVisualMode(e.target.value)}
                           disabled={executionMode === 'full_autopilot'}
                           style={executionMode === 'full_autopilot' ? { opacity: 0.7, cursor: 'not-allowed' } : {}}
@@ -1827,9 +1827,9 @@ export default function OrganicPillarPage() {
 
                 {/* ACCORDION SECTION 3: Product Bridging Settings */}
                 <div style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <div 
-                    onClick={() => setActiveAccordion(2)} 
-                    style={{ padding: '16px 24px', background: activeAccordion === 2 ? 'rgba(59, 130, 246, 0.05)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  <div
+                    onClick={() => setActiveAccordion(2)}
+                    style={{ padding: '16px 24px', background: activeAccordion === 2 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                   >
                     <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>3. Product Bridging Settings</span>
                     <span>{activeAccordion === 2 ? '▲' : '▼'}</span>
@@ -1966,8 +1966,8 @@ export default function OrganicPillarPage() {
                           {visualMode === 'hybrid_lock' && productionMode === 'single' && (
                             <div style={{ background: 'var(--bg-secondary)', padding: 16, borderRadius: 8, display: 'flex', flexDirection: 'column', gap: 12 }}>
                               {bridgingMode === 'select_existing' && targetProductId ? (
-                                <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: 12, borderRadius: 8 }}>
-                                  <div style={{ color: '#10b981', fontWeight: 600, fontSize: '0.85rem' }}>
+                                <div style={{ background: 'var(--status-success-soft)', border: '1px solid var(--status-success-soft)', padding: 12, borderRadius: 8 }}>
+                                  <div style={{ color: 'var(--status-success)', fontWeight: 600, fontSize: '0.85rem' }}>
                                     ✨ Foto Produk & Deklarasi Mandate 88 Otomatis Terhubung dari Database Produk
                                   </div>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
@@ -1983,20 +1983,20 @@ export default function OrganicPillarPage() {
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                                   <div className="form-group" style={{ marginBottom: 0 }}>
                                     <label className="form-label">Foto Referensi Produk</label>
-                                    <input 
-                                      type="file" 
-                                      className="form-input" 
-                                      accept="image/*" 
+                                    <input
+                                      type="file"
+                                      className="form-input"
+                                      accept="image/*"
                                       onChange={e => setProductRefImage(e.target.files[0])}
                                     />
                                   </div>
                                   <div className="form-group" style={{ marginBottom: 0 }}>
                                     <label className="form-label">Deklarasikan Nama Berkas (Declare Filename)</label>
-                                    <input 
-                                      type="text" 
-                                      className="form-input" 
-                                      placeholder="Contoh: botol_serum_biru.png" 
-                                      value={productFilenameDeclare} 
+                                    <input
+                                      type="text"
+                                      className="form-input"
+                                      placeholder="Contoh: botol_serum_biru.png"
+                                      value={productFilenameDeclare}
                                       onChange={e => setProductFilenameDeclare(e.target.value)}
                                     />
                                     <small style={{ color: 'var(--text-muted)' }}>Gunakan nama unik ini sebagai pengenal objek dalam prompt visual</small>
@@ -2013,9 +2013,9 @@ export default function OrganicPillarPage() {
 
                 {/* ACCORDION SECTION 4: Visual Swap Overrides */}
                 <div style={{ borderBottom: 'none' }}>
-                  <div 
-                    onClick={() => setActiveAccordion(3)} 
-                    style={{ padding: '16px 24px', background: activeAccordion === 3 ? 'rgba(59, 130, 246, 0.05)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  <div
+                    onClick={() => setActiveAccordion(3)}
+                    style={{ padding: '16px 24px', background: activeAccordion === 3 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                   >
                     <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>4. Visual Swap Overrides</span>
                     <span>{activeAccordion === 3 ? '▲' : '▼'}</span>
@@ -2050,9 +2050,9 @@ export default function OrganicPillarPage() {
 
                              <div className="form-group">
                                <label className="form-label">Demografi Subjek / Model</label>
-                               <select 
-                                 className="form-input" 
-                                 value={subjectDemographic} 
+                               <select
+                                 className="form-input"
+                                 value={subjectDemographic}
                                  onChange={e => {
                                    const val = e.target.value;
                                    setSubjectDemographic(val);
@@ -2166,10 +2166,10 @@ export default function OrganicPillarPage() {
                                      className="form-input"
                                      style={{ marginTop: 8 }}
                                      placeholder={
-                                       subjectDemographic.startsWith('stylized_3d_') 
-                                         ? "Ketik pakaian 3D kustom..." 
-                                         : subjectDemographic === 'caucasian_male' 
-                                           ? "Ketik pakaian kustom..." 
+                                       subjectDemographic.startsWith('stylized_3d_')
+                                         ? "Ketik pakaian 3D kustom..."
+                                         : subjectDemographic === 'caucasian_male'
+                                           ? "Ketik pakaian kustom..."
                                            : "Ketik warna hijab kustom..."
                                      }
                                      value={wardrobeStyleCustom}
@@ -2209,15 +2209,15 @@ export default function OrganicPillarPage() {
 
                 {/* ACCORDION SECTION 5: Workflow & Video Studio Settings */}
                 <div style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <div 
-                    onClick={() => setActiveAccordion(4)} 
-                    style={{ 
-                      padding: '16px 24px', 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
-                      alignItems: 'center', 
-                      cursor: 'pointer', 
-                      background: activeAccordion === 4 ? 'rgba(59, 130, 246, 0.05)' : 'transparent',
+                  <div
+                    onClick={() => setActiveAccordion(4)}
+                    style={{
+                      padding: '16px 24px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      cursor: 'pointer',
+                      background: activeAccordion === 4 ? 'var(--status-info-soft)' : 'transparent',
                       borderLeft: activeAccordion === 4 ? '3px solid var(--accent-color)' : '3px solid transparent'
                     }}
                   >
@@ -2230,28 +2230,28 @@ export default function OrganicPillarPage() {
 
                   {activeAccordion === 4 && (
                     <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
-                      
+
                       {/* Active Stages Checklist */}
                       <div>
                         <label className="form-label" style={{ marginBottom: 10 }}>Tahapan Workflow Aktif</label>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
-                          
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
+
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-interactive)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
                             <span style={{ fontSize: '0.85rem', color: 'var(--text-color)', fontWeight: '500' }}>Enable TTS (Voiceover)</span>
                             <input type="checkbox" checked={enableTts} onChange={e => setEnableTts(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
                           </div>
 
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-interactive)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
                             <span style={{ fontSize: '0.85rem', color: 'var(--text-color)', fontWeight: '500' }}>Enable G-Labs (AI Video)</span>
                             <input type="checkbox" checked={enableGlabs} onChange={e => setEnableGlabs(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
                           </div>
 
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-interactive)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
                             <span style={{ fontSize: '0.85rem', color: 'var(--text-color)', fontWeight: '500' }}>Enable FFmpeg Muxing</span>
                             <input type="checkbox" checked={enableFfmpeg} onChange={e => setEnableFfmpeg(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
                           </div>
 
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-interactive)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
                             <span style={{ fontSize: '0.85rem', color: 'var(--text-color)', fontWeight: '500' }}>Enable Social Draft Post</span>
                             <input type="checkbox" checked={enableSocialPost} onChange={e => setEnableSocialPost(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
                           </div>
@@ -2273,12 +2273,12 @@ export default function OrganicPillarPage() {
                             </div>
                             <div>
                               <label className="form-label" style={{ fontSize: '0.78rem' }}>Voice Persona</label>
-                              <select 
-                                className="form-input" 
-                                value={voicePersona} 
+                              <select
+                                className="form-input"
+                                value={voicePersona}
                                 onChange={e => setVoicePersona(e.target.value)}
                               >
-                                {voiceProvider === 'gemini' 
+                                {voiceProvider === 'gemini'
                                   ? GEMINI_VOICES.map(v => <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>)
                                   : (targetLanguage === 'en-US' ? MINIMAX_ENGLISH_VOICES : MINIMAX_VOICES).map(v => <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>)
                                 }
@@ -2302,7 +2302,7 @@ export default function OrganicPillarPage() {
                       {enableFfmpeg && (
                         <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
                           <label className="form-label" style={{ fontWeight: 600, color: 'var(--accent-color)' }}>🎬 FFmpeg Video Studio Settings</label>
-                          
+
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                             <label className="form-label" style={{ fontSize: '0.78rem' }}>Mode Sinkronisasi Audio-Video</label>
                             <div style={{ display: 'flex', gap: 24, marginTop: 2 }}>
@@ -2354,15 +2354,15 @@ export default function OrganicPillarPage() {
                               <span>Video Scale:</span>
                               <span style={{ color: 'var(--accent-color)', fontWeight: 'bold' }}>{Math.round(ffmpegVideoScale * 100)}%</span>
                             </label>
-                            <input 
-                              type="range" 
-                              min="1.0" 
-                              max="2.0" 
-                              step="0.05" 
-                              className="form-input" 
-                              value={ffmpegVideoScale} 
-                              onChange={e => setFfmpegVideoScale(parseFloat(e.target.value))} 
-                              style={{ width: '100%', padding: 0 }} 
+                            <input
+                              type="range"
+                              min="1.0"
+                              max="2.0"
+                              step="0.05"
+                              className="form-input"
+                              value={ffmpegVideoScale}
+                              onChange={e => setFfmpegVideoScale(parseFloat(e.target.value))}
+                              style={{ width: '100%', padding: 0 }}
                             />
                           </div>
                         </div>
@@ -2374,11 +2374,11 @@ export default function OrganicPillarPage() {
 
                 {/* Form Footer */}
                 <div style={{ padding: '16px 24px', background: 'var(--bg-secondary)', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-                  <button type="button" className="btn" onClick={() => setShowForm(false)} style={{ background: '#27272a', color: '#9ca3af', border: '1px solid #3f3f46', borderRadius: '8px', padding: '10px 18px', fontWeight: 600 }}>Batal</button>
+                  <button type="button" className="btn" onClick={() => setShowForm(false)} style={{ background: 'var(--surface)', color: 'var(--text-muted)', border: '1px solid #3f3f46', borderRadius: '8px', padding: '10px 18px', fontWeight: 600 }}>Batal</button>
                   <button type="submit" className="btn btn-primary" disabled={creating} onClick={() => setSubmitStatus('running')}>
                     {creating ? 'Membuat...' : '🚀 Buat & Jalankan'}
                   </button>
-                  <button type="submit" className="btn" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.25)' }} disabled={creating} onClick={() => setSubmitStatus('draft')}>
+                  <button type="submit" className="btn" style={{ background: 'var(--status-info-soft)', color: 'var(--status-info)', border: '1px solid var(--status-info-soft)' }} disabled={creating} onClick={() => setSubmitStatus('draft')}>
                     {creating ? 'Menyimpan...' : '💾 Save as Draft'}
                   </button>
                 </div>
@@ -2388,7 +2388,7 @@ export default function OrganicPillarPage() {
           )}
 
           {showPresetSaveModal && (
-            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'var(--overlay-backdrop)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
               <form onSubmit={handleSaveAsPreset} className="card" style={{ width: '100%', maxWidth: '400px', padding: '24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>💾 Simpan sebagai Preset</h3>
@@ -2396,33 +2396,33 @@ export default function OrganicPillarPage() {
                 </div>
                 <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 0 }}>
                   <label style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Nama Preset (Label)</label>
-                  <input 
-                    type="text" 
-                    value={newPresetLabel} 
+                  <input
+                    type="text"
+                    value={newPresetLabel}
                     onChange={(e) => {
                       const val = e.target.value;
                       setNewPresetLabel(val);
                       setNewPresetKey(val.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, ''));
-                    }} 
+                    }}
                     placeholder="Contoh: Wardah Brightening v1"
-                    className="form-input" 
-                    required 
+                    className="form-input"
+                    required
                   />
                 </div>
                 <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 0 }}>
                   <label style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Key Preset (Unique ID)</label>
-                  <input 
-                    type="text" 
-                    value={newPresetKey} 
-                    onChange={(e) => setNewPresetKey(e.target.value.toLowerCase().replace(/[^a-z0-9_-]+/g, ''))} 
+                  <input
+                    type="text"
+                    value={newPresetKey}
+                    onChange={(e) => setNewPresetKey(e.target.value.toLowerCase().replace(/[^a-z0-9_-]+/g, ''))}
                     placeholder="Contoh: wardah_brightening_v1"
-                    className="form-input" 
-                    required 
+                    className="form-input"
+                    required
                   />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 8 }}>
-                  <button type="button" className="btn btn-secondary" onClick={() => setShowPresetSaveModal(false)} style={{ background: '#27272a', color: '#9ca3af', border: '1px solid #3f3f46', borderRadius: '6px', padding: '8px 16px', fontWeight: 600, cursor: 'pointer' }}>Batal</button>
-                  <button type="submit" className="btn btn-primary" style={{ background: 'var(--accent-color)', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 16px', fontWeight: 600, cursor: 'pointer' }}>Simpan Preset</button>
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowPresetSaveModal(false)} style={{ background: 'var(--surface)', color: 'var(--text-muted)', border: '1px solid #3f3f46', borderRadius: '6px', padding: '8px 16px', fontWeight: 600, cursor: 'pointer' }}>Batal</button>
+                  <button type="submit" className="btn btn-primary" style={{ background: 'var(--accent-color)', color: 'var(--text-primary)', border: 'none', borderRadius: '6px', padding: '8px 16px', fontWeight: 600, cursor: 'pointer' }}>Simpan Preset</button>
                 </div>
               </form>
             </div>
@@ -2453,9 +2453,9 @@ export default function OrganicPillarPage() {
               <span style={{
                 fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase',
                 padding: '4px 10px', borderRadius: 12,
-                background: isSchedulerActive ? 'rgba(46, 204, 113, 0.15)' : 'rgba(235, 77, 75, 0.15)',
+                background: isSchedulerActive ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
                 color: isSchedulerActive ? 'var(--success)' : 'var(--danger)',
-                border: `1px solid ${isSchedulerActive ? 'rgba(46, 204, 113, 0.3)' : 'rgba(235, 77, 75, 0.3)'}`
+                border: `1px solid ${isSchedulerActive ? 'var(--status-success-soft)' : 'var(--status-danger-soft)'}`
               }}>
                 {isSchedulerActive ? '🟢 SKEDULER AKTIF' : '🔴 SKEDULER MATI'}
               </span>
@@ -2465,8 +2465,8 @@ export default function OrganicPillarPage() {
                 className={`btn ${(schedulerDetail?.configured ?? isSchedulerActive) ? 'btn-danger' : 'btn-success'}`}
                 style={{
                   fontSize: '0.8rem', padding: '6px 16px', fontWeight: 600,
-                  boxShadow: isSchedulerActive ? '0 0 15px rgba(235, 77, 75, 0.4)' : '0 0 15px rgba(46, 204, 113, 0.4)',
-                  border: isSchedulerActive ? '1px solid rgba(235, 77, 75, 0.6)' : '1px solid rgba(46, 204, 113, 0.6)'
+                  boxShadow: isSchedulerActive ? '0 0 15px var(--status-danger-soft)' : '0 0 15px var(--status-success-soft)',
+                  border: isSchedulerActive ? '1px solid var(--status-danger-soft)' : '1px solid var(--status-success-soft)'
                 }}
               >
                 {(schedulerDetail?.configured ?? isSchedulerActive) ? '🛑 STOP SKEDULER' : '▶️ START SKEDULER'}
@@ -2475,10 +2475,10 @@ export default function OrganicPillarPage() {
           </div>
 
           {/* System Poller Logger */}
-          <div className="card" style={{ padding: '0', background: '#07070a', border: '1px solid var(--border)', marginBottom: '24px' }}>
-            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0b0b12' }}>
+          <div className="card" style={{ padding: '0', background: 'var(--surface)', border: '1px solid var(--border)', marginBottom: '24px' }}>
+            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#00b894', display: 'inline-block', boxShadow: '0 0 8px #00b894' }}></span>
+                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--status-success)', display: 'inline-block', boxShadow: '0 0 8px var(--status-success)' }}></span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>SYSTEM POLLER LOGGER</span>
               </div>
               <button
@@ -2489,7 +2489,7 @@ export default function OrganicPillarPage() {
               </button>
             </div>
             <pre ref={terminalRef} style={{
-              margin: 0, padding: '20px', background: '#07070a', color: '#20c20e',
+              margin: 0, padding: '20px', background: 'var(--surface)', color: '#20c20e',
               fontFamily: 'var(--font-mono)', fontSize: '0.82rem',
               maxHeight: '220px', overflowY: 'auto', lineHeight: '1.5', whiteSpace: 'pre-wrap'
             }}>
@@ -2518,7 +2518,7 @@ export default function OrganicPillarPage() {
                 value={filterBrandId}
                 onChange={e => setFilterBrandId(e.target.value)}
                 style={{
-                  background: 'rgba(255, 255, 255, 0.05)',
+                  background: 'var(--surface-interactive)',
                   border: '1px solid var(--border-color)',
                   color: 'var(--text-primary)',
                   padding: '6px 12px',
@@ -2550,11 +2550,11 @@ export default function OrganicPillarPage() {
                 .map(c => {
                   const isExpanded = expandedCampaignId === c.id;
                   let statusColor = 'var(--text-muted)';
-                  let statusBg = 'rgba(255,255,255,0.06)';
-                  let statusBorder = 'rgba(255,255,255,0.1)';
-                  if (c.status === 'completed') { statusColor = 'var(--success)'; statusBg = 'rgba(46,204,113,0.15)'; statusBorder = 'rgba(46,204,113,0.3)'; }
-                  else if (c.status === 'running') { statusColor = '#3b82f6'; statusBg = 'rgba(59,130,246,0.15)'; statusBorder = 'rgba(59,130,246,0.3)'; }
-                  else if (c.status === 'paused') { statusColor = '#fdcb6e'; statusBg = 'rgba(253,203,110,0.15)'; statusBorder = 'rgba(253,203,110,0.3)'; }
+                  let statusBg = 'var(--surface-interactive)';
+                  let statusBorder = 'var(--border-subtle)';
+                  if (c.status === 'completed') { statusColor = 'var(--success)'; statusBg = 'var(--status-success-soft)'; statusBorder = 'var(--status-success-soft)'; }
+                  else if (c.status === 'running') { statusColor = 'var(--status-info)'; statusBg = 'var(--status-info-soft)'; statusBorder = 'var(--status-info-soft)'; }
+                  else if (c.status === 'paused') { statusColor = 'var(--status-warning)'; statusBg = 'rgba(253,203,110,0.15)'; statusBorder = 'rgba(253,203,110,0.3)'; }
 
                   return (
                     <div
@@ -2570,8 +2570,8 @@ export default function OrganicPillarPage() {
                             <span style={{
                               fontSize: '0.68rem',
                               fontWeight: 700,
-                              background: c.brand_name ? 'rgba(168, 85, 247, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                              border: c.brand_name ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)',
+                              background: c.brand_name ? 'rgba(168, 85, 247, 0.15)' : 'var(--surface-interactive)',
+                              border: c.brand_name ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid var(--border-subtle)',
                               color: c.brand_name ? '#d8b4fe' : 'var(--text-muted)',
                               padding: '2px 8px',
                               borderRadius: '4px',
@@ -2584,7 +2584,7 @@ export default function OrganicPillarPage() {
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                             <span style={{ fontSize: '1.1rem' }}>🌱</span>
                             <strong style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>{c.campaign_name}</strong>
-                            {c.is_mass_production === 1 && <span style={{ fontSize: '0.65rem', background: 'var(--accent)', color: '#fff', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>MASS</span>}
+                            {c.is_mass_production === 1 && <span style={{ fontSize: '0.65rem', background: 'var(--accent)', color: 'var(--text-primary)', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>MASS</span>}
                             <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', padding: '3px 8px', borderRadius: 8, background: statusBg, color: statusColor, border: `1px solid ${statusBorder}` }}>
                               {c.status}
                             </span>
@@ -2596,7 +2596,7 @@ export default function OrganicPillarPage() {
                                 padding: '3px 8px',
                                 borderRadius: 8,
                                 background: 'rgba(52,211,153,0.15)',
-                                color: '#34d399',
+                                color: 'var(--status-success)',
                                 border: '1px solid rgba(52,211,153,0.3)',
                                 display: 'inline-flex',
                                 alignItems: 'center',
@@ -2631,9 +2631,9 @@ export default function OrganicPillarPage() {
                             return (
                               <span key={idx} style={{
                                 padding: '3px 8px', borderRadius: 4, fontSize: '0.68rem', fontWeight: 600,
-                                background: isDone ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.05)',
-                                color: isDone ? '#10b981' : 'var(--text-muted)',
-                                border: `1px solid ${isDone ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.1)'}`
+                                background: isDone ? 'var(--status-success-soft)' : 'var(--surface-interactive)',
+                                color: isDone ? 'var(--status-success)' : 'var(--text-muted)',
+                                border: `1px solid ${isDone ? 'rgba(16,185,129,0.4)' : 'var(--border-subtle)'}`
                               }}>
                                 {isDone ? '✓ ' : ''}{st.label} {pct}%
                               </span>
@@ -2643,7 +2643,7 @@ export default function OrganicPillarPage() {
                       )}
 
                       {/* Action Buttons — rata KIRI, selalu terlihat */}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 12, flexWrap: 'wrap', gap: 10 }} onClick={e => e.stopPropagation()}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--surface-interactive)', paddingTop: 12, flexWrap: 'wrap', gap: 10 }} onClick={e => e.stopPropagation()}>
                         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-start' }}>
                           <button
                             type="button"
@@ -2705,8 +2705,8 @@ export default function OrganicPillarPage() {
                             🗑 Hapus
                           </button>
                         </div>
-                        
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--text-muted)', background: 'rgba(255, 255, 255, 0.04)', padding: '2px 8px', borderRadius: '4px' }}>
+
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--text-muted)', background: 'var(--surface-interactive)', padding: '2px 8px', borderRadius: '4px' }}>
                           🔑 ID: {c.id}
                         </div>
                       </div>
@@ -2733,8 +2733,8 @@ export default function OrganicPillarPage() {
                 <form onSubmit={handleImportSubmit}>
                   <div className="form-group">
                     <label className="form-label">Berkas Kampanye (.makna)</label>
-                    <input 
-                      type="file" 
+                    <input
+                      type="file"
                       accept=".makna"
                       className="form-input"
                       onChange={e => setImportFile(e.target.files[0])}
@@ -2742,11 +2742,11 @@ export default function OrganicPillarPage() {
                     />
                   </div>
                   <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 24 }}>
-                    <button 
-                      type="button" 
-                      className="btn" 
+                    <button
+                      type="button"
+                      className="btn"
                       onClick={() => setShowImportModal(false)}
-                      style={{ background: '#27272a', color: '#9ca3af', border: '1px solid #3f3f46', borderRadius: '8px', padding: '10px 18px', fontWeight: 600 }}
+                      style={{ background: 'var(--surface)', color: 'var(--text-muted)', border: '1px solid #3f3f46', borderRadius: '8px', padding: '10px 18px', fontWeight: 600 }}
                     >
                       Batal
                     </button>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import ThemeToggle from '../components/ThemeToggle';
 
 const EyeIcon = ({ style }) => (
   <svg style={style} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,19 +56,23 @@ export default function LoginPage() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'radial-gradient(circle at top left, #0f172a 0%, #020617 100%)',
+      background: 'radial-gradient(circle at top left, var(--surface-raised) 0%, var(--canvas) 100%)',
       fontFamily: 'Inter, system-ui, sans-serif',
-      color: '#f8fafc'
+      color: 'var(--text-primary)',
+      position: 'relative'
     }}>
+      <div style={{ position: 'absolute', top: '20px', right: '20px', width: '148px' }}>
+        <ThemeToggle />
+      </div>
       <div style={{
         width: '100%',
         maxWidth: '420px',
         padding: '36px',
-        background: 'rgba(15, 23, 42, 0.75)',
+        background: 'color-mix(in srgb, var(--surface) 88%, transparent)',
         backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
+        border: '1px solid var(--border-subtle)',
         borderRadius: '16px',
-        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)'
+        boxShadow: 'var(--shadow-modal)'
       }}>
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <div style={{
@@ -75,7 +80,7 @@ export default function LoginPage() {
             height: '64px',
             margin: '0 auto 16px auto',
             borderRadius: '16px',
-            background: 'linear-gradient(135deg, rgba(0,242,254,0.15), rgba(16,185,129,0.15))',
+            background: 'linear-gradient(135deg, rgba(0,242,254,0.15), var(--status-success-soft))',
             border: '1px solid rgba(0,242,254,0.3)',
             boxShadow: '0 0 24px rgba(0,242,254,0.25)',
             display: 'flex',
@@ -86,17 +91,17 @@ export default function LoginPage() {
               <defs>
                 <linearGradient id="gridGradM_lg" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="#00F2FE" />
-                  <stop offset="50%" stopColor="#3B82F6" />
-                  <stop offset="100%" stopColor="#10B981" />
+                  <stop offset="50%" stopColor="var(--status-info)" />
+                  <stop offset="100%" stopColor="var(--status-success)" />
                 </linearGradient>
               </defs>
               <circle cx="32" cy="32" r="22" fill="rgba(0,242,254,0.12)"/>
               <path d="M16 48 L16 16 L32 34 L48 16 L48 48" stroke="url(#gridGradM_lg)" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M16 28 L24 28 L32 37 L40 28 L48 28" stroke="#00F2FE" strokeWidth="1.5" opacity="0.6" strokeDasharray="2 2"/>
-              <path d="M16 38 L48 38" stroke="#10B981" strokeWidth="1.5" opacity="0.5" strokeDasharray="2 2"/>
+              <path d="M16 38 L48 38" stroke="var(--status-success)" strokeWidth="1.5" opacity="0.5" strokeDasharray="2 2"/>
               <circle cx="16" cy="16" r="3.5" fill="#00F2FE"/>
               <circle cx="48" cy="16" r="3.5" fill="#00F2FE"/>
-              <circle cx="32" cy="34" r="4" fill="#10B981"/>
+              <circle cx="32" cy="34" r="4" fill="var(--status-success)"/>
               <circle cx="16" cy="48" r="3.5" fill="#00F2FE"/>
               <circle cx="48" cy="48" r="3.5" fill="#00F2FE"/>
             </svg>
@@ -104,23 +109,23 @@ export default function LoginPage() {
           <div style={{
             fontSize: '2rem',
             fontWeight: 800,
-            background: 'linear-gradient(135deg, #38bdf8 0%, #10b981 100%)',
+            background: 'linear-gradient(135deg, var(--link) 0%, var(--status-success) 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             letterSpacing: '-0.5px'
           }}>
             MAKNA FLOW
           </div>
-          <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '6px' }}>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '6px' }}>
             Isolated SaaS Content Flow Platform
           </p>
         </div>
 
         {error && (
           <div style={{
-            background: 'rgba(239, 68, 68, 0.15)',
+            background: 'var(--status-danger-soft)',
             border: '1px solid rgba(239, 68, 68, 0.4)',
-            color: '#fca5a5',
+            color: 'var(--status-danger)',
             padding: '10px 14px',
             borderRadius: '8px',
             fontSize: '0.85rem',
@@ -132,7 +137,7 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '18px' }}>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '6px' }}>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
               Username
             </label>
             <input
@@ -144,10 +149,10 @@ export default function LoginPage() {
               style={{
                 width: '100%',
                 padding: '12px 14px',
-                background: 'rgba(30, 41, 59, 0.8)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
+                background: 'var(--input-bg)',
+                border: '1px solid var(--border-subtle)',
                 borderRadius: '8px',
-                color: '#ffffff',
+                color: 'var(--text-primary)',
                 fontSize: '0.9rem',
                 outline: 'none'
               }}
@@ -155,7 +160,7 @@ export default function LoginPage() {
           </div>
 
           <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '6px' }}>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
               Password
             </label>
             <div style={{ position: 'relative' }}>
@@ -168,10 +173,10 @@ export default function LoginPage() {
                 style={{
                   width: '100%',
                   padding: '12px 44px 12px 14px',
-                  background: 'rgba(30, 41, 59, 0.8)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  background: 'var(--input-bg)',
+                  border: '1px solid var(--border-subtle)',
                   borderRadius: '8px',
-                  color: '#ffffff',
+                  color: 'var(--text-primary)',
                   fontSize: '0.9rem',
                   outline: 'none'
                 }}
@@ -181,7 +186,7 @@ export default function LoginPage() {
                 onClick={() => setShowPassword(!showPassword)}
                 style={{
                   position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
-                  background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer',
+                  background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer',
                   padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }}
                 title={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
@@ -201,14 +206,14 @@ export default function LoginPage() {
             style={{
               width: '100%',
               padding: '12px',
-              background: 'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)',
+              background: 'var(--action-primary)',
               border: 'none',
               borderRadius: '8px',
-              color: '#ffffff',
+              color: 'var(--on-action-primary)',
               fontSize: '0.95rem',
               fontWeight: 600,
               cursor: loading ? 'not-allowed' : 'pointer',
-              boxShadow: '0 4px 15px rgba(37, 99, 235, 0.4)',
+              boxShadow: '0 4px 15px var(--accent-glow)',
               transition: 'all 0.2s ease'
             }}
           >

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MAKNA Flow — Theme System Preview</title>
+  <style>
+    *{box-sizing:border-box}html{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    html[data-theme="light"]{color-scheme:light}
+    :root{
+      --canvas:#080c14;--sidebar:#0c121e;--surface:#101827;--surface-2:#162235;--surface-3:#1c2a40;
+      --text:#f4f7fb;--text-2:#b6c2d2;--muted:#8290a5;--line:#26354a;--line-strong:#3c506b;
+      --brand:#2dd4bf;--brand-strong:#5eead4;--brand-soft:rgba(45,212,191,.13);--on-brand:#042f2e;
+      --info:#60a5fa;--info-soft:rgba(96,165,250,.13);--success:#4ade80;--success-soft:rgba(74,222,128,.13);
+      --warning:#fbbf24;--warning-soft:rgba(251,191,36,.13);--danger:#fb7185;--danger-soft:rgba(251,113,133,.13);
+      --focus:#a78bfa;--shadow:0 16px 44px rgba(0,0,0,.28);--radius:14px;--sidebar-w:278px
+    }
+    html[data-theme="light"]{
+      --canvas:#f2f5f8;--sidebar:#ffffff;--surface:#ffffff;--surface-2:#f7f9fc;--surface-3:#edf2f7;
+      --text:#152033;--text-2:#40506a;--muted:#66758a;--line:#d8e0ea;--line-strong:#b9c5d4;
+      --brand:#087f73;--brand-strong:#06665d;--brand-soft:#e2f5f2;--on-brand:#ffffff;
+      --info:#1d63b7;--info-soft:#e8f1fc;--success:#177a43;--success-soft:#e6f5ec;
+      --warning:#925c08;--warning-soft:#fff3d7;--danger:#b4233d;--danger-soft:#fdebef;
+      --focus:#6d4ed6;--shadow:0 14px 38px rgba(31,45,61,.10)
+    }
+    body{margin:0;background:var(--canvas);color:var(--text);min-height:100vh;transition:background .2s,color .2s}
+    button,input,select{font:inherit}button{color:inherit}.app{min-height:100vh;display:grid;grid-template-columns:var(--sidebar-w) minmax(0,1fr)}
+    .sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar-w);background:var(--sidebar);border-right:1px solid var(--line);display:flex;flex-direction:column;z-index:10}
+    .brand{height:82px;padding:17px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}.brand-mark{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--info));color:#fff;display:grid;place-items:center;font-weight:900;box-shadow:0 0 0 5px var(--brand-soft)}
+    .brand-name{font-size:16px;font-weight:850;letter-spacing:.04em}.eyebrow{color:var(--muted);font:700 10px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.11em;text-transform:uppercase}
+    .nav{padding:10px 10px 24px;overflow:auto}.nav-section{padding:18px 10px 7px;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.13em}.nav-item{width:100%;border:0;background:transparent;color:var(--text-2);border-radius:9px;padding:9px 10px;display:flex;align-items:center;gap:10px;text-align:left;cursor:pointer;margin:1px 0;font-size:13px;font-weight:620}.nav-item:hover{background:var(--surface-2);color:var(--text)}.nav-item.active{background:var(--brand-soft);color:var(--brand-strong);box-shadow:inset 3px 0 var(--brand)}.nav-icon{width:24px;text-align:center}.nav-badge{margin-left:auto;border:1px solid var(--line);border-radius:99px;padding:2px 6px;font-size:9px;color:var(--muted)}
+    .sidebar-foot{margin-top:auto;border-top:1px solid var(--line);padding:14px 18px;display:flex;gap:10px;align-items:center}.avatar{width:32px;height:32px;border-radius:50%;background:var(--surface-3);display:grid;place-items:center;color:var(--brand-strong);font-weight:800}.user{font-size:12px;font-weight:700}.role{font-size:10px;color:var(--muted)}
+    .main{grid-column:2;min-width:0}.topbar{height:64px;position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--canvas) 88%,transparent);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);padding:0 28px;display:flex;align-items:center;justify-content:space-between}.crumb{font-size:12px;color:var(--muted)}.crumb strong{color:var(--text-2)}
+    .top-actions,.actions,.filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.icon-btn,.btn,.select,.input{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:9px;min-height:36px;padding:8px 12px}.icon-btn{width:38px;padding:0;display:grid;place-items:center;cursor:pointer}.icon-btn:hover,.btn:hover{border-color:var(--line-strong);background:var(--surface-2)}.btn{font-size:12px;font-weight:750;cursor:pointer}.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}.btn.danger{color:var(--danger);background:var(--danger-soft);border-color:color-mix(in srgb,var(--danger) 35%,var(--line))}.kbd{font-size:10px;color:var(--muted);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:2px 5px}
+    .content{padding:30px;max-width:1640px;margin:auto}.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:22px}.title-wrap{display:flex;gap:13px}.title-icon{width:43px;height:43px;border-radius:12px;background:var(--brand-soft);color:var(--brand-strong);display:grid;place-items:center;font-size:20px}.title{margin:0;font-size:25px;letter-spacing:-.025em}.subtitle{margin:6px 0 0;color:var(--text-2);font-size:13px}.notice{display:flex;gap:10px;padding:12px 14px;border:1px solid color-mix(in srgb,var(--info) 30%,var(--line));background:var(--info-soft);border-radius:11px;margin-bottom:18px;color:var(--text-2);font-size:12px}.notice strong{color:var(--info)}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}.stat{padding:17px}.stat-top{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;font-weight:750}.stat-value{font-size:25px;font-weight:850;margin:9px 0 4px}.trend{font-size:11px;color:var(--success)}
+    .workspace{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,.65fr);gap:16px}.panel{min-width:0}.panel-head{padding:15px 17px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}.panel-title{font-size:13px;font-weight:800}.panel-sub{font-size:11px;color:var(--muted);margin-top:3px}.panel-body{padding:17px}
+    .table{width:100%;border-collapse:collapse;font-size:12px}.table th{text-align:left;color:var(--muted);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:10px;border-bottom:1px solid var(--line);background:var(--surface-2)}.table td{padding:12px 10px;border-bottom:1px solid var(--line);color:var(--text-2)}.table tr:last-child td{border:0}.table strong{color:var(--text)}
+    .badge{display:inline-flex;align-items:center;gap:5px;border-radius:99px;padding:4px 7px;font-size:10px;font-weight:800}.badge:before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}.success{color:var(--success);background:var(--success-soft)}.warning{color:var(--warning);background:var(--warning-soft)}.danger{color:var(--danger);background:var(--danger-soft)}.info{color:var(--info);background:var(--info-soft)}
+    .mini-chart{height:150px;display:flex;align-items:flex-end;gap:9px;padding-top:14px}.bar{flex:1;min-width:10px;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,var(--brand-strong),var(--brand));opacity:.82;position:relative}.bar:hover{opacity:1}.legend{display:flex;justify-content:space-between;color:var(--muted);font-size:10px}.task{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}.task:last-child{border:0}.task-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;background:var(--brand)}.task-title{font-size:12px;font-weight:700}.task-meta{font-size:10px;color:var(--muted);margin-top:3px}
+    .swatches{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.swatch{height:58px;border-radius:9px;border:1px solid var(--line);display:flex;align-items:flex-end;padding:7px;font-size:9px;font-weight:750}.s1{background:var(--canvas)}.s2{background:var(--surface)}.s3{background:var(--surface-2)}.s4{background:var(--brand);color:var(--on-brand)}.s5{background:var(--warning-soft);color:var(--warning)}.s6{background:var(--danger-soft);color:var(--danger)}
+    .mobile-menu{display:none}.audit{margin-top:16px;padding:13px 16px;display:flex;gap:16px;align-items:center;color:var(--text-2);font-size:11px}.score{font-size:18px;font-weight:850;color:var(--success)}
+    @media(max-width:1050px){:root{--sidebar-w:230px}.stats{grid-template-columns:repeat(2,1fr)}.workspace{grid-template-columns:1fr}.swatches{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:760px){.app{display:block}.sidebar{transform:translateX(-100%);transition:transform .2s}.sidebar.open{transform:none;box-shadow:20px 0 50px rgba(0,0,0,.35)}.main{grid-column:auto}.mobile-menu{display:grid}.content{padding:20px}.topbar{padding:0 18px}.page-head{flex-direction:column}.stats{grid-template-columns:1fr}.top-actions .kbd{display:none}}
+    :focus-visible{outline:3px solid color-mix(in srgb,var(--focus) 70%,transparent);outline-offset:2px}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><div class="brand-mark">M</div><div><div class="brand-name">MAKNA FLOW</div><div class="eyebrow">Content OS · Theme Lab</div></div></div>
+      <nav class="nav" id="nav" aria-label="Seluruh menu MAKNA Flow"></nav>
+      <div class="sidebar-foot"><div class="avatar">SB</div><div><div class="user">Sabeq Mursyid</div><div class="role">Superadmin · Staging</div></div></div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div class="top-actions"><button class="icon-btn mobile-menu" id="menuToggle" aria-label="Buka menu">☰</button><div class="crumb">MAKNA Flow / <strong id="crumb">Dashboard</strong></div></div>
+        <div class="top-actions"><span class="kbd">⌘ K</span><button class="icon-btn" aria-label="Notifikasi">◌</button><button class="icon-btn" id="themeToggle" aria-label="Ganti tema" title="Ganti light/dark theme">☀</button></div>
+      </header>
+      <div class="content">
+        <section class="page-head"><div class="title-wrap"><div class="title-icon" id="pageIcon">◈</div><div><div class="eyebrow" id="sectionLabel">Overview</div><h1 class="title" id="pageTitle">Executive Dashboard</h1><p class="subtitle" id="pageSubtitle">Ringkasan operasi konten, produksi, dan distribusi hari ini.</p></div></div><div class="actions"><button class="btn">Export</button><button class="btn primary" id="primaryAction">+ Buat Konten</button></div></section>
+        <div class="notice"><span>ⓘ</span><span><strong>Mockup sistem warna:</strong> semua permukaan, teks, tombol, status, tabel, dan fokus memakai token semantik yang sama di light dan dark theme.</span></div>
+        <section class="stats" id="stats"></section>
+        <section class="workspace">
+          <div class="card panel"><div class="panel-head"><div><div class="panel-title" id="mainPanelTitle">Produksi terbaru</div><div class="panel-sub" id="mainPanelSub">Status lintas workflow dalam 24 jam terakhir</div></div><div class="filters"><select class="select" aria-label="Filter periode"><option>7 hari</option><option>30 hari</option></select><button class="btn">Filter</button></div></div><div class="panel-body" id="mainPanel"></div></div>
+          <div class="card panel"><div class="panel-head"><div><div class="panel-title" id="sidePanelTitle">Throughput</div><div class="panel-sub">Selesai per hari</div></div><span class="badge success">Sehat</span></div><div class="panel-body"><div class="mini-chart" aria-label="Grafik throughput"><div class="bar" style="height:42%"></div><div class="bar" style="height:58%"></div><div class="bar" style="height:47%"></div><div class="bar" style="height:76%"></div><div class="bar" style="height:64%"></div><div class="bar" style="height:88%"></div><div class="bar" style="height:72%"></div></div><div class="legend"><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span><span>Min</span></div><div id="sideTasks"></div></div></div>
+        </section>
+        <section class="card audit"><div><div class="score">AA</div><div class="eyebrow">Contrast target</div></div><div><strong>Prinsip usulan:</strong> teks biasa minimum 4.5:1, elemen besar 3:1, fokus selalu terlihat, dan warna status tidak pernah menjadi satu-satunya pembeda.</div></section>
+        <section class="card panel" style="margin-top:16px"><div class="panel-head"><div><div class="panel-title">Token warna aktif</div><div class="panel-sub">Palet ini berubah sebagai satu sistem saat tema diganti</div></div></div><div class="panel-body"><div class="swatches"><div class="swatch s1">Canvas</div><div class="swatch s2">Surface</div><div class="swatch s3">Raised</div><div class="swatch s4">Primary</div><div class="swatch s5">Warning</div><div class="swatch s6">Danger</div></div></div></section>
+      </div>
+    </main>
+  </div>
+  <script>
+    const groups=[
+      ['OVERVIEW',[['Dashboard','/','◈']]],
+      ['PLANNING',[['Content Planner','/content-planner','▦'],['Product Database','/products','□'],['Deconstruct Lab','/deconstruct','⌁'],['Preset Manager','/settings/presets','⌘'],['Brand Profile Manager','/settings/brand-profiles','◎'],['Universe Manager','/settings/universes','◇']]],
+      ['WORKFLOW',[['RE Campaign','/re-campaigns','▶'],['Pillar Campaign','/pillar-campaigns','♧'],['Sheets Autopilot','/sheets-autopilot','✣'],['Recipe Labs','/recipe-labs','◒'],['Instant Campaign','/instant-factory','↗'],['Multiplier Lab','/multiplier-lab','✦'],['Product Bridging','/product-bridge-inject','⌖'],['RE + Recommendation','/re-plus-recomm','⊕']]],
+      ['PUBLISHING',[['ContentFlow Hub','/content-flow','▤'],['Content Automations','/content-automations','◷']]],
+      ['TOOLS',[['Video Studio','/video-studio','▸'],['TTS Studio','/tts-studio','♬'],['Video Library','/scraper','▥'],['Reverse Engineering','/reverse','⌕']]],
+      ['ANALYTICS',[['Reports','/reports','▥']]],
+      ['SYSTEM',[['User Management','/settings/users','♙'],['Tenant Management','/settings/tenants','▣'],['System Health','/system-health','♡'],['Settings','/settings','⚙']]],
+      ['LEGACY / INTERNAL',[['Ideation','/ideation','✧'],['Production Board','/production','⬡'],['Pipeline v54.9','/pipeline','⟶']]]
+    ];
+    const copy={
+      '/':['Executive Dashboard','Ringkasan operasi konten, produksi, dan distribusi hari ini.','Buat Konten'],
+      '/content-planner':['Content Planner','Susun kalender ide dan arah editorial lintas brand.','Planner Baru'],
+      '/products':['Product Database','Sumber kebenaran produk, klaim, aset, dan affiliate link.','Tambah Produk'],
+      '/deconstruct':['Deconstruct Lab','Bedah referensi kreatif menjadi pola yang dapat digunakan ulang.','Analisis Baru'],
+      '/settings/presets':['Preset Manager','Kelola strategi, guardrail, dan konfigurasi OPC.','Preset Baru'],
+      '/settings/brand-profiles':['Brand Profile Manager','Identitas, suara, dan default editorial setiap brand.','Brand Baru'],
+      '/settings/universes':['Universe Manager','Kelola dunia, karakter, lokasi, dan kontinuitas cerita.','Universe Baru'],
+      '/re-campaigns':['RE Campaign','Bangun kampanye dari referensi yang sudah terbukti.','Campaign Baru'],
+      '/pillar-campaigns':['Organic Pillar Campaign','Produksi konten organik berbasis pilar secara single-pass.','Campaign Baru'],
+      '/sheets-autopilot':['Google Sheets Autopilot','Orkestrasi produksi massal dari spreadsheet.','Hubungkan Sheet'],
+      '/recipe-labs':['Recipe Labs','Eksperimen formula konten dan visual culinary.','Recipe Baru'],
+      '/instant-factory':['V5 Instant Factory','Ubah brief menjadi blueprint produksi siap jalan.','Mulai Produksi'],
+      '/multiplier-lab':['Multiplier Lab','Kembangkan satu aset menjadi banyak varian terarah.','Buat Varian'],
+      '/product-bridge-inject':['Product Bridging','Sisipkan produk ke dalam alur kreatif secara kontekstual.','Bridge Baru'],
+      '/re-plus-recomm':['RE + Recommendation','Kurasi produk dan peluang konten berbasis sinyal.','Mulai Sourcing'],
+      '/content-flow':['ContentFlow Hub','Pusat aset, status editorial, dan distribusi multi-brand.','Tambah Konten'],
+      '/content-automations':['Content Automations','Jadwal native, approval, retry, dan riwayat otomatisasi.','Schedule Baru'],
+      '/video-studio':['FFmpeg Video Studio','Rangkai visual, voiceover, BGM, dan output final.','Render Baru'],
+      '/tts-studio':['TTS Standalone Studio','Bangun voiceover dengan karakter dan dinamika suara.','Buat Audio'],
+      '/scraper':['Video Library','Kelola referensi video dan sumber kreatif.','Tambah Video'],
+      '/reverse':['Reverse Engineering','Analisis struktur dan DNA konten dari sebuah referensi.','Analisis Baru'],
+      '/reports':['Scheduler & Campaign Reports','Pantau kesehatan API, rasio sukses, dan waktu proses.','Unduh Laporan'],
+      '/settings/users':['User Management','Kelola anggota, role, dan akses modul.','Undang User'],
+      '/settings/tenants':['Tenant Management','Control plane organisasi, modul, dan admin tenant.','Tenant Baru'],
+      '/system-health':['System Health','Kesehatan integrasi, worker, database, dan rilis.','Jalankan Check'],
+      '/settings':['Settings','Kredensial integrasi, storage, AI, dan publishing.','Simpan Perubahan'],
+      '/ideation':['Stage 1 — Content Ideation','Generasi dan seleksi gagasan konten awal.','Generate Ideas'],
+      '/production':['Stage 2 — Production Board','Pantau transformasi ide menjadi aset produksi.','Mulai Produksi'],
+      '/pipeline':['Pipeline v54.9','Alur legacy dari ide menuju output terstruktur.','Jalankan Pipeline']
+    };
+    const nav=document.getElementById('nav');
+    groups.forEach(([group,items])=>{const head=document.createElement('div');head.className='nav-section';head.textContent=group;nav.appendChild(head);items.forEach(([label,path,icon])=>{const b=document.createElement('button');b.className='nav-item';b.dataset.path=path;b.innerHTML=`<span class="nav-icon">${icon}</span><span>${label}</span>${group==='LEGACY / INTERNAL'?'<span class="nav-badge">legacy</span>':''}`;b.onclick=()=>selectPage(path,label,icon,group);nav.appendChild(b)})});
+    function tableRows(path){const labels=path.includes('settings')?['Konfigurasi','Pemilik','Status','Diperbarui']:path.includes('studio')?['Job','Sumber','Durasi','Status']:path.includes('campaign')?['Campaign','Brand','Progress','Status']:['Item','Workflow','Waktu','Status'];const rows=[['Nutribake Editorial Agustus','Organic Campaign','2 menit lalu','Berjalan','info'],['7 Hari Sarapan Praktis','ContentFlow','18 menit lalu','Siap Review','warning'],['Kitchen Town Episode 14','Video Studio','42 menit lalu','Selesai','success'],['Herbal Grove Batch 08','Sheets Autopilot','1 jam lalu','Perlu Tindakan','danger']];return `<table class="table"><thead><tr>${labels.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td><span class="badge ${r[4]}">${r[3]}</span></td></tr>`).join('')}</tbody></table>`}
+    function selectPage(path,label,icon,group){document.querySelectorAll('.nav-item').forEach(x=>x.classList.toggle('active',x.dataset.path===path));const [title,sub,action]=copy[path]||[label,'Preview sistem warna dan komponen halaman.','Buat Baru'];document.getElementById('crumb').textContent=label;document.getElementById('pageTitle').textContent=title;document.getElementById('pageSubtitle').textContent=sub;document.getElementById('pageIcon').textContent=icon;document.getElementById('sectionLabel').textContent=group;document.getElementById('primaryAction').textContent='+ '+action;document.getElementById('mainPanelTitle').textContent=label+' terbaru';document.getElementById('mainPanelSub').textContent='Contoh kepadatan data dan status pada '+label;document.getElementById('mainPanel').innerHTML=tableRows(path);document.getElementById('sidebar').classList.remove('open');location.hash=encodeURIComponent(path)}
+    const stats=document.getElementById('stats');[['Aktif hari ini','24','+12% dari kemarin','◷'],['Menunggu review','7','3 prioritas tinggi','◎'],['Success rate','96.8%','+1.4% minggu ini','↗'],['Rata-rata proses','08:42','−48 detik','⌁']].forEach(s=>stats.innerHTML+=`<div class="card stat"><div class="stat-top"><span>${s[0]}</span><span>${s[3]}</span></div><div class="stat-value">${s[1]}</div><div class="trend">${s[2]}</div></div>`);
+    document.getElementById('sideTasks').innerHTML=[['Storyboard perlu approval','3 campaign'],['Quota Gemini aman','68% tersisa'],['Worker Windows aktif','Heartbeat 12 detik']].map((t,i)=>`<div class="task"><div class="task-dot" style="background:${i===0?'var(--warning)':i===1?'var(--info)':'var(--success)'}"></div><div><div class="task-title">${t[0]}</div><div class="task-meta">${t[1]}</div></div></div>`).join('');
+    const root=document.documentElement,toggle=document.getElementById('themeToggle');function setTheme(theme){root.dataset.theme=theme;toggle.textContent=theme==='dark'?'☀':'☾';localStorage.setItem('makna-theme-preview',theme)}toggle.onclick=()=>setTheme(root.dataset.theme==='dark'?'light':'dark');setTheme(localStorage.getItem('makna-theme-preview')||'dark');document.getElementById('menuToggle').onclick=()=>document.getElementById('sidebar').classList.toggle('open');
+    const initial=decodeURIComponent(location.hash.slice(1)||'/');let found=false;groups.forEach(([g,items])=>items.forEach(([l,p,i])=>{if(p===initial){selectPage(p,l,i,g);found=true}}));if(!found)selectPage('/','Dashboard','◈','OVERVIEW');
+  </script>
+</body>
+</html>
