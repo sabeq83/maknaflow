@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAKNA FLOW — Campaign Detail Mockup</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <style>
+    /* GLOBALS.CSS INLINED FOR STANDALONE RUNNING */
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-secondary: #0f172a;
+      --bg-card: rgba(15, 23, 42, 0.75);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --bg-glass: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.1);
+      --border-hover: rgba(6, 182, 212, 0.35);
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
+      --accent: #0891b2;
+      --accent-light: #38bdf8;
+      --accent-glow: rgba(6, 182, 212, 0.18);
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.18);
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --danger-glow: rgba(239, 68, 68, 0.18);
+      --info: #0284c7;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-lg: 16px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,0.6);
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --sidebar-w: 260px;
+      --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+
+      --border-color: rgba(255, 255, 255, 0.1);
+      --accent-color: #0891b2;
+    }
+
+    [data-theme='light'] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-card: rgba(255, 255, 255, 0.85);
+      --bg-card-hover: rgba(241, 245, 249, 0.95);
+      --bg-glass: rgba(15, 23, 42, 0.04);
+      --border: rgba(15, 23, 42, 0.12);
+      --border-hover: rgba(6, 182, 212, 0.6);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #5b6b7c;
+      --accent: #0891b2;
+      --accent-light: #0369a1;
+      --accent-glow: rgba(6, 182, 212, 0.12);
+      --success: #059669;
+      --success-glow: rgba(16, 185, 129, 0.12);
+      --warning: #d97706;
+      --danger: #dc2626;
+      --danger-glow: rgba(220, 38, 38, 0.12);
+      --info: #0284c7;
+      --shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+      --shadow-lg: 0 8px 40px rgba(15, 23, 42, 0.1);
+
+      --border-color: rgba(15, 23, 42, 0.12);
+      --accent-color: #0891b2;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    [data-theme='light'] .sidebar-brand h1 {
+      color: var(--text-primary);
+      -webkit-text-fill-color: var(--text-primary);
+    }
+    [data-theme='light'] .sidebar-brand p {
+      color: var(--text-secondary);
+    }
+    [data-theme='light'] .sidebar-footer strong {
+      color: var(--text-primary) !important;
+    }
+    [data-theme='light'] .form-select option, 
+    [data-theme='light'] .form-input option {
+      background: #ffffff;
+      color: #000000;
+    }
+    [data-theme='light'] .nav-link:hover {
+      background: rgba(15, 23, 42, 0.04);
+    }
+
+    /* LAYOUT */
+    .app-layout { display: flex; height: 100vh; }
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      height: 100vh;
+      z-index: 100;
+    }
+    .sidebar-brand {
+      padding: 20px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-nav { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: all var(--transition);
+      border: 1px solid transparent;
+    }
+    .nav-link:hover {
+      background: var(--bg-glass);
+      color: var(--text-primary);
+      border-color: var(--border);
+    }
+    .nav-link.active {
+      background: rgba(6, 182, 212, 0.12);
+      color: var(--accent-light);
+      border-left: 3px solid var(--accent-light);
+      border-color: rgba(6, 182, 212, 0.3);
+    }
+    .nav-icon { font-size: 1.15rem; width: 24px; text-align: center; }
+    .nav-section { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em; padding: 16px 16px 6px; font-weight: 600; }
+
+    .main-content {
+      flex: 1;
+      margin-left: var(--sidebar-w);
+      overflow-y: auto;
+      height: 100vh;
+      background: var(--bg-primary);
+    }
+    .page-container { max-width: 1200px; margin: 0 auto; padding: 32px; }
+
+    /* CARDS */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      backdrop-filter: blur(20px);
+      transition: all var(--transition);
+    }
+    .card:hover { border-color: var(--border-hover); }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      border: 1px solid transparent;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
+      color: white;
+      border-color: #0891b2;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(6, 182, 212, 0.28); }
+    
+    .btn-secondary {
+      background: var(--bg-glass);
+      color: var(--text-primary);
+      border-color: var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--border-hover); background: var(--bg-card); }
+
+    /* TABS */
+    .tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--bg-glass); padding: 4px; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+    .tab {
+      flex: 1;
+      padding: 10px 16px;
+      text-align: center;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
+      background: none;
+      border: none;
+    }
+    .tab:hover { color: var(--text-primary); }
+    .tab.active { background: var(--accent); color: white; }
+
+    /* STORYBOARD DETAIL */
+    .scene-detail-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: 200px 1fr 150px;
+      gap: 24px;
+      transition: all var(--transition);
+    }
+    .scene-detail-card:hover { border-color: var(--border-hover); }
+
+    .image-placeholder {
+      width: 100%;
+      height: 120px;
+      background: var(--bg-primary);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .scene-meta-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 3px; }
+    .scene-meta-value { font-size: 0.88rem; color: var(--text-primary); margin-bottom: 12px; }
+
+    .prompt-block {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-primary);
+      position: relative;
+      margin-bottom: 12px;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 8px; right: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      cursor: pointer;
+    }
+
+    .badge-approved { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; display: inline-block; }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<div class="app-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, rgba(0,242,254,0.15), rgba(16,185,129,0.15)); border: 1px solid rgba(0,242,254,0.3); display: flex; align-items: center; justify-content: center;">
+          <svg viewBox="0 0 64 64" fill="none" style="width: 22px; height: 22px;">
+            <circle cx="32" cy="32" r="22" fill="rgba(0,242,254,0.1)"/>
+            <path d="M16 48 L16 16 L32 34 L48 16 L48 48" stroke="#00F2FE" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h1 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--text-primary); letter-spacing: 0.02em; font-family: var(--font-mono);">MAKNA FLOW</h1>
+      </div>
+      <p style="margin: 6px 0 0 0; font-size: 0.65rem; color: var(--text-muted); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em;">Isolated SaaS Platform</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-link"><span class="nav-icon">◈</span>Dashboard</a>
+      
+      <div class="nav-section">Planning</div>
+      <a href="#" class="nav-link"><span class="nav-icon">🗓️</span>Content Planner</a>
+      <a href="#" class="nav-link"><span class="nav-icon">📦</span>Product Database</a>
+      
+      <div class="nav-section">Workflow</div>
+      <a href="./campaigns.html" class="nav-link"><span class="nav-icon">🎬</span>RE Campaign</a>
+      <a href="./campaigns.html" class="nav-link active"><span class="nav-icon">🌱</span>Pillar Campaign</a>
+      <a href="#" class="nav-link"><span class="nav-icon">🤖</span>Sheets Autopilot</a>
+
+      <div class="nav-section">Publishing</div>
+      <a href="./content-flow.html" class="nav-link"><span class="nav-icon">📊</span>ContentFlow Hub</a>
+      
+      <div style="padding-left: 28px; display: flex; flex-direction: column; gap: 4px; margin-top: 4px; margin-bottom: 8px;">
+        <a href="#" style="font-size: 11px; color: var(--text-secondary); padding: 5px 10px; border-radius: 6px; text-decoration: none;">🌐 Semua Akun</a>
+        <a href="#" style="font-size: 11px; color: var(--text-secondary); padding: 5px 10px; border-radius: 6px; text-decoration: none;">🏷️ @blue_skincare</a>
+        <a href="#" style="font-size: 11px; color: var(--text-secondary); padding: 5px 10px; border-radius: 6px; text-decoration: none;">🏷️ @siasatsehat</a>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer" style="padding: 1rem; border-top: 1px solid var(--border); margin-top: auto;">
+      <button id="themeToggleBtn" style="width: 100%; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-glass); color: var(--text-primary); cursor: pointer; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
+        🌙 Dark Mode
+      </button>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+        Logged in as: <strong style="color: var(--text-primary)">operator_gemini</strong>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="page-container">
+      
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+        <a href="./campaigns.html" style="color: var(--text-muted); text-decoration: none; font-size: 0.85rem;">← Kembali ke Daftar Kampanye</a>
+      </div>
+
+      <!-- HEADER DETAILS CARD -->
+      <div class="card" style="margin-bottom: 24px; padding: 32px;">
+        <h1 style="margin: 0; font-size: 2.2rem; font-weight: 800; letter-spacing: -0.5px;">🎬 Ramadhan Skincare Campaign</h1>
+        
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; marginTop: 12px; margin-top: 12px; font-size: 0.9rem; color: var(--text-muted); border-bottom: 1px solid var(--border-color); padding-bottom: 16px; margin-bottom: 20px;">
+          <span>🔑 ID: <code style="background: var(--bg-glass); padding: 3px 8px; border-radius: 4px; color: var(--accent-light); font-family: monospace; font-size: 0.85rem;">opc_ramadhan_glow</code></span>
+          <span style="opacity: 0.3;">|</span>
+          <span>🏷️ Brand: <strong>Blue Skincare</strong></span>
+          <span style="opacity: 0.3;">|</span>
+          <span>📅 Dibuat: <strong>10 Feb 2026 14:00</strong></span>
+          <span style="opacity: 0.3;">|</span>
+          <span style="font-size: 0.72rem; background: #10b981; color: #fff; padding: 3px 8px; border-radius: 4px; fontWeight: 700; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">🤖 FULL AUTO PILOT</span>
+        </div>
+
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button class="btn" style="background: linear-gradient(135deg, #e67e22 0%, #d35400 100%); color: #fff; border: none; padding: 10px 16px; font-weight: 600; border-radius: 6px; cursor: pointer;">⏸️ Pause Campaign</button>
+          <button class="btn" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: #fff; border: none; padding: 10px 16px; font-weight: 600; border-radius: 6px; cursor: pointer;">🚀 Push to Contentflow</button>
+          <button class="btn" style="background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%); color: #fff; border: none; padding: 10px 16px; font-weight: 600; border-radius: 6px; cursor: pointer;">☁️ Sync to Cloud</button>
+        </div>
+      </div>
+
+      <!-- TABS CONTAINER -->
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab(this, 'storyboardTab')">Overview & Storyboard</button>
+        <button class="tab" onclick="switchTab(this, 'voTab')">Voice-Over Script</button>
+        <button class="tab" onclick="switchTab(this, 'dnaTab')">Video DNA</button>
+        <button class="tab" onclick="switchTab(this, 'socialTab')">Social Package</button>
+      </div>
+
+      <!-- TAB CONTENT: STORYBOARD -->
+      <div id="storyboardTab" class="tab-content" style="display: block;">
+        <!-- Scene 1 -->
+        <div class="scene-detail-card">
+          <div>
+            <div class="image-placeholder">
+              <span>🖼️ Scene 1 Outline</span>
+              <button class="btn btn-secondary" style="font-size: 0.7rem; padding: 4px 8px; margin-top: 8px;">Generate Image</button>
+            </div>
+          </div>
+          <div>
+            <div class="scene-meta-label">SCENE 1 (Hook - 00:00 - 00:04)</div>
+            <div class="scene-meta-label" style="margin-top: 8px;">Script Action</div>
+            <div class="scene-meta-value">A young woman starts her day with a refreshing skincare routine, smiling at the mirror.</div>
+            
+            <div class="scene-meta-label">AI Image Prompt</div>
+            <div class="prompt-block">
+              "A serene morning scene in a cozy bathroom; a young woman (30s) applying moisturizer with natural daylight, calm smile, soft bokeh background."
+              <button class="copy-btn" onclick="alert('Copied to clipboard!')">Copy</button>
+            </div>
+          </div>
+          <div>
+            <div class="scene-meta-label">Status</div>
+            <span class="badge-approved">Approved</span>
+            
+            <div class="scene-meta-label" style="margin-top: 16px;">Voiceover</div>
+            <div style="font-size: 0.85rem; font-style: italic; color: var(--text-secondary);">"Embrace the radiance of Ramadhan. Start your day fresh and beautiful."</div>
+          </div>
+        </div>
+
+        <!-- Scene 2 -->
+        <div class="scene-detail-card">
+          <div>
+            <div class="image-placeholder">
+              <span>🖼️ Scene 2 Outline</span>
+              <button class="btn btn-secondary" style="font-size: 0.7rem; padding: 4px 8px; margin-top: 8px;">Generate Image</button>
+            </div>
+          </div>
+          <div>
+            <div class="scene-meta-label">SCENE 2 (Product Bridge - 00:04 - 00:08)</div>
+            <div class="scene-meta-label" style="margin-top: 8px;">Script Action</div>
+            <div class="scene-meta-value">She gently applies the Ramadhan Glow Serum on her cheek; focus on texture and light reflections.</div>
+            
+            <div class="scene-meta-label">AI Image Prompt</div>
+            <div class="prompt-block">
+              "Close-up shot of a woman gently massaging Ramadhan Glow Serum onto her cheek; focus on texture, light reflections, product packaging."
+              <button class="copy-btn" onclick="alert('Copied to clipboard!')">Copy</button>
+            </div>
+          </div>
+          <div>
+            <div class="scene-meta-label">Status</div>
+            <span class="badge-approved">Approved</span>
+            
+            <div class="scene-meta-label" style="margin-top: 16px;">Voiceover</div>
+            <div style="font-size: 0.85rem; font-style: italic; color: var(--text-secondary);">"Introducing the Ramadhan Glow Serum—crafted for glowing skin all day long."</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB CONTENT: VO SCRIPT -->
+      <div id="voTab" class="tab-content" style="display: none;">
+        <div class="card">
+          <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Complete Voice-Over Script</h3>
+          <div class="prompt-block" style="font-family: var(--font-sans); line-height: 1.8; font-size: 0.95rem; white-space: pre-wrap;">
+[00:00 - 00:04]
+"Embrace the radiance of Ramadhan. Start your day fresh and beautiful."
+
+[00:04 - 00:08]
+"Introducing the Ramadhan Glow Serum—crafted for glowing skin all day long."
+
+[00:08 - 00:12]
+"Get your glowing Ramadhan routine today. Link is in the description!"
+            <button class="copy-btn" onclick="alert('VO Script Copied!')" style="top: 12px; right: 12px;">Copy Script</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB CONTENT: VIDEO DNA -->
+      <div id="dnaTab" class="tab-content" style="display: none;">
+        <div class="card">
+          <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Video DNA Parameters (AI Generated)</h3>
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+            <tr style="border-bottom: 1px solid var(--border);">
+              <td style="padding: 10px 0; color: var(--text-muted);">Aspect Ratio</td>
+              <td style="padding: 10px 0; font-weight: 600; text-align: right;">9:16 (Vertical)</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border);">
+              <td style="padding: 10px 0; color: var(--text-muted);">Visual Style</td>
+              <td style="padding: 10px 0; font-weight: 600; text-align: right;">Cinematic Realist</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border);">
+              <td style="padding: 10px 0; color: var(--text-muted);">Subject Concept</td>
+              <td style="padding: 10px 0; font-weight: 600; text-align: right;">Faceless Profile / Hands Focus</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border);">
+              <td style="padding: 10px 0; color: var(--text-muted);">Lighting Concept</td>
+              <td style="padding: 10px 0; font-weight: 600; text-align: right;">Golden Hour Warm Lighting</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB CONTENT: SOCIAL PACKAGE -->
+      <div id="socialTab" class="tab-content" style="display: none;">
+        <div class="card">
+          <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Social Media Package</h3>
+          
+          <div style="margin-bottom: 16px;">
+            <div class="scene-meta-label">Caption</div>
+            <div class="prompt-block" style="font-family: var(--font-sans); font-size: 0.9rem; line-height: 1.6;">
+              Tetap glowing sepanjang hari di bulan suci dengan Ramadhan Glow Serum! ✨ Diformulasikan khusus untuk menjaga kelembapan kulit saat berpuasa. Yuk, mulai skincare routine pagimu sekarang! 🧴💖
+              <button class="copy-btn" onclick="alert('Caption Copied!')">Copy</button>
+            </div>
+          </div>
+
+          <div>
+            <div class="scene-meta-label">Hashtags & CTA</div>
+            <div class="prompt-block">
+              #RamadhanGlowing #SkincareRamadhan #GlowSerum #OrganicPillar #BlueSkincare
+              <button class="copy-btn" onclick="alert('Hashtags Copied!')">Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  // Dynamic theme switching
+  const htmlEl = document.documentElement;
+  const themeBtn = document.getElementById('themeToggleBtn');
+
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  htmlEl.setAttribute('data-theme', savedTheme);
+  updateThemeButton(savedTheme);
+
+  themeBtn.addEventListener('click', () => {
+    const currentTheme = htmlEl.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    htmlEl.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeButton(newTheme);
+  });
+
+  function updateThemeButton(theme) {
+    if (theme === 'light') {
+      themeBtn.innerHTML = '🌙 Dark Mode';
+    } else {
+      themeBtn.innerHTML = '☀️ Light Mode';
+    }
+  }
+
+  // Interactive Tabs
+  function switchTab(clickedTab, tabId) {
+    // Deactivate all tabs
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(t => t.classList.remove('active'));
+    
+    // Activate clicked tab
+    clickedTab.classList.add('active');
+
+    // Hide all tab contents
+    const contents = document.querySelectorAll('.tab-content');
+    contents.forEach(c => c.style.display = 'none');
+
+    // Show active tab content
+    document.getElementById(tabId).style.display = 'block';
+  }
+</script>
+</body>
+</html>

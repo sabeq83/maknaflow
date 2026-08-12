@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.7 — Integrasi Fitur Light Theme (12/08/2026)
+- Menambahkan toggle Light/Dark Mode di sidebar footer
+- Mencegah flicker tema dengan script injeksi head
+- Menggunakan CSS variables untuk badge brand dinamis agar kontras tinggi
+
 ## V2.14.6 — Align card download to fetch URL on-demand (12/08/2026)
 - Align card-level download URL resolving logic with modal dynamically on click
 

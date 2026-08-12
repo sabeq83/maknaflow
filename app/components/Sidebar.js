@@ -73,6 +73,22 @@ function SidebarContent() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const [theme, setTheme] = useState('dark');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+      setTheme(currentTheme);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    setTheme(newTheme);
+  };
+
   useEffect(() => {
     fetch('/api/auth/me')
       .then(res => res.json())
@@ -190,10 +206,11 @@ function SidebarContent() {
             margin: 0,
             fontSize: '1.35rem',
             fontWeight: 800,
-            color: '#ffffff',
-            WebkitTextFillColor: '#ffffff',
+            color: 'var(--text-primary)',
+            WebkitTextFillColor: 'var(--text-primary)',
             letterSpacing: '0.03em',
-            lineHeight: '1'
+            lineHeight: '1',
+            fontFamily: 'var(--font-mono)'
           }}>
             MAKNA FLOW
           </h1>
@@ -203,7 +220,7 @@ function SidebarContent() {
         <p style={{
           margin: '8px 0 0 0',
           fontSize: '0.66rem',
-          color: '#ffffff',
+          color: 'var(--text-secondary)',
           opacity: 0.85,
           fontFamily: 'var(--font-mono)',
           textTransform: 'uppercase',
@@ -341,11 +358,33 @@ function SidebarContent() {
         })}
       </nav>
 
-      <div className="sidebar-footer" style={{ padding: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: 'auto' }}>
+      <div className="sidebar-footer" style={{ padding: '1rem', borderTop: '1px solid var(--border)', marginTop: 'auto' }}>
+        <button
+          onClick={toggleTheme}
+          style={{
+            width: '100%',
+            padding: '8px 12px',
+            borderRadius: 'var(--radius-sm)',
+            border: '1px solid var(--border)',
+            background: 'var(--bg-glass)',
+            color: 'var(--text-primary)',
+            cursor: 'pointer',
+            fontSize: '0.85rem',
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            marginBottom: '12px',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          {theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode'}
+        </button>
         {user ? (
           <>
-            <div style={{ fontSize: '0.85rem', color: '#a0aec0', marginBottom: '0.5rem' }}>
-              Logged in as: <strong style={{ color: '#fff' }}>{user.username}</strong> ({user.role})
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+              Logged in as: <strong style={{ color: 'var(--text-primary)' }}>{user.username}</strong> ({user.role})
             </div>
             <button
               onClick={handleLogout}

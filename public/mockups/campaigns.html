@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAKNA FLOW — Campaigns Mockup</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <style>
+    /* GLOBALS.CSS INLINED FOR STANDALONE RUNNING */
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-secondary: #0f172a;
+      --bg-card: rgba(15, 23, 42, 0.75);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --bg-glass: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.1);
+      --border-hover: rgba(6, 182, 212, 0.35);
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
+      --accent: #0891b2;
+      --accent-light: #38bdf8;
+      --accent-glow: rgba(6, 182, 212, 0.18);
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.18);
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --danger-glow: rgba(239, 68, 68, 0.18);
+      --info: #0284c7;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-lg: 16px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,0.6);
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --sidebar-w: 260px;
+      --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+
+      --border-color: rgba(255, 255, 255, 0.1);
+      --accent-color: #0891b2;
+    }
+
+    [data-theme='light'] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-card: rgba(255, 255, 255, 0.85);
+      --bg-card-hover: rgba(241, 245, 249, 0.95);
+      --bg-glass: rgba(15, 23, 42, 0.04);
+      --border: rgba(15, 23, 42, 0.12);
+      --border-hover: rgba(6, 182, 212, 0.6);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #5b6b7c;
+      --accent: #0891b2;
+      --accent-light: #0369a1;
+      --accent-glow: rgba(6, 182, 212, 0.12);
+      --success: #059669;
+      --success-glow: rgba(16, 185, 129, 0.12);
+      --warning: #d97706;
+      --danger: #dc2626;
+      --danger-glow: rgba(220, 38, 38, 0.12);
+      --info: #0284c7;
+      --shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+      --shadow-lg: 0 8px 40px rgba(15, 23, 42, 0.1);
+
+      --border-color: rgba(15, 23, 42, 0.12);
+      --accent-color: #0891b2;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    [data-theme='light'] .sidebar-brand h1 {
+      color: var(--text-primary);
+      -webkit-text-fill-color: var(--text-primary);
+    }
+    [data-theme='light'] .sidebar-brand p {
+      color: var(--text-secondary);
+    }
+    [data-theme='light'] .sidebar-footer strong {
+      color: var(--text-primary) !important;
+    }
+    [data-theme='light'] .form-select option, 
+    [data-theme='light'] .form-input option,
+    [data-theme='light'] .form-textarea option {
+      background: #ffffff;
+      color: #000000;
+    }
+    [data-theme='light'] .nav-link:hover {
+      background: rgba(15, 23, 42, 0.04);
+    }
+
+    /* LAYOUT */
+    .app-layout { display: flex; height: 100vh; }
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      height: 100vh;
+      z-index: 100;
+    }
+    .sidebar-brand {
+      padding: 20px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-nav { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: all var(--transition);
+      border: 1px solid transparent;
+    }
+    .nav-link:hover {
+      background: var(--bg-glass);
+      color: var(--text-primary);
+      border-color: var(--border);
+    }
+    .nav-link.active {
+      background: rgba(6, 182, 212, 0.12);
+      color: var(--accent-light);
+      border-left: 3px solid var(--accent-light);
+      border-color: rgba(6, 182, 212, 0.3);
+    }
+    .nav-icon { font-size: 1.15rem; width: 24px; text-align: center; }
+    .nav-section { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em; padding: 16px 16px 6px; font-weight: 600; }
+
+    .main-content {
+      flex: 1;
+      margin-left: var(--sidebar-w);
+      overflow-y: auto;
+      height: 100vh;
+      background: var(--bg-primary);
+    }
+    .page-container { max-width: 1200px; margin: 0 auto; padding: 32px; }
+    .page-header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; }
+    .page-header h2 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 6px; }
+    .page-header p { color: var(--text-secondary); font-size: 0.9rem; }
+
+    /* CARDS */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      backdrop-filter: blur(20px);
+      transition: all var(--transition);
+    }
+    .card:hover { border-color: var(--border-hover); }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      border: 1px solid transparent;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
+      color: white;
+      border-color: #0891b2;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(6, 182, 212, 0.28); }
+    
+    .btn-secondary {
+      background: var(--bg-glass);
+      color: var(--text-primary);
+      border-color: var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--border-hover); background: var(--bg-card); }
+
+    /* CAMPAIGN CARDS LIST */
+    .campaign-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; margin-bottom: 32px; }
+    
+    .campaign-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all var(--transition);
+    }
+    .campaign-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+    .campaign-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .campaign-title { font-size: 1.15rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; }
+    
+    /* PROGRESS BAR */
+    .progress-wrapper { margin: 16px 0; }
+    .progress-label { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; }
+    .progress-bar { width: 100%; height: 6px; background: var(--bg-glass); border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-light)); border-radius: 3px; }
+
+    /* FORMS & ACCORDIONS */
+    .form-group { margin-bottom: 18px; }
+    .form-label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .form-textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 10px 14px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      outline: none;
+      resize: vertical;
+      transition: all var(--transition);
+    }
+    .form-textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .accordion-header {
+      padding: 16px 20px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      transition: all var(--transition);
+    }
+    .accordion-header:hover { border-color: var(--border-hover); background: var(--bg-card-hover); }
+    .accordion-body {
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-top: none;
+      border-bottom-left-radius: var(--radius-sm);
+      border-bottom-right-radius: var(--radius-sm);
+      margin-top: -12px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    /* BADGES */
+    .badge {
+      display: inline-flex;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .badge-active { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-planning { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<div class="app-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, rgba(0,242,254,0.15), rgba(16,185,129,0.15)); border: 1px solid rgba(0,242,254,0.3); display: flex; align-items: center; justify-content: center;">
+          <svg viewBox="0 0 64 64" fill="none" style="width: 22px; height: 22px;">
+            <circle cx="32" cy="32" r="22" fill="rgba(0,242,254,0.1)"/>
+            <path d="M16 48 L16 16 L32 34 L48 16 L48 48" stroke="#00F2FE" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h1 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--text-primary); letter-spacing: 0.02em; font-family: var(--font-mono);">MAKNA FLOW</h1>
+      </div>
+      <p style="margin: 6px 0 0 0; font-size: 0.65rem; color: var(--text-muted); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em;">Isolated SaaS Platform</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-link"><span class="nav-icon">◈</span>Dashboard</a>
+      
+      <div class="nav-section">Planning</div>
+      <a href="#" class="nav-link"><span class="nav-icon">🗓️</span>Content Planner</a>
+      <a href="#" class="nav-link"><span class="nav-icon">📦</span>Product Database</a>
+      
+      <div class="nav-section">Workflow</div>
+      <a href="./campaigns.html" class="nav-link"><span class="nav-icon">🎬</span>RE Campaign</a>
+      <a href="./campaigns.html" class="nav-link active"><span class="nav-icon">🌱</span>Pillar Campaign</a>
+      <a href="#" class="nav-link"><span class="nav-icon">🤖</span>Sheets Autopilot</a>
+
+      <div class="nav-section">Publishing</div>
+      <a href="./content-flow.html" class="nav-link"><span class="nav-icon">📊</span>ContentFlow Hub</a>
+      
+      <div style="padding-left: 28px; display: flex; flex-direction: column; gap: 4px; margin-top: 4px; margin-bottom: 8px;">
+        <a href="#" style="font-size: 11px; color: var(--text-secondary); padding: 5px 10px; border-radius: 6px; text-decoration: none;">🌐 Semua Akun</a>
+        <a href="#" style="font-size: 11px; color: var(--text-secondary); padding: 5px 10px; border-radius: 6px; text-decoration: none;">🏷️ @blue_skincare</a>
+        <a href="#" style="font-size: 11px; color: var(--text-secondary); padding: 5px 10px; border-radius: 6px; text-decoration: none;">🏷️ @siasatsehat</a>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer" style="padding: 1rem; border-top: 1px solid var(--border); margin-top: auto;">
+      <button id="themeToggleBtn" style="width: 100%; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-glass); color: var(--text-primary); cursor: pointer; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
+        🌙 Dark Mode
+      </button>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+        Logged in as: <strong style="color: var(--text-primary)">operator_gemini</strong>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="page-container">
+      <div class="page-header">
+        <div>
+          <h2>🌱 Organic Pillar Campaign</h2>
+          <p>Kelola dan rancang kampanye video organik (Hook ➜ Bridge ➜ Edu Value)</p>
+        </div>
+        <div style="display: flex; gap: 12px;">
+          <button class="btn btn-secondary">📋 Planner Sync</button>
+          <button class="btn btn-primary" onclick="toggleForm()">+ New Campaign</button>
+        </div>
+      </div>
+
+      <!-- expandable Form card -->
+      <div class="card" id="newCampaignFormCard" style="display: none; margin-bottom: 32px; padding: 0; overflow: hidden;">
+        <div style="padding: 18px 24px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+          <strong style="color: var(--accent-light);">✦ Konfigurasi Baru Organic Pillar Campaign</strong>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">MAKNA V8.5 Sandwich Engine</span>
+        </div>
+        
+        <div style="padding: 24px;">
+          <!-- Accordion Section 1 -->
+          <div class="accordion-header" onclick="toggleAccordion('acc1', 'body1')">
+            <span>1. Basic Creative Strategy</span>
+            <span id="acc1">▼</span>
+          </div>
+          <div class="accordion-body" id="body1" style="display: block;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group">
+                <label class="form-label">Brand Account Name</label>
+                <input type="text" class="form-input" placeholder="Contoh: blue_skincare">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Campaign Name</label>
+                <input type="text" class="form-input" placeholder="Contoh: Ramadhan Glow Serum">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Custom Instruction</label>
+              <textarea class="form-textarea" placeholder="Tulis instruksi skrip tambahan di sini..."></textarea>
+            </div>
+          </div>
+
+          <!-- Accordion Section 2 -->
+          <div class="accordion-header" onclick="toggleAccordion('acc2', 'body2')">
+            <span>2. Aesthetics & Visual Engine</span>
+            <span id="acc2">▲</span>
+          </div>
+          <div class="accordion-body" id="body2">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group">
+                <label class="form-label">Visual Style Preset</label>
+                <select class="form-select">
+                  <option value="cinematic">Cinematic Realist</option>
+                  <option value="3d_cozy">3D Claymation Cozy</option>
+                  <option value="vector">Flat Vector Clean</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Video AI Model</label>
+                <select class="form-select">
+                  <option value="veo">Google Veo (8s)</option>
+                  <option value="veo5">Google Veo (5s)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action buttons inside form -->
+          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 16px;">
+            <button class="btn btn-secondary" onclick="toggleForm()">Batal</button>
+            <button class="btn btn-primary" onclick="alert('Menciptakan kampanye baru...'); toggleForm();">Generate Campaign</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CAMPAIGN CARDS GRID -->
+      <div class="campaign-grid">
+        <!-- Campaign Card 1 -->
+        <div class="campaign-card">
+          <div>
+            <div class="campaign-card-header">
+              <div class="campaign-title">Ramadhan Skincare Campaign</div>
+              <span class="badge badge-active">Active</span>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+              <span>🏷️ Brand: <strong>Blue Skincare</strong></span>
+              <span>📅 Dibuat: <strong>10 Feb 2026</strong></span>
+            </div>
+            
+            <div class="progress-wrapper">
+              <div class="progress-label">
+                <span>Progress Script & Storyboard</span>
+                <span>65%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 65%;"></div>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px;">
+            <a href="./campaign-detail.html?id=opc_ramadhan_glow" class="btn btn-secondary" style="flex: 1; justify-content: center; font-size: 0.8rem; padding: 8px 12px;">👁️ View Detail</a>
+            <button class="btn btn-primary" style="font-size: 0.8rem; padding: 8px 12px;">⏸️ Pause</button>
+          </div>
+        </div>
+
+        <!-- Campaign Card 2 -->
+        <div class="campaign-card">
+          <div>
+            <div class="campaign-card-header">
+              <div class="campaign-title">New Product Launch - Summer</div>
+              <span class="badge badge-planning">Planning</span>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+              <span>🏷️ Brand: <strong>Blue Skincare</strong></span>
+              <span>📅 Dibuat: <strong>12 Feb 2026</strong></span>
+            </div>
+            
+            <div class="progress-wrapper">
+              <div class="progress-label">
+                <span>Progress Script & Storyboard</span>
+                <span>35%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 35%;"></div>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px;">
+            <a href="./campaign-detail.html?id=opc_summer_launch" class="btn btn-secondary" style="flex: 1; justify-content: center; font-size: 0.8rem; padding: 8px 12px;">👁️ View Detail</a>
+            <button class="btn btn-primary" style="font-size: 0.8rem; padding: 8px 12px;">🟢 Start</button>
+          </div>
+        </div>
+
+        <!-- Campaign Card 3 -->
+        <div class="campaign-card">
+          <div>
+            <div class="campaign-card-header">
+              <div class="campaign-title">Q2 Creator Collaboration</div>
+              <span class="badge badge-active">Active</span>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+              <span>🏷️ Brand: <strong>Siasat Sehat</strong></span>
+              <span>📅 Dibuat: <strong>08 Feb 2026</strong></span>
+            </div>
+            
+            <div class="progress-wrapper">
+              <div class="progress-label">
+                <span>Progress Script & Storyboard</span>
+                <span>80%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 80%;"></div>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px;">
+            <a href="./campaign-detail.html?id=opc_q2_creator" class="btn btn-secondary" style="flex: 1; justify-content: center; font-size: 0.8rem; padding: 8px 12px;">👁️ View Detail</a>
+            <button class="btn btn-primary" style="font-size: 0.8rem; padding: 8px 12px;">⏸️ Pause</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  // Dynamic theme switching
+  const htmlEl = document.documentElement;
+  const themeBtn = document.getElementById('themeToggleBtn');
+
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  htmlEl.setAttribute('data-theme', savedTheme);
+  updateThemeButton(savedTheme);
+
+  themeBtn.addEventListener('click', () => {
+    const currentTheme = htmlEl.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    htmlEl.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeButton(newTheme);
+  });
+
+  function updateThemeButton(theme) {
+    if (theme === 'light') {
+      themeBtn.innerHTML = '🌙 Dark Mode';
+    } else {
+      themeBtn.innerHTML = '☀️ Light Mode';
+    }
+  }
+
+  // Expandable campaign creator form toggle
+  const newCampaignFormCard = document.getElementById('newCampaignFormCard');
+  function toggleForm() {
+    if (newCampaignFormCard.style.display === 'none') {
+      newCampaignFormCard.style.display = 'block';
+    } else {
+      newCampaignFormCard.style.display = 'none';
+    }
+  }
+
+  // Form Accordions toggle
+  function toggleAccordion(iconId, bodyId) {
+    const icon = document.getElementById(iconId);
+    const body = document.getElementById(bodyId);
+    if (body.style.display === 'block') {
+      body.style.display = 'none';
+      icon.innerText = '▲';
+    } else {
+      body.style.display = 'block';
+      icon.innerText = '▼';
+    }
+  }
+</script>
+</body>
+</html>

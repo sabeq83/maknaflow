@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAKNA FLOW — ContentFlow Hub Mockup</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <style>
+    /* GLOBALS.CSS INLINED FOR STANDALONE RUNNING */
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-secondary: #0f172a;
+      --bg-card: rgba(15, 23, 42, 0.75);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --bg-glass: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.1);
+      --border-hover: rgba(6, 182, 212, 0.35);
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
+      --accent: #0891b2;
+      --accent-light: #38bdf8;
+      --accent-glow: rgba(6, 182, 212, 0.18);
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.18);
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --danger-glow: rgba(239, 68, 68, 0.18);
+      --info: #0284c7;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-lg: 16px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,0.6);
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --sidebar-w: 260px;
+      --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+      
+      --border-color: rgba(255, 255, 255, 0.1);
+      --accent-color: #0891b2;
+    }
+
+    [data-theme='light'] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-card: rgba(255, 255, 255, 0.85);
+      --bg-card-hover: rgba(241, 245, 249, 0.95);
+      --bg-glass: rgba(15, 23, 42, 0.04);
+      --border: rgba(15, 23, 42, 0.12);
+      --border-hover: rgba(6, 182, 212, 0.6);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #5b6b7c;
+      --accent: #0891b2;
+      --accent-light: #0369a1;
+      --accent-glow: rgba(6, 182, 212, 0.12);
+      --success: #059669;
+      --success-glow: rgba(16, 185, 129, 0.12);
+      --warning: #d97706;
+      --danger: #dc2626;
+      --danger-glow: rgba(220, 38, 38, 0.12);
+      --info: #0284c7;
+      --shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+      --shadow-lg: 0 8px 40px rgba(15, 23, 42, 0.1);
+      
+      --border-color: rgba(15, 23, 42, 0.12);
+      --accent-color: #0891b2;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Override for specific tags in Light theme */
+    [data-theme='light'] .sidebar-brand h1 {
+      color: var(--text-primary);
+      -webkit-text-fill-color: var(--text-primary);
+    }
+    [data-theme='light'] .sidebar-brand p {
+      color: var(--text-secondary);
+    }
+    [data-theme='light'] .sidebar-footer strong {
+      color: var(--text-primary) !important;
+    }
+    [data-theme='light'] .form-select option, 
+    [data-theme='light'] .form-input option {
+      background: #ffffff;
+      color: #000000;
+    }
+    [data-theme='light'] .nav-link:hover {
+      background: rgba(15, 23, 42, 0.04);
+    }
+
+    /* LAYOUT */
+    .app-layout { display: flex; height: 100vh; }
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      height: 100vh;
+      z-index: 100;
+    }
+    .sidebar-brand {
+      padding: 20px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-nav { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: all var(--transition);
+      border: 1px solid transparent;
+    }
+    .nav-link:hover {
+      background: var(--bg-glass);
+      color: var(--text-primary);
+      border-color: var(--border);
+    }
+    .nav-link.active {
+      background: rgba(6, 182, 212, 0.12);
+      color: var(--accent-light);
+      border-left: 3px solid var(--accent-light);
+      border-color: rgba(6, 182, 212, 0.3);
+    }
+    .nav-icon { font-size: 1.15rem; width: 24px; text-align: center; }
+    .nav-section { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em; padding: 16px 16px 6px; font-weight: 600; }
+    
+    .main-content {
+      flex: 1;
+      margin-left: var(--sidebar-w);
+      overflow-y: auto;
+      height: 100vh;
+      background: var(--bg-primary);
+    }
+    .page-container { max-width: 1200px; margin: 0 auto; padding: 32px; }
+    .page-header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-start; }
+    .page-header h2 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 6px; }
+    .page-header p { color: var(--text-secondary); font-size: 0.9rem; }
+
+    /* CARDS */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      backdrop-filter: blur(20px);
+      transition: all var(--transition);
+    }
+    .card:hover { border-color: var(--border-hover); }
+
+    /* STATS GRID */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      position: relative;
+      overflow: hidden;
+      transition: all var(--transition);
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+    .stat-card:hover::before { opacity: 1; }
+    .stat-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+    .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+    .stat-value { font-size: 2rem; font-weight: 700; font-family: var(--font-mono); margin-top: 4px; }
+    .stat-value.accent { color: var(--accent-light); }
+    .stat-value.success { color: var(--success); }
+    .stat-value.warning { color: var(--warning); }
+
+    /* FORMS & FILTERS */
+    .filter-bar {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+      background: var(--bg-card);
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .form-input, .form-select {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      outline: none;
+      transition: all var(--transition);
+    }
+    .form-input:focus, .form-select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      border: 1px solid transparent;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
+      color: white;
+      border-color: #0891b2;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(6, 182, 212, 0.28); }
+    
+    /* TABLES */
+    .table-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .ideas-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .ideas-table th {
+      text-align: left;
+      padding: 14px 18px;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      background: var(--bg-secondary);
+    }
+    .ideas-table td {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.88rem;
+      vertical-align: middle;
+    }
+    .ideas-table tr:last-child td { border-bottom: none; }
+    .ideas-table tr:hover td { background: var(--bg-glass); cursor: pointer; }
+
+    /* STATUS BADGES */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .status-published { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .status-scheduled { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .status-skipped { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+    [data-theme='light'] .status-skipped { color: #7c3aed; background: rgba(124, 58, 237, 0.12); border-color: rgba(124, 58, 237, 0.25); }
+
+    .brand-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .brand-skincare { background: rgba(37, 99, 235, 0.15); color: #3b82f6; border: 1px solid rgba(37, 99, 235, 0.3); }
+    .brand-health { background: rgba(5, 150, 105, 0.15); color: #10b981; border: 1px solid rgba(5, 150, 105, 0.3); }
+    [data-theme='light'] .brand-skincare { color: #1d4ed8; background: rgba(29, 78, 216, 0.08); border-color: rgba(29, 78, 216, 0.2); }
+    [data-theme='light'] .brand-health { color: #047857; background: rgba(4, 120, 87, 0.08); border-color: rgba(4, 120, 87, 0.2); }
+
+    /* MODAL */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      width: 90%;
+      max-width: 650px;
+      box-shadow: var(--shadow-lg);
+      animation: scaleIn 0.2s ease;
+    }
+    @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-header h3 { font-size: 1.25rem; font-weight: 700; }
+    .modal-close { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+    .modal-close:hover { color: var(--text-primary); }
+
+    .scene-card {
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .scene-number { font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-light); font-weight: 600; margin-bottom: 6px; }
+    .scene-text { font-size: 0.85rem; line-height: 1.5; }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<div class="app-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, rgba(0,242,254,0.15), rgba(16,185,129,0.15)); border: 1px solid rgba(0,242,254,0.3); display: flex; align-items: center; justify-content: center;">
+          <svg viewBox="0 0 64 64" fill="none" style="width: 22px; height: 22px;">
+            <circle cx="32" cy="32" r="22" fill="rgba(0,242,254,0.1)"/>
+            <path d="M16 48 L16 16 L32 34 L48 16 L48 48" stroke="#00F2FE" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h1 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--text-primary); letter-spacing: 0.02em; font-family: var(--font-mono);">MAKNA FLOW</h1>
+      </div>
+      <p style="margin: 6px 0 0 0; font-size: 0.65rem; color: var(--text-muted); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em;">Isolated SaaS Platform</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-link"><span class="nav-icon">◈</span>Dashboard</a>
+      
+      <div class="nav-section">Planning</div>
+      <a href="#" class="nav-link"><span class="nav-icon">🗓️</span>Content Planner</a>
+      <a href="#" class="nav-link"><span class="nav-icon">📦</span>Product Database</a>
+      
+      <div class="nav-section">Workflow</div>
+      <a href="./campaigns.html" class="nav-link"><span class="nav-icon">🎬</span>RE Campaign</a>
+      <a href="./campaigns.html" class="nav-link"><span class="nav-icon">🌱</span>Pillar Campaign</a>
+      <a href="#" class="nav-link"><span class="nav-icon">🤖</span>Sheets Autopilot</a>
+
+      <div class="nav-section">Publishing</div>
+      <a href="./content-flow.html" class="nav-link active"><span class="nav-icon">📊</span>ContentFlow Hub</a>
+      
+      <!-- Sub-menu for active brands -->
+      <div style="padding-left: 28px; display: flex; flex-direction: column; gap: 4px; margin-top: 4px; margin-bottom: 8px;">
+        <a href="#" style="font-size: 11px; color: var(--accent-light); font-weight: 700; padding: 5px 10px; border-radius: 6px; text-decoration: none; background: rgba(6,182,212,0.1); border-left: 3px solid var(--accent-light);">🌐 Semua Akun</a>
+        <a href="#" style="font-size: 11px; color: var(--text-secondary); padding: 5px 10px; border-radius: 6px; text-decoration: none;">🏷️ @blue_skincare</a>
+        <a href="#" style="font-size: 11px; color: var(--text-secondary); padding: 5px 10px; border-radius: 6px; text-decoration: none;">🏷️ @siasatsehat</a>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer" style="padding: 1rem; border-top: 1px solid var(--border); margin-top: auto;">
+      <!-- Toggle switch mode -->
+      <button id="themeToggleBtn" style="width: 100%; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-glass); color: var(--text-primary); cursor: pointer; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
+        🌙 Dark Mode
+      </button>
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+        Logged in as: <strong style="color: var(--text-primary)">operator_gemini</strong>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="page-container">
+      <div class="page-header">
+        <div>
+          <h2>📊 ContentFlow Hub</h2>
+          <p>Kelola proses publikasi video, status integrasi TikTok/IG/FB, dan file final</p>
+        </div>
+        <button class="btn btn-primary">🔄 Sync Content</button>
+      </div>
+
+      <!-- STATS GRID -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Video</div>
+          <div class="stat-value accent">124</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Published</div>
+          <div class="stat-value success">82</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Scheduled</div>
+          <div class="stat-value warning">36</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pending Sync</div>
+          <div class="stat-value" style="color: var(--text-primary);">6</div>
+        </div>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <input type="text" class="form-input" placeholder="Cari nama video atau hashtag...">
+        <select class="form-select">
+          <option value="all">Semua Akun</option>
+          <option value="skincare">@blue_skincare</option>
+          <option value="sehat">@siasatsehat</option>
+        </select>
+        <select class="form-select">
+          <option value="all">Status Post</option>
+          <option value="published">Published</option>
+          <option value="scheduled">Scheduled</option>
+        </select>
+        <select class="form-select">
+          <option value="all">Urutan Waktu</option>
+          <option value="newest">Terbaru</option>
+          <option value="oldest">Terlama</option>
+        </select>
+        <button class="btn btn-primary" style="justify-content: center; height: 100%;">Filter</button>
+      </div>
+
+      <!-- IDEAS TABLE -->
+      <div class="table-container">
+        <table class="ideas-table">
+          <thead>
+            <tr>
+              <th>Preview</th>
+              <th>Detail Content</th>
+              <th>Brand / Akun</th>
+              <th>Status</th>
+              <th>Tanggal Post</th>
+              <th>Platform</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="openDetailModal('Glow Serum Booster', 'Published', '10 Feb 2026', 'Blue Skincare', 'skincare')">
+              <td>
+                <div style="width: 70px; height: 45px; background: rgba(0, 0, 0, 0.4); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; border: 1px solid var(--border);">
+                  🎬
+                </div>
+              </td>
+              <td>
+                <strong style="color: var(--text-primary); display: block;">Glow Serum Booster V2</strong>
+                <span style="font-size: 0.78rem; color: var(--text-muted)">ID: opc_glow_9123</span>
+              </td>
+              <td>
+                <span class="brand-badge brand-skincare">Blue Skincare</span>
+              </td>
+              <td>
+                <span class="status-badge status-published">✓ Published</span>
+              </td>
+              <td>10 Feb 2026</td>
+              <td><span style="font-size: 1.2rem;">📱 📸</span></td>
+            </tr>
+
+            <tr onclick="openDetailModal('Healthy Diet Program', 'Scheduled', '14 Feb 2026', 'Siasat Sehat', 'health')">
+              <td>
+                <div style="width: 70px; height: 45px; background: rgba(0, 0, 0, 0.4); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; border: 1px solid var(--border);">
+                  🎬
+                </div>
+              </td>
+              <td>
+                <strong style="color: var(--text-primary); display: block;">Siasat Sehat Pagi Hook</strong>
+                <span style="font-size: 0.78rem; color: var(--text-muted)">ID: opc_health_4412</span>
+              </td>
+              <td>
+                <span class="brand-badge brand-health">Siasat Sehat</span>
+              </td>
+              <td>
+                <span class="status-badge status-scheduled">⏰ Scheduled</span>
+              </td>
+              <td>14 Feb 2026</td>
+              <td><span style="font-size: 1.2rem;">📱</span></td>
+            </tr>
+
+            <tr onclick="openDetailModal('Anti-Aging Night Routine', 'Skipped', '08 Feb 2026', 'Blue Skincare', 'skincare')">
+              <td>
+                <div style="width: 70px; height: 45px; background: rgba(0, 0, 0, 0.4); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; border: 1px solid var(--border);">
+                  🎬
+                </div>
+              </td>
+              <td>
+                <strong style="color: var(--text-primary); display: block;">Blue Serum Night Skincare</strong>
+                <span style="font-size: 0.78rem; color: var(--text-muted)">ID: opc_glow_9111</span>
+              </td>
+              <td>
+                <span class="brand-badge brand-skincare">Blue Skincare</span>
+              </td>
+              <td>
+                <span class="status-badge status-skipped">✕ Skipped</span>
+              </td>
+              <td>08 Feb 2026</td>
+              <td><span style="font-size: 1.2rem;">📸</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- DETAILS MODAL -->
+<div class="modal-backdrop" id="detailModalBackdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Content Details</h3>
+      <button class="modal-close" onclick="closeDetailModal()">✕</button>
+    </div>
+    <div style="margin-bottom: 20px;">
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">
+        Brand Account: <span id="modalBrand" style="font-weight: 600; color: var(--text-primary);">Blue Skincare</span>
+      </p>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">
+        Status: <span id="modalStatus" style="font-weight: 600;">Published</span>
+      </p>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">
+        Scheduled / Posted Date: <span id="modalDate" style="font-weight: 600; color: var(--text-primary);">10 Feb 2026</span>
+      </p>
+    </div>
+    
+    <div style="display: flex; flex-direction: column; gap: 12px; max-height: 300px; overflow-y: auto; padding-right: 6px;">
+      <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Voiceover / Scene Outline</h4>
+      <div class="scene-card">
+        <div class="scene-number">SCENE 1 (Hook - 00:00 - 00:04)</div>
+        <div class="scene-text">"Wajah kusam bikin gak pede pas ketemu orang banyak? Jangan khawatir!"</div>
+      </div>
+      <div class="scene-card">
+        <div class="scene-number">SCENE 2 (Product Bridge - 00:04 - 00:08)</div>
+        <div class="scene-text">"Pake Serum Glow Booster V2. Diformulasikan khusus buat mencerahkan wajah secara alami."</div>
+      </div>
+      <div class="scene-card">
+        <div class="scene-number">SCENE 3 (Outro / Call to action - 00:08 - 00:12)</div>
+        <div class="scene-text">"Order sekarang juga ya, link produk ori ada di bio atau keranjang kuning!"</div>
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; border-top: 1px solid var(--border); padding-top: 16px;">
+      <button class="btn btn-secondary" onclick="closeDetailModal()">Tutup</button>
+      <button class="btn btn-primary" onclick="alert('Membuka file Nextcloud...')">📁 Open Assets Cloud</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Dynamic theme switching
+  const htmlEl = document.documentElement;
+  const themeBtn = document.getElementById('themeToggleBtn');
+
+  // Check saved theme
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  htmlEl.setAttribute('data-theme', savedTheme);
+  updateThemeButton(savedTheme);
+
+  themeBtn.addEventListener('click', () => {
+    const currentTheme = htmlEl.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    htmlEl.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeButton(newTheme);
+  });
+
+  function updateThemeButton(theme) {
+    if (theme === 'light') {
+      themeBtn.innerHTML = '🌙 Dark Mode';
+    } else {
+      themeBtn.innerHTML = '☀️ Light Mode';
+    }
+  }
+
+  // Modal logic
+  const modalBackdrop = document.getElementById('detailModalBackdrop');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalBrand = document.getElementById('modalBrand');
+  const modalStatus = document.getElementById('modalStatus');
+  const modalDate = document.getElementById('modalDate');
+
+  function openDetailModal(title, status, date, brand, brandKey) {
+    modalTitle.innerText = title;
+    modalBrand.innerText = brand;
+    modalStatus.innerText = status;
+    modalDate.innerText = date;
+    
+    // Customize status color
+    if (status === 'Published') {
+      modalStatus.style.color = 'var(--success)';
+    } else if (status === 'Scheduled') {
+      modalStatus.style.color = 'var(--warning)';
+    } else {
+      modalStatus.style.color = '#c084fc';
+    }
+
+    modalBackdrop.style.display = 'flex';
+  }
+
+  function closeDetailModal() {
+    modalBackdrop.style.display = 'none';
+  }
+
+  // Close modal when clicking backdrop
+  modalBackdrop.addEventListener('click', (e) => {
+    if (e.target === modalBackdrop) {
+      closeDetailModal();
+    }
+  });
+</script>
+</body>
+</html>

@@ -52,34 +52,34 @@ const getBrandBadgeStyle = (accountName) => {
   const acc = (accountName || '').toLowerCase().trim();
   if (acc === 'dummybrand01' || acc.includes('blue') || acc.includes('skincare')) {
     return {
-      background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.25) 0%, rgba(59, 130, 246, 0.25) 100%)',
-      border: '1px solid #3b82f6',
-      color: '#93c5fd',
-      boxShadow: '0 2px 10px rgba(59, 130, 246, 0.35)'
+      background: 'var(--brand-blue-bg)',
+      border: '1px solid var(--brand-blue-border)',
+      color: 'var(--brand-blue-text)',
+      boxShadow: '0 2px 10px var(--brand-blue-glow)'
     };
   }
   if (acc === 'dummybrand02' || acc.includes('red') || acc.includes('food')) {
     return {
-      background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.25) 0%, rgba(239, 68, 68, 0.25) 100%)',
-      border: '1px solid #ef4444',
-      color: '#fca5a5',
-      boxShadow: '0 2px 10px rgba(239, 68, 68, 0.35)'
+      background: 'var(--brand-red-bg)',
+      border: '1px solid var(--brand-red-border)',
+      color: 'var(--brand-red-text)',
+      boxShadow: '0 2px 10px var(--brand-red-glow)'
     };
   }
   if (acc === 'siasatsehat' || acc.includes('sehat') || acc.includes('health')) {
     return {
-      background: 'linear-gradient(135deg, rgba(5, 150, 105, 0.3) 0%, rgba(16, 185, 129, 0.3) 100%)',
-      border: '1px solid #10b981',
-      color: '#6ee7b7',
-      boxShadow: '0 2px 10px rgba(16, 185, 129, 0.4)'
+      background: 'var(--brand-green-bg)',
+      border: '1px solid var(--brand-green-border)',
+      color: 'var(--brand-green-text)',
+      boxShadow: '0 2px 10px var(--brand-green-glow)'
     };
   }
   // Fallback Option D (Sleek Emerald Green)
   return {
-    background: 'linear-gradient(135deg, rgba(5, 150, 105, 0.25) 0%, rgba(16, 185, 129, 0.25) 100%)',
-    border: '1px solid #10b981',
-    color: '#6ee7b7',
-    boxShadow: '0 2px 10px rgba(16, 185, 129, 0.35)'
+    background: 'var(--brand-green-bg)',
+    border: '1px solid var(--brand-green-border)',
+    color: 'var(--brand-green-text)',
+    boxShadow: '0 2px 10px var(--brand-green-glow)'
   };
 };
 
