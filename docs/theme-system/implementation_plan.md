@@ -922,4 +922,4 @@ Route detail dinilai menggunakan data staging yang tersedia tanpa melakukan aksi
 
 - [x] Selaraskan background dan warna teks badge tanggal selesai video pada light theme.
 - [x] Batasi lebar pencarian Video ID dan filter produk menjadi 180px.
-- [ ] Verifikasi build, rilis patch, dan deploy hanya ke server dev Mac Mini.
+- [x] Verifikasi build, rilis patch, dan deploy hanya ke server dev Mac Mini.
