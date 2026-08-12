@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.11 — Fix Layout & Viewport Backgrounds Light Theme (12/08/2026)
+- Override main-content viewport background to resolve dark page backgrounds on Content Planner and Universe Manager
+- Override Video Editor Studio kustom CSS panel, tab, drag-zone, dan input selectors
+- Override TTS Editor Studio kustom panel sections, input fields, persona cards, dan audio list items
+
 ## V2.14.10 — Penyelarasan Kontras Light Theme Semua Menu (12/08/2026)
 - Menyematkan CSS attribute selectors untuk override teks putih/terang inline di seluruh menu
 - Menyelaraskan form input, textarea, select, dan tabel secara otomatis di Light Mode
