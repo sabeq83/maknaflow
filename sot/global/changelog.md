@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.14.5 — Fix card-level download button URL formatting (12/08/2026)
+- Align card-level download filename prefix and suffix with Nextcloud standards
+
 ## V2.14.4 — Align modal buttons, add card download, and implement cooldown (12/08/2026)
 - Realign modal buttons into two separate 2-column and 3-column rows
 - Add direct Download Video button to list cards

@@ -185,8 +185,7 @@ function ContentFlowHubPageContent() {
   const getDirectDownloadUrl = (nextcloudUrl, videoId) => {
     if (!nextcloudUrl || !videoId) return null;
     const cleanUrl = nextcloudUrl.replace(/\/+$/, '');
-    const cleanVideoId = videoId.toLowerCase().trim().replace(/[^a-z0-9_]/g, '_');
-    const filename = `${cleanVideoId}_final.mp4`;
+    const filename = `${videoId}_video_final.mp4`;
     return `${cleanUrl}/download?files=${encodeURIComponent(filename)}`;
   };
 
