@@ -195,6 +195,36 @@ textarea::placeholder { color: var(--text-muted); opacity: 1; }
 .btn-danger { background: var(--status-danger-soft); border-color: var(--status-danger); color: var(--status-danger); }
 .btn-success { background: var(--status-success-soft); border-color: var(--status-success); color: var(--status-success); }
 
+/* Harmonized actions used by ContentFlow cards and dialogs. */
+.content-action {
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;
+}
+.content-action:hover:not(:disabled) { transform: translateY(-1px); }
+.content-action-cloud { background: var(--status-info-soft); border-color: var(--status-info); color: var(--status-info); }
+.content-action-cloud:hover { background: color-mix(in srgb, var(--status-info-soft) 72%, var(--status-info) 28%); color: var(--status-info); }
+.content-action-drive { background: var(--status-success-soft); border-color: var(--status-success); color: var(--status-success); }
+.content-action-drive:hover { background: color-mix(in srgb, var(--status-success-soft) 72%, var(--status-success) 28%); color: var(--status-success); }
+.content-action-download { background: var(--action-primary); border-color: var(--action-primary); color: var(--on-action-primary); }
+.content-action-download:hover:not(:disabled) { background: var(--action-primary-hover); border-color: var(--action-primary-hover); color: var(--on-action-primary); }
+.content-action-neutral { background: var(--status-neutral-soft); border-color: var(--status-neutral); color: var(--status-neutral); }
+.content-action-success { background: var(--status-success-soft); border-color: var(--status-success); color: var(--status-success); }
+.content-action:disabled { background: var(--surface-interactive); border-color: var(--border-subtle); color: var(--text-disabled); cursor: not-allowed; box-shadow: none; transform: none; }
+
+/* User Management table surfaces remain legible in both themes. */
+.user-table-shell { background: var(--surface); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-card); }
+.user-table-head { background: var(--surface-raised); color: var(--text-secondary); }
+.user-table-row { background: var(--surface); border-bottom: 1px solid var(--border-subtle); transition: background-color .15s ease; }
+.user-table-row:hover { background: var(--surface-hover); }
+.user-role-admin { background: var(--status-info-soft); border: 1px solid var(--status-info); color: var(--status-info); }
+.user-role-user { background: var(--surface-interactive); border: 1px solid var(--border-strong); color: var(--text-secondary); }
+.user-brand-badge { background: var(--status-neutral-soft); border: 1px solid color-mix(in srgb, var(--status-neutral) 45%, transparent); color: var(--status-neutral); }
+
 .text-danger { color: var(--status-danger); }
 .status-pending,
 .status-warning { color: var(--status-warning); background: var(--status-warning-soft); }

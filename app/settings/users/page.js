@@ -225,15 +225,9 @@ export default function UserManagementPage() {
             </div>
             <button
               onClick={openCreateModal}
+              className="content-action content-action-download"
               style={{
-                background: 'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)',
-                color: 'var(--text-primary)',
-                border: 'none',
                 padding: '10px 18px',
-                borderRadius: '8px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)'
               }}
             >
               ➕ Tambah User Baru
@@ -253,10 +247,10 @@ export default function UserManagementPage() {
           )}
 
           {/* Users Table */}
-          <div style={{ background: 'rgba(15, 23, 42, 0.7)', border: '1px solid var(--border-subtle)', borderRadius: '12px', overflow: 'hidden' }}>
+          <div className="user-table-shell" style={{ borderRadius: '12px', overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
               <thead>
-                <tr style={{ background: 'rgba(30, 41, 59, 0.8)', borderBottom: '1px solid var(--border-subtle)' }}>
+                <tr className="user-table-head" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                   <th style={{ padding: '14px 16px' }}>Username</th>
                   <th style={{ padding: '14px 16px' }}>Role</th>
                   <th style={{ padding: '14px 16px' }}>Akun Brand Ter-assign</th>
@@ -266,20 +260,17 @@ export default function UserManagementPage() {
               </thead>
               <tbody>
                 {users.map(u => (
-                  <tr key={u.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                  <tr key={u.id} className="user-table-row">
                     <td style={{ padding: '14px 16px', fontWeight: 600 }}>
                       👤 {u.username}
                       {u.email && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{u.email}</div>}
                     </td>
                     <td style={{ padding: '14px 16px' }}>
-                      <span style={{
+                      <span className={u.role === 'admin' ? 'user-role-admin' : 'user-role-user'} style={{
                         padding: '4px 10px',
                         borderRadius: '20px',
                         fontSize: '0.75rem',
                         fontWeight: 600,
-                        background: u.role === 'admin' ? 'rgba(56, 189, 248, 0.2)' : 'rgba(148, 163, 184, 0.2)',
-                        color: u.role === 'admin' ? 'var(--link)' : 'var(--text-secondary)',
-                        border: u.role === 'admin' ? '1px solid rgba(56, 189, 248, 0.4)' : '1px solid rgba(148, 163, 184, 0.3)'
                       }}>
                         {u.role.toUpperCase()}
                       </span>
@@ -290,7 +281,7 @@ export default function UserManagementPage() {
                       ) : u.assignedBrands && u.assignedBrands.length > 0 ? (
                         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                           {u.assignedBrands.map(b => (
-                            <span key={b.brand_id} style={{ background: 'rgba(99, 102, 241, 0.2)', color: '#a5b4fc', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
+                            <span key={b.brand_id} className="user-brand-badge" style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
                               🏷️ {b.brand_name}
                             </span>
                           ))}

@@ -869,3 +869,11 @@ Route detail dinilai menggunakan data staging yang tersedia tanpa melakukan aksi
 - [x] Jalankan build final dan pemeriksaan regression permission/navigation.
 - [x] Perbarui changelog, release patch, commit, tag, dan push sesuai SOP.
 - [x] Deploy ke environment dev Mac Mini dan verifikasi kesehatan; staging/production tidak disentuh.
+
+### Follow-up harmonisasi light theme
+
+- [x] Selaraskan tombol Nextcloud, Drive, dan Download pada kartu ContentFlow.
+- [x] Selaraskan seluruh tombol aksi utama pada modal detail ContentFlow.
+- [x] Ganti surface, header, row, role badge, dan brand badge tabel User Management dengan token tema.
+- [x] Jalankan build lokal dan pemeriksaan visual light/dark.
+- [ ] Rilis patch dan deploy hanya ke Mac Mini dev.

@@ -1342,7 +1342,7 @@ function ContentFlowHubPageContent() {
                             const isCardLoading = loadingUrls[item.id];
                             return (
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                <a href={targetUrl} target="_blank" rel="noreferrer" style={{ display: 'block', width: '100%', textAlign: 'center', padding: '6px 10px', borderRadius: '8px', background: 'linear-gradient(135deg, var(--status-info) 0%, var(--link) 100%)', color: 'var(--text-primary)', fontSize: '11px', fontWeight: 700, textDecoration: 'none', boxShadow: '0 2px 8px rgba(56, 189, 248, 0.25)' }} title="Buka Link Nextcloud">
+                                <a className="content-action content-action-cloud" href={targetUrl} target="_blank" rel="noreferrer" style={{ display: 'block', width: '100%', textAlign: 'center', padding: '6px 10px', fontSize: '11px' }} title="Buka Link Nextcloud">
                                   ☁️ Nextcloud
                                 </a>
                                 <button
@@ -1352,22 +1352,13 @@ function ContentFlowHubPageContent() {
                                     handleDownload(item);
                                   }}
                                   disabled={isCardCooldown || isCardLoading}
+                                  className="content-action content-action-download"
                                   style={{
                                     display: 'block',
                                     width: '100%',
                                     textAlign: 'center',
                                     padding: '6px 10px',
-                                    borderRadius: '8px',
-                                    background: (isCardCooldown || isCardLoading)
-                                      ? 'rgba(74, 85, 104, 0.5)'
-                                      : 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)',
-                                    border: (isCardCooldown || isCardLoading) ? '1px solid #4a5568' : '1px solid var(--status-neutral)',
-                                    color: (isCardCooldown || isCardLoading) ? 'var(--text-muted)' : 'var(--text-primary)',
                                     fontSize: '11px',
-                                    fontWeight: 700,
-                                    cursor: (isCardCooldown || isCardLoading) ? 'not-allowed' : 'pointer',
-                                    boxShadow: (isCardCooldown || isCardLoading) ? 'none' : '0 2px 8px rgba(192, 132, 252, 0.25)',
-                                    transition: 'all 0.2s ease'
                                   }}
                                 >
                                   {isCardLoading ? '🔄 Loading...' : isCardCooldown ? '⏳ Cooldown' : '📥 Download Video'}
@@ -1377,7 +1368,7 @@ function ContentFlowHubPageContent() {
                           }
 
                           return (
-                            <a href={targetUrl} target="_blank" rel="noreferrer" style={{ display: 'block', width: '100%', textAlign: 'center', padding: '6px 10px', borderRadius: '8px', background: 'linear-gradient(135deg, var(--status-success) 0%, var(--status-success) 100%)', color: 'var(--text-primary)', fontSize: '11px', fontWeight: 700, textDecoration: 'none', boxShadow: '0 2px 8px var(--status-success-soft)' }} title="Buka Link Google Drive">
+                            <a className="content-action content-action-drive" href={targetUrl} target="_blank" rel="noreferrer" style={{ display: 'block', width: '100%', textAlign: 'center', padding: '6px 10px', fontSize: '11px' }} title="Buka Link Google Drive">
                               📁 Google Drive
                             </a>
                           );
@@ -1531,12 +1522,8 @@ function ContentFlowHubPageContent() {
                         setSchedulePreloadItem(itemToSchedule);
                         setMainView('publishing');
                       }}
-                      style={{
-                        padding: '6px 12px', borderRadius: '8px',
-                        background: 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)',
-                        border: '1px solid var(--status-neutral)', color: 'var(--text-primary)', fontSize: '11px',
-                        fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
-                      }}
+                      className="content-action content-action-neutral"
+                      style={{ padding: '6px 12px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '6px' }}
                       title="Jadwalkan publikasi Facebook / Instagram untuk konten ini"
                     >
                       <span>⏱️ Jadwalkan Publikasi</span>
@@ -1582,23 +1569,8 @@ function ContentFlowHubPageContent() {
                           type="button"
                           onClick={() => copyToClipboard(activeItem.caption, 'Caption', `modal_caption_${activeItem.id}`)}
                           disabled={!activeItem.caption}
-                          style={{
-                            padding: '10px 14px', borderRadius: '10px',
-                            background: copiedKeys[`modal_caption_${activeItem.id}`]
-                              ? 'linear-gradient(135deg, var(--status-success) 0%, var(--status-success) 100%)'
-                              : activeItem.caption
-                                ? 'linear-gradient(135deg, var(--status-neutral) 0%, #6d28d9 100%)'
-                                : 'rgba(30, 41, 59, 0.5)',
-                            border: copiedKeys[`modal_caption_${activeItem.id}`]
-                              ? '1px solid var(--status-success)'
-                              : activeItem.caption
-                                ? '1px solid var(--status-neutral)'
-                                : '1px solid var(--surface-interactive)',
-                            color: activeItem.caption ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: 600, fontSize: '13px',
-                            cursor: activeItem.caption ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                            boxShadow: activeItem.caption && !copiedKeys[`modal_caption_${activeItem.id}`] ? '0 4px 12px rgba(139, 92, 246, 0.3)' : 'none',
-                            transition: 'all 0.2s ease'
-                          }}
+                          className={`content-action ${copiedKeys[`modal_caption_${activeItem.id}`] ? 'content-action-success' : 'content-action-neutral'}`}
+                          style={{ padding: '10px 14px', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                         >
                           {copiedKeys[`modal_caption_${activeItem.id}`] ? '✓ Copied!' : '📋 Copy Caption'}
                         </button>
@@ -1607,15 +1579,8 @@ function ContentFlowHubPageContent() {
                           type="button"
                           onClick={() => copyToClipboard(activeItem.link_affiliate, 'Link Affiliate', `modal_affiliate_${activeItem.id}`)}
                           disabled={!activeItem.link_affiliate}
-                          style={{
-                            padding: '10px 14px', borderRadius: '10px',
-                            background: copiedKeys[`modal_affiliate_${activeItem.id}`] ? 'linear-gradient(135deg, var(--status-success) 0%, var(--status-success) 100%)' : activeItem.link_affiliate ? 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)' : 'rgba(30, 41, 59, 0.5)',
-                            border: copiedKeys[`modal_affiliate_${activeItem.id}`] ? '1px solid var(--status-success)' : activeItem.link_affiliate ? '1px solid var(--status-neutral)' : '1px solid var(--surface-interactive)',
-                            color: activeItem.link_affiliate ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: 700, fontSize: '13px',
-                            cursor: activeItem.link_affiliate ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                            boxShadow: activeItem.link_affiliate ? '0 4px 14px var(--status-neutral-soft)' : 'none',
-                            transition: 'all 0.2s ease'
-                          }}
+                          className={`content-action ${copiedKeys[`modal_affiliate_${activeItem.id}`] ? 'content-action-success' : 'content-action-neutral'}`}
+                          style={{ padding: '10px 14px', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                         >
                           {copiedKeys[`modal_affiliate_${activeItem.id}`] ? '✓ Copied!' : '📋 Copy Affiliate Link'}
                         </button>
@@ -1641,13 +1606,8 @@ function ContentFlowHubPageContent() {
                                 href={activeItem.link_produk}
                                 target="_blank"
                                 rel="noreferrer"
-                                style={{
-                                  padding: '10px 14px', borderRadius: '10px',
-                                  background: 'linear-gradient(135deg, var(--status-info) 0%, var(--link) 100%)',
-                                  border: '1px solid var(--link)', color: 'var(--text-primary)', fontWeight: 700, fontSize: '13px',
-                                  textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                                  boxShadow: '0 4px 14px rgba(56, 189, 248, 0.3)'
-                                }}
+                                className="content-action content-action-cloud"
+                                style={{ padding: '10px 14px', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                               >
                                 🔗 Buka Link Produk
                               </a>
@@ -1681,13 +1641,8 @@ function ContentFlowHubPageContent() {
                                 href={targetUrl}
                                 target="_blank"
                                 rel="noreferrer"
-                                style={{
-                                  padding: '10px 14px', borderRadius: '10px',
-                                  background: isNextcloud ? 'linear-gradient(135deg, var(--status-info) 0%, var(--link) 100%)' : 'linear-gradient(135deg, var(--status-success) 0%, var(--status-success) 100%)',
-                                  border: isNextcloud ? '1px solid var(--link)' : '1px solid var(--status-success)', color: 'var(--text-primary)', fontWeight: 700, fontSize: '13px',
-                                  textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                                  boxShadow: isNextcloud ? '0 4px 14px rgba(56, 189, 248, 0.3)' : '0 4px 14px var(--status-success-soft)'
-                                }}
+                                className={`content-action ${isNextcloud ? 'content-action-cloud' : 'content-action-drive'}`}
+                                style={{ padding: '10px 14px', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                               >
                                 {isNextcloud ? '☁️ Nextcloud Asset' : '📁 Drive Asset'}
                               </a>
@@ -1701,19 +1656,11 @@ function ContentFlowHubPageContent() {
                                   type="button"
                                   onClick={() => handleDownload(activeItem.id, directDownloadUrl)}
                                   disabled={loadingDownloadUrl || !directDownloadUrl || isCooldown}
+                                  className="content-action content-action-download"
                                   style={{
-                                    padding: '10px 14px', borderRadius: '10px',
-                                    background: isCooldown
-                                      ? 'rgba(74, 85, 104, 0.5)'
-                                      : 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)',
-                                    border: isCooldown ? '1px solid #4a5568' : '1px solid var(--status-neutral)',
-                                    color: isCooldown ? 'var(--text-muted)' : 'var(--text-primary)',
-                                    fontWeight: 700, fontSize: '13px',
+                                    padding: '10px 14px', fontSize: '13px',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                                    cursor: (loadingDownloadUrl || !directDownloadUrl || isCooldown) ? 'not-allowed' : 'pointer',
-                                    boxShadow: isCooldown ? 'none' : '0 4px 14px rgba(192, 132, 252, 0.3)',
                                     opacity: (loadingDownloadUrl || !directDownloadUrl) ? 0.6 : 1,
-                                    transition: 'all 0.2s ease'
                                   }}
                                 >
                                   {loadingDownloadUrl ? '🔄 Loading...' : isCooldown ? '⏳ Cooldown' : '📥 Download Video Final'}
@@ -2156,19 +2103,16 @@ function ContentFlowHubPageContent() {
                     <button
                       type="button"
                       onClick={() => setActiveItem(null)}
-                      style={{ padding: '10px 18px', background: 'var(--bg-secondary)', border: '1px solid var(--surface-interactive)', color: 'var(--text-secondary)', borderRadius: '10px', fontWeight: 600, cursor: 'pointer', fontSize: '13px' }}
+                      className="content-action btn-secondary"
+                      style={{ padding: '10px 18px', fontSize: '13px' }}
                     >
                       Batal
                     </button>
                     <button
                       type="submit"
                       disabled={savingStatus}
-                      style={{
-                        padding: '10px 22px', background: 'linear-gradient(135deg, #2563eb 0%, var(--status-neutral) 100%)',
-                        border: 'none', color: 'var(--text-primary)', borderRadius: '10px', fontWeight: 700,
-                        cursor: savingStatus ? 'not-allowed' : 'pointer', fontSize: '13px',
-                        boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)'
-                      }}
+                      className="content-action content-action-download"
+                      style={{ padding: '10px 22px', fontSize: '13px' }}
                     >
                       {savingStatus ? 'Menyimpan...' : '💾 Simpan Perubahan Status'}
                     </button>

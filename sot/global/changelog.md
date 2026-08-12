@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.16 — Harmonisasi Warna ContentFlow dan User Management (12/08/2026)
+- Selaraskan tombol Nextcloud, Drive, download, dan modal ContentFlow pada light/dark theme
+- Perbaiki surface tabel, badge role, dan badge brand User Management pada light theme
+
 ## V2.14.15 — Unified Light and Dark Theme System (12/08/2026)
 - Menambahkan token warna semantik light dan dark untuk seluruh UI MAKNA Flow
 - Menyelaraskan modal, form, status, sidebar, login, dan studio pada kedua tema
