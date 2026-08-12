@@ -1084,7 +1084,7 @@ function ContentFlowHubPageContent() {
           {/* Multi-level Search & Filter Panel */}
           <div style={{ padding: '20px', borderRadius: '16px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', marginBottom: '24px', boxShadow: '0 8px 24px var(--overlay-subtle)' }}>
             {/* Row 1: Universal Search & Metadata Filters (4 Columns) */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(220px, 0.8fr) repeat(3, 1fr)', gap: '12px', marginBottom: '14px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '260px repeat(3, minmax(0, 1fr))', gap: '12px', marginBottom: '14px' }}>
               {/* Universal Search */}
               <div style={{ position: 'relative' }}>
                 <SearchIcon style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: 14, height: 14, color: 'var(--text-muted)' }} />

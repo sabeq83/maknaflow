@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.18 — Penyelarasan Detail Content Planner (12/08/2026)
+- Selaraskan action bar, panel informasi, tabel, badge, dan inline editor detail Content Planner pada light theme
+- Batasi lebar pencarian Video ID ContentFlow dan Publishing Scheduler
+
 ## V2.14.17 — Penyelarasan Lanjutan Light Theme ContentFlow (12/08/2026)
 - Samakan dimensi tombol aset dan rapikan proporsi pencarian ContentFlow
 - Perkuat kontras status platform, badge, dan thumbnail Video ID

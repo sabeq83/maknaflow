@@ -1150,7 +1150,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
 
             <form onSubmit={handleScheduleSubmit}>
               {/* 1. Searchable Video ID Combobox */}
-              <div style={{ marginBottom: 12, position: 'relative' }}>
+              <div style={{ marginBottom: 12, position: 'relative', width: '100%', maxWidth: 360 }}>
                 <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>
                   <span>ID Konten / Video ID <span style={{ color: 'var(--status-danger)' }}>*</span></span>
                   <span style={{ color: 'var(--link)', fontWeight: 400, fontSize: 10 }}>Ketik untuk mencari di Video Library</span>
@@ -1186,10 +1186,10 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                         key={item.id || item.video_id}
                         onClick={() => selectVideoItem(item)}
                         style={{
-                          padding: '8px 12px', borderBottom: '1px solid #1e293b', cursor: 'pointer',
+                          padding: '8px 12px', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer',
                           display: 'flex', flexDirection: 'column', gap: 2, transition: 'background 0.15s'
                         }}
-                        onMouseEnter={(e) => e.currentTarget.style.background = '#1e293b'}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface-hover)'}
                         onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

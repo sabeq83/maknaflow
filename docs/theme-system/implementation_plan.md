@@ -886,3 +886,10 @@ Route detail dinilai menggunakan data staging yang tersedia tanpa melakukan aksi
 - [x] Selaraskan thumbnail serta badge Video ID dengan light theme.
 - [x] Migrasikan surface utama Publishing Scheduler ke token light/dark.
 - [x] Jalankan build, rilis patch, dan deploy hanya ke Mac Mini dev.
+
+### Follow-up Content Planner detail dan Video ID search
+
+- [x] Selaraskan action bar, informational panel, dan tabel detail Content Planner pada light/dark theme.
+- [x] Selaraskan badge, row state, serta inline editor Content Planner.
+- [x] Batasi search Video ID ContentFlow menjadi 260px dan pencarian scheduler maksimal 360px.
+- [ ] Jalankan build, rilis patch, dan deploy hanya ke Mac Mini dev.

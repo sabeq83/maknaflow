@@ -181,7 +181,7 @@ export default function ContentPlannerWorkbench() {
             position: 'fixed', top: '24px', right: '24px', zIndex: 9999,
             padding: '12px 24px', borderRadius: '8px',
             background: toast.type === 'error' ? 'var(--status-danger)' : 'var(--status-success)',
-            color: 'var(--text-primary)', fontWeight: 600, boxShadow: '0 10px 25px var(--overlay-subtle)'
+            color: 'var(--on-action-primary)', fontWeight: 600, boxShadow: '0 10px 25px var(--overlay-subtle)'
           }}>
             {toast.msg}
           </div>
@@ -193,7 +193,7 @@ export default function ContentPlannerWorkbench() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <button
                 onClick={() => router.push('/content-planner')}
-                style={{ background: 'var(--bg-secondary)', border: 'none', color: 'var(--text-muted)', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' }}
+                style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' }}
               >
                 ← Kembali
               </button>
@@ -219,32 +219,32 @@ export default function ContentPlannerWorkbench() {
           <div style={{ display: 'flex', gap: '8px' }}>
             <button
               onClick={() => setShowOpcModal(true)}
-              style={{ padding: '8px 14px', background: 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)', color: 'var(--text-primary)', border: '1px solid var(--status-neutral)', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', fontSize: '13px', boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)' }}
+              style={{ padding: '8px 14px', background: 'var(--status-neutral-soft)', color: 'var(--status-neutral)', border: '1px solid var(--status-neutral)', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', fontSize: '13px' }}
             >
               🌱 Ingest ke OPC (Organic Pillar)
             </button>
             <button
               onClick={handleSyncContentFlow}
               disabled={syncing}
-              style={{ padding: '8px 14px', background: syncing ? 'var(--status-success-soft)' : 'var(--status-success)', color: 'var(--text-primary)', border: '1px solid var(--status-success)', borderRadius: '8px', fontWeight: 600, cursor: syncing ? 'not-allowed' : 'pointer', fontSize: '13px' }}
+              style={{ padding: '8px 14px', background: syncing ? 'var(--surface-interactive)' : 'var(--action-primary)', color: syncing ? 'var(--text-disabled)' : 'var(--on-action-primary)', border: `1px solid ${syncing ? 'var(--border-subtle)' : 'var(--action-primary)'}`, borderRadius: '8px', fontWeight: 700, cursor: syncing ? 'not-allowed' : 'pointer', fontSize: '13px' }}
             >
               {syncing ? '⏳ Menyinkronkan...' : '🚀 Sync ke Content Flow'}
             </button>
             <button
               onClick={() => handleExport('csv')}
-              style={{ padding: '8px 14px', background: '#1e2937', color: 'var(--link)', border: '1px solid var(--surface-interactive)', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '13px' }}
+              style={{ padding: '8px 14px', background: 'var(--status-info-soft)', color: 'var(--status-info)', border: '1px solid var(--status-info)', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '13px' }}
             >
               📥 Export CSV
             </button>
             <button
               onClick={() => handleExport('md')}
-              style={{ padding: '8px 14px', background: '#1e2937', color: '#a78bfa', border: '1px solid var(--surface-interactive)', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '13px' }}
+              style={{ padding: '8px 14px', background: 'var(--status-neutral-soft)', color: 'var(--status-neutral)', border: '1px solid var(--status-neutral)', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '13px' }}
             >
               📝 Export Markdown
             </button>
             <button
               onClick={() => handleExport('json')}
-              style={{ padding: '8px 14px', background: '#1e2937', color: 'var(--status-success)', border: '1px solid var(--surface-interactive)', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '13px' }}
+              style={{ padding: '8px 14px', background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success)', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '13px' }}
             >
               📄 Export JSON
             </button>
@@ -270,8 +270,8 @@ export default function ContentPlannerWorkbench() {
               onClick={handleExecute}
               disabled={executing}
               style={{
-                padding: '12px 24px', background: 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)',
-                color: 'var(--text-primary)', border: 'none', borderRadius: '10px', fontWeight: 700,
+                padding: '12px 24px', background: 'var(--action-primary)',
+                color: 'var(--on-action-primary)', border: '1px solid var(--action-primary)', borderRadius: '10px', fontWeight: 700,
                 cursor: executing ? 'not-allowed' : 'pointer', fontSize: '14px',
                 boxShadow: '0 4px 14px var(--status-neutral-soft)'
               }}
@@ -290,8 +290,8 @@ export default function ContentPlannerWorkbench() {
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
               <span style={{
-                background: planner.content_world === 'cartoon_universe' ? 'var(--status-neutral)' : '#0ea5e9',
-                color: 'var(--text-primary)', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 700
+                background: planner.content_world === 'cartoon_universe' ? 'var(--status-neutral-soft)' : 'var(--status-info-soft)',
+                color: planner.content_world === 'cartoon_universe' ? 'var(--status-neutral)' : 'var(--status-info)', border: `1px solid ${planner.content_world === 'cartoon_universe' ? 'var(--status-neutral)' : 'var(--status-info)'}`, padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 700
               }}>
                 {planner.content_world === 'cartoon_universe' ? '🎬 Cartoon Universe' : '🐾 Hewan Nyata'}
               </span>
@@ -304,7 +304,7 @@ export default function ContentPlannerWorkbench() {
               )}
               {planner.knowledge_domain && planner.knowledge_domain !== 'general' && (
                 <span style={{
-                  background: 'var(--status-info)', color: '#67e8f9', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 600
+                  background: 'var(--status-info-soft)', color: 'var(--status-info)', border: '1px solid var(--status-info)', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 600
                 }}>
                   📚 {planner.knowledge_domain === 'pet_supplies' ? 'Pet Supplies' : planner.knowledge_domain}
                 </span>
@@ -328,7 +328,7 @@ export default function ContentPlannerWorkbench() {
           <div style={{ overflowX: 'auto', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '14px' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', color: 'var(--text-primary)', minWidth: '1600px' }}>
               <thead>
-                <tr style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)', textTransform: 'uppercase', fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.5px' }}>
+                <tr style={{ background: 'var(--surface-raised)', borderBottom: '1px solid var(--border-strong)', textTransform: 'uppercase', fontSize: '11px', color: 'var(--text-secondary)', letterSpacing: '0.5px' }}>
                   <th style={{ padding: '14px 12px', width: '50px', textAlign: 'center' }}>#</th>
                   <th style={{ padding: '14px 12px', width: '60px', textAlign: 'center' }}>Lock</th>
                   <th style={{ padding: '14px 12px', width: '160px', color: 'var(--status-warning)' }}>🆔 Video ID</th>
@@ -338,8 +338,8 @@ export default function ContentPlannerWorkbench() {
                   <th style={{ padding: '14px 12px', width: '200px' }}>4. Context</th>
                   <th style={{ padding: '14px 12px', width: '150px' }}>5. VFO</th>
                   <th style={{ padding: '14px 12px', width: '160px' }}>6. Strategic Angle</th>
-                  <th style={{ padding: '14px 12px', width: '260px', background: 'var(--bg-secondary)', color: 'var(--status-neutral)' }}>7. Hook (Kalimat 3 Detik)</th>
-                  <th style={{ padding: '14px 12px', width: '280px', background: 'var(--bg-secondary)', color: 'var(--status-neutral)' }}>8. Visual Action</th>
+                  <th style={{ padding: '14px 12px', width: '260px', background: 'var(--status-neutral-soft)', color: 'var(--status-neutral)' }}>7. Hook (Kalimat 3 Detik)</th>
+                  <th style={{ padding: '14px 12px', width: '280px', background: 'var(--status-neutral-soft)', color: 'var(--status-neutral)' }}>8. Visual Action</th>
                   <th style={{ padding: '14px 12px', width: '160px' }}>9. {planner?.planner_focus === 'brand_editorial' ? 'Content Subject' : 'Product'}</th>
                   <th style={{ padding: '14px 12px', width: '120px', textAlign: 'center' }}>Aksi</th>
                 </tr>
@@ -349,8 +349,8 @@ export default function ContentPlannerWorkbench() {
                   <tr
                     key={row.id}
                     style={{
-                      borderBottom: '1px solid #1f2937',
-                      background: row.is_locked ? 'rgba(30, 27, 75, 0.25)' : (idx % 2 === 0 ? 'transparent' : 'var(--surface-interactive)')
+                      borderBottom: '1px solid var(--border-subtle)',
+                      background: row.is_locked ? 'var(--status-neutral-soft)' : (idx % 2 === 0 ? 'var(--surface)' : 'var(--surface-raised)')
                     }}
                   >
                     <td style={{ padding: '12px', textAlign: 'center', fontWeight: 700, color: 'var(--text-muted)' }}>{idx + 1}</td>
@@ -366,7 +366,7 @@ export default function ContentPlannerWorkbench() {
 
                     {/* Video ID */}
                     <td style={{ padding: '12px' }}>
-                      <span style={{ fontFamily: 'monospace', fontSize: '11px', color: 'var(--status-warning)', background: '#1c1917', padding: '3px 8px', borderRadius: '4px', border: '1px solid #44403c' }}>
+                      <span style={{ fontFamily: 'monospace', fontSize: '11px', color: 'var(--status-warning)', background: 'var(--status-warning-soft)', padding: '3px 8px', borderRadius: '4px', border: '1px solid var(--status-warning)' }}>
                         {row.video_id || '-'}
                       </span>
                     </td>
@@ -387,11 +387,11 @@ export default function ContentPlannerWorkbench() {
                     <td style={{ padding: '12px', color: 'var(--text-muted)' }}>{row.ws_matrix}</td>
 
                     {/* Column 4: Context */}
-                    <td style={{ padding: '12px', color: '#d4d4d8' }}>{row.context}</td>
+                    <td style={{ padding: '12px', color: 'var(--text-secondary)' }}>{row.context}</td>
 
                     {/* Column 5: VFO */}
                     <td style={{ padding: '12px' }}>
-                      <span style={{ background: 'var(--status-success-soft)', color: '#6ee7b7', padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 600 }}>
+                      <span style={{ background: 'var(--status-success-soft)', color: 'var(--status-success)', padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 600 }}>
                         {row.vfo}
                       </span>
                     </td>
@@ -414,8 +414,8 @@ export default function ContentPlannerWorkbench() {
                             style={{ width: '100%', background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--status-neutral)', borderRadius: '6px', padding: '6px' }}
                           />
                           <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
-                            <button onClick={() => handleCellSave(row.id, 'hook')} style={{ background: 'var(--status-success)', border: 'none', color: 'var(--text-primary)', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}>Simpan</button>
-                            <button onClick={() => setEditingCell(null)} style={{ background: '#374151', border: 'none', color: 'var(--text-primary)', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}>Batal</button>
+                            <button onClick={() => handleCellSave(row.id, 'hook')} style={{ background: 'var(--action-primary)', border: 'none', color: 'var(--on-action-primary)', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}>Simpan</button>
+                            <button onClick={() => setEditingCell(null)} style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}>Batal</button>
                           </div>
                         </div>
                       ) : (
@@ -451,8 +451,8 @@ export default function ContentPlannerWorkbench() {
                             style={{ width: '100%', background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--status-neutral)', borderRadius: '6px', padding: '6px' }}
                           />
                           <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
-                            <button onClick={() => handleCellSave(row.id, 'visual_action')} style={{ background: 'var(--status-success)', border: 'none', color: 'var(--text-primary)', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}>Simpan</button>
-                            <button onClick={() => setEditingCell(null)} style={{ background: '#374151', border: 'none', color: 'var(--text-primary)', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}>Batal</button>
+                            <button onClick={() => handleCellSave(row.id, 'visual_action')} style={{ background: 'var(--action-primary)', border: 'none', color: 'var(--on-action-primary)', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}>Simpan</button>
+                            <button onClick={() => setEditingCell(null)} style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}>Batal</button>
                           </div>
                         </div>
                       ) : (
@@ -494,12 +494,12 @@ export default function ContentPlannerWorkbench() {
                             </div>
                           )}
                           {row.pet_problem && (
-                            <div style={{ fontSize: '10px', color: '#fca5a5', marginTop: '2px' }}>
+                            <div style={{ fontSize: '10px', color: 'var(--status-danger)', marginTop: '2px' }}>
                               ⚠️ {row.pet_problem}
                             </div>
                           )}
                           {row.product_role && row.product_role !== 'none' && (
-                            <div style={{ fontSize: '10px', color: '#6ee7b7', marginTop: '2px' }}>
+                            <div style={{ fontSize: '10px', color: 'var(--status-success)', marginTop: '2px' }}>
                               🎯 {row.product_role} @ {row.product_reveal_beat || '-'}
                             </div>
                           )}
