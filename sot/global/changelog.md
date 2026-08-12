@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.14.8 — Perbaikan Kontras Tombol Product Database (12/08/2026)
+- Mengubah tulisan tombol card produk dari putih statis ke warna kontras adaptif tema
+
 ## V2.14.7 — Integrasi Fitur Light Theme (12/08/2026)
 - Menambahkan toggle Light/Dark Mode di sidebar footer
 - Mencegah flicker tema dengan script injeksi head

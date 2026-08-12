@@ -1778,7 +1778,9 @@ export default function ProductDatabasePage() {
                           border: (p.clean_photo_url || p.cleaned_photo_url)
                             ? '1px solid rgba(255, 127, 80, 0.4)'
                             : '1px solid rgba(108, 92, 231, 0.4)',
-                          color: '#fff',
+                          color: (p.clean_photo_url || p.cleaned_photo_url)
+                            ? 'var(--btn-clean-photo-text, #ffffff)'
+                            : 'var(--btn-gen-photo-text, #ffffff)',
                           fontSize: '0.7rem',
                           fontWeight: 600,
                           padding: '6px 8px',
@@ -1809,7 +1811,7 @@ export default function ProductDatabasePage() {
                           flex: 1,
                           background: 'linear-gradient(135deg, rgba(9, 132, 227, 0.2) 0%, rgba(116, 185, 255, 0.2) 100%)',
                           border: '1px solid rgba(9, 132, 227, 0.4)',
-                          color: '#fff',
+                          color: 'var(--btn-enrich-text, #ffffff)',
                           fontSize: '0.7rem',
                           fontWeight: 600,
                           padding: '6px 8px',

@@ -48,6 +48,11 @@
   --brand-green-border: #10b981;
   --brand-green-text: #6ee7b7;
   --brand-green-glow: rgba(16, 185, 129, 0.35);
+
+  /* Card Button Text Colors (Dark Mode Defaults) */
+  --btn-clean-photo-text: #ffffff;
+  --btn-gen-photo-text: #ffffff;
+  --btn-enrich-text: #ffffff;
 }
 
 [data-theme='light'] {
@@ -91,6 +96,11 @@
   --brand-green-border: rgba(4, 120, 87, 0.2);
   --brand-green-text: #047857;
   --brand-green-glow: rgba(4, 120, 87, 0.1);
+
+  /* Card Button Text Colors (Light Mode Overrides) */
+  --btn-clean-photo-text: #c2410c; /* dark orange */
+  --btn-gen-photo-text: #6d28d9;   /* dark purple */
+  --btn-enrich-text: #1d4ed8;     /* dark blue */
 }
 
 /* Light Theme overrides for hardcoded values */
