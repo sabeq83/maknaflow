@@ -892,4 +892,4 @@ Route detail dinilai menggunakan data staging yang tersedia tanpa melakukan aksi
 - [x] Selaraskan action bar, informational panel, dan tabel detail Content Planner pada light/dark theme.
 - [x] Selaraskan badge, row state, serta inline editor Content Planner.
 - [x] Batasi search Video ID ContentFlow menjadi 260px dan pencarian scheduler maksimal 360px.
-- [ ] Jalankan build, rilis patch, dan deploy hanya ke Mac Mini dev.
+- [x] Jalankan build, rilis patch, dan deploy hanya ke Mac Mini dev.
