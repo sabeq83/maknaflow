@@ -885,4 +885,4 @@ Route detail dinilai menggunakan data staging yang tersedia tanpa melakukan aksi
 - [x] Tingkatkan kontras status TikTok, Facebook, Instagram, dan badge Not Published.
 - [x] Selaraskan thumbnail serta badge Video ID dengan light theme.
 - [x] Migrasikan surface utama Publishing Scheduler ke token light/dark.
-- [ ] Jalankan build, rilis patch, dan deploy hanya ke Mac Mini dev.
+- [x] Jalankan build, rilis patch, dan deploy hanya ke Mac Mini dev.
