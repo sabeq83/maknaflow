@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.4 — Align modal buttons, add card download, and implement cooldown (12/08/2026)
+- Realign modal buttons into two separate 2-column and 3-column rows
+- Add direct Download Video button to list cards
+- Implement 30-second gray cooldown state on download buttons
+
 ## V2.14.3 — Implement campaign sync badges, video download button, and contentflow filters (12/08/2026)
 - Align Phase 1 product image lookup with Re-Gen
 - Add Synced to ContentFlow badges to OPC, RE, Recipe, Multiplier, and Product Bridge campaigns

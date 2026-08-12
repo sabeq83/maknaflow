@@ -180,6 +180,24 @@ function ContentFlowHubPageContent() {
   const [directDownloadUrl, setDirectDownloadUrl] = useState(null);
   const [loadingDownloadUrl, setLoadingDownloadUrl] = useState(false);
   const [copiedKeys, setCopiedKeys] = useState({});
+  const [downloadCooldowns, setDownloadCooldowns] = useState({});
+
+  const getDirectDownloadUrl = (nextcloudUrl, videoId) => {
+    if (!nextcloudUrl || !videoId) return null;
+    const cleanUrl = nextcloudUrl.replace(/\/+$/, '');
+    const cleanVideoId = videoId.toLowerCase().trim().replace(/[^a-z0-9_]/g, '_');
+    const filename = `${cleanVideoId}_final.mp4`;
+    return `${cleanUrl}/download?files=${encodeURIComponent(filename)}`;
+  };
+
+  const handleDownload = (itemId, downloadUrl) => {
+    if (!downloadUrl) return;
+    window.open(downloadUrl, '_blank');
+    setDownloadCooldowns(prev => ({ ...prev, [itemId]: true }));
+    setTimeout(() => {
+      setDownloadCooldowns(prev => ({ ...prev, [itemId]: false }));
+    }, 30000);
+  };
   const [editStatusForm, setEditStatusForm] = useState({
     tiktok_status: 'Not Published',
     tiktok_publish_date: '',
@@ -1300,10 +1318,41 @@ function ContentFlowHubPageContent() {
                           }
 
                           if (isNextcloud) {
+                            const isCardCooldown = downloadCooldowns[item.id];
+                            const cardDownloadUrl = getDirectDownloadUrl(targetUrl, item.video_id);
                             return (
-                              <a href={targetUrl} target="_blank" rel="noreferrer" style={{ display: 'block', width: '100%', textAlign: 'center', padding: '6px 10px', borderRadius: '8px', background: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)', color: '#ffffff', fontSize: '11px', fontWeight: 700, textDecoration: 'none', boxShadow: '0 2px 8px rgba(56, 189, 248, 0.25)' }} title="Buka Link Nextcloud">
-                                ☁️ Nextcloud
-                              </a>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                <a href={targetUrl} target="_blank" rel="noreferrer" style={{ display: 'block', width: '100%', textAlign: 'center', padding: '6px 10px', borderRadius: '8px', background: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)', color: '#ffffff', fontSize: '11px', fontWeight: 700, textDecoration: 'none', boxShadow: '0 2px 8px rgba(56, 189, 248, 0.25)' }} title="Buka Link Nextcloud">
+                                  ☁️ Nextcloud
+                                </a>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDownload(item.id, cardDownloadUrl);
+                                  }}
+                                  disabled={isCardCooldown || !cardDownloadUrl}
+                                  style={{
+                                    display: 'block',
+                                    width: '100%',
+                                    textAlign: 'center',
+                                    padding: '6px 10px',
+                                    borderRadius: '8px',
+                                    background: isCardCooldown
+                                      ? 'rgba(74, 85, 104, 0.5)'
+                                      : 'linear-gradient(135deg, #a855f7 0%, #c084fc 100%)',
+                                    border: isCardCooldown ? '1px solid #4a5568' : '1px solid #c084fc',
+                                    color: isCardCooldown ? '#a0aec0' : '#ffffff',
+                                    fontSize: '11px',
+                                    fontWeight: 700,
+                                    cursor: (isCardCooldown || !cardDownloadUrl) ? 'not-allowed' : 'pointer',
+                                    boxShadow: isCardCooldown ? 'none' : '0 2px 8px rgba(192, 132, 252, 0.25)',
+                                    transition: 'all 0.2s ease'
+                                  }}
+                                >
+                                  {isCardCooldown ? '⏳ Cooldown' : '📥 Download Video'}
+                                </button>
+                              </div>
                             );
                           }
 
@@ -1507,8 +1556,8 @@ function ContentFlowHubPageContent() {
                   }}>
                     {/* Left Column: Actions & Product Data */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto', paddingRight: '4px' }}>
-                      {/* 4 Action Buttons Row */}
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '10px' }}>
+                      {/* Row 1: Copy Actions (2 Columns) */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                         <button
                           type="button"
                           onClick={() => copyToClipboard(activeItem.caption, 'Caption', `modal_caption_${activeItem.id}`)}
@@ -1550,45 +1599,53 @@ function ContentFlowHubPageContent() {
                         >
                           {copiedKeys[`modal_affiliate_${activeItem.id}`] ? '✓ Copied!' : '📋 Copy Affiliate Link'}
                         </button>
+                      </div>
 
-                        {activeItem.link_produk ? (
-                          <a
-                            href={activeItem.link_produk}
-                            target="_blank"
-                            rel="noreferrer"
-                            style={{
-                              padding: '10px 14px', borderRadius: '10px',
-                              background: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)',
-                              border: '1px solid #38bdf8', color: '#ffffff', fontWeight: 700, fontSize: '13px',
-                              textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                              boxShadow: '0 4px 14px rgba(56, 189, 248, 0.3)'
-                            }}
-                          >
-                            🔗 Buka Link Produk
-                          </a>
-                        ) : (
-                          <button
-                            disabled
-                            style={{
-                              padding: '10px 14px', borderRadius: '10px', background: 'rgba(30, 41, 59, 0.5)',
-                              border: '1px solid #334155', color: '#64748b', fontWeight: 600, fontSize: '13px',
-                              cursor: 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
-                            }}
-                          >
-                            🔗 Tanpa Link Produk
-                          </button>
-                        )}
+                      {/* Row 2: Asset & Navigation Links (Dynamic 2 or 3 Columns) */}
+                      {(() => {
+                        const allUrls = [activeItem.nextcloud_url, activeItem.drive_link, activeItem.url_asset].filter(Boolean);
+                        const ncUrl = allUrls.find(u => typeof u === 'string' && (u.includes('100.78.186.123') || u.includes('index.php/s/') || u.toLowerCase().includes('nextcloud')));
+                        const gdUrl = allUrls.find(u => typeof u === 'string' && (u.includes('drive.google.com') || u.includes('docs.google.com')));
 
-                        {(() => {
-                          const allUrls = [activeItem.nextcloud_url, activeItem.drive_link, activeItem.url_asset].filter(Boolean);
-                          const ncUrl = allUrls.find(u => typeof u === 'string' && (u.includes('100.78.186.123') || u.includes('index.php/s/') || u.toLowerCase().includes('nextcloud')));
-                          const gdUrl = allUrls.find(u => typeof u === 'string' && (u.includes('drive.google.com') || u.includes('docs.google.com')));
+                        const targetUrl = ncUrl || activeItem.nextcloud_url || gdUrl || activeItem.drive_link || activeItem.url_asset;
+                        const isNextcloud = Boolean(ncUrl || (activeItem.nextcloud_url && !gdUrl) || (targetUrl && (targetUrl.includes('100.78.186.123') || targetUrl.includes('index.php/s/'))));
+                        
+                        const showDownloadButton = isNextcloud && targetUrl;
+                        const gridCols = showDownloadButton ? '1fr 1fr 1fr' : '1fr 1fr';
 
-                          const targetUrl = ncUrl || activeItem.nextcloud_url || gdUrl || activeItem.drive_link || activeItem.url_asset;
-                          const isNextcloud = Boolean(ncUrl || (activeItem.nextcloud_url && !gdUrl) || (targetUrl && (targetUrl.includes('100.78.186.123') || targetUrl.includes('index.php/s/'))));
+                        return (
+                          <div style={{ display: 'grid', gridTemplateColumns: gridCols, gap: '10px' }}>
+                            {/* 1. Buka Link Produk */}
+                            {activeItem.link_produk ? (
+                              <a
+                                href={activeItem.link_produk}
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{
+                                  padding: '10px 14px', borderRadius: '10px',
+                                  background: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)',
+                                  border: '1px solid #38bdf8', color: '#ffffff', fontWeight: 700, fontSize: '13px',
+                                  textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                  boxShadow: '0 4px 14px rgba(56, 189, 248, 0.3)'
+                                }}
+                              >
+                                🔗 Buka Link Produk
+                              </a>
+                            ) : (
+                              <button
+                                disabled
+                                style={{
+                                  padding: '10px 14px', borderRadius: '10px', background: 'rgba(30, 41, 59, 0.5)',
+                                  border: '1px solid #334155', color: '#64748b', fontWeight: 600, fontSize: '13px',
+                                  cursor: 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
+                                }}
+                              >
+                                🔗 Tanpa Link Produk
+                              </button>
+                            )}
 
-                          if (!targetUrl) {
-                            return (
+                            {/* 2. Nextcloud Asset / Drive Asset / Asset Kosong */}
+                            {!targetUrl ? (
                               <button
                                 disabled
                                 style={{
@@ -1599,54 +1656,53 @@ function ContentFlowHubPageContent() {
                               >
                                 📥 Asset Kosong
                               </button>
-                            );
-                          }
+                            ) : (
+                              <a
+                                href={targetUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{
+                                  padding: '10px 14px', borderRadius: '10px',
+                                  background: isNextcloud ? 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)' : 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+                                  border: isNextcloud ? '1px solid #38bdf8' : '1px solid #10b981', color: '#ffffff', fontWeight: 700, fontSize: '13px',
+                                  textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                  boxShadow: isNextcloud ? '0 4px 14px rgba(56, 189, 248, 0.3)' : '0 4px 14px rgba(16, 185, 129, 0.3)'
+                                }}
+                              >
+                                {isNextcloud ? '☁️ Nextcloud Asset' : '📁 Drive Asset'}
+                              </a>
+                            )}
 
-                          return (
-                             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                               <a
-                                 href={targetUrl}
-                                 target="_blank"
-                                 rel="noreferrer"
-                                 style={{
-                                   padding: '10px 14px', borderRadius: '10px',
-                                   background: isNextcloud ? 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)' : 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-                                   border: isNextcloud ? '1px solid #38bdf8' : '1px solid #10b981', color: '#ffffff', fontWeight: 700, fontSize: '13px',
-                                   textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                                   boxShadow: isNextcloud ? '0 4px 14px rgba(56, 189, 248, 0.3)' : '0 4px 14px rgba(16, 185, 129, 0.3)'
-                                 }}
-                               >
-                                 {isNextcloud ? '☁️ Nextcloud Asset' : '📁 Drive Asset'}
-                               </a>
-
-                               {isNextcloud && (
-                                 <button
-                                   onClick={() => {
-                                     if (directDownloadUrl) {
-                                       window.open(directDownloadUrl, '_blank');
-                                     } else {
-                                       alert('Tautan unduhan langsung sedang dimuat...');
-                                     }
-                                   }}
-                                   disabled={loadingDownloadUrl || !directDownloadUrl}
-                                   style={{
-                                     padding: '10px 14px', borderRadius: '10px',
-                                     background: 'linear-gradient(135deg, #a855f7 0%, #c084fc 100%)',
-                                     border: '1px solid #c084fc', color: '#ffffff', fontWeight: 700, fontSize: '13px',
-                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                                     cursor: (loadingDownloadUrl || !directDownloadUrl) ? 'not-allowed' : 'pointer',
-                                     boxShadow: '0 4px 14px rgba(192, 132, 252, 0.3)',
-                                     opacity: (loadingDownloadUrl || !directDownloadUrl) ? 0.6 : 1,
-                                     transition: 'all 0.2s ease'
-                                   }}
-                                 >
-                                   {loadingDownloadUrl ? '🔄 Loading Link...' : '📥 Download Video Final'}
-                                 </button>
-                               )}
-                             </div>
-                           );
-                        })()}
-                      </div>
+                            {/* 3. Download Video Final with Cooldown */}
+                            {showDownloadButton && (() => {
+                              const isCooldown = downloadCooldowns[activeItem.id];
+                              return (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDownload(activeItem.id, directDownloadUrl)}
+                                  disabled={loadingDownloadUrl || !directDownloadUrl || isCooldown}
+                                  style={{
+                                    padding: '10px 14px', borderRadius: '10px',
+                                    background: isCooldown 
+                                      ? 'rgba(74, 85, 104, 0.5)' 
+                                      : 'linear-gradient(135deg, #a855f7 0%, #c084fc 100%)',
+                                    border: isCooldown ? '1px solid #4a5568' : '1px solid #c084fc',
+                                    color: isCooldown ? '#a0aec0' : '#ffffff',
+                                    fontWeight: 700, fontSize: '13px',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                    cursor: (loadingDownloadUrl || !directDownloadUrl || isCooldown) ? 'not-allowed' : 'pointer',
+                                    boxShadow: isCooldown ? 'none' : '0 4px 14px rgba(192, 132, 252, 0.3)',
+                                    opacity: (loadingDownloadUrl || !directDownloadUrl) ? 0.6 : 1,
+                                    transition: 'all 0.2s ease'
+                                  }}
+                                >
+                                  {loadingDownloadUrl ? '🔄 Loading...' : isCooldown ? '⏳ Cooldown' : '📥 Download Video Final'}
+                                </button>
+                              );
+                            })()}
+                          </div>
+                        );
+                      })()}
 
                       {/* Field Catatan Konten */}
                       <div style={{ background: '#090d16', padding: '16px', borderRadius: '14px', border: '1px solid #1e293b' }}>
