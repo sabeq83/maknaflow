@@ -893,3 +893,10 @@ Route detail dinilai menggunakan data staging yang tersedia tanpa melakukan aksi
 - [x] Selaraskan badge, row state, serta inline editor Content Planner.
 - [x] Batasi search Video ID ContentFlow menjadi 260px dan pencarian scheduler maksimal 360px.
 - [x] Jalankan build, rilis patch, dan deploy hanya ke Mac Mini dev.
+
+### Follow-up field sizing dan header skedul produk
+
+- [x] Batasi search Video ID dan filter produk ContentFlow menjadi 220px.
+- [x] Perkecil kartu/form login agar field password proporsional.
+- [x] Migrasikan header serta kartu Skedul Produk ke surface light/dark.
+- [ ] Jalankan build, rilis patch, dan deploy hanya ke Mac Mini dev.

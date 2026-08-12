@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.19 — Penyelarasan Ukuran Field dan Skedul Produk (12/08/2026)
+- Perkecil search Video ID dan filter produk ContentFlow menjadi proporsional
+- Perkecil form login dan field password
+- Selaraskan header serta kartu Skedul Produk pada light theme
+
 ## V2.14.18 — Penyelarasan Detail Content Planner (12/08/2026)
 - Selaraskan action bar, panel informasi, tabel, badge, dan inline editor detail Content Planner pada light theme
 - Batasi lebar pencarian Video ID ContentFlow dan Publishing Scheduler

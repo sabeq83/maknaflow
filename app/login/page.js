@@ -66,8 +66,9 @@ export default function LoginPage() {
       </div>
       <div style={{
         width: '100%',
-        maxWidth: '420px',
-        padding: '36px',
+        maxWidth: '360px',
+        padding: '32px',
+        boxSizing: 'border-box',
         background: 'color-mix(in srgb, var(--surface) 88%, transparent)',
         backdropFilter: 'blur(16px)',
         border: '1px solid var(--border-subtle)',

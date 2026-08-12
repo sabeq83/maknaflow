@@ -799,8 +799,8 @@ function ContentFlowHubPageContent() {
           {/* Header Controller Card: 5 Active Products Progress */}
           {accountFilter !== 'all' && (
             <div style={{
-              padding: '18px 22px', borderRadius: '18px', background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.6) 100%)',
-              border: '1px solid rgba(16, 185, 129, 0.35)', boxShadow: '0 10px 30px rgba(0,0,0,0.35)', marginBottom: '24px'
+              padding: '18px 22px', borderRadius: '18px', background: 'var(--surface)',
+              border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-card)', marginBottom: '24px'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -834,12 +834,12 @@ function ContentFlowHubPageContent() {
                     <style dangerouslySetInnerHTML={{ __html: `
                       .product-schedule-card:hover {
                         transform: translateY(-4px);
-                        border-color: rgba(16, 185, 129, 0.5) !important;
+                        border-color: var(--status-success) !important;
                         box-shadow: 0 12px 24px var(--overlay-subtle), 0 0 15px var(--status-success-soft) !important;
                       }
                       .product-schedule-card-pending:hover {
                         transform: translateY(-4px);
-                        border-color: rgba(245, 158, 11, 0.5) !important;
+                        border-color: var(--status-warning) !important;
                         box-shadow: 0 12px 24px var(--overlay-subtle), 0 0 15px var(--status-warning-soft) !important;
                       }
                       .custom-schedule-scroll::-webkit-scrollbar {
@@ -854,7 +854,7 @@ function ContentFlowHubPageContent() {
                         border-radius: 10px;
                       }
                       .custom-schedule-scroll::-webkit-scrollbar-thumb:hover {
-                        background: rgba(255, 255, 255, 0.18);
+                        background: var(--border-strong);
                       }
                     `}} />
                     {filledSlots.map((slot) => {
@@ -894,15 +894,13 @@ function ContentFlowHubPageContent() {
                             flexGrow: 1, flexShrink: 1, minWidth: '144px', maxWidth: '200px',
                             height: '215px', padding: '12px 10px', borderRadius: '16px',
                             background: isActive
-                              ? 'linear-gradient(135deg, var(--status-success-soft) 0%, rgba(15, 23, 42, 0.95) 100%)'
-                              : (isCompleted
-                                  ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, rgba(15, 23, 42, 0.9) 100%)'
-                                  : 'linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.5) 100%)'),
+                              ? 'var(--status-success-soft)'
+                              : (isCompleted ? 'var(--status-success-soft)' : 'var(--surface-raised)'),
                             border: isActive
                               ? '2px solid var(--status-success)'
                               : `1px solid ${isCompleted ? 'var(--status-success)' : 'var(--border-subtle)'}`,
                             boxShadow: isActive
-                              ? '0 8px 32px var(--status-success-soft), 0 0 20px rgba(16, 185, 129, 0.35)'
+                              ? '0 8px 32px var(--status-success-soft)'
                               : `0 4px 16px var(--overlay-subtle), 0 0 12px ${glowShadow}`,
                             transform: isActive ? 'translateY(-6px)' : 'none',
                             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', cursor: 'pointer'
@@ -968,7 +966,7 @@ function ContentFlowHubPageContent() {
                           {/* Status Badge */}
                           <div style={{
                             fontSize: '8px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em',
-                            color: accentColor, background: isCompleted ? 'rgba(16, 185, 129, 0.12)' : 'rgba(245, 158, 11, 0.12)',
+                            color: accentColor, background: isCompleted ? 'var(--status-success-soft)' : 'var(--status-warning-soft)',
                             padding: '2px 8px', borderRadius: '20px', border: `1px solid ${accentColor}25`, marginTop: '6px'
                           }}>
                             {isCompleted ? 'Completed' : 'In Progress'}
@@ -1084,7 +1082,7 @@ function ContentFlowHubPageContent() {
           {/* Multi-level Search & Filter Panel */}
           <div style={{ padding: '20px', borderRadius: '16px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', marginBottom: '24px', boxShadow: '0 8px 24px var(--overlay-subtle)' }}>
             {/* Row 1: Universal Search & Metadata Filters (4 Columns) */}
-            <div style={{ display: 'grid', gridTemplateColumns: '260px repeat(3, minmax(0, 1fr))', gap: '12px', marginBottom: '14px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '220px minmax(180px, 1fr) minmax(180px, 1fr) 220px', gap: '12px', marginBottom: '14px' }}>
               {/* Universal Search */}
               <div style={{ position: 'relative' }}>
                 <SearchIcon style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: 14, height: 14, color: 'var(--text-muted)' }} />
