@@ -340,8 +340,8 @@ export default function UserManagementPage() {
           {/* Edit User Modal */}
           {isModalOpen && (
             <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
-              <div style={{ background: '#0f172a', border: '1px solid rgba(255, 255, 255, 0.15)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '650px', maxHeight: '90vh', overflowY: 'auto' }}>
-                <h2 style={{ fontSize: '1.4rem', margin: '0 0 20px 0', color: '#f8fafc' }}>
+              <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '650px', maxHeight: '90vh', overflowY: 'auto' }}>
+                <h2 style={{ fontSize: '1.4rem', margin: '0 0 20px 0', color: 'var(--text-primary)' }}>
                   {editingUser ? `✏️ Edit Pengguna: ${editingUser.username}` : '➕ Tambah Pengguna Baru'}
                 </h2>
 
@@ -448,7 +448,7 @@ export default function UserManagementPage() {
           {/* Dedicated Password Change Modal */}
           {isPasswordModalOpen && passwordTargetUser && (
             <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1010, padding: '20px' }}>
-              <div style={{ background: '#0f172a', border: '1px solid rgba(234, 179, 8, 0.4)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '450px' }}>
+              <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '450px' }}>
                 <h2 style={{ fontSize: '1.3rem', margin: '0 0 8px 0', color: '#facc15' }}>
                   🔑 Ubah Password: {passwordTargetUser.username}
                 </h2>

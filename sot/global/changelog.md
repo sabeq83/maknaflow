@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.13 — Convert Hardcoded Backgrounds to CSS Variables (12/08/2026)
+- Convert universes, content-planner, and content-flow hardcoded inline dark backgrounds to var(--bg-primary) dan var(--bg-secondary) di level file JS
+- Memastikan transisi tema berjalan instan tanpa bergantung pada selektor substring CSS
+
 ## V2.14.12 — Fix Shared Modals & Light-Gray Text Light Theme (12/08/2026)
 - Overrode hardcoded dark backgrounds on ImportPlannerModal dan User Management modals
 - Memetakan warna teks kustom abu-abu/perak terang secara inline ke slate gelap kontras

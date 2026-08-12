@@ -362,7 +362,7 @@ export default function ContentPlannerDashboard() {
     <div className="layout-with-sidebar">
       <Sidebar />
 
-      <main className="main-content" style={{ padding: '32px', background: '#0a0a0c', minHeight: '100vh', color: '#f3f4f6' }}>
+      <main className="main-content" style={{ padding: '32px', background: 'var(--bg-primary)', minHeight: '100vh', color: '#f3f4f6' }}>
         {toast && (
           <div style={{
             position: 'fixed', top: '24px', right: '24px', zIndex: 9999,
@@ -403,7 +403,7 @@ export default function ContentPlannerDashboard() {
           <div style={{ padding: '48px', textAlign: 'center', color: '#9ca3af' }}>Memuat daftar planner...</div>
         ) : planners.length === 0 ? (
           <div style={{
-            padding: '64px 24px', textAlign: 'center', background: '#121318',
+            padding: '64px 24px', textAlign: 'center', background: 'var(--bg-secondary)',
             borderRadius: '16px', border: '1px stroke #1e2029'
           }}>
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>🗓️</div>
@@ -432,7 +432,7 @@ export default function ContentPlannerDashboard() {
                   key={p.id}
                   onClick={() => router.push(`/content-planner/${p.id}`)}
                   style={{
-                    background: '#121318', border: '1px solid #27272a', borderRadius: '14px',
+                    background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '14px',
                     padding: '20px', cursor: 'pointer', transition: 'all 0.2s ease',
                     position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'
                   }}
@@ -509,7 +509,7 @@ export default function ContentPlannerDashboard() {
             display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999
           }}>
             <div style={{
-              background: '#121318', border: '1px solid #27272a', borderRadius: '16px',
+              background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '16px',
               width: '100%', maxWidth: '640px', maxHeight: '90vh', overflowY: 'auto', padding: '28px'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -532,7 +532,7 @@ export default function ContentPlannerDashboard() {
                       <button key={value} type="button" onClick={() => setPlannerFocus(value)} style={{
                         padding: '12px', textAlign: 'left', borderRadius: '10px', cursor: 'pointer',
                         border: plannerFocus === value ? '1px solid #6366f1' : '1px solid #27272a',
-                        background: plannerFocus === value ? '#312e81' : '#18181b', color: '#fff'
+                        background: plannerFocus === value ? '#312e81' : 'var(--bg-secondary)', color: '#fff'
                       }}>
                         <div style={{ fontWeight: 700, marginBottom: '4px' }}>{label}</div>
                         <div style={{ fontSize: '11px', color: '#a1a1aa', lineHeight: 1.4 }}>{desc}</div>
@@ -565,7 +565,7 @@ export default function ContentPlannerDashboard() {
                       }} style={{
                         padding: '10px 8px', textAlign: 'left', borderRadius: '10px', cursor: 'pointer',
                         border: contentWorld === value ? '1px solid #6366f1' : '1px solid #27272a',
-                        background: contentWorld === value ? '#312e81' : '#18181b', color: '#fff'
+                        background: contentWorld === value ? '#312e81' : 'var(--bg-secondary)', color: '#fff'
                       }}>
                         <div style={{ fontWeight: 700, fontSize: '13px', marginBottom: '3px' }}>{label}</div>
                         <div style={{ fontSize: '10px', color: '#a1a1aa', lineHeight: 1.3 }}>{desc}</div>
@@ -584,7 +584,7 @@ export default function ContentPlannerDashboard() {
                     onChange={e => setKnowledgeDomain(e.target.value)}
                     style={{
                       width: '100%', padding: '10px 12px', borderRadius: '10px',
-                      background: '#18181b', border: '1px solid #27272a', color: '#fff', fontSize: '14px'
+                      background: 'var(--bg-secondary)', border: '1px solid #27272a', color: '#fff', fontSize: '14px'
                     }}
                   >
                     <option value="general">General</option>
@@ -648,7 +648,7 @@ export default function ContentPlannerDashboard() {
                 )}
 
                 {/* Input Mode Selector */}
-                {plannerFocus === 'product_campaign' && <div style={{ marginBottom: '20px', background: '#18181b', padding: '4px', borderRadius: '10px', display: 'flex' }}>
+                {plannerFocus === 'product_campaign' && <div style={{ marginBottom: '20px', background: 'var(--bg-secondary)', padding: '4px', borderRadius: '10px', display: 'flex' }}>
                   <button
                     type="button"
                     onClick={() => setInputMode('manual')}
@@ -674,7 +674,7 @@ export default function ContentPlannerDashboard() {
                 </div>}
 
                 {plannerFocus === 'product_campaign' && inputMode === 'existing' && (
-                  <div style={{ marginBottom: '16px', background: '#18181b', padding: '14px', borderRadius: '10px', border: '1px solid #27272a' }}>
+                  <div style={{ marginBottom: '16px', background: 'var(--bg-secondary)', padding: '14px', borderRadius: '10px', border: '1px solid #27272a' }}>
                     <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '8px', fontWeight: 600 }}>
                       🔍 Cari & Pilih Produk dari Database:
                     </label>
@@ -685,7 +685,7 @@ export default function ContentPlannerDashboard() {
                         value={productSearchQuery}
                         onChange={(e) => setProductSearchQuery(e.target.value)}
                         style={{
-                          width: '100%', padding: '10px 36px 10px 12px', background: '#09090b',
+                          width: '100%', padding: '10px 36px 10px 12px', background: 'var(--bg-secondary)',
                           border: '1px solid #3f3f46', borderRadius: '8px', color: '#fff', fontSize: '13px'
                         }}
                       />
@@ -704,7 +704,7 @@ export default function ContentPlannerDashboard() {
                     </div>
 
                     {/* Filtered Product Selection List */}
-                    <div style={{ maxHeight: '160px', overflowY: 'auto', borderRadius: '8px', border: '1px solid #27272a', background: '#09090b' }}>
+                    <div style={{ maxHeight: '160px', overflowY: 'auto', borderRadius: '8px', border: '1px solid #27272a', background: 'var(--bg-secondary)' }}>
                       {existingProducts.filter(p => (p.product_name || '').toLowerCase().includes(productSearchQuery.toLowerCase())).length === 0 ? (
                         <div style={{ padding: '12px', fontSize: '13px', color: '#71717a', textAlign: 'center' }}>
                           Tidak ada produk ditemukan
@@ -754,7 +754,7 @@ export default function ContentPlannerDashboard() {
                   }}>
                     <div style={{
                       width: '72px', height: '72px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0,
-                      background: '#18181b', border: '1px solid #27272a', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                      background: 'var(--bg-secondary)', border: '1px solid #27272a', display: 'flex', alignItems: 'center', justifyContent: 'center'
                     }}>
                       {productPhotoUrl ? (
                         <img
@@ -793,7 +793,7 @@ export default function ContentPlannerDashboard() {
                 {plannerFocus === 'brand_editorial' && <>
                   <div style={{ marginBottom: '16px' }}>
                     <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px', fontWeight: 600 }}>🧬 Brand Profile (Akun Brand) *:</label>
-                    <select value={selectedBrandId} required onChange={e => handleBrandSelection(e.target.value)} style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}>
+                    <select value={selectedBrandId} required onChange={e => handleBrandSelection(e.target.value)} style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}>
                       <option value="">-- Pilih Brand Profile --</option>
                       {brandProfiles.map(b => <option key={b.id} value={b.id}>{b.brand_name} {b.niche ? `(${b.niche})` : ''}</option>)}
                     </select>
@@ -812,11 +812,11 @@ export default function ContentPlannerDashboard() {
                   )}
                   <div style={{ marginBottom: '16px' }}>
                     <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px', fontWeight: 600 }}>Konteks Brand *:</label>
-                    <textarea required rows={3} maxLength={4000} placeholder="Jelaskan niche, positioning, dan nilai akun..." value={brandContext} onChange={e => { setBrandContext(e.target.value); setEditorialDirty(true); setEditorialSource('custom'); }} style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }} />
+                    <textarea required rows={3} maxLength={4000} placeholder="Jelaskan niche, positioning, dan nilai akun..." value={brandContext} onChange={e => { setBrandContext(e.target.value); setEditorialDirty(true); setEditorialSource('custom'); }} style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }} />
                   </div>
                   <div style={{ marginBottom: '16px' }}>
                     <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px', fontWeight: 600 }}>Tujuan Konten:</label>
-                    <textarea rows={2} maxLength={2000} placeholder="misal: Bangun authority, save, share, dan follow" value={contentGoal} onChange={e => { setContentGoal(e.target.value); setEditorialDirty(true); setEditorialSource('custom'); }} style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }} />
+                    <textarea rows={2} maxLength={2000} placeholder="misal: Bangun authority, save, share, dan follow" value={contentGoal} onChange={e => { setContentGoal(e.target.value); setEditorialDirty(true); setEditorialSource('custom'); }} style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }} />
                   </div>
                   <div style={{ marginBottom: '16px' }}>
                     <label style={{ display: 'block', fontSize: '13px', color: '#9ca3af', marginBottom: '6px', fontWeight: 600 }}>Pilar Konten *:</label>
@@ -828,7 +828,7 @@ export default function ContentPlannerDashboard() {
                           if (value && pillars.length < 12 && !pillars.some(p => p.toLowerCase() === value.toLowerCase())) { setPillars([...pillars, value]); setEditorialDirty(true); setEditorialSource('custom'); }
                           setPillarDraft('');
                         }
-                      }} placeholder="misal: Healthy Breakfast" style={{ flex: 1, padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }} />
+                      }} placeholder="misal: Healthy Breakfast" style={{ flex: 1, padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }} />
                       <button type="button" onClick={() => {
                         const value = pillarDraft.trim();
                         if (value && pillars.length < 12 && !pillars.some(p => p.toLowerCase() === value.toLowerCase())) { setPillars([...pillars, value]); setEditorialDirty(true); setEditorialSource('custom'); }
@@ -841,7 +841,7 @@ export default function ContentPlannerDashboard() {
                       </span>)}
                       {pillars.length === 0 && <span style={{ color: '#71717a', fontSize: '12px' }}>Belum ada pilar.</span>}
                     </div>
-                    <select value={pillarDistributionMode} onChange={e => setPillarDistributionMode(e.target.value)} style={{ width: '100%', marginTop: '10px', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}>
+                    <select value={pillarDistributionMode} onChange={e => setPillarDistributionMode(e.target.value)} style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}>
                       <option value="balanced">Balanced — dibagi merata</option>
                       <option value="custom" disabled>Custom Weight — Segera Hadir</option>
                       <option value="growth" disabled>Growth Priority — Segera Hadir</option>
@@ -859,7 +859,7 @@ export default function ContentPlannerDashboard() {
                   <select
                     value={selectedBrandId}
                     onChange={e => handleBrandSelection(e.target.value)}
-                    style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
                   >
                     <option value="">-- Pilih Brand Profile (Opsional) --</option>
                     {brandProfiles.map(b => (
@@ -900,7 +900,7 @@ export default function ContentPlannerDashboard() {
                       setTitle(e.target.value);
                       setIsTitleManuallyEdited(true);
                     }}
-                    style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
                   />
                 </div>
 
@@ -913,7 +913,7 @@ export default function ContentPlannerDashboard() {
                     placeholder="misal: Premium Cocoa Powder / Ceramide Moisturizer"
                     value={productName}
                     onChange={e => setProductName(e.target.value)}
-                    style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
                   />
                 </div>
 
@@ -925,7 +925,7 @@ export default function ContentPlannerDashboard() {
                     placeholder="Jelaskan fungsi utama, bahan, dan manfaat produk untuk pengguna..."
                     value={productDesc}
                     onChange={e => setProductDesc(e.target.value)}
-                    style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
                   />
                 </div>
 
@@ -936,7 +936,7 @@ export default function ContentPlannerDashboard() {
                     placeholder="misal: 5X Ceramide, Halal MUI, Tekstur gel dingin instan"
                     value={productUsp}
                     onChange={e => setProductUsp(e.target.value)}
-                    style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
                   />
                 </div>
 
@@ -951,7 +951,7 @@ export default function ContentPlannerDashboard() {
                           placeholder="https://shopee.co.id/product/..."
                           value={productUrl}
                           onChange={e => setProductUrl(e.target.value)}
-                          style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                          style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
                         />
                       </div>
                       <div>
@@ -961,7 +961,7 @@ export default function ContentPlannerDashboard() {
                           placeholder="https://shope.ee/..."
                           value={affiliateUrl}
                           onChange={e => setAffiliateUrl(e.target.value)}
-                          style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                          style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
                         />
                       </div>
                     </div>
@@ -972,7 +972,7 @@ export default function ContentPlannerDashboard() {
                         placeholder="https://images.shopee.co.id/..."
                         value={productPhotoUrl}
                         onChange={e => setProductPhotoUrl(e.target.value)}
-                        style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                        style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
                       />
                     </div>
                   </>
@@ -987,7 +987,7 @@ export default function ContentPlannerDashboard() {
                         placeholder="https://..."
                         value={productUrl}
                         onChange={e => setProductUrl(e.target.value)}
-                        style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                        style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
                       />
                     </div>
                     <div>
@@ -1014,7 +1014,7 @@ export default function ContentPlannerDashboard() {
                   <select
                     value={targetAudience}
                     onChange={e => setTargetAudience(e.target.value)}
-                    style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
                   >
                     <option value="genz_casual">🔥 Gen-Z & Milenial Muda (Gaul, Santai, Relatable)</option>
                     <option value="ibu_rumah_tangga">🏡 Ibu Rumah Tangga & Keluarga (Hangat, Ramah, Solutif)</option>
@@ -1030,7 +1030,7 @@ export default function ContentPlannerDashboard() {
                       placeholder="Ketik deskripsi target audiens kustom (misal: Gamers 18-24th)..."
                       value={customTargetAudience}
                       onChange={e => setCustomTargetAudience(e.target.value)}
-                      style={{ width: '100%', padding: '10px', marginTop: '8px', background: '#18181b', border: '1px solid #6366f1', borderRadius: '8px', color: '#fff' }}
+                      style={{ width: '100%', padding: '10px', marginTop: '8px', background: 'var(--bg-secondary)', border: '1px solid #6366f1', borderRadius: '8px', color: '#fff' }}
                     />
                   )}
                 </div>
@@ -1041,7 +1041,7 @@ export default function ContentPlannerDashboard() {
                     <select
                       value={platform}
                       onChange={e => setPlatform(e.target.value)}
-                      style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                      style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
                     >
                       <option value="tiktok">TikTok (Short Form)</option>
                       <option value="reels">Instagram Reels</option>
@@ -1061,7 +1061,7 @@ export default function ContentPlannerDashboard() {
                           setProductPlannerCount(Number(e.target.value));
                         }
                       }}
-                      style={{ width: '100%', padding: '10px', background: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
+                      style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
                     >
                       {plannerFocus === 'brand_editorial' ? (
                         pillars.length === 0

@@ -175,7 +175,7 @@ export default function ContentPlannerWorkbench() {
     <div className="layout-with-sidebar">
       <Sidebar />
 
-      <main className="main-content" style={{ padding: '24px', background: '#0a0a0c', minHeight: '100vh', color: '#f3f4f6' }}>
+      <main className="main-content" style={{ padding: '24px', background: 'var(--bg-primary)', minHeight: '100vh', color: '#f3f4f6' }}>
         {toast && (
           <div style={{
             position: 'fixed', top: '24px', right: '24px', zIndex: 9999,
@@ -193,7 +193,7 @@ export default function ContentPlannerWorkbench() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <button
                 onClick={() => router.push('/content-planner')}
-                style={{ background: '#1f2937', border: 'none', color: '#9ca3af', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' }}
+                style={{ background: 'var(--bg-secondary)', border: 'none', color: '#9ca3af', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' }}
               >
                 ← Kembali
               </button>
@@ -254,7 +254,7 @@ export default function ContentPlannerWorkbench() {
         {/* Draft Warning & Execute Banner */}
         {(planner?.status === 'draft' || rows.length === 0) && !loading && (
           <div style={{
-            marginBottom: '20px', padding: '20px 24px', background: '#1e1b4b',
+            marginBottom: '20px', padding: '20px 24px', background: 'var(--bg-secondary)',
             border: '1px solid #4338ca', borderRadius: '12px', display: 'flex',
             justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px'
           }}>
@@ -284,7 +284,7 @@ export default function ContentPlannerWorkbench() {
         {!loading && planner?.content_world && planner.content_world !== 'real_world' && (
           <div style={{
             marginBottom: '20px', padding: '16px 20px',
-            background: planner.content_world === 'cartoon_universe' ? '#1e1b4b' : '#1a2332',
+            background: planner.content_world === 'cartoon_universe' ? 'var(--bg-secondary)' : 'var(--bg-secondary)',
             border: `1px solid ${planner.content_world === 'cartoon_universe' ? '#4338ca' : '#334155'}`,
             borderRadius: '12px'
           }}>
@@ -325,10 +325,10 @@ export default function ContentPlannerWorkbench() {
         {loading ? (
           <div style={{ padding: '64px', textAlign: 'center', color: '#9ca3af' }}>Memuat tabel planner...</div>
         ) : (
-          <div style={{ overflowX: 'auto', background: '#121318', border: '1px solid #27272a', borderRadius: '14px' }}>
+          <div style={{ overflowX: 'auto', background: 'var(--bg-secondary)', border: '1px solid #27272a', borderRadius: '14px' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', color: '#e5e7eb', minWidth: '1600px' }}>
               <thead>
-                <tr style={{ background: '#18181b', borderBottom: '1px solid #27272a', textTransform: 'uppercase', fontSize: '11px', color: '#9ca3af', letterSpacing: '0.5px' }}>
+                <tr style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid #27272a', textTransform: 'uppercase', fontSize: '11px', color: '#9ca3af', letterSpacing: '0.5px' }}>
                   <th style={{ padding: '14px 12px', width: '50px', textAlign: 'center' }}>#</th>
                   <th style={{ padding: '14px 12px', width: '60px', textAlign: 'center' }}>Lock</th>
                   <th style={{ padding: '14px 12px', width: '160px', color: '#fbbf24' }}>🆔 Video ID</th>
@@ -338,8 +338,8 @@ export default function ContentPlannerWorkbench() {
                   <th style={{ padding: '14px 12px', width: '200px' }}>4. Context</th>
                   <th style={{ padding: '14px 12px', width: '150px' }}>5. VFO</th>
                   <th style={{ padding: '14px 12px', width: '160px' }}>6. Strategic Angle</th>
-                  <th style={{ padding: '14px 12px', width: '260px', background: '#1e1b4b', color: '#c7d2fe' }}>7. Hook (Kalimat 3 Detik)</th>
-                  <th style={{ padding: '14px 12px', width: '280px', background: '#1e1b4b', color: '#c7d2fe' }}>8. Visual Action</th>
+                  <th style={{ padding: '14px 12px', width: '260px', background: 'var(--bg-secondary)', color: '#c7d2fe' }}>7. Hook (Kalimat 3 Detik)</th>
+                  <th style={{ padding: '14px 12px', width: '280px', background: 'var(--bg-secondary)', color: '#c7d2fe' }}>8. Visual Action</th>
                   <th style={{ padding: '14px 12px', width: '160px' }}>9. {planner?.planner_focus === 'brand_editorial' ? 'Content Subject' : 'Product'}</th>
                   <th style={{ padding: '14px 12px', width: '120px', textAlign: 'center' }}>Aksi</th>
                 </tr>
@@ -411,7 +411,7 @@ export default function ContentPlannerWorkbench() {
                             rows={3}
                             value={cellValue}
                             onChange={e => setCellValue(e.target.value)}
-                            style={{ width: '100%', background: '#18181b', color: '#fff', border: '1px solid #6366f1', borderRadius: '6px', padding: '6px' }}
+                            style={{ width: '100%', background: 'var(--bg-secondary)', color: '#fff', border: '1px solid #6366f1', borderRadius: '6px', padding: '6px' }}
                           />
                           <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
                             <button onClick={() => handleCellSave(row.id, 'hook')} style={{ background: '#10b981', border: 'none', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}>Simpan</button>
@@ -448,7 +448,7 @@ export default function ContentPlannerWorkbench() {
                             rows={3}
                             value={cellValue}
                             onChange={e => setCellValue(e.target.value)}
-                            style={{ width: '100%', background: '#18181b', color: '#fff', border: '1px solid #6366f1', borderRadius: '6px', padding: '6px' }}
+                            style={{ width: '100%', background: 'var(--bg-secondary)', color: '#fff', border: '1px solid #6366f1', borderRadius: '6px', padding: '6px' }}
                           />
                           <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
                             <button onClick={() => handleCellSave(row.id, 'visual_action')} style={{ background: '#10b981', border: 'none', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}>Simpan</button>
@@ -483,7 +483,7 @@ export default function ContentPlannerWorkbench() {
                       {planner?.planner_focus === 'brand_editorial' && <div style={{ marginTop: '4px', fontSize: '10px', color: '#a1a1aa' }}>{row.cta_type || 'save'} · {row.commercial_intent || 'none'}</div>}
                       {/* Cartoon Universe Metadata (Tahap 1) */}
                       {planner?.content_world === 'cartoon_universe' && row.main_character && (
-                        <div style={{ marginTop: '6px', padding: '6px 8px', background: '#1e1b4b', borderRadius: '6px', border: '1px solid #312e81' }}>
+                        <div style={{ marginTop: '6px', padding: '6px 8px', background: 'var(--bg-secondary)', borderRadius: '6px', border: '1px solid #312e81' }}>
                           <div style={{ fontSize: '10px', color: '#a5b4fc', lineHeight: 1.5 }}>
                             <span title="Karakter Utama">🐱 {row.main_character}</span>
                             {row.supporting_characters && <span style={{ marginLeft: '6px', color: '#818cf8' }}>+ {row.supporting_characters}</span>}

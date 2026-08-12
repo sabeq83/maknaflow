@@ -654,7 +654,7 @@ function ContentFlowHubPageContent() {
     <div className="layout-with-sidebar">
       <Sidebar />
 
-      <main className="main-content" style={{ padding: '28px 32px', background: '#0a0a0c', minHeight: '100vh', color: '#f3f4f6' }}>
+      <main className="main-content" style={{ padding: '28px 32px', background: 'var(--bg-primary)', minHeight: '100vh', color: '#f3f4f6' }}>
         {/* Centered Main Container (1050px) setara OPC / RE */}
         <div style={{ maxWidth: '1050px', margin: '0 auto' }}>
           {/* Toast Notification */}
@@ -724,7 +724,7 @@ function ContentFlowHubPageContent() {
               style={{
                 padding: '9px 18px',
                 borderRadius: '10px',
-                background: mainView === 'library' ? '#2563eb' : '#111827',
+                background: mainView === 'library' ? '#2563eb' : 'var(--bg-secondary)',
                 border: `1px solid ${mainView === 'library' ? '#60a5fa' : '#27272a'}`,
                 color: '#fff',
                 fontSize: '13px',
@@ -744,7 +744,7 @@ function ContentFlowHubPageContent() {
               style={{
                 padding: '9px 18px',
                 borderRadius: '10px',
-                background: mainView === 'publishing' ? 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)' : '#111827',
+                background: mainView === 'publishing' ? 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)' : 'var(--bg-secondary)',
                 border: `1px solid ${mainView === 'publishing' ? '#c084fc' : '#27272a'}`,
                 color: '#fff',
                 fontSize: '13px',
@@ -770,7 +770,7 @@ function ContentFlowHubPageContent() {
             <>
               {/* Quick Metrics Bar */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '24px' }}>
-            <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(18, 19, 24, 0.8)', border: '1px solid #27272a' }}>
+            <div style={{ padding: '16px', borderRadius: '16px', background: 'var(--bg-secondary)', border: '1px solid #27272a' }}>
               <span style={{ fontSize: '12px', color: '#9ca3af', fontWeight: 600, display: 'block' }}>Total Konten Terindeks</span>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '6px' }}>
                 <span style={{ fontSize: '26px', fontWeight: 800, color: '#ffffff' }}>{totalItems}</span>
@@ -794,7 +794,7 @@ function ContentFlowHubPageContent() {
               </div>
             </div>
 
-            <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(18, 19, 24, 0.8)', border: '1px solid #27272a' }}>
+            <div style={{ padding: '16px', borderRadius: '16px', background: 'var(--bg-secondary)', border: '1px solid #27272a' }}>
               <span style={{ fontSize: '12px', color: '#9ca3af', fontWeight: 600, display: 'block' }}>Produk Aktif</span>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '6px' }}>
                 <span style={{ fontSize: '26px', fontWeight: 800, color: '#60a5fa' }}>{availableProducts.length}</span>

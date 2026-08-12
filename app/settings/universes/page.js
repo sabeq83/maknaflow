@@ -422,7 +422,7 @@ export default function UniverseManagerPage() {
   return (
     <div className="app-layout">
       <Sidebar />
-      <main className="main-content" style={{ backgroundColor: '#0f0f23', minHeight: '100vh', color: '#fff', padding: '24px' }}>
+      <main className="main-content" style={{ backgroundColor: 'var(--bg-primary)', minHeight: '100vh', color: '#fff', padding: '24px' }}>
         <div className="page-header" style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <h1 className="page-title" style={{ margin: 0, fontSize: '24px' }}>🏰 Universe Manager</h1>
@@ -465,12 +465,12 @@ export default function UniverseManagerPage() {
         )}
 
         <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: '1px solid #2d3436', paddingBottom: '12px' }}>
-          <button onClick={() => setActiveTab('universes')} style={{ padding: '8px 16px', borderRadius: '20px', border: 'none', backgroundColor: activeTab === 'universes' ? '#6c5ce7' : '#1e1e3a', color: '#fff', cursor: 'pointer' }}>Universes</button>
+          <button onClick={() => setActiveTab('universes')} style={{ padding: '8px 16px', borderRadius: '20px', border: 'none', backgroundColor: activeTab === 'universes' ? '#6c5ce7' : 'var(--bg-secondary)', color: '#fff', cursor: 'pointer' }}>Universes</button>
           {selectedUniverse && (
             <>
-              <button onClick={() => setActiveTab('characters')} style={{ padding: '8px 16px', borderRadius: '20px', border: 'none', backgroundColor: activeTab === 'characters' ? '#6c5ce7' : '#1e1e3a', color: '#fff', cursor: 'pointer' }}>Characters ({selectedUniverse.name})</button>
-              <button onClick={() => setActiveTab('locations')} style={{ padding: '8px 16px', borderRadius: '20px', border: 'none', backgroundColor: activeTab === 'locations' ? '#6c5ce7' : '#1e1e3a', color: '#fff', cursor: 'pointer' }}>Locations</button>
-              <button onClick={() => setActiveTab('episodes')} style={{ padding: '8px 16px', borderRadius: '20px', border: 'none', backgroundColor: activeTab === 'episodes' ? '#6c5ce7' : '#1e1e3a', color: '#fff', cursor: 'pointer' }}>Episodes</button>
+              <button onClick={() => setActiveTab('characters')} style={{ padding: '8px 16px', borderRadius: '20px', border: 'none', backgroundColor: activeTab === 'characters' ? '#6c5ce7' : 'var(--bg-secondary)', color: '#fff', cursor: 'pointer' }}>Characters ({selectedUniverse.name})</button>
+              <button onClick={() => setActiveTab('locations')} style={{ padding: '8px 16px', borderRadius: '20px', border: 'none', backgroundColor: activeTab === 'locations' ? '#6c5ce7' : 'var(--bg-secondary)', color: '#fff', cursor: 'pointer' }}>Locations</button>
+              <button onClick={() => setActiveTab('episodes')} style={{ padding: '8px 16px', borderRadius: '20px', border: 'none', backgroundColor: activeTab === 'episodes' ? '#6c5ce7' : 'var(--bg-secondary)', color: '#fff', cursor: 'pointer' }}>Episodes</button>
             </>
           )}
         </div>
@@ -479,31 +479,31 @@ export default function UniverseManagerPage() {
         {activeTab === 'universes' && (
           <>
             {showForm && (
-              <div style={{ backgroundColor: '#1a1a2e', padding: '24px', borderRadius: '8px', marginBottom: '24px' }}>
+              <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '24px', borderRadius: '8px', marginBottom: '24px' }}>
                 <h3 style={{ marginTop: 0, marginBottom: '20px' }}>{editingId ? 'Edit Universe' : 'Create Universe'}</h3>
                 <form onSubmit={handleUniverseSave} style={{ display: 'grid', gap: '16px' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Name *</label>
-                      <input required name="name" value={formData.name} onChange={handleUniverseChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                      <input required name="name" value={formData.name} onChange={handleUniverseChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                     </div>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Slug *</label>
-                      <input required name="slug" value={formData.slug} onChange={handleUniverseChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                      <input required name="slug" value={formData.slug} onChange={handleUniverseChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                     </div>
                   </div>
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Premise *</label>
-                    <textarea required name="premise" value={formData.premise} onChange={handleUniverseChange} rows="3" style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                    <textarea required name="premise" value={formData.premise} onChange={handleUniverseChange} rows="3" style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Tone</label>
-                      <input name="tone" value={formData.tone} onChange={handleUniverseChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                      <input name="tone" value={formData.tone} onChange={handleUniverseChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                     </div>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Knowledge Domain</label>
-                      <select name="knowledge_domain" value={formData.knowledge_domain} onChange={handleUniverseChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }}>
+                      <select name="knowledge_domain" value={formData.knowledge_domain} onChange={handleUniverseChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }}>
                         <option value="general">General</option>
                         <option value="pet_supplies">Pet Supplies</option>
                         <option value="food_culinary">Food &amp; Culinary</option>
@@ -520,7 +520,7 @@ export default function UniverseManagerPage() {
                         <select
                           value={formData.universe_type || 'animal'}
                           onChange={e => setFormData(f => ({ ...f, universe_type: e.target.value }))}
-                          style={{ width: '100%', padding: '8px', background: '#1e1e3a', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px' }}
+                          style={{ width: '100%', padding: '8px', background: 'var(--bg-secondary)', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px' }}
                         >
                           <option value="animal">🐾 Animal</option>
                           <option value="mascot_object">🎭 Mascot / Object</option>
@@ -528,7 +528,7 @@ export default function UniverseManagerPage() {
                         </select>
                       </div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Human Presence</label>
-                      <select name="human_presence" value={formData.human_presence} onChange={handleUniverseChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }}>
+                      <select name="human_presence" value={formData.human_presence} onChange={handleUniverseChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }}>
                         <option value="allowed">Allowed</option>
                         <option value="faceless_only">Faceless Only</option>
                         <option value="none">None</option>
@@ -542,7 +542,7 @@ export default function UniverseManagerPage() {
                               value={formData.historical_period || ''}
                               onChange={e => setFormData(f => ({ ...f, historical_period: e.target.value }))}
                               placeholder="e.g. Abad ke-7 sampai abad ke-15"
-                              style={{ width: '100%', padding: '8px', background: '#1e1e3a', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px', boxSizing: 'border-box' }}
+                              style={{ width: '100%', padding: '8px', background: 'var(--bg-secondary)', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px', boxSizing: 'border-box' }}
                             />
                           </div>
                           <div style={{ marginBottom: '12px' }}>
@@ -552,7 +552,7 @@ export default function UniverseManagerPage() {
                               onChange={e => setFormData(f => ({ ...f, depiction_policy: e.target.value }))}
                               placeholder="Aturan penggambaran karakter sensitif, larangan, dan panduan representasi..."
                               rows={4}
-                              style={{ width: '100%', padding: '8px', background: '#1e1e3a', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px', resize: 'vertical', boxSizing: 'border-box' }}
+                              style={{ width: '100%', padding: '8px', background: 'var(--bg-secondary)', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px', resize: 'vertical', boxSizing: 'border-box' }}
                             />
                           </div>
                         </>
@@ -561,12 +561,12 @@ export default function UniverseManagerPage() {
                   </div>
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Visual Style *</label>
-                    <textarea required name="visual_style" value={formData.visual_style} onChange={handleUniverseChange} rows="2" style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                    <textarea required name="visual_style" value={formData.visual_style} onChange={handleUniverseChange} rows="2" style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Aspect Ratio</label>
-                      <select name="aspect_ratio" value={formData.aspect_ratio} onChange={handleUniverseChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }}>
+                      <select name="aspect_ratio" value={formData.aspect_ratio} onChange={handleUniverseChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }}>
                         <option value="9:16">9:16</option>
                         <option value="16:9">16:9</option>
                         <option value="1:1">1:1</option>
@@ -574,30 +574,30 @@ export default function UniverseManagerPage() {
                     </div>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Scene Count</label>
-                      <input type="number" name="scene_count" value={formData.scene_count} onChange={handleUniverseChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                      <input type="number" name="scene_count" value={formData.scene_count} onChange={handleUniverseChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                     </div>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Scene Duration (sec)</label>
-                      <input type="number" name="scene_duration" value={formData.scene_duration} onChange={handleUniverseChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                      <input type="number" name="scene_duration" value={formData.scene_duration} onChange={handleUniverseChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                     </div>
                   </div>
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Story Template</label>
-                    <textarea name="story_template" value={formData.story_template} onChange={handleUniverseChange} rows="2" style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                    <textarea name="story_template" value={formData.story_template} onChange={handleUniverseChange} rows="2" style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                   </div>
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>CTA Personality</label>
-                    <input name="cta_personality" value={formData.cta_personality} onChange={handleUniverseChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                    <input name="cta_personality" value={formData.cta_personality} onChange={handleUniverseChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                   </div>
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Pillars</label>
                     <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-                      <input value={pillarDraft} onChange={e => setPillarDraft(e.target.value)} onKeyDown={e => { if(e.key === 'Enter') { e.preventDefault(); addPillar(); } }} placeholder="Add pillar..." style={{ flex: 1, padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                      <input value={pillarDraft} onChange={e => setPillarDraft(e.target.value)} onKeyDown={e => { if(e.key === 'Enter') { e.preventDefault(); addPillar(); } }} placeholder="Add pillar..." style={{ flex: 1, padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                       <button type="button" onClick={addPillar} style={{ padding: '10px 16px', backgroundColor: '#34495e', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Add</button>
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                       {formData.pillars.map((pillar, idx) => (
-                        <span key={idx} style={{ backgroundColor: '#2d3436', padding: '4px 8px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
+                        <span key={idx} style={{ backgroundColor: 'var(--border)', padding: '4px 8px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
                           {pillar}
                           <button type="button" onClick={() => removePillar(idx)} style={{ background: 'none', border: 'none', color: '#e74c3c', cursor: 'pointer' }}>✕</button>
                         </span>
@@ -612,10 +612,10 @@ export default function UniverseManagerPage() {
               </div>
             )}
             
-            <div style={{ backgroundColor: '#1a1a2e', borderRadius: '8px', overflow: 'hidden' }}>
+            <div style={{ backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', overflow: 'hidden' }}>
               <table className="ideas-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
-                  <tr style={{ backgroundColor: '#0f0f23', borderBottom: '1px solid #2d3436' }}>
+                  <tr style={{ backgroundColor: 'var(--bg-primary)', borderBottom: '1px solid #2d3436' }}>
                     <th style={{ padding: '16px' }}>Name</th>
                     <th style={{ padding: '16px' }}>Slug</th>
                     <th style={{ padding: '16px' }}>Visual Style</th>
@@ -653,7 +653,7 @@ export default function UniverseManagerPage() {
               </table>
             </div>
             {selectedUniverse && (
-              <div style={{ marginTop: '24px', backgroundColor: '#1a1a2e', padding: '24px', borderRadius: '8px' }}>
+              <div style={{ marginTop: '24px', backgroundColor: 'var(--bg-secondary)', padding: '24px', borderRadius: '8px' }}>
                 <h4 style={{ margin: '0 0 16px 0', color: '#a29bfe' }}>Preview: {selectedUniverse.name}</h4>
                 <p style={{ margin: '0 0 8px', fontSize: '14px', color: '#bdc3c7' }}><strong>Premise:</strong> {selectedUniverse.premise}</p>
                 <p style={{ margin: '0 0 8px', fontSize: '14px', color: '#bdc3c7' }}><strong>Format:</strong> {selectedUniverse.scene_count} scenes x {selectedUniverse.scene_duration}s ({selectedUniverse.aspect_ratio})</p>
@@ -673,31 +673,31 @@ export default function UniverseManagerPage() {
             </div>
             
             {showCharForm && (
-              <div style={{ backgroundColor: '#1a1a2e', padding: '24px', borderRadius: '8px', marginBottom: '24px' }}>
+              <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '24px', borderRadius: '8px', marginBottom: '24px' }}>
                 <h3 style={{ marginTop: 0, marginBottom: '20px' }}>{editingId ? 'Edit Character' : 'Create Character'}</h3>
                 <form onSubmit={handleCharSave} style={{ display: 'grid', gap: '16px' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Name *</label>
-                      <input required name="name" value={charFormData.name} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                      <input required name="name" value={charFormData.name} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                     </div>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Character Key *</label>
-                      <input required name="character_key" value={charFormData.character_key} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                      <input required name="character_key" value={charFormData.character_key} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                     </div>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Species</label>
-                      <input name="species" value={charFormData.species} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                      <input name="species" value={charFormData.species} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                     </div>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Breed</label>
-                      <input name="breed" value={charFormData.breed} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                      <input name="breed" value={charFormData.breed} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                     </div>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Role</label>
-                      <select name="role" value={charFormData.role} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }}>
+                      <select name="role" value={charFormData.role} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }}>
                         <option value="main_character">Main Character</option>
                         <option value="observer">Observer</option>
                         <option value="first_observer">First Observer</option>
@@ -710,33 +710,33 @@ export default function UniverseManagerPage() {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Body Shape</label>
-                      <input name="body_shape" value={charFormData.body_shape} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                      <input name="body_shape" value={charFormData.body_shape} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                     </div>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Fur Color</label>
-                      <input name="fur_color" value={charFormData.fur_color} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                      <input name="fur_color" value={charFormData.fur_color} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                     </div>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Eye Color</label>
-                      <input name="eye_color" value={charFormData.eye_color} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                      <input name="eye_color" value={charFormData.eye_color} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                     </div>
                   </div>
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Wardrobe</label>
-                    <input name="wardrobe" value={charFormData.wardrobe} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                    <input name="wardrobe" value={charFormData.wardrobe} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Personality</label>
-                      <input name="personality" value={charFormData.personality} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                      <input name="personality" value={charFormData.personality} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                     </div>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Movement Style</label>
-                      <input name="movement_style" value={charFormData.movement_style} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                      <input name="movement_style" value={charFormData.movement_style} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                     </div>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Relative Size</label>
-                      <select name="relative_size" value={charFormData.relative_size} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }}>
+                      <select name="relative_size" value={charFormData.relative_size} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }}>
                         <option value="small">Small</option>
                         <option value="medium">Medium</option>
                         <option value="large">Large</option>
@@ -749,7 +749,7 @@ export default function UniverseManagerPage() {
                       <select
                         value={charFormData.depiction_mode || 'normal'}
                         onChange={e => setCharFormData(f => ({ ...f, depiction_mode: e.target.value }))}
-                        style={{ width: '100%', padding: '8px', background: '#1e1e3a', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px' }}
+                        style={{ width: '100%', padding: '8px', background: 'var(--bg-secondary)', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px' }}
                       >
                         <option value="normal">Normal</option>
                         <option value="faceless">Faceless</option>
@@ -763,7 +763,7 @@ export default function UniverseManagerPage() {
                       <select
                         value={charFormData.reference_type || 'identity'}
                         onChange={e => setCharFormData(f => ({ ...f, reference_type: e.target.value }))}
-                        style={{ width: '100%', padding: '8px', background: '#1e1e3a', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px' }}
+                        style={{ width: '100%', padding: '8px', background: 'var(--bg-secondary)', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px' }}
                       >
                         <option value="identity">Identity</option>
                         <option value="wardrobe">Wardrobe</option>
@@ -777,12 +777,12 @@ export default function UniverseManagerPage() {
                       value={charFormData.historical_period || ''}
                       onChange={e => setCharFormData(f => ({ ...f, historical_period: e.target.value }))}
                       placeholder="e.g. Abad ke-7 sampai abad ke-15"
-                      style={{ width: '100%', padding: '8px', background: '#1e1e3a', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px', boxSizing: 'border-box' }}
+                      style={{ width: '100%', padding: '8px', background: 'var(--bg-secondary)', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px', boxSizing: 'border-box' }}
                     />
                   </div>
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Canonical Prompt</label>
-                    <textarea name="canonical_prompt" value={charFormData.canonical_prompt} onChange={handleCharChange} rows="3" style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                    <textarea name="canonical_prompt" value={charFormData.canonical_prompt} onChange={handleCharChange} rows="3" style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                   </div>
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Reference Image</label>
@@ -798,10 +798,10 @@ export default function UniverseManagerPage() {
             
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
               {characters.length === 0 ? (
-                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', backgroundColor: '#1a1a2e', borderRadius: '8px', color: '#7f8c8d' }}>No characters found.</div>
+                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', color: '#7f8c8d' }}>No characters found.</div>
               ) : characters.map(c => (
-                <div key={c.id} style={{ backgroundColor: '#1a1a2e', borderRadius: '8px', overflow: 'hidden', border: '1px solid #2d3436' }}>
-                  <div style={{ height: '160px', backgroundColor: '#1e1e3a', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid #2d3436' }}>
+                <div key={c.id} style={{ backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', overflow: 'hidden', border: '1px solid #2d3436' }}>
+                  <div style={{ height: '160px', backgroundColor: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid #2d3436' }}>
                     {c.reference_image_url ? (
                       <img src={c.reference_image_url} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
@@ -814,7 +814,7 @@ export default function UniverseManagerPage() {
                       <span style={{ backgroundColor: '#6c5ce7', fontSize: '10px', padding: '2px 6px', borderRadius: '10px' }}>v{c.version || 1}</span>
                     </div>
                     <div style={{ marginBottom: '16px' }}>
-                      <span style={{ display: 'inline-block', backgroundColor: '#2d3436', fontSize: '12px', padding: '4px 8px', borderRadius: '4px', marginBottom: '4px' }}>{c.role}</span>
+                      <span style={{ display: 'inline-block', backgroundColor: 'var(--border)', fontSize: '12px', padding: '4px 8px', borderRadius: '4px', marginBottom: '4px' }}>{c.role}</span>
                       <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#bdc3c7' }}>{c.species} • {c.breed}</p>
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
@@ -848,31 +848,31 @@ export default function UniverseManagerPage() {
             </div>
             
             {showLocForm && (
-              <div style={{ backgroundColor: '#1a1a2e', padding: '24px', borderRadius: '8px', marginBottom: '24px' }}>
+              <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '24px', borderRadius: '8px', marginBottom: '24px' }}>
                 <h3 style={{ marginTop: 0, marginBottom: '20px' }}>{editingId ? 'Edit Location' : 'Create Location'}</h3>
                 <form onSubmit={handleLocSave} style={{ display: 'grid', gap: '16px' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Name *</label>
-                      <input required name="name" value={locFormData.name} onChange={handleLocChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                      <input required name="name" value={locFormData.name} onChange={handleLocChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                     </div>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Location Key *</label>
-                      <input required name="location_key" value={locFormData.location_key} onChange={handleLocChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                      <input required name="location_key" value={locFormData.location_key} onChange={handleLocChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                     </div>
                   </div>
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Visual Description *</label>
-                    <textarea required name="visual_description" value={locFormData.visual_description} onChange={handleLocChange} rows="3" style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                    <textarea required name="visual_description" value={locFormData.visual_description} onChange={handleLocChange} rows="3" style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Lighting Default</label>
-                      <input name="lighting_default" value={locFormData.lighting_default} onChange={handleLocChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
+                      <input name="lighting_default" value={locFormData.lighting_default} onChange={handleLocChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} />
                     </div>
                     <div>
                       <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Props</label>
-                      <input name="props" value={locFormData.props} onChange={handleLocChange} style={{ width: '100%', padding: '10px', backgroundColor: '#1e1e3a', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} placeholder="Comma separated" />
+                      <input name="props" value={locFormData.props} onChange={handleLocChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid #2d3436', color: '#fff', borderRadius: '4px' }} placeholder="Comma separated" />
                     </div>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
@@ -883,7 +883,7 @@ export default function UniverseManagerPage() {
                         value={locFormData.historical_period || ''}
                         onChange={e => setLocFormData(f => ({ ...f, historical_period: e.target.value }))}
                         placeholder="e.g. Abad ke-7 sampai abad ke-15"
-                        style={{ width: '100%', padding: '8px', background: '#1e1e3a', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px', boxSizing: 'border-box' }}
+                        style={{ width: '100%', padding: '8px', background: 'var(--bg-secondary)', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px', boxSizing: 'border-box' }}
                       />
                     </div>
                     <div>
@@ -891,7 +891,7 @@ export default function UniverseManagerPage() {
                       <select
                         value={locFormData.reference_type || 'location'}
                         onChange={e => setLocFormData(f => ({ ...f, reference_type: e.target.value }))}
-                        style={{ width: '100%', padding: '8px', background: '#1e1e3a', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px' }}
+                        style={{ width: '100%', padding: '8px', background: 'var(--bg-secondary)', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px' }}
                       >
                         <option value="location">Location</option>
                         <option value="visual_style">Visual Style</option>
@@ -906,10 +906,10 @@ export default function UniverseManagerPage() {
               </div>
             )}
             
-            <div style={{ backgroundColor: '#1a1a2e', borderRadius: '8px', overflow: 'hidden' }}>
+            <div style={{ backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', overflow: 'hidden' }}>
               <table className="ideas-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
-                  <tr style={{ backgroundColor: '#0f0f23', borderBottom: '1px solid #2d3436' }}>
+                  <tr style={{ backgroundColor: 'var(--bg-primary)', borderBottom: '1px solid #2d3436' }}>
                     <th style={{ padding: '16px' }}>Name</th>
                     <th style={{ padding: '16px' }}>Key</th>
                     <th style={{ padding: '16px' }}>Lighting</th>
@@ -950,7 +950,7 @@ export default function UniverseManagerPage() {
         {activeTab === 'episodes' && selectedUniverse && (
           <div>
             {episodeDigest && (
-              <div style={{ backgroundColor: '#1a1a2e', padding: '24px', borderRadius: '8px', marginBottom: '24px', border: '1px solid #6c5ce7' }}>
+              <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '24px', borderRadius: '8px', marginBottom: '24px', border: '1px solid #6c5ce7' }}>
                 <h4 style={{ margin: '0 0 16px 0', color: '#a29bfe' }}>Anti-Repetition Digest Summary</h4>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
                   <div>
@@ -981,10 +981,10 @@ export default function UniverseManagerPage() {
               </div>
             )}
             
-            <div style={{ backgroundColor: '#1a1a2e', borderRadius: '8px', overflow: 'hidden' }}>
+            <div style={{ backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', overflow: 'hidden' }}>
               <table className="ideas-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
-                  <tr style={{ backgroundColor: '#0f0f23', borderBottom: '1px solid #2d3436' }}>
+                  <tr style={{ backgroundColor: 'var(--bg-primary)', borderBottom: '1px solid #2d3436' }}>
                     <th style={{ padding: '16px' }}>Date</th>
                     <th style={{ padding: '16px' }}>Main Character</th>
                     <th style={{ padding: '16px' }}>Product</th>
@@ -1022,7 +1022,7 @@ export default function UniverseManagerPage() {
             zIndex: 1000, padding: '20px'
           }}>
             <div style={{
-              background: '#1a1a2e', borderRadius: '16px', padding: '32px',
+              background: 'var(--bg-secondary)', borderRadius: '16px', padding: '32px',
               width: '100%', maxWidth: '800px', maxHeight: '90vh',
               overflowY: 'auto', border: '1px solid #2d2d4e'
             }}>
@@ -1129,7 +1129,7 @@ export default function UniverseManagerPage() {
                         setPresetNameInput(e.target.value);
                         setPresetSlugInput(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''));
                       }}
-                      style={{ width: '100%', padding: '10px', background: '#1e1e3a', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px', boxSizing: 'border-box', fontSize: '14px' }}
+                      style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px', boxSizing: 'border-box', fontSize: '14px' }}
                     />
                   </div>
                   <div style={{ marginBottom: '20px' }}>
@@ -1137,7 +1137,7 @@ export default function UniverseManagerPage() {
                     <input
                       type="text" value={presetSlugInput}
                       onChange={e => setPresetSlugInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                      style={{ width: '100%', padding: '10px', background: '#1e1e3a', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px', boxSizing: 'border-box', fontSize: '14px', fontFamily: 'monospace' }}
+                      style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', color: '#e0e0ff', border: '1px solid #3a3a5c', borderRadius: '6px', boxSizing: 'border-box', fontSize: '14px', fontFamily: 'monospace' }}
                     />
                   </div>
 
