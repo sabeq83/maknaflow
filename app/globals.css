@@ -198,6 +198,135 @@
   color: var(--text-primary) !important;
 }
 
+/* ===== GLOBAL INLINE DARK BACKGROUND OVERRIDES ===== */
+[data-theme='light'] [style*='background: #18181b'],
+[data-theme='light'] [style*='background:#18181b'],
+[data-theme='light'] [style*='background-color: #18181b'],
+[data-theme='light'] [style*='background-color:#18181b'],
+[data-theme='light'] [style*='background: #09090b'],
+[data-theme='light'] [style*='background:#09090b'],
+[data-theme='light'] [style*='background-color: #09090b'],
+[data-theme='light'] [style*='background-color:#09090b'],
+[data-theme='light'] [style*='background: #121318'],
+[data-theme='light'] [style*='background:#121318'],
+[data-theme='light'] [style*='background-color: #121318'],
+[data-theme='light'] [style*='background-color:#121318'],
+[data-theme='light'] [style*='background: #0f172a'],
+[data-theme='light'] [style*='background:#0f172a'],
+[data-theme='light'] [style*='background-color: #0f172a'],
+[data-theme='light'] [style*='background-color:#0f172a'],
+[data-theme='light'] [style*='background: #1e293b'],
+[data-theme='light'] [style*='background:#1e293b'],
+[data-theme='light'] [style*='background-color: #1e293b'],
+[data-theme='light'] [style*='background-color:#1e293b'],
+[data-theme='light'] [style*='background: #1e1b4b'],
+[data-theme='light'] [style*='background:#1e1b4b'],
+[data-theme='light'] [style*='background-color: #1e1b4b'],
+[data-theme='light'] [style*='background-color:#1e1b4b'],
+[data-theme='light'] [style*='background: #1a2332'],
+[data-theme='light'] [style*='background:#1a2332'],
+[data-theme='light'] [style*='background-color: #1a2332'],
+[data-theme='light'] [style*='background-color:#1a2332'],
+[data-theme='light'] [style*='background: #312e81'],
+[data-theme='light'] [style*='background:#312e81'],
+[data-theme='light'] [style*='background-color: #312e81'],
+[data-theme='light'] [style*='background-color:#312e81'],
+[data-theme='light'] [style*='background: #164e63'],
+[data-theme='light'] [style*='background:#164e63'],
+[data-theme='light'] [style*='background-color: #164e63'],
+[data-theme='light'] [style*='background-color:#164e63'],
+[data-theme='light'] [style*='background: #1c1917'],
+[data-theme='light'] [style*='background:#1c1917'],
+[data-theme='light'] [style*='background-color: #1c1917'],
+[data-theme='light'] [style*='background-color:#1c1917'],
+[data-theme='light'] [style*='background: #1f2937'],
+[data-theme='light'] [style*='background:#1f2937'],
+[data-theme='light'] [style*='background-color: #1f2937'],
+[data-theme='light'] [style*='background-color:#1f2937'],
+[data-theme='light'] [style*='background: #451a03'],
+[data-theme='light'] [style*='background:#451a03'],
+[data-theme='light'] [style*='background-color: #451a03'],
+[data-theme='light'] [style*='background-color:#451a03'],
+[data-theme='light'] [style*='background: #12131a'],
+[data-theme='light'] [style*='background:#12131a'],
+[data-theme='light'] [style*='background-color: #12131a'],
+[data-theme='light'] [style*='background-color:#12131a'],
+[data-theme='light'] [style*='background: #000000'],
+[data-theme='light'] [style*='background:#000000'],
+[data-theme='light'] [style*='background-color: #000000'],
+[data-theme='light'] [style*='background-color:#000000'],
+[data-theme='light'] [style*='background: #000'],
+[data-theme='light'] [style*='background:#000'],
+[data-theme='light'] [style*='background-color: #000'],
+[data-theme='light'] [style*='background-color:#000'],
+[data-theme='light'] [style*='background: #1e1e3a'],
+[data-theme='light'] [style*='background:#1e1e3a'],
+[data-theme='light'] [style*='background-color: #1e1e3a'],
+[data-theme='light'] [style*='background-color:#1e1e3a'],
+[data-theme='light'] [style*='background: #1a1a2e'],
+[data-theme='light'] [style*='background:#1a1a2e'],
+[data-theme='light'] [style*='background-color: #1a1a2e'],
+[data-theme='light'] [style*='background-color:#1a1a2e'],
+[data-theme='light'] [style*='background: #2d3436'],
+[data-theme='light'] [style*='background:#2d3436'],
+[data-theme='light'] [style*='background-color: #2d3436'],
+[data-theme='light'] [style*='background-color:#2d3436'],
+[data-theme='light'] [style*='background: #3a3a5c'],
+[data-theme='light'] [style*='background:#3a3a5c'],
+[data-theme='light'] [style*='background-color: #3a3a5c'],
+[data-theme='light'] [style*='background-color:#3a3a5c'],
+[data-theme='light'] [style*='background: #34495e'],
+[data-theme='light'] [style*='background:#34495e'],
+[data-theme='light'] [style*='background-color: #34495e'],
+[data-theme='light'] [style*='background-color:#34495e'],
+[data-theme='light'] [style*='background: #05070d'],
+[data-theme='light'] [style*='background:#05070d'],
+[data-theme='light'] [style*='background-color: #05070d'],
+[data-theme='light'] [style*='background-color:#05070d'],
+[data-theme='light'] [style*='background: rgba(18, 19, 24'],
+[data-theme='light'] [style*='background:rgba(18, 19, 24'],
+[data-theme='light'] [style*='background: rgba(0, 0, 0'],
+[data-theme='light'] [style*='background:rgba(0, 0, 0'],
+[data-theme='light'] [style*='background: rgba(255, 255, 255, 0.015)'],
+[data-theme='light'] [style*='background:rgba(255, 255, 255, 0.015)'],
+[data-theme='light'] [style*='background: rgba(255, 255, 255, 0.02)'],
+[data-theme='light'] [style*='background:rgba(255, 255, 255, 0.02)'],
+[data-theme='light'] [style*='background: rgba(255, 255, 255, 0.04)'],
+[data-theme='light'] [style*='background:rgba(255, 255, 255, 0.04)'] {
+  background-color: var(--bg-secondary) !important;
+  background: var(--bg-secondary) !important;
+  border-color: var(--border) !important;
+}
+
+/* Modal backdrop overlay style */
+[data-theme='light'] div[style*='position: fixed'][style*='inset: 0'][style*='background: rgba(0,0,0'],
+[data-theme='light'] div[style*='position: fixed'][style*='inset: 0'][style*='background:rgba(0,0,0'] {
+  background: rgba(15, 23, 42, 0.4) !important;
+}
+
+/* ===== GLOBAL LIGHT-GRAY TEXT COLOR MAPPING ===== */
+[data-theme='light'] [style*='color: #f3f4f6'],
+[data-theme='light'] [style*='color:#f3f4f6'],
+[data-theme='light'] [style*='color: #f1f5f9'],
+[data-theme='light'] [style*='color:#f1f5f9'],
+[data-theme='light'] [style*='color: #e4e4e7'],
+[data-theme='light'] [style*='color:#e4e4e7'],
+[data-theme='light'] [style*='color: #e2e8f0'],
+[data-theme='light'] [style*='color:#e2e8f0'] {
+  color: var(--text-primary) !important;
+}
+
+[data-theme='light'] [style*='color: #cbd5e1'],
+[data-theme='light'] [style*='color:#cbd5e1'],
+[data-theme='light'] [style*='color: #9ca3af'],
+[data-theme='light'] [style*='color:#9ca3af'],
+[data-theme='light'] [style*='color: #94a3b8'],
+[data-theme='light'] [style*='color:#94a3b8'],
+[data-theme='light'] [style*='color: #a0aec0'],
+[data-theme='light'] [style*='color:#a0aec0'] {
+  color: var(--text-muted) !important;
+}
+
 /* ===== VIDEO EDITOR STUDIO OVERRIDES ===== */
 [data-theme='light'] .studio-control-panel,
 [data-theme='light'] .studio-preview-panel {

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.12 — Fix Shared Modals & Light-Gray Text Light Theme (12/08/2026)
+- Overrode hardcoded dark backgrounds on ImportPlannerModal dan User Management modals
+- Memetakan warna teks kustom abu-abu/perak terang secara inline ke slate gelap kontras
+- Menyelaraskan visual seluruh panel overlay dan form input di Light Mode
+
 ## V2.14.11 — Fix Layout & Viewport Backgrounds Light Theme (12/08/2026)
 - Override main-content viewport background to resolve dark page backgrounds on Content Planner and Universe Manager
 - Override Video Editor Studio kustom CSS panel, tab, drag-zone, dan input selectors
