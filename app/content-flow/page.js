@@ -991,6 +991,7 @@ function ContentFlowHubPageContent() {
               paddingBottom: '4px'
             }}>
               <button
+                className={`contentflow-brand-tab ${accountFilter === 'all' ? 'contentflow-brand-tab-active' : ''}`}
                 onClick={() => {
                   setAccountFilter('all');
                   router.push('/content-flow?account=all');
@@ -1001,8 +1002,6 @@ function ContentFlowHubPageContent() {
                   fontSize: '12px',
                   fontWeight: 600,
                   cursor: 'pointer',
-                  border: accountFilter === 'all' ? '1px solid var(--status-success)' : '1px solid var(--border)',
-                  background: accountFilter === 'all' ? 'var(--status-success-soft)' : 'var(--bg-secondary)',
                   transition: 'all 0.2s ease',
                   display: 'flex',
                   alignItems: 'center',
@@ -1022,6 +1021,7 @@ function ContentFlowHubPageContent() {
                   const isSelected = accountFilter.toLowerCase() === acc.toLowerCase();
                   return (
                     <button
+                      className={`contentflow-brand-tab ${isSelected ? 'contentflow-brand-tab-active' : ''}`}
                       key={acc}
                       onClick={() => {
                         setAccountFilter(acc);
@@ -1033,9 +1033,6 @@ function ContentFlowHubPageContent() {
                         fontSize: '12px',
                         fontWeight: 600,
                         cursor: 'pointer',
-                        border: isSelected ? '1px solid var(--status-success)' : '1px solid var(--border)',
-                        background: isSelected ? 'var(--status-success-soft)' : 'var(--bg-secondary)',
-                        color: isSelected ? 'var(--status-success)' : 'var(--text-primary)',
                         transition: 'all 0.2s ease',
                         whiteSpace: 'nowrap',
                         display: 'flex',

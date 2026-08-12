@@ -887,6 +887,11 @@ Route detail dinilai menggunakan data staging yang tersedia tanpa melakukan aksi
 - [x] Migrasikan surface utama Publishing Scheduler ke token light/dark.
 - [x] Jalankan build, rilis patch, dan deploy hanya ke Mac Mini dev.
 
+### Follow-up tab akun brand ContentFlow
+
+- [x] Tingkatkan kontras tab brand default, hover, dan selected pada light/dark theme.
+- [ ] Jalankan build, rilis patch, dan deploy hanya ke Mac Mini dev.
+
 ### Follow-up Content Planner detail dan Video ID search
 
 - [x] Selaraskan action bar, informational panel, dan tabel detail Content Planner pada light/dark theme.

@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.20 — Kontras Tab Brand ContentFlow (12/08/2026)
+- Perkuat kontras tab Semua Akun dan nama brand pada light theme
+- Tambahkan state hover dan selected yang konsisten pada light/dark theme
+
 ## V2.14.19 — Penyelarasan Ukuran Field dan Skedul Produk (12/08/2026)
 - Perkecil search Video ID dan filter produk ContentFlow menjadi proporsional
 - Perkecil form login dan field password

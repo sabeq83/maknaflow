@@ -226,6 +226,10 @@ textarea::placeholder { color: var(--text-muted); opacity: 1; }
 .contentflow-video-id { background: color-mix(in srgb, var(--surface) 88%, transparent); border: 1px solid var(--status-info); color: var(--status-info); }
 .contentflow-platform-chip { background: var(--surface-raised); border: 1px solid var(--border-strong); color: var(--text-secondary); }
 .contentflow-status-unpublished { background: var(--surface-interactive); border: 1px solid var(--border-strong); color: var(--text-secondary); }
+.contentflow-brand-tab { background: var(--surface-interactive); border: 1px solid var(--border-strong); color: var(--text-secondary); }
+.contentflow-brand-tab:hover { background: var(--surface-hover); border-color: var(--status-info); color: var(--text-primary); }
+.contentflow-brand-tab-active { background: var(--status-success-soft); border: 1px solid var(--status-success); color: var(--status-success); box-shadow: 0 0 0 1px color-mix(in srgb, var(--status-success) 18%, transparent); }
+.contentflow-brand-tab-active:hover { background: var(--status-success-soft); border-color: var(--status-success); color: var(--status-success); }
 
 /* User Management table surfaces remain legible in both themes. */
 .user-table-shell { background: var(--surface); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-card); }
