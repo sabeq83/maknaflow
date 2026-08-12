@@ -227,7 +227,7 @@ export default function UserManagementPage() {
               onClick={openCreateModal}
               style={{
                 background: 'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)',
-                color: '#fff',
+                color: 'var(--text-primary)',
                 border: 'none',
                 padding: '10px 18px',
                 borderRadius: '8px',
@@ -266,10 +266,10 @@ export default function UserManagementPage() {
               </thead>
               <tbody>
                 {users.map(u => (
-                  <tr key={u.id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                  <tr key={u.id} style={{ borderBottom: '1px solid var(--border)' }}>
                     <td style={{ padding: '14px 16px', fontWeight: 600 }}>
                       👤 {u.username}
-                      {u.email && <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{u.email}</div>}
+                      {u.email && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{u.email}</div>}
                     </td>
                     <td style={{ padding: '14px 16px' }}>
                       <span style={{
@@ -303,7 +303,7 @@ export default function UserManagementPage() {
                       {u.role === 'admin' ? (
                         <span style={{ color: '#818cf8', fontSize: '0.8rem' }}>🔒 Full All Menus</span>
                       ) : (
-                        <div style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                           {(u.menuPermissions || []).length} / {allMenus.length} Menu Diizinkan
                         </div>
                       )}
@@ -348,35 +348,35 @@ export default function UserManagementPage() {
                 <form onSubmit={handleSubmit}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '4px' }}>Username</label>
+                      <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Username</label>
                       <input
                         type="text"
                         required
                         disabled={!!editingUser}
                         value={formData.username}
                         onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                        style={{ width: '100%', padding: '10px', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '6px', color: '#fff' }}
+                        style={{ width: '100%', padding: '10px', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '6px', color: 'var(--text-primary)' }}
                       />
                     </div>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '4px' }}>Password {editingUser && '(Kosongkan jika tak diubah)'}</label>
+                      <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Password {editingUser && '(Kosongkan jika tak diubah)'}</label>
                       <input
                         type="password"
                         required={!editingUser}
                         value={formData.password}
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                         placeholder={editingUser ? '••••••••' : 'Masukkan password'}
-                        style={{ width: '100%', padding: '10px', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '6px', color: '#fff' }}
+                        style={{ width: '100%', padding: '10px', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '6px', color: 'var(--text-primary)' }}
                       />
                     </div>
                   </div>
 
                   <div style={{ marginBottom: '16px' }}>
-                    <label style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '4px' }}>Role</label>
+                    <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Role</label>
                     <select
                       value={formData.role}
                       onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                      style={{ width: '100%', padding: '10px', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '6px', color: '#fff' }}
+                      style={{ width: '100%', padding: '10px', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '6px', color: 'var(--text-primary)' }}
                     >
                       <option value="user">User Biasa (Terbatas per Brand & Menu)</option>
                       <option value="admin">Admin (Akses Full All System & Global View)</option>
@@ -429,13 +429,13 @@ export default function UserManagementPage() {
                     <button
                       type="button"
                       onClick={() => setIsModalOpen(false)}
-                      style={{ padding: '10px 16px', background: 'rgba(148, 163, 184, 0.2)', border: 'none', borderRadius: '6px', color: '#cbd5e1', cursor: 'pointer' }}
+                      style={{ padding: '10px 16px', background: 'rgba(148, 163, 184, 0.2)', border: 'none', borderRadius: '6px', color: 'var(--text-secondary)', cursor: 'pointer' }}
                     >
                       Batal
                     </button>
                     <button
                       type="submit"
-                      style={{ padding: '10px 20px', background: 'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)', border: 'none', borderRadius: '6px', color: '#fff', fontWeight: 600, cursor: 'pointer' }}
+                      style={{ padding: '10px 20px', background: 'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)', border: 'none', borderRadius: '6px', color: 'var(--text-primary)', fontWeight: 600, cursor: 'pointer' }}
                     >
                       Simpan Pengguna
                     </button>
@@ -452,7 +452,7 @@ export default function UserManagementPage() {
                 <h2 style={{ fontSize: '1.3rem', margin: '0 0 8px 0', color: '#facc15' }}>
                   🔑 Ubah Password: {passwordTargetUser.username}
                 </h2>
-                <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '16px' }}>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
                   Masukkan password baru untuk akun pengguna ini.
                 </p>
 
@@ -464,7 +464,7 @@ export default function UserManagementPage() {
 
                 <form onSubmit={handlePasswordSubmit}>
                   <div style={{ marginBottom: '20px' }}>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '6px' }}>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
                       Password Baru
                     </label>
                     <input
@@ -474,7 +474,7 @@ export default function UserManagementPage() {
                       value={newPasswordInput}
                       onChange={(e) => setNewPasswordInput(e.target.value)}
                       placeholder="Ketik password baru"
-                      style={{ width: '100%', padding: '12px', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid rgba(255, 255, 255, 0.15)', borderRadius: '8px', color: '#fff', fontSize: '0.95rem' }}
+                      style={{ width: '100%', padding: '12px', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid rgba(255, 255, 255, 0.15)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '0.95rem' }}
                     />
                   </div>
 
@@ -482,7 +482,7 @@ export default function UserManagementPage() {
                     <button
                       type="button"
                       onClick={closePasswordModal}
-                      style={{ padding: '10px 16px', background: 'rgba(148, 163, 184, 0.2)', border: 'none', borderRadius: '6px', color: '#cbd5e1', cursor: 'pointer' }}
+                      style={{ padding: '10px 16px', background: 'rgba(148, 163, 184, 0.2)', border: 'none', borderRadius: '6px', color: 'var(--text-secondary)', cursor: 'pointer' }}
                     >
                       Batal
                     </button>

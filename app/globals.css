@@ -504,6 +504,118 @@
   background: var(--bg-card-hover) !important;
 }
 
+/* --- Additional Theme Toggle Overrides for Dashboard, ContentFlow, and User Management --- */
+
+[data-theme=light] [style*="background: rgba(15, 23, 42, 0.75)"],
+[data-theme=light] [style*="background:rgba(15, 23, 42, 0.75)"],
+[data-theme=light] [style*="background-color: rgba(15, 23, 42, 0.75)"],
+[data-theme=light] [style*="background-color:rgba(15, 23, 42, 0.75)"],
+[data-theme=light] [style*="background: rgba(30, 41, 59, 0.8)"],
+[data-theme=light] [style*="background:rgba(30, 41, 59, 0.8)"],
+[data-theme=light] [style*="background-color: rgba(30, 41, 59, 0.8)"],
+[data-theme=light] [style*="background-color:rgba(30, 41, 59, 0.8)"],
+[data-theme=light] [style*="background: rgba(30, 41, 59, 0.5)"],
+[data-theme=light] [style*="background:rgba(30, 41, 59, 0.5)"],
+[data-theme=light] [style*="background-color: rgba(30, 41, 59, 0.5)"],
+[data-theme=light] [style*="background-color:rgba(30, 41, 59, 0.5)"],
+[data-theme=light] [style*="background: rgba(11, 15, 25, 0.6)"],
+[data-theme=light] [style*="background:rgba(11, 15, 25, 0.6)"],
+[data-theme=light] [style*="background-color: rgba(11, 15, 25, 0.6)"],
+[data-theme=light] [style*="background-color:rgba(11, 15, 25, 0.6)"],
+[data-theme=light] [style*="background: rgba(15, 23, 42, 0.7)"],
+[data-theme=light] [style*="background:rgba(15, 23, 42, 0.7)"],
+[data-theme=light] [style*="background-color: rgba(15, 23, 42, 0.7)"],
+[data-theme=light] [style*="background-color:rgba(15, 23, 42, 0.7)"] {
+  background: var(--bg-card) !important;
+  background-color: var(--bg-card) !important;
+}
+
+/* Overrides for hardcoded linear gradients starting with dark colors */
+[data-theme=light] [style*="background: linear-gradient(145deg, rgba(15, 23, 42"],
+[data-theme=light] [style*="background:linear-gradient(145deg, rgba(15, 23, 42"],
+[data-theme=light] [style*="background: linear-gradient(135deg, rgba(15, 23, 42"],
+[data-theme=light] [style*="background:linear-gradient(135deg, rgba(15, 23, 42"] {
+  background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-glass) 100%) !important;
+}
+
+/* Overrides for specific dark hex background colors */
+[data-theme=light] [style*="background: #111827"],
+[data-theme=light] [style*="background:#111827"],
+[data-theme=light] [style*="background-color: #111827"],
+[data-theme=light] [style*="background-color:#111827"],
+[data-theme=light] [style*="background: #101725"],
+[data-theme=light] [style*="background:#101725"],
+[data-theme=light] [style*="background-color: #101725"],
+[data-theme=light] [style*="background-color:#101725"],
+[data-theme=light] [style*="background: #101727"],
+[data-theme=light] [style*="background:#101727"],
+[data-theme=light] [style*="background-color: #101727"],
+[data-theme=light] [style*="background-color:#101727"],
+[data-theme=light] [style*="background: #0b101b"],
+[data-theme=light] [style*="background:#0b101b"],
+[data-theme=light] [style*="background-color: #0b101b"],
+[data-theme=light] [style*="background-color:#0b101b"],
+[data-theme=light] [style*="background: #1a233a"],
+[data-theme=light] [style*="background:#1a233a"],
+[data-theme=light] [style*="background-color: #1a233a"],
+[data-theme=light] [style*="background-color:#1a233a"],
+[data-theme=light] [style*="background: #0e1626"],
+[data-theme=light] [style*="background:#0e1626"],
+[data-theme=light] [style*="background-color: #0e1626"],
+[data-theme=light] [style*="background-color:#0e1626"],
+[data-theme=light] [style*="background: #080d1a"],
+[data-theme=light] [style*="background:#080d1a"],
+[data-theme=light] [style*="background-color: #080d1a"],
+[data-theme=light] [style*="background-color:#080d1a"] {
+  background: var(--bg-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Ensure inputs, dropdown selectors, and textareas inside containers inherit light theme styles */
+[data-theme=light] input,
+[data-theme=light] select,
+[data-theme=light] textarea {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border) !important;
+}
+
+/* Ensure option elements display readable text inside light dropdowns */
+[data-theme=light] option {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Overrides for specific hardcoded dark borders */
+[data-theme=light] [style*="border: 1px solid #253046"],
+[data-theme=light] [style*="border:1px solid #253046"],
+[data-theme=light] [style*="border: 1px solid #2a354b"],
+[data-theme=light] [style*="border:1px solid #2a354b"],
+[data-theme=light] [style*="border: 1px solid #28354d"],
+[data-theme=light] [style*="border:1px solid #28354d"],
+[data-theme=light] [style*="border-bottom: 1px solid #1c2638"],
+[data-theme=light] [style*="border-bottom:1px solid #1c2638"],
+[data-theme=light] [style*="border: 1px solid rgba(255, 255, 255, 0.1)"],
+[data-theme=light] [style*="border:1px solid rgba(255, 255, 255, 0.1)"],
+[data-theme=light] [style*="border: 1px solid rgba(255, 255, 255, 0.08)"],
+[data-theme=light] [style*="border:1px solid rgba(255, 255, 255, 0.08)"],
+[data-theme=light] [style*="border: 1px solid rgba(255, 255, 255, 0.05)"],
+[data-theme=light] [style*="border:1px solid rgba(255, 255, 255, 0.05)"] {
+  border-color: var(--border) !important;
+}
+
+/* Overrides for specific text colors inside Scheduler components */
+[data-theme=light] [style*="color: #728097"],
+[data-theme=light] [style*="color:#728097"],
+[data-theme=light] [style*="color: #9eabc0"],
+[data-theme=light] [style*="color:#9eabc0"],
+[data-theme=light] [style*="color: #e5e7eb"],
+[data-theme=light] [style*="color:#e5e7eb"],
+[data-theme=light] [style*="color: #cbd5e1"],
+[data-theme=light] [style*="color:#cbd5e1"] {
+  color: var(--text-secondary) !important;
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body { height: 100%; overflow: hidden; }

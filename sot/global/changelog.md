@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.14 — Align Dashboard ContentFlow and User Table in Light Theme (12/08/2026)
+- Convert dashboard, contentflow, and user management table hardcoded backgrounds directly to css variables
+- Scan all pages using automated browser subagent to verify visual correctness
+- Verified 100% theme alignment on Dashboard, ContentFlow, and User settings in Light Mode
+
 ## V2.14.13 — Convert Hardcoded Backgrounds to CSS Variables (12/08/2026)
 - Convert universes, content-planner, and content-flow hardcoded inline dark backgrounds to var(--bg-primary) dan var(--bg-secondary) di level file JS
 - Memastikan transisi tema berjalan instan tanpa bergantung pada selektor substring CSS
