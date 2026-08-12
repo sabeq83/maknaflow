@@ -224,6 +224,11 @@ textarea::placeholder { color: var(--text-muted); opacity: 1; }
 .contentflow-view-tab-active:hover { background: var(--status-info-soft); color: var(--status-info); }
 .contentflow-video-thumbnail { background: linear-gradient(135deg, var(--surface-raised), var(--surface-interactive)); border: 1px solid var(--border-subtle); }
 .contentflow-video-id { background: color-mix(in srgb, var(--surface) 88%, transparent); border: 1px solid var(--status-info); color: var(--status-info); }
+.contentflow-production-date { display: inline-flex; align-items: center; background: var(--surface); border: 1px solid var(--border-strong); color: var(--text-secondary); box-shadow: 0 2px 8px var(--overlay-subtle); }
+[data-theme='light'] .contentflow-production-date { background: #f7f9fc; border-color: #aebccd; color: #40506a; }
+.contentflow-compact-filter { width: 180px; min-width: 0; }
+.contentflow-compact-filter input,
+.contentflow-compact-filter select { box-sizing: border-box; max-width: 100%; }
 .contentflow-platform-chip { background: var(--surface-raised); border: 1px solid var(--border-strong); color: var(--text-secondary); }
 .contentflow-status-unpublished { background: var(--surface-interactive); border: 1px solid var(--border-strong); color: var(--text-secondary); }
 .contentflow-brand-tab { background: var(--surface-interactive); border: 1px solid var(--border-strong); color: var(--text-secondary); }

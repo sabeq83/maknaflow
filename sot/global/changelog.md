@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.23 — Badge Tanggal dan Filter Ringkas ContentFlow (13/08/2026)
+- Selaraskan badge tanggal selesai video dengan light dan dark theme
+- Perkecil pencarian Video ID dan filter produk menjadi 180px
+
 ## V2.14.22 — Warna Subtab Brand Sidebar (13/08/2026)
 - Hapus warna putih dan gradient hardcode pada subtab brand Sidebar
 - Gunakan teks hijau gelap dan background hijau lembut untuk selected light theme

@@ -1079,15 +1079,15 @@ function ContentFlowHubPageContent() {
           {/* Multi-level Search & Filter Panel */}
           <div style={{ padding: '20px', borderRadius: '16px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', marginBottom: '24px', boxShadow: '0 8px 24px var(--overlay-subtle)' }}>
             {/* Row 1: Universal Search & Metadata Filters (4 Columns) */}
-            <div style={{ display: 'grid', gridTemplateColumns: '220px minmax(180px, 1fr) minmax(180px, 1fr) 220px', gap: '12px', marginBottom: '14px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '180px minmax(180px, 1fr) minmax(180px, 1fr) 180px', gap: '12px', marginBottom: '14px' }}>
               {/* Universal Search */}
-              <div style={{ position: 'relative' }}>
+              <div className="contentflow-compact-filter" style={{ position: 'relative' }}>
                 <SearchIcon style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: 14, height: 14, color: 'var(--text-muted)' }} />
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Cari ID Video, Hook, Produk, Caption..."
+                  placeholder="Cari Video ID..."
                   style={{
                     width: '100%', padding: '9px 12px 9px 36px', borderRadius: '10px', background: 'var(--bg-secondary)',
                     border: '1px solid var(--border-strong)', color: 'var(--text-primary)', fontSize: '12px', outline: 'none'
@@ -1126,7 +1126,7 @@ function ContentFlowHubPageContent() {
               </div>
 
               {/* Product Filter with Search Box */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div className="contentflow-compact-filter" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <input
                   type="text"
                   value={productSearchTerm}
@@ -1299,7 +1299,7 @@ function ContentFlowHubPageContent() {
 
                         {item.production_date && (
                           <div style={{ position: 'absolute', bottom: '8px', right: '8px', zIndex: 2 }}>
-                            <span style={{ padding: '3px 6px', borderRadius: '4px', background: 'rgba(15, 23, 42, 0.95)', border: '1px solid var(--surface-interactive)', color: 'var(--text-muted)', fontSize: '8px', fontWeight: 700 }}>
+                            <span className="contentflow-production-date" style={{ padding: '3px 6px', borderRadius: '4px', fontSize: '8px', fontWeight: 700 }}>
                               📅 Selesai: {formatDate(item.production_date)}
                             </span>
                           </div>

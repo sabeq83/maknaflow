@@ -917,3 +917,9 @@ Route detail dinilai menggunakan data staging yang tersedia tanpa melakukan aksi
 - [x] Perkecil kartu/form login agar field password proporsional.
 - [x] Migrasikan header serta kartu Skedul Produk ke surface light/dark.
 - [x] Jalankan build, rilis patch, dan deploy hanya ke Mac Mini dev.
+
+### Follow-up badge selesai dan filter ringkas ContentFlow
+
+- [x] Selaraskan background dan warna teks badge tanggal selesai video pada light theme.
+- [x] Batasi lebar pencarian Video ID dan filter produk menjadi 180px.
+- [ ] Verifikasi build, rilis patch, dan deploy hanya ke server dev Mac Mini.
