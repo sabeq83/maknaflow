@@ -867,5 +867,5 @@ Route detail dinilai menggunakan data staging yang tersedia tanpa melakukan aksi
 - [x] Jalankan audit literal warna dan selesaikan allowlist platform.
 - [x] Uji seluruh route dalam matriks desktop/mobile × dark/light.
 - [x] Jalankan build final dan pemeriksaan regression permission/navigation.
-- [ ] Perbarui changelog, release patch, commit, tag, dan push sesuai SOP.
-- [ ] Deploy ke staging dan verifikasi kesehatan; jangan deploy production tanpa perintah eksplisit.
+- [x] Perbarui changelog, release patch, commit, tag, dan push sesuai SOP.
+- [x] Deploy ke environment dev Mac Mini dan verifikasi kesehatan; staging/production tidak disentuh.
