@@ -887,6 +887,12 @@ Route detail dinilai menggunakan data staging yang tersedia tanpa melakukan aksi
 - [x] Migrasikan surface utama Publishing Scheduler ke token light/dark.
 - [x] Jalankan build, rilis patch, dan deploy hanya ke Mac Mini dev.
 
+### Follow-up tanggal rilis dan selected brand
+
+- [x] Batasi lebar ketiga field Tanggal Rilis modal ContentFlow menjadi 168px.
+- [x] Paksa selected brand light theme memakai teks hijau gelap di atas hijau lembut.
+- [ ] Jalankan build, rilis patch, dan deploy hanya ke Mac Mini dev.
+
 ### Follow-up tab akun brand ContentFlow
 
 - [x] Tingkatkan kontras tab brand default, hover, dan selected pada light/dark theme.

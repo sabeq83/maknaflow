@@ -230,6 +230,9 @@ textarea::placeholder { color: var(--text-muted); opacity: 1; }
 .contentflow-brand-tab:hover { background: var(--surface-hover); border-color: var(--status-info); color: var(--text-primary); }
 .contentflow-brand-tab-active { background: var(--status-success-soft); border: 1px solid var(--status-success); color: var(--status-success); box-shadow: 0 0 0 1px color-mix(in srgb, var(--status-success) 18%, transparent); }
 .contentflow-brand-tab-active:hover { background: var(--status-success-soft); border-color: var(--status-success); color: var(--status-success); }
+.contentflow-release-date { width: 168px; max-width: 100%; box-sizing: border-box; color-scheme: inherit; }
+[data-theme='light'] button.contentflow-brand-tab-active,
+[data-theme='light'] button.contentflow-brand-tab-active:hover { color: #0b5d38; background: #dff3e7; border-color: #177a43; }
 
 /* User Management table surfaces remain legible in both themes. */
 .user-table-shell { background: var(--surface); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-card); }

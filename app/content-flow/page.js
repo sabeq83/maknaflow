@@ -1955,10 +1955,11 @@ function ContentFlowHubPageContent() {
                           </button>
                         </div>
                         <input
+                          className="contentflow-release-date"
                           type="date"
                           value={editStatusForm.tiktok_publish_date}
                           onChange={(e) => setEditStatusForm({ ...editStatusForm, tiktok_publish_date: e.target.value })}
-                          style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', outline: 'none', colorScheme: 'dark', transition: 'all 0.2s ease', ...getDateInputStyle(editStatusForm.tiktok_publish_date) }}
+                          style={{ padding: '8px 10px', borderRadius: '8px', outline: 'none', transition: 'all 0.2s ease', ...getDateInputStyle(editStatusForm.tiktok_publish_date) }}
                         />
                       </div>
 
@@ -2009,10 +2010,11 @@ function ContentFlowHubPageContent() {
                           </button>
                         </div>
                         <input
+                          className="contentflow-release-date"
                           type="date"
                           value={editStatusForm.facebook_publish_date}
                           onChange={(e) => setEditStatusForm({ ...editStatusForm, facebook_publish_date: e.target.value })}
-                          style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', outline: 'none', colorScheme: 'dark', transition: 'all 0.2s ease', ...getDateInputStyle(editStatusForm.facebook_publish_date) }}
+                          style={{ padding: '8px 10px', borderRadius: '8px', outline: 'none', transition: 'all 0.2s ease', ...getDateInputStyle(editStatusForm.facebook_publish_date) }}
                         />
                       </div>
 
@@ -2063,10 +2065,11 @@ function ContentFlowHubPageContent() {
                           </button>
                         </div>
                         <input
+                          className="contentflow-release-date"
                           type="date"
                           value={editStatusForm.instagram_publish_date}
                           onChange={(e) => setEditStatusForm({ ...editStatusForm, instagram_publish_date: e.target.value })}
-                          style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', outline: 'none', colorScheme: 'dark', transition: 'all 0.2s ease', ...getDateInputStyle(editStatusForm.instagram_publish_date) }}
+                          style={{ padding: '8px 10px', borderRadius: '8px', outline: 'none', transition: 'all 0.2s ease', ...getDateInputStyle(editStatusForm.instagram_publish_date) }}
                         />
                       </div>
 

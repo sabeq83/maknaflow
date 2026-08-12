@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.21 — Proporsi Tanggal Rilis dan Kontras Brand (12/08/2026)
+- Batasi lebar field Tanggal Rilis modal ContentFlow menjadi 168px
+- Pastikan selected brand light theme menggunakan teks hijau gelap yang nyaman dibaca
+
 ## V2.14.20 — Kontras Tab Brand ContentFlow (12/08/2026)
 - Perkuat kontras tab Semua Akun dan nama brand pada light theme
 - Tambahkan state hover dan selected yang konsisten pada light/dark theme
