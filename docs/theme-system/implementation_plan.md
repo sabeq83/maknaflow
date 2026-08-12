@@ -876,4 +876,4 @@ Route detail dinilai menggunakan data staging yang tersedia tanpa melakukan aksi
 - [x] Selaraskan seluruh tombol aksi utama pada modal detail ContentFlow.
 - [x] Ganti surface, header, row, role badge, dan brand badge tabel User Management dengan token tema.
 - [x] Jalankan build lokal dan pemeriksaan visual light/dark.
-- [ ] Rilis patch dan deploy hanya ke Mac Mini dev.
+- [x] Rilis patch dan deploy hanya ke Mac Mini dev.
