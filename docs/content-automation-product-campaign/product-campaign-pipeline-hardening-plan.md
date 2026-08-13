@@ -796,6 +796,6 @@ Rollback:
 - [x] Verifikasi PM2 Dev, port 5020/7020, schema `dev`, pool 3.
 - [x] Jalankan smoke test flags, approval actions, dan recovery tanpa provider berbiaya.
 - [x] Konfirmasi tidak ada deploy Staging/Production.
-- [ ] Jalankan release patch non-interactive.
-- [ ] Verifikasi commit, tag, dan push branch kerja.
+- [x] Jalankan release patch non-interactive.
+- [x] Verifikasi commit, tag, dan push branch kerja.
 - [x] Jangan merge/push `main` pada tahap hardening tanpa keputusan setelah pilot.
