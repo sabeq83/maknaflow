@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.14.27 — Product Campaign Modal Refinement (13/08/2026)
+- Menampilkan seluruh Data Produk dengan status linked dan unlinked
+- Menambahkan binding Brand-Product serta affiliate routing saat schedule disimpan
+- Menambahkan tiga OPC preset Product Campaign berbasis metadata compatibility
+- Memisahkan Target Audience dan Visual Subject dengan source resolution
+- Menambahkan integration tests runbook dan deployment Mac Mini Dev
+
 ## V2.14.26 — Content Automation Product Campaign (13/08/2026)
 - Menambahkan alur Product Campaign berbasis OPC hingga checkpoint start frame dan approval
 - Menambahkan approval per item dan bulk serta produksi lanjutan TTS video FFmpeg

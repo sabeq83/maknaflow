@@ -84,7 +84,7 @@ assert.throws(()=>normalizeContentAutomation({
   }
 }),/creative, start_frames, atau none/);
 
-const normalizedProduct=normalizeContentAutomation({name:'Product Weekly',campaign_kind:'product_campaign',timezone:'Asia/Jakarta',frequency:'weekly',schedule:{weekday:1,hour:8,minute:0},operator_request:{planner:{planner_focus:'product_campaign',brand_id:'brand-1',product_id:'product-1',brand_product_id:'brand-product-1',product_name:'Brownies',product_description:'Brownies sehat tinggi serat',planner_count:6,platform:'tiktok'},selection:{mode:'all'},opc:{preset:'product_campaign_v1',workflow:{approval_mode:'start_frames',auto_sync_contentflow:true,enable_social_post:false}}}});
+const normalizedProduct=normalizeContentAutomation({name:'Product Weekly',campaign_kind:'product_campaign',timezone:'Asia/Jakarta',frequency:'weekly',schedule:{weekday:1,hour:8,minute:0},operator_request:{planner:{planner_focus:'product_campaign',brand_id:'brand-1',product_id:'product-1',brand_product_id:'brand-product-1',product_name:'Brownies',product_description:'Brownies sehat tinggi serat',target_audience:'Ibu bekerja usia 25–40',planner_count:6,platform:'tiktok'},selection:{mode:'all'},opc:{preset:'product_campaign_v1',basic_strategy:{target_demographic:'custom',target_demographic_custom:'Perempuan Indonesia usia 25–40'},workflow:{approval_mode:'start_frames',auto_sync_contentflow:true,enable_social_post:false}}}});
 assert.equal(normalizedProduct.campaign_kind,'product_campaign');
 assert.equal(normalizedProduct.product_id,'product-1');
 assert.equal(normalizedProduct.operator_request.production.approval_mode,'start_frames');
