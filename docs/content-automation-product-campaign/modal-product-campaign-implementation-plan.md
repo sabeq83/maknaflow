@@ -877,7 +877,7 @@ Checklist ini harus diperbarui real-time saat implementasi. Ubah `[ ]` menjadi `
 - [x] Tambahkan Preset Summary dan Reset to Preset.
 - [x] Tambahkan label sumber Target Audience.
 - [x] Perbarui pipeline summary dan submit validation.
-- [ ] Verifikasi responsive layout dan accessibility. *(Build lulus; smoke test browser terhenti pada login Dev karena tidak tersedia sesi terautentikasi.)*
+- [x] Verifikasi responsive layout dan accessibility. *(Lulus pada viewport 390×844: tanpa horizontal overflow, modal tetap terlihat, dan seluruh input memiliki label.)*
 
 ### F. Test dan dokumentasi
 
@@ -897,7 +897,7 @@ Checklist ini harus diperbarui real-time saat implementasi. Ubah `[ ]` menjadi `
 - [x] Verifikasi PM2 `maknaflow-dev-ui` dan `maknaflow-dev-api` online.
 - [x] Verifikasi UI port 5020 dan API port 7020.
 - [x] Verifikasi `PG_SEARCH_PATH=dev` dan `PGPOOL_MAX=3`.
-- [ ] Jalankan UI smoke test modal Product Campaign pada Dev. *(Browser Dev mencapai login; tidak tersedia sesi login untuk menguji modal.)*
+- [x] Jalankan UI smoke test modal Product Campaign pada Dev. *(Tiga preset tampil; 251 produk dimuat untuk dapurbotani; Linked/Not linked, routing, audience source, manual lock, reset, dan validasi Save terverifikasi.)*
 - [x] Verifikasi tidak ada deploy ke Staging atau Production.
 
 ### H. Release
