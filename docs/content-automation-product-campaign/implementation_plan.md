@@ -1202,6 +1202,7 @@ Checklist ini wajib diperbarui real-time oleh agent pelaksana. Ubah `[ ]` menjad
 - [x] Verifikasi remote build dan PM2 Dev tanpa polling SSH berulang.
 - [x] Verifikasi UI Dev port 5020 dan API Dev port 7020.
 - [x] Verifikasi seluruh query memakai database schema `dev` dan `PGPOOL_MAX=3`.
+- [x] Selesaikan parity image reference initial/Regen sebelum pilot provider 6 item.
 - [ ] Jalankan product pilot 6 item di Server Dev Mac Mini.
 - [ ] Verifikasi approval per item OPC.
 - [ ] Verifikasi bulk approval Content Automations.

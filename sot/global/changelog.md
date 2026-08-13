@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.30 — Perbaikan Parity Reference Start Frame OPC (14/08/2026)
+- Samakan payload T2I initial dan Regen melalui shared request builder
+- Gunakan active_photo Product Database sebagai reference canonical dan fail-closed pada product clip
+- Tambahkan audit fingerprint aman, regression test, dan deploy Mac Mini Dev
+
 ## V2.14.29 — Integrasi Preset dan Product Database Content Automation (14/08/2026)
 - Hubungkan OPC preset Content Automation ke Preset Manager dengan campaign kind eksplisit dan fallback kompatibel
 - Gunakan Product Database canonical untuk picker Content Automation dan Content Planner

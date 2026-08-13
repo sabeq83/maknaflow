@@ -156,19 +156,17 @@ export const POST = withTenantContext(async (req, { params }) => {
       }
     }
 
-    const t2iResult = await generateImage({
-      prompt: t2i_prompt,
-      model: imageModel,
-      aspect_ratio: campaign.aspect_ratio || '9:16',
-      reference_images: resolvedRefs.allReferences.length > 0 ? resolvedRefs.allReferences : undefined,
-      webhookOverride: brandProfile
-    });
+    const { buildOpcStartFrameRequest } = await import('../../../../../../../lib/opc-start-frame-request');
+    const { recordStartFrameRequestAudit } = await import('../../../../../../../lib/opc-start-frame-audit');
+    const builtRequest = await buildOpcStartFrameRequest({ campaign, item, clipIndex, prompt: t2i_prompt, origin: 'manual_regen', extraReferences: isCartoon ? resolvedRefs.allReferences : [] });
+    const t2iResult = await generateImage(builtRequest.providerRequest);
 
     if (!t2iResult?.task_id) {
       return NextResponse.json({ success: false, error: "Failed to submit T2I task to G-Labs" }, { status: 500 });
     }
 
     const t2iTaskId = t2iResult.task_id;
+    await recordStartFrameRequestAudit(builtRequest.audit, t2iTaskId);
     console.log(`[OPC Single SF Regen] T2I task ${t2iTaskId} submitted. Polling...`);
 
     let t2iCompleted = false;

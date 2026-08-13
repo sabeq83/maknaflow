@@ -51,6 +51,14 @@ Redeploy tag aplikasi sebelumnya hanya ke `~/maknaflow-dev`, kemudian reload PM2
 - `PG_SEARCH_PATH=dev`.
 - `PGPOOL_MAX=3`.
 - Dilarang menjalankan deploy Staging atau Production tanpa instruksi eksplisit.
+
+## OPC Start Frame Reference Audit
+
+- Foto aktif ditentukan oleh pointer `active_photo`; Product Picker, initial generation, dan Regen harus memiliki SHA-256 yang sama.
+- Initial dan Regen untuk item/clip/prompt yang sama harus menghasilkan `request_fingerprint` identik pada `opc_start_frame_request_audits`.
+- `reference_count=1` wajib untuk clip dengan `requires_product_reference=true`.
+- Error `PRODUCT_REFERENCE_UNAVAILABLE` harus memperbaiki sumber foto; jangan memaksa pure T2I.
+- Audit hanya boleh berisi hash, source field, origin, dan task ID—bukan Base64, prompt penuh, API key, atau cookie.
 # Product Campaign Pipeline Hardening
 
 ## Feature flags
