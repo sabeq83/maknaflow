@@ -93,7 +93,7 @@ assert.deepEqual(randomA, randomRetry);
 
 const oldToken = process.env.MAKNA_OPERATOR_API_TOKEN;
 const oldTenant = process.env.MAKNA_OPERATOR_TENANT_ID;
-Object.assign(process.env, loadStagingEnv());
+if (process.env.USE_EXISTING_TEST_DB !== 'true') Object.assign(process.env, loadStagingEnv());
 const { authenticateOperator } = await import('../lib/operator-auth.js');
 process.env.MAKNA_OPERATOR_API_TOKEN = 'operator-test-secret';
 process.env.MAKNA_OPERATOR_TENANT_ID = 'tenant_test';
@@ -114,7 +114,7 @@ await assert.rejects(
 const credentialToken = `credential-${crypto.randomUUID()}`;
 const credentialTenant = `test_operator_${Date.now().toString(36)}`;
 const credentialId = `opc_test_${Date.now().toString(36)}`;
-const client = new pg.Client({ host: process.env.PGHOST, port: Number(process.env.PGPORT), user: process.env.PGUSER, password: process.env.PGPASSWORD, database: process.env.PGDATABASE });
+const client = new pg.Client({ host: process.env.PGHOST, port: Number(process.env.PGPORT), user: process.env.PGUSER, password: process.env.PGPASSWORD, database: process.env.PGDATABASE, options: `-c search_path=${process.env.PG_SEARCH_PATH || 'public'}` });
 await client.connect();
 try {
   await client.query("INSERT INTO tenants (id, name, slug) VALUES ($1, 'Operator Test', $1)", [credentialTenant]);

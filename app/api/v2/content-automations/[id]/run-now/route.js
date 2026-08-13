@@ -4,6 +4,7 @@ import { createAutomationAuditEvent,createRunNow,getAutomation,updateRun } from 
 import { createOperatorJobFromRequest } from '@/lib/operator-job-service';
 import { calculateBackoff,classifyAutomationError,shouldRetry } from '@/lib/content-automation-retry';
 import { applyProductSnapshotToOperatorRequest,captureProductSnapshot } from '@/lib/content-automation-product-snapshot';
+import { assertProductCampaignEnabled } from '@/lib/content-automation-feature-flags';
 
 export async function POST(request,{params}){
   let run,schedule;
@@ -13,6 +14,7 @@ export async function POST(request,{params}){
     const {id}=await params;
     schedule=await getAutomation(id);
     if(!schedule)return NextResponse.json({success:false,error:'Not found'},{status:404});
+    if(schedule.campaign_kind==='product_campaign')await assertProductCampaignEnabled({execution:true,tenantId:user.tenantId});
     run=await createRunNow(schedule);
     let payload=typeof schedule.operator_request_json==='string'?JSON.parse(schedule.operator_request_json):schedule.operator_request_json;
     if((schedule.campaign_kind||payload?.planner?.planner_focus)==='product_campaign'){

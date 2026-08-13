@@ -38,3 +38,44 @@ Redeploy tag aplikasi sebelumnya hanya ke `~/maknaflow-dev`, kemudian reload PM2
 - `PG_SEARCH_PATH=dev`.
 - `PGPOOL_MAX=3`.
 - Dilarang menjalankan deploy Staging atau Production tanpa instruksi eksplisit.
+# Product Campaign Pipeline Hardening
+
+## Feature flags
+
+- `content_automation_product_campaign_enabled`: mengizinkan pembuatan schedule Product Campaign untuk tenant.
+- `content_automation_product_campaign_pilot_enabled`: mengizinkan `run-now` dan dispatch scheduler Product Campaign.
+- Brand Editorial tidak dipengaruhi kedua flag tersebut.
+- Emergency stop: matikan flag pilot lebih dahulu; worker tidak akan membuat operator job baru.
+
+## Durable start-frame worker
+
+Worker menyimpan satu manifest per item, clip, tipe asset, dan revision di `pillar_campaign_item_assets`. Status normal:
+
+`queued → processing → provider_processing → completed`
+
+Kegagalan retryable menjadi `retry_wait`; lease kedaluwarsa dipulihkan otomatis. Maksimal lima attempt sebelum `failed`. Restart service aman karena `provider_task_id`, request, attempt, dan lease tersimpan di PostgreSQL.
+
+## Review actions
+
+Endpoint canonical: `POST /api/v2/pillar-campaigns/items/:itemId/review-action` dengan `action` berupa `approve`, `hold`, `resume`, atau `reject`. Selalu kirim `review_revision` dan header `Idempotency-Key`. `hold` dan `reject` wajib memiliki alasan. Endpoint approve lama tetap menjadi compatibility wrapper.
+
+## Production stage ledger
+
+TTS, video submission, FFmpeg/upload, dan ContentFlow memakai `pillar_campaign_stage_executions`. Idempotency key mengandung tenant, item, stage, dan revision. Jangan menghapus ledger saat recovery; lepaskan lease atau biarkan lease expire.
+
+## Pemeriksaan Dev tanpa provider berbayar
+
+1. Pastikan feature flag enabled/pilot dapat diubah Admin tenant.
+2. Pastikan tenant lain tidak ikut berubah.
+3. Verifikasi create/run Product Campaign ditolak ketika flag terkait off.
+4. Uji hold/resume/reject pada item fixture; jangan approve fixture yang akan memicu provider.
+5. Sisipkan asset fixture ber-lease kedaluwarsa lalu jalankan recovery; pastikan menjadi `retry_wait`.
+6. Periksa log JSON dan pastikan token/API key ter-redaksi.
+
+## Rollback Dev
+
+1. Matikan `content_automation_product_campaign_pilot_enabled`.
+2. Tunggu stage yang sedang claimed selesai atau lease expire.
+3. Deploy tag patch sebelumnya ke `~/maknaflow-dev`.
+4. Jangan menghapus asset manifest, review action ledger, atau stage execution ledger.
+5. Jangan melakukan deployment Staging/Production dalam rangkaian hardening ini.

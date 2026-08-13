@@ -551,6 +551,8 @@ CONTENT_AUTOMATION_LEASE_MS=60000
 - [x] Fase 2B: implementasikan notification outbox dan provider Telegram pilot.
 - [x] Fase 2C: implementasikan calendar view dan run-health UI.
 - [ ] Fase 2D: hardening, test, observability, serta pilot Windows.
+  - [x] Pipeline hardening Product Campaign: tenant flags, durable start-frame, review state machine, stage ledger, dan redacted structured logging.
+  - [ ] Pilot provider/Windows dijalankan terpisah setelah hardening Dev disetujui.
 
 ### Fase 3 — Multi-node dan Governance
 

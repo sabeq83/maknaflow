@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
-import { approvePillarCampaignItem } from '@/lib/pillar-campaign-approval';
+import { approvePillarCampaignItem, transitionPillarReview } from '@/lib/pillar-campaign-approval';
 
 import { withTenantContext } from '@/lib/auth';
 
 export const POST = withTenantContext(async (request, { params }, user) => {
   try {
     const { itemId } = await params;
-    const result = await approvePillarCampaignItem(itemId, { ...(await request.json()), actor_id: user.id });
+    const body = await request.json();
+    const result = body.only_save
+      ? await approvePillarCampaignItem(itemId, { ...body, actor_id: user.id })
+      : await transitionPillarReview({ itemId, action: 'approve', reviewRevision: body.review_revision, actorId: user.id, idempotencyKey: request.headers.get('idempotency-key') || `legacy-approve:${itemId}:${body.review_revision}`, changes: body });
     return NextResponse.json({
       success: true,
       ...result,

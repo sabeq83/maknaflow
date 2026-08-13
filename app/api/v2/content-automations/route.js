@@ -3,6 +3,7 @@ import { withTenantContext } from '@/lib/auth';
 import { normalizeContentAutomation } from '@/lib/content-automation-contract';
 import { createAutomation, createAutomationAuditEvent, listAutomations, listNotifications, listRuns } from '@/lib/content-automation-repository';
 import { prepareProductCampaignSchedule } from '@/lib/content-automation-binding-service';
+import { assertProductCampaignEnabled } from '@/lib/content-automation-feature-flags';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,6 +23,7 @@ export const GET = withTenantContext(async (request, _context, user) => {
 export const POST = withTenantContext(async (request, _context, user) => {
   try {
     const body = await request.json();
+    if (body.campaign_kind === 'product_campaign') await assertProductCampaignEnabled({ tenantId: user.tenantId });
     const prepared = body.campaign_kind === 'product_campaign' ? await prepareProductCampaignSchedule(body) : { body, bindingAction: null, binding: null };
     const data = normalizeContentAutomation(prepared.body);
     const schedule = await createAutomation(data, user.id);

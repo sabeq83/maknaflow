@@ -85,6 +85,16 @@ export async function register() {
       console.log('ℹ️  Content Automation Worker disabled by environment.');
     }
 
+    if (backgroundServicesEnabled && process.env.ENABLE_START_FRAME_WORKER !== 'false') {
+      try {
+        const { startStartFrameWorker } = await import('./lib/start-frame-worker.js');
+        startStartFrameWorker();
+        console.log('🖼️ Durable Start Frame Worker started.');
+      } catch (err) {
+        console.error('❌ Failed to start Start Frame Worker:', err.message);
+      }
+    }
+
     if (backgroundServicesEnabled && process.env.ENABLE_CONTENT_AUTOMATION_NOTIFICATIONS !== 'false') {
       try {
         const { startContentAutomationNotificationWorker } = await import('./lib/content-automation-notification-worker.js');

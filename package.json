@@ -1,6 +1,6 @@
 {
   "name": "maknaflow",
-  "version": "2.14.27",
+  "version": "2.14.28",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack -p 3005",
@@ -27,6 +27,8 @@
     "test:content-automation": "node scripts/test-content-automation.mjs",
     "test:content-automation:product": "node scripts/test-content-automation-product.mjs",
     "test:content-automation:product-integration": "node scripts/test-content-automation-product-integration.mjs",
+    "test:content-automation:hardening": "node scripts/test-content-automation-hardening.mjs",
+    "test:content-automation:hardening-integration": "node scripts/test-content-automation-hardening-integration.mjs",
     "test:content-automation:phase2": "node scripts/test-content-automation-phase2.mjs",
     "test:content-automation:phase2d": "node scripts/test-content-automation-phase2d.mjs",
     "test:phase-1-2": "node scripts/test-phase-1-2.mjs",

@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.14.28 — Product Campaign Pipeline Hardening (13/08/2026)
+- Tenant-scoped Product Campaign feature flags dan admin controls
+- Durable start-frame worker dengan lease, retry, dan recovery
+- Review state machine dan idempotent production stage ledger
+- Structured events, redaction tests, dan Dev runbook
+
 ## V2.14.27 — Product Campaign Modal Refinement (13/08/2026)
 - Menampilkan seluruh Data Produk dengan status linked dan unlinked
 - Menambahkan binding Brand-Product serta affiliate routing saat schedule disimpan

@@ -3,7 +3,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { getRun, updateRun } from '@/lib/content-automation-repository';
 import { appendOperatorJobEvent, getDb, getOperatorJob } from '@/lib/db';
 import { buildOperatorReviewArtifact } from '@/lib/operator-review-artifact';
-import { approvePillarCampaignItemUnchanged } from '@/lib/pillar-campaign-approval';
+import { transitionPillarReview } from '@/lib/pillar-campaign-approval';
 
 export async function POST(request, { params }) {
   try {
@@ -26,7 +26,7 @@ export async function POST(request, { params }) {
     const approved = [], blocked = [];
     for (const item of targets) {
       try {
-        await approvePillarCampaignItemUnchanged(item.id, { review_revision: review.revision, actor_id: user.id });
+        await transitionPillarReview({ itemId: item.id, action: 'approve', reviewRevision: review.revision, actorId: user.id, idempotencyKey: `automation-bulk:${run.id}:${review.revision}:${item.id}:approve` });
         approved.push(item.id);
       } catch (error) {
         blocked.push({ id: item.id, code: error.code, message: error.message });

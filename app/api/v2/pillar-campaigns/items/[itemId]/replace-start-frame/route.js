@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getDb, updatePillarCampaignItem } from '../../../../../../../lib/db';
 import fs from 'fs';
 import path from 'path';
+import { recordCompletedStartFrameAsset } from '@/lib/pillar-start-frame-service';
 
 import { withTenantContext } from '@/lib/auth';
 
@@ -89,6 +90,7 @@ export const POST = withTenantContext(async (req, { params }) => {
 
       await updatePillarCampaignItem(itemId, updates);
     })();
+    await recordCompletedStartFrameAsset(itemId, { clipIndex, localPath: relativeStartFramePath });
 
     const localUrl = `${relativeStartFramePath}?t=${Date.now()}`;
     return NextResponse.json({
