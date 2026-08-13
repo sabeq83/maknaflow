@@ -54,6 +54,8 @@ assert.equal(cleaned.caption,'');
 assert.equal(containsAiDirectiveLeak(cleaned,directive),false);
 const normalized=normalizeContentAutomation({name:'Nutribake Weekly',timezone:'Asia/Jakarta',frequency:'weekly',schedule:{weekday:1,hour:8,minute:0},operator_request:{planner:{planner_focus:'brand_editorial',account_name:'nutribake',brand_context:'Edukasi hidup sehat',pillars:['Healthy Breakfast'],planner_count:1,platform:'tiktok'},selection:{mode:'all'},opc:{preset:'nutribake_editorial_v1',workflow:{approval_mode:'storyboard',enable_social_post:false}}}});
 assert.equal(normalized.operator_request.production.scheduler_pause_at,'tts');
+assert.equal(normalized.operator_request.production.approval_mode,'creative');
+assert.equal(normalized.campaign_kind,'brand_editorial');
 assert.equal(normalized.operator_request.production.enable_social_post,false);
 assert.equal(normalized.missed_run_policy,'skip');
 assert.deepEqual(normalized.retry_policy,{max_attempts:3,base_seconds:60,max_seconds:900});
@@ -80,5 +82,12 @@ assert.throws(()=>normalizeContentAutomation({
     selection:{mode:'all'},
     opc:{preset:'nutribake_editorial_v1',workflow:{approval_mode:'invalid_mode',enable_social_post:false}}
   }
-}),/storyboard atau none/);
+}),/creative, start_frames, atau none/);
+
+const normalizedProduct=normalizeContentAutomation({name:'Product Weekly',campaign_kind:'product_campaign',timezone:'Asia/Jakarta',frequency:'weekly',schedule:{weekday:1,hour:8,minute:0},operator_request:{planner:{planner_focus:'product_campaign',brand_id:'brand-1',product_id:'product-1',brand_product_id:'brand-product-1',product_name:'Brownies',product_description:'Brownies sehat tinggi serat',planner_count:6,platform:'tiktok'},selection:{mode:'all'},opc:{preset:'product_campaign_v1',workflow:{approval_mode:'start_frames',auto_sync_contentflow:true,enable_social_post:false}}}});
+assert.equal(normalizedProduct.campaign_kind,'product_campaign');
+assert.equal(normalizedProduct.product_id,'product-1');
+assert.equal(normalizedProduct.operator_request.production.approval_mode,'start_frames');
+assert.equal(normalizedProduct.operator_request.production.preproduction_checkpoint,'start_frames');
+assert.equal(normalizedProduct.operator_request.production.auto_sync_contentflow,true);
 console.log('Content automation schedule and contract tests passed.');

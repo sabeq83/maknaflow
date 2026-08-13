@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.14.26 — Content Automation Product Campaign (13/08/2026)
+- Menambahkan alur Product Campaign berbasis OPC hingga checkpoint start frame dan approval
+- Menambahkan approval per item dan bulk serta produksi lanjutan TTS video FFmpeg
+- Menambahkan sinkronisasi ContentFlow independen dan UI pemilihan brand-product
+- Menambahkan dokumentasi implementasi prompt Antigravity dan mockup UI
+- Deploy terverifikasi hanya pada Mac Mini Dev schema dev
+
 ## V2.14.25 — Perbaikan Bug Ganti Foto Produk (13/08/2026)
 - Memperbaiki runtime crash TypeError akibat salah import validateRawProductImage di backend
 - Menormalkan tipe upload cleaned menjadi clean di frontend dan backend

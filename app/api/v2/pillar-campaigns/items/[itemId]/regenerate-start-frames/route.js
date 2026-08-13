@@ -3,6 +3,7 @@ import { getDb, updatePillarCampaignItem, getSetting } from '../../../../../../.
 import { generateImage, getTaskStatus, getFileUrl } from '../../../../../../../lib/webhook-client';
 import fs from 'fs';
 import path from 'path';
+import { refreshStartFrameCheckpoint } from '@/lib/pillar-start-frame-service';
 
 import { withTenantContext } from '@/lib/auth';
 
@@ -269,6 +270,7 @@ async function runItemRegenerateStartFramesBackground(itemId, campaign, item, ne
       regenerate_start_frames_status: null,
       regenerate_start_frames_progress: null
     });
+    await refreshStartFrameCheckpoint(itemId);
     console.log(`[OPC SF Regen] Item ${itemId} start frame regeneration finished successfully.`);
   } catch (err) {
     console.error(`[OPC SF Regen] Error:`, err.message);

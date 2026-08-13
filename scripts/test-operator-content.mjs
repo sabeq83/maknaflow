@@ -43,6 +43,7 @@ const nutribakeRequest = {
 const normalized = normalizeOperatorContentRequest(nutribakeRequest);
 assert.equal(normalized.planner.planner_count, 7);
 assert.equal(normalized.production.scheduler_pause_at, 'tts');
+assert.equal(normalized.production.approval_mode, 'creative');
 assert.equal(normalized.production.enable_social_post, false);
 assert.equal(normalized.selection.mode, 'all');
 assert.equal(
@@ -76,6 +77,7 @@ const v2 = normalizeOperatorContentRequest({
 assert.equal(v2.contract_version, '2');
 assert.equal(v2.production.target_demographic, 'ibu_rumah_tangga');
 assert.equal(v2.production.target_clips_count, 3);
+assert.equal(v2.production.approval_mode, 'creative');
 assert.equal(JSON.parse(v2.production.visual_overrides_json).wardrobe_style, 'sequential');
 assert.throws(() => normalizeOperatorContentRequest({
   planner: nutribakeRequest.planner,

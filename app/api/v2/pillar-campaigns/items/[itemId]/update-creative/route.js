@@ -97,7 +97,15 @@ export const PATCH = withTenantContext(async (request, { params }) => {
     }
 
     const updateFields = {
-      row_creative_payload: JSON.stringify(creativePayload)
+      row_creative_payload: JSON.stringify(creativePayload),
+      // Any creative mutation invalidates the immutable review/approval checkpoint.
+      review_revision: null,
+      approved_revision: null,
+      approved_at: null,
+      approved_by: null,
+      start_frame_status: 'pending',
+      start_frame_completed_count: 0,
+      workflow_status: 'creative_processing'
     };
 
     if (resetStatus) {

@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
-import { createRunNow,getAutomation,updateRun } from '@/lib/content-automation-repository';
+import { createAutomationAuditEvent,createRunNow,getAutomation,updateRun } from '@/lib/content-automation-repository';
 import { createOperatorJobFromRequest } from '@/lib/operator-job-service';
 import { calculateBackoff,classifyAutomationError,shouldRetry } from '@/lib/content-automation-retry';
+import { applyProductSnapshotToOperatorRequest,captureProductSnapshot } from '@/lib/content-automation-product-snapshot';
 
 export async function POST(request,{params}){
   let run,schedule;
@@ -13,7 +14,13 @@ export async function POST(request,{params}){
     schedule=await getAutomation(id);
     if(!schedule)return NextResponse.json({success:false,error:'Not found'},{status:404});
     run=await createRunNow(schedule);
-    const payload=typeof schedule.operator_request_json==='string'?JSON.parse(schedule.operator_request_json):schedule.operator_request_json;
+    let payload=typeof schedule.operator_request_json==='string'?JSON.parse(schedule.operator_request_json):schedule.operator_request_json;
+    if((schedule.campaign_kind||payload?.planner?.planner_focus)==='product_campaign'){
+      const snapshot=await captureProductSnapshot({brandProfileId:schedule.brand_profile_id||payload.planner.brand_id,productId:schedule.product_id||payload.planner.product_id,brandProductId:schedule.brand_product_id||payload.planner.brand_product_id});
+      payload=applyProductSnapshotToOperatorRequest(payload,snapshot);
+      await updateRun(run.id,{campaign_kind:'product_campaign',product_snapshot_json:JSON.stringify(snapshot)});
+      await createAutomationAuditEvent({tenantId:user.tenantId,type:'product_snapshot_captured',scheduleId:schedule.id,runId:run.id,event:{product_id:snapshot.product_id,brand_product_id:snapshot.brand_product_id,sha256:snapshot.sha256}});
+    }
     const job=await createOperatorJobFromRequest({request:payload,idempotencyKey:run.idempotency_key,actor:`automation-run-now:${user.id}`});
     await updateRun(run.id,{operator_job_id:job.id,status:'job_created'});
     return NextResponse.json({success:true,run_id:run.id,operator_job_id:job.id});

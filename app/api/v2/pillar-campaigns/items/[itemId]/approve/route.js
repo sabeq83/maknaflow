@@ -3,10 +3,10 @@ import { approvePillarCampaignItem } from '@/lib/pillar-campaign-approval';
 
 import { withTenantContext } from '@/lib/auth';
 
-export const POST = withTenantContext(async (request, { params }) => {
+export const POST = withTenantContext(async (request, { params }, user) => {
   try {
     const { itemId } = await params;
-    const result = await approvePillarCampaignItem(itemId, await request.json());
+    const result = await approvePillarCampaignItem(itemId, { ...(await request.json()), actor_id: user.id });
     return NextResponse.json({
       success: true,
       ...result,
