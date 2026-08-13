@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.25 — Perbaikan Bug Ganti Foto Produk (13/08/2026)
+- Memperbaiki runtime crash TypeError akibat salah import validateRawProductImage di backend
+- Menormalkan tipe upload cleaned menjadi clean di frontend dan backend
+
 ## V2.14.24 — Perbaikan UI Database Produk (13/08/2026)
 - Meningkatkan kontras warna tombol Re-Enrich AI dan Re-Gen Photo dengan semantic CSS tokens
 - Membatasi lebar maksimal search box produk agar lebih serasi dan tidak terlalu panjang

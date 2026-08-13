@@ -4,7 +4,8 @@ import fs from 'fs';
 import { withTenantContext } from '@/lib/auth';
 import { getActiveTenantId } from '@/lib/tenant-context';
 import { getProductById, updateProduct } from '@/lib/product-repository';
-import { saveRawProductImage, saveCleanProductImage, validateRawProductImage } from '@/lib/product-image-storage';
+import { saveRawProductImage, saveCleanProductImage } from '@/lib/product-image-storage';
+import { validateRawProductImage } from '@/lib/product-validation';
 
 export const dynamic = 'force-dynamic';
 
@@ -78,9 +79,9 @@ export const POST = withTenantContext(async (request) => {
       return NextResponse.json({ success: false, error: 'Missing file, productId, or type' }, { status: 400 });
     }
 
-    // Pada pipeline baru: hanya 'raw' dan 'clean' yang valid
+    // Pada pipeline baru: hanya 'raw', 'clean', dan alias 'cleaned' yang valid
     // 'generated' dan 'studio' tidak lagi diterima
-    const validTypes = ['raw', 'clean'];
+    const validTypes = ['raw', 'clean', 'cleaned'];
     if (!validTypes.includes(type)) {
       return NextResponse.json({
         success: false,
@@ -113,7 +114,7 @@ export const POST = withTenantContext(async (request) => {
       updateData.raw_photo_sha256 = stored.sha256;
       // Setelah replace raw, tandai foto perlu review
       updateData.photo_status = 'needs_review';
-    } else if (type === 'clean') {
+    } else if (type === 'clean' || type === 'cleaned') {
       stored = await saveCleanProductImage({ tenantId, productId, buffer, mimeType });
       updateData.clean_photo_url = stored.relativePath;
       updateData.cleaned_photo_url = stored.relativePath; // mirror compatibility

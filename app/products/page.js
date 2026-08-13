@@ -355,7 +355,8 @@ export default function ProductDatabasePage() {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('productId', productId);
-    formData.append('type', tabType);
+    // Normalkan 'cleaned' ke 'clean' agar selaras dengan spesifikasi API
+    formData.append('type', tabType === 'cleaned' ? 'clean' : tabType);
 
     try {
       const res = await fetch('/api/v2/products/image', {
