@@ -729,6 +729,6 @@ Tujuan: troubleshooting preset/product source dan rollback.
 - [x] Smoke test Preset Manager, Product Picker, binding, dan Save paused tanpa provider call.
 - [x] Pastikan pilot flag tetap off selama smoke test.
 - [x] Konfirmasi tidak ada deployment Staging/Production.
-- [ ] Jalankan release patch non-interactive.
-- [ ] Verifikasi commit, tag, dan push branch kerja.
-- [ ] Jangan merge/push `main` tanpa instruksi lanjutan pengguna.
+- [x] Jalankan release patch non-interactive.
+- [x] Verifikasi commit, tag, dan push branch kerja.
+- [x] Jangan merge/push `main` tanpa instruksi lanjutan pengguna.
