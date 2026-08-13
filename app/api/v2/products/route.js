@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import { withTenantContext } from '@/lib/auth';
 import { getActiveTenantId } from '@/lib/tenant-context';
-import { createProduct, listProducts, updateProduct } from '@/lib/product-repository';
+import { createProduct, updateProduct } from '@/lib/product-repository';
 import {
   parseProductMultipart,
   validateSingleProductCreate,
@@ -10,6 +10,7 @@ import {
 } from '@/lib/product-validation';
 import { saveRawProductImage } from '@/lib/product-image-storage';
 import { pgQuery } from '@/lib/db-pg';
+import { listProductCatalog } from '@/lib/product-catalog-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,7 +20,8 @@ export const GET = withTenantContext(async (request) => {
     const search = searchParams.get('search') || '';
     const category = searchParams.get('category') || '';
 
-    let products = await listProducts({ search, category });
+    const catalog = await listProductCatalog({ search, category, cursor: searchParams.get('cursor'), limit: searchParams.get('limit') || 100 });
+    let products = catalog.data;
 
     // Rewrite photo_urls: hanya proxy path lokal, jangan bungkus URL eksternal
     products = products.map(p => {
@@ -50,6 +52,7 @@ export const GET = withTenantContext(async (request) => {
     return NextResponse.json({
       success: true,
       data: products,
+      pagination: catalog.pagination,
       scraping_count: scrapingCount
     });
   } catch (error) {

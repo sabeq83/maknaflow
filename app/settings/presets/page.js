@@ -46,6 +46,7 @@ const MINIMAX_ENGLISH_VOICES = [
 const initialForm = {
   key: '',
   label: '',
+  campaign_kinds: ['brand_editorial'],
   // Section 1: basic_strategy
   narrative_mode: 'Storytelling',
   target_language: 'id-ID',
@@ -108,6 +109,7 @@ function mapPresetToForm(p) {
   return {
     key: p.key || '',
     label: p.label || c.label || p.key || '',
+    campaign_kinds: p.campaign_kinds || c.campaign_kinds || ['brand_editorial'],
     // basic_strategy
     narrative_mode: bs.narrative_mode || 'Storytelling',
     target_language: bs.target_language || 'id-ID',
@@ -167,6 +169,7 @@ function mapFormToPayload(f) {
     config: {
       schema_version: '2',
       label: f.label,
+      campaign_kinds: f.campaign_kinds,
       basic_strategy: {
         narrative_mode: f.narrative_mode,
         voice_provider: f.voice_provider,
@@ -302,6 +305,7 @@ export default function PresetsPage() {
   const handleSave = async (e) => {
     e.preventDefault();
     if (!form.key || !form.label) return setMessage('Key dan Label wajib diisi.');
+    if (!form.campaign_kinds.length) return setMessage('Pilih minimal satu jenis campaign.');
     setBusy(true);
     try {
       const body = mapFormToPayload(form);
@@ -370,6 +374,7 @@ export default function PresetsPage() {
                       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
                         Key: <code style={{ color: 'var(--accent-color)' }}>{p.key}</code> · Revision: {p.revision} · Type: {p.is_system ? 'System (Read-only)' : 'Custom'}
                       </div>
+                      <div style={{display:'flex',gap:6,marginTop:7,flexWrap:'wrap'}}>{(p.campaign_kinds||[]).map(kind=><span key={kind} style={{fontSize:11,padding:'3px 7px',borderRadius:12,background:'var(--status-info-soft)'}}>{kind==='product_campaign'?'Product Campaign':'Brand Editorial'}</span>)}{p.campaign_kinds_source==='inferred'&&<span style={{fontSize:11,color:'var(--warning)'}}>⚠ Inferred — Edit & Save untuk konfirmasi</span>}</div>
                     </div>
                     <div style={{ display: 'flex', gap: 8 }}>
                       {p.is_system ? (
@@ -417,6 +422,7 @@ export default function PresetsPage() {
                   />
                 </label>
               </div>
+              <fieldset style={{marginTop:16,border:'1px solid var(--border-color)',borderRadius:8,padding:12}}><legend>Digunakan untuk Campaign</legend><div style={{display:'flex',gap:18,flexWrap:'wrap'}}>{[['brand_editorial','Brand Editorial'],['product_campaign','Product Campaign']].map(([kind,label])=><label key={kind} style={{display:'flex',gap:7,alignItems:'center'}}><input type="checkbox" checked={form.campaign_kinds.includes(kind)} onChange={event=>setForm({...form,campaign_kinds:event.target.checked?[...new Set([...form.campaign_kinds,kind])]:form.campaign_kinds.filter(value=>value!==kind)})}/>{label}</label>)}</div>{form.campaign_kinds.length===0&&<small style={{color:'var(--status-danger)'}}>Pilih minimal satu jenis campaign.</small>}</fieldset>
             </div>
 
             {/* Accordion Panels */}

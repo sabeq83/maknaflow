@@ -3,8 +3,12 @@ import { tenantContext } from '../lib/tenant-context.js';
 import { listEligibleAutomationProducts } from '../lib/content-automation-product-snapshot.js';
 import { ensureAutomationProductBinding } from '../lib/content-automation-binding-service.js';
 import { pgQuery } from '../lib/db-pg.js';
+import { listProductCatalog, listBindingSummaries } from '../lib/product-catalog-service.js';
 
 await tenantContext.run('default_tenant', async () => {
+  const catalog = await listProductCatalog({ limit: 10 });
+  assert.ok(catalog.data.length > 0, 'Katalog produk harus dapat dimuat tanpa Brand Profile.');
+  assert.equal(typeof catalog.pagination.has_more, 'boolean');
   const brand = (await pgQuery("SELECT id FROM brand_profiles WHERE tenant_id=$1 ORDER BY brand_name LIMIT 1", ['default_tenant'])).rows[0];
   assert.ok(brand?.id, 'Dev fixture membutuhkan minimal satu Brand Profile.');
   const result = await listEligibleAutomationProducts({ brandProfileId: brand.id });
@@ -13,6 +17,8 @@ await tenantContext.run('default_tenant', async () => {
   assert.ok(result.products.length > 0, 'Katalog harus memuat Data Produk tenant, termasuk unlinked.');
   const unlinked = result.products.find(product => !product.brand_product_id);
   assert.ok(unlinked, 'Dev fixture harus memiliki minimal satu produk unlinked.');
+  const summaries = await listBindingSummaries({ brandProfileId: brand.id, productIds: catalog.data.map(product => product.id) });
+  assert.equal(summaries instanceof Map, true);
   await assert.rejects(() => ensureAutomationProductBinding({ brandProfileId: brand.id, productId: unlinked.product_id, bindingInput: { product_id: 'different-product' } }), /tidak konsisten/);
   let created;
   try {

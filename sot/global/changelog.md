@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.29 — Integrasi Preset dan Product Database Content Automation (14/08/2026)
+- Hubungkan OPC preset Content Automation ke Preset Manager dengan campaign kind eksplisit dan fallback kompatibel
+- Gunakan Product Database canonical untuk picker Content Automation dan Content Planner
+- Tambahkan migrasi Dev, regression tests, runbook, dan deploy Mac Mini Dev
+
 ## V2.14.28 — Product Campaign Pipeline Hardening (13/08/2026)
 - Tenant-scoped Product Campaign feature flags dan admin controls
 - Durable start-frame worker dengan lease, retry, dan recovery

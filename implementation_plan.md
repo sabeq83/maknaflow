@@ -552,6 +552,7 @@ CONTENT_AUTOMATION_LEASE_MS=60000
 - [x] Fase 2C: implementasikan calendar view dan run-health UI.
 - [ ] Fase 2D: hardening, test, observability, serta pilot Windows.
   - [x] Pipeline hardening Product Campaign: tenant flags, durable start-frame, review state machine, stage ledger, dan redacted structured logging.
+  - [x] Integrasikan Content Automation ke Preset Manager dan katalog Product Database canonical; sinkronkan picker Content Planner.
   - [ ] Pilot provider/Windows dijalankan terpisah setelah hardening Dev disetujui.
 
 ### Fase 3 — Multi-node dan Governance

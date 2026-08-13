@@ -4,16 +4,29 @@
 
 - `product_extractions`: katalog utama Data Produk tenant.
 - `brand_products`: binding Brand Profile, affiliate routing, tracking, CTA, dan status aktif.
-- OPC preset: konfigurasi creative/visual/production; hanya preset dengan `campaign_kinds` sesuai yang muncul.
+- `/api/v2/products`: endpoint katalog produk canonical untuk Content Automation dan Content Planner.
+- `product-options`: compatibility wrapper yang menambahkan ringkasan binding bila Brand Profile dipilih; pemuatan katalog tidak bergantung pada Brand Profile.
+- OPC preset: konfigurasi creative/visual/production dari Preset Manager. Preset baru wajib menyimpan `campaign_kinds` secara eksplisit.
+
+Preset lama tanpa `campaign_kinds` tetap kompatibel melalui inference deterministik. Jalankan migrasi metadata hanya pada schema target:
+
+```bash
+node scripts/migrate-operator-preset-campaign-kinds.mjs
+node scripts/migrate-operator-preset-campaign-kinds.mjs --apply
+```
+
+Selalu review output dry-run sebelum `--apply`. Untuk perubahan manual, buka `/settings/presets`; badge menunjukkan `explicit`, `inferred`, atau `system`.
 
 ## Troubleshooting dropdown Produk
 
-1. Pastikan Brand Profile telah dipilih.
-2. Periksa `GET /api/v2/content-automations/product-options?brand_profile_id=...`.
+1. Periksa `GET /api/v2/products?limit=50&search=...`; produk harus dapat dimuat tanpa Brand Profile.
+2. Bila Brand Profile dipilih, periksa `GET /api/v2/content-automations/product-options?brand_profile_id=...` untuk status binding.
 3. HTTP 401 berarti sesi login tidak tersedia.
 4. HTTP 403/404 berarti Brand Profile bukan milik tenant aktif.
 5. Respons sukses harus memuat `summary.total`, termasuk produk berstatus Not linked.
 6. Produk tanpa deskripsi diblokir dari Save karena snapshot run mensyaratkan nama dan deskripsi.
+
+Urutan modal Product Campaign adalah **OPC Preset → Produk → Brand Profile → Binding**. Perubahan Brand Profile tidak boleh menghapus produk yang sudah dipilih.
 
 ## Binding saat Save
 

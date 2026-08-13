@@ -90,9 +90,19 @@ export default function ContentPlannerDashboard() {
 
   useEffect(() => {
     fetchPlanners();
-    fetch('/api/product-agent').then(r => r.json()).then(d => { if (d.success) setExistingProducts(d.data || []); }).catch(() => {});
     fetch('/api/v2/brand-profiles').then(r => r.json()).then(d => { if (d.success) setBrandProfiles(d.data || []); }).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (plannerFocus !== 'product_campaign' || inputMode !== 'existing') return;
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      const query = new URLSearchParams({ limit: '100' });
+      if (productSearchQuery.trim()) query.set('search', productSearchQuery.trim());
+      fetch(`/api/v2/products?${query}`, { signal: controller.signal }).then(r => r.json()).then(d => { if (d.success) setExistingProducts(d.data || []); }).catch(error => { if (error.name !== 'AbortError') setExistingProducts([]); });
+    }, 250);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [plannerFocus, inputMode, productSearchQuery]);
 
   useEffect(() => {
     if (maxEditorialRowsPerPillar > 0 && editorialRowsPerPillar > maxEditorialRowsPerPillar) {
