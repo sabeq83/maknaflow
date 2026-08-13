@@ -1209,8 +1209,8 @@ Checklist ini wajib diperbarui real-time oleh agent pelaksana. Ubah `[ ]` menjad
 - [ ] Verifikasi automatic ContentFlow sync dan retry.
 - [x] Jalankan health check environment Dev yang relevan.
 - [x] Konfirmasi tidak ada deployment ke folder/port/schema Staging Mac Mini.
-- [ ] Perbarui changelog dan dokumentasi operasional.
-- [ ] Jalankan release non-interactive patch.
+- [x] Perbarui changelog dan dokumentasi operasional.
+- [x] Jalankan release non-interactive patch.
 - [ ] Verifikasi commit, tag, dan push `main`.
 - [x] Jangan deploy ke Server Staging Mac Mini.
 - [x] Jangan deploy Production tanpa perintah manual eksplisit.
