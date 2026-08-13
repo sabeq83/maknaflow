@@ -1016,7 +1016,7 @@ export default function ProductDatabasePage() {
           {/* Filters & Search Bar */}
           <div className="card" style={{ padding: '16px 20px', marginBottom: '24px' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
-              <div style={{ flex: 1, minWidth: '280px', position: 'relative' }}>
+              <div style={{ flex: '1 1 320px', maxWidth: '480px', position: 'relative' }}>
                 <input
                   type="text"
                   className="form-input"
@@ -1130,9 +1130,9 @@ export default function ProductDatabasePage() {
                       onClick={handleBulkReEnrich}
                       disabled={regeneratingTruths}
                       style={{
-                        background: 'linear-gradient(135deg, #0984e3 0%, #74b9ff 100%)',
+                        background: 'var(--btn-bulk-enrich-bg)',
                         border: 'none',
-                        color: 'var(--text-primary)',
+                        color: 'var(--btn-bulk-enrich-text)',
                         fontSize: '0.75rem',
                         fontWeight: 600,
                         padding: '6px 12px',
@@ -1158,9 +1158,9 @@ export default function ProductDatabasePage() {
                       onClick={handleBulkRegeneratePhotos}
                       disabled={regeneratingPhotos}
                       style={{
-                        background: 'linear-gradient(135deg, #ffa502 0%, #ff7f50 100%)',
+                        background: 'var(--btn-bulk-photo-bg)',
                         border: 'none',
-                        color: 'var(--text-primary)',
+                        color: 'var(--btn-bulk-photo-text)',
                         fontSize: '0.75rem',
                         fontWeight: 600,
                         padding: '6px 12px',
@@ -1773,14 +1773,14 @@ export default function ProductDatabasePage() {
                         style={{
                           flex: 1,
                           background: (p.clean_photo_url || p.cleaned_photo_url)
-                            ? 'linear-gradient(135deg, rgba(255, 127, 80, 0.2) 0%, rgba(255, 165, 0, 0.2) 100%)'
-                            : 'linear-gradient(135deg, var(--status-neutral-soft) 0%, rgba(168, 85, 247, 0.2) 100%)',
+                            ? 'var(--btn-photo-bg)'
+                            : 'var(--btn-photo-neutral-bg)',
                           border: (p.clean_photo_url || p.cleaned_photo_url)
-                            ? '1px solid rgba(255, 127, 80, 0.4)'
-                            : '1px solid var(--status-neutral-soft)',
+                            ? '1px solid var(--btn-photo-border)'
+                            : '1px solid var(--btn-photo-neutral-border)',
                           color: (p.clean_photo_url || p.cleaned_photo_url)
-                            ? 'var(--btn-clean-photo-text, var(--text-primary))'
-                            : 'var(--btn-gen-photo-text, var(--text-primary))',
+                            ? 'var(--btn-photo-text)'
+                            : 'var(--btn-photo-neutral-text)',
                           fontSize: '0.7rem',
                           fontWeight: 600,
                           padding: '6px 8px',
@@ -1809,9 +1809,9 @@ export default function ProductDatabasePage() {
                         disabled={reEnrichingId === p.id || (p.enrichment_status && ['pending', 'processing'].includes(p.enrichment_status))}
                         style={{
                           flex: 1,
-                          background: 'linear-gradient(135deg, rgba(9, 132, 227, 0.2) 0%, rgba(116, 185, 255, 0.2) 100%)',
-                          border: '1px solid rgba(9, 132, 227, 0.4)',
-                          color: 'var(--btn-enrich-text, var(--text-primary))',
+                          background: 'var(--btn-enrich-bg)',
+                          border: '1px solid var(--btn-enrich-border)',
+                          color: 'var(--btn-enrich-text)',
                           fontSize: '0.7rem',
                           fontWeight: 600,
                           padding: '6px 8px',

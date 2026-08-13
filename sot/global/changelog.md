@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.24 — Perbaikan UI Database Produk (13/08/2026)
+- Meningkatkan kontras warna tombol Re-Enrich AI dan Re-Gen Photo dengan semantic CSS tokens
+- Membatasi lebar maksimal search box produk agar lebih serasi dan tidak terlalu panjang
+
 ## V2.14.23 — Badge Tanggal dan Filter Ringkas ContentFlow (13/08/2026)
 - Selaraskan badge tanggal selesai video dengan light dan dark theme
 - Perkecil pencarian Video ID dan filter produk menjadi 180px

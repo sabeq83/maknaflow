@@ -97,6 +97,27 @@
   --btn-clean-photo-text: var(--on-action-primary);
   --btn-gen-photo-text: var(--on-action-primary);
   --btn-enrich-text: var(--on-action-primary);
+
+  /* Tombol Re-Enrich AI (Biru/Info) */
+  --btn-enrich-bg: var(--status-info-soft);
+  --btn-enrich-border: color-mix(in srgb, var(--status-info) 30%, transparent);
+  --btn-enrich-text: var(--status-info);
+
+  /* Tombol Re-Gen Photo (Orange/Warning) */
+  --btn-photo-bg: var(--status-warning-soft);
+  --btn-photo-border: color-mix(in srgb, var(--status-warning) 30%, transparent);
+  --btn-photo-text: var(--status-warning);
+
+  /* Tombol Gen Photo Baru/Belum Ada (Ungu/Neutral) */
+  --btn-photo-neutral-bg: var(--status-neutral-soft);
+  --btn-photo-neutral-border: color-mix(in srgb, var(--status-neutral) 30%, transparent);
+  --btn-photo-neutral-text: var(--status-neutral);
+
+  /* Tombol Bulk Actions (Teks Putih Kontras di atas Solid Gradient) */
+  --btn-bulk-enrich-bg: linear-gradient(135deg, #0984e3 0%, #74b9ff 100%);
+  --btn-bulk-enrich-text: #ffffff;
+  --btn-bulk-photo-bg: linear-gradient(135deg, #ffa502 0%, #ff7f50 100%);
+  --btn-bulk-photo-text: #ffffff;
 }
 
 [data-theme='light'] {
