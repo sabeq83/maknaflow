@@ -902,7 +902,7 @@ Checklist ini harus diperbarui real-time saat implementasi. Ubah `[ ]` menjadi `
 
 ### H. Release
 
-- [ ] Perbarui changelog.
-- [ ] Jalankan release patch non-interactive sesuai SOP.
-- [ ] Verifikasi commit, tag, dan push remote.
-- [ ] Catat item yang belum diuji end-to-end bila memerlukan biaya layanan AI.
+- [x] Perbarui changelog.
+- [x] Jalankan release patch non-interactive sesuai SOP.
+- [x] Verifikasi commit, tag, dan push remote.
+- [x] Catat item yang belum diuji end-to-end bila memerlukan biaya layanan AI. *(Tidak ada generasi AI berbiaya yang dijalankan; UI smoke tertahan autentikasi.)*
