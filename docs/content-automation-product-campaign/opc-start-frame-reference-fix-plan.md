@@ -547,7 +547,7 @@ Tahap ini membutuhkan persetujuan biaya eksplisit terpisah:
 
 ### H. Release
 
-- [ ] Jalankan patch release non-interactive setelah verifikasi aman selesai.
-- [ ] Verifikasi commit, tag, dan push branch kerja.
-- [ ] Jangan merge/push `main` tanpa instruksi eksplisit.
-- [ ] Jangan deploy Production tanpa perintah manual eksplisit.
+- [x] Jalankan patch release non-interactive setelah verifikasi aman selesai.
+- [x] Verifikasi commit, tag, dan push branch kerja.
+- [x] Jangan merge/push `main` tanpa instruksi eksplisit.
+- [x] Jangan deploy Production tanpa perintah manual eksplisit.
