@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.14.36 — Perbaikan Clean Photo Reference OPC (14/08/2026)
+- Gunakan foto Clean sebagai referensi Phase 1 dan Regen
+- Validasi MIME byte length dan SHA payload Base64
+- Samakan shared request builder dan tambahkan product identity lock
+- Catat keterbatasan fidelity generatif G-Labs
+
 ## V2.14.35 — Perbaikan Canonical Product Reference OPC (14/08/2026)
 - Satukan resolver foto produk Phase 1 dan Regen
 - Kirim foto canonical hanya pada product clip

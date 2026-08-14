@@ -1919,3 +1919,900 @@ Verifikasi branch `main/local-staging` sesuai workflow repository, tag patch bar
 - [x] Deploy ke Mac Mini Dev dan lakukan smoke test shared request Phase 1/Regen klip 3 tanpa provider call.
 - [x] Verifikasi tidak ada product-reference leakage pada non-bridge clip melalui payload integration test.
 - [x] Jalankan release patch non-interaktif dan verifikasi tag/branch remote.
+
+---
+
+# Rencana Implementasi v2.14.36 — Clean Photo sebagai Reference Campaign OPC
+
+## 1. Ringkasan Keputusan
+
+Untuk start frame Product Campaign OPC, istilah **foto produk database** didefinisikan sebagai foto Clean yang ditampilkan dan dikelola oleh pipeline Product Database saat ini. Resolver campaign tidak lagi mengikuti `active_photo` bila field tersebut menunjuk `generated_photo_url` legacy.
+
+Urutan canonical khusus campaign:
+
+```text
+clean_photo_url
+→ cleaned_photo_url
+→ photo_url
+→ raw_photo_url
+→ fail-closed
+```
+
+`generated_photo_url` sengaja tidak menjadi fallback otomatis untuk campaign. Field tersebut adalah aset legacy dan hanya dapat digunakan kembali kelak melalui pilihan operator yang eksplisit, bukan melalui `active_photo` lama.
+
+Perbaikan mempertahankan kontrak v2.14.35:
+
+- hanya bridge/product clip menerima product reference;
+- Phase 1 dan Regen memakai builder yang sama;
+- gambar dikirim sebagai Base64 Data URI pada `reference_images`;
+- tepat satu product reference pada product clip;
+- audit tidak menyimpan Base64 atau secret.
+
+## 2. Bukti Reproduksi Item #137
+
+Produk: `Omura Premium Cocoa Powder` (`pe_sync_1781148697786_850`).
+
+```text
+active_photo        = generated_photo_url
+generated_photo_url = /uploads/products/generated/generated_pe_sync_1781148697786_850.jpg
+clean_photo_url     = /uploads/products/default_tenant/clean/clean_default_tenant_pe_sync_1781148697786_850_1786412675863.jpg
+photo_url           = sama dengan clean_photo_url
+```
+
+Audit v2.14.35 Phase 1 dan Regen klip 3:
+
+```text
+reference_source_field = generated_photo_url
+reference_sha256       = 98b25fa0f20d96fd811946f3b424b8399ded216221d8592022fbaeb459c14a3c
+```
+
+Dengan demikian format Base64 sudah benar, tetapi file yang diubah menjadi Base64 bukan foto Clean yang dilihat operator pada Product Database.
+
+## 3. Scope dan Non-Scope
+
+### Scope
+
+- resolver reference khusus campaign OPC;
+- penghapusan override gambar berbasis nama produk pada Mass Production;
+- pembuktian SHA file sumber, Base64 payload, dan request outbound;
+- regression test dengan kondisi `active_photo=generated_photo_url`;
+- Phase 1 dan Regen nyata di Mac Mini Dev menggunakan produk Omura;
+- rilis patch setelah hasil visual disetujui.
+
+### Non-Scope
+
+- tidak mengubah pipeline pembuatan foto Raw/Clean;
+- tidak menghapus file atau kolom `generated_photo_url`;
+- tidak mengubah arti `active_photo` untuk consumer selain campaign OPC;
+- tidak memperbaiki PostgreSQL slow-query dalam patch ini;
+- tidak deploy Production tanpa perintah manual eksplisit.
+
+## 4. Desain Perbaikan
+
+### 4.1 Resolver campaign dipisahkan dari resolver active-photo umum
+
+Tambahkan resolver bernama eksplisit, misalnya:
+
+```js
+resolveCampaignProductReference({ product, fallbackPaths, cwd })
+```
+
+Resolver ini hanya memakai kandidat Clean/compatibility/Raw. `resolveActiveProductReference()` tetap tersedia bagi consumer lain agar patch tidak menyebabkan perubahan global tersembunyi.
+
+### 4.2 Product ID menjadi identitas tunggal
+
+Semua pengambilan foto untuk campaign memakai:
+
+```text
+campaign.target_product_id
+```
+
+Lookup berdasarkan `LOWER(product_name)` dihapus dari jalur foto. Untuk campaign legacy tanpa product ID, request product clip harus gagal dengan error terstruktur, bukan menebak produk berdasarkan nama.
+
+Lookup berdasarkan nama untuk truth metadata dapat dipertahankan sementara bila tidak memengaruhi pemilihan gambar, tetapi harus diberi warning legacy dan tidak boleh menulis `product_ref_image_path`.
+
+### 4.3 Hilangkan side effect `Fix4`
+
+Blok `Fix4` saat ini:
+
+- mencari produk berdasarkan nama;
+- menimpa `tempCampaign.product_ref_image_path`;
+- memperbarui `pillar_campaigns.product_ref_image_path` selama Phase 1.
+
+Blok tersebut dihapus. Shared builder membaca Product Database berdasarkan ID pada saat request dibuat. `product_ref_image_path` dipertahankan hanya sebagai compatibility fallback untuk campaign legacy non-linked, bukan sumber utama linked product.
+
+### 4.4 Bukti Base64 sampai batas HTTP
+
+Tambahkan helper aman untuk menghitung SHA dari Data URI yang benar-benar berada dalam `reference_images`:
+
+```js
+sha256(decodeBase64DataUri(reference_images[0]))
+```
+
+Sebelum `fetch('/api/image/generate')`, verifikasi:
+
+```text
+payload reference SHA === resolver file SHA
+```
+
+Log/audit hanya menyimpan SHA, MIME type, byte length, source field, dan jumlah reference. Isi Base64 tidak boleh dicatat.
+
+Untuk mode queue, metadata SHA yang sama harus ikut pada job metadata/audit agar jalur direct HTTP dan BullMQ dapat dibandingkan tanpa menyimpan payload di database log.
+
+## 5. Rencana Per File — Before dan After
+
+### `lib/product-reference-resolver.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+function photoCandidates(product, fallbackPaths = []) {
+  const active = ACTIVE_PHOTO_FIELDS.includes(product?.active_photo)
+    ? product[product.active_photo]
+    : null;
+
+  return [
+    active,
+    product?.clean_photo_url,
+    product?.cleaned_photo_url,
+    product?.generated_photo_url,
+    product?.raw_photo_url,
+    product?.photo_url,
+    ...fallbackPaths
+  ];
+}
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+function campaignPhotoCandidates(product, fallbackPaths = []) {
+  return uniquePaths([
+    product?.clean_photo_url,
+    product?.cleaned_photo_url,
+    product?.photo_url,
+    product?.raw_photo_url,
+    ...fallbackPaths
+  ]);
+}
+
+export function resolveCampaignProductReference(options) {
+  return resolveReferenceFromCandidates(
+    campaignPhotoCandidates(options.product, options.fallbackPaths),
+    options.cwd
+  );
+}
+```
+
+Resolver generic `resolveActiveProductReference()` tidak diubah perilakunya untuk consumer lain.
+
+### `lib/opc-start-frame-request.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const reference = requirement.required
+  ? resolveActiveProductReference({
+      product,
+      fallbackPaths: [campaign?.product_ref_image_path, row.product_ref_image_path],
+      cwd
+    })
+  : null;
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const reference = requirement.required
+  ? resolveCampaignProductReference({
+      product,
+      fallbackPaths: productId
+        ? []
+        : [campaign?.product_ref_image_path, row.product_ref_image_path],
+      cwd
+    })
+  : null;
+
+if (requirement.required && !productId) {
+  throw new ProductReferenceUnavailableError(
+    'Product clip tidak memiliki target_product_id.'
+  );
+}
+```
+
+Linked campaign tidak boleh jatuh ke snapshot path lama apabila record produk canonical tersedia tetapi foto Clean/Raw hilang.
+
+Audit yang diharapkan untuk item #137:
+
+```text
+reference_source_field = clean_photo_url
+reference_sha256       = SHA file clean_default_tenant_...jpg
+product_reference_count = 1
+```
+
+### `lib/scheduler-processors.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const dbImg = await db.prepare(`
+  SELECT clean_photo_url, photo_url
+  FROM product_extractions
+  WHERE LOWER(product_name) = LOWER(?)
+  LIMIT 1
+`).get(resolvedProductName);
+
+tempCampaign.product_ref_image_path = dbImg.clean_photo_url;
+await db.prepare(`
+  UPDATE pillar_campaigns
+  SET product_ref_image_path = ?
+  WHERE id = ?
+`).run(dbImg.clean_photo_url, campaign.id);
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+// Tidak ada lookup atau mutation reference image pada processPillarGenerator.
+// Shared OPC start-frame builder memuat foto canonical berdasarkan target_product_id.
+```
+
+Jika prompt memerlukan nama file reference, metadata tersebut dibaca berdasarkan `target_product_id` tanpa mengubah campaign dan tanpa memasukkan URL lain ke provider payload.
+
+### `lib/webhook-client.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+if (reference_images) body.reference_images = reference_images;
+
+await fetch(`${submitBaseUrl}/api/image/generate`, {
+  method: 'POST',
+  headers: submitHeaders,
+  body: JSON.stringify(body)
+});
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const referenceMetadata = inspectBase64References(reference_images);
+if (reference_images?.length) body.reference_images = reference_images;
+
+logSafeReferenceMetadata({
+  model: primaryModel,
+  referenceCount: referenceMetadata.length,
+  referenceSha256s: referenceMetadata.map(ref => ref.sha256),
+  referenceByteLengths: referenceMetadata.map(ref => ref.byteLength)
+});
+
+await fetch(`${submitBaseUrl}/api/image/generate`, {
+  method: 'POST',
+  headers: submitHeaders,
+  body: JSON.stringify(body)
+});
+```
+
+Helper wajib menolak Base64 kosong, MIME tidak cocok dengan magic bytes, dan payload yang SHA-nya berbeda dari metadata builder bila expected SHA disediakan.
+
+### `lib/opc-start-frame-audit.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+reference_source_field,
+reference_sha256,
+request_fingerprint
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+reference_source_field: 'clean_photo_url',
+reference_sha256: sourceFileSha256,
+payload_reference_sha256: decodedPayloadSha256,
+reference_mime_type: 'image/jpeg',
+reference_byte_length: decodedPayloadByteLength
+```
+
+Jika tidak ingin migrasi tabel pada patch ini, `payload_reference_sha256` diverifikasi runtime dan structured log terlebih dahulu. Yang wajib adalah assertion equality sebelum provider submit.
+
+### `scripts/test-opc-start-frame-reference.mjs`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const product = {
+  active_photo: 'generated_photo_url',
+  generated_photo_url: '/uploads/active.jpg',
+  clean_photo_url: '/uploads/old.jpg'
+};
+
+assert.equal(built.audit.reference_source_field, 'generated_photo_url');
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const product = {
+  active_photo: 'generated_photo_url',
+  generated_photo_url: '/uploads/generated-legacy.jpg',
+  clean_photo_url: '/uploads/clean-current.jpg',
+  photo_url: '/uploads/clean-current.jpg'
+};
+
+assert.equal(built.audit.reference_source_field, 'clean_photo_url');
+assert.equal(built.audit.reference_sha256, sha256(cleanCurrentBytes));
+assert.deepEqual(
+  decodeReferenceImages(built.providerRequest.reference_images),
+  [cleanCurrentBytes]
+);
+assert.notEqual(built.audit.reference_sha256, sha256(generatedLegacyBytes));
+```
+
+Matrix tetap wajib:
+
+```text
+bridge_at_clip=3, duration=1 → [0, 0, 1, 0]
+```
+
+### `scripts/test-opc-start-frame-reference-integration.mjs`
+
+**Code Sebelum (Current/Before)**
+
+```js
+assert.equal(initial.audit.reference_source_field, 'generated_photo_url');
+assert.equal(initial.audit.reference_sha256, regen.audit.reference_sha256);
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+assert.equal(product.id, 'pe_sync_1781148697786_850');
+assert.equal(product.active_photo, 'generated_photo_url');
+assert.equal(initial.audit.reference_source_field, 'clean_photo_url');
+assert.equal(initial.audit.reference_sha256, sha256(cleanPhotoFile));
+assert.equal(initial.audit.reference_sha256, regen.audit.reference_sha256);
+assert.deepEqual(initial.providerRequest.reference_images, regen.providerRequest.reference_images);
+assert.equal(nonBridge.providerRequest.reference_images, undefined);
+```
+
+Integration test tetap wajib dijalankan dengan `PG_SEARCH_PATH=dev` dan tanpa provider call sebelum smoke test visual.
+
+## 6. Tahapan Verifikasi
+
+### 6.1 Automated gate
+
+```bash
+npm run test:opc:start-frame-reference
+PG_SEARCH_PATH=dev npm run test:opc:start-frame-reference-integration
+npm run build
+```
+
+Gate gagal bila:
+
+- `generated_photo_url` terpilih pada fixture Omura;
+- SHA decoded Base64 berbeda dari SHA file Clean;
+- non-bridge clip membawa product reference;
+- Phase 1/Regen menghasilkan source atau SHA berbeda;
+- Base64/secret masuk log atau audit.
+
+### 6.2 Dev preflight
+
+Sebelum provider call, tampilkan bukti aman:
+
+```text
+product_id
+clean_photo_url
+source_file_sha256
+decoded_base64_sha256
+MIME
+byte_length
+bridge clip
+```
+
+`source_file_sha256` wajib sama dengan `decoded_base64_sha256`.
+
+### 6.3 Visual end-to-end — wajib sebelum rilis
+
+Gunakan produk Omura pada Mac Mini Dev:
+
+1. Simpan screenshot/preview foto Clean dari Product Database.
+2. Jalankan campaign baru dengan bridge klip 3.
+3. Pastikan audit outbound klip 3 menunjukkan `clean_photo_url` dan SHA file Clean.
+4. Pastikan klip 1, 2, dan 4 memiliki nol product reference.
+5. Inspeksi gambar hasil Phase 1 klip 3 terhadap foto Clean.
+6. Klik Regen pada klip 3.
+7. Pastikan Regen memakai SHA Clean yang sama.
+8. Inspeksi gambar hasil Regen terhadap foto Clean.
+9. Jangan merilis bila kemasan/label/warna produk masih berbeda secara material.
+
+Jika payload sudah terbukti Clean tetapi output visual masih salah, masalah dipindahkan ke fidelity model/prompt G-Labs. Pada kondisi tersebut jangan mengubah resolver lagi; evaluasi image-edit mode, reference-strength, named subject binding, atau compositing produk sebagai pekerjaan terpisah.
+
+## 7. Rollback dan Rilis
+
+Tidak melakukan rollback penuh ke v2.14.31. Emergency rollback hanya mengembalikan prioritas pemilihan foto Clean pada jalur OPC, sambil mempertahankan bridge guard dan parity v2.14.35.
+
+Rilis hanya setelah automated gate dan visual end-to-end berhasil:
+
+```bash
+npm run release-non-interactive -- --type patch \
+  --title "Perbaikan Clean Photo Reference OPC" \
+  --points "Gunakan foto Clean untuk Base64 campaign|Hapus override foto berbasis nama produk|Verifikasi SHA payload Phase 1 dan Regen"
+```
+
+Deploy otomatis hanya ke Mac Mini Dev. Production tetap memerlukan perintah eksplisit pengguna.
+
+## 7A. Temuan Acceptance Test dan Prompt Identity Lock
+
+Phase 1 nyata item #139 membuktikan payload Clean belum cukup: prompt lama masih menyebut file `generated_*` dan memberi deskripsi generik sehingga provider menggambar ulang label produk.
+
+### `lib/opc-start-frame-request.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+providerRequest: { prompt, reference_images: references }
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const providerPrompt = reference ? lockProductIdentityPrompt(prompt, product) : prompt;
+providerRequest: { prompt: providerPrompt, reference_images: references }
+```
+
+Lock menyatakan foto terlampir sebagai satu-satunya visual truth, melarang redesign/relabel/substitution, dan membersihkan petunjuk filename legacy `generated_*`.
+
+### `scripts/test-opc-start-frame-reference.mjs`
+
+**Code Sebelum (Current/Before)**
+
+```js
+assert.deepEqual(built.providerRequest.expected_reference_sha256s, [payloadMetadata.sha256]);
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+assert.match(built.providerRequest.prompt, /HIGHEST PRIORITY PRODUCT IDENTITY LOCK/);
+assert.doesNotMatch(built.providerRequest.prompt, /generated_product-1\.jpg/);
+```
+
+## Execution Task List v2.14.36
+
+- [x] Tambahkan regression fixture Omura dengan `active_photo=generated_photo_url` dan Clean yang berbeda.
+- [x] Tambahkan resolver `resolveCampaignProductReference()` dengan prioritas Clean → compatibility → Raw.
+- [x] Pastikan `generated_photo_url` tidak menjadi fallback otomatis campaign OPC.
+- [x] Migrasikan shared OPC builder dari active-photo resolver ke campaign-photo resolver.
+- [ ] Tolak linked Product Campaign tanpa `target_product_id` atau tanpa foto Clean/Raw yang valid.
+- [x] Hapus blok `Fix4` lookup gambar berdasarkan nama dan mutation `product_ref_image_path`.
+- [x] Pastikan metadata truth lookup tidak dapat mengubah pilihan gambar.
+- [x] Tambahkan pemeriksaan MIME, byte length, dan SHA decoded Base64 sebelum HTTP/queue submit.
+- [x] Pastikan audit/log hanya menyimpan metadata aman, bukan Base64.
+- [x] Perbarui unit test matrix dan assertion bahwa bytes payload sama dengan file Clean.
+- [x] Perbarui integration test Dev memakai bukti item #137/produk Omura.
+- [x] Jalankan unit test, integration test schema Dev, dan build Next.js.
+- [x] Deploy v2.14.36 candidate ke Mac Mini Dev.
+- [x] Tambahkan product-identity prompt lock dan hapus petunjuk filename `generated_*` setelah Phase 1 nyata membuktikan output masih generik meski payload Clean.
+- [x] Ulangi unit test, build, deploy Dev, Phase 1, dan Regen setelah prompt lock.
+- [ ] Jalankan Phase 1 nyata dan verifikasi visual klip 3 terhadap foto Clean.
+- [x] Jalankan Regen nyata dan verifikasi visual serta SHA terhadap foto Clean yang sama.
+- [x] Verifikasi klip non-bridge tidak membawa product reference.
+- [x] Jika visual masih salah meski SHA Clean benar, hentikan rilis dan audit fidelity/mode G-Labs.
+- [ ] Jika seluruh acceptance test lulus, jalankan release patch dan verifikasi commit/tag/remote.
+
+### Hasil Acceptance Test Dev
+
+- Regen item #137 dengan Clean SHA `2cf934…3502` menghasilkan kemasan Indonesia Powder/BMI yang dikenali dengan benar.
+- Phase 1 item #139 sebelum prompt lock memakai SHA Clean yang sama, tetapi menghasilkan sachet generik `PURE UNSWEETENED COCOA POWDER`.
+- Regen item #139 setelah prompt lock menghasilkan kemasan Indonesia Powder/BMI yang benar.
+- Phase 1 item #141 setelah prompt lock tetap memakai `clean_photo_url` SHA `2cf934…3502`, tetapi menghasilkan desain sachet cokelat/emas bertuliskan Omura yang bukan kemasan database.
+- Kesimpulan: transport Base64 dan resolver sudah benar; image-to-image provider bersifat probabilistik dan prompt lock tidak dapat menjadi jaminan fidelity. Release dihentikan. Perbaikan berikutnya harus memakai deterministic product compositing/identity-preserving render, bukan menambah prompt lagi.
+
+### Keputusan Rilis Pengguna
+
+Pada 14 Agustus 2026 pengguna menyetujui rilis perbaikan parsial karena versi ini telah memastikan Phase 1 dan Regen memakai foto Clean yang benar, serta Regen terbukti dapat memperbaiki sebagian output yang tidak sesuai. Known limitation: hasil G-Labs tetap probabilistik dan Regen tidak dijamin benar pada satu percobaan.
+
+# Rencana Implementasi v2.14.36-R2 — Deterministic Product Compositing (DIBATALKAN)
+
+> **Status: DIBATALKAN atas instruksi pengguna. Seluruh isi seksi ini tidak boleh dieksekusi dan bukan lagi rencana aktif.**
+
+## 1. Sasaran dan Keputusan Arsitektur
+
+Untuk setiap klip bridge/product OPC, G-Labs tidak lagi bertanggung jawab menggambar identitas produk. G-Labs hanya menghasilkan **background plate** tanpa kemasan, label, logo, atau objek produk. Setelah plate selesai diunduh, MAKNA menempelkan cutout yang berasal langsung dari `clean_photo_url` secara lokal menggunakan `sharp`.
+
+```text
+Foto Clean database
+  → verifikasi MIME + SHA
+  → background removal menjadi cutout PNG transparan
+  → validasi alpha/bounding box
+  → cache berdasarkan source SHA
+                                     ┌─ non-bridge → output G-Labs apa adanya
+Prompt scene → G-Labs background ────┤
+                                     └─ bridge → composite cutout produk → final start frame
+```
+
+Konsekuensi desain:
+
+- output bridge tidak pernah menyimpan produk hasil imajinasi provider;
+- label, warna, logo, dan artwork berasal dari piksel foto Clean;
+- Phase 1, single Regen, bulk/durable Regen, recovery, dan worker memakai finalizer yang sama;
+- bila cutout tidak valid, sistem **fail-closed** dan tidak mengganti start frame lama dengan hasil generik;
+- compositing hanya berlaku pada clip yang ditentukan `resolveProductReferenceRequirement()`;
+- non-bridge tetap menggunakan background plate tanpa product overlay;
+- Production tidak disentuh sampai acceptance Dev lulus.
+
+## 2. Strategi Visual Deterministik
+
+### 2.1 Cutout produk
+
+Foto Clean saat ini berupa JPEG berlatar putih karena `createCleanProductShot()` melakukan `flatten()`. Pipeline baru tidak mengubah foto Clean tersebut. Ia membuat aset turunan transparan:
+
+```text
+public/uploads/products/cutouts/<tenant>/<product-id>_<source-sha-12>.png
+```
+
+Urutan cutout:
+
+1. baca hanya file yang sudah dipilih `resolveCampaignProductReference()`;
+2. hitung dan cocokkan SHA sumber;
+3. jalankan `@imgly/background-removal-node` menjadi RGBA PNG tanpa `flatten()`;
+4. trim area transparan dengan padding aman 2–3%;
+5. validasi bahwa empat sudut transparan, bounding box produk masuk batas wajar, dan opaque coverage tidak kosong/seluas kanvas;
+6. simpan secara atomik ke cache berdasarkan SHA;
+7. bila cache tersedia, validasi manifest sebelum digunakan kembali.
+
+Tidak menggunakan penghapusan warna putih berbasis threshold karena bagian kemasan Omura berwarna putih/silver dan dapat ikut hilang.
+
+### 2.2 Background plate G-Labs
+
+Untuk product clip, shared builder mengubah prompt menjadi scene-only:
+
+```text
+Generate the requested environment as a clean background plate.
+Reserve an unobstructed product stage in the center-lower area.
+Do not generate packaging, sachets, labels, logos, text, hands in front
+of the product stage, or any substitute product.
+```
+
+Reference foto produk tidak perlu dikirim ke G-Labs pada mode composite karena provider tidak lagi diminta menggambar produk. Foto Clean tetap dibaca dan di-hash sebelum submit untuk mengunci composition contract. Context reference non-produk, misalnya karakter cartoon, tetap dapat dikirim sesuai kontraknya.
+
+### 2.3 Placement dan render
+
+Preset awal: `center_tabletop_v1`.
+
+- output dinormalisasi ke resolusi aspect ratio campaign, default 1080×1920 untuk 9:16;
+- background plate memakai `cover` tanpa distorsi;
+- cutout memakai `contain`, maksimal 52% lebar dan 58% tinggi frame;
+- pusat horizontal 50%; baseline produk 84% tinggi frame;
+- shadow dibuat dari alpha cutout yang diblur dan ditempatkan **di belakang** produk;
+- cutout produk ditaruh paling akhir sehingga tidak dapat ditimpa tangan/objek generatif;
+- output PNG ditulis ke file sementara lalu atomic rename;
+- file G-Labs mentah disimpan sebagai diagnostic plate dengan retention terbatas, bukan sebagai `t2i_images_json` final.
+
+Versi preset dan seluruh koordinat masuk composition audit sehingga hasil dapat direproduksi.
+
+## 3. Perubahan File
+
+### 3.1 `lib/opc-product-compositor.js` — file baru
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Belum ada finalizer produk deterministik.
+// Call site langsung fs.writeFileSync(startFrameLocalPath, imgBuffer).
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function finalizeOpcStartFrame({
+  campaign, item, clipIndex, backgroundBuffer, outputPath, origin
+}) {
+  const requirement = resolveProductReferenceRequirement({ campaign, item, clipIndex });
+  if (!requirement.required) return writeBackgroundAtomically(backgroundBuffer, outputPath);
+
+  const source = await resolveRequiredCampaignProductSource(campaign);
+  const cutout = await getOrCreateProductCutout(source);
+  const result = await compositeProductPlate({
+    backgroundBuffer,
+    cutoutPath: cutout.path,
+    preset: 'center_tabletop_v1'
+  });
+  await writeAtomically(outputPath, result.buffer);
+  await recordCompositionAudit({ ...result.audit, origin, clipIndex });
+  return result;
+}
+```
+
+Modul ini menjadi satu-satunya tempat yang boleh memfinalisasi start frame OPC. Ia menangani normalisasi orientasi, cutout cache, alpha validation, resize, shadow, composite, hash, atomic write, dan fail-closed.
+
+### 3.2 `lib/opc-start-frame-request.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const providerPrompt = reference ? lockProductIdentityPrompt(prompt, product) : prompt;
+providerRequest: {
+  prompt: providerPrompt,
+  reference_images: reference ? [reference.base64DataUrl] : undefined
+}
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const composition = requirement.required
+  ? buildProductCompositionContract({ product, reference, preset: 'center_tabletop_v1' })
+  : null;
+const providerPrompt = composition
+  ? buildBackgroundPlatePrompt(prompt, composition.preset)
+  : prompt;
+
+return {
+  providerRequest: {
+    prompt: providerPrompt,
+    reference_images: contextReferences.length ? contextReferences : undefined
+  },
+  composition,
+  audit
+};
+```
+
+Product Data URI tidak lagi dikirim ke image generator pada composite mode. Contract tetap membawa source path, SHA, MIME, product ID, dan preset secara internal untuk finalizer; data ini tidak dimasukkan ke HTTP body G-Labs.
+
+### 3.3 `lib/bg-remover.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+await sharp(transparentBuffer)
+  .flatten({ background: { r: 255, g: 255, b: 255 } })
+  .jpeg({ quality: 90 })
+  .toFile(finalOutputPath);
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function createTransparentProductCutout(inputBuffer) {
+  const transparentBlob = await removeBackground(toImageBlob(inputBuffer), { model: 'medium' });
+  return sharp(Buffer.from(await transparentBlob.arrayBuffer()))
+    .ensureAlpha()
+    .trim({ background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .png()
+    .toBuffer();
+}
+```
+
+Fungsi Clean lama tetap kompatibel. Fungsi baru tidak melakukan flatten dan tidak mengeksekusi command string dari input yang tidak tervalidasi.
+
+### 3.4 `lib/scheduler-processors.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const imgBuffer = Buffer.from(await imgResponse.arrayBuffer());
+fs.writeFileSync(startFrameLocalPath, imgBuffer);
+t2iImagePaths[c - 1] = relativeStartFramePath;
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const backgroundBuffer = Buffer.from(await imgResponse.arrayBuffer());
+await finalizeOpcStartFrame({
+  campaign: tempCampaign,
+  item,
+  clipIndex: c,
+  backgroundBuffer,
+  outputPath: startFrameLocalPath,
+  origin: 'phase_1_initial'
+});
+t2iImagePaths[c - 1] = relativeStartFramePath;
+```
+
+Semua write path OPC—sequential, threading, production recovery, dan jalur kompatibilitas—wajib dialihkan. Write path RE/IFC tidak diubah.
+
+### 3.5 `app/api/v2/pillar-campaigns/items/[itemId]/regenerate-t2i/route.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const imgBuffer = Buffer.from(await imgResponse.arrayBuffer());
+fs.writeFileSync(startFrameLocalPath, imgBuffer);
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const backgroundBuffer = Buffer.from(await imgResponse.arrayBuffer());
+await finalizeOpcStartFrame({
+  campaign, item, clipIndex, backgroundBuffer,
+  outputPath: startFrameLocalPath,
+  origin: 'manual_regen'
+});
+```
+
+Database hanya di-update setelah composite dan audit berhasil. Jika cutout/composite gagal, endpoint mengembalikan error terstruktur dan mempertahankan file serta URL start frame sebelumnya.
+
+### 3.6 `app/api/v2/pillar-campaigns/items/[itemId]/regenerate-start-frames/route.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+request: { prompt, model, aspect_ratio, webhookOverride }
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+request: {
+  context: { campaignId: campaign.id, itemId: item.id, clipIndex, prompt, origin: 'bulk_regen' }
+}
+```
+
+Durable Regen tidak lagi melewati shared builder. Snapshot contract yang aman disimpan dalam `request_json`; Base64 dan API key tidak disimpan di tabel antrean.
+
+### 3.7 `lib/start-frame-provider-adapter.js` dan `lib/start-frame-worker.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+await fs.writeFile(path.join(directory, filename), providerBuffer);
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const backgroundBuffer = Buffer.from(await response.arrayBuffer());
+await finalizeOpcStartFrame({
+  campaign, item, clipIndex: asset.clip_index,
+  backgroundBuffer, outputPath, origin: 'bulk_regen'
+});
+```
+
+Adapter mengembalikan task metadata tanpa secret. Worker memuat campaign/item dalam tenant context, memfinalisasi composite, baru kemudian menandai asset `completed`.
+
+### 3.8 `lib/db-pg.js` dan `lib/opc-start-frame-composition-audit.js` — file audit baru
+
+**Code Sebelum (Current/Before)**
+
+```sql
+-- Audit request hanya membuktikan payload/provider request.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```sql
+CREATE TABLE IF NOT EXISTS opc_start_frame_composition_audits (
+  id TEXT PRIMARY KEY,
+  tenant_id TEXT NOT NULL,
+  campaign_id TEXT NOT NULL,
+  campaign_item_id TEXT NOT NULL,
+  clip_index INTEGER NOT NULL,
+  origin TEXT NOT NULL,
+  source_sha256 TEXT NOT NULL,
+  cutout_sha256 TEXT NOT NULL,
+  background_sha256 TEXT NOT NULL,
+  output_sha256 TEXT NOT NULL,
+  preset_version TEXT NOT NULL,
+  placement_json JSONB NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+Audit tidak menyimpan Base64, gambar, filesystem absolut, prompt penuh, atau credential.
+
+### 3.9 Test baru dan pembaruan test
+
+File:
+
+- `scripts/test-opc-product-compositor.mjs` — baru;
+- `scripts/test-opc-start-frame-reference.mjs`;
+- `scripts/test-opc-start-frame-reference-integration.mjs`.
+
+**Code Sebelum (Current/Before)**
+
+```js
+assert.deepEqual(providerRequest.expected_reference_sha256s, [cleanSha]);
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+assert.equal(built.composition.source_sha256, cleanSha);
+assert.equal(built.providerRequest.reference_images, undefined);
+assert.equal(composite.audit.source_sha256, cleanSha);
+assert.equal(composite.audit.preset_version, 'center_tabletop_v1');
+assertProductPixelsDerivedFromCutout(composite.output, composite.cutout, composite.placement);
+```
+
+Fixture mencakup Omura, non-bridge, landscape/portrait background, cache hit, cache korup, cutout invalid, atomic-write failure, single Regen, bulk Regen, dan Phase 1 parity.
+
+## 4. Failure Handling dan Rollback
+
+### Fail-closed
+
+- foto Clean/Raw tidak ditemukan → `PRODUCT_REFERENCE_UNAVAILABLE`;
+- background removal gagal → `PRODUCT_CUTOUT_FAILED`;
+- alpha/bounding box tidak valid → `PRODUCT_CUTOUT_INVALID`;
+- composite gagal → `PRODUCT_COMPOSITE_FAILED`;
+- output tidak memiliki audit source/cutout/output SHA → jangan update database;
+- start frame lama tidak dihapus atau ditimpa sampai file baru selesai dan lolos validasi.
+
+### Feature flag
+
+Tambahkan tenant setting:
+
+```text
+opc_product_composite_mode = off | shadow | enforce
+```
+
+- `off`: rollback operasional ke perilaku lama tanpa menghapus kode;
+- `shadow`: menghasilkan composite diagnostic tetapi UI masih memakai output lama, khusus verifikasi awal;
+- `enforce`: composite menjadi satu-satunya output bridge yang boleh disimpan.
+
+Dev dimulai dari `shadow`, lalu `enforce` setelah fixture Omura lulus. Release harus memakai default `enforce` untuk product campaign dan `off` untuk non-product campaign.
+
+## 5. Acceptance Criteria
+
+### Automated
+
+1. Hanya clip bridge mempunyai composition contract.
+2. Provider request bridge tidak membawa product Base64 dan prompt melarang provider membuat produk.
+3. Source SHA audit sama dengan SHA `clean_photo_url` database.
+4. Cutout cache key berubah ketika foto Clean berubah.
+5. Output final mengandung cutout yang sama pada placement yang tercatat.
+6. Phase 1, single Regen, bulk Regen, worker retry, dan production recovery menghasilkan finalizer fingerprint yang sama.
+7. Non-bridge output byte-identical dengan normalized provider plate dan tidak memiliki composition audit.
+8. Kegagalan cutout/composite mempertahankan start frame lama.
+9. Tidak ada Base64/secret di log, DB audit, atau durable `request_json`.
+
+### Visual Dev — Omura
+
+1. Gunakan campaign `opc_260814_kwngx7` dan produk `pe_sync_1781148697786_850`.
+2. Bandingkan foto Clean, cached cutout, raw G-Labs plate, dan final composite secara berdampingan.
+3. Final clip 3 harus mempertahankan logo Indonesia Powder, panel BMI, ilustrasi cocoa, warna silver/cokelat, serta geometri kemasan.
+4. Background plate tidak boleh berisi produk generik atau teks kemasan lain.
+5. Produk tidak boleh tertutup tangan/objek dan tidak boleh tampak melayang; shadow harus konsisten.
+6. Phase 1 dan Regen boleh memiliki background berbeda, tetapi cutout produk dan placement preset harus sama.
+7. Clip 1, 2, dan 4 tidak boleh memuat overlay produk.
+
+## 6. Urutan Rilis
+
+1. Implementasi dan unit test lokal.
+2. Integration test schema Dev.
+3. Deploy candidate ke Mac Mini Dev dengan mode `shadow`.
+4. Periksa empat artefak Omura dan composition audit.
+5. Ubah Dev ke `enforce`, jalankan Phase 1 serta single/bulk Regen nyata.
+6. Jalankan build dan cluster health check.
+7. Hanya bila seluruh acceptance lulus, jalankan patch release non-interaktif dan deploy ulang Dev.
+8. Staging/Production tidak dideploy tanpa instruksi pengguna; Production tetap memerlukan persetujuan eksplisit.
+
+## Execution Task List — Deterministic Product Compositing
+
+- [ ] Tambahkan setting `opc_product_composite_mode` dengan nilai `off|shadow|enforce`.
+- [ ] Implementasikan transparent cutout tanpa flatten dan cache berdasarkan source SHA.
+- [ ] Tambahkan alpha, bounding-box, MIME, dan cache-manifest validation.
+- [ ] Implementasikan `finalizeOpcStartFrame()` dengan preset `center_tabletop_v1`, shadow, hash, dan atomic write.
+- [ ] Ubah shared request builder agar product clip meminta background plate dan membawa internal composition contract.
+- [ ] Pastikan product Base64 tidak lagi dikirim ke G-Labs pada composite mode.
+- [ ] Migrasikan Phase 1 sequential dan threading ke shared finalizer.
+- [ ] Migrasikan production recovery/compatibility write path OPC ke shared finalizer.
+- [ ] Migrasikan single Regen ke shared finalizer dan pertahankan file lama saat gagal.
+- [ ] Perbaiki bulk/durable Regen agar membawa campaign/item context tanpa Base64/secret.
+- [ ] Migrasikan start-frame worker ke shared finalizer dalam tenant context.
+- [ ] Tambahkan composition audit table dan safe audit writer.
+- [ ] Tambahkan unit fixture Omura dan test pixel provenance/placement.
+- [ ] Tambahkan test cache hit, cache invalid, cutout invalid, dan atomic rollback.
+- [ ] Tambahkan parity test Phase 1, single Regen, bulk Regen, recovery, dan worker.
+- [ ] Jalankan unit test, integration test Dev, dan Next.js build.
+- [ ] Deploy candidate ke Mac Mini Dev dalam mode `shadow`.
+- [ ] Verifikasi foto Clean, cutout, raw plate, final composite, dan seluruh SHA audit Omura.
+- [ ] Aktifkan mode `enforce` di Dev dan jalankan Phase 1 nyata.
+- [ ] Jalankan single Regen dan bulk Regen nyata di Dev.
+- [ ] Verifikasi klip non-bridge tidak mempunyai overlay produk.
+- [ ] Jalankan cluster health check.
+- [ ] Jika seluruh acceptance lulus, release patch dan verifikasi commit/tag/remote.
