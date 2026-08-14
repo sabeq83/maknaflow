@@ -40,7 +40,7 @@ export const POST = withTenantContext(async (req, { params }) => {
     }
 
     const { resolveProductBase64 } = await import('../../../../../../../lib/scheduler-processors');
-    const productBase64 = resolveProductBase64(campaign, productData);
+    const productBase64 = await resolveProductBase64(campaign, productData);
 
     console.log(`[RE UI Regenerate] Submitting T2I task for clip ${clipIndex}...`);
 

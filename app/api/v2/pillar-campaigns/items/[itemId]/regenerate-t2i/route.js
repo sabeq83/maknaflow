@@ -89,7 +89,7 @@ export const POST = withTenantContext(async (req, { params }) => {
     }
 
     const rowPayload = item.row_creative_payload ? JSON.parse(item.row_creative_payload) : {};
-    const productBase64 = resolveProductBase64(campaign, productData, rowPayload);
+    const productBase64 = await resolveProductBase64(campaign, productData, rowPayload);
 
     // Call T2I webhook helper
     const payload = {

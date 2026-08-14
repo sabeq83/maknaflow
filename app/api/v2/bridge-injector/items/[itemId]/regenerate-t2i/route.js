@@ -76,7 +76,7 @@ export const POST = withTenantContext(async (req, { params }) => {
       productData = await db.prepare('SELECT * FROM product_extractions WHERE id = ?').get(item.target_product_id);
     }
     const { resolveProductBase64 } = await import('../../../../../../../lib/scheduler-processors');
-    const productBase64 = resolveProductBase64({}, productData);
+    const productBase64 = await resolveProductBase64({}, productData);
 
     // 3. Trigger image generation
     const imageModel = await getSetting('webhook_image_model') || 'nano_banana_pro';

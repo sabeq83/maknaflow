@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.14.32 — Fix: resolveProductBase64 async — image reference produk kini benar sampai ke G-Labs (14/08/2026)
+- Bug #1 CRITICAL: getProductById dipanggil tanpa await di resolveProductBase64 — p = Promise bukan data produk, foto DB tidak pernah terbaca
+- Bug #2 HIGH: resolveProductBase64 dideklarasikan sync tapi operasinya async — diubah menjadi async function + gunakan dynamic import
+- Bug #3 MEDIUM: ProductReferenceUnavailableError di opc-start-frame-request.js hanya di-throw jika extraReferences juga kosong + defensive enrichment dari DB
+- Fix await di semua 7 pemanggil resolveProductBase64 di scheduler-processors.js dan 3 route API (pillar/re-campaigns/bridge-injector regenerate-t2i)
+
 ## V2.14.31 — Fix: Product reference image tidak terkirim ke G-Labs di Phase 1 OPC (14/08/2026)
 - Bug: productBase64 di-resolve di Phase 1 tapi tidak diteruskan sebagai extraReferences ke buildOpcStartFrameRequest
 - Fix: submitStartFrame kini menghitung bridge clip range dan meneruskan productBase64 ke G-Labs, konsisten dengan logika regenerate-t2i
