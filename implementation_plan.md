@@ -1503,3 +1503,419 @@ assertDirectiveNeverBecomesOutro();
 - [x] Jalankan build dan staging verification.
 - [x] Jalankan release patch dan verifikasi branch/tag remote.
 - [x] Jangan mengerjakan Fase 2A sampai ada perintah pengguna.
+
+---
+
+# Rencana Implementasi Perbaikan OPC Start Frame Product Reference v2.14.35
+
+## 1. Tujuan
+
+Memastikan start frame OPC memakai tepat satu foto produk aktif dari Product Database hanya pada klip produk/bridge, dengan payload referensi yang identik antara Phase 1 dan Regen. Perbaikan harus menghilangkan ketergantungan OPC pada resolver legacy `resolveProductBase64()` tanpa mengganggu consumer RE, Bridge Injector, atau IFC yang masih memakainya.
+
+Target perilaku untuk campaign dengan `bridge_at_clip=3` dan `bridge_duration_clips=1`:
+
+- klip 1, 2, dan klip setelah 3 tidak menerima foto produk;
+- klip 3 menerima tepat satu foto produk canonical;
+- Phase 1 dan Regen klip 3 mempunyai `reference_sha256`, `reference_count`, dan product reference yang identik;
+- bila foto canonical tidak tersedia, klip produk gagal secara eksplisit sebelum request dikirim ke G-Labs;
+- pergantian `active_photo` di Product Database langsung dipakai oleh request berikutnya.
+
+## 2. Akar Masalah yang Harus Ditutup
+
+1. OPC mempunyai dua resolver foto produk dengan prioritas berbeda. `resolveProductBase64()` memilih `clean_photo_url` lebih dahulu, sedangkan `resolveActiveProductReference()` menghormati `active_photo` dan mengenal `generated_photo_url`.
+2. Phase 1 dan Regen menghitung `isBridge` sendiri, lalu memasukkan hasil resolver legacy sebagai `extraReferences`.
+3. Sejak v2.14.34, shared builder hanya memakai foto canonical sebagai fallback jika `extraReferences` kosong. Reference legacy yang sudah terisi karena itu mengalahkan foto aktif database.
+4. Keputusan product clip tersebar antara bridge range dan metadata AI, sehingga caller dan builder dapat berbeda pendapat.
+5. Regression test saat ini hanya memanggil builder langsung. Test tidak mengeksekusi adapter Phase 1 dan Regen, serta integration test bergantung pada campaign yang sudah ada di schema database.
+
+## 3. Desain Perbaikan
+
+### 3.1 Satu keputusan product-reference policy
+
+`resolveProductReferenceRequirement()` menjadi satu-satunya fungsi yang menentukan apakah product reference wajib. Semua angka dinormalisasi dengan pemeriksaan nilai eksplisit, bukan fallback `||`.
+
+Prioritas keputusan:
+
+1. bridge range campaign yang tervalidasi;
+2. metadata eksplisit `requires_product_reference === true`;
+3. metadata eksplisit `product_visible === true`;
+4. selain itu `not_required`.
+
+Hasil resolver harus membawa `bridgeStart`, `bridgeEnd`, dan `reason` agar Phase 1, Regen, test, dan audit menggunakan keputusan yang sama.
+
+### 3.2 Builder menjadi pemilik tunggal foto produk OPC
+
+`buildOpcStartFrameRequest()` sendiri yang:
+
+- memuat produk berdasarkan `target_product_id/product_id`;
+- memilih foto melalui `resolveActiveProductReference()`;
+- menambahkan foto canonical hanya jika policy mewajibkannya;
+- memastikan tepat satu product reference;
+- melakukan fail-closed bila product reference wajib tetapi tidak ditemukan.
+
+Caller tidak boleh lagi mengirim product photo melalui `extraReferences`. Parameter tersebut diperjelas menjadi `contextReferences` dan hanya boleh berisi reference non-produk seperti karakter kartun.
+
+### 3.3 Adapter Phase 1 dan Regen tipis
+
+Phase 1 dan Regen hanya mengirim campaign, item, clip index, prompt, origin, dan optional character/context references. Keduanya tidak boleh memuat produk, menjalankan `resolveProductBase64()`, atau menghitung bridge range sendiri.
+
+### 3.4 Audit dan invariants
+
+Audit mencatat policy efektif dan identitas foto canonical tanpa menyimpan Base64:
+
+- `requires_product_reference`;
+- `requirement_reason`;
+- `reference_count` total;
+- `product_reference_count` pada object audit;
+- `reference_source_field`;
+- `reference_sha256`;
+- effective bridge range.
+
+Invariant sebelum provider call:
+
+- product clip: `product_reference_count === 1`;
+- non-product clip: `product_reference_count === 0`;
+- Base64 tidak pernah masuk audit/log.
+
+Tidak diperlukan migrasi awal untuk kolom baru: metadata tambahan dapat dipakai dalam structured log/test terlebih dahulu, sedangkan kolom audit existing tetap diisi kompatibel.
+
+## 4. Rencana Per File — Before dan After
+
+### `lib/opc-start-frame-contract.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const bridgeStart = Number(campaign?.bridge_at_clip || 2);
+const bridgeEnd = bridgeStart + Math.max(1, Number(campaign?.bridge_duration_clips || 1)) - 1;
+const bridge = Number(clipIndex) >= bridgeStart && Number(clipIndex) <= bridgeEnd;
+const required = productCampaign && (
+  bridge || clip.product_visible === true || clip.requires_product_reference === true
+);
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const normalizedClipIndex = normalizePositiveClipIndex(clipIndex);
+const bridgeStart = normalizePositiveClipIndex(campaign?.bridge_at_clip, 2);
+const bridgeDuration = normalizeBridgeDuration(campaign?.bridge_duration_clips, 1);
+const bridgeEnd = bridgeStart + bridgeDuration - 1;
+const bridge = normalizedClipIndex >= bridgeStart && normalizedClipIndex <= bridgeEnd;
+
+const metadataRequired = clip.requires_product_reference === true || clip.product_visible === true;
+const required = productCampaign && (bridge || metadataRequired);
+
+return {
+  required,
+  productCampaign,
+  bridge,
+  bridgeStart,
+  bridgeEnd,
+  reason: bridge ? 'bridge_range'
+    : clip.requires_product_reference === true ? 'clip_metadata'
+    : clip.product_visible === true ? 'product_visible'
+    : 'not_required'
+};
+```
+
+### `lib/opc-start-frame-request.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+export async function buildOpcStartFrameRequest({
+  campaign, item, clipIndex, prompt, origin, extraReferences = []
+}) {
+  const reference = resolveActiveProductReference({ product, fallbackPaths });
+  const references = [...extraReferences];
+  if (!references.length && requirement.required && reference) {
+    references.push(reference.base64DataUrl);
+  }
+}
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function buildOpcStartFrameRequest({
+  campaign, item, clipIndex, prompt, origin, contextReferences = []
+}) {
+  const requirement = resolveProductReferenceRequirement({ campaign, item, clipIndex });
+  const productReference = requirement.required
+    ? await resolveCanonicalOpcProductReference({ campaign, item })
+    : null;
+
+  if (requirement.required && !productReference) {
+    throw new ProductReferenceUnavailableError();
+  }
+
+  const references = dedupeReferences([
+    ...sanitizeContextReferences(contextReferences),
+    ...(productReference ? [productReference.base64DataUrl] : [])
+  ]);
+
+  return buildProviderAndAuditPayload({
+    references,
+    productReference,
+    requirement,
+    campaign,
+    item,
+    clipIndex,
+    prompt,
+    origin
+  });
+}
+```
+
+Catatan implementasi: `reference_sha256` dan fingerprint harus dihitung dari reference yang benar-benar dikirim, bukan sekadar reference yang sempat ditemukan di database.
+
+### `lib/product-reference-resolver.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+export function resolveActiveProductReference({ product, fallbackPaths = [], cwd = process.cwd() }) {
+  // memilih active_photo lalu fallback field lain
+}
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function resolveCanonicalOpcProductReference({ campaign, item, cwd = process.cwd() }) {
+  const productId = campaign?.target_product_id ?? campaign?.product_id ?? null;
+  if (!productId) return null;
+
+  const product = await getProductById(productId);
+  return resolveActiveProductReference({
+    product,
+    fallbackPaths: explicitCompatibilityFallbacks(campaign, item),
+    cwd
+  });
+}
+```
+
+Jika pemisahan repository dependency diperlukan untuk menghindari circular import, helper orchestration diletakkan di `lib/opc-product-reference.js`, sedangkan resolver file/path tetap murni di file existing.
+
+### `lib/scheduler-processors.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const productBase64 = await resolveProductBase64(tempCampaign, productData, rowPayload);
+const isBridge = cNum >= bridgeAtClip && cNum <= productEndClip;
+if (isBridge && productBase64) {
+  extraReferences = [productBase64];
+}
+const built = await buildOpcStartFrameRequest({
+  campaign: tempCampaign,
+  item,
+  clipIndex,
+  prompt,
+  extraReferences
+});
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const contextReferences = isCartoonWorld
+  ? await resolveClipCharacterReferences({ campaign: tempCampaign, item, clipIndex })
+  : [];
+
+const built = await buildOpcStartFrameRequest({
+  campaign: tempCampaign,
+  item: { ...item, new_video_plan_json: JSON.stringify(newVideoPlan) },
+  clipIndex,
+  prompt,
+  origin: 'phase_1_initial',
+  contextReferences
+});
+```
+
+Perubahan hanya pada jalur OPC `processPillarGenerator`. Export `resolveProductBase64()` dipertahankan sementara untuk consumer non-OPC agar scope patch tidak melebar.
+
+### `app/api/v2/pillar-campaigns/items/[itemId]/regenerate-t2i/route.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const productBase64 = await resolveProductBase64(campaign, productData, rowPayload);
+const isBridge = cNum >= bridgeAtClip && cNum <= productEndClip;
+if (isBridge && productBase64) {
+  resolvedRefs = { allReferences: [productBase64] };
+}
+const builtRequest = await buildOpcStartFrameRequest({
+  campaign, item, clipIndex, prompt: t2i_prompt,
+  origin: 'manual_regen',
+  extraReferences: resolvedRefs.allReferences
+});
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const contextReferences = isCartoon
+  ? await resolveClipCharacterReferences({ campaign, item, clipIndex })
+  : [];
+
+const builtRequest = await buildOpcStartFrameRequest({
+  campaign,
+  item,
+  clipIndex,
+  prompt: t2i_prompt,
+  origin: 'manual_regen',
+  contextReferences
+});
+```
+
+Route Handler tetap menggunakan `POST`, `await params`, dan `NextResponse` sesuai dokumentasi Next.js 16.2.5. Perubahan difokuskan pada delegasi business logic ke service bersama.
+
+### `lib/opc-start-frame-audit.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+if (JSON.stringify(audit).includes('base64,')) {
+  throw new Error('START_FRAME_AUDIT_CONTAINS_BASE64');
+}
+await pgQuery('INSERT INTO opc_start_frame_request_audits ...', values);
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+assertSafeStartFrameAudit(audit);
+assertReferenceInvariant(audit);
+await pgQuery('INSERT INTO opc_start_frame_request_audits ...', values);
+```
+
+Invariant dijalankan sebelum provider submission di builder/service; audit recorder mempertahankan pemeriksaan defensif kedua.
+
+### `scripts/test-opc-start-frame-reference.mjs`
+
+**Code Sebelum (Current/Before)**
+
+```js
+assert.equal(resolveProductReferenceRequirement({ campaign, item, clipIndex: 3 }).required, true);
+assert.match(scheduler, /buildOpcStartFrameRequest/);
+assert.match(regen, /origin: 'manual_regen'/);
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+await assertReferenceMatrix({
+  bridgeAt: 3,
+  duration: 1,
+  expectedProductReferenceCounts: [0, 0, 1, 0, 0]
+});
+
+await assertPhase1AndRegenParity({
+  clipIndex: 3,
+  expectedSourceField: 'generated_photo_url',
+  expectedProductReferenceCount: 1
+});
+
+await assert.rejects(
+  () => buildProductClipRequestWithoutPhoto(),
+  error => error.code === 'PRODUCT_REFERENCE_UNAVAILABLE'
+);
+```
+
+Test harus memeriksa `providerRequest.reference_images` dan SHA aktual, bukan regex source code sebagai bukti utama.
+
+### `scripts/test-opc-start-frame-reference-integration.mjs`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const campaign = await pgQuery(`
+  SELECT * FROM pillar_campaigns
+  WHERE target_product_id IS NOT NULL
+  ORDER BY created_at DESC LIMIT 1
+`);
+assert.ok(campaign, 'Campaign Product OPC Dev tidak tersedia.');
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const fixture = await createIsolatedOpcReferenceFixture({
+  tenantId: TEST_TENANT_ID,
+  bridgeAtClip: 3,
+  bridgeDurationClips: 1,
+  activePhoto: 'generated_photo_url'
+});
+
+try {
+  await assertPersistedInitialAndRegenAuditParity(fixture);
+} finally {
+  await cleanupIsolatedOpcReferenceFixture(fixture);
+}
+```
+
+Integration test wajib memakai schema Dev yang eksplisit dan tidak melakukan provider call. Implementasi memilih fixture Product OPC Dev secara read-only agar test tidak membuat atau menghapus data campaign; test menolak berjalan bila `PG_SEARCH_PATH` bukan `dev`.
+
+## 5. Verifikasi
+
+### 5.1 Automated
+
+```bash
+npm run test:opc:start-frame-reference
+npm run test:opc:start-frame-reference-integration
+npm run build
+```
+
+Acceptance assertions:
+
+- matrix bridge clip 3 menghasilkan count `[0,0,1,0,...]`;
+- reference source mengikuti `active_photo` walaupun `clean_photo_url` lain masih tersedia;
+- Phase 1 dan Regen menghasilkan product SHA yang sama;
+- mengganti active photo mengubah SHA request berikutnya;
+- missing canonical photo pada product clip menghasilkan HTTP 422/error terstruktur;
+- non-product clip tidak membawa product reference;
+- audit tidak mengandung Base64.
+
+### 5.2 Dev Mac Mini
+
+1. Deploy hanya ke Dev dengan `npm run deploy:macmini-dev`.
+2. Buat satu Product Campaign fixture dengan bridge tepat di klip 3.
+3. Jalankan Phase 1 dan catat audit klip 1–seluruh klip.
+4. Pastikan hanya klip 3 mempunyai satu product SHA.
+5. Regen klip 3, lalu pastikan SHA product sama dengan Phase 1.
+6. Regen satu non-bridge clip dan pastikan `reference_count` produk tetap nol.
+7. Inspeksi visual: produk klip 3 sesuai foto aktif database dan tidak muncul pada klip lain akibat reference leakage.
+
+Deployment Production tidak termasuk scope dan hanya boleh dilakukan setelah perintah manual eksplisit pengguna.
+
+## 6. Strategi Rilis
+
+Setelah unit test, integration test, build, dan Dev smoke test berhasil:
+
+```bash
+npm run release-non-interactive -- --type patch \
+  --title "Perbaikan Canonical Product Reference OPC" \
+  --points "Satukan resolver foto produk Phase 1 dan Regen|Kirim foto canonical hanya pada product clip|Tambah regression matrix dan parity audit"
+```
+
+Verifikasi branch `main/local-staging` sesuai workflow repository, tag patch baru, changelog, dan remote GitHub sebelum menyatakan selesai.
+
+## Execution Task List
+
+- [x] Tambahkan test reproduksi v2.14.34: `active_photo` berbeda dari `clean_photo_url` dan bridge di klip 3.
+- [x] Normalisasi contract product-reference policy dan effective bridge range.
+- [x] Jadikan shared start-frame builder pemilik tunggal canonical product reference OPC.
+- [x] Pisahkan context/character references dari product reference.
+- [x] Hapus pemakaian `resolveProductBase64()` dari Phase 1 OPC tanpa mengubah consumer non-OPC.
+- [x] Hapus pemakaian `resolveProductBase64()` dan perhitungan bridge lokal dari Regen OPC.
+- [x] Tambahkan invariant tepat satu product reference pada product clip dan nol pada non-product clip.
+- [x] Perkuat audit fingerprint agar merepresentasikan reference yang benar-benar dikirim.
+- [x] Ubah unit test menjadi payload matrix dan parity test nyata.
+- [x] Ubah integration test menjadi fixture Dev read-only tanpa provider call dan dengan guard schema eksplisit.
+- [x] Jalankan unit test dan integration test OPC start-frame.
+- [x] Jalankan build Next.js.
+- [x] Deploy ke Mac Mini Dev dan lakukan smoke test shared request Phase 1/Regen klip 3 tanpa provider call.
+- [x] Verifikasi tidak ada product-reference leakage pada non-bridge clip melalui payload integration test.
+- [x] Jalankan release patch non-interaktif dan verifikasi tag/branch remote.

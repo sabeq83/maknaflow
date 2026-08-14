@@ -74,22 +74,7 @@ export const POST = withTenantContext(async (req, { params }) => {
       return `data:${mimeType};base64,${buffer.toString('base64')}`;
     };
 
-    const { resolveProductBase64 } = await import('../../../../../../../lib/scheduler-processors');
-    let productData = null;
-    if (campaign.target_product_id) {
-      productData = await db.prepare("SELECT * FROM product_extractions WHERE id = ?").get(campaign.target_product_id);
-    }
-    if (!productData) {
-      const rowPayloadTmp = item.row_creative_payload ? JSON.parse(item.row_creative_payload) : {};
-      const prodTerm = rowPayloadTmp.product_name || campaign.campaign_name || '';
-      if (prodTerm) {
-        const firstWord = prodTerm.split(' ')[0] || prodTerm;
-        productData = await db.prepare("SELECT * FROM product_extractions WHERE product_name LIKE ? ORDER BY id DESC LIMIT 1").get(`%${firstWord}%`);
-      }
-    }
-
     const rowPayload = item.row_creative_payload ? JSON.parse(item.row_creative_payload) : {};
-    const productBase64 = await resolveProductBase64(campaign, productData, rowPayload);
 
     // Call T2I webhook helper
     const payload = {
@@ -100,13 +85,6 @@ export const POST = withTenantContext(async (req, { params }) => {
       subjectDemographicCustom: campaign.target_demographic_custom || null,
       visualOverrides: campaign.visual_overrides_json ? JSON.parse(campaign.visual_overrides_json) : null
     };
-
-    // If it's the bridge/product clip, we pass the product photo
-    const bridgeAtClip = campaign.bridge_at_clip || 2;
-    const bridgeDurationClips = campaign.bridge_duration_clips !== undefined ? Number(campaign.bridge_duration_clips) : 1;
-    const productEndClip = bridgeDurationClips > 0 ? (bridgeAtClip + bridgeDurationClips - 1) : bridgeAtClip;
-    const cNum = Number(clipIndex);
-    const isBridge = (cNum >= bridgeAtClip && cNum <= productEndClip);
 
     const brandProfile = campaign.brand_profile_id
       ? await db.prepare('SELECT * FROM brand_profiles WHERE id = ?').get(campaign.brand_profile_id)
@@ -135,30 +113,27 @@ export const POST = withTenantContext(async (req, { params }) => {
     const normalizedClipChars = clipCharacters.map(normalizeCharacterId).filter(Boolean);
 
     const isCartoon = rowPayload.content_world === 'cartoon_universe' || campaign.content_world === 'cartoon_universe';
-    let resolvedRefs = { allReferences: [] };
+    let contextReferences = [];
     if (isCartoon) {
       let universeSnapshot = null;
       try {
         universeSnapshot = campaign.universe_snapshot_json ? JSON.parse(campaign.universe_snapshot_json) : null;
       } catch (_) {}
-      resolvedRefs = resolveClipReferenceImages({
+      const resolvedRefs = resolveClipReferenceImages({
         contentWorld: 'cartoon_universe',
         universeProfile: campaign.universe_profile || rowPayload.universe_profile || 'pawville',
         universeSnapshot,
         clip: clipIndex,
-        productReference: productBase64,
+        productReference: null,
         productRevealBeat: rowPayload.product_reveal_beat || campaign.product_reveal_beat || 'none',
         clipCharacters: normalizedClipChars
       });
-    } else {
-      if (isBridge && productBase64) {
-        resolvedRefs = { allReferences: [productBase64] };
-      }
+      contextReferences = resolvedRefs.allReferences || [];
     }
 
     const { buildOpcStartFrameRequest } = await import('../../../../../../../lib/opc-start-frame-request');
     const { recordStartFrameRequestAudit } = await import('../../../../../../../lib/opc-start-frame-audit');
-    const builtRequest = await buildOpcStartFrameRequest({ campaign, item, clipIndex, prompt: t2i_prompt, origin: 'manual_regen', extraReferences: resolvedRefs.allReferences });
+    const builtRequest = await buildOpcStartFrameRequest({ campaign, item, clipIndex, prompt: t2i_prompt, origin: 'manual_regen', contextReferences });
     const t2iResult = await generateImage(builtRequest.providerRequest);
 
     if (!t2iResult?.task_id) {

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.35 — Perbaikan Canonical Product Reference OPC (14/08/2026)
+- Satukan resolver foto produk Phase 1 dan Regen
+- Kirim foto canonical hanya pada product clip
+- Tambah regression matrix dan parity audit
+
 ## V2.14.34 — Fix: DB reference sebagai fallback murni + Regen teruskan extraReferences real_world (14/08/2026)
 - Fix 1 (opc-start-frame-request.js): DB reference hanya dipakai sebagai fallback ketika extraReferences kosong DAN required — mencegah over-correction sekaligus tetap memberikan fallback saat productBase64 null
 - Fix 2 (regenerate-t2i/route.js): Ganti isCartoon ? resolvedRefs.allReferences : [] menjadi resolvedRefs.allReferences — real_world bridge clips kini meneruskan photo reference ke G-Labs
