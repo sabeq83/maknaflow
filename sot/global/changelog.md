@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.33 — Fix: Over-correction — kembalikan guard requirement.required di opc-start-frame-request (14/08/2026)
+- Bug: v2.14.32 menghapus guard requirement.required di buildOpcStartFrameRequest menyebabkan reference foto produk dikirim ke semua klip
+- Fix: kembalikan guard requirement.required — reference DB hanya ditambahkan untuk bridge clips (required=true), non-bridge clips tetap pure T2I
+- Kondisi throw error (extraReferences fallback) dari v2.14.32 tetap dipertahankan
+
 ## V2.14.32 — Fix: resolveProductBase64 async — image reference produk kini benar sampai ke G-Labs (14/08/2026)
 - Bug #1 CRITICAL: getProductById dipanggil tanpa await di resolveProductBase64 — p = Promise bukan data produk, foto DB tidak pernah terbaca
 - Bug #2 HIGH: resolveProductBase64 dideklarasikan sync tapi operasinya async — diubah menjadi async function + gunakan dynamic import
