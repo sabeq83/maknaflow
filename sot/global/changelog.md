@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.34 — Fix: DB reference sebagai fallback murni + Regen teruskan extraReferences real_world (14/08/2026)
+- Fix 1 (opc-start-frame-request.js): DB reference hanya dipakai sebagai fallback ketika extraReferences kosong DAN required — mencegah over-correction sekaligus tetap memberikan fallback saat productBase64 null
+- Fix 2 (regenerate-t2i/route.js): Ganti isCartoon ? resolvedRefs.allReferences : [] menjadi resolvedRefs.allReferences — real_world bridge clips kini meneruskan photo reference ke G-Labs
+- Kedua fix memastikan Phase 1 dan Regen menghasilkan foto produk identik hanya di bridge clip
+
 ## V2.14.33 — Fix: Over-correction — kembalikan guard requirement.required di opc-start-frame-request (14/08/2026)
 - Bug: v2.14.32 menghapus guard requirement.required di buildOpcStartFrameRequest menyebabkan reference foto produk dikirim ke semua klip
 - Fix: kembalikan guard requirement.required — reference DB hanya ditambahkan untuk bridge clips (required=true), non-bridge clips tetap pure T2I

@@ -158,7 +158,7 @@ export const POST = withTenantContext(async (req, { params }) => {
 
     const { buildOpcStartFrameRequest } = await import('../../../../../../../lib/opc-start-frame-request');
     const { recordStartFrameRequestAudit } = await import('../../../../../../../lib/opc-start-frame-audit');
-    const builtRequest = await buildOpcStartFrameRequest({ campaign, item, clipIndex, prompt: t2i_prompt, origin: 'manual_regen', extraReferences: isCartoon ? resolvedRefs.allReferences : [] });
+    const builtRequest = await buildOpcStartFrameRequest({ campaign, item, clipIndex, prompt: t2i_prompt, origin: 'manual_regen', extraReferences: resolvedRefs.allReferences });
     const t2iResult = await generateImage(builtRequest.providerRequest);
 
     if (!t2iResult?.task_id) {
