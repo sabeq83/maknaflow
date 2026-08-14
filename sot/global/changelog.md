@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.37 — Update Download Video Button Behavior (14/08/2026)
+- Ubah tombol Download Video menjadi Downloaded dan abu-abu setelah diklik sekali
+- Perbaikan parameter handleDownload di detail modal
+- Tombol download tetap aktif berfungsi setelah diunduh
+
 ## V2.14.36 — Perbaikan Clean Photo Reference OPC (14/08/2026)
 - Gunakan foto Clean sebagai referensi Phase 1 dan Regen
 - Validasi MIME byte length dan SHA payload Base64

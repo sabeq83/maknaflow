@@ -183,20 +183,25 @@ function ContentFlowHubPageContent() {
   const [downloadCooldowns, setDownloadCooldowns] = useState({});
   const [resolvedUrls, setResolvedUrls] = useState({});
   const [loadingUrls, setLoadingUrls] = useState({});
+  const [downloadedItems, setDownloadedItems] = useState({});
 
   const handleDownload = async (item, directUrl = null) => {
-    if (downloadCooldowns[item.id]) return;
+    // Pastikan item valid (jika dipanggil dari modal)
+    const targetItem = typeof item === 'object' && item !== null ? item : { id: item };
+    
+    // Mencegah double click beruntun saat loading url
+    if (loadingUrls[targetItem.id]) return;
 
-    let urlToOpen = directUrl || resolvedUrls[item.id];
+    let urlToOpen = directUrl || resolvedUrls[targetItem.id];
 
-    if (!urlToOpen) {
-      setLoadingUrls(prev => ({ ...prev, [item.id]: true }));
+    if (!urlToOpen && targetItem.video_id && targetItem.nextcloud_url) {
+      setLoadingUrls(prev => ({ ...prev, [targetItem.id]: true }));
       try {
-        const res = await fetch(`/api/content-flow/media-files?videoId=${encodeURIComponent(item.video_id)}&folderUrl=${encodeURIComponent(item.nextcloud_url)}`);
+        const res = await fetch(`/api/content-flow/media-files?videoId=${encodeURIComponent(targetItem.video_id)}&folderUrl=${encodeURIComponent(targetItem.nextcloud_url)}`);
         const json = await res.json();
         if (json.success && json.defaultFile) {
           urlToOpen = json.defaultFile.directUrl;
-          setResolvedUrls(prev => ({ ...prev, [item.id]: urlToOpen }));
+          setResolvedUrls(prev => ({ ...prev, [targetItem.id]: urlToOpen }));
         } else {
           alert('Gagal mendeteksi file video final di folder Nextcloud.');
           return;
@@ -206,16 +211,13 @@ function ContentFlowHubPageContent() {
         alert('Terjadi kesalahan saat menghubungi server.');
         return;
       } finally {
-        setLoadingUrls(prev => ({ ...prev, [item.id]: false }));
+        setLoadingUrls(prev => ({ ...prev, [targetItem.id]: false }));
       }
     }
 
     if (urlToOpen) {
       window.open(urlToOpen, '_blank');
-      setDownloadCooldowns(prev => ({ ...prev, [item.id]: true }));
-      setTimeout(() => {
-        setDownloadCooldowns(prev => ({ ...prev, [item.id]: false }));
-      }, 30000);
+      setDownloadedItems(prev => ({ ...prev, [targetItem.id]: true }));
     }
   };
   const [editStatusForm, setEditStatusForm] = useState({
@@ -1325,8 +1327,8 @@ function ContentFlowHubPageContent() {
                           }
 
                           if (isNextcloud) {
-                            const isCardCooldown = downloadCooldowns[item.id];
                             const isCardLoading = loadingUrls[item.id];
+                            const isCardDownloaded = downloadedItems[item.id];
                             return (
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                 <a className="content-action content-action-cloud content-action-compact" href={targetUrl} target="_blank" rel="noreferrer" style={{ width: '100%', textAlign: 'center', padding: '6px 10px', fontSize: '11px' }} title="Buka Link Nextcloud">
@@ -1338,17 +1340,22 @@ function ContentFlowHubPageContent() {
                                     e.stopPropagation();
                                     handleDownload(item);
                                   }}
-                                  disabled={isCardCooldown || isCardLoading}
-                                  className="content-action content-action-download content-action-compact"
+                                  disabled={isCardLoading}
+                                  className={`content-action content-action-compact ${isCardDownloaded ? '' : 'content-action-download'}`}
                                   style={{
                                     display: 'block',
                                     width: '100%',
                                     textAlign: 'center',
                                     padding: '6px 10px',
                                     fontSize: '11px',
+                                    ...(isCardDownloaded ? {
+                                      background: 'var(--surface-interactive)',
+                                      color: 'var(--text-disabled)',
+                                      borderColor: 'var(--border-subtle)',
+                                    } : {})
                                   }}
                                 >
-                                  {isCardLoading ? '🔄 Loading...' : isCardCooldown ? '⏳ Cooldown' : '📥 Download Video'}
+                                  {isCardLoading ? '🔄 Loading...' : isCardDownloaded ? '📥 Downloaded' : '📥 Download Video'}
                                 </button>
                               </div>
                             );
@@ -1635,25 +1642,30 @@ function ContentFlowHubPageContent() {
                               </a>
                             )}
 
-                            {/* 3. Download Video Final with Cooldown */}
+                            {/* 3. Download Video Final */}
                             {showDownloadButton && (() => {
-                              const isCooldown = downloadCooldowns[activeItem.id];
-                              return (
-                                <button
-                                  type="button"
-                                  onClick={() => handleDownload(activeItem.id, directDownloadUrl)}
-                                  disabled={loadingDownloadUrl || !directDownloadUrl || isCooldown}
-                                  className="content-action content-action-download"
-                                  style={{
-                                    padding: '10px 14px', fontSize: '13px',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                                    opacity: (loadingDownloadUrl || !directDownloadUrl) ? 0.6 : 1,
-                                  }}
-                                >
-                                  {loadingDownloadUrl ? '🔄 Loading...' : isCooldown ? '⏳ Cooldown' : '📥 Download Video Final'}
-                                </button>
-                              );
-                            })()}
+                               const isDownloaded = downloadedItems[activeItem.id];
+                               return (
+                                 <button
+                                   type="button"
+                                   onClick={() => handleDownload(activeItem, directDownloadUrl)}
+                                   disabled={loadingDownloadUrl || !directDownloadUrl}
+                                   className={`content-action ${isDownloaded ? '' : 'content-action-download'}`}
+                                   style={{
+                                     padding: '10px 14px', fontSize: '13px',
+                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                     opacity: (loadingDownloadUrl || !directDownloadUrl) ? 0.6 : 1,
+                                     ...(isDownloaded ? {
+                                       background: 'var(--surface-interactive)',
+                                       color: 'var(--text-disabled)',
+                                       borderColor: 'var(--border-subtle)',
+                                     } : {})
+                                   }}
+                                 >
+                                   {loadingDownloadUrl ? '🔄 Loading...' : isDownloaded ? '📥 Downloaded' : '📥 Download Video Final'}
+                                 </button>
+                               );
+                             })()}
                           </div>
                         );
                       })()}
