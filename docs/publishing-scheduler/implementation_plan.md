@@ -807,3 +807,360 @@ test('legacy Facebook caller remains draft-only', async () => {});
 - Production: dilarang tanpa perintah manual eksplisit pengguna.
 - Hindari polling SSH berulang; deployment remote build mengikuti SOP zero-spam repository.
 
+## 16. Remediasi Facebook Reels Publishing
+
+### 16.1 Tujuan dan diagnosis terkonfirmasi
+
+Remediasi ini memastikan pilihan `reels` untuk Facebook benar-benar menggunakan kontrak Facebook Reels Publishing yang didukung oleh versi Graph API aktif, bukan endpoint video Page generik. Diagnosis kode saat ini:
+
+1. `video` dan `reels` Facebook sama-sama dikirim ke `/{page-id}/videos`.
+2. Facebook `draft` benar-benar unpublished, tetapi Instagram mengabaikan `publish_mode` dan tetap memublikasikan container.
+3. Satu field `platform` dari form dapat menimpa platform seluruh akun ketika Facebook dan Instagram dipilih bersamaan.
+4. Facebook dianggap `published` segera setelah memperoleh ID, tanpa menunggu processing/transcoding dan tanpa membuktikan objek tersebut Reel.
+5. Permalink Facebook awal dibentuk secara lokal, bukan diambil dari objek kanonikal Meta.
+
+### 16.2 Keputusan implementasi
+
+- Kontrak endpoint Facebook Reels, permission, batas media, dan lifecycle wajib diverifikasi kembali terhadap dokumentasi resmi Meta untuk `META_GRAPH_VERSION` yang dipakai tepat sebelum implementasi. Bila kontrak resmi berbeda, dokumentasi resmi menjadi sumber kebenaran.
+- `media_type = reels` memakai adapter Facebook Reels khusus dengan fase `start → upload/transfer → status polling → finish/publish → verify` sesuai kontrak versi aktif.
+- `media_type = video` tetap memakai jalur video Page generik; UI menjelaskan perbedaannya.
+- Job Facebook live hanya berstatus `published` setelah objek eksternal terverifikasi published dan permalink kanonikal tersedia.
+- Draft tidak pernah dihitung sebagai published. Draft memakai status terminal/ringkasan yang berbeda dan tidak mengisi `*_publish_date`.
+- Platform setiap target selalu berasal dari `publishing_accounts.platform`; client tidak boleh menimpa platform akun.
+- Facebook dan Instagram tetap menjadi job independen meskipun dijadwalkan dalam satu submit.
+- Timeout setelah fase finish/publish masuk `verifying`, tidak langsung mengulang publish.
+- Rollout dilakukan dengan feature flag `ENABLE_FACEBOOK_REELS_PUBLISHING`, default `false` sampai pilot staging lulus.
+
+### 16.3 Lifecycle Facebook Reel yang diusulkan
+
+```text
+scheduled
+  → processing
+  → creating_container     (inisialisasi/upload session Meta)
+  → uploading_media        (server transfer atau upload binary)
+  → waiting_media          (processing/transcoding)
+  → publishing             (finish/publish)
+  → verifying              (ambil status, tipe objek, permalink)
+  → published
+```
+
+Cabang aman:
+
+```text
+upload belum terkirim + transient error → retry_wait
+upload/publish outcome ambigu           → verifying
+format/permission ditolak               → failed
+token/eligibility/checkpoint            → needs_review
+```
+
+### 16.4 Perubahan file dan code snippets
+
+#### `lib/publishing-contract.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+export const MEDIA_TYPES = ['text_only', 'image', 'video', 'reels'];
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export const MEDIA_TYPES = ['text_only', 'image', 'video', 'reels'];
+export const FACEBOOK_REELS_STAGES = [
+  'creating_container',
+  'uploading_media',
+  'waiting_media',
+  'publishing',
+  'verifying'
+];
+
+export function validatePlatformMediaContract({ platform, mediaType, publishMode }) {
+  // Tolak kombinasi ambigu dan tegakkan semantics draft/live per platform.
+}
+```
+
+#### `lib/meta-publisher.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const isVideo = (mediaType === 'video' || mediaType === 'reels') && Boolean(mediaUrl);
+if (isVideo) endpoint = `/${cleanPageId}/videos`;
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function startFacebookReelUpload({ facebookPageId, token }) {
+  // Inisialisasi Reels upload session memakai kontrak Graph API versi aktif.
+}
+
+export async function transferFacebookReel({ uploadSession, token, mediaUrl }) {
+  // Transfer file_url atau binary upload sesuai kontrak resmi dan hasil preflight.
+}
+
+export async function getFacebookVideoStatus({ videoId, token }) {
+  // Kembalikan processing state terstruktur; jangan menganggap ID berarti published.
+}
+
+export async function finishFacebookReel({ facebookPageId, videoId, token, caption }) {
+  // Finalisasi sebagai Reel live hanya setelah media siap.
+}
+
+export async function fetchFacebookReelDetails({ videoId, token }) {
+  // Ambil status, permalink kanonikal, created_time, dan bukti tipe objek.
+}
+```
+
+Jalur lama `publishFacebookLive()` tetap digunakan hanya untuk `text_only`, `image`, dan `video`; `reels` tidak boleh jatuh kembali ke `/{page-id}/videos` secara diam-diam.
+
+#### `lib/publishing-worker.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+result = await publishFacebookLive({
+  facebookPageId: job.facebook_page_id,
+  token: plainToken,
+  caption: job.caption_snapshot,
+  mediaUrl: job.media_url_snapshot,
+  mediaType: job.media_type
+});
+
+await markPublishingResult(job.tenant_id, job.id, {
+  status: 'published',
+  externalPostId: result.postId
+});
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+if (job.platform === 'facebook' && job.media_type === 'reels') {
+  return processFacebookReelJob(job, plainToken);
+}
+
+// processFacebookReelJob menyimpan video/session ID segera, melanjutkan stage
+// secara idempotent, menunggu processing selesai, lalu memverifikasi permalink
+// sebelum menandai published.
+```
+
+Sinkronisasi Content Flow juga membedakan `Draft Created`, `Processing`, `Published`, `Verifying`, dan `Failed`; draft tidak mengisi tanggal publikasi.
+
+#### `lib/publishing-repository.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const targetPlatform = platform || acc.platform;
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+if (platform && platform !== acc.platform) {
+  throw new Error('Platform target tidak cocok dengan platform publishing account.');
+}
+const targetPlatform = acc.platform;
+```
+
+Claim job mengikutsertakan seluruh external upload state yang diperlukan agar restart worker dapat melanjutkan fase, bukan membuat upload/publish baru.
+
+#### `lib/db-pg.js`
+
+**Code Sebelum (Current/Before)**
+
+```sql
+external_container_id TEXT,
+external_post_id TEXT,
+external_permalink TEXT,
+```
+
+**Code Sesudah (Proposed/After)**
+
+```sql
+external_container_id TEXT,
+external_post_id TEXT,
+external_permalink TEXT,
+external_media_status TEXT,
+external_object_type TEXT,
+provider_stage TEXT,
+provider_state_json JSONB NOT NULL DEFAULT '{}'::jsonb,
+verified_at TIMESTAMPTZ,
+```
+
+Migrasi bersifat additive dan backfill-safe; `provider_state_json` hanya menyimpan identifier/state non-secret.
+
+#### `app/api/v2/publishing/jobs/route.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const targets = validated.account_ids.map(accId => ({
+  accountId: accId,
+  platform: validated.platform,
+  // ...
+}));
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const targets = validated.account_ids.map(accountId => ({
+  accountId,
+  // Repository menyelesaikan dan memvalidasi platform dari account.
+  publishMode: validated.publish_mode,
+  mediaType: validated.media_type,
+  // ...
+}));
+```
+
+API mengembalikan job terpisah per account/platform dan menolak kombinasi media/mode yang tidak didukung.
+
+#### `app/api/v2/publishing/preflight/route.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+if (contentType && !contentType.startsWith('video/')) {
+  warnings.push(`Content-Type media '${contentType}' mungkin bukan video MP4/MOV.`);
+}
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const probe = await probePublishingMedia(mediaUrl);
+validateFacebookReelMedia({
+  contentType,
+  contentLength,
+  codec: probe.codec,
+  audioCodec: probe.audioCodec,
+  width: probe.width,
+  height: probe.height,
+  duration: probe.duration,
+  frameRate: probe.frameRate
+});
+```
+
+Preflight membedakan warning dan blocker serta memakai batas resmi sesuai Graph API aktif, bukan angka generik bersama untuk Facebook dan Instagram.
+
+#### `app/api/v2/publishing/jobs/[id]/route.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+status: metaDetail.isPublished ? 'published' : job.status
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const reconciled = await reconcileMetaPublishingJob(job, account);
+await markPublishingResult(tenantId, id, {
+  status: reconciled.status,
+  externalPostId: reconciled.postId,
+  externalPermalink: reconciled.permalink,
+  verifiedAt: reconciled.verifiedAt
+});
+```
+
+Rekonsiliasi Facebook Reel memeriksa processing state dan tipe objek, bukan hanya boolean `published`.
+
+#### `app/content-flow/PublishingScheduler.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+setScheduleForm({ ...scheduleForm, account_ids: next, platform: acc.platform });
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+setScheduleForm(previous => ({
+  ...previous,
+  account_ids: next
+}));
+```
+
+UI menampilkan platform per akun, label terpisah `Facebook Reel` dan `Facebook Video`, serta penjelasan bahwa `Draft` tidak tayang. Status processing/verifying ditampilkan tanpa mengklaim konten telah published.
+
+#### `tests/publishing-scheduler.test.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+test('legacy Facebook caller remains draft-only', async () => {});
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+test('facebook reels never use the generic page videos endpoint', async () => {});
+test('facebook reel waits for media readiness before finish', async () => {});
+test('ambiguous finish outcome enters verifying without duplicate publish', async () => {});
+test('draft is never recorded as published or given a publish date', async () => {});
+test('instagram draft mode does not silently publish live', async () => {});
+test('each selected account keeps its repository platform', async () => {});
+test('canonical Facebook permalink is stored after verification', async () => {});
+test('worker restart resumes the saved Facebook Reel stage', async () => {});
+```
+
+#### `sot/global/publishing-scheduler.md`
+
+**Code Sebelum (Current/Before)**
+
+```md
+Facebook publishing mendukung draft/live melalui publisher Meta.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```md
+Dokumentasikan perbedaan Facebook Page video dan Facebook Reel, lifecycle upload,
+status mapping, reconciliation, permission, media constraints, feature flag,
+runbook needs_review, observability, dan rollback tanpa menghapus audit.
+```
+
+### 16.5 Execution Task List — Facebook Reels Remediation
+
+- [x] Audit implementasi saat ini dan konfirmasi bahwa Facebook `reels` masih diarahkan ke endpoint video Page generik.
+- [x] Verifikasi kontrak Facebook Reels Publishing, permission, processing status, media constraint, dan versi Graph API resmi yang aktif.
+- [x] Tambahkan contract/status mapping Facebook Reel serta semantics draft/live yang konsisten lintas platform.
+- [x] Perbaiki routing target agar platform selalu berasal dari publishing account dan setiap akun menghasilkan job independen.
+- [x] Tambahkan migrasi additive untuk provider stage, media status, object type, verification timestamp, dan resume state non-secret.
+- [x] Implementasikan adapter Facebook Reel start, transfer, processing poll, finish, canonical detail, dan sanitasi error.
+- [x] Refactor worker menjadi state machine idempotent yang dapat melanjutkan job setelah restart dan aman terhadap unknown outcome.
+- [x] Perbaiki Content Flow summary agar draft/processing/verifying/published tidak tercampur dan publish date hanya diisi setelah verifikasi.
+- [x] Perketat preflight Facebook Reel berdasarkan codec, audio, dimensi, durasi, frame rate, ukuran, MIME, redirect, dan akses publik.
+- [x] Perbaiki UI pemilihan multi-account, pilihan Facebook Reel vs Video, copy draft/live, approval, serta indikator processing/verifying.
+- [x] Tambahkan unit, repository, API, worker state-machine, restart recovery, duplicate prevention, dan regression tests.
+- [x] Jalankan `npm run test:publishing-scheduler`, test terkait Content Flow, lint/build, dan review diff/security.
+- [ ] Jalankan pilot staging dengan satu Reel non-kritis; bandingkan objek, permalink, visibility, serta distribusi terhadap upload manual Meta Business Suite.
+- [ ] Observasi beberapa siklus tanpa duplicate/misclassification sebelum mengaktifkan feature flag lebih luas.
+- [ ] Setelah verifikasi berhasil, jalankan release patch non-interaktif dan verifikasi version, changelog, commit, tag, branch `main`, serta remote.
+
+### 16.6 Acceptance Criteria — Facebook Reels
+
+- Memilih `Facebook Reel` tidak pernah memanggil endpoint video Page generik.
+- Job tidak menjadi `published` hanya karena Meta mengembalikan upload/video ID.
+- Reel hanya menjadi `published` setelah processing selesai, hasil eksternal terverifikasi, dan permalink kanonikal tersimpan.
+- Draft tidak terlihat sebagai publikasi live dan tidak mengisi `facebook_publish_date`.
+- Instagram tidak memublikasikan job draft secara diam-diam.
+- Memilih akun Facebook dan Instagram bersamaan menghasilkan dua job dengan platform masing-masing yang benar.
+- Restart/crash pada setiap stage tidak membuat upload atau post duplikat.
+- Timeout setelah finish tidak melakukan blind retry; job masuk `verifying` dan direkonsiliasi.
+- Content Flow menyimpan status, tanggal, dan URL yang sesuai dengan hasil eksternal sebenarnya.
+- Pilot staging membuktikan objek Facebook dikenali sebagai Reel dan dapat dibuka dari permalink kanonikal.
+
+### 16.7 Rollout dan rollback
+
+1. Deploy migrasi additive dengan `ENABLE_FACEBOOK_REELS_PUBLISHING=false`.
+2. Jalankan seluruh test dan satu dry-run/preflight tanpa publish.
+3. Aktifkan hanya untuk satu tenant/Page staging dan satu konten yang disetujui.
+4. Pause global publishing bila terdeteksi duplicate, object type salah, permalink salah, atau mismatch Content Flow.
+5. Rollback melalui feature flag ke jalur lama untuk `video`; jangan fallback diam-diam untuk `reels`.
+6. Pertahankan job/attempt/provider state untuk audit dan reconciliation; jangan drop kolom saat rollback.
+7. Production tetap memerlukan perintah manual eksplisit pengguna.

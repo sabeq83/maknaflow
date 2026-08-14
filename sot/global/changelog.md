@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.39 — Perbaikan Facebook Reels Publishing (14/08/2026)
+- Gunakan lifecycle resmi Facebook Reels video_reels dengan upload dan verifikasi status
+- Pisahkan status draft live dan routing platform per akun
+- Tambahkan preflight media state recovery UI serta regression tests
+
 ## V2.14.38 — Persist Downloaded State via LocalStorage (14/08/2026)
 - Simpan status Downloaded di localStorage agar bertahan setelah refresh browser
 - Verifikasi dan deployment ke server dev

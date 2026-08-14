@@ -69,7 +69,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
     account_ids: [],
     platform: 'facebook',
     publish_mode: 'draft',
-    media_type: 'video',
+    media_type: 'reels',
     caption: initialPreloadItem?.caption || '',
     media_url: initialPreloadItem?.url_asset || initialPreloadItem?.nextcloud_url || '',
     scheduled_at: new Date(Date.now() + 3600000).toISOString().slice(0, 16), // default +1 hour
@@ -191,7 +191,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
           setScheduleForm(prev => ({
             ...prev,
             media_url: best.directUrl,
-            media_type: best.mediaType || 'video'
+            media_type: (best.mediaType || 'video') === 'video' ? 'reels' : best.mediaType
           }));
         }
       } else {
@@ -211,7 +211,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
       setScheduleForm(prev => ({
         ...prev,
         media_url: found.directUrl,
-        media_type: found.mediaType || 'video'
+        media_type: (found.mediaType || 'video') === 'video' ? 'reels' : found.mediaType
       }));
     }
   };
@@ -221,7 +221,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
     // 1. Resolve media type
     const rawAsset = item.url_asset || item.nextcloud_url || '';
     const isImage = /\.(png|jpg|jpeg|webp)$/i.test(rawAsset);
-    const mediaType = isImage ? 'image' : 'video';
+    const mediaType = isImage ? 'image' : 'reels';
 
     // 2. Resolve public URL
     let resolvedMediaUrl = '';
@@ -517,12 +517,16 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
       showToast('Pilih minimal satu akun dan ID konten ⚠️');
       return;
     }
+    const selectedAccounts = accounts.filter(account => scheduleForm.account_ids.includes(account.id));
+    if (scheduleForm.publish_mode === 'draft' && selectedAccounts.some(account => account.platform === 'instagram')) {
+      showToast('Instagram tidak mendukung draft pada scheduler ini. Pilih mode Live. ⚠️');
+      return;
+    }
     setSubmittingSchedule(true);
     try {
       const payload = {
         content_id: scheduleForm.content_id,
         account_ids: scheduleForm.account_ids,
-        platform: scheduleForm.platform,
         publish_mode: scheduleForm.publish_mode,
         media_type: scheduleForm.media_type,
         caption: scheduleForm.caption,
@@ -573,11 +577,14 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
     switch (status) {
       case 'published':
         return <span style={{ background: 'var(--status-success-soft)', color: 'var(--status-success)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-success)' }}></span>PUBLISHED</span>;
+      case 'draft_created':
+        return <span style={{ background: 'var(--status-info-soft)', color: 'var(--status-info)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-info)' }}></span>DRAFT CREATED</span>;
       case 'scheduled':
         return <span style={{ background: 'var(--status-info-soft)', color: 'var(--status-info)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-info)' }}></span>SCHEDULED</span>;
       case 'processing':
       case 'publishing':
       case 'creating_container':
+      case 'uploading_media':
       case 'waiting_media':
         return <span style={{ background: 'var(--status-neutral-soft)', color: 'var(--status-neutral)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-neutral)' }}></span>PROCESSING</span>;
       case 'verifying':
@@ -781,6 +788,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
             <option value="processing">Processing</option>
             <option value="retry_wait">Retry Wait</option>
             <option value="published">Published</option>
+            <option value="draft_created">Draft Created</option>
             <option value="failed">Failed</option>
             <option value="cancelled">Cancelled</option>
           </select>
@@ -905,7 +913,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                                   Retry
                                 </button>
                               )}
-                              {(job.external_post_id || job.status === 'published') && (
+                              {(job.external_post_id || job.status === 'published' || job.status === 'draft_created') && (
                                 <button
                                   disabled={syncingJobId === job.id}
                                   onClick={() => handleSyncMetaPost(job.id)}
@@ -1249,7 +1257,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                               const next = e.target.checked
                                 ? [...scheduleForm.account_ids, acc.id]
                                 : scheduleForm.account_ids.filter(id => id !== acc.id);
-                              setScheduleForm({ ...scheduleForm, account_ids: next, platform: acc.platform });
+                              setScheduleForm(previous => ({ ...previous, account_ids: next }));
                             }}
                           />
                           <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{acc.display_name}</span>
@@ -1277,7 +1285,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                     onChange={(e) => setScheduleForm({ ...scheduleForm, publish_mode: e.target.value })}
                     style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}
                   >
-                    <option value="draft">Scheduled Draft (Aman - Meta Draft)</option>
+                    <option value="draft">Draft (Tidak tayang ke publik)</option>
                     <option value="live">Live (Memerlukan Approval)</option>
                   </select>
                 </div>
@@ -1290,7 +1298,8 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                     onChange={(e) => setScheduleForm({ ...scheduleForm, media_type: e.target.value })}
                     style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}
                   >
-                    <option value="video">🎬 Video (MP4 / Reels)</option>
+                    <option value="reels">📱 Reel Vertikal (Facebook/Instagram)</option>
+                    <option value="video">🎬 Video Page / Feed</option>
                     <option value="image">🖼️ Gambar / Foto (JPEG/PNG)</option>
                     <option value="text_only">📝 Teks Saja</option>
                   </select>

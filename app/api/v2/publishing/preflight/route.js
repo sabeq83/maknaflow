@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { withTenantContext } from '@/lib/auth';
 import { getActiveTenantId } from '@/lib/tenant-context';
 import { getPublishingAccountById } from '@/lib/publishing-repository';
+import { probePublishingMedia, validateFacebookReelProbe } from '@/lib/publishing-media-probe';
 
 export const dynamic = 'force-dynamic';
 
@@ -78,6 +79,17 @@ export const POST = withTenantContext(async (request) => {
         validAccounts.push(acc);
       } else {
         validAccounts.push(acc);
+      }
+    }
+
+    if (mediaType === 'reels' && validAccounts.some(account => account.platform === 'facebook') && mediaUrl) {
+      try {
+        const probe = await probePublishingMedia(mediaUrl.trim());
+        const validation = validateFacebookReelProbe(probe);
+        errors.push(...validation.errors);
+        warnings.push(...validation.warnings);
+      } catch (probeError) {
+        errors.push(`Metadata Facebook Reel tidak dapat diverifikasi: ${probeError.message}`);
       }
     }
 

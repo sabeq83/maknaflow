@@ -8,6 +8,8 @@ import {
   calculateRetryDelay,
   sanitizeErrorMessage
 } from '../lib/publishing-contract.js';
+import { validatePlatformMediaContract } from '../lib/publishing-contract.js';
+import { validateFacebookReelProbe } from '../lib/publishing-media-probe.js';
 import {
   savePublishingAccount,
   listPublishingAccounts,
@@ -36,7 +38,94 @@ test('Publishing Contract: platforms and statuses are defined', () => {
   assert.ok(PUBLISHING_STATUSES.includes('processing'));
   assert.ok(PUBLISHING_STATUSES.includes('verifying'));
   assert.ok(PUBLISHING_STATUSES.includes('published'));
+  assert.ok(PUBLISHING_STATUSES.includes('draft_created'));
   assert.ok(PUBLISHING_STATUSES.includes('failed'));
+});
+
+test('Publishing Contract: Instagram draft is rejected instead of silently publishing live', () => {
+  assert.throws(() => validatePlatformMediaContract({
+    platform: 'instagram', mediaType: 'reels', publishMode: 'draft'
+  }), /Instagram draft belum didukung/);
+});
+
+test('Facebook Reels preflight validates official media constraints', () => {
+  const valid = validateFacebookReelProbe({
+    codec: 'h264', audioCodec: 'aac', width: 1080, height: 1920, duration: 30, frameRate: 30
+  });
+  assert.deepEqual(valid.errors, []);
+
+  const invalid = validateFacebookReelProbe({
+    codec: 'mpeg4', audioCodec: 'mp3', width: 480, height: 854, duration: 120, frameRate: 20
+  });
+  assert.ok(invalid.errors.length >= 5);
+});
+
+test('Meta Publisher: Facebook reels use video_reels lifecycle and never generic videos endpoint', async () => {
+  const previousFetch = globalThis.fetch;
+  const previousFlag = process.env.ENABLE_FACEBOOK_REELS_PUBLISHING;
+  process.env.ENABLE_FACEBOOK_REELS_PUBLISHING = 'true';
+  const calls = [];
+  globalThis.fetch = async (url, options = {}) => {
+    calls.push({ url: String(url), options });
+    return new Response(JSON.stringify({ video_id: 'vid_123', upload_url: 'https://rupload.facebook.com/video-upload/v25.0/vid_123' }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  };
+  try {
+    const { startFacebookReelUpload } = await import('../lib/meta-publisher.js');
+    const result = await startFacebookReelUpload({ facebookPageId: 'page_1', token: 'page_token' });
+    assert.equal(result.videoId, 'vid_123');
+    assert.ok(calls.some(call => call.url.includes('/page_1/video_reels')));
+    assert.ok(!calls.some(call => call.url.includes('/page_1/videos')));
+  } finally {
+    globalThis.fetch = previousFetch;
+    if (previousFlag === undefined) delete process.env.ENABLE_FACEBOOK_REELS_PUBLISHING;
+    else process.env.ENABLE_FACEBOOK_REELS_PUBLISHING = previousFlag;
+  }
+});
+
+test('Meta Publisher: generic Facebook publisher rejects reels fallback', async () => {
+  const { publishFacebookLive } = await import('../lib/meta-publisher.js');
+  await assert.rejects(() => publishFacebookLive({
+    facebookPageId: 'page_1', token: 'token', caption: 'x', mediaUrl: 'https://example.com/x.mp4', mediaType: 'reels'
+  }), /lifecycle Reels Publishing API/);
+});
+
+test('Meta Publisher: Facebook Reel transfer, readiness, finish, and canonical verification contract', async () => {
+  const previousFetch = globalThis.fetch;
+  const calls = [];
+  const responses = [
+    { success: true },
+    { status: { video_status: 'ready', uploading_phase: { status: 'completed' }, processing_phase: { status: 'completed' } } },
+    { success: true },
+    { id: 'vid_123', permalink_url: 'https://www.facebook.com/reel/vid_123', published: true, status: { video_status: 'ready', publishing_phase: { status: 'completed', publish_status: 'published' } } }
+  ];
+  globalThis.fetch = async (url, options = {}) => {
+    calls.push({ url: String(url), options });
+    return new Response(JSON.stringify(responses.shift()), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  };
+  try {
+    const {
+      transferFacebookReel,
+      getFacebookVideoStatus,
+      finishFacebookReel,
+      fetchFacebookReelDetails
+    } = await import('../lib/meta-publisher.js');
+    await transferFacebookReel({ uploadUrl: 'https://rupload.facebook.com/video-upload/v25.0/vid_123', token: 'page_token', mediaUrl: 'https://cdn.example.com/reel.mp4' });
+    const status = await getFacebookVideoStatus({ videoId: 'vid_123', token: 'page_token' });
+    assert.equal(status.videoStatus, 'ready');
+    await finishFacebookReel({ facebookPageId: 'page_1', videoId: 'vid_123', token: 'page_token', caption: 'Caption', publishMode: 'live' });
+    const details = await fetchFacebookReelDetails({ videoId: 'vid_123', token: 'page_token' });
+    assert.equal(details.objectType, 'REEL');
+    assert.equal(details.isPublished, true);
+    assert.equal(details.permalink, 'https://www.facebook.com/reel/vid_123');
+    assert.equal(calls[0].options.headers.file_url, 'https://cdn.example.com/reel.mp4');
+    assert.ok(calls[2].url.includes('/page_1/video_reels'));
+    assert.equal(JSON.parse(calls[2].options.body).video_state, 'PUBLISHED');
+  } finally {
+    globalThis.fetch = previousFetch;
+  }
 });
 
 test('Publishing Contract: sanitizes tokens and secrets from messages', () => {
@@ -383,6 +472,4 @@ test('Instagram Workflow: Container creation and container status validation', a
   assert.equal(validIg.content_id, 'VID-IG-01');
   assert.equal(validIg.media_type, 'video');
 });
-
-
 

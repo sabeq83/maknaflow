@@ -63,7 +63,6 @@ export const POST = withTenantContext(async (request, user) => {
 
     const targets = validated.account_ids.map(accId => ({
       accountId: accId,
-      platform: validated.platform,
       publishMode: validated.publish_mode,
       mediaType: validated.media_type,
       caption: validated.caption,

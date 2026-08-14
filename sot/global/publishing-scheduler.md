@@ -14,9 +14,10 @@ Publishing Scheduler adalah mesin penjadwalan dan penerbitan konten media sosial
    - Klaim job atomik dengan `SELECT ... FOR UPDATE SKIP LOCKED` dalam transaksi terpisah untuk mencegah resource lock pada pool database (`PGPOOL_MAX=3`).
    - Idempotency key conflict resolution `(tenant_id, idempotency_key)` untuk mencegah duplikasi penerbitan.
 3. **Meta Publisher Engine** (`lib/meta-publisher.js`):
-   - Meta Graph API `v22.0`.
+   - Meta Graph API default `v25.0` dan dapat dioverride melalui `META_GRAPH_VERSION`.
    - Facebook Draft creation (default safe guardrail: `published: false, unpublished_content_type: 'DRAFT'`).
    - Facebook Live publishing (dilindungi feature flag `ENABLE_FACEBOOK_LIVE=true` dan status approval).
+   - Facebook Reels memakai lifecycle resmi `/{page-id}/video_reels`: initialize, hosted upload ke `rupload.facebook.com`, processing poll, finish, lalu verifikasi permalink/status.
    - Instagram Container lifecycle: `createInstagramContainer` -> `getInstagramContainerStatus` polling -> `publishInstagramContainer`.
 4. **Encrypted Secret Storage** (`lib/encrypted-secret.js`):
    - Token akun Meta disimpan dalam bentuk ciphertext terenkripsi AES-256-GCM.
@@ -56,6 +57,25 @@ Publishing Scheduler adalah mesin penjadwalan dan penerbitan konten media sosial
    - Jika terjadi network reset / socket timeout saat pemanggilan publish, job dipindahkan ke status `verifying`. Worker tidak akan langsung melakukan retry untuk menghindari duplikasi draft/posting di Meta Business Suite.
 3. **Stale Recovery**:
    - Job yang terhenti dalam status `processing` lebih dari 5 menit (misal server restart tiba-tiba) secara otomatis direcovery oleh worker tick ke antrean `retry_wait` atau `verifying`.
+
+## 3.1 Facebook Reel vs Video Page
+
+- `media_type=reels` tidak boleh menggunakan endpoint `/{page-id}/videos`.
+- `media_type=video` tetap berarti video Page/feed generik.
+- Reel menyimpan `external_object_type=REEL`, provider stage, status media, dan state non-secret agar worker dapat melanjutkan setelah restart.
+- Job hanya menjadi `published` setelah publishing state terverifikasi; ID upload saja tidak cukup.
+- Timeout setelah finish masuk `verifying` dan tidak melakukan blind publish retry.
+- Mode draft berakhir sebagai `draft_created`, tidak dihitung published, dan tidak mengisi `facebook_publish_date`.
+- Instagram draft ditolak sampai implementasi draft resmi tersedia; worker tidak boleh memublikasikannya secara diam-diam.
+- Aktifkan adapter dengan `ENABLE_FACEBOOK_REELS_PUBLISHING=true`; pause worker secara global untuk rollback darurat.
+
+### Batas media Facebook Reel
+
+- MP4 direkomendasikan, rasio vertikal 9:16 direkomendasikan.
+- Minimum 540x960; rekomendasi 1080x1920.
+- Durasi 3–90 detik dan frame rate 24–60 fps.
+- Codec video H.264/H.265/VP9/AV1; audio AAC-LC direkomendasikan.
+- Hosted URL harus publik tanpa autentikasi dan dapat diambil oleh user-agent Meta.
 
 ---
 
