@@ -185,6 +185,18 @@ function ContentFlowHubPageContent() {
   const [loadingUrls, setLoadingUrls] = useState({});
   const [downloadedItems, setDownloadedItems] = useState({});
 
+  // Muat status downloaded dari localStorage saat component did mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('maknaflow_downloaded_items');
+      if (saved) {
+        setDownloadedItems(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.error('Error loading downloaded items from localStorage:', e);
+    }
+  }, []);
+
   const handleDownload = async (item, directUrl = null) => {
     // Pastikan item valid (jika dipanggil dari modal)
     const targetItem = typeof item === 'object' && item !== null ? item : { id: item };
@@ -217,7 +229,17 @@ function ContentFlowHubPageContent() {
 
     if (urlToOpen) {
       window.open(urlToOpen, '_blank');
-      setDownloadedItems(prev => ({ ...prev, [targetItem.id]: true }));
+      
+      // Simpan ke state dan localStorage
+      setDownloadedItems(prev => {
+        const updated = { ...prev, [targetItem.id]: true };
+        try {
+          localStorage.setItem('maknaflow_downloaded_items', JSON.stringify(updated));
+        } catch (e) {
+          console.error('Error saving downloaded items to localStorage:', e);
+        }
+        return updated;
+      });
     }
   };
   const [editStatusForm, setEditStatusForm] = useState({

@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.38 — Persist Downloaded State via LocalStorage (14/08/2026)
+- Simpan status Downloaded di localStorage agar bertahan setelah refresh browser
+- Verifikasi dan deployment ke server dev
+
 ## V2.14.37 — Update Download Video Button Behavior (14/08/2026)
 - Ubah tombol Download Video menjadi Downloaded dan abu-abu setelah diklik sekali
 - Perbaikan parameter handleDownload di detail modal
