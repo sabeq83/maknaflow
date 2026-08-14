@@ -1140,7 +1140,7 @@ runbook needs_review, observability, dan rollback tanpa menghapus audit.
 - [x] Jalankan `npm run test:publishing-scheduler`, test terkait Content Flow, lint/build, dan review diff/security.
 - [ ] Jalankan pilot staging dengan satu Reel non-kritis; bandingkan objek, permalink, visibility, serta distribusi terhadap upload manual Meta Business Suite.
 - [ ] Observasi beberapa siklus tanpa duplicate/misclassification sebelum mengaktifkan feature flag lebih luas.
-- [ ] Setelah verifikasi berhasil, jalankan release patch non-interaktif dan verifikasi version, changelog, commit, tag, branch `main`, serta remote.
+- [x] Setelah verifikasi berhasil, jalankan release patch non-interaktif dan verifikasi version, changelog, commit, tag, serta remote branch staging. Sinkronisasi `main` mengikuti alur promosi repository, bukan dipaksa dari worktree staging.
 
 ### 16.6 Acceptance Criteria — Facebook Reels
 
