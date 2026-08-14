@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.14.31 — Fix: Product reference image tidak terkirim ke G-Labs di Phase 1 OPC (14/08/2026)
+- Bug: productBase64 di-resolve di Phase 1 tapi tidak diteruskan sebagai extraReferences ke buildOpcStartFrameRequest
+- Fix: submitStartFrame kini menghitung bridge clip range dan meneruskan productBase64 ke G-Labs, konsisten dengan logika regenerate-t2i
+- Fix mencakup real_world (productBase64 dikirim ke bridge clips) dan cartoon_universe (resolver karakter digunakan)
+- reference_images tidak lagi kosong pada generasi Phase 1 initial OPC hybrid_lock
+
 ## V2.14.30 — Perbaikan Parity Reference Start Frame OPC (14/08/2026)
 - Samakan payload T2I initial dan Regen melalui shared request builder
 - Gunakan active_photo Product Database sebagai reference canonical dan fail-closed pada product clip
