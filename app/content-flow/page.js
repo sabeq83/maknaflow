@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar';
 import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import PublishingScheduler from './PublishingScheduler';
+import ContentFlowAnalytics from './ContentFlowAnalytics';
 
 const SearchIcon = ({ style }) => (
   <svg style={style} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -94,10 +95,24 @@ function ContentFlowHubPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const accountQuery = searchParams.get('account') || 'all';
-  const initialView = searchParams.get('view') === 'publishing' ? 'publishing' : 'library';
+  const requestedView = searchParams.get('view');
+  const initialView = ['library', 'publishing', 'analytics'].includes(requestedView)
+    ? requestedView
+    : 'library';
 
   const [mainView, setMainView] = useState(initialView);
   const [schedulePreloadItem, setSchedulePreloadItem] = useState(null);
+
+  const handleSwitchView = useCallback((newView) => {
+    setMainView(newView);
+    const params = new URLSearchParams(searchParams.toString());
+    if (newView === 'library') {
+      params.delete('view');
+    } else {
+      params.set('view', newView);
+    }
+    router.replace(`/content-flow?${params.toString()}`);
+  }, [searchParams, router]);
 
   const [items, setItems] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -375,11 +390,13 @@ function ContentFlowHubPageContent() {
   }, [searchTerm, sourceFilter, accountFilter, productFilter, pipelineFilter, tiktokFilter, fbFilter, igFilter, showToast]);
 
   useEffect(() => {
-    loadContent();
+    if (mainView !== 'analytics') {
+      loadContent();
+    }
     if (accountFilter && accountFilter !== 'all') {
       fetchBrandSchedules(accountFilter);
     }
-  }, [loadContent, accountFilter, fetchBrandSchedules]);
+  }, [loadContent, accountFilter, fetchBrandSchedules, mainView]);
 
   function openAdminScheduleModal() {
     let targetBrand = accountFilter;
@@ -740,10 +757,10 @@ function ContentFlowHubPageContent() {
             </div>
           </div>
 
-          {/* Primary View Switcher: Content Library vs Publishing Scheduler */}
+          {/* Primary View Switcher: Content Library vs Publishing Scheduler vs Analytics */}
           <div className="contentflow-view-tabs" style={{ display: 'flex', gap: '10px', marginBottom: '20px', paddingBottom: '14px' }}>
             <button
-              onClick={() => { setMainView('library'); setSchedulePreloadItem(null); }}
+              onClick={() => { handleSwitchView('library'); setSchedulePreloadItem(null); }}
               className={`content-action contentflow-view-tab ${mainView === 'library' ? 'contentflow-view-tab-active' : ''}`}
               style={{
                 padding: '9px 18px',
@@ -760,7 +777,7 @@ function ContentFlowHubPageContent() {
               <span>▣ Content Library</span>
             </button>
             <button
-              onClick={() => setMainView('publishing')}
+              onClick={() => handleSwitchView('publishing')}
               className={`content-action contentflow-view-tab ${mainView === 'publishing' ? 'contentflow-view-tab-active' : ''}`}
               style={{
                 padding: '9px 18px',
@@ -776,13 +793,31 @@ function ContentFlowHubPageContent() {
               <ClockIcon style={{ width: 15, height: 15 }} />
               <span>⏱️ Publishing Scheduler</span>
             </button>
+            <button
+              onClick={() => handleSwitchView('analytics')}
+              className={`content-action contentflow-view-tab ${mainView === 'analytics' ? 'contentflow-view-tab-active' : ''}`}
+              style={{
+                padding: '9px 18px',
+                borderRadius: '10px',
+                fontSize: '13px',
+                fontWeight: 750,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <span>⌁ Analytics & Reporting</span>
+            </button>
           </div>
 
           {mainView === 'publishing' ? (
             <PublishingScheduler
               initialPreloadItem={schedulePreloadItem}
-              onBackToLibrary={() => { setMainView('library'); setSchedulePreloadItem(null); }}
+              onBackToLibrary={() => { handleSwitchView('library'); setSchedulePreloadItem(null); }}
             />
+          ) : mainView === 'analytics' ? (
+            <ContentFlowAnalytics accountQuery={accountQuery} />
           ) : (
             <>
               {/* Quick Metrics Bar */}
@@ -1536,7 +1571,7 @@ function ContentFlowHubPageContent() {
                         const itemToSchedule = { ...activeItem };
                         setActiveItem(null);
                         setSchedulePreloadItem(itemToSchedule);
-                        setMainView('publishing');
+                        handleSwitchView('publishing');
                       }}
                       className="content-action content-action-neutral"
                       style={{ padding: '6px 12px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '6px' }}

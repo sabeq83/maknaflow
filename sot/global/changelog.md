@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.46 — Content Flow Analytics Reporting (15/08/2026)
+- Menambahkan dashboard statistik produksi dan publikasi Content Flow
+- Menambahkan reporting tenant-aware per brand dan platform
+- Menambahkan filter waktu grafik anomali data dan export CSV
+
 ## V2.14.45 — Peningkatan Validasi Affiliate Link Content Planner (15/08/2026)
 - Menambahkan auto-resolve dan auto-lock affiliate link reaktif berdasarkan pilihan brand dan produk
 - Menambahkan opsi checkbox kampanye non-affiliate
