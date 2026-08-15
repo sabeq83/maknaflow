@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.44 — Normalisasi Validasi review_revision Backend (15/08/2026)
+- Melonggarkan validasi review_revision di backend agar mendukung null atau empty string pada kampanye pilar (OPC) baru
+- Menghindari error review_revision wajib diisi jika revisi belum pernah terbuat di database
+
 ## V2.14.43 — Perbaikan Tombol Approve OPC (15/08/2026)
 - Menambahkan review_revision pada payload handleApprove dan handleSaveDraft di halaman pilar-campaigns (OPC)
 - Memperbaiki error review_revision wajib diisi ketika menyetujui kampanye
