@@ -3444,7 +3444,7 @@ origin                      = campaign_data_repair
 - [ ] Jalankan repair dry-run lokal/fixture.
 - [x] Jalankan seluruh targeted test dan Next.js production build.
 - [x] Deploy serta verifikasi patch di Mac Mini Dev.
-- [ ] Jalankan release patch non-interaktif dan verifikasi commit/tag/remote.
+- [x] Jalankan release patch non-interaktif dan verifikasi commit/tag/remote.
 - [ ] Deploy patch ke Mac Mini Staging setelah Dev lulus.
 - [ ] Pause campaign `opc_260815_ir4y96` sebelum repair data.
 - [ ] Ambil snapshot before-repair Staging.

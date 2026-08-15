@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.42 — Kompatibilitas Repair OPC Staging (15/08/2026)
+- Hilangkan asumsi kolom updated_at pada campaign lama
+- Pertahankan rollback transaksional repair OPC
+
 ## V2.14.41 — Perbaiki OPC Tenant Lineage dan Bridge Clip (15/08/2026)
 - Kunci ingest OPC ke product_id tenant aktif
 - Samakan single dan bulk start-frame regen ke canonical request

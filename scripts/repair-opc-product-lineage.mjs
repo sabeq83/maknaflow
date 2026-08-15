@@ -112,7 +112,7 @@ try {
     await client.query('SELECT pg_advisory_xact_lock(hashtext($1))', [`repair:${campaignId}`]);
     const locked = (await client.query('SELECT target_product_id FROM pillar_campaigns WHERE id=$1 FOR UPDATE', [campaignId])).rows[0];
     if (locked.target_product_id !== EXPECTED.oldProductId) throw new Error('Campaign berubah setelah preflight; repair dibatalkan.');
-    await client.query(`UPDATE pillar_campaigns SET status='paused',target_product_id=$2,product_ref_image_path=$3,updated_at=CURRENT_TIMESTAMP WHERE id=$1`,
+    await client.query(`UPDATE pillar_campaigns SET status='paused',target_product_id=$2,product_ref_image_path=$3 WHERE id=$1`,
       [campaignId, EXPECTED.newProductId, referencePath]);
 
     for (const item of items) {
