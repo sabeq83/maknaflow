@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.43 — Perbaikan Tombol Approve OPC (15/08/2026)
+- Menambahkan review_revision pada payload handleApprove dan handleSaveDraft di halaman pilar-campaigns (OPC)
+- Memperbaiki error review_revision wajib diisi ketika menyetujui kampanye
+
 ## V2.14.42 — Kompatibilitas Repair OPC Staging (15/08/2026)
 - Hilangkan asumsi kolom updated_at pada campaign lama
 - Pertahankan rollback transaksional repair OPC

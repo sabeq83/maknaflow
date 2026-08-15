@@ -1737,7 +1737,8 @@ export default function PillarCampaignDetailPage() {
             ffmpeg_sfx_volume: settings.ffmpeg_sfx_volume,
             ffmpeg_bgm_volume: settings.ffmpeg_bgm_volume,
             ffmpeg_sync_option: settings.ffmpeg_sync_option,
-            selected_vo_version: activeVoVersion
+            selected_vo_version: activeVoVersion,
+            review_revision: item.review_revision
           })
         });
         const resData = await res.json();
@@ -1787,7 +1788,8 @@ export default function PillarCampaignDetailPage() {
             ffmpeg_bgm_volume: settings.ffmpeg_bgm_volume,
             ffmpeg_sync_option: settings.ffmpeg_sync_option,
             only_save: true,
-            selected_vo_version: activeVoVersion
+            selected_vo_version: activeVoVersion,
+            review_revision: item.review_revision
           })
         });
         const resData = await res.json();
