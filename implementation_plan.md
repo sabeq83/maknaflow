@@ -3441,18 +3441,18 @@ origin                      = campaign_data_repair
 - [x] Tambahkan regression fixture dua tenant dengan produk bernama sama.
 - [x] Tambahkan parity test initial/single/bulk/recovery/repair.
 - [x] Implementasikan repair script dengan `--dry-run`, `--apply`, dan confirmation guard.
-- [ ] Jalankan repair dry-run lokal/fixture.
+- [x] Jalankan repair dry-run lokal/fixture.
 - [x] Jalankan seluruh targeted test dan Next.js production build.
 - [x] Deploy serta verifikasi patch di Mac Mini Dev.
 - [x] Jalankan release patch non-interaktif dan verifikasi commit/tag/remote.
-- [ ] Deploy patch ke Mac Mini Staging setelah Dev lulus.
-- [ ] Pause campaign `opc_260815_ir4y96` sebelum repair data.
-- [ ] Ambil snapshot before-repair Staging.
-- [ ] Jalankan Staging dry-run dan verifikasi expected row count.
-- [ ] Apply repair transaksional pada campaign `opc_260815_ir4y96`.
-- [ ] Verifikasi target product dan 12 campaign bindings.
-- [ ] Antrekan ulang hanya clip 3 item `371–382` dengan canonical context.
-- [ ] Verifikasi 12 audit SHA clip 3 dan checksum clip non-target.
-- [ ] Verifikasi seluruh item kembali completed `4/4` dan review state konsisten.
-- [ ] Resume campaign setelah acceptance criteria lulus.
-- [ ] Pastikan tidak ada deployment atau mutasi Production.
+- [x] Deploy patch ke Mac Mini Staging setelah Dev lulus.
+- [x] Pause campaign `opc_260815_ir4y96` sebelum repair data.
+- [x] Ambil snapshot before-repair Staging.
+- [x] Jalankan Staging dry-run dan verifikasi expected row count.
+- [x] Apply repair transaksional pada campaign `opc_260815_ir4y96`.
+- [x] Verifikasi target product dan 12 campaign bindings.
+- [x] Antrekan ulang hanya clip 3 item `371–382` dengan canonical context.
+- [x] Verifikasi 12 audit SHA clip 3 dan checksum clip non-target.
+- [x] Verifikasi seluruh item kembali completed `4/4` dan review state konsisten.
+- [x] Resume campaign setelah acceptance criteria lulus.
+- [x] Pastikan tidak ada deployment atau mutasi Production.
