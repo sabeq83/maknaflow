@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.40 — Perbaiki FFprobe Preflight Mac Mini (15/08/2026)
+- Gunakan resolver FFprobe runtime yang tervalidasi
+- Tetapkan FFPROBE_PATH pada PM2 Mac Mini
+- Tambahkan regression test resolusi binary
+
 ## V2.14.39 — Perbaikan Facebook Reels Publishing (14/08/2026)
 - Gunakan lifecycle resmi Facebook Reels video_reels dengan upload dan verifikasi status
 - Pisahkan status draft live dan routing platform per akun

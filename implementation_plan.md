@@ -2816,3 +2816,268 @@ Dev dimulai dari `shadow`, lalu `enforce` setelah fixture Omura lulus. Release h
 - [ ] Verifikasi klip non-bridge tidak mempunyai overlay produk.
 - [ ] Jalankan cluster health check.
 - [ ] Jika seluruh acceptance lulus, release patch dan verifikasi commit/tag/remote.
+
+---
+
+# Implementation Plan — Perbaikan FFprobe Preflight Facebook Reel di Mac Mini Staging
+
+## 1. Ringkasan Masalah
+
+Preflight Facebook Reel gagal di Mac Mini Staging dengan `ENOENT` karena `lib/publishing-media-probe.js` mengeksekusi `ffprobe.path` secara langsung. Saat dibundel oleh Next.js, nilai tersebut mengarah ke:
+
+```text
+/Users/masbenu/maknaflow-staging/.next/server/chunks/bin/darwin/arm64/ffprobe
+```
+
+Pemeriksaan server membuktikan path hasil bundling itu tidak ada, sedangkan dua binary yang valid tersedia:
+
+```text
+/opt/homebrew/bin/ffprobe
+/Users/masbenu/maknaflow-staging/node_modules/ffprobe-static/bin/darwin/arm64/ffprobe
+```
+
+Perbaikan harus membuat resolusi binary independen dari struktur internal `.next`, fail-fast dengan pesan yang jelas, dan dipakai konsisten oleh seluruh pemrosesan media.
+
+## 2. Ruang Lingkup
+
+1. Tambahkan resolver FFprobe bersama yang dapat diuji tanpa melakukan spawn.
+2. Gunakan resolver pada preflight Publishing Scheduler.
+3. Hilangkan resolver duplikat dari Video Studio dan Smart Sync.
+4. Tetapkan `FFPROBE_PATH=/opt/homebrew/bin/ffprobe` secara eksplisit pada PM2 Mac Mini.
+5. Tambahkan regression test untuk urutan fallback dan kasus path `.next` hilang.
+6. Verifikasi lokal, deploy Dev, lalu deploy Staging dan ulangi preflight Facebook Reel.
+
+Perubahan tidak mencakup algoritma validasi metadata Reel, lifecycle Meta Publishing API, maupun instalasi ulang FFmpeg.
+
+## 3. Rancangan Perubahan per File
+
+### 3.1 `lib/ffprobe-path.js` — file baru
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Belum ada resolver FFprobe bersama.
+// Setiap modul menentukan path sendiri atau memakai ffprobe.path langsung.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+import fs from 'node:fs';
+import path from 'node:path';
+import ffprobe from 'ffprobe-static';
+
+export function resolveFfprobePath({
+  envPath = process.env.FFPROBE_PATH,
+  platform = process.platform,
+  arch = process.arch,
+  cwd = process.cwd(),
+  staticPath = ffprobe.path,
+  existsSync = fs.existsSync
+} = {}) {
+  const executable = platform === 'win32' ? 'ffprobe.exe' : 'ffprobe';
+  const candidates = [
+    envPath,
+    platform === 'darwin' && arch === 'arm64' ? '/opt/homebrew/bin/ffprobe' : null,
+    path.join(cwd, 'node_modules', 'ffprobe-static', 'bin', platform, arch, executable),
+    staticPath
+  ].filter(Boolean);
+
+  const resolved = candidates.find(candidate => existsSync(candidate));
+  if (!resolved) throw new Error(`FFprobe binary tidak ditemukan. Kandidat: ${candidates.join(', ')}`);
+  return resolved;
+}
+```
+
+Implementasi final juga menormalisasi path virtual `/ROOT`, membuang kandidat duplikat, dan memvalidasi bahwa target merupakan file yang dapat dieksekusi. `FFPROBE_PATH` yang diisi tetapi invalid harus menghasilkan error konfigurasi eksplisit, bukan diam-diam memakai binary lain.
+
+### 3.2 `lib/publishing-media-probe.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+import ffprobe from 'ffprobe-static';
+
+const { stdout } = await execFileAsync(ffprobe.path, [
+  '-v', 'error',
+  // ...
+]);
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+import { resolveFfprobePath } from './ffprobe-path.js';
+
+const ffprobePath = resolveFfprobePath();
+const { stdout } = await execFileAsync(ffprobePath, [
+  '-v', 'error',
+  // ...
+]);
+```
+
+Resolver dipanggil ketika probe dijalankan sehingga perubahan environment pada startup/test dapat terbaca, dan error menyebut masalah konfigurasi FFprobe tanpa mengekspos data sensitif.
+
+### 3.3 `lib/video-studio-processor.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+function getFfprobePath() {
+  if (process.env.FFPROBE_PATH) return process.env.FFPROBE_PATH;
+  // Homebrew, /ROOT, dan node_modules fallback lokal...
+}
+
+const ffprobePath = getFfprobePath();
+ffmpeg.setFfprobePath(ffprobePath);
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+import { resolveFfprobePath } from './ffprobe-path.js';
+
+ffmpeg.setFfprobePath(resolveFfprobePath());
+```
+
+Perilaku existing dipertahankan, tetapi sumber resolusi menjadi satu dan konsisten dengan preflight.
+
+### 3.4 `lib/smart-sync-engine.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+function getFfprobePath() {
+  // Resolver kedua yang menduplikasi Video Studio.
+}
+
+ffmpeg.setFfprobePath(getFfprobePath());
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+import { resolveFfprobePath } from './ffprobe-path.js';
+
+ffmpeg.setFfprobePath(resolveFfprobePath());
+```
+
+### 3.5 `ecosystem.macmini.config.cjs`
+
+**Code Sebelum (Current/Before)**
+
+```js
+env_staging: {
+  NODE_ENV: 'production',
+  APP_ENV: 'staging',
+  // FFPROBE_PATH belum ditetapkan.
+}
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+env_staging: {
+  NODE_ENV: 'production',
+  APP_ENV: 'staging',
+  FFPROBE_PATH: '/opt/homebrew/bin/ffprobe',
+}
+```
+
+Nilai yang sama ditambahkan pada environment UI Dev Mac Mini karena route preflight berjalan di proses Next.js UI. API process dapat diberi nilai yang sama untuk konsistensi, tetapi bukan dependency langsung route tersebut.
+
+### 3.6 `tests/ffprobe-path.test.js` — file baru
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Belum ada regression test untuk resolusi binary FFprobe.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+test('memprioritaskan FFPROBE_PATH yang valid', () => { /* ... */ });
+test('memakai Homebrew arm64 pada Mac Mini', () => { /* ... */ });
+test('fallback ke ffprobe-static dalam node_modules', () => { /* ... */ });
+test('tidak memilih path .next yang tidak ada', () => { /* ... */ });
+test('gagal dengan pesan diagnostik jika binary tidak ditemukan', () => { /* ... */ });
+```
+
+Test menggunakan dependency injection `existsSync` sehingga tidak bergantung pada OS mesin test dan tidak menjalankan proses eksternal.
+
+### 3.7 `tests/publishing-scheduler.test.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+test('Facebook Reels preflight validates official media constraints', () => {
+  // Hanya menguji hasil validasi metadata.
+});
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+test('Facebook Reels preflight validates official media constraints', () => {
+  // Validasi metadata tetap dipertahankan.
+});
+
+test('publishing media probe memakai resolver FFprobe, bukan path bundle Next.js', async () => {
+  // Spawn/invoker diinjeksi atau dimock dan path executable diverifikasi.
+});
+```
+
+Jika injeksi executor ke `probePublishingMedia` membuat API produksi lebih kompleks, assertion integrasi diletakkan seluruhnya pada `tests/ffprobe-path.test.js` dan test scheduler tetap tidak diubah.
+
+## 4. Strategi Error Handling
+
+- `FFPROBE_PATH` terkonfigurasi tetapi tidak valid: preflight gagal dengan pesan konfigurasi yang spesifik.
+- Homebrew tidak tersedia: resolver mencoba binary paket `ffprobe-static` berdasarkan platform/architecture runtime.
+- Path `ffprobe-static` hasil bundling menunjuk `.next/server/chunks` tetapi file tidak ada: kandidat ditolak sebelum `spawn`, lalu resolver menggunakan kandidat valid lain atau memberi error diagnostik.
+- Timeout dan kegagalan membaca URL media tetap memakai mekanisme preflight yang sekarang.
+- Tidak ada penyalinan binary manual ke `.next`, karena direktori tersebut merupakan output build yang tidak stabil.
+
+## 5. Acceptance Criteria
+
+1. Unit test resolver dan Publishing Scheduler lulus.
+2. `npm run build` berhasil tanpa error baru terkait FFprobe.
+3. Setelah deploy Dev, proses PM2 menerima `FFPROBE_PATH=/opt/homebrew/bin/ffprobe`.
+4. Preflight Facebook Reel Dev berhasil membaca codec, audio, dimensi, durasi, dan frame rate.
+5. Setelah deploy Staging, tidak ada lagi spawn ke `.next/server/chunks/bin/darwin/arm64/ffprobe`.
+6. Preflight Staging menggunakan `/opt/homebrew/bin/ffprobe` dan mengembalikan hasil validasi metadata.
+7. PM2 Staging UI/API tetap online dan endpoint UI/API memberi HTTP 200.
+8. Video Studio dan Smart Sync tetap dapat membaca metadata setelah memakai resolver bersama.
+
+## 6. Urutan Implementasi dan Rilis
+
+1. Implementasikan resolver bersama dan unit test.
+2. Migrasikan preflight, Video Studio, dan Smart Sync ke resolver bersama.
+3. Tambahkan environment FFprobe pada konfigurasi PM2 Mac Mini.
+4. Jalankan targeted test, test scheduler, dan build.
+5. Deploy ke Mac Mini Dev, verifikasi environment PM2 dan lakukan preflight nyata.
+6. Jalankan release patch non-interaktif sesuai SOP repo.
+7. Deploy ke Mac Mini Staging setelah Dev lulus.
+8. Ulangi preflight Facebook Reel di Staging dan periksa log PM2 serta health endpoint.
+9. Production tidak disentuh tanpa instruksi eksplisit pengguna.
+
+## Execution Task List — FFprobe Preflight Mac Mini
+
+- [x] Tambahkan `lib/ffprobe-path.js` dengan urutan resolver yang deterministik.
+- [x] Validasi `FFPROBE_PATH` dan executable candidate secara fail-fast.
+- [x] Tangani path virtual `/ROOT` dan path bundle `.next` yang hilang.
+- [x] Ubah `lib/publishing-media-probe.js` memakai resolver bersama.
+- [x] Migrasikan `lib/video-studio-processor.js` ke resolver bersama.
+- [x] Migrasikan `lib/smart-sync-engine.js` ke resolver bersama.
+- [x] Tambahkan `FFPROBE_PATH` pada environment PM2 Mac Mini Staging dan Dev.
+- [x] Tambahkan regression test resolver FFprobe.
+- [x] Tambahkan atau sesuaikan test integrasi Publishing Scheduler bila diperlukan.
+- [x] Jalankan targeted unit test dan `tests/publishing-scheduler.test.js`.
+- [x] Jalankan Next.js production build.
+- [ ] Deploy dan verifikasi preflight pada Mac Mini Dev.
+- [ ] Perbarui checklist ini setelah setiap tahap selesai.
+- [ ] Jalankan patch release non-interaktif dan verifikasi commit/tag/remote.
+- [ ] Deploy ke Mac Mini Staging.
+- [ ] Verifikasi PM2, UI 5010, API 7010, dan path FFprobe runtime.
+- [ ] Jalankan ulang preflight Facebook Reel Staging sampai metadata berhasil dibaca.
+- [ ] Pastikan Production tidak dideploy tanpa instruksi eksplisit.
