@@ -1,6 +1,6 @@
 {
   "name": "maknaflow",
-  "version": "2.14.40",
+  "version": "2.14.41",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack -p 3005",
@@ -26,6 +26,7 @@
     "test:operator-content": "node scripts/test-operator-content.mjs",
     "test:operator-presets": "node scripts/test-operator-presets.mjs",
     "test:opc:start-frame-reference": "node scripts/test-opc-start-frame-reference.mjs",
+    "test:opc:product-lineage": "node scripts/test-opc-product-lineage.mjs",
     "test:opc:start-frame-reference-integration": "node scripts/test-opc-start-frame-reference-integration.mjs",
     "test:product-catalog": "node scripts/test-product-catalog-contract.mjs",
     "test:content-automation": "node scripts/test-content-automation.mjs",

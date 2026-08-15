@@ -3,6 +3,7 @@ import { getDb, updatePillarCampaignItem, getSetting } from '../../../../../../.
 import { generateImage, getTaskStatus, getFileUrl } from '../../../../../../../lib/webhook-client';
 import fs from 'fs';
 import path from 'path';
+import { recordCompletedStartFrameAsset } from '@/lib/pillar-start-frame-service';
 
 import { withTenantContext } from '@/lib/auth';
 
@@ -209,6 +210,7 @@ export const POST = withTenantContext(async (req, { params }) => {
         t2i_start_frame_path: `/uploads/start_frames/${startFrameFilename}`
       });
     })();
+    await recordCompletedStartFrameAsset(itemId, { clipIndex, localPath: `/uploads/start_frames/${startFrameFilename}` });
 
     const localUrl = `/uploads/start_frames/${startFrameFilename}?t=${Date.now()}`;
     return NextResponse.json({
@@ -218,6 +220,6 @@ export const POST = withTenantContext(async (req, { params }) => {
     });
 
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, code: error.code || 'OPC_REGEN_FAILED', error: error.message }, { status: error.status || 500 });
   }
 });

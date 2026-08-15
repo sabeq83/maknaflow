@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.41 — Perbaiki OPC Tenant Lineage dan Bridge Clip (15/08/2026)
+- Kunci ingest OPC ke product_id tenant aktif
+- Samakan single dan bulk start-frame regen ke canonical request
+- Tambahkan repair aman untuk campaign OPC lintas tenant
+
 ## V2.14.40 — Perbaiki FFprobe Preflight Mac Mini (15/08/2026)
 - Gunakan resolver FFprobe runtime yang tervalidasi
 - Tetapkan FFPROBE_PATH pada PM2 Mac Mini

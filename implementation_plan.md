@@ -3082,3 +3082,377 @@ Jika injeksi executor ke `probePublishingMedia` membuat API produksi lebih kompl
 - [ ] Verifikasi PM2, UI 5010, API 7010, dan path FFprobe runtime.
 - [ ] Jalankan ulang preflight Facebook Reel Staging sampai metadata berhasil dibaca.
 - [x] Pastikan Production tidak dideploy tanpa instruksi eksplisit.
+
+---
+
+# Implementation Plan — Tenant-Safe OPC Product Ingest dan Repair `opc_260815_ir4y96`
+
+## 1. Tujuan
+
+1. Memperbaiki bug Planner → OPC yang mengabaikan `planner.product_id` lalu memilih produk bernama sama dari tenant lain.
+2. Menjadikan tenant/product/binding validation sebagai syarat wajib sebelum campaign Product OPC dibuat.
+3. Menyamakan perilaku Phase 1, single Regen, dan durable/bulk Regen agar selalu memakai canonical product reference builder.
+4. Memperbaiki data campaign Staging `opc_260815_ir4y96` secara transaksional dan dapat diaudit.
+5. Meregenerasi hanya bridge clip 3 yang invalid, tanpa mengulang clip 1, 2, dan 4.
+
+## 2. Fakta Audit dan Target Repair
+
+Data valid:
+
+```text
+Campaign tenant       : default_tenant
+Campaign              : opc_260815_ir4y96
+Planner               : pln_65839439
+Planner product_id    : pe_sync_1781148697786_165
+Brand Profile         : df382ce8-2145-4464-ae63-79375ff3aff2 (dapurbotani)
+Brand-product binding : 8c4e2a22-f880-4970-8d37-ff69b0026c55 (aktif)
+Foto Clean            : /uploads/products/clean/clean_pe_sync_1781148697786_165.jpg
+```
+
+Data campaign yang salah:
+
+```text
+target_product_id     : 292f7423-9096-45b8-bf74-07273d02171a
+product tenant        : tnt_sy-dodot_4ba27b
+campaign bindings     : tidak ada
+```
+
+Semua item `371–382` harus dianggap belum mempunyai bridge clip 3 yang terbukti valid. Item `372–382` gagal membuat clip 3; item `371` mempunyai hasil durable regen tanpa audit canonical product reference sehingga clip 3 revision tersebut juga harus diganti.
+
+## 3. Perubahan Kode
+
+### 3.1 `lib/pillar-campaign-ingest.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const explicitProductId = globalSettings.target_product_id || null;
+let targetProdId = explicitProductId || (!isEditorial ? planner.target_product_id : null) || null;
+
+if (targetProdId) {
+  product = await db.prepare('SELECT * FROM product_extractions WHERE id = ?').get(targetProdId);
+} else if (!isEditorial && planner.product_name) {
+  product = await db.prepare(
+    'SELECT * FROM product_extractions WHERE LOWER(product_name) = LOWER(?) LIMIT 1'
+  ).get(planner.product_name);
+}
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+const tenantId = planner.tenant_id || getActiveTenantId();
+const explicitProductId = globalSettings.target_product_id || null;
+let targetProdId = explicitProductId || (!isEditorial ? planner.product_id : null) || null;
+
+if (targetProdId) {
+  product = await getProductById(targetProdId);
+  if (!product) {
+    throw new PillarCampaignIngestError(
+      'Produk Planner tidak ditemukan pada tenant aktif.',
+      422,
+      'OPC_PRODUCT_TENANT_MISMATCH'
+    );
+  }
+} else if (!isEditorial && planner.product_name) {
+  product = await db.prepare(
+    'SELECT * FROM product_extractions WHERE tenant_id = ? AND LOWER(product_name) = LOWER(?) LIMIT 1'
+  ).get(tenantId, planner.product_name);
+}
+```
+
+Tambahkan invariant sebelum `createPillarCampaignBundle()`:
+
+```js
+assertOpcProductLineage({ tenantId, planner, brandProfile, product, brandProductBinding });
+```
+
+Untuk Product Campaign, kegagalan `campaign_product_bindings` menjadi fatal dan transaksi pembuatan bundle dibatalkan. Tidak boleh lagi hanya dicatat sebagai `[OPC Ingest Binding Warning]`.
+
+### 3.2 `lib/opc-product-lineage.js` — file baru
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Belum ada satu validator canonical untuk tenant lineage OPC.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+export async function resolveAndValidateOpcProductLineage({
+  planner,
+  explicitProductId,
+  brandProfileId
+}) {
+  const tenantId = getActiveTenantId();
+  const productId = explicitProductId || planner.product_id;
+  const product = await getProductById(productId);
+  if (!product) throw new OpcProductTenantMismatchError(productId, tenantId);
+
+  const brand = await getBrandProfileByTenant(brandProfileId, tenantId);
+  const binding = await getActiveBrandProduct({ tenantId, brandProfileId, productId });
+  if (!brand || !binding) throw new OpcProductBindingUnavailableError();
+
+  return { tenantId, product, brand, binding };
+}
+```
+
+Validator tidak melakukan fallback lintas tenant dan tidak memilih produk hanya berdasarkan nama jika `planner.product_id` tersedia.
+
+### 3.3 `app/api/v2/pillar-campaigns/items/[itemId]/regenerate-t2i/route.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+} catch (error) {
+  return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+}
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+} catch (error) {
+  return NextResponse.json({
+    success: false,
+    code: error.code || 'OPC_REGEN_FAILED',
+    error: error.message
+  }, { status: error.status || 500 });
+}
+```
+
+Setelah file berhasil disimpan, route juga memanggil `recordCompletedStartFrameAsset()` agar single Regen mempunyai checkpoint asset yang sama dengan worker durable.
+
+### 3.4 `app/api/v2/pillar-campaigns/items/[itemId]/regenerate-start-frames/route.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+request: {
+  prompt: clip.t2i_prompt,
+  model,
+  aspect_ratio: campaign.aspect_ratio || '9:16',
+  webhookOverride: brandProfile || undefined
+}
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+context: {
+  campaignId: campaign.id,
+  itemId: item.id,
+  clipIndex: Number(clip.clip_index),
+  prompt: clip.t2i_prompt,
+  origin: 'bulk_regen'
+}
+```
+
+Route menjalankan canonical preflight seluruh context sebelum menulis antrean. Bila clip 3 tidak memiliki reference valid, request ditolak HTTP 422 dan tidak ada revision parsial yang dibuat.
+
+### 3.5 `lib/pillar-start-frame-service.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+await queueStartFrameRevision(itemId, clips);
+// Revision selalu menganggap clips.length sebagai seluruh expected asset.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+await queueStartFrameRevision(itemId, clips, {
+  expectedCount: campaign.target_clips_count,
+  carryForwardCompleted: true
+});
+```
+
+Partial repair clip 3 membuat revision baru, menyalin checkpoint clip 1, 2, dan 4 yang valid ke revision tersebut, lalu hanya mengantrekan clip 3. Aggregate tetap `4/4` setelah repair selesai.
+
+### 3.6 `lib/start-frame-provider-adapter.js`
+
+**Code Sebelum (Current/Before)**
+
+```js
+const built = context
+  ? await buildOpcStartFrameRequest(context)
+  : { providerRequest: request, audit: request?.audit || null };
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+if (!request?.context) {
+  throw new StartFrameContextRequiredError();
+}
+const built = await buildOpcStartFrameRequest(resolvedContext);
+```
+
+Untuk asset OPC baru, raw provider request tanpa campaign/item context ditolak. Compatibility hanya boleh dipertahankan untuk asset legacy yang sudah memiliki provider task sebelum rilis, bukan submission baru.
+
+### 3.7 `scripts/repair-opc-product-lineage.mjs` — file baru
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Tidak ada repair command terkontrol untuk cross-tenant OPC campaign.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```bash
+node scripts/repair-opc-product-lineage.mjs \
+  --schema staging \
+  --campaign opc_260815_ir4y96 \
+  --expected-old-product 292f7423-9096-45b8-bf74-07273d02171a \
+  --new-product pe_sync_1781148697786_165 \
+  --dry-run
+```
+
+Apply memerlukan flag tambahan eksplisit:
+
+```bash
+--apply --confirm-campaign opc_260815_ir4y96
+```
+
+Script menggunakan satu transaksi dan `SELECT ... FOR UPDATE`. Script berhenti tanpa perubahan kecuali seluruh assertion berikut benar:
+
+1. schema tepat `staging`;
+2. campaign tepat `opc_260815_ir4y96` dan tenant `default_tenant`;
+3. old product ID masih sama dengan hasil audit;
+4. planner `pln_65839439` memakai `pe_sync_1781148697786_165`;
+5. produk baru berada di `default_tenant` dan file Clean valid;
+6. Brand Profile dapurbotani berada di tenant yang sama;
+7. brand-product binding `8c4e2a22-f880-4970-8d37-ff69b0026c55` masih aktif;
+8. item campaign tepat `371–382` dan belum berubah sejak dry-run.
+
+Transaksi apply:
+
+```sql
+UPDATE pillar_campaigns
+SET target_product_id = 'pe_sync_1781148697786_165',
+    product_ref_image_path = '/uploads/products/clean/clean_pe_sync_1781148697786_165.jpg'
+WHERE id = 'opc_260815_ir4y96'
+  AND tenant_id = 'default_tenant'
+  AND target_product_id = '292f7423-9096-45b8-bf74-07273d02171a';
+```
+
+Script juga:
+
+- memperbarui `row_creative_payload.product_ref_image_path` hanya untuk 12 item target;
+- membuat `campaign_product_bindings` per item menggunakan binding aktif dapurbotani;
+- tidak menghapus start frame lama;
+- menandai clip 3 lama sebagai superseded melalui revision baru;
+- mengantrekan hanya clip 3 dengan canonical context `origin: campaign_data_repair`;
+- mencatat snapshot before/after dan ID asset revision baru ke audit output tanpa menyimpan Base64.
+
+### 3.8 Test baru dan pembaruan test
+
+File:
+
+- `scripts/test-opc-product-lineage.mjs` — baru;
+- `scripts/test-opc-start-frame-reference.mjs`;
+- test route/durable start-frame yang relevan.
+
+**Code Sebelum (Current/Before)**
+
+```js
+// Tidak ada fixture dua tenant dengan produk bernama sama.
+```
+
+**Code Sesudah (Proposed/After)**
+
+```js
+test('planner product_id menang atas lookup nama', ...);
+test('fallback nama selalu tenant-scoped', ...);
+test('explicit cross-tenant product ditolak sebelum campaign dibuat', ...);
+test('binding failure membatalkan seluruh OPC bundle', ...);
+test('bulk regen clip bridge selalu membawa satu product reference', ...);
+test('partial revision membawa forward clip non-target', ...);
+test('single dan bulk regen menghasilkan reference SHA yang sama', ...);
+test('repair dry-run tidak mengubah database', ...);
+test('repair apply idempotent dan menolak expected-old mismatch', ...);
+```
+
+## 4. Prosedur Repair Campaign Staging
+
+1. Pause campaign `opc_260815_ir4y96` agar scheduler tidak membuat percobaan baru selama repair.
+2. Ambil snapshot read-only campaign, planner, product, binding, 12 item, asset revision, dan audit reference.
+3. Jalankan repair script `--dry-run`; simpan ringkasan jumlah row yang akan berubah.
+4. Implementasikan dan verifikasi patch di lokal.
+5. Deploy patch ke Mac Mini Dev dan jalankan fixture cross-tenant.
+6. Release patch sesuai SOP.
+7. Deploy patch ke Mac Mini Staging.
+8. Jalankan kembali dry-run dan bandingkan dengan snapshot awal.
+9. Jalankan repair `--apply` satu kali dalam transaksi.
+10. Pastikan campaign menunjuk produk default dan mempunyai 12 binding item.
+11. Jalankan worker untuk revision repair clip 3.
+12. Verifikasi setiap item `371–382` mempunyai clip 3 baru dengan:
+
+```text
+requires_product_reference = true
+requirement_reason          = bridge_range
+reference_count             = 1
+reference_source_field      = clean_photo_url
+reference_sha256            = payload_reference_sha256
+origin                      = campaign_data_repair
+```
+
+13. Pastikan clip 1, 2, dan 4 tidak berubah checksum.
+14. Pastikan seluruh item kembali `start_frame_status=completed`, `4/4`, dan status review konsisten.
+15. Resume campaign hanya setelah seluruh acceptance criteria lulus.
+
+## 5. Rollback
+
+- Code rollback melalui revert rilis patch jika regression terjadi.
+- Data repair tidak menghapus asset lama; revision sebelum repair tetap tersedia sebagai evidence.
+- Sebelum apply, script menyimpan snapshot JSON tanpa secret di lokasi audit terkontrol.
+- Jika queue/provider gagal, campaign tetap menunjuk produk default yang benar; hanya revision clip 3 ditandai failed dan dapat diretry.
+- Mengembalikan old cross-tenant product ID bukan rollback yang valid. Rollback hanya membatalkan revision baru, bukan memulihkan relasi data yang sudah terbukti salah.
+
+## 6. Acceptance Criteria
+
+1. Planner `pln_65839439` tetap menunjuk `pe_sync_1781148697786_165`.
+2. Campaign `opc_260815_ir4y96` menunjuk produk yang sama dan tenant seluruh lineage adalah `default_tenant`.
+3. Terdapat binding valid untuk seluruh item `371–382`.
+4. Tidak ada lookup produk berdasarkan nama tanpa tenant filter.
+5. Cross-tenant explicit product ID ditolak sebelum campaign/item dibuat.
+6. Initial, single Regen, bulk Regen, recovery, dan repair memakai builder yang sama.
+7. Seluruh clip 3 mempunyai satu Clean reference dan audit SHA yang cocok.
+8. Clip 1, 2, dan 4 mempunyai nol product reference dan checksum tidak berubah selama repair.
+9. Tidak ada provider submission raw tanpa context.
+10. Campaign tidak berada pada `ready_for_review` ketika checkpoint start frame masih partial.
+11. Dev test, build, deployment, dan health check lulus sebelum Staging dimutasi.
+12. Production tidak disentuh tanpa instruksi eksplisit.
+
+## Execution Task List — OPC Tenant Lineage dan Campaign Repair
+
+- [x] Implementasikan canonical OPC product-lineage validator.
+- [x] Ubah ingest agar memakai `planner.product_id`.
+- [x] Tenant-scope seluruh fallback lookup produk berdasarkan nama.
+- [x] Jadikan product/binding validation fatal sebelum bundle dibuat.
+- [x] Tambahkan error code `OPC_PRODUCT_TENANT_MISMATCH` dan `OPC_PRODUCT_BINDING_UNAVAILABLE`.
+- [x] Perbaiki single Regen agar mempertahankan HTTP status/error code dan asset checkpoint.
+- [x] Ubah bulk Regen menjadi canonical context request.
+- [x] Tolak submission OPC durable tanpa context.
+- [x] Implementasikan partial revision dengan carry-forward asset non-target.
+- [x] Tambahkan regression fixture dua tenant dengan produk bernama sama.
+- [x] Tambahkan parity test initial/single/bulk/recovery/repair.
+- [x] Implementasikan repair script dengan `--dry-run`, `--apply`, dan confirmation guard.
+- [ ] Jalankan repair dry-run lokal/fixture.
+- [x] Jalankan seluruh targeted test dan Next.js production build.
+- [x] Deploy serta verifikasi patch di Mac Mini Dev.
+- [ ] Jalankan release patch non-interaktif dan verifikasi commit/tag/remote.
+- [ ] Deploy patch ke Mac Mini Staging setelah Dev lulus.
+- [ ] Pause campaign `opc_260815_ir4y96` sebelum repair data.
+- [ ] Ambil snapshot before-repair Staging.
+- [ ] Jalankan Staging dry-run dan verifikasi expected row count.
+- [ ] Apply repair transaksional pada campaign `opc_260815_ir4y96`.
+- [ ] Verifikasi target product dan 12 campaign bindings.
+- [ ] Antrekan ulang hanya clip 3 item `371–382` dengan canonical context.
+- [ ] Verifikasi 12 audit SHA clip 3 dan checksum clip non-target.
+- [ ] Verifikasi seluruh item kembali completed `4/4` dan review state konsisten.
+- [ ] Resume campaign setelah acceptance criteria lulus.
+- [ ] Pastikan tidak ada deployment atau mutasi Production.
