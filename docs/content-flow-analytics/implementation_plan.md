@@ -606,7 +606,7 @@ YouTube Published             0
 - [x] Tahap 7 — Jalankan test reporting, test Publishing Scheduler, dan build staging; perbaiki seluruh kegagalan.
 - [x] Tahap 8 — Jalankan verifikasi manual pada staging dan cocokkan hasil dengan query PostgreSQL tenant yang sama.
 - [x] Tahap 9 — Perbarui dokumentasi bila implementasi menyimpang secara sah dari rencana, lalu tandai seluruh checklist selesai secara real-time.
-- [ ] Tahap 10 — Jalankan release patch non-interaktif, verifikasi changelog, commit, tag, branch `main`, dan push ke `https://github.com/sabeq83/maknaflow.git`.
+- [x] Tahap 10 — Jalankan release patch non-interaktif, verifikasi changelog, commit, tag, branch `main`, dan push ke `https://github.com/sabeq83/maknaflow.git`.
 
 ## 16. Perintah Rilis Wajib Setelah Verifikasi
 
