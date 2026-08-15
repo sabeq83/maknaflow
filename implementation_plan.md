@@ -3074,10 +3074,11 @@ Jika injeksi executor ke `probePublishingMedia` membuat API produksi lebih kompl
 - [x] Tambahkan atau sesuaikan test integrasi Publishing Scheduler bila diperlukan.
 - [x] Jalankan targeted unit test dan `tests/publishing-scheduler.test.js`.
 - [x] Jalankan Next.js production build.
-- [ ] Deploy dan verifikasi preflight pada Mac Mini Dev.
-- [ ] Perbarui checklist ini setelah setiap tahap selesai.
-- [ ] Jalankan patch release non-interaktif dan verifikasi commit/tag/remote.
+- [x] Deploy ke Mac Mini Dev dan verifikasi resolver FFprobe runtime, PM2, serta health endpoint.
+- [ ] Jalankan preflight Facebook Reel nyata melalui sesi pengguna Dev.
+- [x] Perbarui checklist ini setelah setiap tahap selesai.
+- [x] Jalankan patch release non-interaktif dan verifikasi commit/tag/remote.
 - [ ] Deploy ke Mac Mini Staging.
 - [ ] Verifikasi PM2, UI 5010, API 7010, dan path FFprobe runtime.
 - [ ] Jalankan ulang preflight Facebook Reel Staging sampai metadata berhasil dibaca.
-- [ ] Pastikan Production tidak dideploy tanpa instruksi eksplisit.
+- [x] Pastikan Production tidak dideploy tanpa instruksi eksplisit.
