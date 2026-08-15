@@ -78,6 +78,8 @@ export default function ContentPlannerDashboard() {
   const [brandProfiles, setBrandProfiles] = useState([]);
   const [selectedBrandId, setSelectedBrandId] = useState('');
   const [executingIds, setExecutingIds] = useState({});
+  const [isAffiliateLinkLocked, setIsAffiliateLinkLocked] = useState(false);
+  const [isNonAffiliate, setIsNonAffiliate] = useState(false);
   const [syncingIds, setSyncingIds] = useState({});
   const editorialCountOptions = getBrandEditorialCountOptions(pillars.length);
   const maxEditorialRowsPerPillar = editorialCountOptions.length;
@@ -103,6 +105,51 @@ export default function ContentPlannerDashboard() {
     }, 250);
     return () => { clearTimeout(timer); controller.abort(); };
   }, [plannerFocus, inputMode, productSearchQuery]);
+
+  // Auto-resolve affiliate link reaktif saat produk atau brand dipilih
+  useEffect(() => {
+    if (plannerFocus !== 'product_campaign' || !selectedProductId || isNonAffiliate) {
+      if (isNonAffiliate) {
+        setAffiliateUrl('');
+        setIsAffiliateLinkLocked(true);
+      } else {
+        setIsAffiliateLinkLocked(false);
+      }
+      return;
+    }
+    const controller = new AbortController();
+    fetch('/api/v2/affiliate-links/resolve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        brandProfileId: selectedBrandId || null,
+        productId: selectedProductId,
+        explicitOverride: null
+      }),
+      signal: controller.signal
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && d.data) {
+          const resolution = d.data;
+          // Jika resolusi berasal dari brand_product (sudah dibinding), autofill dan kunci
+          if (resolution.source === 'brand_product') {
+            setAffiliateUrl(resolution.affiliateLink || '');
+            setIsAffiliateLinkLocked(true);
+          } else {
+            // Jika tidak terikat brand, biarkan kosong dan tidak terkunci agar memicu validasi error di Generate
+            setAffiliateUrl('');
+            setIsAffiliateLinkLocked(false);
+          }
+        }
+      })
+      .catch(error => {
+        if (error.name !== 'AbortError') {
+          console.error('[Affiliate Auto-Resolve Error]:', error);
+        }
+      });
+    return () => controller.abort();
+  }, [selectedProductId, selectedBrandId, plannerFocus, isNonAffiliate]);
 
   useEffect(() => {
     if (maxEditorialRowsPerPillar > 0 && editorialRowsPerPillar > maxEditorialRowsPerPillar) {
@@ -225,16 +272,28 @@ export default function ContentPlannerDashboard() {
     applyBrandEditorialDefaults(brand);
   }
 
-  function showToast(msg, type = 'success') {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3500);
+  function showToast(msg, type = 'success', duration = 3500, isCenter = false) {
+    setToast({ msg, type, isCenter });
+    setTimeout(() => setToast(null), duration);
   }
 
   async function handleGenerate(e) {
     e.preventDefault();
-    if (plannerFocus === 'product_campaign' && (!productName || !productDesc)) {
-      showToast('Nama Produk dan Deskripsi Wajib Diisi', 'error');
-      return;
+    if (plannerFocus === 'product_campaign') {
+      if (!productName || !productDesc) {
+        showToast('Nama Produk dan Deskripsi Wajib Diisi', 'error');
+        return;
+      }
+      // Validasi ketat jika bukan kampanye non-affiliate, wajib terikat (locked dari brand_product)
+      if (!isNonAffiliate && !isAffiliateLinkLocked) {
+        showToast(
+          'Gagal membuat planner, isikan url affiliate dulu sesuai nama brand di menu product database.',
+          'error',
+          30000,
+          true
+        );
+        return;
+      }
     }
     if (plannerFocus === 'brand_editorial' && (!brandContext.trim() || pillars.length === 0)) {
       showToast('Konteks Brand dan minimal satu Pilar Konten wajib diisi', 'error');
@@ -375,12 +434,36 @@ export default function ContentPlannerDashboard() {
       <main className="main-content" style={{ padding: '32px', background: 'var(--bg-primary)', minHeight: '100vh', color: 'var(--text-primary)' }}>
         {toast && (
           <div style={{
-            position: 'fixed', top: '24px', right: '24px', zIndex: 9999,
-            padding: '12px 24px', borderRadius: '8px',
+            position: 'fixed',
+            top: toast.isCenter ? '50%' : '24px',
+            left: toast.isCenter ? '50%' : 'auto',
+            right: toast.isCenter ? 'auto' : '24px',
+            transform: toast.isCenter ? 'translate(-50%, -50%)' : 'none',
+            zIndex: 9999,
+            padding: toast.isCenter ? '24px 32px' : '12px 24px',
+            borderRadius: '8px',
             background: toast.type === 'error' ? 'var(--status-danger)' : 'var(--status-success)',
-            color: 'var(--text-primary)', fontWeight: 600, boxShadow: '0 10px 25px var(--overlay-subtle)'
+            color: 'var(--text-primary)',
+            fontWeight: 600,
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)',
+            maxWidth: toast.isCenter ? '500px' : 'auto',
+            textAlign: toast.isCenter ? 'center' : 'left',
+            border: toast.isCenter ? '2px solid rgba(255,255,255,0.1)' : 'none'
           }}>
             {toast.msg}
+            {toast.isCenter && (
+              <button
+                type="button"
+                onClick={() => setToast(null)}
+                style={{
+                  display: 'block', margin: '16px auto 0 auto', padding: '6px 16px',
+                  background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '4px',
+                  color: '#fff', cursor: 'pointer', fontWeight: 'bold'
+                }}
+              >
+                Tutup
+              </button>
+            )}
           </div>
         )}
 
@@ -951,6 +1034,19 @@ export default function ContentPlannerDashboard() {
                 </div>
 
                 {/* URL Fields */}
+                <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <input
+                    type="checkbox"
+                    id="isNonAffiliate"
+                    checked={isNonAffiliate}
+                    onChange={e => setIsNonAffiliate(e.target.checked)}
+                    style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                  />
+                  <label htmlFor="isNonAffiliate" style={{ fontSize: '13px', color: 'var(--text-muted)', cursor: 'pointer', userSelect: 'none' }}>
+                    Bukan Produk Affiliate (Kampanye Non-Affiliate)
+                  </label>
+                </div>
+
                 {inputMode === 'manual' ? (
                   <>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
@@ -995,21 +1091,29 @@ export default function ContentPlannerDashboard() {
                       <input
                         type="text"
                         placeholder="https://..."
+                        disabled={isNonAffiliate}
                         value={productUrl}
                         onChange={e => setProductUrl(e.target.value)}
-                        style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                        style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)', opacity: isNonAffiliate ? 0.6 : 1 }}
                       />
                     </div>
                     <div>
-                      <label style={{ display: 'block', fontSize: '13px', color: 'var(--status-neutral)', marginBottom: '6px', fontWeight: 700 }}>
-                        🛍️ URL Affiliate Kampanye (Isi Di Sini):
+                      <label style={{ display: 'block', fontSize: '13px', color: isAffiliateLinkLocked ? 'var(--text-muted)' : 'var(--status-neutral)', marginBottom: '6px', fontWeight: 700 }}>
+                        🛍️ URL Affiliate Kampanye {isAffiliateLinkLocked ? '(Terkunci)' : '(Wajib dari DB)'}:
                       </label>
                       <input
                         type="text"
-                        placeholder="https://shope.ee/..."
+                        placeholder={isNonAffiliate ? 'Non-Affiliate Campaign' : 'Harus terdaftar di database produk...'}
+                        disabled={isAffiliateLinkLocked}
                         value={affiliateUrl}
                         onChange={e => setAffiliateUrl(e.target.value)}
-                        style={{ width: '100%', padding: '10px', background: 'var(--status-neutral-soft)', border: '1px solid var(--status-neutral)', borderRadius: '8px', color: 'var(--text-primary)', fontWeight: 600 }}
+                        style={{
+                          width: '100%', padding: '10px',
+                          background: isAffiliateLinkLocked ? 'var(--bg-secondary)' : 'var(--status-neutral-soft)',
+                          border: isAffiliateLinkLocked ? '1px solid var(--border-subtle)' : '1px solid var(--status-neutral)',
+                          borderRadius: '8px', color: 'var(--text-primary)', fontWeight: 600,
+                          opacity: isAffiliateLinkLocked ? 0.7 : 1
+                        }}
                       />
                     </div>
                   </div>

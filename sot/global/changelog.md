@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.45 — Peningkatan Validasi Affiliate Link Content Planner (15/08/2026)
+- Menambahkan auto-resolve dan auto-lock affiliate link reaktif berdasarkan pilihan brand dan produk
+- Menambahkan opsi checkbox kampanye non-affiliate
+- Menambahkan notifikasi error 30 detik di tengah layar jika link affiliate belum dikonfigurasi di database
+
 ## V2.14.44 — Normalisasi Validasi review_revision Backend (15/08/2026)
 - Melonggarkan validasi review_revision di backend agar mendukung null atau empty string pada kampanye pilar (OPC) baru
 - Menghindari error review_revision wajib diisi jika revisi belum pernah terbuat di database
