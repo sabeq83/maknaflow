@@ -3935,12 +3935,13 @@ export default function RECampaignDetailPage() {
                           updateSettingField('voice_provider', prov);
                           // Auto set suitable persona
                           if (prov === 'gemini') {
-                            updateSettingField('voice_persona', 'Kore');
+                            if (!GEMINI_VOICES.some(v => v.id === settings.voice_persona)) {
+                              updateSettingField('voice_persona', 'Kore');
+                            }
                           } else {
-                            if (campaign.target_language === 'en-US') {
-                              updateSettingField('voice_persona', 'English_causual_narrator_vv1');
-                            } else {
-                              updateSettingField('voice_persona', 'Indonesian_casual_reporter_vv2');
+                            const validVoices = campaign?.target_language === 'en-US' ? MINIMAX_ENGLISH_VOICES : MINIMAX_VOICES;
+                            if (!validVoices.some(v => v.id === settings.voice_persona)) {
+                              updateSettingField('voice_persona', campaign?.target_language === 'en-US' ? 'English_causual_narrator_vv1' : 'Indonesian_casual_reporter_vv2');
                             }
                           }
                         }}

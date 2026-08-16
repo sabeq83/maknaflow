@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.47 — Fix Voice Persona Desync in RE Campaign Creation (16/08/2026)
+- Fix default state and reactive sanitizer for voice persona
+- Sanitize backend voice persona payload
+- Patch campaign re_260816_rmc0zt data in Postgres staging
+
 ## V2.14.46 — Content Flow Analytics Reporting (15/08/2026)
 - Menambahkan dashboard statistik produksi dan publikasi Content Flow
 - Menambahkan reporting tenant-aware per brand dan platform

@@ -206,31 +206,39 @@ export const POST = withTenantContext(async (request, _context, user) => {
       return NextResponse.json({ error: 'urls must be a non-empty array' }, { status: 400 });
     }
 
-    await createReCampaign({
-      id,
-      campaign_name: campaign_name.trim(),
-      execution_mode: execution_mode || 'manual_review',
-      status: status || 'running',
-      aspect_ratio: aspect_ratio || '9:16',
-      target_ai: target_ai || 'Google Veo (8s)',
-      custom_instruction: custom_instruction || '',
-      brand_profile_id: brand_profile_id || null,
-      is_bridging_active: is_bridging_active ? 1 : 0,
-      target_clips_count: target_clips_count || 5,
-      bridge_at_clip: bridge_at_clip || 2,
-      bridge_duration_clips: bridge_duration_clips !== undefined ? Number(bridge_duration_clips) : 0,
-      bridging_mode: bridging_mode || 'select_existing',
-      target_product_id: target_product_id || null,
-      ephemeral_product_data: ephemeral_product_data || null,
-      promotion_style: promotion_style || 'Softselling',
-      narrative_mode: narrative_mode || 'Storytelling',
-      post_youtube_draft: post_youtube_draft || 0,
-      post_tiktok_draft: post_tiktok_draft || 0,
-      post_facebook_draft: post_facebook_draft || 0,
-      facebook_page_id: facebook_page_id || null,
-      facebook_server_url: facebook_server_url || null,
-      voice_provider: voice_provider || 'minimax',
-      voice_persona: voice_persona || 'Kore',
+      const effectiveProvider = voice_provider || 'minimax';
+      let effectivePersona = voice_persona;
+      if (effectiveProvider === 'minimax' && (!effectivePersona || effectivePersona === 'Kore')) {
+        effectivePersona = (target_language === 'en-US') ? 'English_causual_narrator_vv1' : 'Indonesian_casual_reporter_vv2';
+      } else if (effectiveProvider === 'gemini' && (!effectivePersona || effectivePersona.startsWith('Indonesian_') || effectivePersona.startsWith('English_'))) {
+        effectivePersona = 'Kore';
+      }
+
+      await createReCampaign({
+        id,
+        campaign_name: campaign_name.trim(),
+        execution_mode: execution_mode || 'manual_review',
+        status: status || 'running',
+        aspect_ratio: aspect_ratio || '9:16',
+        target_ai: target_ai || 'Google Veo (8s)',
+        custom_instruction: custom_instruction || '',
+        brand_profile_id: brand_profile_id || null,
+        is_bridging_active: is_bridging_active ? 1 : 0,
+        target_clips_count: target_clips_count || 5,
+        bridge_at_clip: bridge_at_clip || 2,
+        bridge_duration_clips: bridge_duration_clips !== undefined ? Number(bridge_duration_clips) : 0,
+        bridging_mode: bridging_mode || 'select_existing',
+        target_product_id: target_product_id || null,
+        ephemeral_product_data: ephemeral_product_data || null,
+        promotion_style: promotion_style || 'Softselling',
+        narrative_mode: narrative_mode || 'Storytelling',
+        post_youtube_draft: post_youtube_draft || 0,
+        post_tiktok_draft: post_tiktok_draft || 0,
+        post_facebook_draft: post_facebook_draft || 0,
+        facebook_page_id: facebook_page_id || null,
+        facebook_server_url: facebook_server_url || null,
+        voice_provider: effectiveProvider,
+        voice_persona: effectivePersona,
       voice_speed: voice_speed !== undefined ? Number(voice_speed) : 1.0,
       voice_volume: voice_volume !== undefined ? Number(voice_volume) : 1.0,
       ffmpeg_sync_option: ffmpeg_sync_option || 'smart_sync',

@@ -88,7 +88,7 @@ export default function RECampaignsPage() {
 
   // Audio & Social Settings States (v6.5)
   const [voiceProvider, setVoiceProvider] = useState('minimax');
-  const [voicePersona, setVoicePersona] = useState('Kore');
+  const [voicePersona, setVoicePersona] = useState('Indonesian_casual_reporter_vv2');
   const [voiceSpeed, setVoiceSpeed] = useState(1.0);
   const [voiceVolume, setVoiceVolume] = useState(1.0);
   const [postYoutube, setPostYoutube] = useState(false);
@@ -489,12 +489,13 @@ export default function RECampaignsPage() {
 
   useEffect(() => {
     if (voiceProvider === 'gemini') {
-      setVoicePersona('Kore');
+      if (!GEMINI_VOICES.some(v => v.id === voicePersona)) {
+        setVoicePersona('Kore');
+      }
     } else {
-      if (targetLanguage === 'en-US') {
-        setVoicePersona('English_causual_narrator_vv1');
-      } else {
-        setVoicePersona('Indonesian_casual_reporter_vv2');
+      const validVoices = targetLanguage === 'en-US' ? MINIMAX_ENGLISH_VOICES : MINIMAX_VOICES;
+      if (!validVoices.some(v => v.id === voicePersona)) {
+        setVoicePersona(targetLanguage === 'en-US' ? 'English_causual_narrator_vv1' : 'Indonesian_casual_reporter_vv2');
       }
     }
   }, [voiceProvider, targetLanguage]);
