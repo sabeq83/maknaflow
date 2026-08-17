@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.14.49 — Meneruskan AI Directive dan Outro pada RE (17/08/2026)
+- Meneruskan parameter ai_directive dan mandatory_outro_line dari campaign RE ke Gemini AI prompt builder di scheduler-processors.js
+
 ## V2.14.48 — Hapus Unggahan Video Final Redundan (17/08/2026)
 - Menghapus pembuatan file cadangan video_final.mp4 redundan pada campaign RE, OPC, dan IFC
 - Menstandarkan hanya pada file unik [filePrefix]_video_final.mp4 guna menghemat penyimpanan cloud dan menyederhanakan tracking
