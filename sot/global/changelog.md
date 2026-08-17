@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.48 — Hapus Unggahan Video Final Redundan (17/08/2026)
+- Menghapus pembuatan file cadangan video_final.mp4 redundan pada campaign RE, OPC, dan IFC
+- Menstandarkan hanya pada file unik [filePrefix]_video_final.mp4 guna menghemat penyimpanan cloud dan menyederhanakan tracking
+
 ## V2.14.47 — Fix Voice Persona Desync in RE Campaign Creation (16/08/2026)
 - Fix default state and reactive sanitizer for voice persona
 - Sanitize backend voice persona payload
