@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.14.73 — Remove terminal log from Multiplier Tab 5 (18/08/2026)
+- Clean up Tab 5 System Log by deleting terminal log preview
+
 ## V2.14.72 — Align Multiplier Lab detail layout to 1 column (18/08/2026)
 - Convert vertical sidebar tabs to horizontal top tabs matching OPC style
 

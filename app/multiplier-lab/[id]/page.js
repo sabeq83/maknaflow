@@ -872,11 +872,6 @@ function CampaignDetailPageContent() {
                                         </div>
                                       )}
                                     </div>
-
-                                    {/* Terminal logger */}
-                                    <pre style={{ margin: 0, padding: 16, background: 'var(--surface)', color: '#20c20e', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', maxHeight: 150, overflowY: 'auto', borderRadius: 6 }}>
-                                      {terminalLogs}
-                                    </pre>
                                   </div>
                                 )}
 
