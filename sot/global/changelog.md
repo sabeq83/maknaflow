@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.53 — Integrated Gemini Key Pool on Deconstruct (18/08/2026)
+- Mengintegrasikan Gemini API Key Pooling (executeWithKeyPool) pada Deconstruct Lab
+- Memperbaiki properti fileUri pada upload video Gemini File API
+
 ## V2.14.52 — Migrated Deconstruct queue to Campaign Scheduler (18/08/2026)
 - Memindahkan antrean Deconstruct Lab ke Campaign Local Scheduler
 - Menambahkan Status Skeduler ON/OFF dan System Poller Logger di UI
