@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.14.65 — Align Multiplier Lab detail tabs to RE Campaign & Revert Worker to Sequential (18/08/2026)
+- Menghilangkan tombol pause/resume/delete tingkat baris dan memusatkannya pada Batch Card
+- Menampilkan info statistik status Fase 1 dan Fase 2 pada kartu Batch
+- Menyelaraskan detail baris Multiplier Lab menjadi 5 tab utama persis menu RE Campaign
+- Mengembalikan worker antrean ke sekuensial per baris LIMIT 1 (OPC-like) untuk menghindari quota rate limits
+- Memperbaiki bug log berputar dengan menambahkan await pada seluruh update query database
+
 ## V2.14.64 — Implement parallel queue processing in Multiplier Lab (18/08/2026)
 - Mengubah worker agar mengeksekusi hingga 4 tugas secara paralel menggunakan Promise.all sehingga proses remake massal berjalan jauh lebih cepat
 

@@ -71,6 +71,7 @@ function MultiplierLabPageContent() {
   const [loadingTasks, setLoadingTasks] = useState(true);
   const [expandedTaskId, setExpandedTaskId] = useState(null);
   const [expandedSubTaskId, setExpandedSubTaskId] = useState(null);
+  const [activeInnerTabs, setActiveInnerTabs] = useState({});
 
   // Forms configuration states
   const [productionMode, setProductionMode] = useState('single'); // 'single' or 'mass'
@@ -2049,7 +2050,16 @@ function MultiplierLabPageContent() {
                     const sortedBatches = Object.values(grouped).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
                     return sortedBatches.map(batch => {
                       const isBatchExpanded = expandedTaskId === batch.id;
-                      const stats = { pending: 0, running: 0, waiting: 0, completed: 0, failed: 0, stopped: 0 };
+                      const stats = {
+                        pending: 0, running: 0, waiting: 0, completed: 0, failed: 0, stopped: 0,
+                        f1_pending: 0,
+                        f1_running: 0,
+                        f1_waiting: 0,
+                        f2_running: 0,
+                        f2_completed: 0,
+                        f2_failed: 0,
+                        f2_paused: 0
+                      };
                       batch.tasks.forEach(t => {
                         if (t.status === 'completed') stats.completed++;
                         else if (t.status === 'failed') stats.failed++;
@@ -2057,6 +2067,14 @@ function MultiplierLabPageContent() {
                         else if (t.status === 'waiting_approval') stats.waiting++;
                         else if (t.status === 'pending_resolution') stats.pending++;
                         else stats.running++;
+
+                        if (['pending_resolution', 'resolving_product'].includes(t.status)) stats.f1_pending++;
+                        else if (['remaking', 'generating_t2i'].includes(t.status)) stats.f1_running++;
+                        else if (t.status === 'waiting_approval') stats.f1_waiting++;
+                        else if (['generating_audio', 'generating_visuals', 'ffmpeg_muxing'].includes(t.status)) stats.f2_running++;
+                        else if (t.status === 'completed') stats.f2_completed++;
+                        else if (t.status === 'failed') stats.f2_failed++;
+                        else if (t.status === 'paused') stats.f2_paused++;
                       });
                       const assetTitle = batch.asset_niche || batch.asset_caption || 'Blueprint Video';
                       const batchTitle = batch.isBatch 
@@ -2079,19 +2097,46 @@ function MultiplierLabPageContent() {
                                 )}
                               </div>
                               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                                {batch.isBatch ? `Status: ${stats.completed} Selesai · ${stats.running} Berjalan · ${stats.waiting} Menunggu Approval · ${stats.stopped} Berhenti` : `Status: ${batch.tasks[0].status.toUpperCase()}`}
+                                {batch.isBatch 
+                                  ? `Fase 1: ${stats.f1_pending + stats.f1_running + stats.f1_waiting} tasks · Fase 2: ${stats.f2_completed} Selesai · ${stats.f2_running} Proses · ${stats.f2_failed} Gagal`
+                                  : `Status: ${batch.tasks[0].status.toUpperCase()}`}
                               </div>
                             </div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                               {batch.created_at ? new Date(batch.created_at).toLocaleString('id-ID') : ''}
                             </div>
                           </div>
-                          {isBatchExpanded && batch.isBatch && (
-                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginBottom: '8px' }}>
-                              {stats.waiting > 0 && <button className="btn btn-sm btn-success" style={{ fontSize: '0.72rem', padding: '4px 10px' }} onClick={() => handleBatchAction(batch.id, 'approve')}>✅ Approve Semua WAITING ({stats.waiting})</button>}
-                              {stats.running > 0 && <button className="btn btn-sm btn-danger" style={{ fontSize: '0.72rem', padding: '4px 10px' }} onClick={() => handleBatchAction(batch.id, 'pause')}>⏸️ Pause Semua Berjalan ({stats.running})</button>}
-                              {stats.stopped > 0 && <button className="btn btn-sm btn-success" style={{ fontSize: '0.72rem', padding: '4px 10px' }} onClick={() => handleBatchAction(batch.id, 'resume')}>▶️ Resume Semua Stopped ({stats.stopped})</button>}
-                              <button className="btn btn-sm btn-secondary" style={{ fontSize: '0.72rem', padding: '4px 10px' }} onClick={() => handleBatchAction(batch.id, 'delete')}>🗑️ Hapus Seluruh Batch</button>
+
+                          {isBatchExpanded && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginBottom: '8px' }} onClick={e => e.stopPropagation()}>
+                              {/* Fase 1 & 2 Status Columns */}
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', background: 'var(--surface)', padding: '12px 16px', borderRadius: '6px', border: '1px solid var(--border)' }}>
+                                <div>
+                                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Fase 1: Discovery & T2I</span>
+                                  <div style={{ fontSize: '0.78rem', marginTop: '6px', display: 'flex', gap: '12px', color: 'var(--text-secondary)' }}>
+                                    <span>⏳ Antrean: <b>{stats.f1_pending}</b></span>
+                                    <span>⚡ Proses: <b>{stats.f1_running}</b></span>
+                                    {stats.f1_waiting > 0 && <span style={{ color: 'var(--status-warning)', fontWeight: 600 }}>⏸️ Approval: {stats.f1_waiting}</span>}
+                                  </div>
+                                </div>
+                                <div>
+                                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Fase 2: Video Production</span>
+                                  <div style={{ fontSize: '0.78rem', marginTop: '6px', display: 'flex', gap: '12px', color: 'var(--text-secondary)' }}>
+                                    <span>⚡ Proses: <b>{stats.f2_running}</b></span>
+                                    <span>✅ Selesai: <b style={{ color: 'var(--success)' }}>{stats.f2_completed}</b></span>
+                                    {stats.f2_failed > 0 && <span style={{ color: 'var(--status-danger)' }}>⚠️ Gagal: {stats.f2_failed}</span>}
+                                    {stats.f2_paused > 0 && <span style={{ color: 'var(--text-muted)' }}>⏸️ Pause: {stats.f2_paused}</span>}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Batch Controls */}
+                              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
+                                {stats.f1_waiting > 0 && <button className="btn btn-sm btn-success" style={{ fontSize: '0.72rem', padding: '6px 12px', fontWeight: 600 }} onClick={() => handleBatchAction(batch.id, 'approve')}>✅ Approve Semua WAITING ({stats.f1_waiting})</button>}
+                                {(stats.f1_running > 0 || stats.f2_running > 0 || stats.f1_pending > 0) && <button className="btn btn-sm btn-danger" style={{ fontSize: '0.72rem', padding: '6px 12px', fontWeight: 600 }} onClick={() => handleBatchAction(batch.id, 'pause')}>⏸️ Pause Semua Berjalan</button>}
+                                {(stats.f2_paused > 0 || stats.f2_failed > 0) && <button className="btn btn-sm btn-success" style={{ fontSize: '0.72rem', padding: '6px 12px', fontWeight: 600 }} onClick={() => handleBatchAction(batch.id, 'resume')}>▶️ Resume Semua Stopped</button>}
+                                <button className="btn btn-sm btn-secondary" style={{ fontSize: '0.72rem', padding: '6px 12px' }} onClick={() => handleBatchAction(batch.id, 'delete')}>🗑️ Hapus Seluruh Batch</button>
+                              </div>
                             </div>
                           )}
                           {isBatchExpanded && (
@@ -2228,24 +2273,21 @@ function MultiplierLabPageContent() {
                             type="button"
                             className="btn btn-primary btn-sm"
                             onClick={() => setExpandedSubTaskId(isExpanded ? null : t.id)}
-                            style={{ fontSize: '0.75rem', padding: '6px 12px' }}
+                            style={{ fontSize: '0.75rem', padding: '6px 12px', fontWeight: 600 }}
                           >
-                            🔍 Detail
+                            {isExpanded ? '▲ Sembunyikan Detail' : '🔍 Detail Naskah & Preview'}
                           </button>
 
-                          <button
-                            onClick={() => handleToggleTaskStatus(t.id, t.status)}
-                            className="btn btn-sm"
-                            style={{
-                              color: (t.status === 'paused' || t.status === 'failed' || t.status === 'waiting_approval') ? 'var(--success)' : 'var(--danger)',
-                              background: (t.status === 'paused' || t.status === 'failed' || t.status === 'waiting_approval') ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
-                              borderColor: (t.status === 'paused' || t.status === 'failed' || t.status === 'waiting_approval') ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
-                              fontSize: '0.75rem',
-                              padding: '6px 12px'
-                            }}
-                          >
-                            {t.status === 'waiting_approval' ? '✅ Approve & Run' : ((t.status === 'paused' || t.status === 'failed') ? '▶️ Resume' : '⏸️ Pause')}
-                          </button>
+                          {t.ffmpeg_output_path && (
+                            <a
+                              href={t.ffmpeg_output_path}
+                              download
+                              className="btn btn-success btn-sm"
+                              style={{ textDecoration: 'none', fontSize: '0.75rem', padding: '6px 12px', fontWeight: 600 }}
+                            >
+                              📥 Download Video Final
+                            </a>
+                          )}
 
                           {t.asset_source_url && (
                             <a
@@ -2255,34 +2297,25 @@ function MultiplierLabPageContent() {
                               className="btn btn-secondary btn-sm"
                               style={{ textDecoration: 'none', fontSize: '0.75rem', padding: '6px 12px' }}
                             >
-                              📊 Template
+                              📊 Template Blueprint
                             </a>
                           )}
-
-                          <button
-                            type="button"
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => handleCopyTaskSettings(t)}
-                            style={{ fontSize: '0.75rem', padding: '6px 12px' }}
-                          >
-                            📋 Copy
-                          </button>
-
-                          <button
-                            onClick={() => handleDelete(t.id)}
-                            className="btn btn-danger btn-sm"
-                            style={{ background: '#dc2626', color: 'var(--text-primary)', borderColor: '#dc2626', fontSize: '0.75rem', padding: '6px 12px' }}
-                          >
-                            🗑 Hapus
-                          </button>
                         </div>
 
                         {/* Task Detail Expanded */}
                         {isExpanded && (() => {
-                          const activeTab = activeTabs[t.id] || 'concept';
+                          const activeTab = activeTabs[t.id] || 'decon';
                           const handleSelectTab = (tabId) => {
                             setActiveTabs(prev => ({ ...prev, [t.id]: tabId }));
                           };
+
+                          const currentInnerTab = activeInnerTabs[t.id] || 'storyboard_visual';
+                          const setInnerTab = (tabId) => {
+                            setActiveInnerTabs(prev => ({ ...prev, [t.id]: tabId }));
+                          };
+
+                          const storyboard = t.remake_storyboard_json ? JSON.parse(t.remake_storyboard_json) : [];
+                          const prompts = t.t2i_i2v_prompts_json ? JSON.parse(t.t2i_i2v_prompts_json) : [];
 
                           return (
                             <div style={{ padding: '16px 0 0 0', borderTop: '1px solid var(--border)', background: 'transparent', marginTop: '16px' }} onClick={e => e.stopPropagation()}>
@@ -2295,50 +2328,17 @@ function MultiplierLabPageContent() {
                                     controls
                                     style={{ width: '100%', borderRadius: 'var(--radius-sm)', background: '#000', maxHeight: 320 }}
                                   />
-                                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 8 }}>
-                                    {t.nextcloud_video_url && (
-                                      <a
-                                        href={t.nextcloud_video_url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="btn btn-secondary"
-                                        style={{ fontSize: '0.78rem', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: 4 }}
-                                      >
-                                        ☁️ Nextcloud Video
-                                      </a>
-                                    )}
-                                    {t.nextcloud_md_url && (
-                                      <a
-                                        href={t.nextcloud_md_url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="btn btn-secondary"
-                                        style={{ fontSize: '0.78rem', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: 4 }}
-                                      >
-                                        📝 Nextcloud Narrative (.md)
-                                      </a>
-                                    )}
-                                    <a
-                                      href={t.ffmpeg_output_path}
-                                      download
-                                      className="btn btn-primary"
-                                      style={{ fontSize: '0.78rem', padding: '6px 12px' }}
-                                    >
-                                      📥 Download Video Final
-                                    </a>
-                                  </div>
                                 </div>
                               )}
 
                               {/* Tabs Navigation */}
                               <div style={{ display: 'flex', gap: 6, borderBottom: '1px solid var(--border)', paddingBottom: '10px', marginBottom: '16px', overflowX: 'auto' }}>
                                 {[
-                                  { id: 'concept', label: '💡 Konsep Awal & Produk' },
-                                  { id: 'storyboard', label: '📖 Storyboard' },
-                                  { id: 'voiceover', label: '🎤 Voiceover' },
-                                  { id: 'prompts', label: '🤖 AI Video Prompt' },
-                                  { id: 'social', label: '📱 Social Draft' },
-                                  { id: 'logs', label: '🖥 System Log' }
+                                  { id: 'decon', label: '🔍 Tab 1: Dekonstruksi Asli' },
+                                  { id: 'storyboard', label: '📖 Tab 2: Storyboard & Rencana Visual Baru' },
+                                  { id: 'assets', label: '☁️ Tab 3: Asset Vault & Cloud Recovery Panel' },
+                                  { id: 'dna', label: '🧬 Tab 4: Metadata Video DNA' },
+                                  { id: 'logs', label: '🖥 Tab 5: System Log' }
                                 ].map(tab => (
                                   <button
                                     key={tab.id}
@@ -2362,220 +2362,290 @@ function MultiplierLabPageContent() {
                                 ))}
                               </div>
 
-                              {/* Tab Content 1: concept */}
-                              {activeTab === 'concept' && (
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-
-                                  {/* Left Column: Template Blueprint details */}
-                                  <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                    <strong style={{ fontSize: '0.85rem', color: 'var(--accent-light)', borderBottom: '1px solid var(--surface-interactive)', paddingBottom: 6 }}>
-                                      📹 Detail Template Blueprint
-                                    </strong>
-                                    <div>
-                                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2 }}>Tautan Asal</div>
-                                      <span style={{ fontSize: '0.78rem', color: 'var(--text-primary)', wordBreak: 'break-all' }}>
-                                        {t.asset_source_url ? (
-                                          <a href={t.asset_source_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--info)' }}>
-                                            {t.asset_source_url} ↗
-                                          </a>
-                                        ) : '-'}
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2 }}>Tags Aset</div>
-                                      <span style={{ fontSize: '0.78rem', color: 'var(--text-primary)' }}>
-                                        {(() => {
-                                          const matchingAsset = assets.find(a => a.id === t.deconstruct_asset_id);
-                                          if (matchingAsset && matchingAsset.tags) {
-                                            return matchingAsset.tags.split(',').map((tag, tIdx) => (
-                                              <span key={tIdx} style={{ display: 'inline-block', background: 'var(--surface-interactive)', padding: '2px 6px', borderRadius: 4, marginRight: 6, fontSize: '0.7rem' }}>
-                                                #{tag.trim()}
-                                              </span>
-                                            ));
-                                          }
-                                          return '-';
-                                        })()}
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2 }}>Visual Style</div>
-                                      <span style={{ fontSize: '0.78rem', color: 'var(--text-primary)' }}>{vsoData.visualStyle || '-'}</span>
-                                    </div>
-                                    <div>
-                                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2 }}>Narrative Mode</div>
-                                      <span style={{ fontSize: '0.78rem', color: 'var(--text-primary)' }}>{vsoData.narrativeMode || '-'}</span>
-                                    </div>
-                                    <div>
-                                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2 }}>Face Visibility</div>
-                                      <span style={{ fontSize: '0.78rem', color: 'var(--text-primary)' }}>{vsoData.faceVisibility || '-'}</span>
-                                    </div>
-                                  </div>
-
-                                  {/* Right Column: Target Product & Bridging details */}
-                                  <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                    <strong style={{ fontSize: '0.85rem', color: 'var(--accent-light)', borderBottom: '1px solid var(--surface-interactive)', paddingBottom: 6 }}>
-                                      🛍️ Target Produk & Bridging
-                                    </strong>
-                                    <div>
-                                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2 }}>Tautan Produk Target</div>
-                                      <span style={{ fontSize: '0.78rem', color: 'var(--text-primary)', wordBreak: 'break-all' }}>
-                                        {t.target_product_url ? (
-                                          <a href={t.target_product_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--info)' }}>
-                                            {t.target_product_url} ↗
-                                          </a>
-                                        ) : 'Input Manual'}
-                                      </span>
-                                    </div>
-                                    {t.affiliate_url && (
-                                      <div>
-                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2 }}>Affiliate URL</div>
-                                        <span style={{ fontSize: '0.78rem', color: 'var(--text-primary)', wordBreak: 'break-all' }}>{t.affiliate_url}</span>
-                                      </div>
-                                    )}
-                                    <div>
-                                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2 }}>Visual Mode</div>
-                                      <span style={{ fontSize: '0.78rem', color: 'var(--text-primary)' }}>
-                                        {bridgingData.visualMode === 'hybrid_lock' ? 'Double-Pass Pixel Lock (T2I ➜ I2V)' : 'Pure Text-to-Video'}
-                                      </span>
-                                    </div>
-                                    <div>
-                                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2 }}>Gaya Promosi</div>
-                                      <span style={{ fontSize: '0.78rem', color: 'var(--text-primary)' }}>
-                                        {bridgingData.isBridgingActive ? `${bridgingData.promotionStyle || 'Softselling'} (Klip ${bridgingData.bridgeAtClip || 2} durasi ${bridgingData.bridgeDurationClips || 1} klip)` : 'Nonaktif'}
-                                      </span>
-                                    </div>
-
-                                    {/* Ref Image if present */}
-                                    {bridgingData.productRefImagePath && (
-                                      <div>
-                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 4 }}>Gambar Referensi Produk</div>
-                                        <img
-                                          src={bridgingData.productRefImagePath}
-                                          alt="Referensi Produk"
-                                          style={{ maxWidth: '100%', maxHeight: '100px', borderRadius: 4, border: '1px solid var(--border)' }}
-                                        />
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Tab Content 2: storyboard */}
-                              {activeTab === 'storyboard' && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                                  {t.remake_storyboard_json ? (
-                                    JSON.parse(t.remake_storyboard_json).map((scene, sIdx) => (
-                                      <div key={sIdx} style={{ background: 'var(--bg-secondary)', padding: 12, borderRadius: 6, border: '1px solid var(--surface-interactive)' }}>
-                                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6 }}>
-                                          Adegan {scene.scene || sIdx + 1}
-                                        </div>
-                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', marginBottom: 6, lineHeight: 1.4 }}>
-                                          <b>Visual:</b> {scene.visual_description}
-                                        </div>
-                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontStyle: 'italic', lineHeight: 1.4 }}>
-                                          <b>Voiceover:</b> "{scene.narration_transcript || scene.voiceover || '-'}"
-                                        </div>
-                                      </div>
-                                    ))
-                                  ) : (
-                                    <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                                      Storyboard belum digenerate (Status: {t.status.replace('_', ' ')}).
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-
-                              {/* Tab Content: voiceover */}
-                              {activeTab === 'voiceover' && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                              {/* Tab Content 1: decon */}
+                              {activeTab === 'decon' && (
+                                <div style={{ background: 'var(--surface-interactive)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                  <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 700 }}>🔍 Dekonstruksi Asli Kompetitor</h4>
                                   {(() => {
-                                    const aConfig = JSON.parse(t.audio_config_json || '{}');
+                                    const matchingAsset = assets.find(a => a.id === t.deconstruct_asset_id);
+                                    if (!matchingAsset) return <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Data dekonstruksi tidak ditemukan.</div>;
+
+                                    let originalStoryboard = [];
+                                    try {
+                                      originalStoryboard = JSON.parse(matchingAsset.original_storyboard_json || '[]');
+                                    } catch(_) {}
+
                                     return (
-                                      <>
-                                        <div style={{ background: 'var(--bg-secondary)', padding: 14, borderRadius: 6, border: '1px solid var(--surface-interactive)', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                          <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>
-                                            🎙️ Voiceover & Sound Settings
-                                          </div>
-                                          <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', display: 'flex', flexWrap: 'wrap', gap: 16 }}>
-                                            <div><b>Status TTS:</b> {aConfig.enableTts ? '⚡ Aktif' : '❌ Nonaktif'}</div>
-                                            <div><b>Provider:</b> {aConfig.voiceProvider || 'minimax'}</div>
-                                            <div><b>Persona:</b> {aConfig.voicePersona || 'Indonesian_SweetGirl'}</div>
-                                            <div><b>Speed:</b> {aConfig.voiceSpeed || 1.0}x</div>
-                                          </div>
-                                          {aConfig.combined_audio_path && (
-                                            <div style={{ marginTop: 8 }}>
-                                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 4 }}>Audio Voiceover Gabungan:</div>
-                                              <audio controls src={aConfig.combined_audio_path} style={{ width: '100%', height: 36, borderRadius: 4 }} />
+                                      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                        {/* Strategy upgrade summary */}
+                                        <div style={{ background: 'var(--bg-secondary)', padding: 12, borderRadius: 6, border: '1px solid var(--border)' }}>
+                                          <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--accent-light)', marginBottom: 6 }}>💡 Analisis & Strategi Upgrade</div>
+                                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, fontSize: '0.78rem' }}>
+                                            <div>
+                                              <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem', fontWeight: 600 }}>Tautan Kompetitor</span>
+                                              <a href={matchingAsset.source_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--info)' }}>
+                                                {matchingAsset.source_url ? matchingAsset.source_url.substring(0, 50) + '...' : '-'} ↗
+                                              </a>
                                             </div>
+                                            <div>
+                                              <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem', fontWeight: 600 }}>Niche & Topik</span>
+                                              <span>{matchingAsset.niche} / {matchingAsset.topic}</span>
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        {/* competitor scenes list */}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Adegan Video Asli:</span>
+                                          {originalStoryboard.length === 0 ? (
+                                            <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Tidak ada adegan asli terdaftar.</div>
+                                          ) : (
+                                            originalStoryboard.map((scene, sIdx) => (
+                                              <div key={sIdx} style={{ background: 'var(--bg-secondary)', padding: 12, borderRadius: 6, border: '1px solid var(--border)', display: 'flex', gap: 12 }}>
+                                                <div style={{ minWidth: 40, borderRight: '1px solid var(--border)', paddingRight: 8, textAlign: 'center' }}>
+                                                  <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', display: 'block' }}>CLiP</span>
+                                                  <strong style={{ fontSize: '1rem', color: 'var(--accent-light)' }}>#{scene.clip || sIdx + 1}</strong>
+                                                </div>
+                                                <div style={{ flex: 1, fontSize: '0.78rem' }}>
+                                                  <p style={{ margin: 0 }}><b>Visual:</b> {scene.visual_description || '-'}</p>
+                                                  <p style={{ margin: '4px 0 0 0', color: 'var(--text-muted)' }}><b>Audio:</b> {scene.voiceover_narration || scene.voice_over || '-'}</p>
+                                                </div>
+                                              </div>
+                                            ))
                                           )}
                                         </div>
-
-                                        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', marginTop: 4 }}>
-                                          📜 Transkrip Naskah Suara Per Adegan
-                                        </div>
-                                        {t.remake_storyboard_json ? (
-                                          JSON.parse(t.remake_storyboard_json).map((scene, sIdx) => (
-                                            <div key={sIdx} style={{ background: 'var(--bg-secondary)', padding: 12, borderRadius: 6, border: '1px solid var(--surface-interactive)' }}>
-                                              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--info)', marginBottom: 4 }}>
-                                                Adegan {scene.scene || sIdx + 1}
-                                              </div>
-                                              <div style={{ fontSize: '0.82rem', color: 'var(--text-primary)', fontStyle: 'italic', lineHeight: 1.4 }}>
-                                                "{scene.narration_transcript || scene.voiceover || '-'}"
-                                              </div>
-                                            </div>
-                                          ))
-                                        ) : (
-                                          <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                                            Transkrip belum tersedia.
-                                          </div>
-                                        )}
-                                      </>
+                                      </div>
                                     );
                                   })()}
                                 </div>
                               )}
 
-                              {/* Tab Content 3: prompts */}
-                              {activeTab === 'prompts' && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                                  {t.t2i_i2v_prompts_json ? (
-                                    JSON.parse(t.t2i_i2v_prompts_json).map((pObj, pIdx) => (
-                                      <div key={pIdx} style={{ background: 'var(--bg-secondary)', padding: 12, borderRadius: 6, border: '1px solid var(--surface-interactive)' }}>
-                                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6 }}>
-                                          Klip {pObj.scene || pIdx + 1}
-                                        </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                                          {pObj.t2v_prompt && <div><b>T2V Prompt:</b> <span style={{ color: 'var(--text-primary)' }}>{pObj.t2v_prompt}</span></div>}
-                                          {pObj.t2i_prompt && <div><b>T2I Prompt:</b> <span style={{ color: 'var(--text-primary)' }}>{pObj.t2i_prompt}</span></div>}
-                                          {pObj.i2v_prompt && <div><b>I2V Motion:</b> <span style={{ color: 'var(--text-primary)' }}>{pObj.i2v_prompt}</span></div>}
-                                          {!pObj.t2v_prompt && !pObj.t2i_prompt && !pObj.i2v_prompt && <div style={{ color: 'var(--text-muted)' }}>Tidak ada prompt visual untuk klip ini.</div>}
-                                        </div>
-                                      </div>
-                                    ))
-                                  ) : (
-                                    <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                                      Visual prompts belum digenerate (Status: {t.status.replace('_', ' ')}).
+                              {/* Tab Content 2: storyboard */}
+                              {activeTab === 'storyboard' && (
+                                <div style={{ background: 'var(--surface-interactive)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: 10, marginBottom: 8 }}>
+                                    <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 700 }}>📖 Storyboard & Rencana Visual Baru</h4>
+                                  </div>
+
+                                  {/* Sub-tab Navigation */}
+                                  <div style={{ display: 'flex', gap: 6, borderBottom: '1px solid var(--border-subtle)', paddingBottom: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
+                                    {[
+                                      { id: 'storyboard_visual', label: '📖 Storyboard Visual' },
+                                      { id: 'storyboard_vo', label: '🎤 Voiceover' },
+                                      { id: 'storyboard_prompts', label: '🤖 Prompts Visual' },
+                                      { id: 'storyboard_social', label: '📱 Social Draft' }
+                                    ].map(tab => (
+                                      <button
+                                        key={tab.id}
+                                        type="button"
+                                        onClick={() => setInnerTab(tab.id)}
+                                        className="btn"
+                                        style={{
+                                          fontSize: '0.75rem',
+                                          padding: '4px 10px',
+                                          borderRadius: 4,
+                                          border: currentInnerTab === tab.id ? '1px solid var(--accent)' : '1px solid transparent',
+                                          background: currentInnerTab === tab.id ? 'var(--status-neutral-soft)' : 'transparent',
+                                          color: currentInnerTab === tab.id ? 'var(--accent-light)' : 'var(--text-secondary)',
+                                          fontWeight: currentInnerTab === tab.id ? '600' : 'normal',
+                                          cursor: 'pointer'
+                                        }}
+                                      >
+                                        {tab.label}
+                                      </button>
+                                    ))}
+                                  </div>
+
+                                  {currentInnerTab === 'storyboard_visual' && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                      {storyboard.length === 0 ? (
+                                        <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Tidak ada data storyboard.</div>
+                                      ) : (
+                                        storyboard.map((s, idx) => (
+                                          <div key={idx} style={{ display: 'flex', gap: '14px', background: 'var(--bg-secondary)', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--border)' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '60px', borderRight: '1px solid var(--border)', paddingRight: '12px' }}>
+                                              <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Scene</span>
+                                              <span style={{ fontSize: '1.15rem', fontWeight: 'bold', color: 'var(--accent-light)' }}>{s.scene || idx + 1}</span>
+                                              <span style={{ fontSize: '0.65rem', background: 'var(--surface-interactive)', padding: '2px 5px', borderRadius: '4px', marginTop: '4px', fontWeight: 600 }}>{s.duration || '-'}</span>
+                                            </div>
+                                            <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '12px' }}>
+                                              <div>
+                                                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', fontWeight: 600, marginBottom: '2px' }}>Visual Description</span>
+                                                <p style={{ margin: 0, lineHeight: '1.45' }}>{s.visual_description || '-'}</p>
+                                              </div>
+                                              <div>
+                                                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', fontWeight: 600, marginBottom: '2px' }}>Camera Movement</span>
+                                                <p style={{ margin: 0, lineHeight: '1.45', color: '#70a1ff' }}>{s.camera_movement || '-'}</p>
+                                              </div>
+                                              <div>
+                                                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', fontWeight: 600, marginBottom: '2px' }}>Audio & SFX Mood</span>
+                                                <p style={{ margin: 0, lineHeight: '1.45', color: '#ff6b81' }}>{s.audio_mood || '-'}</p>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ))
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {currentInnerTab === 'storyboard_vo' && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                      {storyboard.length === 0 ? (
+                                        <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Tidak ada data voiceover script.</div>
+                                      ) : (
+                                        storyboard.map((s, idx) => {
+                                          const ttsCompleted = t.status === 'completed' || ['generating_visuals', 'ffmpeg_muxing'].includes(t.status);
+                                          return (
+                                            <div key={idx} style={{ display: 'flex', gap: '14px', background: 'var(--bg-secondary)', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--border)', alignItems: 'center' }}>
+                                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '60px', borderRight: '1px solid var(--border)', paddingRight: '12px' }}>
+                                                <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Scene</span>
+                                                <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--accent-light)' }}>{s.scene || idx + 1}</span>
+                                                <span style={{ fontSize: '0.65rem', background: 'var(--surface-interactive)', padding: '2px 5px', borderRadius: '4px', marginTop: '4px', fontWeight: 600 }}>{s.duration || '-'}</span>
+                                              </div>
+                                              <div style={{ flex: 1, background: 'var(--bg-secondary)', padding: '8px 12px', borderRadius: '6px', borderLeft: '3px solid var(--accent)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                                <p style={{ margin: 0, fontStyle: 'italic', fontSize: '0.85rem', lineHeight: '1.5', color: '#ecf0f1' }}>
+                                                  "{s.narration_transcript || s.voiceover || '-'}"
+                                                </p>
+                                                {ttsCompleted && (
+                                                  <div style={{ marginTop: '6px' }}>
+                                                    <audio
+                                                      src={`/temp/tts_clip_mult_${t.id}_${idx}.mp3`}
+                                                      controls
+                                                      style={{ width: '100%', height: '32px', borderRadius: '4px' }}
+                                                    />
+                                                  </div>
+                                                )}
+                                              </div>
+                                            </div>
+                                          );
+                                        })
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {currentInnerTab === 'storyboard_prompts' && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                                      {prompts.length === 0 ? (
+                                        <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Tidak ada data prompts visual.</div>
+                                      ) : (
+                                        prompts.map((pObj, pIdx) => {
+                                          const isHybridLock = bridgingData.visualMode === 'hybrid_lock' && (pIdx + 1) === (Number(bridgingData.bridgeAtClip) || 2);
+                                          return (
+                                            <div key={pIdx} style={{ background: 'var(--bg-secondary)', padding: 14, borderRadius: 6, border: '1px solid var(--border)' }}>
+                                              <div style={{ fontWeight: 'bold', color: 'var(--accent-light)', fontSize: '0.85rem', marginBottom: 8 }}>
+                                                🎬 Klip {pObj.scene || pIdx + 1} {isHybridLock && <span style={{ fontSize: '0.7rem', padding: '1px 6px', background: 'var(--accent-glow)', color: 'var(--accent-light)', borderRadius: 4, marginLeft: 6 }}>HYBRID LOCK</span>}
+                                              </div>
+                                              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: '0.78rem' }}>
+                                                {isHybridLock ? (
+                                                  <>
+                                                    <div>
+                                                      <b>T2I Prompt (Start Frame):</b>
+                                                      <pre style={{ background: '#111', padding: 8, borderRadius: 4, margin: '4px 0 0 0', whiteSpace: 'pre-wrap' }}>{pObj.t2i_prompt || '-'}</pre>
+                                                    </div>
+                                                    <div>
+                                                      <b>I2V Prompt (Motion):</b>
+                                                      <pre style={{ background: '#111', padding: 8, borderRadius: 4, margin: '4px 0 0 0', whiteSpace: 'pre-wrap' }}>{pObj.i2v_prompt || '-'}</pre>
+                                                    </div>
+                                                    {bridgingData.generatedStartFrameUrl && (
+                                                      <div style={{ marginTop: 8 }}>
+                                                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>🖼️ Rendered Start Frame Preview:</span>
+                                                        <img src={bridgingData.generatedStartFrameUrl} alt="T2I Start Frame" style={{ maxHeight: 150, borderRadius: 4, border: '1px solid var(--border)' }} />
+                                                      </div>
+                                                    )}
+                                                  </>
+                                                ) : (
+                                                  <div>
+                                                    <b>T2V Prompt:</b>
+                                                    <pre style={{ background: '#111', padding: 8, borderRadius: 4, margin: '4px 0 0 0', whiteSpace: 'pre-wrap' }}>{pObj.t2v_prompt || pObj.prompt || '-'}</pre>
+                                                  </div>
+                                                )}
+                                              </div>
+                                            </div>
+                                          );
+                                        })
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {currentInnerTab === 'storyboard_social' && (
+                                    <div style={{ background: 'var(--bg-secondary)', padding: 16, borderRadius: 6, border: '1px solid var(--border)' }}>
+                                      <strong style={{ fontSize: '0.82rem', color: 'var(--accent-light)', display: 'block', marginBottom: 8 }}>📱 Social Copywriting Draft</strong>
+                                      {t.new_caption ? (
+                                        <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', fontSize: '0.8rem', color: 'var(--text-primary)', margin: 0 }}>
+                                          {t.new_caption}
+                                        </pre>
+                                      ) : (
+                                        <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Belum digenerate.</div>
+                                      )}
                                     </div>
                                   )}
                                 </div>
                               )}
 
-                              {/* Tab Content 4: social */}
-                              {activeTab === 'social' && (
-                                <div>
-                                  {t.new_caption ? (
-                                    <pre style={{
-                                      background: 'var(--bg-secondary)', padding: 16, borderRadius: 6, fontSize: '0.8rem',
-                                      color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', fontFamily: 'inherit', margin: 0,
-                                      border: '1px solid var(--surface-interactive)', lineHeight: 1.5
-                                    }}>
-                                      {t.new_caption}
-                                    </pre>
-                                  ) : (
-                                    <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                                      Caption belum digenerate (Status: {t.status.replace('_', ' ')}).
+                              {/* Tab Content 3: assets */}
+                              {activeTab === 'assets' && (
+                                <div style={{ background: 'var(--surface-interactive)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: 10, flexWrap: 'wrap', gap: 10 }}>
+                                    <div>
+                                      <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 700 }}>☁️ Asset Vault & Cloud Recovery Panel</h4>
+                                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Status sinkronisasi penyimpanan Nextcloud.</span>
                                     </div>
-                                  )}
+                                    <div style={{ display: 'flex', gap: 8 }}>
+                                      {t.nextcloud_video_url && (
+                                        <a href={t.nextcloud_video_url} target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm" style={{ fontSize: '0.72rem', padding: '6px 12px' }}>
+                                          📁 Folder Nextcloud
+                                        </a>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  <div style={{ fontSize: '0.78rem', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                    <h5 style={{ margin: 0, color: 'var(--accent-light)', fontWeight: 700 }}>Aset Lokasi File Server:</h5>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+                                      <div style={{ background: 'var(--bg-secondary)', padding: 12, borderRadius: 6, border: '1px solid var(--border)' }}>
+                                        <div style={{ fontWeight: 600, marginBottom: 4 }}>Markdown Narrative (.md)</div>
+                                        {t.nextcloud_md_url ? (
+                                          <a href={t.nextcloud_md_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--success)', fontWeight: 600 }}>✅ Ready (Nextcloud) ↗</a>
+                                        ) : (
+                                          <span style={{ color: 'var(--text-muted)' }}>⏳ Pending upload</span>
+                                        )}
+                                      </div>
+                                      <div style={{ background: 'var(--bg-secondary)', padding: 12, borderRadius: 6, border: '1px solid var(--border)' }}>
+                                        <div style={{ fontWeight: 600, marginBottom: 4 }}>Video Output (.mp4)</div>
+                                        {t.ffmpeg_output_path ? (
+                                          <span style={{ color: 'var(--success)', fontWeight: 600 }}>✅ Ready (Local Server)</span>
+                                        ) : (
+                                          <span style={{ color: 'var(--text-muted)' }}>⏳ Pending render</span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Tab Content 4: dna */}
+                              {activeTab === 'dna' && (
+                                <div style={{ background: 'var(--surface-interactive)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                                  <h4 style={{ margin: '0 0 16px 0', color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 700 }}>🧬 Metadata Video DNA</h4>
+                                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                                    {[
+                                      { field: 'pilarKonten', label: 'Pilar Konten', val: vsoData.pilarKonten || '-' },
+                                      { field: 'hookType', label: 'Hook Type', val: vsoData.hookType || '-' },
+                                      { field: 'visualStyle', label: 'Visual Style', val: vsoData.visualStyle || '-' },
+                                      { field: 'signatureMoment', label: 'Signature Moment', val: vsoData.signatureMoment || '-' },
+                                      { field: 'cameraPace', label: 'Camera Pace', val: vsoData.cameraPace || '-' },
+                                      { field: 'primaryEmotion', label: 'Primary Emotion', val: vsoData.primaryEmotion || '-' },
+                                      { field: 'affiliateIntegration', label: 'Affiliate Integration', val: vsoData.affiliateIntegration || '-' },
+                                      { field: 'affiliateMention', label: 'Affiliate Mention', val: vsoData.affiliateMention || '-' },
+                                      { field: 'sceneCount', label: 'Scene Count', val: prompts.length || '-' },
+                                      { field: 'ctaType', label: 'CTA Type', val: vsoData.ctaType || '-' }
+                                    ].map(({ field, label, val }) => (
+                                      <div key={field} style={{ background: 'var(--bg-secondary)', padding: '10px 12px', borderRadius: 4, border: '1px solid var(--border)' }}>
+                                        <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginBottom: '2px', fontWeight: 600 }}>{label}</label>
+                                        <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600 }}>{val}</span>
+                                      </div>
+                                    ))}
+                                  </div>
                                 </div>
                               )}
 
@@ -2614,11 +2684,6 @@ function MultiplierLabPageContent() {
                             </div>
                           );
                         })()}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
             </div>
           );
         });
