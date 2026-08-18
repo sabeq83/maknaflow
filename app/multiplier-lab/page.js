@@ -2684,6 +2684,11 @@ function MultiplierLabPageContent() {
                             </div>
                           );
                         })()}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           );
         });

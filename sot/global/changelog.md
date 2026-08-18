@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.14.66 — Fix page.js JSX syntax closing tags (18/08/2026)
+- Memperbaiki tag penutup JSX dan bracket pemicu error compiler webpack
+
 ## V2.14.65 — Align Multiplier Lab detail tabs to RE Campaign & Revert Worker to Sequential (18/08/2026)
 - Menghilangkan tombol pause/resume/delete tingkat baris dan memusatkannya pada Batch Card
 - Menampilkan info statistik status Fase 1 dan Fase 2 pada kartu Batch
