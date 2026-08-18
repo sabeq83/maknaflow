@@ -27,7 +27,8 @@ export const GET = withTenantContext(async (request) => {
       instant: 'instant_factory_logs.txt',
       recipe: 'recipe_logs.txt',
       product_bulk: 'product_bulk_logs.txt',
-      bridge_injector: 'bridge_injector_logs.txt'
+      bridge_injector: 'bridge_injector_logs.txt',
+      deconstruct: 'deconstruct_logs.txt'
     };
 
     const filename = whitelist[type];

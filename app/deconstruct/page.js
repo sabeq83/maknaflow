@@ -47,6 +47,67 @@ export default function DeconstructPage() {
   const pollingRef = useRef(null);
   const csvRef = useRef(null);
 
+  // Scheduler Status & Poller Logs
+  const [isSchedulerActive, setIsSchedulerActive] = useState(true);
+  const [terminalLogs, setTerminalLogs] = useState('');
+  const terminalRef = useRef(null);
+  const logIntervalRef = useRef(null);
+
+  async function fetchSchedulerStatus() {
+    try {
+      const res = await fetch('/api/v2/deconstruct/scheduler-control');
+      const data = await res.json();
+      if (data.success) {
+        setIsSchedulerActive(data.isSchedulerActive);
+      }
+    } catch (_) {}
+  }
+
+  async function toggleScheduler() {
+    try {
+      const res = await fetch('/api/v2/deconstruct/scheduler-control', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ schedulerStatus: !isSchedulerActive })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsSchedulerActive(data.isSchedulerActive);
+        showToast(data.isSchedulerActive ? 'Skeduler diaktifkan' : 'Skeduler dimatikan');
+        pollLogs();
+      }
+    } catch (_) {
+      showToast('Gagal mengubah status skeduler', 'error');
+    }
+  }
+
+  async function pollLogs() {
+    try {
+      const res = await fetch(`/api/system-logs?type=deconstruct&t=${Date.now()}`);
+      const text = await res.text();
+      setTerminalLogs(text);
+    } catch (_) {}
+  }
+
+  useEffect(() => {
+    fetchSchedulerStatus();
+    pollLogs();
+
+    logIntervalRef.current = setInterval(() => {
+      pollLogs();
+    }, 5000);
+
+    return () => {
+      if (logIntervalRef.current) clearInterval(logIntervalRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (terminalRef.current) {
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    }
+  }, [terminalLogs]);
+
   function showToast(msg, type = 'success') {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 4000);
@@ -344,6 +405,55 @@ export default function DeconstructPage() {
           >
             <span>+</span> Simpan URL
           </button>
+        </div>
+
+        {/* Status Skeduler Card */}
+        <div style={{
+          background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
+          padding: 16, marginBottom: 20,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12
+        }}>
+          <div>
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0 }}>⚙️ Status Skeduler Deconstruct Lab</h3>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '4px 0 0' }}>Mengontrol jalannya antrean dekonstruksi video AI secara otomatis.</p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{
+              fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', padding: '4px 10px', borderRadius: 12,
+              background: isSchedulerActive ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
+              color: isSchedulerActive ? 'var(--success)' : 'var(--danger)',
+              border: `1px solid ${isSchedulerActive ? 'var(--status-success-soft)' : 'var(--status-danger-soft)'}`
+            }}>
+              {isSchedulerActive ? '🟢 SKEDULER AKTIF' : '🔴 SKEDULER MATI'}
+            </span>
+            <button
+              type="button"
+              onClick={toggleScheduler}
+              className={`btn ${isSchedulerActive ? 'btn-danger' : 'btn-success'}`}
+              style={{
+                fontSize: '0.8rem', padding: '6px 16px', fontWeight: 600,
+                boxShadow: isSchedulerActive ? '0 0 15px var(--status-danger-soft)' : '0 0 15px var(--status-success-soft)',
+                border: isSchedulerActive ? '1px solid var(--status-danger-soft)' : '1px solid var(--status-success-soft)',
+                cursor: 'pointer'
+              }}
+            >
+              {isSchedulerActive ? '🛑 STOP SKEDULER' : '▶️ START SKEDULER'}
+            </button>
+          </div>
+        </div>
+
+        {/* System Poller Logger */}
+        <div className="card" style={{ padding: '0', background: 'var(--surface)', border: '1px solid var(--border)', marginBottom: '24px' }}>
+          <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--status-success)', display: 'inline-block', boxShadow: '0 0 8px var(--status-success)' }}></span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>SYSTEM POLLER LOGGER</span>
+            </div>
+            <button onClick={pollLogs} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.75rem', cursor: 'pointer', fontFamily: 'var(--font-mono)' }}>[Refresh Log]</button>
+          </div>
+          <pre ref={terminalRef} style={{ margin: 0, padding: '20px', background: 'var(--surface)', color: '#20c20e', fontFamily: 'var(--font-mono)', fontSize: '0.82rem', maxHeight: '220px', overflowY: 'auto', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
+            {terminalLogs || 'Memuat log aktivitas...'}
+          </pre>
         </div>
 
         {/* Toolbar & Filters */}

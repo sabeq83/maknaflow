@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.52 — Migrated Deconstruct queue to Campaign Scheduler (18/08/2026)
+- Memindahkan antrean Deconstruct Lab ke Campaign Local Scheduler
+- Menambahkan Status Skeduler ON/OFF dan System Poller Logger di UI
+
 ## V2.14.51 — Centered Layout and Footer Space (18/08/2026)
 - Penyelarasan layout terpusat pada Deconstruct Lab, Content Planner, Preset, Brand Profile, dan Universe Manager
 - Penambahan footer Copyright 2026 MaknaFlow untuk batas scroll halaman
