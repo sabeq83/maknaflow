@@ -8,7 +8,7 @@ export const GET = withTenantContext(async () => {
     const db = getDb();
     // Ambil aset yang sudah selesai didekonstruksi
     const assets = await db.prepare(`
-      SELECT id, source_url, original_caption, product_ideas_json, created_at, tags
+      SELECT id, source_url, original_caption, product_ideas_json, created_at, tags, niche, viral_pattern_summary
       FROM re_deconstructed_assets
       WHERE status = 'deconstructed'
       ORDER BY created_at DESC

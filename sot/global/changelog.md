@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.50 — Deconstruct URL Library (18/08/2026)
+- Tambah library URL berbasis niche
+- Tambah antrean dekonstruksi massal serial
+- Tambah detail asset dan integrasi Recipe serta Multiplier Labs
+
 ## V2.14.49 — Meneruskan AI Directive dan Outro pada RE (17/08/2026)
 - Meneruskan parameter ai_directive dan mandatory_outro_line dari campaign RE ke Gemini AI prompt builder di scheduler-processors.js
 
