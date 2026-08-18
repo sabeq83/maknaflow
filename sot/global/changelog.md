@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.67 — Fix deconstruct assets original storyboard and compliance score type crash (18/08/2026)
+- Menyertakan field original_storyboard_json pada API deconstruct agar halaman UI dapat memuat Tab 1 Dekonstruksi Asli
+- Menambahkan mapping risk_score string ke integer untuk kolom bigint compliance_score guna mencegah crash bertipe data di PostgreSQL
+- Menambahkan migrasi otomatis penambahan kolom error_message pada tabel re_multiplier_tasks
+
 ## V2.14.66 — Fix page.js JSX syntax closing tags (18/08/2026)
 - Memperbaiki tag penutup JSX dan bracket pemicu error compiler webpack
 
