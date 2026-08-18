@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.14.62 — Fix Multiplier Lab log filename multi-tenancy (18/08/2026)
+- Mengubah penulisan logToMultiplier agar menyertakan tenant ID pada nama berkas logs sehingga dapat dibaca sistem poller logger
+
 ## V2.14.61 — Fix Webpack bundle dynamic require crash (18/08/2026)
 - Mengubah dynamic require ke dynamic await import untuk re-multiplier-worker.js agar tidak menyebabkan crash TypeError b is not a function
 
