@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.59 — Aesthetics & Visual Settings Alignment (18/08/2026)
+- Pemindahan dropdown Visual Mode ke Accordion 2 (Aesthetics & Visual Settings)
+- Penyelarasan opsi Visual Style menjadi Cinematic, UGC, dan Macrophotography
+- Menerapkan penguncian otomatis (lock) foto referensi produk dan nama berkas jika produk dari pustaka database dipilih
+
 ## V2.14.58 — Multiplier Lab Configuration Alignment (18/08/2026)
 - Penyelarasan lengkap 5 accordion konfigurasi Multiplier Lab sesuai RE Campaign
 - Daftar dropdown Voice Persona lengkap untuk Gemini dan MiniMax

@@ -1224,9 +1224,16 @@ function MultiplierLabPageContent() {
                       <div className="form-group">
                         <label className="form-label">Visual Style</label>
                         <select className="form-input" value={visualStyle} onChange={e => setVisualStyle(e.target.value)}>
-                          <option value="Cinematic">Cinematic (Estetik / Filmis)</option>
-                          <option value="Minimalist">Minimalist</option>
-                          <option value="UGC Vlog">UGC Vlog (Kasual)</option>
+                          <option value="Cinematic">Cinematic</option>
+                          <option value="UGC">UGC</option>
+                          <option value="Macrophotography">Macrophotography</option>
+                        </select>
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Visual Mode</label>
+                        <select className="form-input" value={visualMode} onChange={e => setVisualMode(e.target.value)}>
+                          <option value="pure_t2v">Pure T2V (Klasik - Text-to-Video untuk semua klip)</option>
+                          <option value="hybrid_lock">Hybrid Lock (RE Hybrid & Product Pixel Lock - Double-Pass)</option>
                         </select>
                       </div>
                       <div className="form-group">
@@ -1470,34 +1477,41 @@ function MultiplierLabPageContent() {
                         </>
                       )}
 
-                      {/* Pixel Lock Image Upload (Always visible in Single mode for both direct and bridged placement) */}
-                      {productionMode === 'single' && (
+                      {/* Foto Referensi Produk Upload - Tampilkan jika visualMode === 'hybrid_lock' */}
+                      {visualMode === 'hybrid_lock' && (
                         <div style={{ background: 'var(--bg-secondary)', padding: 16, borderRadius: 8, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                          <div className="form-group">
-                            <label className="form-label">Visual Mode</label>
-                            <select className="form-input" value={visualMode} onChange={e => setVisualMode(e.target.value)}>
-                              <option value="pure_t2v">Pure Text-To-Video (T2V Langsung)</option>
-                              <option value="hybrid_lock">Double-Pass Pixel Lock (T2I ➜ Veo 3.1 I2V)</option>
-                            </select>
-                          </div>
-
-                          {visualMode === 'hybrid_lock' && (
+                          {bridgingMode === 'select_existing' && targetProductId && productRefImage ? (
+                            <div style={{ background: 'var(--status-success-soft)', border: '1px solid var(--border)', padding: 12, borderRadius: 8 }}>
+                              <div style={{ color: 'var(--status-success)', fontWeight: 600, fontSize: '0.85rem', marginBottom: 8 }}>
+                                🔒 Terkunci dari Database Produk (Reference Image & Filename terikat otomatis)
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                {typeof productRefImage === 'string' && (
+                                  <img src={productRefImage} alt="Product Ref" style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--border)' }} />
+                                )}
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)' }}>
+                                  <div><b>Berkas Deklarasi:</b> <code>{productFilenameDeclare || 'Auto Generated'}</code></div>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                               <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label">Foto Referensi Produk</label>
+                                <label className="form-label">📸 Unggah Foto Produk (Reference Image)</label>
                                 <input
                                   type="file"
-                                  className="form-input"
                                   accept="image/*"
                                   onChange={e => setProductRefImage(e.target.files[0])}
+                                  className="form-input"
                                 />
+                                <small style={{ color: 'var(--text-muted)' }}>Foto produk yang akan di-lock penampilannya pada video promosi.</small>
                               </div>
                               <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label">Deklarasi Nama Berkas (Filename)</label>
+                                <label className="form-label">🏷️ Nama Berkas Gambar Produk (Deklarasi Mandate 88)</label>
                                 <input
                                   type="text"
                                   className="form-input"
-                                  placeholder="Contoh: botol_serum.png"
+                                  placeholder="Contoh: youth_retinol_serum.png"
                                   value={productFilenameDeclare}
                                   onChange={e => setProductFilenameDeclare(e.target.value)}
                                 />
