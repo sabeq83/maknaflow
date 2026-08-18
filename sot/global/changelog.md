@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.14.75 — Fix properties mapping for storyboard (18/08/2026)
+- Map narration_transcript and prompts to UI fields dynamically in fetchTasks
+
 ## V2.14.74 — Fix deconstruct and storyboard layout details (18/08/2026)
 - Add original deconstruction storyboard table to Tab 1
 - Stack storyboard edit clips vertically in 1 column in Tab 2

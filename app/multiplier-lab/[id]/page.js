@@ -87,12 +87,30 @@ function CampaignDetailPageContent() {
         
         // Populate local states for editing if not already set
         data.tasks.forEach(t => {
-          if (!editedStoryboards[t.id]) {
+          const currentStoryboard = editedStoryboards[t.id] || [];
+          if (currentStoryboard.length === 0) {
             let storyboard = [];
             try {
               storyboard = JSON.parse(t.remake_storyboard_json || '[]');
             } catch (_) {}
-            setEditedStoryboards(prev => ({ ...prev, [t.id]: storyboard }));
+            
+            let prompts = [];
+            try {
+              prompts = JSON.parse(t.t2i_i2v_prompts_json || '[]');
+            } catch (_) {}
+
+            const combined = storyboard.map((scene, idx) => {
+              const p = prompts[idx] || {};
+              return {
+                ...scene,
+                narration: scene.narration_transcript || scene.voiceover || scene.narration || '',
+                t2i_prompt: p.t2i_prompt || '',
+                i2v_prompt: p.i2v_prompt || p.t2v_prompt || ''
+              };
+            });
+            if (combined.length > 0) {
+              setEditedStoryboards(prev => ({ ...prev, [t.id]: combined }));
+            }
           }
           if (editedCaptions[t.id] === undefined) {
             setEditedCaptions(prev => ({ ...prev, [t.id]: t.new_caption || '' }));
