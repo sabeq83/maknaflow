@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.54 — Enforce Deconstruct Serial Queue Lock (18/08/2026)
+- Membatasi eksekusi antrean Deconstruct Lab secara serial (satu per satu)
+- Menambahkan label [Video X/Y] progres pada log dan terminal logger
+
 ## V2.14.53 — Integrated Gemini Key Pool on Deconstruct (18/08/2026)
 - Mengintegrasikan Gemini API Key Pooling (executeWithKeyPool) pada Deconstruct Lab
 - Memperbaiki properti fileUri pada upload video Gemini File API
