@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.14.69 — Multiplier Lab UI Alignment & Rich 5-Tabs Layout (18/08/2026)
+- Penyelarasan UI Multiplier Lab dengan visualisasi kaya RE dan OPC
+- Restrukturisasi card batch induk menjadi 3-kolom grid
+- Penyusunan ulang Tab 1 dengan detail produk target dan foto produk
+- Penyusunan ulang Tab 2 dengan Grid Preview Start Frame Gambar T2I untuk hybrid_lock
+- Penyelarasan Tab 3 Asset Vault, Tab 4 DNA Metadata, dan Tab 5 System Log dengan antrean GLabs
+
 ## V2.14.68 — Enforce 60-second request timeout in resilient generative AI model (18/08/2026)
 - Wrap generative content promises inside makeModelResilient with 60s timeout to prevent infinite socket hangs on unstable networks
 

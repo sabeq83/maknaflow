@@ -6,7 +6,8 @@ import {
   getMultiplierTasks, 
   createMultiplierTask,
   getSetting,
-  setSetting
+  setSetting,
+  dbAll
 } from '@/lib/db';
 
 import { withTenantContext } from '@/lib/auth';
@@ -14,6 +15,9 @@ import { withTenantContext } from '@/lib/auth';
 export const GET = withTenantContext(async () => {
   try {
     const tasks = await getMultiplierTasks();
+    for (const task of tasks) {
+      task.glabs_tasks = await dbAll('SELECT * FROM glabs_tasks WHERE item_id = ? ORDER BY clip_index ASC', [task.id]);
+    }
     const isSchedulerActive = await getSetting('multiplier_scheduler_active') !== 'false';
     return NextResponse.json({ success: true, tasks, isSchedulerActive });
   } catch (error) {
