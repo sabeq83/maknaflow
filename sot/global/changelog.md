@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.76 — Implement Generate All T2I and expose all retry buttons (18/08/2026)
+- Add bulk start frames regenerate API
+- Add Generate All T2I button to Grid Preview
+- Add retry button for completed and failed pipeline stages
+
 ## V2.14.75 — Fix properties mapping for storyboard (18/08/2026)
 - Map narration_transcript and prompts to UI fields dynamically in fetchTasks
 

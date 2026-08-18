@@ -141,7 +141,29 @@ function CampaignDetailPageContent() {
     } catch (_) {}
   };
 
+  const handleGenerateAllT2I = async (taskId) => {
+    if (!confirm('Apakah Anda yakin ingin meregenerasi semua start frame T2I untuk adegan ini di latar belakang?')) return;
+    try {
+      const res = await fetch(`/api/v2/multiplier/${taskId}/regenerate-start-frames`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Proses regenerasi semua start frame telah dimulai di latar belakang.');
+        fetchTasks();
+      } else {
+        showToast(data.error || 'Gagal memulai regenerasi massal.', 'error');
+      }
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
   const handleRegenerateT2I = async (taskId, clipIndex, prompt) => {
+    if (!prompt) {
+      showToast("T2I prompt kosong, mohon masukkan deskripsi prompt terlebih dahulu.", "error");
+      return;
+    }
     const taskKey = `${taskId}_${clipIndex}`;
     setRegeneratingT2I(prev => ({ ...prev, [taskKey]: true }));
     try {
@@ -331,11 +353,20 @@ function CampaignDetailPageContent() {
               <span style={{ fontSize: '0.72rem', fontWeight: 600, padding: '4px 10px', borderRadius: 6, background: bg, color, border }}>
                 {labelText}
               </span>
-              {status === 'danger' && (
+              {(status === 'success' || status === 'danger') && (
                 <button
                   type="button"
                   onClick={() => handleTriggerRetry(task.id, stage.name)}
-                  style={{ background: 'var(--danger)', color: 'var(--text-primary)', border: 'none', borderRadius: 4, padding: '2px 8px', fontSize: '0.65rem', cursor: 'pointer', fontWeight: 700 }}
+                  style={{
+                    background: status === 'danger' ? 'var(--danger)' : 'var(--surface-interactive)',
+                    color: status === 'danger' ? 'var(--text-primary)' : 'var(--text-muted)',
+                    border: status === 'danger' ? 'none' : '1px solid var(--border-subtle)',
+                    borderRadius: 4,
+                    padding: '2px 8px',
+                    fontSize: '0.65rem',
+                    cursor: 'pointer',
+                    fontWeight: 700
+                  }}
                 >
                   🔄 Retry
                 </button>
@@ -644,9 +675,27 @@ function CampaignDetailPageContent() {
                                     {/* Start Frame Grid Preview */}
                                     {bridging.visualMode === 'hybrid_lock' && (
                                       <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 8, padding: 20 }}>
-                                        <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: 8, fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                          🖼️ Grid Preview Start Frame Gambar (T2I)
-                                        </div>
+                                         <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                           <span style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                             🖼️ Grid Preview Start Frame Gambar (T2I)
+                                           </span>
+                                           <button
+                                             type="button"
+                                             onClick={() => handleGenerateAllT2I(task.id)}
+                                             style={{
+                                               background: 'var(--accent)',
+                                               color: 'var(--text-primary)',
+                                               border: 'none',
+                                               borderRadius: 4,
+                                               padding: '4px 10px',
+                                               fontSize: '0.72rem',
+                                               fontWeight: 700,
+                                               cursor: 'pointer'
+                                             }}
+                                           >
+                                             ⚡ Generate All T2I
+                                           </button>
+                                         </div>
                                         
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 16, marginTop: 12 }}>
                                           {storyboard.map((clip, cidx) => {
