@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.57 — Multiplier Blueprint Product Workflows (18/08/2026)
+- Tambah pencarian dan preview blueprint lengkap
+- Tambah workflow multi blueprint dan multi produk
+- Perbaiki task per baris dan antrean serial
+
 ## V2.14.56 — Sanitize URL and tenant details from deconstruct logs (18/08/2026)
 - Menyembunyikan detail tautan URL video, file URI, dan suffix nama tenant dari log konsol dekonstruksi
 

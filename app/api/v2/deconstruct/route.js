@@ -14,10 +14,58 @@ export const GET = withTenantContext(async (request) => {
     const { searchParams } = new URL(request.url);
     const tenantId = getActiveTenantId();
 
-    // Mode legacy: list completed assets untuk consumer Labs
+    // Mode legacy: list completed assets untuk consumer Labs (mendukung q, niche, limit)
     if (searchParams.get('assets') === 'true') {
+      const q = searchParams.get('q') || '';
+      const niche = searchParams.get('niche') || '';
+      const limit = Number(searchParams.get('limit') || 20);
+
       const db = getDb();
-      const assets = await db.prepare("SELECT * FROM re_deconstructed_assets WHERE status = 'deconstructed' AND tenant_id = ? ORDER BY created_at DESC").all(tenantId);
+      let query = "SELECT id, batch_id, source_url, original_caption, niche, tags, created_at, viral_pattern_summary, product_ideas_json, original_storyboard_json FROM re_deconstructed_assets WHERE status = 'deconstructed' AND tenant_id = ?";
+      const params = [tenantId];
+
+      if (niche) {
+        query += " AND niche = ?";
+        params.push(niche);
+      }
+
+      if (q) {
+        query += " AND (source_url ILIKE ? OR niche ILIKE ? OR tags ILIKE ? OR original_caption ILIKE ? OR viral_pattern_summary ILIKE ? OR product_ideas_json ILIKE ?)";
+        const likeQ = `%${q}%`;
+        params.push(likeQ, likeQ, likeQ, likeQ, likeQ, likeQ);
+      }
+
+      query += " ORDER BY created_at DESC LIMIT ?";
+      params.push(limit);
+
+      const rows = await db.prepare(query).all(...params);
+      
+      const assets = rows.map(row => {
+        let scene_count = 0;
+        try {
+          scene_count = JSON.parse(row.original_storyboard_json || '[]').length;
+        } catch(_) {}
+
+        let recommended_products = [];
+        try {
+          const ideas = JSON.parse(row.product_ideas_json || '[]');
+          recommended_products = Array.isArray(ideas) ? ideas : [];
+        } catch(_) {}
+
+        return {
+          id: row.id,
+          batch_id: row.batch_id,
+          source_url: row.source_url,
+          original_caption: row.original_caption,
+          niche: row.niche,
+          tags: row.tags,
+          deconstructed_at: row.created_at,
+          viral_pattern_summary: row.viral_pattern_summary,
+          scene_count,
+          recommended_products
+        };
+      });
+
       return NextResponse.json({ success: true, assets });
     }
 

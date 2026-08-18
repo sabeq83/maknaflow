@@ -16,6 +16,16 @@ function MultiplierLabPageContent() {
   const [assetSearchQuery, setAssetSearchQuery] = useState('');
   const [productSearchQuery, setProductSearchQuery] = useState('');
 
+  // New workflows inputs & states
+  const [workflowMode, setWorkflowMode] = useState('multi_blueprint_one_product'); // 'multi_blueprint_one_product' | 'one_blueprint_multi_product'
+  const [selectedBlueprintIds, setSelectedBlueprintIds] = useState([]);
+  const [selectedProductIds, setSelectedProductIds] = useState([]);
+  const [combinationRows, setCombinationRows] = useState([]);
+  const [previewAsset, setPreviewAsset] = useState(null);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [nicheFilter, setNicheFilter] = useState('');
+  const [niches, setNiches] = useState([]);
+
   // Queue tasks and monitoring
   const [tasks, setTasks] = useState([]);
   const [loadingTasks, setLoadingTasks] = useState(true);
@@ -113,12 +123,13 @@ function MultiplierLabPageContent() {
 
   // Fetch initial library data and active tasks
   useEffect(() => {
-    fetchAssets();
+    fetchAssets('', '');
     fetchTasks();
     pollLogs();
     fetch('/api/v2/brand-profiles').then(r => r.json()).then(d => { if (d.success) setBrandProfiles(d.data || []); }).catch(() => {});
     fetch('/api/product-agent').then(r => r.json()).then(d => { if (d.success) setProducts(d.data || []); }).catch(() => {});
     fetch('/api/v2/operator-presets').then(r => r.json()).then(d => { if (d.success) setPresets(d.presets || []); }).catch(() => {});
+    fetch('/api/v2/deconstruct?limit=1').then(r => r.json()).then(d => { if (d.success) setNiches(d.niches || []); }).catch(() => {});
 
     pollingRef.current = setInterval(() => {
       fetchTasks(true);
@@ -142,6 +153,7 @@ function MultiplierLabPageContent() {
   useEffect(() => {
     if (assets.length > 0 && preSelectedAssetId) {
       setSelectedAssetId(preSelectedAssetId);
+      setSelectedBlueprintIds([preSelectedAssetId]);
     }
   }, [assets, preSelectedAssetId]);
 
@@ -215,10 +227,10 @@ function MultiplierLabPageContent() {
     showToast(`Preset "${preset.label}" berhasil diterapkan!`);
   };
 
-  async function fetchAssets() {
+  async function fetchAssets(query = '', niche = '') {
     setLoadingAssets(true);
     try {
-      const res = await fetch('/api/v2/deconstruct?assets=true');
+      const res = await fetch(`/api/v2/deconstruct?assets=true&q=${encodeURIComponent(query)}&niche=${encodeURIComponent(niche)}`);
       const data = await res.json();
       if (data.success) {
         setAssets(data.assets || []);
@@ -229,6 +241,129 @@ function MultiplierLabPageContent() {
       setLoadingAssets(false);
     }
   }
+
+  // Generate Combination Rows
+  const generateCombinationRows = () => {
+    let rows = [];
+    const selectedBlueprints = assets.filter(a => selectedBlueprintIds.includes(a.id));
+
+    if (workflowMode === 'multi_blueprint_one_product') {
+      if (selectedBlueprintIds.length === 0) {
+        showToast('Pilih setidaknya satu blueprint video', 'error');
+        return;
+      }
+      
+      let singleProduct = {};
+      if (bridgingMode === 'select_existing') {
+        const prod = products.find(p => p.id === targetProductId);
+        if (!prod) {
+          showToast('Pilih produk dari pustaka terlebih dahulu', 'error');
+          return;
+        }
+        singleProduct = {
+          target_product_id: targetProductId,
+          product_name: prod.product_name,
+          target_product_url: prod.source_url || '',
+          affiliate_url: affiliateUrl || ''
+        };
+      } else if (bridgingMode === 'url_extract') {
+        if (!productUrl) {
+          showToast('Masukkan URL produk terlebih dahulu', 'error');
+          return;
+        }
+        singleProduct = {
+          target_product_id: null,
+          product_name: 'URL Extract Product',
+          target_product_url: productUrl,
+          affiliate_url: affiliateUrl || ''
+        };
+      } else {
+        if (!manualProductName) {
+          showToast('Masukkan nama produk terlebih dahulu', 'error');
+          return;
+        }
+        singleProduct = {
+          target_product_id: null,
+          product_name: manualProductName,
+          target_product_url: '',
+          affiliate_url: affiliateUrl || ''
+        };
+      }
+
+      for (const bp of selectedBlueprints) {
+        rows.push({
+          deconstruct_asset_id: bp.id,
+          deconstruct_asset_url: bp.source_url,
+          deconstruct_asset_title: bp.niche || bp.original_caption || bp.id,
+          target_product_id: singleProduct.target_product_id,
+          target_product_name: singleProduct.product_name,
+          target_product_url: singleProduct.target_product_url,
+          affiliate_url: singleProduct.affiliate_url
+        });
+      }
+    } else {
+      if (!selectedAssetId) {
+        showToast('Pilih satu blueprint video terlebih dahulu', 'error');
+        return;
+      }
+      const singleBp = assets.find(a => a.id === selectedAssetId);
+      if (!singleBp) return;
+
+      const libProducts = products.filter(p => selectedProductIds.includes(p.id)).map(p => ({
+        target_product_id: p.id,
+        product_name: p.product_name,
+        target_product_url: p.source_url || '',
+        affiliate_url: ''
+      }));
+
+      const textareaUrls = massUrlsText
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .map(url => ({
+          target_product_id: null,
+          product_name: 'URL: ' + (url.length > 30 ? url.substring(0, 30) + '...' : url),
+          target_product_url: url,
+          affiliate_url: ''
+        }));
+
+      const allProducts = [...libProducts, ...textareaUrls];
+      if (allProducts.length === 0) {
+        showToast('Pilih setidaknya satu produk dari pustaka atau masukkan URL produk massal', 'error');
+        return;
+      }
+
+      for (const prod of allProducts) {
+        rows.push({
+          deconstruct_asset_id: singleBp.id,
+          deconstruct_asset_url: singleBp.source_url,
+          deconstruct_asset_title: singleBp.niche || singleBp.original_caption || singleBp.id,
+          target_product_id: prod.target_product_id,
+          target_product_name: prod.product_name,
+          target_product_url: prod.target_product_url,
+          affiliate_url: prod.affiliate_url
+        });
+      }
+    }
+
+    setCombinationRows(rows);
+    showToast('Tabel review kombinasi berhasil dibuat!');
+  };
+
+  const handleViewBlueprintDetail = async (id) => {
+    try {
+      const res = await fetch(`/api/v2/deconstruct/assets/${id}`);
+      const data = await res.json();
+      if (data.success) {
+        setPreviewAsset(data.asset);
+        setShowPreviewModal(true);
+      } else {
+        showToast('Gagal memuat detail blueprint: ' + data.error, 'error');
+      }
+    } catch (e) {
+      showToast('Error: ' + e.message, 'error');
+    }
+  };
 
   async function fetchTasks(silent = false) {
     if (!silent) setLoadingTasks(true);
@@ -356,94 +491,90 @@ function MultiplierLabPageContent() {
   // Handle Form Submission
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!selectedAssetId) { showToast('Silakan pilih salah satu video blueprint', 'error'); return; }
+
+    if (combinationRows.length === 0) {
+      showToast('Tabel tinjauan kombinasi kosong. Silakan buat tinjauan kombinasi terlebih dahulu.', 'error');
+      return;
+    }
 
     setSubmitting(true);
     try {
-      const formData = new FormData();
-      formData.append('deconstruct_asset_id', selectedAssetId);
-      formData.append('production_mode', productionMode);
-
-      // Setup VSO/Aesthetic configuration JSON
-      const vsoData = {
-        narrativeMode,
-        visualStyle,
-        targetAi,
-        videoModel,
-        aspectRatio,
-        faceVisibility,
-        wordsPerClip,
-        isVsoActive,
-        characterConcept,
-        subjectDemographic,
-        wardrobeStyle: wardrobeStyle,
-        lightingStyle: lightingStyle
+      const payload = {
+        mode: workflowMode,
+        rows: combinationRows.map(row => ({
+          deconstruct_asset_id: row.deconstruct_asset_id,
+          target_product_id: row.target_product_id,
+          target_product_url: row.target_product_url,
+          affiliate_url: row.affiliate_url
+        })),
+        vso_config_json: JSON.stringify({
+          narrativeMode,
+          visualStyle,
+          targetAi,
+          videoModel,
+          aspectRatio,
+          faceVisibility,
+          wordsPerClip,
+          isVsoActive,
+          characterConcept,
+          subjectDemographic,
+          wardrobeStyle,
+          lightingStyle
+        }),
+        bridging_config_json: JSON.stringify({
+          isBridgingActive,
+          targetClipsCount,
+          bridgeAtClip,
+          bridgeDurationClips,
+          promotionStyle,
+          bridgingMode,
+          targetProductId,
+          manualProductName,
+          manualProductDesc,
+          manualProductUsp,
+          productUrl,
+          visualMode,
+          productFilenameDeclare
+        }),
+        audio_config_json: JSON.stringify({
+          enableTts,
+          voiceProvider,
+          voicePersona,
+          voiceSpeed,
+          voiceVolume,
+          ttsModelQuality,
+          enableGlabs,
+          enableFfmpeg,
+          targetLanguage,
+          ffmpegSyncOption,
+          ffmpegVideoScale,
+          ffmpegSfxVolume,
+          ffmpegBgmVolume
+        }),
+        enable_vo_audit: enableVoAudit ? 1 : 0
       };
-      formData.append('vso_config_json', JSON.stringify(vsoData));
 
-      // Setup Bridging config JSON
-      const bridgingData = {
-        isBridgingActive,
-        targetClipsCount,
-        bridgeAtClip,
-        bridgeDurationClips,
-        promotionStyle,
-        bridgingMode,
-        targetProductId,
-        manualProductName,
-        manualProductDesc,
-        manualProductUsp,
-        productUrl,
-        visualMode,
-        productFilenameDeclare
-      };
-      formData.append('bridging_config_json', JSON.stringify(bridgingData));
-
-      // Setup Audio/Workflow config JSON
-      const audioData = {
-        enableTts,
-        voiceProvider,
-        voicePersona,
-        voiceSpeed,
-        voiceVolume,
-        ttsModelQuality,
-        enableGlabs,
-        enableFfmpeg,
-        targetLanguage,
-        ffmpegSyncOption,
-        ffmpegVideoScale,
-        ffmpegSfxVolume,
-        ffmpegBgmVolume
-      };
-      formData.append('audio_config_json', JSON.stringify(audioData));
-      formData.append('enable_vo_audit', enableVoAudit ? '1' : '0');
-
-      // Single Mode vs Multi Mode specifics
-      if (productionMode === 'single') {
-        formData.append('target_product_url', productUrl);
-        formData.append('affiliate_url', affiliateUrl);
-        if (productRefImage) {
-          formData.append('product_media', productRefImage);
-        }
+      let bodyData;
+      let headers = {};
+      if (productRefImage) {
+        const formData = new FormData();
+        formData.append('rows', JSON.stringify(payload.rows));
+        formData.append('mode', payload.mode);
+        formData.append('vso_config_json', payload.vso_config_json);
+        formData.append('bridging_config_json', payload.bridging_config_json);
+        formData.append('audio_config_json', payload.audio_config_json);
+        formData.append('enable_vo_audit', String(payload.enable_vo_audit));
+        formData.append('product_media', productRefImage);
+        bodyData = formData;
       } else {
-        // Parse textarea newline separated product URLs
-        const rows = massUrlsText
-          .split('\n')
-          .map(line => line.trim())
-          .filter(line => line.length > 0)
-          .map(url => ({ url, affiliate_url: '' }));
-
-        if (rows.length === 0) {
-          showToast('Masukkan setidaknya satu URL produk untuk diproses', 'error');
-          setSubmitting(false);
-          return;
-        }
-        formData.append('csv_data_json', JSON.stringify(rows));
+        bodyData = JSON.stringify(payload);
+        headers = { 'Content-Type': 'application/json' };
       }
 
       const res = await fetch('/api/v2/multiplier', {
         method: 'POST',
-        body: formData
+        headers,
+        body: bodyData
       });
       const data = await res.json();
       if (data.success) {
@@ -452,6 +583,9 @@ function MultiplierLabPageContent() {
         setAffiliateUrl('');
         setMassUrlsText('');
         setProductRefImage(null);
+        setSelectedBlueprintIds([]);
+        setSelectedProductIds([]);
+        setCombinationRows([]);
         setShowConfigForm(false);
         fetchTasks();
         pollLogs();
@@ -641,23 +775,35 @@ function MultiplierLabPageContent() {
                     <div style={{ display: 'flex', gap: 6, background: 'var(--overlay-subtle)', padding: 3, borderRadius: 6 }}>
                       <button
                         type="button"
-                        onClick={() => setProductionMode('single')}
+                        onClick={() => {
+                          setWorkflowMode('multi_blueprint_one_product');
+                          setProductionMode('single'); // backward sync
+                          setSelectedBlueprintIds([]);
+                          setSelectedProductIds([]);
+                          setCombinationRows([]);
+                        }}
                         style={{
-                          border: 'none', background: productionMode === 'single' ? 'var(--accent)' : 'transparent',
+                          border: 'none', background: workflowMode === 'multi_blueprint_one_product' ? 'var(--accent)' : 'transparent',
                           color: 'var(--text-primary)', fontSize: '0.72rem', fontWeight: 600, padding: '5px 10px', borderRadius: 4, cursor: 'pointer'
                         }}
                       >
-                        Single Product
+                        Multi Blueprint → 1 Produk
                       </button>
                       <button
                         type="button"
-                        onClick={() => setProductionMode('mass')}
+                        onClick={() => {
+                          setWorkflowMode('one_blueprint_multi_product');
+                          setProductionMode('mass'); // backward sync
+                          setSelectedBlueprintIds([]);
+                          setSelectedProductIds([]);
+                          setCombinationRows([]);
+                        }}
                         style={{
-                          border: 'none', background: productionMode === 'mass' ? 'var(--accent)' : 'transparent',
+                          border: 'none', background: workflowMode === 'one_blueprint_multi_product' ? 'var(--accent)' : 'transparent',
                           color: 'var(--text-primary)', fontSize: '0.72rem', fontWeight: 600, padding: '5px 10px', borderRadius: 4, cursor: 'pointer'
                         }}
                       >
-                        Mass Remake
+                        1 Blueprint → Multi Produk
                       </button>
                     </div>
                     <button
@@ -735,61 +881,191 @@ function MultiplierLabPageContent() {
                   </div>
                 </div>
 
-                {/* 1. Asset Picker */}
+                {/* 1. Blueprint Card Picker with Search */}
                 <div style={{ padding: 24, borderBottom: '1px solid var(--border)' }}>
                   <div className="form-group" style={{ marginBottom: 0 }}>
                     <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>📹 Pilih Blueprint Video Target</label>
-                           {/* Search Input for Video Blueprint */}
-                    <input
-                      type="text"
-                      className="form-input"
-                      style={{ marginBottom: 10, fontSize: '0.8rem' }}
-                      placeholder="🔍 Cari blueprint video berdasarkan URL atau tag..."
-                      value={assetSearchQuery}
-                      onChange={e => setAssetSearchQuery(e.target.value)}
-                    />
-
-                    {loadingAssets ? (
-                      <div style={{ padding: 12, color: 'var(--text-muted)', fontSize: '0.8rem' }}>Loading blueprint video...</div>
-                    ) : (
+                    
+                    <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+                      <input
+                        type="text"
+                        className="form-input"
+                        style={{ fontSize: '0.8rem', flex: 2 }}
+                        placeholder="🔍 Cari blueprint berdasarkan URL, niche, tags, resume..."
+                        value={assetSearchQuery}
+                        onChange={e => setAssetSearchQuery(e.target.value)}
+                      />
                       <select
                         className="form-input"
-                        value={selectedAssetId}
-                        onChange={e => setSelectedAssetId(e.target.value)}
-                        required
+                        style={{ fontSize: '0.8rem', flex: 1 }}
+                        value={nicheFilter}
+                        onChange={e => setNicheFilter(e.target.value)}
                       >
-                        <option value="">-- Pilih Blueprint Video (Deconstructed) --</option>
-                        {assets
-                          .filter(a => {
-                            const query = assetSearchQuery.toLowerCase();
-                            return (a.source_url || '').toLowerCase().includes(query) ||
-                                   (a.tags || '').toLowerCase().includes(query);
-                          })
-                          .map(a => {
-                            const shortUrl = a.source_url.length > 50 ? a.source_url.substring(0, 50) + '...' : a.source_url;
-                            const tagLabel = a.tags ? ` [#${a.tags.split(',').map(t => t.trim()).join(' #')}]` : '';
-                            return (
-                              <option key={a.id} value={a.id}>
-                                {shortUrl}{tagLabel}
-                              </option>
-                            );
-                          })
-                        }
+                        <option value="">-- Semua Niche --</option>
+                        {niches.map(n => (
+                          <option key={n} value={n}>{n}</option>
+                        ))}
                       </select>
+                      <button
+                        type="button"
+                        onClick={() => fetchAssets(assetSearchQuery, nicheFilter)}
+                        className="btn btn-secondary"
+                        style={{ fontSize: '0.8rem', padding: '6px 14px' }}
+                      >
+                        Cari
+                      </button>
+                    </div>
+
+                    {loadingAssets ? (
+                      <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)' }}>
+                        <div className="spinner" style={{ width: 24, height: 24, margin: '0 auto 8px' }}></div>
+                        Memuat blueprint...
+                      </div>
+                    ) : (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16, maxHeight: '400px', overflowY: 'auto', padding: 8, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface-interactive)' }}>
+                        {assets.map(a => {
+                          const isSelected = workflowMode === 'multi_blueprint_one_product'
+                            ? selectedBlueprintIds.includes(a.id)
+                            : selectedAssetId === a.id;
+                          
+                          const handleToggle = () => {
+                            if (workflowMode === 'multi_blueprint_one_product') {
+                              setSelectedBlueprintIds(prev =>
+                                prev.includes(a.id) ? prev.filter(id => id !== a.id) : [...prev, a.id]
+                              );
+                            } else {
+                              setSelectedAssetId(a.id);
+                            }
+                          };
+
+                          return (
+                            <div
+                              key={a.id}
+                              style={{
+                                background: isSelected ? 'var(--status-info-soft)' : 'var(--bg-card)',
+                                border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`,
+                                borderRadius: 8,
+                                padding: 14,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-between',
+                                gap: 10,
+                                transition: 'all 0.2s ease',
+                                boxShadow: isSelected ? '0 0 10px rgba(0, 120, 255, 0.1)' : 'none'
+                              }}
+                              onClick={handleToggle}
+                            >
+                              <div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                  <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', background: 'var(--overlay-subtle)', padding: '2px 6px', borderRadius: 4, color: 'var(--accent)', fontWeight: 600 }}>
+                                    {a.niche || 'Skincare'}
+                                  </span>
+                                  <input
+                                    type={workflowMode === 'multi_blueprint_one_product' ? 'checkbox' : 'radio'}
+                                    checked={isSelected}
+                                    name="selected_blueprint_radio"
+                                    onChange={handleToggle}
+                                    onClick={e => e.stopPropagation()}
+                                  />
+                                </div>
+                                <h4 style={{ fontSize: '0.85rem', fontWeight: 600, margin: '8px 0 4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-primary)' }}>
+                                  {a.original_caption || 'Blueprint Video'}
+                                </h4>
+                                <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', margin: 0, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                                  🔗 {a.source_url}
+                                </p>
+                                {a.viral_pattern_summary && (
+                                  <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '6px 0', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                    💡 {a.viral_pattern_summary}
+                                  </p>
+                                )}
+                                {a.tags && (
+                                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
+                                    {a.tags.split(',').slice(0, 3).map(tag => (
+                                      <span key={tag} style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                                        #{tag.trim()}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: 8, marginTop: 4 }}>
+                                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                                  🎬 {a.scene_count || 0} Scene
+                                </span>
+                                <button
+                                  type="button"
+                                  className="btn btn-secondary"
+                                  style={{ fontSize: '0.7rem', padding: '4px 10px', height: 'auto', background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleViewBlueprintDetail(a.id);
+                                  }}
+                                >
+                                  Lihat Detail
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {assets.length === 0 && (
+                          <div style={{ gridColumn: '1/span 3', padding: 24, textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                            Tidak ada blueprint ditemukan.
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
 
-                  {productionMode === 'mass' && (
-                    <div className="form-group" style={{ marginTop: 14, marginBottom: 0 }}>
-                      <label className="form-label">Daftar URL Produk (1 Baris per URL)</label>
-                      <textarea
-                        rows="4"
-                        className="form-textarea"
-                        placeholder="https://shopee.co.id/product-1&#10;https://shopee.co.id/product-2"
-                        value={massUrlsText}
-                        onChange={e => setMassUrlsText(e.target.value)}
-                        required
-                      />
+                  {workflowMode === 'one_blueprint_multi_product' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 14 }}>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label" style={{ fontWeight: 700 }}>📦 Pilih Produk dari Pustaka (Multi-Select)</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          style={{ marginBottom: 10, fontSize: '0.8rem' }}
+                          placeholder="🔍 Cari produk di pustaka..."
+                          value={productSearchQuery}
+                          onChange={e => setProductSearchQuery(e.target.value)}
+                        />
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10, maxHeight: '200px', overflowY: 'auto', padding: 10, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface-interactive)' }}>
+                          {products
+                            .filter(p => (p.product_name || '').toLowerCase().includes(productSearchQuery.toLowerCase()))
+                            .map(p => {
+                              const isChecked = selectedProductIds.includes(p.id);
+                              const handleToggleProduct = () => {
+                                setSelectedProductIds(prev =>
+                                  isChecked ? prev.filter(id => id !== p.id) : [...prev, p.id]
+                                );
+                              };
+                              return (
+                                <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 8, border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', background: isChecked ? 'var(--status-info-soft)' : 'var(--bg-card)', fontSize: '0.78rem' }}>
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={handleToggleProduct}
+                                  />
+                                  <span style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-primary)' }}>
+                                    {p.product_name}
+                                  </span>
+                                </label>
+                              );
+                            })}
+                        </div>
+                      </div>
+
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label" style={{ fontWeight: 700 }}>🔗 Atau Tambah URL Produk Baru (1 Baris per URL)</label>
+                        <textarea
+                          rows="3"
+                          className="form-textarea"
+                          placeholder="https://shopee.co.id/product-1&#10;https://shopee.co.id/product-2"
+                          value={massUrlsText}
+                          onChange={e => setMassUrlsText(e.target.value)}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1100,6 +1376,77 @@ function MultiplierLabPageContent() {
                           )}
                         </div>
                       )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Tinjauan Kombinasi Section */}
+                <div style={{ padding: 24, borderBottom: '1px solid var(--border)', background: 'var(--surface-interactive)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <div>
+                      <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>📊 Tinjauan Kombinasi Blueprint & Produk</strong>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '4px 0 0' }}>
+                        Buat tabel kombinasi berdasarkan blueprint dan produk pilihan Anda sebelum melakukan render.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={generateCombinationRows}
+                      style={{ fontSize: '0.8rem', padding: '6px 14px', background: 'var(--accent)', border: 'none', borderRadius: 4, cursor: 'pointer', fontWeight: 600, color: 'var(--text-primary)' }}
+                    >
+                      ⚡ Buat Tabel Tinjauan
+                    </button>
+                  </div>
+
+                  {combinationRows.length > 0 ? (
+                    <div style={{ overflowX: 'auto', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg-card)' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', textAlign: 'left' }}>
+                        <thead>
+                          <tr style={{ background: 'var(--overlay-subtle)', borderBottom: '1px solid var(--border)', color: 'var(--text-muted)' }}>
+                            <th style={{ padding: '10px 12px', fontWeight: 600 }}>No</th>
+                            <th style={{ padding: '10px 12px', fontWeight: 600 }}>Blueprint</th>
+                            <th style={{ padding: '10px 12px', fontWeight: 600 }}>Produk</th>
+                            <th style={{ padding: '10px 12px', fontWeight: 600 }}>Mode Bridge</th>
+                            <th style={{ padding: '10px 12px', fontWeight: 600 }}>Aksi</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {combinationRows.map((row, idx) => (
+                            <tr key={idx} style={{ borderBottom: idx < combinationRows.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                              <td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>{idx + 1}</td>
+                              <td style={{ padding: '10px 12px' }}>
+                                <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{row.deconstruct_asset_title}</div>
+                                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 300 }}>
+                                  {row.deconstruct_asset_url}
+                                </div>
+                              </td>
+                              <td style={{ padding: '10px 12px' }}>
+                                <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{row.target_product_name}</div>
+                                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 300 }}>
+                                  {row.target_product_url || 'Input Manual / Belum diekstrak'}
+                                </div>
+                              </td>
+                              <td style={{ padding: '10px 12px', textTransform: 'uppercase', color: 'var(--info)', fontWeight: 600 }}>
+                                {isBridgingActive ? promotionStyle : 'Direct'}
+                              </td>
+                              <td style={{ padding: '10px 12px' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => setCombinationRows(prev => prev.filter((_, i) => i !== idx))}
+                                  style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontWeight: 600 }}
+                                >
+                                  Hapus
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div style={{ textAlign: 'center', padding: 24, border: '2px dashed var(--border)', borderRadius: 8, color: 'var(--text-muted)', fontSize: '0.78rem', background: 'var(--bg-card)' }}>
+                      Tinjauan kombinasi belum dibuat. Silakan pilih blueprint dan produk kemudian klik "Buat Tabel Tinjauan".
                     </div>
                   )}
                 </div>
@@ -1944,6 +2291,100 @@ function MultiplierLabPageContent() {
 
         </div>
       </main>
+
+      {/* Blueprint Detail Modal */}
+      {showPreviewModal && previewAsset && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', alignItems: 'center',
+          zIndex: 1100, padding: 20
+        }}>
+          <div style={{
+            background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12,
+            maxWidth: 800, width: '100%', maxHeight: '90vh', overflowY: 'auto',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column'
+          }}>
+            {/* Modal Header */}
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  🎬 Detail Blueprint Video
+                </h3>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>ID: {previewAsset.id}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPreviewModal(false);
+                  setPreviewAsset(null);
+                }}
+                style={{
+                  border: 'none', background: 'var(--surface-interactive)', color: 'var(--text-muted)',
+                  fontSize: '0.8rem', padding: '6px 12px', borderRadius: 6, cursor: 'pointer', border: '1px solid var(--border)'
+                }}
+              >
+                ❌ Tutup
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
+              {/* Asset Metadata */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, background: 'var(--surface-interactive)', padding: 16, borderRadius: 8 }}>
+                <div>
+                  <strong style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>URL Sumber</strong>
+                  <a href={previewAsset.source_url} target="_blank" rel="noreferrer" style={{ fontSize: '0.82rem', color: 'var(--accent)', wordBreak: 'break-all' }}>
+                    {previewAsset.source_url}
+                  </a>
+                </div>
+                <div>
+                  <strong style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>Niche / Kategori</strong>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>{previewAsset.niche || 'General'}</span>
+                </div>
+                <div style={{ gridColumn: 'span 2' }}>
+                  <strong style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>Pola Viral (Summary)</strong>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{previewAsset.viral_pattern_summary || '-'}</span>
+                </div>
+                <div style={{ gridColumn: 'span 2' }}>
+                  <strong style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>Tags</strong>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{previewAsset.tags || '-'}</span>
+                </div>
+              </div>
+
+              {/* Storyboard Detail */}
+              <div>
+                <h4 style={{ fontSize: '0.9rem', color: 'var(--text-primary)', marginBottom: 12, borderBottom: '1px solid var(--border)', paddingBottom: 6 }}>
+                  📖 Storyboard & Scene ({previewAsset.storyboard?.length || 0} Scene)
+                </h4>
+                {previewAsset.storyboard && previewAsset.storyboard.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {previewAsset.storyboard.map((scene, idx) => (
+                      <div key={idx} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 12, background: 'var(--bg-secondary)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                          <span style={{ fontWeight: 'bold', fontSize: '0.78rem', color: 'var(--accent)' }}>Scene #{idx + 1}</span>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>⏱ Durasi: {scene.duration_seconds || scene.duration || 3}s</span>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: '0.78rem' }}>
+                          <div>
+                            <strong style={{ color: 'var(--text-muted)', display: 'block', marginBottom: 2 }}>Visual Action Prompt:</strong>
+                            <p style={{ margin: 0, color: 'var(--text-primary)' }}>{scene.visual_action_prompt || scene.visual_prompt}</p>
+                          </div>
+                          <div>
+                            <strong style={{ color: 'var(--text-muted)', display: 'block', marginBottom: 2 }}>Voice-Over (Script):</strong>
+                            <p style={{ margin: 0, color: 'var(--text-primary)', fontStyle: 'italic' }}>"{scene.voiceover_script || scene.voiceover}"</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', padding: 12 }}>Tidak ada data storyboard detail.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Toast Alert */}
       {toast && (

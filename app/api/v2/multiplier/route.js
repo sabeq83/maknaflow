@@ -57,7 +57,10 @@ export const POST = withTenantContext(async (request) => {
         vso_config_json: formData.get('vso_config_json') || '{}',
         bridging_config_json: formData.get('bridging_config_json') || '{}',
         audio_config_json: formData.get('audio_config_json') || '{}',
-        enable_vo_audit: Number(formData.get('enable_vo_audit') || 1)
+        enable_vo_audit: Number(formData.get('enable_vo_audit') || 1),
+        rows: formData.get('rows') ? JSON.parse(formData.get('rows')) : null,
+        shared_config: formData.get('shared_config') ? JSON.parse(formData.get('shared_config')) : null,
+        mode: formData.get('mode') || null
       };
 
       // Handle product media file upload
@@ -92,9 +95,61 @@ export const POST = withTenantContext(async (request) => {
       vso_config_json,
       bridging_config_json,
       audio_config_json,
-      enable_vo_audit = 1
+      enable_vo_audit = 1,
+      rows,
+      shared_config,
+      mode
     } = parsedBody;
 
+    // Support new format: rows payload in body
+    if (rows && Array.isArray(rows)) {
+      if (rows.length === 0) {
+        return NextResponse.json({ success: false, error: 'rows tidak boleh kosong' }, { status: 400 });
+      }
+      if (rows.length > 20) {
+        return NextResponse.json({ success: false, error: 'Maksimum 20 kombinasi per submit' }, { status: 400 });
+      }
+
+      // Validate each row
+      for (const row of rows) {
+        if (!row.deconstruct_asset_id) {
+          return NextResponse.json({ success: false, error: 'Setiap baris wajib memiliki deconstruct_asset_id' }, { status: 400 });
+        }
+        if (!row.target_product_url && !row.target_product_id) {
+          return NextResponse.json({ success: false, error: 'Setiap baris wajib memiliki target_product_url atau target_product_id' }, { status: 400 });
+        }
+      }
+
+      const { createMultiplierBatchWithTasks } = await import('@/lib/db');
+      
+      let vsoConfig = {};
+      let bridgingConfig = {};
+      let audioConfig = {};
+      try { vsoConfig = typeof vso_config_json === 'string' ? JSON.parse(vso_config_json) : (vso_config_json || {}); } catch(_) {}
+      try { bridgingConfig = typeof bridging_config_json === 'string' ? JSON.parse(bridging_config_json) : (bridging_config_json || {}); } catch(_) {}
+      try { audioConfig = typeof audio_config_json === 'string' ? JSON.parse(audio_config_json) : (audio_config_json || {}); } catch(_) {}
+
+      if (productRefImagePath) {
+        bridgingConfig.product_ref_image_path = productRefImagePath;
+      }
+
+      const batchId = `mtb_${uuidv4().replaceAll('-', '').slice(0, 16)}`;
+      const batch = {
+        batch_id: batchId,
+        shared_config: shared_config || { vso: vsoConfig, bridging: bridgingConfig, audio: audioConfig },
+        enable_vo_audit: Number(enable_vo_audit !== undefined ? enable_vo_audit : 1)
+      };
+
+      await createMultiplierBatchWithTasks(batch, rows);
+
+      return NextResponse.json({
+        success: true,
+        message: `Berhasil mendaftarkan batch ${batchId} dengan ${rows.length} tugas.`,
+        batch_id: batchId
+      });
+    }
+
+    // Legacy formats
     if (!deconstruct_asset_id) {
       return NextResponse.json({ success: false, error: 'deconstruct_asset_id wajib diisi' }, { status: 400 });
     }
@@ -115,39 +170,34 @@ export const POST = withTenantContext(async (request) => {
     const tasksCreated = [];
 
     if (production_mode === 'mass' && csv_data_json) {
-      let rows = [];
+      let massRows = [];
       try {
-        rows = typeof csv_data_json === 'string' ? JSON.parse(csv_data_json) : csv_data_json;
+        massRows = typeof csv_data_json === 'string' ? JSON.parse(csv_data_json) : csv_data_json;
       } catch(_) {}
 
-      if (Array.isArray(rows) && rows.length > 0) {
-        for (let i = 0; i < rows.length; i++) {
-          const row = rows[i];
-          const rowTaskId = `${batchTaskId}_row${i + 1}`;
-          
-          // Clone configs for this row
-          const rowVso = { ...vsoConfig };
-          const rowBridge = { ...bridgingConfig };
-          const rowAudio = { ...audioConfig };
-
-          // Override specific fields if present in CSV row
-          const rowAffiliate = row.affiliate_url || affiliate_url || '';
+      if (Array.isArray(massRows) && massRows.length > 0) {
+        const formattedRows = massRows.map((row, i) => {
           const rowProductUrl = row.target_product_url || row.product_url || target_product_url || bridgingConfig.productUrl || '';
-
-          await createMultiplierTask({
-            id: rowTaskId,
-            batch_id: batchTaskId,
+          return {
             deconstruct_asset_id,
+            target_product_id: null,
             target_product_url: rowProductUrl,
-            affiliate_url: rowAffiliate,
-            vso_config_json: JSON.stringify(rowVso),
-            bridging_config_json: JSON.stringify(rowBridge),
-            audio_config_json: JSON.stringify(rowAudio),
-            status: 'pending_resolution',
-            enable_vo_audit: Number(enable_vo_audit !== undefined ? enable_vo_audit : 1)
-          });
-          tasksCreated.push(rowTaskId);
-        }
+            affiliate_url: row.affiliate_url || affiliate_url || ''
+          };
+        });
+
+        const { createMultiplierBatchWithTasks } = await import('@/lib/db');
+        await createMultiplierBatchWithTasks({
+          batch_id: batchTaskId,
+          shared_config: { vso: vsoConfig, bridging: bridgingConfig, audio: audioConfig },
+          enable_vo_audit: Number(enable_vo_audit !== undefined ? enable_vo_audit : 1)
+        }, formattedRows);
+
+        return NextResponse.json({
+          success: true,
+          message: `Berhasil mendaftarkan massal ${formattedRows.length} tugas.`,
+          batch_id: batchTaskId
+        });
       }
     }
 
