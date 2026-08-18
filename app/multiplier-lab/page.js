@@ -49,62 +49,34 @@ function MultiplierLabPageContent() {
   const router = useRouter();
   const preSelectedAssetId = searchParams.get('asset_id');
 
-  // Asset list and selection
   const [assets, setAssets] = useState([]);
   const [loadingAssets, setLoadingAssets] = useState(true);
   const [selectedAssetId, setSelectedAssetId] = useState('');
   const [assetSearchQuery, setAssetSearchQuery] = useState('');
-  const [productSearchQuery, setProductSearchQuery] = useState('');
 
-  // New workflows inputs & states
-  const [workflowMode, setWorkflowMode] = useState('multi_blueprint_one_product'); // 'multi_blueprint_one_product' | 'one_blueprint_multi_product'
-  const [selectedBlueprintIds, setSelectedBlueprintIds] = useState([]);
-  const [selectedProductIds, setSelectedProductIds] = useState([]);
-  const [combinationRows, setCombinationRows] = useState([]);
-  const [previewAsset, setPreviewAsset] = useState(null);
-  const [showPreviewModal, setShowPreviewModal] = useState(false);
-  const [nicheFilter, setNicheFilter] = useState('');
-  const [niches, setNiches] = useState([]);
-
-  // Queue tasks and monitoring
   const [tasks, setTasks] = useState([]);
   const [loadingTasks, setLoadingTasks] = useState(true);
-  const [expandedTaskId, setExpandedTaskId] = useState(null);
-  const [expandedSubTaskId, setExpandedSubTaskId] = useState(null);
-  const [activeInnerTabs, setActiveInnerTabs] = useState({});
+  const [campaigns, setCampaigns] = useState([]);
 
-  // Forms configuration states
-  const [productionMode, setProductionMode] = useState('single'); // 'single' or 'mass'
+  const [productionMode, setProductionMode] = useState('single');
   const [activeAccordion, setActiveAccordion] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState(null);
   const pollingRef = useRef(null);
   const terminalRef = useRef(null);
 
-  // Forms and Scheduler States
   const [showConfigForm, setShowConfigForm] = useState(false);
   const [isSchedulerActive, setIsSchedulerActive] = useState(true);
-  const [presets, setPresets] = useState([]);
-  const [selectedPresetKey, setSelectedPresetKey] = useState('');
   const [terminalLogs, setTerminalLogs] = useState('');
-  const [activeTabs, setActiveTabs] = useState({}); // { [taskId]: 'concept' | 'storyboard' | 'prompts' | 'social' | 'logs' }
 
-  // Single mode product states
   const [productUrl, setProductUrl] = useState('');
   const [affiliateUrl, setAffiliateUrl] = useState('');
-
-  // Mass mode product states
   const [massUrlsText, setMassUrlsText] = useState('');
 
-  // Brand and products from library
-  const [accountName, setAccountName] = useState('');
-  const [campaignName, setCampaignName] = useState('');
   const [brandProfiles, setBrandProfiles] = useState([]);
   const [selectedBrandId, setSelectedBrandId] = useState('');
-  const [products, setProducts] = useState([]);
-  const [targetProductId, setTargetProductId] = useState('');
+  const [filterBrandId, setFilterBrandId] = useState('all');
 
-  // 1. Aesthetics & Visual Settings + VSO
   const [narrativeMode, setNarrativeMode] = useState('Storytelling');
   const [visualStyle, setVisualStyle] = useState('Cinematic');
   const [targetAi, setTargetAi] = useState('Google Veo (8s)');
@@ -113,7 +85,6 @@ function MultiplierLabPageContent() {
   const [faceVisibility, setFaceVisibility] = useState('Faceless');
   const [wordsPerClip, setWordsPerClip] = useState('17-19 kata');
 
-  // Visual Swap Overrides (VSO)
   const [isVsoActive, setIsVsoActive] = useState(false);
   const [characterConcept, setCharacterConcept] = useState('faceless');
   const [subjectDemographic, setSubjectDemographic] = useState('syari_classic');
@@ -122,13 +93,12 @@ function MultiplierLabPageContent() {
   const [lightingStyle, setLightingStyle] = useState('random');
   const [lightingStyleCustom, setLightingStyleCustom] = useState('');
 
-  // 2. Product Bridging Settings
   const [isBridgingActive, setIsBridgingActive] = useState(true);
   const [targetClipsCount, setTargetClipsCount] = useState(4);
   const [bridgeAtClip, setBridgeAtClip] = useState(2);
   const [bridgeDurationClips, setBridgeDurationClips] = useState(1);
   const [promotionStyle, setPromotionStyle] = useState('Softselling');
-  const [bridgingMode, setBridgingMode] = useState('url_extract'); // default to URL extract for easiest onboarding
+  const [bridgingMode, setBridgingMode] = useState('url_extract');
   const [manualProductName, setManualProductName] = useState('');
   const [manualProductDesc, setManualProductDesc] = useState('');
   const [manualProductUsp, setManualProductUsp] = useState('');
@@ -136,7 +106,6 @@ function MultiplierLabPageContent() {
   const [productFilenameDeclare, setProductFilenameDeclare] = useState('');
   const [visualMode, setVisualMode] = useState('hybrid_lock');
 
-  // 3. Workflow & Audio Settings
   const [enableTts, setEnableTts] = useState(true);
   const [voiceProvider, setVoiceProvider] = useState('minimax');
   const [voicePersona, setVoicePersona] = useState('Indonesian_casual_reporter_vv2');
@@ -152,9 +121,8 @@ function MultiplierLabPageContent() {
   const [ffmpegSfxVolume, setFfmpegSfxVolume] = useState(0.0);
   const [ffmpegBgmVolume, setFfmpegBgmVolume] = useState(0.0);
   const [enableSocialPost, setEnableSocialPost] = useState(false);
-  const [enableVoAudit, setEnableVoAudit] = useState(1); // Default 1 (Yes)
+  const [enableVoAudit, setEnableVoAudit] = useState(1);
 
-  // Staging / Guardrail overrides (RE equivalence)
   const [nextcloudParentFolder, setNextcloudParentFolder] = useState('/MAKNA_Assets');
   const [targetDemographic, setTargetDemographic] = useState('genz_casual');
   const [targetDemographicCustom, setTargetDemographicCustom] = useState('');
@@ -162,15 +130,11 @@ function MultiplierLabPageContent() {
   const [mandatoryOutroLine, setMandatoryOutroLine] = useState('');
   const [customInstruction, setCustomInstruction] = useState('');
 
-  // Fetch initial library data and active tasks
   useEffect(() => {
-    fetchAssets('', '');
+    fetchAssets();
     fetchTasks();
     pollLogs();
     fetch('/api/v2/brand-profiles').then(r => r.json()).then(d => { if (d.success) setBrandProfiles(d.data || []); }).catch(() => {});
-    fetch('/api/product-agent').then(r => r.json()).then(d => { if (d.success) setProducts(d.data || []); }).catch(() => {});
-    fetch('/api/v2/operator-presets').then(r => r.json()).then(d => { if (d.success) setPresets(d.presets || []); }).catch(() => {});
-    fetch('/api/v2/deconstruct?limit=1').then(r => r.json()).then(d => { if (d.success) setNiches(d.niches || []); }).catch(() => {});
 
     pollingRef.current = setInterval(() => {
       fetchTasks(true);
@@ -190,2880 +154,649 @@ function MultiplierLabPageContent() {
     }
   }, [terminalLogs]);
 
-  // Pre-select deconstruction asset from search params
   useEffect(() => {
     if (assets.length > 0 && preSelectedAssetId) {
       setSelectedAssetId(preSelectedAssetId);
-      setSelectedBlueprintIds([preSelectedAssetId]);
     }
   }, [assets, preSelectedAssetId]);
 
-  function showToast(msg, type = 'success') {
-    setToast({ msg, type });
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
     setTimeout(() => setToast(null), 4000);
-  }
-
-  const handleApplyPreset = (presetKey) => {
-    setSelectedPresetKey(presetKey);
-    const preset = presets.find(p => p.key === presetKey);
-    if (!preset || !preset.config) return;
-    const config = preset.config;
-
-    // 1. Creative Strategy (basic_strategy)
-    if (config.basic_strategy) {
-      setNarrativeMode(config.basic_strategy.narrative_mode || 'Storytelling');
-      setTargetLanguage(config.basic_strategy.target_language || 'id-ID');
-      setEnableVoAudit(config.basic_strategy.enable_vo_audit ?? 1);
-      setPromotionStyle(config.basic_strategy.promotion_style || 'Softselling');
-    }
-
-    // 2. Aesthetics & Visual (visual_engine)
-    if (config.visual_engine) {
-      setVisualStyle(config.visual_engine.visual_style || 'Cinematic');
-      setVideoModel(config.visual_engine.video_model || 'veo_31_lite');
-      setAspectRatio(config.visual_engine.aspect_ratio || '9:16');
-      setFaceVisibility(config.visual_engine.face_visibility || 'Faceless');
-      setWordsPerClip(config.visual_engine.words_per_clip || '17-19 kata');
-      setVisualMode(config.visual_engine.visual_mode || 'hybrid_lock');
-      if (config.visual_engine.video_model === 'veo_31_lite') {
-        setTargetAi('Google Veo (8s)');
-      } else {
-        setTargetAi('Google Veo (5s)');
-      }
-    }
-
-    // 3. Product Bridging (product_bridging)
-    if (config.product_bridging) {
-      setIsBridgingActive(config.product_bridging.is_bridging_active || false);
-      setBridgeAtClip(config.product_bridging.bridge_at_clip || 2);
-      setBridgeDurationClips(config.product_bridging.bridge_duration_clips || 1);
-    }
-
-    // 4. Visual Swap Overrides (visual_swap)
-    if (config.visual_swap) {
-      setIsVsoActive(config.visual_swap.is_vso_active || false);
-      setCharacterConcept(config.visual_swap.character_concept || 'faceless');
-      setSubjectDemographic(config.visual_swap.subject_demographic || 'syari_classic');
-      setWardrobeStyle(config.visual_swap.wardrobe_style || 'random');
-      setWardrobeStyleCustom(config.visual_swap.wardrobe_style_custom || '');
-      setLightingStyle(config.visual_swap.lighting_style || 'random');
-      setLightingStyleCustom(config.visual_swap.lighting_style_custom || '');
-    }
-
-    // 5. Workflow (workflow)
-    if (config.workflow) {
-      setEnableTts(config.workflow.enable_tts || false);
-      setVoiceProvider(config.basic_strategy?.voice_provider || 'minimax');
-      setVoicePersona(config.basic_strategy?.voice_persona || 'Indonesian_professional_anchor_vv2');
-      setVoiceSpeed(Number(config.basic_strategy?.voice_speed ?? 1.0));
-      setVoiceVolume(Number(config.basic_strategy?.voice_volume ?? 1.0));
-      setTtsModelQuality(config.basic_strategy?.tts_model_quality || 'speech-2.8-turbo');
-      setEnableGlabs(config.workflow.enable_glabs || false);
-      setEnableFfmpeg(config.workflow.enable_ffmpeg || false);
-      setFfmpegSyncOption(config.workflow.ffmpeg_sync_option || 'smart_sync');
-      setFfmpegVideoScale(Number(config.workflow.ffmpeg_video_scale ?? 1.0));
-      setFfmpegSfxVolume(Number(config.workflow.ffmpeg_sfx_volume ?? 0.0));
-      setFfmpegBgmVolume(Number(config.workflow.ffmpeg_bgm_volume ?? 0.00));
-    }
-    showToast(`Preset "${preset.label}" berhasil diterapkan!`);
   };
 
-  async function fetchAssets(query = '', niche = '') {
+  const fetchAssets = async () => {
     setLoadingAssets(true);
     try {
-      const res = await fetch(`/api/v2/deconstruct?assets=true&q=${encodeURIComponent(query)}&niche=${encodeURIComponent(niche)}`);
+      const res = await fetch('/api/v2/deconstruct?limit=100');
       const data = await res.json();
       if (data.success) {
-        setAssets(data.assets || []);
+        setAssets(data.data || []);
       }
-    } catch {
-      showToast('Gagal memuat pustaka aset dekonstruksi', 'error');
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoadingAssets(false);
     }
-  }
-
-  // Generate Combination Rows
-  const generateCombinationRows = () => {
-    let rows = [];
-    const selectedBlueprints = assets.filter(a => selectedBlueprintIds.includes(a.id));
-
-    if (workflowMode === 'multi_blueprint_one_product') {
-      if (selectedBlueprintIds.length === 0) {
-        showToast('Pilih setidaknya satu blueprint video', 'error');
-        return;
-      }
-      
-      let singleProduct = {};
-      if (bridgingMode === 'select_existing') {
-        const prod = products.find(p => p.id === targetProductId);
-        if (!prod) {
-          showToast('Pilih produk dari pustaka terlebih dahulu', 'error');
-          return;
-        }
-        singleProduct = {
-          target_product_id: targetProductId,
-          product_name: prod.product_name,
-          target_product_url: prod.source_url || '',
-          affiliate_url: affiliateUrl || ''
-        };
-      } else if (bridgingMode === 'url_extract') {
-        if (!productUrl) {
-          showToast('Masukkan URL produk terlebih dahulu', 'error');
-          return;
-        }
-        singleProduct = {
-          target_product_id: null,
-          product_name: 'URL Extract Product',
-          target_product_url: productUrl,
-          affiliate_url: affiliateUrl || ''
-        };
-      } else {
-        if (!manualProductName) {
-          showToast('Masukkan nama produk terlebih dahulu', 'error');
-          return;
-        }
-        singleProduct = {
-          target_product_id: null,
-          product_name: manualProductName,
-          target_product_url: '',
-          affiliate_url: affiliateUrl || ''
-        };
-      }
-
-      for (const bp of selectedBlueprints) {
-        rows.push({
-          deconstruct_asset_id: bp.id,
-          deconstruct_asset_url: bp.source_url,
-          deconstruct_asset_title: bp.niche || bp.original_caption || bp.id,
-          target_product_id: singleProduct.target_product_id,
-          target_product_name: singleProduct.product_name,
-          target_product_url: singleProduct.target_product_url,
-          affiliate_url: singleProduct.affiliate_url
-        });
-      }
-    } else {
-      if (!selectedAssetId) {
-        showToast('Pilih satu blueprint video terlebih dahulu', 'error');
-        return;
-      }
-      const singleBp = assets.find(a => a.id === selectedAssetId);
-      if (!singleBp) return;
-
-      const libProducts = products.filter(p => selectedProductIds.includes(p.id)).map(p => ({
-        target_product_id: p.id,
-        product_name: p.product_name,
-        target_product_url: p.source_url || '',
-        affiliate_url: ''
-      }));
-
-      const textareaUrls = massUrlsText
-        .split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 0)
-        .map(url => ({
-          target_product_id: null,
-          product_name: 'URL: ' + (url.length > 30 ? url.substring(0, 30) + '...' : url),
-          target_product_url: url,
-          affiliate_url: ''
-        }));
-
-      const allProducts = [...libProducts, ...textareaUrls];
-      if (allProducts.length === 0) {
-        showToast('Pilih setidaknya satu produk dari pustaka atau masukkan URL produk massal', 'error');
-        return;
-      }
-
-      for (const prod of allProducts) {
-        rows.push({
-          deconstruct_asset_id: singleBp.id,
-          deconstruct_asset_url: singleBp.source_url,
-          deconstruct_asset_title: singleBp.niche || singleBp.original_caption || singleBp.id,
-          target_product_id: prod.target_product_id,
-          target_product_name: prod.product_name,
-          target_product_url: prod.target_product_url,
-          affiliate_url: prod.affiliate_url
-        });
-      }
-    }
-
-    setCombinationRows(rows);
-    showToast('Tabel review kombinasi berhasil dibuat!');
   };
 
-  const handleViewBlueprintDetail = async (id) => {
-    try {
-      const res = await fetch(`/api/v2/deconstruct/assets/${id}`);
-      const data = await res.json();
-      if (data.success) {
-        setPreviewAsset(data.asset);
-        setShowPreviewModal(true);
-      } else {
-        showToast('Gagal memuat detail blueprint: ' + data.error, 'error');
-      }
-    } catch (e) {
-      showToast('Error: ' + e.message, 'error');
-    }
-  };
-
-  async function fetchTasks(silent = false) {
-    if (!silent) setLoadingTasks(true);
+  const fetchTasks = async (isPoll = false) => {
+    if (!isPoll) setLoadingTasks(true);
     try {
       const res = await fetch('/api/v2/multiplier');
       const data = await res.json();
       if (data.success) {
         setTasks(data.tasks || []);
-        if (data.isSchedulerActive !== undefined) {
-          setIsSchedulerActive(data.isSchedulerActive);
-        }
+        setIsSchedulerActive(data.isSchedulerActive);
+        
+        // Group tasks into campaigns (batches)
+        const groups = {};
+        data.tasks.forEach(t => {
+          const bid = t.batch_id || `single_${t.id}`;
+          if (!groups[bid]) {
+            let brandName = '';
+            let productTitle = '';
+            try {
+              const snap = t.product_snapshot_json ? (typeof t.product_snapshot_json === 'string' ? JSON.parse(t.product_snapshot_json) : t.product_snapshot_json) : null;
+              brandName = snap?.product_name || '';
+            } catch (_) {}
+
+            groups[bid] = {
+              id: bid,
+              brand_profile_id: t.brand_profile_id || 'default_tenant',
+              brand_name: t.brand_name || brandName || 'default_tenant',
+              campaign_name: t.new_caption ? t.new_caption.slice(0, 50) : `Multiplier Campaign ${bid.slice(4, 10)}`,
+              created_at: t.created_at,
+              status: t.status,
+              tasks: [],
+              stats: { total: 0, completed: 0, failed: 0, processing: 0 }
+            };
+          }
+          groups[bid].tasks.push(t);
+          groups[bid].stats.total++;
+          if (t.status === 'completed') groups[bid].stats.completed++;
+          else if (t.status === 'failed') groups[bid].stats.failed++;
+          else if (['remaking', 'generating_audio', 'generating_visuals', 'ffmpeg_muxing'].includes(t.status)) groups[bid].stats.processing++;
+        });
+
+        // Determine aggregated campaign status
+        const campaignList = Object.values(groups).map(g => {
+          let overallStatus = 'draft';
+          if (g.stats.completed === g.stats.total) overallStatus = 'completed';
+          else if (g.stats.failed > 0) overallStatus = 'failed';
+          else if (g.stats.processing > 0) overallStatus = 'running';
+          else if (g.tasks.some(t => t.status === 'paused')) overallStatus = 'paused';
+          
+          return { ...g, status: overallStatus };
+        });
+
+        setCampaigns(campaignList.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
       }
-    } catch {
-      if (!silent) showToast('Gagal memuat antrean multiplier', 'error');
+    } catch (err) {
+      console.error(err);
     } finally {
-      if (!silent) setLoadingTasks(false);
+      if (!isPoll) setLoadingTasks(false);
     }
-  }
+  };
 
-  async function pollLogs() {
+  const pollLogs = async () => {
     try {
-      const res = await fetch(`/api/system-logs?type=multiplier&t=${Date.now()}`);
-      if (res.ok) {
-        const text = await res.text();
-        const lines = text.split('\n');
-        const last500 = lines.slice(-500).join('\n');
-        setTerminalLogs(last500 || 'Belum ada log aktivitas multiplier.');
+      const res = await fetch('/api/system-logs?service=multiplier');
+      const data = await res.json();
+      if (data.success) {
+        setTerminalLogs(data.logs || 'Memulai pemantauan sistem log...');
       }
-    } catch (e) {
-      // Ignore network errors on initial log checks
-    }
-  }
+    } catch (_) {}
+  };
 
-  async function toggleGlobalScheduler() {
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setSubmitting(true);
+    const formData = new FormData();
+    formData.append('file', file);
     try {
-      const res = await fetch('/api/v2/multiplier', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ schedulerActive: !isSchedulerActive })
-      });
-      const json = await res.json();
-      if (json.success) {
-        setIsSchedulerActive(!isSchedulerActive);
-        showToast(`Skeduler berhasil ${!isSchedulerActive ? 'diaktifkan' : 'dimatikan'}`);
-        pollLogs();
+      const res = await fetch('/api/v2/products/image', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.success) {
+        setProductRefImage(data.filePath);
+        setProductFilenameDeclare(data.fileName);
+        showToast('Foto produk berhasil diunggah.');
       } else {
-        showToast('Gagal mengubah status skeduler: ' + json.error, 'error');
+        showToast(data.error || 'Gagal mengunggah foto.', 'error');
       }
-    } catch (e) {
-      showToast('Error: ' + e.message, 'error');
-    }
-  }
-
-  async function handleToggleTaskStatus(id, currentStatus) {
-    const isPaused = currentStatus === 'paused';
-    const isFailed = currentStatus === 'failed';
-    const isWaiting = currentStatus === 'waiting_approval';
-    const newStatus = (isPaused || isFailed) ? 'pending_resolution' : (isWaiting ? 'generating_audio' : 'paused');
-
-    try {
-      const res = await fetch(`/api/v2/multiplier/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      });
-      const json = await res.json();
-      if (json.success) {
-        showToast(`Status tugas berhasil diubah menjadi ${newStatus}`);
-        fetchTasks(true);
-        pollLogs();
-      } else {
-        showToast('Gagal mengubah status tugas: ' + json.error, 'error');
-      }
-    } catch (e) {
-      showToast('Error: ' + e.message, 'error');
-    }
-  }
-
-  async function handleBatchAction(batchId, action) {
-    const batchTasks = tasks.filter(t => (t.batch_id === batchId || (!t.batch_id && `single_${t.id}` === batchId)));
-    if (batchTasks.length === 0) return;
-
-    if (action === 'delete') {
-      if (!confirm(`Apakah Anda yakin ingin menghapus seluruh batch (${batchTasks.length} tugas)?`)) return;
-      setLoadingTasks(true);
-      try {
-        for (const t of batchTasks) {
-          await fetch(`/api/v2/multiplier/${t.id}`, { method: 'DELETE' });
-        }
-        showToast('Batch berhasil dihapus');
-        setExpandedTaskId(null);
-        setExpandedSubTaskId(null);
-        fetchTasks();
-      } catch (e) {
-        showToast('Error: ' + e.message, 'error');
-        setLoadingTasks(false);
-      }
-      return;
-    }
-
-    setLoadingTasks(true);
-    try {
-      for (const t of batchTasks) {
-        let newStatus = null;
-        if (action === 'approve' && t.status === 'waiting_approval') {
-          newStatus = 'generating_audio';
-        } else if (action === 'pause' && !['completed', 'failed', 'paused', 'waiting_approval'].includes(t.status)) {
-          newStatus = 'paused';
-        } else if (action === 'resume' && t.status === 'paused') {
-          newStatus = 'pending_resolution';
-        }
-
-        if (newStatus) {
-          await fetch(`/api/v2/multiplier/${t.id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: newStatus })
-          });
-        }
-      }
-      showToast(`Aksi batch ${action.toUpperCase()} selesai diproses`);
-      fetchTasks(true);
-      pollLogs();
-    } catch (e) {
-      showToast('Error: ' + e.message, 'error');
+    } catch (err) {
+      showToast(err.message, 'error');
     } finally {
-      setLoadingTasks(false);
+      setSubmitting(false);
     }
-  }
+  };
 
-  function handleCopyTaskSettings(task) {
-    try {
-      if (task.deconstruct_asset_id) setSelectedAssetId(task.deconstruct_asset_id);
-      if (task.target_product_url) setProductUrl(task.target_product_url);
-      if (task.affiliate_url) setAffiliateUrl(task.affiliate_url);
-
-      const vso = JSON.parse(task.vso_config_json || '{}');
-      if (vso.characterConcept) setCharacterConcept(vso.characterConcept);
-      if (vso.subjectDemographic) setSubjectDemographic(vso.subjectDemographic);
-      if (vso.wardrobeStyle) setWardrobeStyle(vso.wardrobeStyle);
-      if (vso.wardrobeStyleCustom) setWardrobeStyleCustom(vso.wardrobeStyleCustom);
-      if (vso.lightingStyle) setLightingStyle(vso.lightingStyle);
-      if (vso.lightingStyleCustom) setLightingStyleCustom(vso.lightingStyleCustom);
-      setIsVsoActive(Object.keys(vso).length > 0);
-
-      const bridging = JSON.parse(task.bridging_config_json || '{}');
-      if (bridging.isBridgingActive !== undefined) setIsBridgingActive(bridging.isBridgingActive);
-      if (bridging.targetClipsCount) setTargetClipsCount(bridging.targetClipsCount);
-      if (bridging.bridgeAtClip) setBridgeAtClip(bridging.bridgeAtClip);
-      if (bridging.bridgeDurationClips) setBridgeDurationClips(bridging.bridgeDurationClips);
-      if (bridging.promotionStyle) setPromotionStyle(bridging.promotionStyle);
-      if (bridging.bridgingMode) setBridgingMode(bridging.bridgingMode);
-      if (bridging.manualProductName) setManualProductName(bridging.manualProductName);
-      if (bridging.manualProductDesc) setManualProductDesc(bridging.manualProductDesc);
-      if (bridging.manualProductUsp) setManualProductUsp(bridging.manualProductUsp);
-      if (bridging.productFilenameDeclare) setProductFilenameDeclare(bridging.productFilenameDeclare);
-      if (bridging.visualMode) setVisualMode(bridging.visualMode);
-      if (bridging.targetProductId) setTargetProductId(bridging.targetProductId);
-
-      const audio = JSON.parse(task.audio_config_json || '{}');
-      if (audio.enableTts !== undefined) setEnableTts(audio.enableTts);
-      if (audio.voiceProvider) setVoiceProvider(audio.voiceProvider);
-      if (audio.voicePersona) setVoicePersona(audio.voicePersona);
-      if (audio.voiceSpeed) setVoiceSpeed(audio.voiceSpeed);
-      if (audio.voiceVolume) setVoiceVolume(audio.voiceVolume);
-      if (audio.enableFfmpeg !== undefined) setEnableFfmpeg(audio.enableFfmpeg);
-      if (audio.ffmpegBgmVolume !== undefined) setFfmpegBgmVolume(audio.ffmpegBgmVolume);
-      if (audio.ffmpegBgmPath) setFfmpegBgmPath(audio.ffmpegBgmPath);
-
-      // Open the config form automatically
-      setShowConfigForm(true);
-      showToast('Konfigurasi tugas berhasil disalin ke form!');
-    } catch (e) {
-      showToast('Gagal menyalin konfigurasi: ' + e.message, 'error');
-    }
-  }
-
-  // Handle Form Submission
-  async function handleSubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (combinationRows.length === 0) {
-      showToast('Tabel tinjauan kombinasi kosong. Silakan buat tinjauan kombinasi terlebih dahulu.', 'error');
+    if (!selectedAssetId) {
+      showToast('Harap pilih dekonstruksi referensi (blueprint).', 'error');
       return;
     }
 
     setSubmitting(true);
     try {
       const payload = {
-        mode: workflowMode,
-        rows: combinationRows.map(row => ({
-          deconstruct_asset_id: row.deconstruct_asset_id,
-          target_product_id: row.target_product_id,
-          target_product_url: row.target_product_url,
-          affiliate_url: row.affiliate_url
-        })),
+        deconstruct_asset_id: selectedAssetId,
+        production_mode: productionMode,
+        enable_vo_audit: enableVoAudit,
         vso_config_json: JSON.stringify({
-          narrativeMode,
-          visualStyle,
-          targetAi,
-          videoModel,
-          aspectRatio,
-          faceVisibility,
-          wordsPerClip,
-          isVsoActive,
-          characterConcept,
-          subjectDemographic,
-          wardrobeStyle,
-          lightingStyle
+          narrativeMode, visualStyle, targetAi, videoModel, aspectRatio, faceVisibility, wordsPerClip,
+          isVsoActive, characterConcept, subjectDemographic, wardrobeStyle, wardrobeStyleCustom, lightingStyle, lightingStyleCustom
         }),
         bridging_config_json: JSON.stringify({
-          isBridgingActive,
-          targetClipsCount,
-          bridgeAtClip,
-          bridgeDurationClips,
-          promotionStyle,
-          bridgingMode,
-          targetProductId,
-          manualProductName,
-          manualProductDesc,
-          manualProductUsp,
-          productUrl,
-          visualMode,
-          productFilenameDeclare
+          isBridgingActive, targetClipsCount, bridgeAtClip, bridgeDurationClips, promotionStyle, bridgingMode,
+          manualProductName, manualProductDesc, manualProductUsp, visualMode
         }),
         audio_config_json: JSON.stringify({
-          enableTts,
-          voiceProvider,
-          voicePersona,
-          voiceSpeed,
-          voiceVolume,
-          ttsModelQuality,
-          enableGlabs,
-          enableFfmpeg,
-          targetLanguage,
-          ffmpegSyncOption,
-          ffmpegVideoScale,
-          ffmpegSfxVolume,
-          ffmpegBgmVolume
+          enableTts, voiceProvider, voicePersona, voiceSpeed, voiceVolume, ttsModelQuality,
+          enableGlabs, enableFfmpeg, targetLanguage, ffmpegSyncOption, syncMode,
+          ffmpegVideoScale, ffmpegSfxVolume, ffmpegBgmVolume, enableSocialPost,
+          nextcloudParentFolder, targetDemographic, targetDemographicCustom, aiDirective,
+          mandatoryOutroLine, customInstruction
         }),
-        enable_vo_audit: enableVoAudit ? 1 : 0
+        productRefImagePath: productRefImage
       };
 
-      let bodyData;
-      let headers = {};
-      if (productRefImage) {
-        const formData = new FormData();
-        formData.append('rows', JSON.stringify(payload.rows));
-        formData.append('mode', payload.mode);
-        formData.append('vso_config_json', payload.vso_config_json);
-        formData.append('bridging_config_json', payload.bridging_config_json);
-        formData.append('audio_config_json', payload.audio_config_json);
-        formData.append('enable_vo_audit', String(payload.enable_vo_audit));
-        formData.append('product_media', productRefImage);
-        bodyData = formData;
+      if (productionMode === 'single') {
+        payload.target_product_url = productUrl;
+        payload.affiliate_url = affiliateUrl;
       } else {
-        bodyData = JSON.stringify(payload);
-        headers = { 'Content-Type': 'application/json' };
+        const lines = massUrlsText.split('\n').map(l => l.trim()).filter(Boolean);
+        const rows = lines.map(line => {
+          const parts = line.split('|');
+          return {
+            target_product_url: parts[0],
+            affiliate_url: parts[1] || ''
+          };
+        });
+        payload.csv_data_json = JSON.stringify(rows);
       }
 
       const res = await fetch('/api/v2/multiplier', {
         method: 'POST',
-        headers,
-        body: bodyData
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       if (data.success) {
-        showToast(data.message || 'Task Multiplier Lab berhasil didaftarkan.');
+        showToast('Kampanye Multiplier baru berhasil didaftarkan!');
+        setShowConfigForm(false);
         setProductUrl('');
         setAffiliateUrl('');
         setMassUrlsText('');
         setProductRefImage(null);
-        setSelectedBlueprintIds([]);
-        setSelectedProductIds([]);
-        setCombinationRows([]);
-        setShowConfigForm(false);
         fetchTasks();
-        pollLogs();
       } else {
-        showToast(data.error || 'Gagal mendaftarkan task', 'error');
+        showToast(data.error || 'Gagal mendaftarkan kampanye.', 'error');
       }
     } catch (err) {
-      showToast('Error mengirim data: ' + err.message, 'error');
+      showToast(err.message, 'error');
     } finally {
       setSubmitting(false);
     }
-  }
+  };
 
-  // Handle deletion of task
-  async function handleDelete(taskId) {
-    if (!confirm('Hapus task multiplier ini?')) return;
+  const toggleGlobalScheduler = async () => {
     try {
-      const res = await fetch(`/api/v2/multiplier/${taskId}`, { method: 'DELETE' });
+      const res = await fetch('/api/v2/multiplier', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'toggle_scheduler' })
+      });
       const data = await res.json();
       if (data.success) {
-        showToast('Task berhasil dihapus');
-        if (expandedTaskId === taskId) setExpandedTaskId(null);
-        fetchTasks();
-        pollLogs();
+        setIsSchedulerActive(data.isActive);
+        showToast(`Status Scheduler berhasil diubah menjadi: ${data.isActive ? 'AKTIF' : 'NONAKTIF'}`);
       }
-    } catch {
-      showToast('Gagal menghapus task', 'error');
+    } catch (err) {
+      showToast(err.message, 'error');
     }
-  }
+  };
 
-  function getStatusStyle(status) {
-    const map = {
-      pending_resolution: { color: 'var(--text-muted)', bg: 'var(--surface-interactive)' },
-      resolving_product: { color: 'var(--info)', bg: 'rgba(116,185,255,0.15)' },
-      remaking: { color: 'var(--info)', bg: 'rgba(116,185,255,0.15)' },
-      generating_audio: { color: 'var(--info)', bg: 'rgba(116,185,255,0.15)' },
-      generating_visuals: { color: 'var(--info)', bg: 'rgba(116,185,255,0.15)' },
-      ffmpeg_muxing: { color: 'var(--info)', bg: 'rgba(116,185,255,0.15)' },
-      completed: { color: 'var(--success)', bg: 'var(--success-glow)' },
-      failed: { color: 'var(--danger)', bg: 'var(--danger-glow)' },
-      paused: { color: 'var(--status-warning)', bg: 'rgba(253, 203, 110, 0.15)' }
-    };
-    return map[status] || { color: 'var(--text-primary)', bg: 'var(--border-subtle)' };
-  }
+  const toggleStatus = async (campaign) => {
+    const isCurrentlyRunning = campaign.status === 'running';
+    const action = isCurrentlyRunning ? 'pause' : 'resume';
+    try {
+      const res = await fetch('/api/v2/multiplier', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, batchId: campaign.id })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`Berhasil mengubah status kampanye ke ${action.toUpperCase()}`);
+        fetchTasks();
+      }
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  const deleteCampaign = async (batchId) => {
+    if (!confirm('Apakah Anda yakin ingin menghapus seluruh kampanye beserta tugas di dalamnya?')) return;
+    try {
+      const res = await fetch(`/api/v2/multiplier?batchId=${batchId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Kampanye berhasil dihapus.');
+        fetchTasks();
+      } else {
+        showToast(data.error || 'Gagal menghapus kampanye.', 'error');
+      }
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  const filteredCampaigns = campaigns.filter(c => filterBrandId === 'all' || c.brand_profile_id === filterBrandId);
 
   return (
-    <div className="app-container">
+    <div className="container" style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-main)' }}>
       <Sidebar />
-
-      <main className="main-content">
-        <div style={{ padding: '24px 32px', maxWidth: '1200px', margin: '0 auto' }}>
-
-          {/* Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-            <div>
-              <h1 className="page-title" style={{ margin: 0, fontSize: '1.6rem', display: 'flex', alignItems: 'center', gap: 10 }}>
-                🎛️ Multiplier Lab (Remake Engine)
-              </h1>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginTop: 4 }}>
-                Suntikkan produk jualan Anda ke dalam blueprint video kompetitor yang sukses secara dinamis.
-              </p>
-            </div>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button
-                type="button"
-                onClick={() => fetchTasks()}
-                className="btn btn-secondary"
-                style={{ fontSize: '0.78rem', padding: '8px 14px' }}
-              >
-                🔄 Refresh Antrean
-              </button>
-            </div>
+      <div className="content" style={{ flex: 1, padding: '30px 40px', overflowY: 'auto' }}>
+        
+        {/* Header Section */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
+          <div>
+            <h1 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0, background: 'linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              🧬 Multiplier Lab & Remake Engine
+            </h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginTop: 4 }}>
+              Duplikasi & rekonstruksi massal video konten performa tinggi untuk katalog produk Anda.
+            </p>
           </div>
+          <button
+            onClick={() => setShowConfigForm(!showConfigForm)}
+            className="btn btn-primary"
+            style={{ fontWeight: 600, padding: '10px 20px', borderRadius: 8, fontSize: '0.88rem' }}
+          >
+            {showConfigForm ? '📂 Tutup Form Kreasi' : '⚡ Buat Kampanye Baru'}
+          </button>
+        </div>
 
-          {/* Global Scheduler Control Card */}
+        {toast && (
           <div style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-sm)',
-            padding: 16,
-            marginBottom: 20,
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: 12
+            position: 'fixed', top: 20, right: 20, zIndex: 9999,
+            padding: '12px 24px', borderRadius: 8, fontSize: '0.85rem', fontWeight: 600,
+            background: toast.type === 'error' ? 'var(--status-danger-soft)' : 'var(--status-success-soft)',
+            border: `1px solid ${toast.type === 'error' ? 'var(--danger)' : 'var(--success)'}`,
+            color: 'var(--text-primary)', boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
           }}>
-            <div>
-              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
-                ⚙️ Status Skeduler Multiplier Lab
-              </h3>
-              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '4px 0 0' }}>
-                Mengontrol jalannya antrean pembuatan video hasil perkalian (multiplier) secara otomatis.
-              </p>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                padding: '4px 10px',
-                borderRadius: 12,
-                background: isSchedulerActive ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
-                color: isSchedulerActive ? 'var(--success)' : 'var(--danger)',
-                border: `1px solid ${isSchedulerActive ? 'var(--status-success-soft)' : 'var(--status-danger-soft)'}`
-              }}>
-                {isSchedulerActive ? '🟢 SKEDULER AKTIF' : '🔴 SKEDULER MATI'}
-              </span>
-              <button
-                type="button"
-                onClick={toggleGlobalScheduler}
-                className={`btn ${isSchedulerActive ? 'btn-danger' : 'btn-success'}`}
-                style={{
-                  fontSize: '0.8rem',
-                  padding: '6px 16px',
-                  fontWeight: 600,
-                  boxShadow: isSchedulerActive ? '0 0 15px var(--status-danger-soft)' : '0 0 15px var(--status-success-soft)',
-                  border: isSchedulerActive ? '1px solid var(--status-danger-soft)' : '1px solid var(--status-success-soft)'
-                }}
-              >
-                {isSchedulerActive ? '🛑 STOP SKEDULER' : '▶️ START SKEDULER'}
-              </button>
-            </div>
+            {toast.message}
           </div>
+        )}
 
-          {/* Activity Terminal */}
-          <div className="card" style={{ padding: '0', background: 'var(--surface)', border: '1px solid var(--border)', marginBottom: '24px' }}>
-            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--status-success)', display: 'inline-block', boxShadow: '0 0 8px var(--status-success)' }}></span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>SYSTEM POLLER LOGGER</span>
-              </div>
-              <button
-                onClick={pollLogs}
-                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.75rem', cursor: 'pointer', fontFamily: 'var(--font-mono)' }}
-              >
-                [Refresh Log]
-              </button>
-            </div>
-            <pre
-              ref={terminalRef}
-              style={{
-                margin: 0,
-                padding: '20px',
-                background: 'var(--surface)',
-                color: '#20c20e',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.82rem',
-                maxHeight: '220px',
-                overflowY: 'auto',
-                lineHeight: '1.5',
-                whiteSpace: 'pre-wrap'
-              }}
-            >
-              {terminalLogs}
-            </pre>
-          </div>
-
-          {/* Stacked Layout: Config Form & Antrean */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-
-            {/* Config Form Settings */}
-            {!showConfigForm ? (
-              <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 0 }}>
-                <button
-                  type="button"
-                  onClick={() => setShowConfigForm(true)}
-                  className="btn btn-primary"
-                  style={{
-                    fontSize: '0.85rem',
-                    padding: '10px 20px',
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    boxShadow: '0 0 15px var(--accent-glow)'
-                  }}
-                >
-                  ➕ New Multiplier Campaign / Buat Remake Baru
-                </button>
-              </div>
-            ) : (
-              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 0 }}>
-                <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>⚙️ Konfigurasi Remake Video</strong>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ display: 'flex', gap: 6, background: 'var(--overlay-subtle)', padding: 3, borderRadius: 6 }}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setWorkflowMode('multi_blueprint_one_product');
-                          setProductionMode('single'); // backward sync
-                          setSelectedBlueprintIds([]);
-                          setSelectedProductIds([]);
-                          setCombinationRows([]);
-                        }}
-                        style={{
-                          border: 'none', background: workflowMode === 'multi_blueprint_one_product' ? 'var(--accent)' : 'transparent',
-                          color: 'var(--text-primary)', fontSize: '0.72rem', fontWeight: 600, padding: '5px 10px', borderRadius: 4, cursor: 'pointer'
-                        }}
-                      >
-                        Multi Blueprint → 1 Produk
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setWorkflowMode('one_blueprint_multi_product');
-                          setProductionMode('mass'); // backward sync
-                          setSelectedBlueprintIds([]);
-                          setSelectedProductIds([]);
-                          setCombinationRows([]);
-                        }}
-                        style={{
-                          border: 'none', background: workflowMode === 'one_blueprint_multi_product' ? 'var(--accent)' : 'transparent',
-                          color: 'var(--text-primary)', fontSize: '0.72rem', fontWeight: 600, padding: '5px 10px', borderRadius: 4, cursor: 'pointer'
-                        }}
-                      >
-                        1 Blueprint → Multi Produk
-                      </button>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setShowConfigForm(false)}
-                      style={{
-                        border: 'none',
-                        background: 'var(--surface-interactive)',
-                        color: 'var(--text-muted)',
-                        fontSize: '0.75rem',
-                        padding: '5px 10px',
-                        borderRadius: 4,
-                        cursor: 'pointer',
-                        border: '1px solid var(--border)'
-                      }}
-                    >
-                      ❌ Tutup Form
-                    </button>
-                  </div>
-                </div>
-
-              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
-
-                {/* 0. Brand Account & Campaign Identity */}
-                <div style={{ padding: 24, borderBottom: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">🏷️ Nama Akun (Brand Account)</label>
-                    <select
-                      className="form-input"
-                      value={accountName}
-                      onChange={e => {
-                        const newAcc = e.target.value;
-                        setAccountName(newAcc);
-                        const now = new Date();
-                        const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
-                        setCampaignName(`[ MULTIPLIER ${dateStr} ] - ${newAcc ? newAcc + ' - ' : ''}`);
-                      }}
-                    >
-                      <option value="">-- Pilih Nama Akun Brand --</option>
-                      {brandProfiles.map(bp => (
-                        <option key={bp.id} value={bp.account_name || bp.brand_name}>
-                          {bp.brand_name} ({bp.account_name || bp.brand_name})
-                        </option>
-                      ))}
-                      <option value="nutribake">nutribake</option>
-                      <option value="siasatsehat">siasatsehat</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">Nama Kampanye Multiplier</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="Contoh: Multiplier Remake v1"
-                      value={campaignName}
-                      onChange={e => setCampaignName(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">🎛️ Terapkan Preset Kampanye</label>
-                    <select
-                      className="form-input"
-                      value={selectedPresetKey}
-                      onChange={e => handleApplyPreset(e.target.value)}
-                    >
-                      <option value="">-- Tanpa Preset (Atur Manual) --</option>
-                      {presets.map(p => (
-                        <option key={p.key} value={p.key}>
-                          {p.label} {p.is_system ? ' (System)' : ''}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* 1. Blueprint Card Picker with Search */}
-                <div style={{ padding: 24, borderBottom: '1px solid var(--border)' }}>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>📹 Pilih Blueprint Video Target</label>
-                    
-                    <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-                      <input
-                        type="text"
-                        className="form-input"
-                        style={{ fontSize: '0.8rem', flex: 2 }}
-                        placeholder="🔍 Cari blueprint berdasarkan URL, niche, tags, resume..."
-                        value={assetSearchQuery}
-                        onChange={e => setAssetSearchQuery(e.target.value)}
-                      />
+        {/* Creation Config Form */}
+        {showConfigForm && (
+          <div className="card" style={{ marginBottom: 28, border: '1px solid var(--border)', background: 'var(--bg-card)' }}>
+            <h3 style={{ margin: '0 0 16px', fontSize: '1.1rem', fontWeight: 700 }}>⚙️ Konfigurasi Kampanye Multiplier Baru</h3>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              
+              {/* Accordion Configs */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                
+                {/* Accordion 1: Source Blueprint & Mode */}
+                <details open={activeAccordion === 0} onClick={(e) => { e.preventDefault(); setActiveAccordion(0); }} style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+                  <summary style={{ padding: '14px 20px', fontWeight: 600, cursor: 'pointer', background: 'var(--overlay-subtle)' }}>
+                    📂 1. Pilih Blueprint Referensi & Mode Produksi
+                  </summary>
+                  <div style={{ padding: 20, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    <div className="form-group">
+                      <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>
+                        Pilih Blueprint Dekonstruksi Referensi
+                      </label>
                       <select
+                        value={selectedAssetId}
+                        onChange={e => setSelectedAssetId(e.target.value)}
                         className="form-input"
-                        style={{ fontSize: '0.8rem', flex: 1 }}
-                        value={nicheFilter}
-                        onChange={e => setNicheFilter(e.target.value)}
+                        required
+                        style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: 6 }}
                       >
-                        <option value="">-- Semua Niche --</option>
-                        {niches.map(n => (
-                          <option key={n} value={n}>{n}</option>
+                        <option value="">-- Pilih Blueprint --</option>
+                        {assets.map(a => (
+                          <option key={a.id} value={a.id}>
+                            [{a.niche || 'Niche'}] {a.original_caption?.slice(0, 60) || a.id}...
+                          </option>
                         ))}
                       </select>
-                      <button
-                        type="button"
-                        onClick={() => fetchAssets(assetSearchQuery, nicheFilter)}
-                        className="btn btn-secondary"
-                        style={{ fontSize: '0.8rem', padding: '6px 14px' }}
-                      >
-                        Cari
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                      <div>
+                        <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Mode Produksi</label>
+                        <div style={{ display: 'flex', gap: 12 }}>
+                          <button type="button" onClick={() => setProductionMode('single')} className={`btn ${productionMode === 'single' ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: 1, padding: 10 }}>Single Task</button>
+                          <button type="button" onClick={() => setProductionMode('mass')} className={`btn ${productionMode === 'mass' ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: 1, padding: 10 }}>Mass Campaign</button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Audit Voiceover Safe</label>
+                        <select value={enableVoAudit} onChange={e => setEnableVoAudit(Number(e.target.value))} className="form-input" style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: 6 }}>
+                          <option value={1}>Aktifkan (TikTok Safe)</option>
+                          <option value={0}>Matikan (Lewati)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {productionMode === 'single' ? (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                        <div className="form-group">
+                          <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>URL Detail Produk Tokopedia/Shopee</label>
+                          <input type="url" value={productUrl} onChange={e => setProductUrl(e.target.value)} placeholder="https://shopee.co.id/product-name" className="form-input" required={productionMode === 'single'} />
+                        </div>
+                        <div className="form-group">
+                          <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>URL Affiliate Rekomendasi (Opsional)</label>
+                          <input type="url" value={affiliateUrl} onChange={e => setAffiliateUrl(e.target.value)} placeholder="https://shope.ee/xxxxx" className="form-input" />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="form-group">
+                        <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>
+                          Daftar URL Produk Massal (Satu URL per Baris, Format: `url_produk|url_affiliate_opsional`)
+                        </label>
+                        <textarea
+                          value={massUrlsText}
+                          onChange={e => setMassUrlsText(e.target.value)}
+                          placeholder="https://tokopedia.com/product-a|https://tokopedia.link/aff-a&#10;https://shopee.co.id/product-b"
+                          rows={4}
+                          className="form-input"
+                          required={productionMode === 'mass'}
+                          style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: 6, fontFamily: 'monospace' }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </details>
+
+                {/* Accordion 2: Aesthetics Strategy */}
+                <details open={activeAccordion === 1} onClick={(e) => { e.preventDefault(); setActiveAccordion(1); }} style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+                  <summary style={{ padding: '14px 20px', fontWeight: 600, cursor: 'pointer', background: 'var(--overlay-subtle)' }}>
+                    🎨 2. Aesthetics & Visual Style (VSO Overrides)
+                  </summary>
+                  <div style={{ padding: 20, borderTop: '1px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+                    <div>
+                      <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Visual Style Preset</label>
+                      <select value={visualStyle} onChange={e => setVisualStyle(e.target.value)} className="form-input" style={{ width: '100%' }}>
+                        <option value="Cinematic">Cinematic</option>
+                        <option value="Aesthetic Warm">Aesthetic Warm</option>
+                        <option value="Product Showcase">Product Showcase</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Video Model (G-Labs)</label>
+                      <select value={videoModel} onChange={e => setVideoModel(e.target.value)} className="form-input" style={{ width: '100%' }}>
+                        <option value="veo_31_lite">Google Veo (8s) Lite</option>
+                        <option value="veo_31">Google Veo (8s) High Quality</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Aspect Ratio</label>
+                      <select value={aspectRatio} onChange={e => setAspectRatio(e.target.value)} className="form-input" style={{ width: '100%' }}>
+                        <option value="9:16">Vertical 9:16 (TikTok/Shorts)</option>
+                        <option value="16:9">Landscape 16:9 (YouTube)</option>
+                      </select>
+                    </div>
+                  </div>
+                </details>
+
+                {/* Accordion 3: Product Bridging */}
+                <details open={activeAccordion === 2} onClick={(e) => { e.preventDefault(); setActiveAccordion(2); }} style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+                  <summary style={{ padding: '14px 20px', fontWeight: 600, cursor: 'pointer', background: 'var(--overlay-subtle)' }}>
+                    🌉 3. Product Bridging & Start Frame Settings
+                  </summary>
+                  <div style={{ padding: 20, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+                      <div>
+                        <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Visual Mode</label>
+                        <select value={visualMode} onChange={e => setVisualMode(e.target.value)} className="form-input" style={{ width: '100%' }}>
+                          <option value="hybrid_lock">Hybrid Lock (Start Frame T2I + I2V)</option>
+                          <option value="pure_t2v">Pure Text-To-Video (T2V)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Klip Target Promosi</label>
+                        <input type="number" min={1} max={10} value={bridgeAtClip} onChange={e => setBridgeAtClip(Number(e.target.value))} className="form-input" style={{ width: '100%' }} />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Gaya Promosi</label>
+                        <select value={promotionStyle} onChange={e => setPromotionStyle(e.target.value)} className="form-input" style={{ width: '100%' }}>
+                          <option value="Softselling">Softselling (Storytelling)</option>
+                          <option value="Hardselling">Hardselling (Direct USP)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {visualMode === 'hybrid_lock' && (
+                      <div style={{ background: 'var(--overlay-subtle)', padding: 16, borderRadius: 8, border: '1px solid var(--border)' }}>
+                        <h4 style={{ margin: '0 0 10px', fontSize: '0.85rem', fontWeight: 700 }}>📸 Upload Foto Acuan Produk (Optional)</h4>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                          <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} id="product-ref-upload" />
+                          <button type="button" className="btn btn-secondary" onClick={() => document.getElementById('product-ref-upload').click()} style={{ fontSize: '0.8rem' }}>
+                            📤 Pilih Foto Produk
+                          </button>
+                          {productFilenameDeclare && (
+                            <span style={{ fontSize: '0.75rem', color: 'var(--success)' }}>
+                              ✓ Terunggah: {productFilenameDeclare}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </details>
+
+              </div>
+
+              {/* Action Form Footer */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowConfigForm(false)}>Batal</button>
+                <button type="submit" className="btn btn-primary" disabled={submitting}>
+                  {submitting ? '⏳ Mendaftarkan...' : '🚀 Daftarkan Kampanye'}
+                </button>
+              </div>
+
+            </form>
+          </div>
+        )}
+
+        {/* Global Scheduler Controller */}
+        <div style={{
+          background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
+          padding: 16, marginBottom: 20,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12
+        }}>
+          <div>
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0 }}>⚙️ Status Skeduler Multiplier Lab</h3>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '4px 0 0' }}>Mengontrol jalannya rendering video kampanye remake secara terpusat.</p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{
+              fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', padding: '4px 10px', borderRadius: 12,
+              background: isSchedulerActive ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
+              color: isSchedulerActive ? 'var(--success)' : 'var(--danger)',
+              border: `1px solid ${isSchedulerActive ? 'var(--status-success-soft)' : 'var(--status-danger-soft)'}`
+            }}>
+              {isSchedulerActive ? '🟢 SKEDULER AKTIF' : '🔴 SKEDULER MATI'}
+            </span>
+            <button
+              type="button"
+              onClick={toggleGlobalScheduler}
+              className={`btn ${isSchedulerActive ? 'btn-danger' : 'btn-success'}`}
+              style={{
+                fontSize: '0.8rem', padding: '6px 16px', fontWeight: 600,
+                boxShadow: isSchedulerActive ? '0 0 15px var(--status-danger-soft)' : '0 0 15px var(--status-success-soft)',
+                border: isSchedulerActive ? '1px solid var(--status-danger-soft)' : '1px solid var(--status-success-soft)'
+              }}
+            >
+              {isSchedulerActive ? '🛑 STOP SKEDULER' : '▶️ START SKEDULER'}
+            </button>
+          </div>
+        </div>
+
+        {/* System Logs */}
+        <div className="card" style={{ padding: '0', background: 'var(--surface)', border: '1px solid var(--border)', marginBottom: '24px' }}>
+          <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--status-success)', display: 'inline-block', boxShadow: '0 0 8px var(--status-success)' }}></span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>SYSTEM POLLER LOGGER (MULTIPLIER)</span>
+            </div>
+            <button onClick={pollLogs} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.75rem', cursor: 'pointer', fontFamily: 'var(--font-mono)' }}>[Refresh Log]</button>
+          </div>
+          <pre ref={terminalRef} style={{ margin: 0, padding: '20px', background: 'var(--surface)', color: '#20c20e', fontFamily: 'var(--font-mono)', fontSize: '0.82rem', maxHeight: '180px', overflowY: 'auto', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
+            {terminalLogs}
+          </pre>
+        </div>
+
+        {/* Brand filter and campaigns header */}
+        <div style={{
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-sm)',
+          padding: '12px 20px',
+          marginBottom: '20px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 12
+        }}>
+          <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>🎬 Daftar Kampanye Multiplier ({filteredCampaigns.length})</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>🔍 FILTER BRAND:</span>
+            <select
+              value={filterBrandId}
+              onChange={e => setFilterBrandId(e.target.value)}
+              style={{
+                background: 'var(--surface-interactive)',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-primary)',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+                fontWeight: 600
+              }}
+            >
+              <option value="all">Semua Brand</option>
+              {brandProfiles.map(bp => (
+                <option key={bp.id} value={bp.id}>{bp.brand_name}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Campaigns rendering cards */}
+        {loadingTasks ? (
+          <div style={{ color: 'var(--text-muted)', padding: 32, textAlign: 'center' }}>Memuat kampanye...</div>
+        ) : filteredCampaigns.length === 0 ? (
+          <div className="card" style={{ textAlign: 'center', padding: '48px 24px' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: 12 }}>🎬</div>
+            <p style={{ color: 'var(--text-muted)' }}>Tidak ada kampanye yang cocok dengan filter brand ini.</p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {filteredCampaigns.map(c => {
+              const pct = Math.round((c.stats.completed / c.stats.total) * 100) || 0;
+              let statusColor = 'var(--text-muted)';
+              let statusBg = 'var(--surface-interactive)';
+              let statusBorder = 'var(--border-subtle)';
+              if (c.status === 'completed') { statusColor = 'var(--success)'; statusBg = 'var(--status-success-soft)'; statusBorder = 'var(--status-success-soft)'; }
+              else if (c.status === 'running') { statusColor = 'var(--status-info)'; statusBg = 'var(--status-info-soft)'; statusBorder = 'var(--status-info-soft)'; }
+              else if (c.status === 'paused') { statusColor = 'var(--status-warning)'; statusBg = 'rgba(253,203,110,0.15)'; statusBorder = 'rgba(253,203,110,0.3)'; }
+              else if (c.status === 'failed') { statusColor = 'var(--danger)'; statusBg = 'var(--status-danger-soft)'; statusBorder = 'var(--status-danger-soft)'; }
+
+              return (
+                <div key={c.id} className="card" style={{ border: '1px solid var(--border)', background: 'var(--bg-card)', padding: '20px', borderRadius: 'var(--radius-sm)' }}>
+                  {/* Card Header */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <span style={{
+                          fontSize: '0.68rem',
+                          fontWeight: 700,
+                          background: c.brand_name ? 'rgba(168, 85, 247, 0.15)' : 'var(--surface-interactive)',
+                          border: c.brand_name ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid var(--border-subtle)',
+                          color: c.brand_name ? '#d8b4fe' : 'var(--text-muted)',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px'
+                        }}>
+                          🏷️ Brand: {c.brand_name || 'Tidak Ditentukan'}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '1.1rem' }}>🎬</span>
+                        <strong style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>{c.campaign_name}</strong>
+                        <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', padding: '3px 8px', borderRadius: 8, background: statusBg, color: statusColor, border: `1px solid ${statusBorder}` }}>
+                          {c.status}
+                        </span>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      {new Date(c.created_at).toLocaleString('id-ID')}
+                    </div>
+                  </div>
+
+                  {/* Stats */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10, fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: 12 }}>
+                    <div><strong>Total Item:</strong> <span style={{ color: 'var(--text-primary)' }}>{c.stats.total}</span></div>
+                    <div><strong>Selesai Render:</strong> <span style={{ color: 'var(--success)' }}>{c.stats.completed}</span></div>
+                    <div><strong>Gagal:</strong> <span style={{ color: 'var(--danger)' }}>{c.stats.failed}</span></div>
+                    <div><strong>Dalam Antrean:</strong> <span style={{ color: 'var(--status-info)' }}>{c.stats.processing}</span></div>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div style={{ marginBottom: 12 }}>
+                    <div style={{ background: 'var(--bg-secondary)', borderRadius: 4, height: 5, overflow: 'hidden' }}>
+                      <div style={{ width: `${pct}%`, height: '100%', background: 'var(--accent)', transition: 'width 0.4s' }} />
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 4 }}>{pct}% complete</div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--surface-interactive)', paddingTop: 12, flexWrap: 'wrap', gap: 10 }}>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+                      <button type="button" className="btn btn-primary btn-sm" onClick={() => router.push(`/multiplier-lab/${c.id}`)} style={{ fontSize: '0.75rem', padding: '6px 12px' }}>
+                        🔍 Detail Kampanye
+                      </button>
+
+                      {c.status !== 'completed' && (
+                        <button type="button" className={`btn btn-sm ${c.status === 'running' ? 'btn-danger' : 'btn-success'}`} onClick={() => toggleStatus(c)} style={{ fontSize: '0.75rem', padding: '6px 12px' }}>
+                          {c.status === 'draft' ? '▶ Run' : (c.status === 'running' ? '⏸ Pause' : '▶ Resume')}
+                        </button>
+                      )}
+
+                      <button type="button" className="btn btn-danger btn-sm" onClick={() => deleteCampaign(c.id)} style={{ fontSize: '0.75rem', padding: '6px 12px' }}>
+                        🗑 Hapus
                       </button>
                     </div>
 
-                    {loadingAssets ? (
-                      <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)' }}>
-                        <div className="spinner" style={{ width: 24, height: 24, margin: '0 auto 8px' }}></div>
-                        Memuat blueprint...
-                      </div>
-                    ) : (
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16, maxHeight: '400px', overflowY: 'auto', padding: 8, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface-interactive)' }}>
-                        {assets.map(a => {
-                          const isSelected = workflowMode === 'multi_blueprint_one_product'
-                            ? selectedBlueprintIds.includes(a.id)
-                            : selectedAssetId === a.id;
-                          
-                          const handleToggle = () => {
-                            if (workflowMode === 'multi_blueprint_one_product') {
-                              setSelectedBlueprintIds(prev =>
-                                prev.includes(a.id) ? prev.filter(id => id !== a.id) : [...prev, a.id]
-                              );
-                            } else {
-                              setSelectedAssetId(a.id);
-                            }
-                          };
-
-                          return (
-                            <div
-                              key={a.id}
-                              style={{
-                                background: isSelected ? 'var(--status-info-soft)' : 'var(--bg-card)',
-                                border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`,
-                                borderRadius: 8,
-                                padding: 14,
-                                cursor: 'pointer',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'space-between',
-                                gap: 10,
-                                transition: 'all 0.2s ease',
-                                boxShadow: isSelected ? '0 0 10px rgba(0, 120, 255, 0.1)' : 'none'
-                              }}
-                              onClick={handleToggle}
-                            >
-                              <div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                  <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', background: 'var(--overlay-subtle)', padding: '2px 6px', borderRadius: 4, color: 'var(--accent)', fontWeight: 600 }}>
-                                    {a.niche || 'Skincare'}
-                                  </span>
-                                  <input
-                                    type={workflowMode === 'multi_blueprint_one_product' ? 'checkbox' : 'radio'}
-                                    checked={isSelected}
-                                    name="selected_blueprint_radio"
-                                    onChange={handleToggle}
-                                    onClick={e => e.stopPropagation()}
-                                  />
-                                </div>
-                                <h4 style={{ fontSize: '0.85rem', fontWeight: 600, margin: '8px 0 4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-primary)' }}>
-                                  {a.original_caption || 'Blueprint Video'}
-                                </h4>
-                                <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', margin: 0, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                                  🔗 {a.source_url}
-                                </p>
-                                {a.viral_pattern_summary && (
-                                  <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '6px 0', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                                    💡 {a.viral_pattern_summary}
-                                  </p>
-                                )}
-                                {a.tags && (
-                                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
-                                    {a.tags.split(',').slice(0, 3).map(tag => (
-                                      <span key={tag} style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
-                                        #{tag.trim()}
-                                      </span>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: 8, marginTop: 4 }}>
-                                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                                  🎬 {a.scene_count || 0} Scene
-                                </span>
-                                <button
-                                  type="button"
-                                  className="btn btn-secondary"
-                                  style={{ fontSize: '0.7rem', padding: '4px 10px', height: 'auto', background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleViewBlueprintDetail(a.id);
-                                  }}
-                                >
-                                  Lihat Detail
-                                </button>
-                              </div>
-                            </div>
-                          );
-                        })}
-                        {assets.length === 0 && (
-                          <div style={{ gridColumn: '1/span 3', padding: 24, textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                            Tidak ada blueprint ditemukan.
-                          </div>
-                        )}
-                      </div>
-                    )}
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--text-muted)', background: 'var(--surface-interactive)', padding: '2px 8px', borderRadius: '4px' }}>
+                      🔑 ID Batch: {c.id}
+                    </div>
                   </div>
-
-                  {workflowMode === 'one_blueprint_multi_product' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 14 }}>
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label className="form-label" style={{ fontWeight: 700 }}>📦 Pilih Produk dari Pustaka (Multi-Select)</label>
-                        <input
-                          type="text"
-                          className="form-input"
-                          style={{ marginBottom: 10, fontSize: '0.8rem' }}
-                          placeholder="🔍 Cari produk di pustaka..."
-                          value={productSearchQuery}
-                          onChange={e => setProductSearchQuery(e.target.value)}
-                        />
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10, maxHeight: '200px', overflowY: 'auto', padding: 10, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface-interactive)' }}>
-                          {products
-                            .filter(p => (p.product_name || '').toLowerCase().includes(productSearchQuery.toLowerCase()))
-                            .map(p => {
-                              const isChecked = selectedProductIds.includes(p.id);
-                              const handleToggleProduct = () => {
-                                setSelectedProductIds(prev =>
-                                  isChecked ? prev.filter(id => id !== p.id) : [...prev, p.id]
-                                );
-                              };
-                              return (
-                                <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 8, border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', background: isChecked ? 'var(--status-info-soft)' : 'var(--bg-card)', fontSize: '0.78rem' }}>
-                                  <input
-                                    type="checkbox"
-                                    checked={isChecked}
-                                    onChange={handleToggleProduct}
-                                  />
-                                  <span style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-primary)' }}>
-                                    {p.product_name}
-                                  </span>
-                                </label>
-                              );
-                            })}
-                        </div>
-                      </div>
-
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label className="form-label" style={{ fontWeight: 700 }}>🔗 Atau Tambah URL Produk Baru (1 Baris per URL)</label>
-                        <textarea
-                          rows="3"
-                          className="form-textarea"
-                          placeholder="https://shopee.co.id/product-1&#10;https://shopee.co.id/product-2"
-                          value={massUrlsText}
-                          onChange={e => setMassUrlsText(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                  )}
                 </div>
-
-                {/* ACCORDION SECTIONS */}
-
-                {/* Section 1: Basic Creative Strategy */}
-                <div style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <div
-                    onClick={() => setActiveAccordion(0)}
-                    style={{ padding: '16px 24px', background: activeAccordion === 0 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                  >
-                    <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>1. Basic Creative Strategy</span>
-                    <span>{activeAccordion === 0 ? '▲' : '▼'}</span>
-                  </div>
-                  {activeAccordion === 0 && (
-                    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16, background: 'var(--overlay-subtle)' }}>
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label className="form-label">Parent Folder Nextcloud</label>
-                        <input
-                          className="form-input"
-                          placeholder="Contoh: /MAKNA_Assets"
-                          value={nextcloudParentFolder}
-                          onChange={e => setNextcloudParentFolder(e.target.value)}
-                          required
-                        />
-                      </div>
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label className="form-label">Bahasa Naskah Voiceover (Script Language)</label>
-                        <select
-                          className="form-input"
-                          value={targetLanguage}
-                          onChange={e => setTargetLanguage(e.target.value)}
-                        >
-                          <option value="id-ID">🇮🇩 Bahasa Indonesia (Lokal)</option>
-                          <option value="en-US">🇺🇸 English (Global / US Market)</option>
-                        </select>
-                      </div>
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label className="form-label">🎯 Target Demografi & Tone Bahasa</label>
-                        <select
-                          className="form-input"
-                          value={targetDemographic}
-                          onChange={e => setTargetDemographic(e.target.value)}
-                        >
-                          <option value="genz_casual">Gen-Z & Milenial Muda (Santai, Gaul, Akrab "Kamu/Lo")</option>
-                          <option value="ibu_rumah_tangga">Ibu Rumah Tangga & Keluarga (Ramah, Mengayomi "Bunda/Moms")</option>
-                          <option value="professional_executive">Profesional & Worker (Lugas, Refined, Efisien "Anda/Kamu")</option>
-                          <option value="hijab_syari_family">Keluarga Hijrah & Syari (Santun, Islami Alami "Bunda/Ukhti")</option>
-                          <option value="fitness_health_enthusiast">Penggiat Olahraga & Kesehatan (Motivatif, Energik, Informatif)</option>
-                          <option value="custom">Custom Input Bebas...</option>
-                        </select>
-                        {targetDemographic === 'custom' && (
-                          <input
-                            type="text"
-                            className="form-input"
-                            style={{ marginTop: 8 }}
-                            placeholder="Contoh: Mahasiswa Rantau yang Hemat"
-                            value={targetDemographicCustom}
-                            onChange={e => setTargetDemographicCustom(e.target.value)}
-                          />
-                        )}
-                      </div>
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label className="form-label">AI Directive / Guardrail (Staging Override)</label>
-                        <textarea
-                          className="form-textarea"
-                          style={{ minHeight: 60 }}
-                          placeholder="Instruksi kontrol AI internal (misal: Bahas brand sebagai ahli kuliner; jangan bahas kompetitor...)"
-                          value={aiDirective}
-                          onChange={e => setAiDirective(e.target.value)}
-                        />
-                      </div>
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label className="form-label">Mandatory Outro Line (Staging Override)</label>
-                        <input
-                          type="text"
-                          className="form-input"
-                          placeholder="Kalimat wajib di akhir klip voiceover (misal: Produk ada di keranjang kuning ya!)"
-                          value={mandatoryOutroLine}
-                          onChange={e => setMandatoryOutroLine(e.target.value)}
-                        />
-                      </div>
-                      <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label className="form-label">Custom Instruction (Opsional)</label>
-                        <textarea
-                          className="form-textarea"
-                          style={{ minHeight: 80 }}
-                          placeholder="Instruksi tambahan untuk AI saat menganalisa video ini..."
-                          value={customInstruction}
-                          onChange={e => setCustomInstruction(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Section 2: Aesthetics & Visual Settings */}
-                <div style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <div
-                    onClick={() => setActiveAccordion(1)}
-                    style={{ padding: '16px 24px', background: activeAccordion === 1 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                  >
-                    <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>2. Aesthetics & Visual Settings</span>
-                    <span>{activeAccordion === 1 ? '▲' : '▼'}</span>
-                  </div>
-                  {activeAccordion === 1 && (
-                    <div style={{ padding: 24, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, background: 'var(--overlay-subtle)' }}>
-                      <div className="form-group">
-                        <label className="form-label">Narrative Mode</label>
-                        <select className="form-input" value={narrativeMode} onChange={e => setNarrativeMode(e.target.value)}>
-                          <option value="Storytelling">Storytelling (Daily-life)</option>
-                          <option value="Problem-Solution">Problem-Solution</option>
-                          <option value="Educational">Educational (Tutorial)</option>
-                        </select>
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">Visual Style</label>
-                        <select className="form-input" value={visualStyle} onChange={e => setVisualStyle(e.target.value)}>
-                          <option value="Cinematic">Cinematic</option>
-                          <option value="UGC">UGC</option>
-                          <option value="Macrophotography">Macrophotography</option>
-                        </select>
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">Visual Mode</label>
-                        <select className="form-input" value={visualMode} onChange={e => setVisualMode(e.target.value)}>
-                          <option value="pure_t2v">Pure T2V (Klasik - Text-to-Video untuk semua klip)</option>
-                          <option value="hybrid_lock">Hybrid Lock (RE Hybrid & Product Pixel Lock - Double-Pass)</option>
-                        </select>
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">AI Engine & Model</label>
-                        <select className="form-input" value={targetAi} onChange={e => setTargetAi(e.target.value)}>
-                          <option value="Google Veo (8s)">Google Veo (8s)</option>
-                        </select>
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">Video Model</label>
-                        <select className="form-input" value={videoModel} onChange={e => setVideoModel(e.target.value)}>
-                          <option value="veo_31_lite">Veo 3.1 Lite</option>
-                        </select>
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">Aspect Ratio</label>
-                        <select className="form-input" value={aspectRatio} onChange={e => setAspectRatio(e.target.value)}>
-                          <option value="9:16">9:16 (Vertical TikTok)</option>
-                          <option value="16:9">16:9 (Horizontal YouTube)</option>
-                          <option value="1:1">1:1 (Square)</option>
-                        </select>
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">Face Visibility</label>
-                        <select className="form-input" value={faceVisibility} onChange={e => setFaceVisibility(e.target.value)}>
-                          <option value="Faceless">Faceless (Fokus Aksi Tangan)</option>
-                          <option value="POV">POV (Sudut Pandang Kamera Utama)</option>
-                          <option value="Silhouette">Silhouette (Estetik Siluet)</option>
-                        </select>
-                      </div>
-                      <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                        <label className="form-label">Kepadatan Kata per Klip (Words per Clip)</label>
-                        <select className="form-input" value={wordsPerClip} onChange={e => setWordsPerClip(e.target.value)}>
-                          <option value="15-16 kata">15-16 kata (Cepat, Dinamis)</option>
-                          <option value="17-19 kata">17-19 kata (Standar, Berirama)</option>
-                          <option value="20-24 kata">20-24 kata (Padat, Edukatif)</option>
-                        </select>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Section 3: Product Bridging Settings */}
-                <div style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <div
-                    onClick={() => setActiveAccordion(2)}
-                    style={{ padding: '16px 24px', background: activeAccordion === 2 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                  >
-                    <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>3. Product Bridging Settings</span>
-                    <span>{activeAccordion === 2 ? '▲' : '▼'}</span>
-                  </div>
-                  {activeAccordion === 2 && (
-                    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16, background: 'var(--overlay-subtle)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <label className="switch">
-                          <input
-                            type="checkbox"
-                            checked={isBridgingActive}
-                            onChange={e => setIsBridgingActive(e.target.checked)}
-                          />
-                          <span className="slider"></span>
-                        </label>
-                        <strong>🔌 Aktifkan Bridging Promosi Produk (Sandwich Protocol)</strong>
-                      </div>
-
-                      {isBridgingActive && (
-                        <>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-                            <div className="form-group">
-                              <label className="form-label">Jumlah Klip Video (N)</label>
-                              <input
-                                type="number"
-                                className="form-input"
-                                min="3"
-                                max="10"
-                                value={targetClipsCount}
-                                onChange={e => setTargetClipsCount(Number(e.target.value))}
-                                required
-                              />
-                            </div>
-                            <div className="form-group">
-                              <label className="form-label">Mulai Promosi pada Klip Ke- (X)</label>
-                              <input
-                                type="number"
-                                className="form-input"
-                                min="1"
-                                max={targetClipsCount}
-                                value={bridgeAtClip}
-                                onChange={e => setBridgeAtClip(Number(e.target.value))}
-                                required
-                              />
-                            </div>
-                            <div className="form-group">
-                              <label className="form-label">Durasi Promosi (Jumlah Klip)</label>
-                              <input
-                                type="number"
-                                className="form-input"
-                                min="1"
-                                max={targetClipsCount - bridgeAtClip + 1}
-                                value={bridgeDurationClips}
-                                onChange={e => setBridgeDurationClips(Number(e.target.value))}
-                                required
-                              />
-                            </div>
-                          </div>
-
-                          <div className="form-group">
-                            <label className="form-label">Gaya Promosi</label>
-                            <select className="form-input" value={promotionStyle} onChange={e => setPromotionStyle(e.target.value)}>
-                              <option value="Softselling">Softselling (Halus)</option>
-                              <option value="Hardsell">Hardsell (Jelas, Promosi USP)</option>
-                              <option value="Education">Education (Review Logis)</option>
-                            </select>
-                          </div>
-                        </>
-                      )}
-
-                      {/* Product DNA Injection Settings (Always visible in Single mode for both direct and bridged placement) */}
-                      {productionMode === 'single' && (
-                        <>
-                          <div className="form-group">
-                            <label className="form-label">Metode Penyertaan Produk</label>
-                            <div style={{ display: 'flex', gap: 16, marginTop: 4 }}>
-                              <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.8rem' }}>
-                                <input type="radio" name="bridgingModeMult" value="url_extract" checked={bridgingMode === 'url_extract'} onChange={e => setBridgingMode(e.target.value)} />
-                                Ekstrak dari URL
-                              </label>
-                              <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.8rem' }}>
-                                <input type="radio" name="bridgingModeMult" value="select_existing" checked={bridgingMode === 'select_existing'} onChange={e => setBridgingMode(e.target.value)} />
-                                Pilih dari Pustaka
-                              </label>
-                              <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.8rem' }}>
-                                <input type="radio" name="bridgingModeMult" value="manual_input" checked={bridgingMode === 'manual_input'} onChange={e => setBridgingMode(e.target.value)} />
-                                Tulis Manual
-                              </label>
-                            </div>
-                          </div>
-
-                          {bridgingMode === 'url_extract' && (
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, background: 'var(--bg-secondary)', padding: 16, borderRadius: 8 }}>
-                              <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label">URL Produk (Shopee/Tokopedia)</label>
-                                <input
-                                  type="url"
-                                  className="form-input"
-                                  placeholder="https://shopee.co.id/product-url"
-                                  value={productUrl}
-                                  onChange={e => setProductUrl(e.target.value)}
-                                  required={bridgingMode === 'url_extract'}
-                                />
-                              </div>
-                              <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label">Affiliate URL (Opsional)</label>
-                                <input
-                                  type="url"
-                                  className="form-input"
-                                  placeholder="https://shope.ee/short-url"
-                                  value={affiliateUrl}
-                                  onChange={e => setAffiliateUrl(e.target.value)}
-                                />
-                              </div>
-                            </div>
-                          )}
-
-                          {bridgingMode === 'select_existing' && (
-                            <div className="form-group" style={{ background: 'var(--bg-secondary)', padding: 16, borderRadius: 8, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                              <div>
-                                <label className="form-label">Pilih Produk</label>
-
-                                {/* Search Input for Product Selection */}
-                                <input
-                                  type="text"
-                                  className="form-input"
-                                  style={{ marginBottom: 10, fontSize: '0.8rem' }}
-                                  placeholder="🔍 Cari produk berdasarkan nama atau brand..."
-                                  value={productSearchQuery}
-                                  onChange={e => setProductSearchQuery(e.target.value)}
-                                />
-
-                                <select className="form-input" value={targetProductId} onChange={e => {
-                                  const val = e.target.value;
-                                  setTargetProductId(val);
-                                  if (val) {
-                                    const selProduct = products.find(p => String(p.id) === String(val));
-                                    if (selProduct) {
-                                      const photoPath = selProduct.photo_url || selProduct.clean_photo_url || selProduct.generated_photo_url || selProduct.raw_photo_url || '';
-                                      if (photoPath) {
-                                        setProductRefImage(photoPath);
-                                        const derivedFilename = selProduct.filename_declare || (selProduct.product_name ? `${selProduct.product_name.toLowerCase().replace(/[^a-z0-9]/g, '_')}_ref.jpg` : 'product_ref.jpg');
-                                        setProductFilenameDeclare(derivedFilename);
-                                      }
-                                    }
-                                  }
-                                }}>
-                                  <option value="">-- Pilih Produk Terdaftar --</option>
-                                  {products
-                                    .filter(p =>
-                                      (p.product_name || '').toLowerCase().includes(productSearchQuery.toLowerCase()) ||
-                                      (p.brand_name || '').toLowerCase().includes(productSearchQuery.toLowerCase())
-                                    )
-                                    .map(p => (
-                                      <option key={p.id} value={p.id}>{p.brand_name || 'Generik'} - {p.product_name}</option>
-                                    ))
-                                  }
-                                </select>
-                                {targetProductId && productRefImage && (
-                                  <div style={{ marginTop: 10, background: 'var(--status-success-soft)', border: '1px solid var(--status-success-soft)', padding: 12, borderRadius: 8 }}>
-                                    <div style={{ color: 'var(--status-success)', fontWeight: 600, fontSize: '0.85rem' }}>
-                                      ✨ Foto Produk & Deklarasi Mandate 88 Otomatis Terhubung dari Database Produk
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
-                                      {typeof productRefImage === 'string' && (
-                                        <img src={productRefImage} alt="Product Ref" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--border-color)' }} />
-                                      )}
-                                      <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)' }}>
-                                        <div><b>Nama Berkas Deklarasi:</b> <code>{productFilenameDeclare || 'Auto Generated'}</code></div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          )}
-
-                          {bridgingMode === 'manual_input' && (
-                            <div style={{ background: 'var(--bg-secondary)', padding: 16, borderRadius: 8, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                              <div className="form-group">
-                                <label className="form-label">Nama Produk</label>
-                                <input className="form-input" placeholder="Contoh: Makna Brightening Serum" value={manualProductName} onChange={e => setManualProductName(e.target.value)} />
-                              </div>
-                              <div className="form-group">
-                                <label className="form-label">Deskripsi Singkat</label>
-                                <textarea className="form-textarea" placeholder="Manfaat utama..." value={manualProductDesc} onChange={e => setManualProductDesc(e.target.value)} />
-                              </div>
-                              <div className="form-group">
-                                <label className="form-label">Unique Selling Point (USP)</label>
-                                <input className="form-input" placeholder="Contoh: Mengandung 10% Niacinamide" value={manualProductUsp} onChange={e => setManualProductUsp(e.target.value)} />
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      )}
-
-                      {/* Foto Referensi Produk Upload - Tampilkan jika visualMode === 'hybrid_lock' */}
-                      {visualMode === 'hybrid_lock' && (
-                        <div style={{ background: 'var(--bg-secondary)', padding: 16, borderRadius: 8, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                          {bridgingMode === 'select_existing' && targetProductId && productRefImage ? (
-                            <div style={{ background: 'var(--status-success-soft)', border: '1px solid var(--border)', padding: 12, borderRadius: 8 }}>
-                              <div style={{ color: 'var(--status-success)', fontWeight: 600, fontSize: '0.85rem', marginBottom: 8 }}>
-                                🔒 Terkunci dari Database Produk (Reference Image & Filename terikat otomatis)
-                              </div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                {typeof productRefImage === 'string' && (
-                                  <img src={productRefImage} alt="Product Ref" style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--border)' }} />
-                                )}
-                                <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)' }}>
-                                  <div><b>Berkas Deklarasi:</b> <code>{productFilenameDeclare || 'Auto Generated'}</code></div>
-                                </div>
-                              </div>
-                            </div>
-                          ) : (
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                              <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label">📸 Unggah Foto Produk (Reference Image)</label>
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  onChange={e => setProductRefImage(e.target.files[0])}
-                                  className="form-input"
-                                />
-                                <small style={{ color: 'var(--text-muted)' }}>Foto produk yang akan di-lock penampilannya pada video promosi.</small>
-                              </div>
-                              <div className="form-group" style={{ marginBottom: 0 }}>
-                                <label className="form-label">🏷️ Nama Berkas Gambar Produk (Deklarasi Mandate 88)</label>
-                                <input
-                                  type="text"
-                                  className="form-input"
-                                  placeholder="Contoh: youth_retinol_serum.png"
-                                  value={productFilenameDeclare}
-                                  onChange={e => setProductFilenameDeclare(e.target.value)}
-                                />
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Tinjauan Kombinasi Section */}
-                <div style={{ padding: 24, borderBottom: '1px solid var(--border)', background: 'var(--surface-interactive)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                    <div>
-                      <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>📊 Tinjauan Kombinasi Blueprint & Produk</strong>
-                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '4px 0 0' }}>
-                        Buat tabel kombinasi berdasarkan blueprint dan produk pilihan Anda sebelum melakukan render.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={generateCombinationRows}
-                      style={{ fontSize: '0.8rem', padding: '6px 14px', background: 'var(--accent)', border: 'none', borderRadius: 4, cursor: 'pointer', fontWeight: 600, color: 'var(--text-primary)' }}
-                    >
-                      ⚡ Buat Tabel Tinjauan
-                    </button>
-                  </div>
-
-                  {combinationRows.length > 0 ? (
-                    <div style={{ overflowX: 'auto', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg-card)' }}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', textAlign: 'left' }}>
-                        <thead>
-                          <tr style={{ background: 'var(--overlay-subtle)', borderBottom: '1px solid var(--border)', color: 'var(--text-muted)' }}>
-                            <th style={{ padding: '10px 12px', fontWeight: 600 }}>No</th>
-                            <th style={{ padding: '10px 12px', fontWeight: 600 }}>Blueprint</th>
-                            <th style={{ padding: '10px 12px', fontWeight: 600 }}>Produk</th>
-                            <th style={{ padding: '10px 12px', fontWeight: 600 }}>Mode Bridge</th>
-                            <th style={{ padding: '10px 12px', fontWeight: 600 }}>Aksi</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {combinationRows.map((row, idx) => (
-                            <tr key={idx} style={{ borderBottom: idx < combinationRows.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                              <td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>{idx + 1}</td>
-                              <td style={{ padding: '10px 12px' }}>
-                                <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{row.deconstruct_asset_title}</div>
-                                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 300 }}>
-                                  {row.deconstruct_asset_url}
-                                </div>
-                              </td>
-                              <td style={{ padding: '10px 12px' }}>
-                                <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{row.target_product_name}</div>
-                                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 300 }}>
-                                  {row.target_product_url || 'Input Manual / Belum diekstrak'}
-                                </div>
-                              </td>
-                              <td style={{ padding: '10px 12px', textTransform: 'uppercase', color: 'var(--info)', fontWeight: 600 }}>
-                                {isBridgingActive ? promotionStyle : 'Direct'}
-                              </td>
-                              <td style={{ padding: '10px 12px' }}>
-                                <button
-                                  type="button"
-                                  onClick={() => setCombinationRows(prev => prev.filter((_, i) => i !== idx))}
-                                  style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontWeight: 600 }}
-                                >
-                                  Hapus
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  ) : (
-                    <div style={{ textAlign: 'center', padding: 24, border: '2px dashed var(--border)', borderRadius: 8, color: 'var(--text-muted)', fontSize: '0.78rem', background: 'var(--bg-card)' }}>
-                      Tinjauan kombinasi belum dibuat. Silakan pilih blueprint dan produk kemudian klik "Buat Tabel Tinjauan".
-                    </div>
-                  )}
-                </div>
-
-                {/* Section 4: Visual Swap Overrides */}
-                <div style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <div
-                    onClick={() => setActiveAccordion(3)}
-                    style={{ padding: '16px 24px', background: activeAccordion === 3 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                  >
-                    <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>4. Visual Swap Overrides (VSO)</span>
-                    <span>{activeAccordion === 3 ? '▲' : '▼'}</span>
-                  </div>
-                  {activeAccordion === 3 && (
-                    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16, background: 'var(--overlay-subtle)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <label className="switch">
-                          <input
-                            type="checkbox"
-                            checked={isVsoActive}
-                            onChange={e => setIsVsoActive(e.target.checked)}
-                          />
-                          <span className="slider"></span>
-                        </label>
-                        <strong>🎭 Aktifkan Visual Swap Overrides</strong>
-                      </div>
-
-                      {isVsoActive && (
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                          <div className="form-group">
-                            <label className="form-label">Konsep Karakter (Framing)</label>
-                            <select className="form-input" value={characterConcept} onChange={e => setCharacterConcept(e.target.value)}>
-                              <option value="faceless">Faceless (Fokus Tangan)</option>
-                              <option value="pov">POV (First Person View)</option>
-                              <option value="silhouette">Siluet Bayangan</option>
-                              <option value="stylized_3d">3D Stylized Claymation</option>
-                            </select>
-                          </div>
-                          <div className="form-group">
-                            <label className="form-label">Demografi Subjek / Model</label>
-                            <select
-                              className="form-input"
-                              value={subjectDemographic}
-                              onChange={e => {
-                                const val = e.target.value;
-                                setSubjectDemographic(val);
-                                setWardrobeStyle('random');
-                                if (val.startsWith('stylized_3d_')) {
-                                  setCharacterConcept('stylized_3d');
-                                } else {
-                                  setCharacterConcept('faceless');
-                                }
-                              }}
-                            >
-                              <option value="syari_classic">Wanita Gamis Syar'iy (Hanya Tangan)</option>
-                              <option value="caucasian_male">Pria Kaukasia (Hanya Tangan)</option>
-                              <option value="stylized_3d_muslimah">Wanita 3D Stylized (Clay Art)</option>
-                              <option value="stylized_3d_male">Pria 3D Stylized (Clay Art)</option>
-                              <option value="stylized_3d_duo">Duo 3D Stylized - 2 Karakter (Clay Art)</option>
-                            </select>
-                          </div>
-                          <div className="form-group">
-                            <label className="form-label">Pakaian / Wardrobe</label>
-                            <select className="form-input" value={wardrobeStyle} onChange={e => setWardrobeStyle(e.target.value)}>
-                              <option value="random">🎲 Random (Acak)</option>
-                              <option value="sequential">🔄 Sequential (Urut per baris)</option>
-                              {subjectDemographic === 'stylized_3d_muslimah' ? (
-                                <optgroup label="Pakaian 3D Muslimah">
-                                  <option value="3d_fem_emerald">Gamis Hijau Emerald 3D</option>
-                                  <option value="3d_fem_pastel_pink">Gamis Pastel Pink 3D</option>
-                                  <option value="3d_fem_jetblack">Abaya Hitam Legam 3D</option>
-                                  <option value="3d_fem_mocca">Gamis Mocca 3D</option>
-                                </optgroup>
-                              ) : subjectDemographic === 'stylized_3d_male' ? (
-                                <optgroup label="Pakaian 3D Pria">
-                                  <option value="3d_male_tan_knit">Sweater Tan Rajut 3D</option>
-                                  <option value="3d_male_sage_jacket">Jaket Kasual Sage Green 3D</option>
-                                  <option value="3d_male_charcoal_tshirt">Kaos Charcoal Katun 3D</option>
-                                  <option value="3d_male_terracotta_flannel">Kemeja Flanel Terracotta 3D</option>
-                                </optgroup>
-                              ) : subjectDemographic === 'stylized_3d_duo' ? (
-                                <optgroup label="Harmoni Pakaian Duo Terkoordinasi">
-                                  <option value="3d_duo_earth">Tema 1: Earthy Warmth (Tan Sweater & Cream Abaya)</option>
-                                  <option value="3d_duo_contrast">Tema 2: Urban Contrast (Terracotta Jacket & Sage Abaya)</option>
-                                  <option value="3d_duo_monochrome">Tema 3: Minimalist Monochrome (Off-White T-shirt & Black Abaya)</option>
-                                  <option value="3d_duo_pastel">Tema 4: Soft Pastel Harmony (Mint Polo & Lilac Abaya)</option>
-                                  <option value="3d_duo_cool">Tema 5: Professional Cool Tones (Grey Flannel & Teal Abaya)</option>
-                                </optgroup>
-                              ) : subjectDemographic === 'caucasian_male' ? (
-                                <optgroup label="Preset Warna Pria Kaukasia">
-                                  <option value="male_terracotta">Pria: Terracotta</option>
-                                  <option value="male_caramel">Pria: Caramel Latte</option>
-                                  <option value="male_khaki_tan">Pria: Khaki / Tan</option>
-                                  <option value="male_navy_blue">Pria: Navy Blue</option>
-                                  <option value="male_forest_green">Pria: Forest Green</option>
-                                  <option value="male_charcoal">Pria: Charcoal Grey</option>
-                                  <option value="male_burgundy">Pria: Burgundy Maroon</option>
-                                  <option value="male_sage_muted">Pria: Sage Green Muted</option>
-                                  <option value="male_steel_blue">Pria: Steel Blue</option>
-                                  <option value="male_cloud_dancer">Pria: Off-White (Cloud Dancer)</option>
-                                </optgroup>
-                              ) : (
-                                <>
-                                  <optgroup label="1. Earth Tones & Warm Neutrals">
-                                    <option value="amber_terracotta">Amber Haze & Terracotta</option>
-                                    <option value="mocca_caramel">Mocca, Taupe & Caramel Latte</option>
-                                    <option value="warm_grey">Warm Grey</option>
-                                  </optgroup>
-                                  <optgroup label="2. Muted Pastels (Pastel Refined)">
-                                    <option value="sage_muted">Sage Green Muted</option>
-                                    <option value="lavender_lilac">Lavender Soft & Soft Lilac</option>
-                                    <option value="butter_yellow">Butter Yellow (Butter Cream)</option>
-                                  </optgroup>
-                                  <optgroup label="3. Modern Cool & Deep Tones">
-                                    <option value="teal_navy">Transformative Teal & Navy Blue</option>
-                                    <option value="olive_modern">Olive Green Modern</option>
-                                    <option value="mahogany_maroon">Mahogany & Maroon</option>
-                                  </optgroup>
-                                  <optgroup label="4. Netral Klasik Modern">
-                                    <option value="cloud_dancer">Cloud Dancer (Off-White Modern)</option>
-                                  </optgroup>
-                                </>
-                              )}
-                              <option value="custom">-- Tulis Custom --</option>
-                            </select>
-                            {wardrobeStyle === 'custom' && (
-                              <input
-                                type="text"
-                                className="form-input"
-                                style={{ marginTop: 8 }}
-                                placeholder={
-                                  subjectDemographic.startsWith('stylized_3d_')
-                                    ? "Ketik pakaian 3D kustom..."
-                                    : subjectDemographic === 'caucasian_male'
-                                      ? "Ketik pakaian kustom..."
-                                      : "Ketik warna kustom..."
-                                }
-                                value={wardrobeStyleCustom}
-                                onChange={e => setWardrobeStyleCustom(e.target.value)}
-                              />
-                            )}
-                          </div>
-                          <div className="form-group">
-                            <label className="form-label">Pencahayaan (Lighting)</label>
-                            <select className="form-input" value={lightingStyle} onChange={e => setLightingStyle(e.target.value)}>
-                              <option value="random">🎲 Random (Acak)</option>
-                              <option value="window_daylight">Soft Window Daylight (Cahaya jendela natural)</option>
-                              <option value="golden_hour">Golden Hour Warm Sunset (Sorot sore keemasan)</option>
-                              <option value="moody_shadow">Moody Cinematic Shadow (Kontras chiaroscuro dramatis)</option>
-                              <option value="studio_softbox">Clean Professional Studio Softbox (Sangat bersih)</option>
-                              <option value="lab_cold">Clinical Cold White (Putih lab bersih terang)</option>
-                              <option value="cyber_neon">Moody Cyberpunk Blue-Pink Neon (Warna glow modern)</option>
-                              <option value="candle_warm">Cozy Dim Candlelight Ambiance (Sangat syahdu hangat)</option>
-                              <option value="custom">-- Tulis Custom --</option>
-                            </select>
-                            {lightingStyle === 'custom' && (
-                              <input type="text" className="form-input" style={{ marginTop: 8 }} placeholder="Lighting kustom..." value={lightingStyleCustom} onChange={e => setLightingStyleCustom(e.target.value)} />
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Section 5: Workflow & Audio Settings */}
-                <div style={{ borderBottom: 'none' }}>
-                  <div
-                    onClick={() => setActiveAccordion(4)}
-                    style={{ padding: '16px 24px', background: activeAccordion === 4 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>⚙️ 5. Workflow & Audio Settings</span>
-                      <span style={{ fontSize: '0.72rem', background: (enableTts || enableGlabs || enableFfmpeg || enableSocialPost) ? 'var(--status-success-soft)' : 'var(--surface-interactive)', color: (enableTts || enableGlabs || enableFfmpeg || enableSocialPost) ? 'var(--status-success)' : 'var(--text-muted)', padding: '2px 6px', borderRadius: 4 }}>
-                        {(enableTts || enableGlabs || enableFfmpeg || enableSocialPost) ? 'Active Stages' : 'All Off'}
-                      </span>
-                    </div>
-                    <span>{activeAccordion === 4 ? '▲' : '▼'}</span>
-                  </div>
-                  {activeAccordion === 4 && (
-                    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16, background: 'var(--overlay-subtle)' }}>
-
-                      {/* Active Stages Checklist */}
-                      <div>
-                        <label className="form-label" style={{ marginBottom: 10 }}>Tahapan Workflow Aktif</label>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-card)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)' }}>
-                            <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '500' }}>Enable TTS (Voiceover)</span>
-                            <input type="checkbox" checked={enableTts} onChange={e => setEnableTts(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-card)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)' }}>
-                            <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '500' }}>Enable G-Labs (AI Video)</span>
-                            <input type="checkbox" checked={enableGlabs} onChange={e => setEnableGlabs(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-card)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)' }}>
-                            <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '500' }}>Enable FFmpeg Muxing</span>
-                            <input type="checkbox" checked={enableFfmpeg} onChange={e => setEnableFfmpeg(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-card)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)' }}>
-                            <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '500' }}>Enable Social Draft Post</span>
-                            <input type="checkbox" checked={enableSocialPost} onChange={e => setEnableSocialPost(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Audio/TTS settings */}
-                      {enableTts && (
-                        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 14 }}>
-                          <label className="form-label" style={{ fontWeight: 600, color: 'var(--accent)' }}>🔊 TTS Audio Engine Settings</label>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 8 }}>
-                            <div>
-                              <label className="form-label" style={{ fontSize: '0.78rem' }}>Voice Provider</label>
-                              <select className="form-input" value={voiceProvider} onChange={e => setVoiceProvider(e.target.value)}>
-                                <option value="minimax">MiniMax VO Engine</option>
-                                <option value="gemini">Gemini TTS Engine</option>
-                              </select>
-                            </div>
-                            <div>
-                              <label className="form-label" style={{ fontSize: '0.78rem' }}>Voice Persona</label>
-                              <select
-                                className="form-input"
-                                value={voicePersona}
-                                onChange={e => setVoicePersona(e.target.value)}
-                              >
-                                {voiceProvider === 'gemini'
-                                  ? GEMINI_VOICES.map(v => <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>)
-                                  : (targetLanguage === 'en-US' ? MINIMAX_ENGLISH_VOICES : MINIMAX_VOICES).map(v => <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>)
-                                }
-                              </select>
-                            </div>
-                          </div>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 10 }}>
-                            <div>
-                              <label className="form-label" style={{ fontSize: '0.78rem' }}>Speed ({voiceSpeed}x)</label>
-                              <input type="range" min="0.5" max="2.0" step="0.1" value={voiceSpeed} onChange={e => setVoiceSpeed(parseFloat(e.target.value))} style={{ width: '100%' }} />
-                            </div>
-                            <div>
-                              <label className="form-label" style={{ fontSize: '0.78rem' }}>Volume ({voiceVolume}x)</label>
-                              <input type="range" min="0.0" max="1.0" step="0.1" value={voiceVolume} onChange={e => setVoiceVolume(parseFloat(e.target.value))} style={{ width: '100%' }} />
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* TikTok Safe Compliance Audit */}
-                      <div className="form-group" style={{ background: 'var(--bg-secondary)', padding: 16, borderRadius: 8, marginBottom: 0, marginTop: 4 }}>
-                        <label className="form-label">Audit Kepatuhan TikTok Safe</label>
-                        <select
-                          className="form-input"
-                          value={enableVoAudit}
-                          onChange={e => setEnableVoAudit(Number(e.target.value))}
-                        >
-                          <option value={1}>✅ Yes (Audit Compliance & Render 2 Versi VO)</option>
-                          <option value={0}>❌ No (Tanpa Audit Compliance)</option>
-                        </select>
-                      </div>
-
-                      {/* FFmpeg Video Studio Settings */}
-                      {enableFfmpeg && (
-                        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                          <label className="form-label" style={{ fontWeight: 600, color: 'var(--accent)' }}>🎬 FFmpeg Video Studio Settings</label>
-                          
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                            <label className="form-label" style={{ fontSize: '0.78rem' }}>Mode Sinkronisasi Audio-Video</label>
-                            <div style={{ display: 'flex', gap: 24, marginTop: 2 }}>
-                              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.82rem', color: 'var(--text-primary)' }}>
-                                <input
-                                  type="radio"
-                                  name="syncModeReAutopilot"
-                                  value="auto"
-                                  checked={syncMode === 'auto'}
-                                  onChange={() => {
-                                    setSyncMode('auto');
-                                    setFfmpegSyncOption('smart_sync');
-                                  }}
-                                  style={{ width: 14, height: 14, cursor: 'pointer' }}
-                                />
-                                <span><b>Auto-Pilot Smart Sync</b></span>
-                              </label>
-                              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.82rem', color: 'var(--text-primary)' }}>
-                                <input
-                                  type="radio"
-                                  name="syncModeReAutopilot"
-                                  value="manual"
-                                  checked={syncMode === 'manual'}
-                                  onChange={() => {
-                                    setSyncMode('manual');
-                                    setFfmpegSyncOption('shortest');
-                                  }}
-                                  style={{ width: 14, height: 14, cursor: 'pointer' }}
-                                />
-                                <span>Kustom Manual</span>
-                              </label>
-                            </div>
-
-                            {syncMode === 'manual' && (
-                              <div className="form-group" style={{ flex: 1, marginTop: 6, marginBottom: 0 }}>
-                                <label className="form-label" style={{ fontSize: '0.78rem' }}>Metode Manual</label>
-                                <select className="form-input" value={ffmpegSyncOption} onChange={e => setFfmpegSyncOption(e.target.value)}>
-                                  <option value="shortest">shortest (Potong video - Default)</option>
-                                  <option value="loop">loop (Ulang video)</option>
-                                  <option value="stretch">stretch (Ubah kecepatan)</option>
-                                  <option value="freeze">freeze (Tahan frame terakhir)</option>
-                                </select>
-                              </div>
-                            )}
-                          </div>
-
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                            <div className="form-group">
-                              <label className="form-label" style={{ fontSize: '0.78rem' }}>BGM Volume</label>
-                              <input type="number" min="0" max="1" step="0.05" className="form-input" value={ffmpegBgmVolume} onChange={e => setFfmpegBgmVolume(parseFloat(e.target.value))} />
-                            </div>
-                            <div className="form-group">
-                              <label className="form-label" style={{ fontSize: '0.78rem' }}>SFX Volume</label>
-                              <input type="number" min="0" max="1" step="0.05" className="form-input" value={ffmpegSfxVolume} onChange={e => setFfmpegSfxVolume(parseFloat(e.target.value))} />
-                            </div>
-                          </div>
-
-                          <div>
-                            <label className="form-label" style={{ fontSize: '0.78rem', display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                              <span>Video Scale:</span>
-                              <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{Math.round(ffmpegVideoScale * 100)}%</span>
-                            </label>
-                            <input
-                              type="range"
-                              min="1.0"
-                              max="2.0"
-                              step="0.05"
-                              className="form-input"
-                              value={ffmpegVideoScale}
-                              onChange={e => setFfmpegVideoScale(parseFloat(e.target.value))}
-                              style={{ width: '100%', padding: 0 }}
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                    </div>
-                  )}
-                </div>
-
-                {/* Submit Action */}
-                <div style={{ padding: 24, borderTop: '1px solid var(--border)', background: 'var(--overlay-subtle)', display: 'flex', justifyContent: 'flex-end' }}>
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                    disabled={submitting}
-                    style={{ padding: '12px 24px', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: 8 }}
-                  >
-                    {submitting ? (
-                      <>
-                        <div className="spinner" style={{ width: 14, height: 14, border: '2px solid var(--text-primary)', borderTopColor: 'transparent' }}></div>
-                        Mengirim...
-                      </>
-                    ) : (
-                      '🚀 Generate Remake Video'
-                    )}
-                  </button>
-                </div>
-              </form>
-            </div>
-            )}
-
-            {/* Queue Section: Active Task Queue */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '16px 20px' }}>
-                <strong style={{ fontSize: '0.92rem', color: 'var(--text-primary)', display: 'block', marginBottom: 2 }}>
-                  📋 Antrean Render Multiplier
-                </strong>
-                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                  Total {tasks.length} task terdaftar di database
-                </span>
-              </div>
-
-              {loadingTasks ? (
-                <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
-                  <div className="spinner" style={{ margin: '0 auto 12px', width: 24, height: 24 }}></div>
-                  Memuat data antrean...
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  {(() => {
-                    const grouped = {};
-                    tasks.forEach(t => {
-                      const bid = t.batch_id || `single_${t.id}`;
-                      if (!grouped[bid]) {
-                        grouped[bid] = {
-                          id: bid,
-                          isBatch: !!t.batch_id,
-                          created_at: t.created_at,
-                          tenant_id: t.tenant_id,
-                          tasks: [],
-                          asset_source_url: t.asset_source_url,
-                          asset_niche: t.asset_niche,
-                          asset_caption: t.asset_caption,
-                          deconstruct_asset_id: t.deconstruct_asset_id
-                        };
-                      }
-                      grouped[bid].tasks.push(t);
-                    });
-                    const sortedBatches = Object.values(grouped).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                    return sortedBatches.map(batch => {
-                      const isBatchExpanded = expandedTaskId === batch.id;
-                      const stats = {
-                        pending: 0, running: 0, waiting: 0, completed: 0, failed: 0, stopped: 0,
-                        f1_pending: 0,
-                        f1_running: 0,
-                        f1_waiting: 0,
-                        f2_running: 0,
-                        f2_completed: 0,
-                        f2_failed: 0,
-                        f2_paused: 0
-                      };
-                      batch.tasks.forEach(t => {
-                        if (t.status === 'completed') stats.completed++;
-                        else if (t.status === 'failed') stats.failed++;
-                        else if (t.status === 'paused') stats.stopped++;
-                        else if (t.status === 'waiting_approval') stats.waiting++;
-                        else if (t.status === 'pending_resolution') stats.pending++;
-                        else stats.running++;
-
-                        if (['pending_resolution', 'resolving_product'].includes(t.status)) stats.f1_pending++;
-                        else if (['remaking', 'generating_t2i'].includes(t.status)) stats.f1_running++;
-                        else if (t.status === 'waiting_approval') stats.f1_waiting++;
-                        else if (['generating_audio', 'generating_visuals', 'ffmpeg_muxing'].includes(t.status)) stats.f2_running++;
-                        else if (t.status === 'completed') stats.f2_completed++;
-                        else if (t.status === 'failed') stats.f2_failed++;
-                        else if (t.status === 'paused') stats.f2_paused++;
-                      });
-                      const assetTitle = batch.asset_niche || batch.asset_caption || 'Blueprint Video';
-                      const batchTitle = batch.isBatch 
-                        ? `${assetTitle} ➜ Mass Remake (${batch.tasks.length} Produk)`
-                        : `${assetTitle} ➜ ${(() => {
-                            let snapshot = {};
-                            try { snapshot = typeof batch.tasks[0].product_snapshot_json === 'string' ? JSON.parse(batch.tasks[0].product_snapshot_json) : (batch.tasks[0].product_snapshot_json || {}); } catch(_) {}
-                            return snapshot.product_name || batch.tasks[0].target_product_url || 'Manual Input Product';
-                          })()}`;
-                      const brand = brandProfiles.find(bp => bp.id === batch.brand_profile_id || bp.id === batch.tasks[0].brand_profile_id || bp.id === batch.tasks[0].selected_brand_id);
-                      const brandName = brand ? brand.brand_name : 'Tidak Ditentukan';
-
-                      return (
-                        <div key={batch.id} className="card" style={{ border: '1px solid var(--border)', background: 'var(--bg-card)', padding: '20px', borderRadius: 'var(--radius-sm)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                          
-                          {/* 3-Column Grid Card Header */}
-                          <div 
-                            style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr 1fr', gap: '20px', alignItems: 'center', cursor: 'pointer' }} 
-                            onClick={() => setExpandedTaskId(isBatchExpanded ? null : batch.id)}
-                          >
-                            {/* Kolom 1: Sumber */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                              <span style={{
-                                display: 'inline-block',
-                                fontSize: '0.68rem',
-                                fontWeight: 700,
-                                background: brandName !== 'Tidak Ditentukan' ? 'rgba(168, 85, 247, 0.15)' : 'var(--surface-interactive)',
-                                border: brandName !== 'Tidak Ditentukan' ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid var(--border-subtle)',
-                                color: brandName !== 'Tidak Ditentukan' ? '#d8b4fe' : 'var(--text-muted)',
-                                padding: '2px 8px',
-                                borderRadius: '4px',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.5px',
-                                alignSelf: 'flex-start'
-                              }}>
-                                🏷️ Brand: {brandName}
-                              </span>
-                              <strong style={{ fontSize: '1.02rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <span>📦</span>
-                                <span>{batchTitle}</span>
-                              </strong>
-                              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                                📅 {batch.created_at ? new Date(batch.created_at).toLocaleString('id-ID') : ''}
-                              </span>
-                            </div>
-
-                            {/* Kolom 2: Status Fase */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', borderLeft: '1px solid var(--border)', paddingLeft: '20px' }}>
-                              <div style={{ fontSize: '0.75rem' }}>
-                                <span style={{ fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.68rem', letterSpacing: '0.5px', display: 'block', marginBottom: '4px' }}>
-                                  Fase 1: Discovery & T2I
-                                </span>
-                                <div style={{ display: 'flex', gap: '10px' }}>
-                                  <span>⏳ Antrean: <b style={{ background: 'var(--surface-interactive)', padding: '2px 6px', borderRadius: '4px', color: 'var(--text-secondary)' }}>{stats.f1_pending}</b></span>
-                                  <span>⚡ Proses: <b style={{ background: 'var(--surface-interactive)', padding: '2px 6px', borderRadius: '4px', color: 'var(--text-secondary)' }}>{stats.f1_running}</b></span>
-                                  {stats.f1_waiting > 0 && <span style={{ color: 'var(--status-warning)', fontWeight: 600 }}>⏸️ Approval: <b style={{ background: 'var(--surface-interactive)', padding: '2px 6px', borderRadius: '4px', color: 'var(--status-warning)' }}>{stats.f1_waiting}</b></span>}
-                                </div>
-                              </div>
-                              <div style={{ fontSize: '0.75rem' }}>
-                                <span style={{ fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.68rem', letterSpacing: '0.5px', display: 'block', marginBottom: '4px' }}>
-                                  Fase 2: Video Production
-                                </span>
-                                <div style={{ display: 'flex', gap: '10px' }}>
-                                  <span>⚡ Proses: <b style={{ background: 'var(--surface-interactive)', padding: '2px 6px', borderRadius: '4px', color: 'var(--text-secondary)' }}>{stats.f2_running}</b></span>
-                                  <span>✅ Selesai: <b style={{ background: 'var(--surface-interactive)', padding: '2px 6px', borderRadius: '4px', color: 'var(--success)' }}>{stats.f2_completed}</b></span>
-                                  {stats.f2_failed > 0 && <span style={{ color: 'var(--status-danger)' }}>⚠️ Gagal: <b style={{ background: 'var(--surface-interactive)', padding: '2px 6px', borderRadius: '4px', color: 'var(--status-danger)' }}>{stats.f2_failed}</b></span>}
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Kolom 3: Aksi */}
-                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end', alignItems: 'center', borderLeft: '1px solid var(--border)', paddingLeft: '20px' }} onClick={e => e.stopPropagation()}>
-                              {stats.f1_waiting > 0 && (
-                                <button className="btn btn-sm btn-success" style={{ fontSize: '0.72rem', padding: '6px 12px', fontWeight: 600 }} onClick={() => handleBatchAction(batch.id, 'approve')}>
-                                  ✅ Approve Semua ({stats.f1_waiting})
-                                </button>
-                              )}
-                              {(stats.f1_running > 0 || stats.f2_running > 0 || stats.f1_pending > 0) && (
-                                <button className="btn btn-sm btn-danger" style={{ fontSize: '0.72rem', padding: '6px 12px', fontWeight: 600 }} onClick={() => handleBatchAction(batch.id, 'pause')}>
-                                  ⏸️ Pause Semua
-                                </button>
-                              )}
-                              {(stats.f2_paused > 0 || stats.f2_failed > 0) && (
-                                <button className="btn btn-sm btn-success" style={{ fontSize: '0.72rem', padding: '6px 12px', fontWeight: 600 }} onClick={() => handleBatchAction(batch.id, 'resume')}>
-                                  ▶️ Resume Semua
-                                </button>
-                              )}
-                              <button className="btn btn-sm btn-secondary" style={{ fontSize: '0.72rem', padding: '6px 12px' }} onClick={() => handleBatchAction(batch.id, 'delete')}>
-                                🗑️ Hapus Batch
-                              </button>
-                              <button className="btn btn-sm btn-secondary" style={{ fontSize: '0.72rem', padding: '6px 12px' }} onClick={() => setExpandedTaskId(isBatchExpanded ? null : batch.id)}>
-                                {isBatchExpanded ? '🔼 Tutup' : '🔽 Detail'}
-                              </button>
-                            </div>
-                          </div>
-
-                          {isBatchExpanded && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }} onClick={e => e.stopPropagation()}>
-                              {batch.tasks.map((t, idx) => {
-                                const isExpanded = expandedSubTaskId === t.id;
-
-                    let statusLabel = 'PENDING';
-                    let badgeStyle = { background: 'rgba(108, 117, 125, 0.15)', color: 'var(--text-muted)', border: '1px solid rgba(108, 117, 125, 0.3)' };
-
-                    if (t.status === 'completed') {
-                      statusLabel = 'COMPLETED';
-                      badgeStyle = { background: 'var(--status-success-soft)', color: 'var(--success)', border: '1px solid var(--status-success-soft)' };
-                    } else if (t.status === 'failed') {
-                      statusLabel = 'FAILED';
-                      badgeStyle = { background: 'var(--status-danger-soft)', color: 'var(--danger)', border: '1px solid var(--status-danger-soft)' };
-                    } else if (t.status === 'paused') {
-                      statusLabel = 'STOPPED';
-                      badgeStyle = { background: 'rgba(253, 203, 110, 0.15)', color: 'var(--status-warning)', border: '1px solid rgba(253, 203, 110, 0.3)' };
-                    } else if (t.status === 'pending_resolution') {
-                      statusLabel = 'PENDING';
-                      badgeStyle = { background: 'rgba(108, 117, 125, 0.15)', color: 'var(--text-muted)', border: '1px solid rgba(108, 117, 125, 0.3)' };
-                    } else {
-                      statusLabel = 'RUNNING';
-                      badgeStyle = { background: 'var(--status-info-soft)', color: 'var(--info)', border: '1px solid var(--status-info-soft)' };
-                    }
-
-                    let bridgingData = {};
-                    try {
-                      bridgingData = JSON.parse(t.bridging_config_json || '{}');
-                    } catch (e) {}
-
-                    let vsoData = {};
-                    try {
-                      vsoData = JSON.parse(t.vso_config_json || '{}');
-                    } catch (e) {}
-
-                    let audioData = {};
-                    try {
-                      audioData = JSON.parse(t.audio_config_json || '{}');
-                    } catch (e) {}
-
-                    return (
-                      <div
-                        key={t.id}
-                        className="card"
-                        style={{ cursor: 'pointer', transition: 'all 0.2s ease', border: '1px solid var(--border)', background: 'var(--bg-card)', padding: '20px', borderRadius: 'var(--radius-sm)' }}
-                        onClick={() => setExpandedSubTaskId(isExpanded ? null : t.id)}
-                      >
-                        {/* Task Header */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                          <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                              <span style={{ fontSize: '1rem' }}>🎬</span>
-                              <strong style={{ fontSize: '0.92rem', color: 'var(--text-primary)' }}>
-                                {(() => {
-                                  let snapshot = {};
-                                  try { snapshot = typeof t.product_snapshot_json === 'string' ? JSON.parse(t.product_snapshot_json) : (t.product_snapshot_json || {}); } catch(_) {}
-                                  return snapshot.product_name || t.target_product_url || 'Target Produk';
-                                })()}
-                              </strong>
-                              <span style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', padding: '2px 8px', borderRadius: 4, ...badgeStyle }}>
-                                {statusLabel}
-                              </span>
-                              {t.is_synced ? (
-                                <span style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', padding: '2px 8px', borderRadius: 4, background: 'rgba(52, 211, 153, 0.15)', color: 'var(--status-success)', border: '1px solid rgba(52, 211, 153, 0.3)' }}>
-                                  🔗 SYNCED
-                                </span>
-                              ) : null}
-                            </div>
-                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                              <span>ID: <code style={{ fontFamily: 'var(--font-mono)' }}>{t.id}</code></span>
-                              <span>VSO: {vsoData.isVsoActive ? 'Aktif' : 'Nonaktif'} | {vsoData.aspectRatio || '9:16'} | {vsoData.videoModel || 'veo_31_lite'}</span>
-                            </div>
-                            {t.error_message && (
-                              <div style={{ fontSize: '0.72rem', color: 'var(--danger)', marginTop: '6px', background: 'var(--danger-glow)', padding: '4px 8px', borderRadius: '4px', border: '1px solid rgba(251, 113, 133, 0.2)' }}>
-                                ⚠️ Error: {t.error_message}
-                              </div>
-                            )}
-                          </div>
-                          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                            {t.ffmpeg_output_path && (
-                              <a
-                                href={t.ffmpeg_output_path}
-                                download={`Multiplier_${t.id}.mp4`}
-                                onClick={e => e.stopPropagation()}
-                                className="btn btn-secondary btn-sm"
-                                style={{ fontSize: '0.72rem', padding: '4px 10px' }}
-                              >
-                                📥 Download
-                              </a>
-                            )}
-                            {t.status === 'completed' && !t.is_synced && (
-                              <button
-                                type="button"
-                                onClick={async (e) => {
-                                  e.stopPropagation();
-                                  try {
-                                    const res = await fetch(`/api/v2/content-flow/sync-multiplier?taskId=${t.id}`, { method: 'POST' });
-                                    const data = await res.json();
-                                    if (data.success) {
-                                      showToast('Berhasil mengirimkan video ke ContentFlow Staging!');
-                                      const r = await fetch('/api/v2/multiplier');
-                                      const d = await r.json();
-                                      if (d.success) setTasks(d.tasks);
-                                    } else {
-                                      showToast(`Gagal sync: ${data.error}`);
-                                    }
-                                  } catch (err) {
-                                    showToast(`Error sync: ${err.message}`);
-                                  }
-                                }}
-                                className="btn btn-primary btn-sm"
-                                style={{ fontSize: '0.72rem', padding: '4px 10px', background: 'rgba(52, 211, 153, 0.15)', borderColor: 'rgba(52, 211, 153, 0.3)', color: 'var(--success)' }}
-                              >
-                                🔗 Send to CF
-                              </button>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Task Detail Expanded */}
-                        {isExpanded && (() => {
-                          const activeTab = activeTabs[t.id] || 'decon';
-                          const handleSelectTab = (tabId) => {
-                            setActiveTabs(prev => ({ ...prev, [t.id]: tabId }));
-                          };
-
-                          const currentInnerTab = activeInnerTabs[t.id] || 'storyboard_visual';
-                          const setInnerTab = (tabId) => {
-                            setActiveInnerTabs(prev => ({ ...prev, [t.id]: tabId }));
-                          };
-
-                          const storyboard = t.remake_storyboard_json ? JSON.parse(t.remake_storyboard_json) : [];
-                          const prompts = t.t2i_i2v_prompts_json ? JSON.parse(t.t2i_i2v_prompts_json) : [];
-
-                          return (
-                            <div style={{ padding: '16px 0 0 0', borderTop: '1px solid var(--border)', background: 'transparent', marginTop: '16px' }} onClick={e => e.stopPropagation()}>
-
-                              {/* Visual Player if finished */}
-                              {t.status === 'completed' && t.ffmpeg_output_path && (
-                                <div style={{ marginBottom: 16 }}>
-                                  <video
-                                    src={t.ffmpeg_output_path}
-                                    controls
-                                    style={{ width: '100%', borderRadius: 'var(--radius-sm)', background: '#000', maxHeight: 320 }}
-                                  />
-                                </div>
-                              )}
-
-                              {/* Tabs Navigation */}
-                              <div style={{ display: 'flex', gap: 6, borderBottom: '1px solid var(--border)', paddingBottom: '10px', marginBottom: '16px', overflowX: 'auto' }}>
-                                {[
-                                  { id: 'decon', label: '🔍 Tab 1: Dekonstruksi Asli' },
-                                  { id: 'storyboard', label: '📖 Tab 2: Storyboard & Rencana Visual Baru' },
-                                  { id: 'assets', label: '☁️ Tab 3: Asset Vault & Cloud Recovery Panel' },
-                                  { id: 'dna', label: '🧬 Tab 4: Metadata Video DNA' },
-                                  { id: 'logs', label: '🖥 Tab 5: System Log' }
-                                ].map(tab => (
-                                  <button
-                                    key={tab.id}
-                                    type="button"
-                                    onClick={() => handleSelectTab(tab.id)}
-                                    className="btn"
-                                    style={{
-                                      fontSize: '0.78rem',
-                                      padding: '6px 12px',
-                                      borderRadius: 4,
-                                      border: activeTab === tab.id ? '1px solid var(--accent)' : '1px solid transparent',
-                                      background: activeTab === tab.id ? 'var(--accent-glow)' : 'transparent',
-                                      color: activeTab === tab.id ? 'var(--accent-light)' : 'var(--text-secondary)',
-                                      fontWeight: activeTab === tab.id ? '600' : 'normal',
-                                      cursor: 'pointer',
-                                      whiteSpace: 'nowrap'
-                                    }}
-                                  >
-                                    {tab.label}
-                                  </button>
-                                ))}
-                              </div>
-
-                              {/* Tab Content 1: decon */}
-                              {activeTab === 'decon' && (
-                                <div style={{ background: 'var(--surface-interactive)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 16 }}>
-                                  <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 700 }}>🔍 Dekonstruksi Asli Kompetitor</h4>
-                                  {(() => {
-                                    const matchingAsset = assets.find(a => a.id === t.deconstruct_asset_id);
-                                    if (!matchingAsset) return <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Data dekonstruksi tidak ditemukan.</div>;
-
-                                    let originalStoryboard = [];
-                                    try {
-                                      originalStoryboard = JSON.parse(matchingAsset.original_storyboard_json || '[]');
-                                    } catch(_) {}
-
-                                    let productSnapshot = {};
-                                    try {
-                                      productSnapshot = typeof t.product_snapshot_json === 'string' ? JSON.parse(t.product_snapshot_json) : (t.product_snapshot_json || {});
-                                    } catch(_) {}
-
-                                    const productPhotoPath = bridgingData.product_ref_image_path;
-
-                                    return (
-                                      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                        {/* Strategy upgrade summary */}
-                                        <div style={{ background: 'var(--bg-secondary)', padding: 12, borderRadius: 6, border: '1px solid var(--border)' }}>
-                                          <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--accent-light)', marginBottom: 6 }}>💡 Analisis & Strategi Upgrade</div>
-                                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, fontSize: '0.78rem' }}>
-                                            <div>
-                                              <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem', fontWeight: 600 }}>Tautan Kompetitor</span>
-                                              <a href={matchingAsset.source_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--info)' }}>
-                                                {matchingAsset.source_url ? matchingAsset.source_url.substring(0, 50) + '...' : '-'} ↗
-                                              </a>
-                                            </div>
-                                            <div>
-                                              <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.7rem', fontWeight: 600 }}>Niche & Topik</span>
-                                              <span>{matchingAsset.niche} / {matchingAsset.topic}</span>
-                                            </div>
-                                          </div>
-                                        </div>
-
-                                        {/* competitor scenes list */}
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Adegan Video Asli:</span>
-                                          {originalStoryboard.length === 0 ? (
-                                            <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Tidak ada adegan asli terdaftar.</div>
-                                          ) : (
-                                            originalStoryboard.map((scene, sIdx) => (
-                                              <div key={sIdx} style={{ background: 'var(--bg-secondary)', padding: 12, borderRadius: 6, border: '1px solid var(--border)', display: 'flex', gap: 12 }}>
-                                                <div style={{ minWidth: 40, borderRight: '1px solid var(--border)', paddingRight: 8, textAlign: 'center' }}>
-                                                  <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', display: 'block' }}>CLiP</span>
-                                                  <strong style={{ fontSize: '1rem', color: 'var(--accent-light)' }}>#{scene.clip || sIdx + 1}</strong>
-                                                </div>
-                                                <div style={{ flex: 1, fontSize: '0.78rem' }}>
-                                                  <p style={{ margin: 0 }}><b>Visual:</b> {scene.visual_description || '-'}</p>
-                                                  <p style={{ margin: '4px 0 0 0', color: 'var(--text-muted)' }}><b>Audio:</b> {scene.voiceover_narration || scene.voice_over || '-'}</p>
-                                                </div>
-                                              </div>
-                                            ))
-                                          )}
-                                        </div>
-
-                                        {/* Detail Produk Target */}
-                                        <div style={{ background: 'var(--bg-secondary)', padding: 16, borderRadius: 6, border: '1px solid var(--border)', marginTop: 12 }}>
-                                          <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--accent-light)', marginBottom: 14 }}>📦 Detail Produk Target</div>
-                                          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-                                            {/* Product photo display */}
-                                            <div style={{ width: 120, height: 120, background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 6, display: 'flex', alignItems: 'center', justify: 'center', overflow: 'hidden', position: 'relative' }}>
-                                              {productPhotoPath ? (
-                                                <img src={productPhotoPath} alt="Product Photo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                              ) : (
-                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                                                  <span style={{ fontSize: '1.8rem' }}>📦</span>
-                                                  <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)' }}>No Photo</span>
-                                                </div>
-                                              )}
-                                            </div>
-                                            
-                                            {/* Product details table */}
-                                            <div style={{ flex: 1, minWidth: 280 }}>
-                                              <table style={{ width: '100%', fontSize: '0.78rem', borderCollapse: 'collapse', textAlign: 'left' }}>
-                                                <tbody>
-                                                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                                                    <th style={{ padding: '8px 4px', color: 'var(--text-muted)', width: '30%' }}>Nama Produk</th>
-                                                    <td style={{ padding: '8px 4px', fontWeight: 600, color: 'var(--text-primary)' }}>{productSnapshot.product_name || 'Input Manual/URL'}</td>
-                                                  </tr>
-                                                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                                                    <th style={{ padding: '8px 4px', color: 'var(--text-muted)' }}>Deskripsi</th>
-                                                    <td style={{ padding: '8px 4px', lineHeight: 1.45 }}>{productSnapshot.product_description || '-'}</td>
-                                                  </tr>
-                                                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                                                    <th style={{ padding: '8px 4px', color: 'var(--text-muted)' }}>USP</th>
-                                                    <td style={{ padding: '8px 4px', color: 'var(--accent-light)' }}>
-                                                      {typeof productSnapshot.unique_selling_point === 'string'
-                                                        ? productSnapshot.unique_selling_point
-                                                        : (Array.isArray(productSnapshot.unique_selling_point)
-                                                          ? productSnapshot.unique_selling_point.join(', ')
-                                                          : JSON.stringify(productSnapshot.unique_selling_point || '-'))
-                                                      }
-                                                    </td>
-                                                  </tr>
-                                                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                                                    <th style={{ padding: '8px 4px', color: 'var(--text-muted)' }}>Tautan Produk</th>
-                                                    <td style={{ padding: '8px 4px', wordBreak: 'break-all' }}>
-                                                      <a href={t.target_product_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--info)' }}>
-                                                        {t.target_product_url || '-'} ↗
-                                                      </a>
-                                                    </td>
-                                                  </tr>
-                                                </tbody>
-                                              </table>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    );
-                                  })()}
-                                </div>
-                              )}
-
-                              {/* Tab Content 2: storyboard */}
-                              {activeTab === 'storyboard' && (
-                                <div style={{ background: 'var(--surface-interactive)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 16 }}>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: 10, marginBottom: 8 }}>
-                                    <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 700 }}>📖 Storyboard & Rencana Visual Baru</h4>
-                                  </div>
-
-                                  {/* Grid Preview Start Frame Gambar (T2I) if hybrid_lock */}
-                                  {(() => {
-                                    const isHybridLock = bridgingData.visualMode === 'hybrid_lock';
-                                    if (!isHybridLock) return null;
-
-                                    const t2iImages = t.t2i_images_json ? JSON.parse(t.t2i_images_json) : [];
-
-                                    return (
-                                      <div style={{
-                                        background: 'var(--bg-secondary)',
-                                        border: '1px solid var(--border)',
-                                        borderRadius: '8px',
-                                        padding: '20px',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        gap: '12px',
-                                        marginBottom: '10px'
-                                      }}>
-                                        <div style={{
-                                          display: 'flex',
-                                          justifyContent: 'space-between',
-                                          alignItems: 'center',
-                                          borderBottom: '1px solid var(--border)',
-                                          paddingBottom: '6px'
-                                        }}>
-                                          <span style={{ fontWeight: '600', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                            🖼️ Grid Preview Start Frame Gambar (T2I)
-                                          </span>
-                                        </div>
-                                        <div style={{
-                                          display: 'grid',
-                                          gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-                                          gap: '16px',
-                                          marginTop: '10px'
-                                        }}>
-                                          {prompts.map((p, idx) => {
-                                            const clipImgPath = t2iImages[idx];
-                                            return (
-                                              <div key={idx} style={{
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                gap: '8px',
-                                                alignItems: 'center',
-                                                background: 'var(--surface-interactive)',
-                                                padding: '10px',
-                                                borderRadius: '6px',
-                                                border: '1px solid var(--border)'
-                                              }}>
-                                                <div style={{ fontWeight: '700', fontSize: '0.72rem', color: 'var(--accent-light)' }}>
-                                                  Klip #{p.scene || (idx + 1)}
-                                                </div>
-                                                <div style={{ width: '100%', height: '180px', position: 'relative', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--border)' }}>
-                                                  {clipImgPath ? (
-                                                    <img
-                                                      src={clipImgPath}
-                                                      alt={`Klip ${idx + 1}`}
-                                                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                    />
-                                                  ) : (
-                                                    <div style={{
-                                                      width: '100%',
-                                                      height: '100%',
-                                                      background: 'var(--bg-secondary)',
-                                                      display: 'flex',
-                                                      flexDirection: 'column',
-                                                      alignItems: 'center',
-                                                      justifyContent: 'center',
-                                                      color: 'var(--text-muted)',
-                                                      fontSize: '0.62rem',
-                                                      padding: '5px',
-                                                      textAlign: 'center'
-                                                    }}>
-                                                      <span>🖼️ Belum Ada Start Frame</span>
-                                                    </div>
-                                                  )}
-                                                </div>
-                                              </div>
-                                            );
-                                          })}
-                                        </div>
-                                      </div>
-                                    );
-                                  })()}
-
-                                  {/* Sub-tab Navigation */}
-                                  <div style={{ display: 'flex', gap: 6, borderBottom: '1px solid var(--border-subtle)', paddingBottom: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
-                                    {[
-                                      { id: 'storyboard_visual', label: '📖 Storyboard Visual' },
-                                      { id: 'storyboard_vo', label: '🎤 Voiceover' },
-                                      { id: 'storyboard_prompts', label: '🤖 Prompts Visual' },
-                                      { id: 'storyboard_social', label: '📱 Social Draft' }
-                                    ].map(tab => (
-                                      <button
-                                        key={tab.id}
-                                        type="button"
-                                        onClick={() => setInnerTab(tab.id)}
-                                        className="btn"
-                                        style={{
-                                          fontSize: '0.75rem',
-                                          padding: '4px 10px',
-                                          borderRadius: 4,
-                                          border: currentInnerTab === tab.id ? '1px solid var(--accent)' : '1px solid transparent',
-                                          background: currentInnerTab === tab.id ? 'var(--status-neutral-soft)' : 'transparent',
-                                          color: currentInnerTab === tab.id ? 'var(--accent-light)' : 'var(--text-secondary)',
-                                          fontWeight: currentInnerTab === tab.id ? '600' : 'normal',
-                                          cursor: 'pointer'
-                                        }}
-                                      >
-                                        {tab.label}
-                                      </button>
-                                    ))}
-                                  </div>
-
-                                  {currentInnerTab === 'storyboard_visual' && (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                                      {storyboard.length === 0 ? (
-                                        <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Tidak ada data storyboard.</div>
-                                      ) : (
-                                        storyboard.map((s, idx) => (
-                                          <div key={idx} style={{ display: 'flex', gap: '14px', background: 'var(--bg-secondary)', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--border)' }}>
-                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '60px', borderRight: '1px solid var(--border)', paddingRight: '12px' }}>
-                                              <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Scene</span>
-                                              <span style={{ fontSize: '1.15rem', fontWeight: 'bold', color: 'var(--accent-light)' }}>{s.scene || idx + 1}</span>
-                                              <span style={{ fontSize: '0.65rem', background: 'var(--surface-interactive)', padding: '2px 5px', borderRadius: '4px', marginTop: '4px', fontWeight: 600 }}>{s.duration || '-'}</span>
-                                            </div>
-                                            <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '12px' }}>
-                                              <div>
-                                                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', fontWeight: 600, marginBottom: '2px' }}>Visual Description</span>
-                                                <p style={{ margin: 0, lineHeight: '1.45' }}>{s.visual_description || '-'}</p>
-                                              </div>
-                                              <div>
-                                                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', fontWeight: 600, marginBottom: '2px' }}>Camera Movement</span>
-                                                <p style={{ margin: 0, lineHeight: '1.45', color: '#70a1ff' }}>{s.camera_movement || '-'}</p>
-                                              </div>
-                                              <div>
-                                                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', fontWeight: 600, marginBottom: '2px' }}>Audio & SFX Mood</span>
-                                                <p style={{ margin: 0, lineHeight: '1.45', color: '#ff6b81' }}>{s.audio_mood || '-'}</p>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        ))
-                                      )}
-                                    </div>
-                                  )}
-
-                                  {currentInnerTab === 'storyboard_vo' && (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                                      {storyboard.length === 0 ? (
-                                        <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Tidak ada data voiceover script.</div>
-                                      ) : (
-                                        storyboard.map((s, idx) => {
-                                          const ttsCompleted = t.status === 'completed' || ['generating_visuals', 'ffmpeg_muxing'].includes(t.status);
-                                          return (
-                                            <div key={idx} style={{ display: 'flex', gap: '14px', background: 'var(--bg-secondary)', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--border)', alignItems: 'center' }}>
-                                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '60px', borderRight: '1px solid var(--border)', paddingRight: '12px' }}>
-                                                <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Scene</span>
-                                                <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--accent-light)' }}>{s.scene || idx + 1}</span>
-                                                <span style={{ fontSize: '0.65rem', background: 'var(--surface-interactive)', padding: '2px 5px', borderRadius: '4px', marginTop: '4px', fontWeight: 600 }}>{s.duration || '-'}</span>
-                                              </div>
-                                              <div style={{ flex: 1, background: 'var(--bg-secondary)', padding: '8px 12px', borderRadius: '6px', borderLeft: '3px solid var(--accent)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                                <p style={{ margin: 0, fontStyle: 'italic', fontSize: '0.85rem', lineHeight: '1.5', color: '#ecf0f1' }}>
-                                                  "{s.narration_transcript || s.voiceover || '-'}"
-                                                </p>
-                                                {ttsCompleted && (
-                                                  <div style={{ marginTop: '6px' }}>
-                                                    <audio
-                                                      src={`/temp/tts_clip_mult_${t.id}_${idx}.mp3`}
-                                                      controls
-                                                      style={{ width: '100%', height: '32px', borderRadius: '4px' }}
-                                                    />
-                                                  </div>
-                                                )}
-                                              </div>
-                                            </div>
-                                          );
-                                        })
-                                      )}
-                                    </div>
-                                  )}
-
-                                  {currentInnerTab === 'storyboard_prompts' && (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                                      {prompts.length === 0 ? (
-                                        <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Tidak ada data prompts visual.</div>
-                                      ) : (
-                                        prompts.map((pObj, pIdx) => {
-                                          const isHybridLock = bridgingData.visualMode === 'hybrid_lock' && (pIdx + 1) === (Number(bridgingData.bridgeAtClip) || 2);
-                                          return (
-                                            <div key={pIdx} style={{ background: 'var(--bg-secondary)', padding: 14, borderRadius: 6, border: '1px solid var(--border)' }}>
-                                              <div style={{ fontWeight: 'bold', color: 'var(--accent-light)', fontSize: '0.85rem', marginBottom: 8 }}>
-                                                🎬 Klip {pObj.scene || pIdx + 1} {isHybridLock && <span style={{ fontSize: '0.7rem', padding: '1px 6px', background: 'var(--accent-glow)', color: 'var(--accent-light)', borderRadius: 4, marginLeft: 6 }}>HYBRID LOCK</span>}
-                                              </div>
-                                              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: '0.78rem' }}>
-                                                {isHybridLock ? (
-                                                  <>
-                                                    <div>
-                                                      <b>T2I Prompt (Start Frame):</b>
-                                                      <pre style={{ background: '#111', padding: 8, borderRadius: 4, margin: '4px 0 0 0', whiteSpace: 'pre-wrap' }}>{pObj.t2i_prompt || '-'}</pre>
-                                                    </div>
-                                                    <div>
-                                                      <b>I2V Prompt (Motion):</b>
-                                                      <pre style={{ background: '#111', padding: 8, borderRadius: 4, margin: '4px 0 0 0', whiteSpace: 'pre-wrap' }}>{pObj.i2v_prompt || '-'}</pre>
-                                                    </div>
-                                                  </>
-                                                ) : (
-                                                  <div>
-                                                    <b>T2V Prompt:</b>
-                                                    <pre style={{ background: '#111', padding: 8, borderRadius: 4, margin: '4px 0 0 0', whiteSpace: 'pre-wrap' }}>{pObj.t2v_prompt || pObj.prompt || '-'}</pre>
-                                                  </div>
-                                                )}
-                                              </div>
-                                            </div>
-                                          );
-                                        })
-                                      )}
-                                    </div>
-                                  )}
-
-                                  {currentInnerTab === 'storyboard_social' && (
-                                    <div style={{ background: 'var(--bg-secondary)', padding: 16, borderRadius: 6, border: '1px solid var(--border)' }}>
-                                      <strong style={{ fontSize: '0.82rem', color: 'var(--accent-light)', display: 'block', marginBottom: 8 }}>📱 Social Copywriting Draft</strong>
-                                      {t.new_caption ? (
-                                        <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', fontSize: '0.8rem', color: 'var(--text-primary)', margin: 0 }}>
-                                          {t.new_caption}
-                                        </pre>
-                                      ) : (
-                                        <div style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Belum digenerate.</div>
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-
-                              {/* Tab Content 3: assets */}
-                              {activeTab === 'assets' && (
-                                <div style={{ background: 'var(--surface-interactive)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 16 }}>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: 10, flexWrap: 'wrap', gap: 10 }}>
-                                    <div>
-                                      <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 700 }}>☁️ Asset Vault & Cloud Recovery Panel</h4>
-                                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                                        Kelola aset lokal (T2I, I2V, TTS, MD) dan unggah manual ke Nextcloud / Drive meskipun pipeline belum komplit.
-                                      </span>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: 8 }}>
-                                      {(t.nextcloud_video_url || t.drive_target_folder) && (
-                                        <a href={t.nextcloud_video_url || t.drive_target_folder} target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm" style={{ fontSize: '0.72rem', padding: '6px 12px' }}>
-                                          🔗 Buka Folder Nextcloud
-                                        </a>
-                                      )}
-                                    </div>
-                                  </div>
-
-                                  <div>
-                                    <h5 style={{ margin: '0 0 12px 0', color: 'var(--accent-light)', fontSize: '0.82rem', fontWeight: 700 }}>
-                                      🎬 Status Aset per Klip & Pemulihan Granular
-                                    </h5>
-                                    <div style={{ overflowX: 'auto' }}>
-                                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', textAlign: 'left' }}>
-                                        <thead>
-                                          <tr style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}>
-                                            <th style={{ padding: '8px' }}>Klip</th>
-                                            <th style={{ padding: '8px' }}>🖼️ Start Frame (T2I)</th>
-                                            <th style={{ padding: '8px' }}>🎥 Motion Video (I2V)</th>
-                                            <th style={{ padding: '8px' }}>🎵 Voiceover (TTS)</th>
-                                          </tr>
-                                        </thead>
-                                        <tbody>
-                                          {prompts.map((p, idx) => {
-                                            const t2iImages = t.t2i_images_json ? JSON.parse(t.t2i_images_json) : [];
-                                            const hasImg = !!t2iImages[idx];
-                                            const isDone = t.status === 'completed';
-                                            return (
-                                              <tr key={idx} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                                                <td style={{ padding: '10px 8px', fontWeight: 700, color: 'var(--text-primary)' }}>Klip #{p.scene || (idx + 1)}</td>
-                                                <td style={{ padding: '10px 8px' }}>
-                                                  {hasImg ? <span style={{ color: 'var(--success)', fontWeight: 600 }}>✅ Ready</span> : <span style={{ color: 'var(--text-muted)' }}>❌ Missing</span>}
-                                                </td>
-                                                <td style={{ padding: '10px 8px' }}>
-                                                  {isDone ? <span style={{ color: 'var(--success)', fontWeight: 600 }}>✅ Ready</span> : <span style={{ color: 'var(--text-muted)' }}>⏳ Pending</span>}
-                                                </td>
-                                                <td style={{ padding: '10px 8px' }}>
-                                                  <span style={{ color: 'var(--success)', fontWeight: 600 }}>✅ Script Ready</span>
-                                                </td>
-                                              </tr>
-                                            );
-                                          })}
-                                        </tbody>
-                                      </table>
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Tab Content 4: dna */}
-                              {activeTab === 'dna' && (
-                                <div style={{ background: 'var(--surface-interactive)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 16 }}>
-                                  <h4 style={{ margin: '0 0 16px 0', color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 700 }}>🧬 Metadata Video DNA</h4>
-                                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-                                    {[
-                                      { field: 'pilar_konten', label: 'Pilar Konten', val: vsoData.pilarKonten },
-                                      { field: 'hook_type', label: 'Hook Type', val: vsoData.hookType },
-                                      { field: 'visual_style', label: 'Visual Style', val: vsoData.visualStyle || t.visual_style },
-                                      { field: 'signature_moment', label: 'Signature Moment', val: vsoData.signatureMoment },
-                                      { field: 'camera_pace', label: 'Camera Pace', val: vsoData.cameraPace },
-                                      { field: 'primary_emotion', label: 'Primary Emotion', val: vsoData.primaryEmotion },
-                                      { field: 'affiliate_integration', label: 'Affiliate Integration', val: vsoData.affiliateIntegration },
-                                      { field: 'affiliate_mention', label: 'Affiliate Mention', val: vsoData.affiliateMention },
-                                      { field: 'scene_count', label: 'Scene Count', val: storyboard.length, isNumber: true },
-                                      { field: 'cta_type', label: 'CTA Type', val: vsoData.ctaType }
-                                    ].map(({ field, label, val, isNumber }) => (
-                                      <div key={field}>
-                                        <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: '6px', fontWeight: 600 }}>{label}</label>
-                                        <input
-                                          type={isNumber ? 'number' : 'text'}
-                                          className="form-control"
-                                          disabled
-                                          style={{
-                                            fontSize: '0.8rem',
-                                            padding: '8px 12px',
-                                            background: 'var(--surface-interactive)',
-                                            border: '1px solid var(--border-subtle)',
-                                            borderRadius: '4px',
-                                            color: 'var(--text-primary)',
-                                            width: '100%',
-                                            boxSizing: 'border-box'
-                                          }}
-                                          value={val || ''}
-                                        />
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Tab Content 5: logs */}
-                              {activeTab === 'logs' && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                                  <div style={{ background: 'var(--bg-secondary)', padding: 16, borderRadius: 8, border: '1px solid var(--border)' }}>
-                                    <div style={{ fontWeight: 600, fontSize: '0.85rem', marginBottom: 12, color: 'var(--text-primary)', borderBottom: '1px solid var(--border)', paddingBottom: 8 }}>
-                                      ⚙️ Detail Teknis Pipeline & Variabel:
-                                    </div>
-                                    <table style={{ width: '100%', fontSize: '0.8rem', borderCollapse: 'collapse', textAlign: 'left' }}>
-                                      <tbody>
-                                        <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                                          <td style={{ padding: '8px 0', color: 'var(--text-muted)' }}>ID Item</td>
-                                          <td style={{ padding: '8px 0', fontWeight: 600 }}>#{t.id}</td>
-                                        </tr>
-                                        <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                                          <td style={{ padding: '8px 0', color: 'var(--text-muted)' }}>Voiceover Provider</td>
-                                          <td style={{ padding: '8px 0' }}>{audioData.voiceProvider || 'minimax'} ({audioData.voicePersona || 'Indonesian_professional_anchor_vv2'})</td>
-                                        </tr>
-                                        <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                                          <td style={{ padding: '8px 0', color: 'var(--text-muted)' }}>Visual Mode</td>
-                                          <td style={{ padding: '8px 0' }}>{bridgingData.visualMode || 'pure_t2v'}</td>
-                                        </tr>
-                                        <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                                          <td style={{ padding: '8px 0', color: 'var(--text-muted)' }}>Retry Count</td>
-                                          <td style={{ padding: '8px 0' }}>{t.retry_count || 0} kali</td>
-                                        </tr>
-                                        <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                                          <td style={{ padding: '8px 0', color: 'var(--text-muted)' }}>Nextcloud Upload Status</td>
-                                          <td style={{ padding: '8px 0' }}>
-                                            <span style={{
-                                              padding: '2px 8px', borderRadius: 4, fontSize: '0.72rem', fontWeight: 600,
-                                              color: t.status === 'completed' ? 'var(--status-success)' : 'var(--text-muted)',
-                                              background: t.status === 'completed' ? 'var(--status-success-soft)' : 'var(--surface-interactive)',
-                                              border: t.status === 'completed' ? '1px solid var(--status-success-soft)' : '1px solid var(--border)'
-                                            }}>
-                                              {t.status === 'completed' ? 'completed' : 'pending'}
-                                            </span>
-                                          </td>
-                                        </tr>
-                                        <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                                          <td style={{ padding: '8px 0', color: 'var(--text-muted)' }}>Nextcloud Storage Link</td>
-                                          <td style={{ padding: '8px 0' }}>
-                                            {t.nextcloud_video_url ? (
-                                              <a href={t.nextcloud_video_url} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', fontWeight: 600, textDecoration: 'underline' }}>
-                                                [Buka Nextcloud ➔]
-                                              </a>
-                                            ) : (t.drive_target_folder ? (
-                                              <a href={t.drive_target_folder} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', fontWeight: 600, textDecoration: 'underline' }}>
-                                                [Buka Nextcloud ➔]
-                                              </a>
-                                            ) : '(Belum diunggah)')}
-                                          </td>
-                                        </tr>
-                                      </tbody>
-                                    </table>
-
-                                    {/* G-Labs tasks list section */}
-                                    {t.glabs_tasks && t.glabs_tasks.length > 0 && (
-                                      <div style={{ marginTop: 20 }}>
-                                        <div style={{ fontWeight: 600, fontSize: '0.82rem', color: 'var(--text-primary)', marginBottom: 8 }}>
-                                          Antrean Video Task (GLabs):
-                                        </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                          {t.glabs_tasks.map(gt => (
-                                            <div key={gt.task_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--overlay-subtle)', padding: '8px 12px', borderRadius: 6, fontSize: '0.75rem' }}>
-                                              <div>
-                                                <div style={{ fontWeight: 600 }}>Task ID: {gt.task_id}</div>
-                                                <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>Klip {gt.clip_index} | Prompt: {gt.prompt ? gt.prompt.slice(0, 50) : ''}...</div>
-                                              </div>
-                                              <span style={{
-                                                padding: '2px 8px', borderRadius: 4, fontSize: '0.72rem', fontWeight: 600,
-                                                color: gt.status === 'completed' ? 'var(--status-success)' : (gt.status === 'failed' ? 'var(--status-danger)' : 'var(--status-info)'),
-                                                background: gt.status === 'completed' ? 'var(--status-success-soft)' : (gt.status === 'failed' ? 'var(--status-danger-soft)' : 'var(--status-info-soft)'),
-                                                border: gt.status === 'completed' ? '1px solid var(--status-success-soft)' : (gt.status === 'failed' ? '1px solid var(--status-danger-soft)' : '1px solid var(--status-info-soft)')
-                                              }}>
-                                                {gt.status}
-                                              </span>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-
-                                  <pre style={{
-                                    background: 'var(--surface)', padding: '16px', borderRadius: 6, fontSize: '0.78rem',
-                                    color: '#20c20e', fontFamily: 'var(--font-mono)', margin: 0,
-                                    border: '1px solid var(--border)', maxHeight: '250px', overflowY: 'auto',
-                                    lineHeight: 1.5, whiteSpace: 'pre-wrap'
-                                  }}>
-                                    {(() => {
-                                      const filtered = terminalLogs
-                                        .split('\n')
-                                        .filter(line => line.includes(t.id))
-                                        .join('\n');
-                                      return filtered || `Belum ada log sistem yang tercatat untuk Task ID: ${t.id}.`;
-                                    })()}
-                                  </pre>
-                                </div>
-                              )}
-
-                              {/* Processing Progress Status */}
-                              {t.status !== 'completed' && t.status !== 'failed' && (
-                                <div style={{ padding: 12, textAlign: 'center', background: 'var(--bg-secondary)', borderRadius: 6, marginTop: 16 }}>
-                                  <div className="spinner" style={{ width: 16, height: 16, margin: '0 auto 8px' }}></div>
-                                  <span style={{ fontSize: '0.78rem', color: 'var(--info)' }}>
-                                    {t.status === 'pending_resolution' && 'Menunggu antrean resolusi produk...'}
-                                    {t.status === 'resolving_product' && 'Mengekstrak DNA & data produk target...'}
-                                    {t.status === 'remaking' && 'Menggunakan Gemini AI untuk remake storyboard...'}
-                                    {t.status === 'generating_audio' && 'Merender voiceover TTS (MiniMax)...'}
-                                    {t.status === 'generating_visuals' && 'Merender visual adegan video (G-Labs)...'}
-                                    {t.status === 'ffmpeg_muxing' && 'Menggabungkan audio-video final (FFmpeg)...'}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        });
-      })()}
-    </div>
-  )}
-</div>
-
+              );
+            })}
           </div>
+        )}
 
-        </div>
-      </main>
-
-      {/* Blueprint Detail Modal */}
-      {showPreviewModal && previewAsset && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', alignItems: 'center',
-          zIndex: 1100, padding: 20
-        }}>
-          <div style={{
-            background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12,
-            maxWidth: 800, width: '100%', maxHeight: '90vh', overflowY: 'auto',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column'
-          }}>
-            {/* Modal Header */}
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  🎬 Detail Blueprint Video
-                </h3>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>ID: {previewAsset.id}</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowPreviewModal(false);
-                  setPreviewAsset(null);
-                }}
-                style={{
-                  border: 'none', background: 'var(--surface-interactive)', color: 'var(--text-muted)',
-                  fontSize: '0.8rem', padding: '6px 12px', borderRadius: 6, cursor: 'pointer', border: '1px solid var(--border)'
-                }}
-              >
-                ❌ Tutup
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
-              {/* Asset Metadata */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, background: 'var(--surface-interactive)', padding: 16, borderRadius: 8 }}>
-                <div>
-                  <strong style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>URL Sumber</strong>
-                  <a href={previewAsset.source_url} target="_blank" rel="noreferrer" style={{ fontSize: '0.82rem', color: 'var(--accent)', wordBreak: 'break-all' }}>
-                    {previewAsset.source_url}
-                  </a>
-                </div>
-                <div>
-                  <strong style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>Niche / Kategori</strong>
-                  <span style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>{previewAsset.niche || 'General'}</span>
-                </div>
-                <div style={{ gridColumn: 'span 2' }}>
-                  <strong style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>Pola Viral (Summary)</strong>
-                  <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{previewAsset.viral_pattern_summary || '-'}</span>
-                </div>
-                <div style={{ gridColumn: 'span 2' }}>
-                  <strong style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>Tags</strong>
-                  <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{previewAsset.tags || '-'}</span>
-                </div>
-              </div>
-
-              {/* Storyboard Detail */}
-              <div>
-                <h4 style={{ fontSize: '0.9rem', color: 'var(--text-primary)', marginBottom: 12, borderBottom: '1px solid var(--border)', paddingBottom: 6 }}>
-                  📖 Storyboard & Scene ({previewAsset.storyboard?.length || 0} Scene)
-                </h4>
-                {previewAsset.storyboard && previewAsset.storyboard.length > 0 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                    {previewAsset.storyboard.map((scene, idx) => (
-                      <div key={idx} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 12, background: 'var(--bg-secondary)' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                          <span style={{ fontWeight: 'bold', fontSize: '0.78rem', color: 'var(--accent)' }}>Scene #{idx + 1}</span>
-                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>⏱ Durasi: {scene.duration_seconds || scene.duration || 3}s</span>
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: '0.78rem' }}>
-                          <div>
-                            <strong style={{ color: 'var(--text-muted)', display: 'block', marginBottom: 2 }}>Visual Action Prompt:</strong>
-                            <p style={{ margin: 0, color: 'var(--text-primary)' }}>{scene.visual_action_prompt || scene.visual_prompt}</p>
-                          </div>
-                          <div>
-                            <strong style={{ color: 'var(--text-muted)', display: 'block', marginBottom: 2 }}>Voice-Over (Script):</strong>
-                            <p style={{ margin: 0, color: 'var(--text-primary)', fontStyle: 'italic' }}>"{scene.voiceover_script || scene.voiceover}"</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', padding: 12 }}>Tidak ada data storyboard detail.</p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Toast Alert */}
-      {toast && (
-        <div style={{
-          position: 'fixed', bottom: 24, right: 24, zIndex: 1000,
-          background: toast.type === 'error' ? 'var(--danger)' : 'var(--success)',
-          color: 'var(--text-primary)', padding: '12px 24px', borderRadius: 8, fontSize: '0.85rem', fontWeight: 600,
-          boxShadow: '0 4px 12px var(--overlay-subtle)', display: 'flex', alignItems: 'center', gap: 8
-        }}>
-          <span>{toast.type === 'error' ? '⚠️' : '✓'}</span>
-          <span>{toast.msg}</span>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
 
 export default function MultiplierLabPage() {
   return (
-    <Suspense fallback={
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--bg-main)', color: 'var(--text-primary)' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div className="spinner" style={{ width: 40, height: 40, border: '4px solid var(--border-subtle)', borderTopColor: 'var(--accent)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-          <p style={{ marginTop: 16, fontSize: '0.9rem', color: 'var(--text-muted)' }}>Memuat Multiplier Lab...</p>
-        </div>
-      </div>
-    }>
+    <Suspense fallback={<div style={{ color: 'var(--text-muted)', padding: 40, textAlign: 'center' }}>Memuat Halaman...</div>}>
       <MultiplierLabPageContent />
     </Suspense>
   );

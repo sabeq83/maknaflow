@@ -12,11 +12,21 @@ import {
 
 import { withTenantContext } from '@/lib/auth';
 
-export const GET = withTenantContext(async () => {
+export const GET = withTenantContext(async (request) => {
   try {
-    const tasks = await getMultiplierTasks();
+    const { searchParams } = new URL(request.url);
+    const batchId = searchParams.get('batchId');
+    let tasks = await getMultiplierTasks();
+    if (batchId) {
+      tasks = tasks.filter(t => t.batch_id === batchId);
+    }
     for (const task of tasks) {
-      task.glabs_tasks = await dbAll('SELECT * FROM glabs_tasks WHERE item_id = ? ORDER BY clip_index ASC', [task.id]);
+      const glabsTasks = await dbAll('SELECT * FROM glabs_tasks WHERE campaign_id = ? ORDER BY item_id ASC', [task.id]);
+      task.glabs_tasks = glabsTasks.map(gt => ({
+        ...gt,
+        clip_index: Number(gt.item_id),
+        prompt: gt.clip_index
+      }));
     }
     const isSchedulerActive = await getSetting('multiplier_scheduler_active') !== 'false';
     return NextResponse.json({ success: true, tasks, isSchedulerActive });

@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.14.70 — Rekonstruksi Multiplier Lab Aligned OPC (18/08/2026)
+- Pemisahan main page dan detail page kampanye
+- Integrasi pipeline status dan retry per tahapan
+- T2I regen dan replace pada start frame grid
+- 5 Tab detail workbench terintegrasi
+
 ## V2.14.69 — Multiplier Lab UI Alignment & Rich 5-Tabs Layout (18/08/2026)
 - Penyelarasan UI Multiplier Lab dengan visualisasi kaya RE dan OPC
 - Restrukturisasi card batch induk menjadi 3-kolom grid
