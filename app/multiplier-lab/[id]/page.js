@@ -330,9 +330,10 @@ function CampaignDetailPageContent() {
   };
 
   return (
-    <div className="container" style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-main)' }}>
+    <div className="app-layout">
       <Sidebar />
-      <div className="content" style={{ flex: 1, padding: '30px 40px', overflowY: 'auto' }}>
+      <main className="main-content">
+        <div style={{ padding: '24px 32px', maxWidth: '1200px', margin: '0 auto' }}>
         
         {/* Header Campaign */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
@@ -887,7 +888,8 @@ function CampaignDetailPageContent() {
           </table>
         </div>
 
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

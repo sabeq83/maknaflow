@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.14.71 — Fix Multiplier Lab centering layout (18/08/2026)
+- Update layout wrappers to app-layout and main-content in campaigns list and detail pages
+
 ## V2.14.70 — Rekonstruksi Multiplier Lab Aligned OPC (18/08/2026)
 - Pemisahan main page dan detail page kampanye
 - Integrasi pipeline status dan retry per tahapan
