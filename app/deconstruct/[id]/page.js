@@ -127,9 +127,9 @@ export default function AssetDetailPage({ params }) {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--background)' }}>
+      <div className="app-layout">
         <Sidebar />
-        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+        <main className="main-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
           <div className="spinner" style={{ width: 40, height: 40, borderWidth: 4 }}></div>
           <span style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>Memuat detail aset dekonstruksi...</span>
         </main>
@@ -139,9 +139,9 @@ export default function AssetDetailPage({ params }) {
 
   if (error || !asset) {
     return (
-      <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--background)' }}>
+      <div className="app-layout">
         <Sidebar />
-        <main style={{ flex: 1, padding: 32, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <main className="main-content" style={{ padding: 32, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ padding: '24px 32px', background: 'var(--danger-glow)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', textAlign: 'center', maxWidth: 460 }}>
             <span style={{ fontSize: '2rem', display: 'block', marginBottom: 12 }}>⚠</span>
             <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0, color: 'var(--danger)' }}>Kesalahan Memuat Aset</h3>
@@ -167,10 +167,11 @@ export default function AssetDetailPage({ params }) {
   if (asset.status === 'failed') currentStageIndex = -1;
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--background)' }}>
+    <div className="app-layout">
       <Sidebar />
 
-      <main style={{ flex: 1, padding: '24px 32px', overflowY: 'auto' }}>
+      <main className="main-content">
+        <div className="page-container">
         {/* Back and Title Navigation */}
         <div style={{ marginBottom: 20 }}>
           <Link href="/deconstruct" style={{ textDecoration: 'none', color: 'var(--text-muted)', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 600, transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'} onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}>
@@ -606,7 +607,11 @@ export default function AssetDetailPage({ params }) {
             {toast.msg}
           </div>
         )}
-      </main>
+        <footer style={{ marginTop: '80px', padding: '24px 0', borderTop: '1px solid var(--border-subtle)', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+          © 2026 MaknaFlow
+        </footer>
+      </div>
+    </main>
 
       <style dangerouslySetInnerHTML={{ __html: `
         .spinner {

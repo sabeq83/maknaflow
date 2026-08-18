@@ -172,10 +172,11 @@ export default function ContentPlannerWorkbench() {
   }
 
   return (
-    <div className="layout-with-sidebar">
+    <div className="app-layout">
       <Sidebar />
 
-      <main className="main-content" style={{ padding: '24px', background: 'var(--bg-primary)', minHeight: '100vh', color: 'var(--text-primary)' }}>
+      <main className="main-content">
+        <div className="page-container">
         {toast && (
           <div style={{
             position: 'fixed', top: '24px', right: '24px', zIndex: 9999,
@@ -534,7 +535,6 @@ export default function ContentPlannerWorkbench() {
           </div>
         )}
 
-        {/* Import Planner Modal for OPC */}
         <ImportPlannerModal
           isOpen={showOpcModal}
           onClose={() => setShowOpcModal(false)}
@@ -548,6 +548,10 @@ export default function ContentPlannerWorkbench() {
             router.push('/pillar-campaigns');
           }}
         />
+          <footer style={{ marginTop: '80px', padding: '24px 0', borderTop: '1px solid var(--border-subtle)', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+            © 2026 MaknaFlow
+          </footer>
+        </div>
       </main>
     </div>
   );

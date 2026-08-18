@@ -179,6 +179,7 @@ export default function BrandProfilesPage() {
     <div className="app-layout">
       <Sidebar />
       <main className="main-content">
+        <div className="page-container">
         <div className="page-header">
           <div>
             <h1 className="page-title">🧬 Brand Profile Manager</h1>
@@ -417,6 +418,10 @@ export default function BrandProfilesPage() {
             </table>
           </div>
         )}
+          <footer style={{ marginTop: '80px', padding: '24px 0', borderTop: '1px solid var(--border-subtle)', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+            © 2026 MaknaFlow
+          </footer>
+        </div>
       </main>
     </div>
   );

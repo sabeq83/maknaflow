@@ -422,7 +422,8 @@ export default function UniverseManagerPage() {
   return (
     <div className="app-layout">
       <Sidebar />
-      <main className="main-content" style={{ backgroundColor: 'var(--bg-primary)', minHeight: '100vh', color: 'var(--text-primary)', padding: '24px' }}>
+      <main className="main-content">
+        <div className="page-container">
         <div className="page-header" style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <h1 className="page-title" style={{ margin: 0, fontSize: '24px' }}>🏰 Universe Manager</h1>
@@ -1187,6 +1188,10 @@ export default function UniverseManagerPage() {
         )}
         </>
         )}
+          <footer style={{ marginTop: '80px', padding: '24px 0', borderTop: '1px solid var(--border-subtle)', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+            © 2026 MaknaFlow
+          </footer>
+        </div>
       </main>
     </div>
   );

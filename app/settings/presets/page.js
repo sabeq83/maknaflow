@@ -338,9 +338,10 @@ export default function PresetsPage() {
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
 
   return (
-    <div className="layout-with-sidebar">
+    <div className="app-layout">
       <Sidebar />
-      <main className="main-content" style={{ padding: 32 }}>
+      <main className="main-content">
+        <div className="page-container">
         <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
             <h1>🎛️ Preset Manager</h1>
@@ -831,6 +832,10 @@ export default function PresetsPage() {
             </div>
           </form>
         )}
+          <footer style={{ marginTop: '80px', padding: '24px 0', borderTop: '1px solid var(--border-subtle)', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+            © 2026 MaknaFlow
+          </footer>
+        </div>
       </main>
     </div>
   );

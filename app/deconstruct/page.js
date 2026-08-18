@@ -310,10 +310,11 @@ export default function DeconstructPage() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--background)' }}>
+    <div className="app-layout">
       <Sidebar />
       
-      <main style={{ flex: 1, padding: '24px 32px', overflowY: 'auto' }}>
+      <main className="main-content">
+        <div className="page-container">
         {/* Header Section */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
           <div>
@@ -906,7 +907,11 @@ export default function DeconstructPage() {
             {toast.msg}
           </div>
         )}
-      </main>
+        <footer style={{ marginTop: '80px', padding: '24px 0', borderTop: '1px solid var(--border-subtle)', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+          © 2026 MaknaFlow
+        </footer>
+      </div>
+    </main>
 
       <style dangerouslySetInnerHTML={{ __html: `
         .spinner {

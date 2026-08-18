@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.51 — Centered Layout and Footer Space (18/08/2026)
+- Penyelarasan layout terpusat pada Deconstruct Lab, Content Planner, Preset, Brand Profile, dan Universe Manager
+- Penambahan footer Copyright 2026 MaknaFlow untuk batas scroll halaman
+
 ## V2.14.50 — Deconstruct URL Library (18/08/2026)
 - Tambah library URL berbasis niche
 - Tambah antrean dekonstruksi massal serial
