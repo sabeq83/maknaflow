@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.14.68 — Enforce 60-second request timeout in resilient generative AI model (18/08/2026)
+- Wrap generative content promises inside makeModelResilient with 60s timeout to prevent infinite socket hangs on unstable networks
+
 ## V2.14.67 — Fix deconstruct assets original storyboard and compliance score type crash (18/08/2026)
 - Menyertakan field original_storyboard_json pada API deconstruct agar halaman UI dapat memuat Tab 1 Dekonstruksi Asli
 - Menambahkan mapping risk_score string ke integer untuk kolom bigint compliance_score guna mencegah crash bertipe data di PostgreSQL
