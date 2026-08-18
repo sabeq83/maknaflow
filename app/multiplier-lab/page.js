@@ -70,6 +70,7 @@ function MultiplierLabPageContent() {
   const [tasks, setTasks] = useState([]);
   const [loadingTasks, setLoadingTasks] = useState(true);
   const [expandedTaskId, setExpandedTaskId] = useState(null);
+  const [expandedSubTaskId, setExpandedSubTaskId] = useState(null);
 
   // Forms configuration states
   const [productionMode, setProductionMode] = useState('single'); // 'single' or 'mass'
@@ -459,7 +460,8 @@ function MultiplierLabPageContent() {
   async function handleToggleTaskStatus(id, currentStatus) {
     const isPaused = currentStatus === 'paused';
     const isFailed = currentStatus === 'failed';
-    const newStatus = (isPaused || isFailed) ? 'pending_resolution' : 'paused';
+    const isWaiting = currentStatus === 'waiting_approval';
+    const newStatus = (isPaused || isFailed) ? 'pending_resolution' : (isWaiting ? 'generating_audio' : 'paused');
 
     try {
       const res = await fetch(`/api/v2/multiplier/${id}`, {
@@ -477,6 +479,58 @@ function MultiplierLabPageContent() {
       }
     } catch (e) {
       showToast('Error: ' + e.message, 'error');
+    }
+  }
+
+  async function handleBatchAction(batchId, action) {
+    const batchTasks = tasks.filter(t => (t.batch_id === batchId || (!t.batch_id && `single_${t.id}` === batchId)));
+    if (batchTasks.length === 0) return;
+
+    if (action === 'delete') {
+      if (!confirm(`Apakah Anda yakin ingin menghapus seluruh batch (${batchTasks.length} tugas)?`)) return;
+      setLoadingTasks(true);
+      try {
+        for (const t of batchTasks) {
+          await fetch(`/api/v2/multiplier/${t.id}`, { method: 'DELETE' });
+        }
+        showToast('Batch berhasil dihapus');
+        setExpandedTaskId(null);
+        setExpandedSubTaskId(null);
+        fetchTasks();
+      } catch (e) {
+        showToast('Error: ' + e.message, 'error');
+        setLoadingTasks(false);
+      }
+      return;
+    }
+
+    setLoadingTasks(true);
+    try {
+      for (const t of batchTasks) {
+        let newStatus = null;
+        if (action === 'approve' && t.status === 'waiting_approval') {
+          newStatus = 'generating_audio';
+        } else if (action === 'pause' && !['completed', 'failed', 'paused', 'waiting_approval'].includes(t.status)) {
+          newStatus = 'paused';
+        } else if (action === 'resume' && t.status === 'paused') {
+          newStatus = 'pending_resolution';
+        }
+
+        if (newStatus) {
+          await fetch(`/api/v2/multiplier/${t.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus })
+          });
+        }
+      }
+      showToast(`Aksi batch ${action.toUpperCase()} selesai diproses`);
+      fetchTasks(true);
+      pollLogs();
+    } catch (e) {
+      showToast('Error: ' + e.message, 'error');
+    } finally {
+      setLoadingTasks(false);
     }
   }
 
@@ -1972,9 +2026,78 @@ function MultiplierLabPageContent() {
                   Memuat data antrean...
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  {tasks.map((t, idx) => {
-                    const isExpanded = expandedTaskId === t.id;
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {(() => {
+                    const grouped = {};
+                    tasks.forEach(t => {
+                      const bid = t.batch_id || `single_${t.id}`;
+                      if (!grouped[bid]) {
+                        grouped[bid] = {
+                          id: bid,
+                          isBatch: !!t.batch_id,
+                          created_at: t.created_at,
+                          tenant_id: t.tenant_id,
+                          tasks: [],
+                          asset_source_url: t.asset_source_url,
+                          asset_niche: t.asset_niche,
+                          asset_caption: t.asset_caption,
+                          deconstruct_asset_id: t.deconstruct_asset_id
+                        };
+                      }
+                      grouped[bid].tasks.push(t);
+                    });
+                    const sortedBatches = Object.values(grouped).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                    return sortedBatches.map(batch => {
+                      const isBatchExpanded = expandedTaskId === batch.id;
+                      const stats = { pending: 0, running: 0, waiting: 0, completed: 0, failed: 0, stopped: 0 };
+                      batch.tasks.forEach(t => {
+                        if (t.status === 'completed') stats.completed++;
+                        else if (t.status === 'failed') stats.failed++;
+                        else if (t.status === 'paused') stats.stopped++;
+                        else if (t.status === 'waiting_approval') stats.waiting++;
+                        else if (t.status === 'pending_resolution') stats.pending++;
+                        else stats.running++;
+                      });
+                      const assetTitle = batch.asset_niche || batch.asset_caption || 'Blueprint Video';
+                      const batchTitle = batch.isBatch 
+                        ? `${assetTitle} ➜ Mass Remake (${batch.tasks.length} Produk)`
+                        : `${assetTitle} ➜ ${(() => {
+                            let snapshot = {};
+                            try { snapshot = typeof batch.tasks[0].product_snapshot_json === 'string' ? JSON.parse(batch.tasks[0].product_snapshot_json) : (batch.tasks[0].product_snapshot_json || {}); } catch(_) {}
+                            return snapshot.product_name || batch.tasks[0].target_product_url || 'Manual Input Product';
+                          })()}`;
+
+                      return (
+                        <div key={batch.id} className="card" style={{ border: '1px solid var(--border)', background: 'var(--bg-card)', padding: '20px', borderRadius: 'var(--radius-sm)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', cursor: 'pointer' }} onClick={() => setExpandedTaskId(isBatchExpanded ? null : batch.id)}>
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: '1.1rem' }}>📦</span>
+                                <strong style={{ fontSize: '1.05rem', color: 'var(--text-primary)' }}>{batchTitle}</strong>
+                                {batch.isBatch && (
+                                  <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '4px', background: 'rgba(54, 162, 235, 0.15)', color: 'var(--info)', border: '1px solid rgba(54, 162, 235, 0.3)' }}>BATCH</span>
+                                )}
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                {batch.isBatch ? `Status: ${stats.completed} Selesai · ${stats.running} Berjalan · ${stats.waiting} Menunggu Approval · ${stats.stopped} Berhenti` : `Status: ${batch.tasks[0].status.toUpperCase()}`}
+                              </div>
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                              {batch.created_at ? new Date(batch.created_at).toLocaleString('id-ID') : ''}
+                            </div>
+                          </div>
+                          {isBatchExpanded && batch.isBatch && (
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', borderBottom: '1px solid var(--border)', paddingBottom: '12px', marginBottom: '8px' }}>
+                              {stats.waiting > 0 && <button className="btn btn-sm btn-success" style={{ fontSize: '0.72rem', padding: '4px 10px' }} onClick={() => handleBatchAction(batch.id, 'approve')}>✅ Approve Semua WAITING ({stats.waiting})</button>}
+                              {stats.running > 0 && <button className="btn btn-sm btn-danger" style={{ fontSize: '0.72rem', padding: '4px 10px' }} onClick={() => handleBatchAction(batch.id, 'pause')}>⏸️ Pause Semua Berjalan ({stats.running})</button>}
+                              {stats.stopped > 0 && <button className="btn btn-sm btn-success" style={{ fontSize: '0.72rem', padding: '4px 10px' }} onClick={() => handleBatchAction(batch.id, 'resume')}>▶️ Resume Semua Stopped ({stats.stopped})</button>}
+                              <button className="btn btn-sm btn-secondary" style={{ fontSize: '0.72rem', padding: '4px 10px' }} onClick={() => handleBatchAction(batch.id, 'delete')}>🗑️ Hapus Seluruh Batch</button>
+                            </div>
+                          )}
+                          {isBatchExpanded && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                              {batch.tasks.map((t, idx) => {
+                                const isExpanded = expandedSubTaskId === t.id;
 
                     let statusLabel = 'PENDING';
                     let badgeStyle = { background: 'rgba(108, 117, 125, 0.15)', color: 'var(--text-muted)', border: '1px solid rgba(108, 117, 125, 0.3)' };
@@ -2016,7 +2139,7 @@ function MultiplierLabPageContent() {
                         key={t.id}
                         className="card"
                         style={{ cursor: 'pointer', transition: 'all 0.2s ease', border: '1px solid var(--border)', background: 'var(--bg-card)', padding: '20px', borderRadius: 'var(--radius-sm)' }}
-                        onClick={() => setExpandedTaskId(isExpanded ? null : t.id)}
+                        onClick={() => setExpandedSubTaskId(isExpanded ? null : t.id)}
                       >
                         {/* Task Header */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
@@ -2104,7 +2227,7 @@ function MultiplierLabPageContent() {
                           <button
                             type="button"
                             className="btn btn-primary btn-sm"
-                            onClick={() => setExpandedTaskId(isExpanded ? null : t.id)}
+                            onClick={() => setExpandedSubTaskId(isExpanded ? null : t.id)}
                             style={{ fontSize: '0.75rem', padding: '6px 12px' }}
                           >
                             🔍 Detail
@@ -2114,14 +2237,14 @@ function MultiplierLabPageContent() {
                             onClick={() => handleToggleTaskStatus(t.id, t.status)}
                             className="btn btn-sm"
                             style={{
-                              color: (t.status === 'paused' || t.status === 'failed') ? 'var(--success)' : 'var(--danger)',
-                              background: (t.status === 'paused' || t.status === 'failed') ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
-                              borderColor: (t.status === 'paused' || t.status === 'failed') ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
+                              color: (t.status === 'paused' || t.status === 'failed' || t.status === 'waiting_approval') ? 'var(--success)' : 'var(--danger)',
+                              background: (t.status === 'paused' || t.status === 'failed' || t.status === 'waiting_approval') ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
+                              borderColor: (t.status === 'paused' || t.status === 'failed' || t.status === 'waiting_approval') ? 'var(--status-success-soft)' : 'var(--status-danger-soft)',
                               fontSize: '0.75rem',
                               padding: '6px 12px'
                             }}
                           >
-                            {(t.status === 'paused' || t.status === 'failed') ? '▶️ Resume' : '⏸️ Pause'}
+                            {t.status === 'waiting_approval' ? '✅ Approve & Run' : ((t.status === 'paused' || t.status === 'failed') ? '▶️ Resume' : '⏸️ Pause')}
                           </button>
 
                           {t.asset_source_url && (
@@ -2494,14 +2617,15 @@ function MultiplierLabPageContent() {
                       </div>
                     );
                   })}
-                  {tasks.length === 0 && (
-                    <div style={{ textAlign: 'center', padding: 40, border: '2px dashed var(--border)', borderRadius: 'var(--radius-md)', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
-                      Belum ada antrean task multiplier yang dijalankan.
-                    </div>
-                  )}
                 </div>
               )}
             </div>
+          );
+        });
+      })()}
+    </div>
+  )}
+</div>
 
           </div>
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.63 — Restructure Multiplier Lab to 2-phase pipeline & Batch UI grouping (18/08/2026)
+- Mengubah alur Multiplier Lab menjadi 2 fase dengan user approval sebelum merender video
+- Menyatukan rendering daftar tugas massal menjadi satu Batch Card di UI
+
 ## V2.14.62 — Fix Multiplier Lab log filename multi-tenancy (18/08/2026)
 - Mengubah penulisan logToMultiplier agar menyertakan tenant ID pada nama berkas logs sehingga dapat dibaca sistem poller logger
 
