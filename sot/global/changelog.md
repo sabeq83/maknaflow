@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.14.64 — Implement parallel queue processing in Multiplier Lab (18/08/2026)
+- Mengubah worker agar mengeksekusi hingga 4 tugas secara paralel menggunakan Promise.all sehingga proses remake massal berjalan jauh lebih cepat
+
 ## V2.14.63 — Restructure Multiplier Lab to 2-phase pipeline & Batch UI grouping (18/08/2026)
 - Mengubah alur Multiplier Lab menjadi 2 fase dengan user approval sebelum merender video
 - Menyatukan rendering daftar tugas massal menjadi satu Batch Card di UI
