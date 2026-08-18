@@ -2024,7 +2024,16 @@ function MultiplierLabPageContent() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                               <span style={{ fontSize: '1.1rem' }}>🔗</span>
                               <strong style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>
-                                {t.target_product_url || 'Manual Input Product'}
+                                {(() => {
+                                  let productSnapshot = {};
+                                  try {
+                                    productSnapshot = typeof t.product_snapshot_json === 'string' ? JSON.parse(t.product_snapshot_json) : (t.product_snapshot_json || {});
+                                  } catch (_) {}
+                                  const assetTitle = t.asset_niche || t.asset_caption || 'Blueprint Video';
+                                  const productName = productSnapshot.product_name || bridgingData.manualProductName || t.target_product_url || 'Manual Input Product';
+                                  const shortId = t.id ? `#${t.id.replace('mtk_', '').slice(0, 4)}` : '';
+                                  return `${assetTitle} ➜ ${productName} (${shortId})`;
+                                })()}
                               </strong>
                               <span style={{
                                 fontSize: '0.68rem',

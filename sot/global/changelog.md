@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.60 — Multiplier Lab Title & Scheduler Fix (18/08/2026)
+- Menampilkan judul kartu representatif [Blueprint] ke [Product Name] beserta short hash ID unik
+- Memperbaiki otonomi scheduler Multiplier Lab agar mengambil antrean tugas dari semua tenant secara global di background thread
+
 ## V2.14.59 — Aesthetics & Visual Settings Alignment (18/08/2026)
 - Pemindahan dropdown Visual Mode ke Accordion 2 (Aesthetics & Visual Settings)
 - Penyelarasan opsi Visual Style menjadi Cinematic, UGC, dan Macrophotography
