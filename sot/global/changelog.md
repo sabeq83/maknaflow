@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.55 — Align timezone to TIMESTAMPTZ and sanitize logs (18/08/2026)
+- Mengubah tipe data created_at pada deconstruct tables ke TIMESTAMPTZ agar timezone GMT+7
+- Men-sanitize log output deconstruct scheduler di console dengan mengganti printout JSON mentah menjadi label Processed
+
 ## V2.14.54 — Enforce Deconstruct Serial Queue Lock (18/08/2026)
 - Membatasi eksekusi antrean Deconstruct Lab secara serial (satu per satu)
 - Menambahkan label [Video X/Y] progres pada log dan terminal logger
