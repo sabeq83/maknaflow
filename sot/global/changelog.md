@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.14.56 — Sanitize URL and tenant details from deconstruct logs (18/08/2026)
+- Menyembunyikan detail tautan URL video, file URI, dan suffix nama tenant dari log konsol dekonstruksi
+
 ## V2.14.55 — Align timezone to TIMESTAMPTZ and sanitize logs (18/08/2026)
 - Mengubah tipe data created_at pada deconstruct tables ke TIMESTAMPTZ agar timezone GMT+7
 - Men-sanitize log output deconstruct scheduler di console dengan mengganti printout JSON mentah menjadi label Processed
