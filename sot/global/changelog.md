@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.14.61 — Fix Webpack bundle dynamic require crash (18/08/2026)
+- Mengubah dynamic require ke dynamic await import untuk re-multiplier-worker.js agar tidak menyebabkan crash TypeError b is not a function
+
 ## V2.14.60 — Multiplier Lab Title & Scheduler Fix (18/08/2026)
 - Menampilkan judul kartu representatif [Blueprint] ke [Product Name] beserta short hash ID unik
 - Memperbaiki otonomi scheduler Multiplier Lab agar mengambil antrean tugas dari semua tenant secara global di background thread
