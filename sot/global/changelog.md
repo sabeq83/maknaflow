@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.58 — Multiplier Lab Configuration Alignment (18/08/2026)
+- Penyelarasan lengkap 5 accordion konfigurasi Multiplier Lab sesuai RE Campaign
+- Daftar dropdown Voice Persona lengkap untuk Gemini dan MiniMax
+- Dukungan Parent Nextcloud, Target Demografi, internal guardrail, dan mandatory outro
+
 ## V2.14.57 — Multiplier Blueprint Product Workflows (18/08/2026)
 - Tambah pencarian dan preview blueprint lengkap
 - Tambah workflow multi blueprint dan multi produk

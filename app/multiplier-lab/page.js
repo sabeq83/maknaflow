@@ -4,6 +4,46 @@ import Sidebar from '../components/Sidebar';
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 
+const GEMINI_VOICES = [
+  { id: 'Kore', name: 'Kore (Female)', avatar: '👩', desc: 'Standard Female (Skincare/Cosmetic)' },
+  { id: 'Fenrir', name: 'Fenrir (Male)', avatar: '🧔', desc: 'Deep/Heavy Male (Otomotif/High-End)' },
+  { id: 'Puck', name: 'Puck (Male)', avatar: '👦', desc: 'Ceria, Playful (Makanan/Promo Kilat)' },
+  { id: 'Charon', name: 'Charon (Male)', avatar: '👨', desc: 'Formal, News Style (Review Tech/Finansial)' },
+  { id: 'Leda', name: 'Leda (Female)', avatar: '👵', desc: 'Hangat, Ramah (Edukasi/Ibu Anak)' },
+  { id: 'Zephyr', name: 'Zephyr (Male)', avatar: 'sn', desc: 'Kasual, Santai (Storytelling/Daily Vlog)' },
+  { id: 'Orus', name: 'Orus (Male)', avatar: '🧔', desc: 'Tegas, Optimis (Motivasi/Online Course)' },
+  { id: 'Aoede', name: 'Aoede (Female)', avatar: '👩‍🎨', desc: 'Artistik, Ekspresif (Fashion/Seni)' },
+  { id: 'Callirrhoe', name: 'Callirrhoe (Female)', avatar: '👩‍💼', desc: 'Berenergi, Dinamis (Olahraga/Lifestyle)' },
+  { id: 'Autonoe', name: 'Autonoe (Female)', avatar: '👩‍🎓', desc: 'Dewasa, Profesional (Bisnis/Corporate)' },
+  { id: 'Enceladus', name: 'Enceladus (Male)', avatar: '👨‍🎤', desc: 'Misterius, Berat (Teaser/Trailer)' },
+  { id: 'Iapetus', name: 'Iapetus (Male)', avatar: '👴', desc: 'Bijaksana, Ramah (Mentor/Tips Hidup)' },
+  { id: 'Umbriel', name: 'Umbriel (Male)', avatar: '👨‍🔬', desc: 'Dingin, Fokus (Dokumenter/Sains)' },
+  { id: 'Despina', name: 'Despina (Female)', avatar: '👧', desc: 'Cepat, Riang (TikTok/Tips Singkat)' },
+];
+
+const MINIMAX_VOICES = [
+  { id: 'Indonesian_casual_reporter_vv2', name: 'Casual Reporter (Male)', avatar: '👨', desc: 'Laki-laki (Casual Reporter - Vv2)' },
+  { id: 'Indonesian_compelling_storyteller_vv2', name: 'Compelling Storyteller (Male)', avatar: '👨', desc: 'Laki-laki (Storyteller - Vv2)' },
+  { id: 'Indonesian_expressive_podcaster_vv2', name: 'Expressive Podcaster (Male)', avatar: '👨', desc: 'Laki-laki (Podcaster - Vv2)' },
+  { id: 'Indonesian_energetic_streamer_vv2', name: 'Energetic Streamer (Male)', avatar: '👨', desc: 'Laki-laki (Streamer - Vv2)' },
+  { id: 'Indonesian_intellectual_commentator_vv2', name: 'Intellectual Commentator (Female)', avatar: '👩', desc: 'Perempuan (Commentator - Vv2)' },
+  { id: 'Indonesian_professional_anchor_vv2', name: 'Professional Anchor (Female)', avatar: '👩', desc: 'Perempuan (Anchor - Vv2)' },
+  { id: 'Indonesian_crisp_reporter_vv2', name: 'Crisp Reporter (Female)', avatar: '👩', desc: 'Perempuan (Crisp Reporter - Vv2)' }
+];
+
+const MINIMAX_ENGLISH_VOICES = [
+  { id: 'English_Resonant_Man', name: 'Resonant Man (Male)', avatar: '👨', desc: 'English Resonant Man' },
+  { id: 'English_Trustworth_Man', name: 'Trustworthy Man (Male)', avatar: '👨', desc: 'English Trustworthy Man' },
+  { id: 'English_causual_narrator_vv1', name: 'Casual Narrator (Male)', avatar: '👨', desc: 'English Casual Narrator' },
+  { id: 'English_causual_podcast_vv1', name: 'Casual Podcast (Male)', avatar: '👨', desc: 'English Casual Podcast' },
+  { id: 'English_expressive_host__vv1', name: 'Expressive Host (Male)', avatar: '👨', desc: 'English Expressive Host' },
+  { id: 'English_instructive_professor_vv1', name: 'Instructive Professor (Female)', avatar: '👩', desc: 'English Instructive Professor' },
+  { id: 'English_nursery_teacher_vv2', name: 'Nursery Teacher (Female)', avatar: '👩', desc: 'English Nursery Teacher' },
+  { id: 'English_captivating_female1', name: 'Captivating Female (Female)', avatar: '👩', desc: 'English Captivating Female' },
+  { id: 'English_radiant_girl', name: 'Radiant Girl (Female)', avatar: '👩', desc: 'English Radiant Girl' },
+  { id: 'English_CalmWoman', name: 'Calm Woman (Female)', avatar: '👩', desc: 'English Calm Woman' }
+];
+
 function MultiplierLabPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -95,31 +135,30 @@ function MultiplierLabPageContent() {
   const [visualMode, setVisualMode] = useState('hybrid_lock');
 
   // 3. Workflow & Audio Settings
-  const [enableTts, setEnableTts] = useState(false);
+  const [enableTts, setEnableTts] = useState(true);
   const [voiceProvider, setVoiceProvider] = useState('minimax');
-  const [voicePersona, setVoicePersona] = useState('Indonesian_professional_anchor_vv2');
+  const [voicePersona, setVoicePersona] = useState('Indonesian_casual_reporter_vv2');
   const [voiceSpeed, setVoiceSpeed] = useState(1.0);
   const [voiceVolume, setVoiceVolume] = useState(1.0);
   const [ttsModelQuality, setTtsModelQuality] = useState('speech-2.8-turbo');
-  const [enableGlabs, setEnableGlabs] = useState(false);
-  const [enableFfmpeg, setEnableFfmpeg] = useState(false);
+  const [enableGlabs, setEnableGlabs] = useState(true);
+  const [enableFfmpeg, setEnableFfmpeg] = useState(true);
   const [targetLanguage, setTargetLanguage] = useState('id-ID');
   const [ffmpegSyncOption, setFfmpegSyncOption] = useState('smart_sync');
+  const [syncMode, setSyncMode] = useState('auto');
   const [ffmpegVideoScale, setFfmpegVideoScale] = useState(1.0);
   const [ffmpegSfxVolume, setFfmpegSfxVolume] = useState(0.0);
-  const [ffmpegBgmVolume, setFfmpegBgmVolume] = useState(0.15);
+  const [ffmpegBgmVolume, setFfmpegBgmVolume] = useState(0.0);
+  const [enableSocialPost, setEnableSocialPost] = useState(false);
   const [enableVoAudit, setEnableVoAudit] = useState(1); // Default 1 (Yes)
 
-  const MINIMAX_VOICES = [
-    { id: 'Indonesian_casual_reporter_vv2', name: 'Anchor Casual (Male)', desc: 'Natural & energetic' },
-    { id: 'Indonesian_SweetGirl', name: 'Sweet Girl (Female)', desc: 'Friendly & conversational' },
-    { id: 'Indonesian_Bilingual_Girl_v2', name: 'Bilingual Girl (Female)', desc: 'Clear narration' }
-  ];
-
-  const GEMINI_VOICES = [
-    { id: 'Kore', name: 'Kore (Male)', desc: 'Formal presenter tone' },
-    { id: 'Puck', name: 'Puck (Female)', desc: 'Crisp and professional' }
-  ];
+  // Staging / Guardrail overrides (RE equivalence)
+  const [nextcloudParentFolder, setNextcloudParentFolder] = useState('/MAKNA_Assets');
+  const [targetDemographic, setTargetDemographic] = useState('genz_casual');
+  const [targetDemographicCustom, setTargetDemographicCustom] = useState('');
+  const [aiDirective, setAiDirective] = useState('');
+  const [mandatoryOutroLine, setMandatoryOutroLine] = useState('');
+  const [customInstruction, setCustomInstruction] = useState('');
 
   // Fetch initial library data and active tasks
   useEffect(() => {
@@ -1072,16 +1111,107 @@ function MultiplierLabPageContent() {
 
                 {/* ACCORDION SECTIONS */}
 
-                {/* Section 1: Aesthetics & Visual Settings */}
+                {/* Section 1: Basic Creative Strategy */}
                 <div style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <div
                     onClick={() => setActiveAccordion(0)}
                     style={{ padding: '16px 24px', background: activeAccordion === 0 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                   >
-                    <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>1. Aesthetics & Visual Settings</span>
+                    <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>1. Basic Creative Strategy</span>
                     <span>{activeAccordion === 0 ? '▲' : '▼'}</span>
                   </div>
                   {activeAccordion === 0 && (
+                    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16, background: 'var(--overlay-subtle)' }}>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label">Parent Folder Nextcloud</label>
+                        <input
+                          className="form-input"
+                          placeholder="Contoh: /MAKNA_Assets"
+                          value={nextcloudParentFolder}
+                          onChange={e => setNextcloudParentFolder(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label">Bahasa Naskah Voiceover (Script Language)</label>
+                        <select
+                          className="form-input"
+                          value={targetLanguage}
+                          onChange={e => setTargetLanguage(e.target.value)}
+                        >
+                          <option value="id-ID">🇮🇩 Bahasa Indonesia (Lokal)</option>
+                          <option value="en-US">🇺🇸 English (Global / US Market)</option>
+                        </select>
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label">🎯 Target Demografi & Tone Bahasa</label>
+                        <select
+                          className="form-input"
+                          value={targetDemographic}
+                          onChange={e => setTargetDemographic(e.target.value)}
+                        >
+                          <option value="genz_casual">Gen-Z & Milenial Muda (Santai, Gaul, Akrab "Kamu/Lo")</option>
+                          <option value="ibu_rumah_tangga">Ibu Rumah Tangga & Keluarga (Ramah, Mengayomi "Bunda/Moms")</option>
+                          <option value="professional_executive">Profesional & Worker (Lugas, Refined, Efisien "Anda/Kamu")</option>
+                          <option value="hijab_syari_family">Keluarga Hijrah & Syari (Santun, Islami Alami "Bunda/Ukhti")</option>
+                          <option value="fitness_health_enthusiast">Penggiat Olahraga & Kesehatan (Motivatif, Energik, Informatif)</option>
+                          <option value="custom">Custom Input Bebas...</option>
+                        </select>
+                        {targetDemographic === 'custom' && (
+                          <input
+                            type="text"
+                            className="form-input"
+                            style={{ marginTop: 8 }}
+                            placeholder="Contoh: Mahasiswa Rantau yang Hemat"
+                            value={targetDemographicCustom}
+                            onChange={e => setTargetDemographicCustom(e.target.value)}
+                          />
+                        )}
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label">AI Directive / Guardrail (Staging Override)</label>
+                        <textarea
+                          className="form-textarea"
+                          style={{ minHeight: 60 }}
+                          placeholder="Instruksi kontrol AI internal (misal: Bahas brand sebagai ahli kuliner; jangan bahas kompetitor...)"
+                          value={aiDirective}
+                          onChange={e => setAiDirective(e.target.value)}
+                        />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label">Mandatory Outro Line (Staging Override)</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          placeholder="Kalimat wajib di akhir klip voiceover (misal: Produk ada di keranjang kuning ya!)"
+                          value={mandatoryOutroLine}
+                          onChange={e => setMandatoryOutroLine(e.target.value)}
+                        />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label className="form-label">Custom Instruction (Opsional)</label>
+                        <textarea
+                          className="form-textarea"
+                          style={{ minHeight: 80 }}
+                          placeholder="Instruksi tambahan untuk AI saat menganalisa video ini..."
+                          value={customInstruction}
+                          onChange={e => setCustomInstruction(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Section 2: Aesthetics & Visual Settings */}
+                <div style={{ borderBottom: '1px solid var(--border-color)' }}>
+                  <div
+                    onClick={() => setActiveAccordion(1)}
+                    style={{ padding: '16px 24px', background: activeAccordion === 1 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  >
+                    <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>2. Aesthetics & Visual Settings</span>
+                    <span>{activeAccordion === 1 ? '▲' : '▼'}</span>
+                  </div>
+                  {activeAccordion === 1 && (
                     <div style={{ padding: 24, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, background: 'var(--overlay-subtle)' }}>
                       <div className="form-group">
                         <label className="form-label">Narrative Mode</label>
@@ -1139,16 +1269,16 @@ function MultiplierLabPageContent() {
                   )}
                 </div>
 
-                {/* Section 2: Product Bridging Settings */}
+                {/* Section 3: Product Bridging Settings */}
                 <div style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <div
-                    onClick={() => setActiveAccordion(1)}
-                    style={{ padding: '16px 24px', background: activeAccordion === 1 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                    onClick={() => setActiveAccordion(2)}
+                    style={{ padding: '16px 24px', background: activeAccordion === 2 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                   >
-                    <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>2. Product Bridging Settings</span>
-                    <span>{activeAccordion === 1 ? '▲' : '▼'}</span>
+                    <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>3. Product Bridging Settings</span>
+                    <span>{activeAccordion === 2 ? '▲' : '▼'}</span>
                   </div>
-                  {activeAccordion === 1 && (
+                  {activeAccordion === 2 && (
                     <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16, background: 'var(--overlay-subtle)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <label className="switch">
@@ -1451,16 +1581,16 @@ function MultiplierLabPageContent() {
                   )}
                 </div>
 
-                {/* Section 3: Visual Swap Overrides */}
+                {/* Section 4: Visual Swap Overrides */}
                 <div style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <div
-                    onClick={() => setActiveAccordion(2)}
-                    style={{ padding: '16px 24px', background: activeAccordion === 2 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                    onClick={() => setActiveAccordion(3)}
+                    style={{ padding: '16px 24px', background: activeAccordion === 3 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                   >
-                    <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>3. Visual Swap Overrides (VSO)</span>
-                    <span>{activeAccordion === 2 ? '▲' : '▼'}</span>
+                    <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>4. Visual Swap Overrides (VSO)</span>
+                    <span>{activeAccordion === 3 ? '▲' : '▼'}</span>
                   </div>
-                  {activeAccordion === 2 && (
+                  {activeAccordion === 3 && (
                     <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16, background: 'var(--overlay-subtle)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <label className="switch">
@@ -1612,64 +1742,87 @@ function MultiplierLabPageContent() {
                   )}
                 </div>
 
-                {/* Section 4: Workflow & Audio Settings */}
+                {/* Section 5: Workflow & Audio Settings */}
                 <div style={{ borderBottom: 'none' }}>
                   <div
-                    onClick={() => setActiveAccordion(3)}
-                    style={{ padding: '16px 24px', background: activeAccordion === 3 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                    onClick={() => setActiveAccordion(4)}
+                    style={{ padding: '16px 24px', background: activeAccordion === 4 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                   >
-                    <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>4. Workflow & Audio Settings</span>
-                    <span>{activeAccordion === 3 ? '▲' : '▼'}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>⚙️ 5. Workflow & Audio Settings</span>
+                      <span style={{ fontSize: '0.72rem', background: (enableTts || enableGlabs || enableFfmpeg || enableSocialPost) ? 'var(--status-success-soft)' : 'var(--surface-interactive)', color: (enableTts || enableGlabs || enableFfmpeg || enableSocialPost) ? 'var(--status-success)' : 'var(--text-muted)', padding: '2px 6px', borderRadius: 4 }}>
+                        {(enableTts || enableGlabs || enableFfmpeg || enableSocialPost) ? 'Active Stages' : 'All Off'}
+                      </span>
+                    </div>
+                    <span>{activeAccordion === 4 ? '▲' : '▼'}</span>
                   </div>
-                  {activeAccordion === 3 && (
+                  {activeAccordion === 4 && (
                     <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16, background: 'var(--overlay-subtle)' }}>
 
-                      {/* TTS Voiceover toggle */}
-                      <div style={{ background: 'var(--bg-secondary)', padding: 16, borderRadius: 8, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                          <label className="switch">
-                            <input type="checkbox" checked={enableTts} onChange={e => setEnableTts(e.target.checked)} />
-                            <span className="slider"></span>
-                          </label>
-                          <strong>🎙 Aktifkan Voiceover (TTS Engine)</strong>
+                      {/* Active Stages Checklist */}
+                      <div>
+                        <label className="form-label" style={{ marginBottom: 10 }}>Tahapan Workflow Aktif</label>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-card)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)' }}>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '500' }}>Enable TTS (Voiceover)</span>
+                            <input type="checkbox" checked={enableTts} onChange={e => setEnableTts(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-card)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)' }}>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '500' }}>Enable G-Labs (AI Video)</span>
+                            <input type="checkbox" checked={enableGlabs} onChange={e => setEnableGlabs(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-card)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)' }}>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '500' }}>Enable FFmpeg Muxing</span>
+                            <input type="checkbox" checked={enableFfmpeg} onChange={e => setEnableFfmpeg(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-card)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)' }}>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '500' }}>Enable Social Draft Post</span>
+                            <input type="checkbox" checked={enableSocialPost} onChange={e => setEnableSocialPost(e.target.checked)} style={{ width: 16, height: 16, cursor: 'pointer' }} />
+                          </div>
                         </div>
-
-                        {enableTts && (
-                          <>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 8 }}>
-                              <div className="form-group">
-                                <label className="form-label">TTS Provider</label>
-                                <select className="form-input" value={voiceProvider} onChange={e => setVoiceProvider(e.target.value)}>
-                                  <option value="minimax">MiniMax (Dynamic Voice)</option>
-                                  <option value="gemini">Gemini Audio (Google Natural)</option>
-                                </select>
-                              </div>
-                              <div className="form-group">
-                                <label className="form-label">Voice Persona</label>
-                                <select className="form-input" value={voicePersona} onChange={e => setVoicePersona(e.target.value)}>
-                                  {voiceProvider === 'gemini'
-                                    ? GEMINI_VOICES.map(v => <option key={v.id} value={v.id}>{v.name}</option>)
-                                    : MINIMAX_VOICES.map(v => <option key={v.id} value={v.id}>{v.name}</option>)
-                                  }
-                                </select>
-                              </div>
-                            </div>
-                            <div style={{ display: 'flex', gap: 16 }}>
-                              <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
-                                <label className="form-label">Speed ({voiceSpeed}x)</label>
-                                <input type="range" min="0.5" max="2.0" step="0.1" className="form-input" value={voiceSpeed} onChange={e => setVoiceSpeed(Number(e.target.value))} style={{ width: '100%' }} />
-                              </div>
-                              <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
-                                <label className="form-label">Volume ({voiceVolume})</label>
-                                <input type="range" min="0.1" max="2.0" step="0.1" className="form-input" value={voiceVolume} onChange={e => setVoiceVolume(Number(e.target.value))} style={{ width: '100%' }} />
-                              </div>
-                            </div>
-                          </>
-                        )}
                       </div>
 
+                      {/* Audio/TTS settings */}
+                      {enableTts && (
+                        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 14 }}>
+                          <label className="form-label" style={{ fontWeight: 600, color: 'var(--accent)' }}>🔊 TTS Audio Engine Settings</label>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 8 }}>
+                            <div>
+                              <label className="form-label" style={{ fontSize: '0.78rem' }}>Voice Provider</label>
+                              <select className="form-input" value={voiceProvider} onChange={e => setVoiceProvider(e.target.value)}>
+                                <option value="minimax">MiniMax VO Engine</option>
+                                <option value="gemini">Gemini TTS Engine</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="form-label" style={{ fontSize: '0.78rem' }}>Voice Persona</label>
+                              <select
+                                className="form-input"
+                                value={voicePersona}
+                                onChange={e => setVoicePersona(e.target.value)}
+                              >
+                                {voiceProvider === 'gemini'
+                                  ? GEMINI_VOICES.map(v => <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>)
+                                  : (targetLanguage === 'en-US' ? MINIMAX_ENGLISH_VOICES : MINIMAX_VOICES).map(v => <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>)
+                                }
+                              </select>
+                            </div>
+                          </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 10 }}>
+                            <div>
+                              <label className="form-label" style={{ fontSize: '0.78rem' }}>Speed ({voiceSpeed}x)</label>
+                              <input type="range" min="0.5" max="2.0" step="0.1" value={voiceSpeed} onChange={e => setVoiceSpeed(parseFloat(e.target.value))} style={{ width: '100%' }} />
+                            </div>
+                            <div>
+                              <label className="form-label" style={{ fontSize: '0.78rem' }}>Volume ({voiceVolume}x)</label>
+                              <input type="range" min="0.0" max="1.0" step="0.1" value={voiceVolume} onChange={e => setVoiceVolume(parseFloat(e.target.value))} style={{ width: '100%' }} />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       {/* TikTok Safe Compliance Audit */}
-                      <div className="form-group" style={{ background: 'var(--bg-secondary)', padding: 16, borderRadius: 8, marginBottom: 0 }}>
+                      <div className="form-group" style={{ background: 'var(--bg-secondary)', padding: 16, borderRadius: 8, marginBottom: 0, marginTop: 4 }}>
                         <label className="form-label">Audit Kepatuhan TikTok Safe</label>
                         <select
                           className="form-input"
@@ -1681,47 +1834,87 @@ function MultiplierLabPageContent() {
                         </select>
                       </div>
 
-                      {/* G-Labs Video Generator */}
-                      <div style={{ background: 'var(--bg-secondary)', padding: 16, borderRadius: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <label className="switch">
-                          <input type="checkbox" checked={enableGlabs} onChange={e => setEnableGlabs(e.target.checked)} />
-                          <span className="slider"></span>
-                        </label>
-                        <strong>🎬 Aktifkan Video Generation (G Labs)</strong>
-                      </div>
-
-                      {/* FFmpeg Smart Sync Muxer */}
-                      <div style={{ background: 'var(--bg-secondary)', padding: 16, borderRadius: 8, display: 'flex', flexDirection: 'column', gap: 12, opacity: (!enableTts || !enableGlabs) ? 0.5 : 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                          <label className="switch">
-                            <input
-                              type="checkbox"
-                              checked={enableFfmpeg}
-                              onChange={e => setEnableFfmpeg(e.target.checked)}
-                              disabled={!enableTts || !enableGlabs}
-                            />
-                            <span className="slider"></span>
-                          </label>
-                          <strong>🎞 Aktifkan Smart-Sync Muxing (FFmpeg Studio)</strong>
-                        </div>
-
-                        {enableFfmpeg && enableTts && enableGlabs && (
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 8 }}>
-                            <div className="form-group" style={{ marginBottom: 0 }}>
-                              <label className="form-label">Mode Sinkronisasi</label>
-                              <select className="form-input" value={ffmpegSyncOption} onChange={e => setFfmpegSyncOption(e.target.value)}>
-                                <option value="smart_sync">Auto-Pilot Smart Sync</option>
-                                <option value="shortest">Shortest (Hard Trim)</option>
-                                <option value="stretch">Stretch (Symmetrical Speed)</option>
-                              </select>
+                      {/* FFmpeg Video Studio Settings */}
+                      {enableFfmpeg && (
+                        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                          <label className="form-label" style={{ fontWeight: 600, color: 'var(--accent)' }}>🎬 FFmpeg Video Studio Settings</label>
+                          
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            <label className="form-label" style={{ fontSize: '0.78rem' }}>Mode Sinkronisasi Audio-Video</label>
+                            <div style={{ display: 'flex', gap: 24, marginTop: 2 }}>
+                              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.82rem', color: 'var(--text-primary)' }}>
+                                <input
+                                  type="radio"
+                                  name="syncModeReAutopilot"
+                                  value="auto"
+                                  checked={syncMode === 'auto'}
+                                  onChange={() => {
+                                    setSyncMode('auto');
+                                    setFfmpegSyncOption('smart_sync');
+                                  }}
+                                  style={{ width: 14, height: 14, cursor: 'pointer' }}
+                                />
+                                <span><b>Auto-Pilot Smart Sync</b></span>
+                              </label>
+                              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.82rem', color: 'var(--text-primary)' }}>
+                                <input
+                                  type="radio"
+                                  name="syncModeReAutopilot"
+                                  value="manual"
+                                  checked={syncMode === 'manual'}
+                                  onChange={() => {
+                                    setSyncMode('manual');
+                                    setFfmpegSyncOption('shortest');
+                                  }}
+                                  style={{ width: 14, height: 14, cursor: 'pointer' }}
+                                />
+                                <span>Kustom Manual</span>
+                              </label>
                             </div>
-                            <div className="form-group" style={{ marginBottom: 0 }}>
-                              <label className="form-label">BGM Volume</label>
-                              <input type="number" min="0" max="1" step="0.05" className="form-input" value={ffmpegBgmVolume} onChange={e => setFfmpegBgmVolume(Number(e.target.value))} />
+
+                            {syncMode === 'manual' && (
+                              <div className="form-group" style={{ flex: 1, marginTop: 6, marginBottom: 0 }}>
+                                <label className="form-label" style={{ fontSize: '0.78rem' }}>Metode Manual</label>
+                                <select className="form-input" value={ffmpegSyncOption} onChange={e => setFfmpegSyncOption(e.target.value)}>
+                                  <option value="shortest">shortest (Potong video - Default)</option>
+                                  <option value="loop">loop (Ulang video)</option>
+                                  <option value="stretch">stretch (Ubah kecepatan)</option>
+                                  <option value="freeze">freeze (Tahan frame terakhir)</option>
+                                </select>
+                              </div>
+                            )}
+                          </div>
+
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                            <div className="form-group">
+                              <label className="form-label" style={{ fontSize: '0.78rem' }}>BGM Volume</label>
+                              <input type="number" min="0" max="1" step="0.05" className="form-input" value={ffmpegBgmVolume} onChange={e => setFfmpegBgmVolume(parseFloat(e.target.value))} />
+                            </div>
+                            <div className="form-group">
+                              <label className="form-label" style={{ fontSize: '0.78rem' }}>SFX Volume</label>
+                              <input type="number" min="0" max="1" step="0.05" className="form-input" value={ffmpegSfxVolume} onChange={e => setFfmpegSfxVolume(parseFloat(e.target.value))} />
                             </div>
                           </div>
-                        )}
-                      </div>
+
+                          <div>
+                            <label className="form-label" style={{ fontSize: '0.78rem', display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                              <span>Video Scale:</span>
+                              <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{Math.round(ffmpegVideoScale * 100)}%</span>
+                            </label>
+                            <input
+                              type="range"
+                              min="1.0"
+                              max="2.0"
+                              step="0.05"
+                              className="form-input"
+                              value={ffmpegVideoScale}
+                              onChange={e => setFfmpegVideoScale(parseFloat(e.target.value))}
+                              style={{ width: '100%', padding: 0 }}
+                            />
+                          </div>
+                        </div>
+                      )}
+
                     </div>
                   )}
                 </div>
