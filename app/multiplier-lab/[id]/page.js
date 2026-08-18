@@ -581,6 +581,41 @@ function CampaignDetailPageContent() {
                                         )}
                                       </div>
                                     </div>
+
+                                    {/* Original Deconstruction Storyboard Table */}
+                                    <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 8, padding: 20 }}>
+                                      <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 12, borderBottom: '1px solid var(--border)', paddingBottom: 6 }}>
+                                        📖 Alur Storyboard Dekonstruksi Asli
+                                      </div>
+                                      {(() => {
+                                        const originalStoryboard = task.original_storyboard_json ? JSON.parse(task.original_storyboard_json) : [];
+                                        if (originalStoryboard.length === 0) {
+                                          return <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', fontStyle: 'italic' }}>Tidak ada data storyboard dekonstruksi asli.</div>;
+                                        }
+                                        return (
+                                          <table className="ideas-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                            <thead>
+                                              <tr style={{ background: 'var(--overlay-subtle)', borderBottom: '1px solid var(--border)' }}>
+                                                <th style={{ padding: '10px', textAlign: 'left', width: '10%' }}>Scene</th>
+                                                <th style={{ padding: '10px', textAlign: 'left', width: '15%' }}>Timestamp</th>
+                                                <th style={{ padding: '10px', textAlign: 'left', width: '35%' }}>Visual Description</th>
+                                                <th style={{ padding: '10px', textAlign: 'left', width: '40%' }}>Voice Narration Audio Transcript</th>
+                                              </tr>
+                                            </thead>
+                                            <tbody>
+                                              {originalStoryboard.map((scene, sidx) => (
+                                                <tr key={sidx} style={{ borderBottom: '1px solid var(--border)' }}>
+                                                  <td style={{ padding: '10px', fontWeight: 700, color: 'var(--accent-light)' }}>#{scene.scene || sidx + 1}</td>
+                                                  <td style={{ padding: '10px', fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>{scene.duration || scene.timestamp || '-'}</td>
+                                                  <td style={{ padding: '10px', fontSize: '0.78rem', lineHeight: 1.4 }}>{scene.visual_description || '-'}</td>
+                                                  <td style={{ padding: '10px', fontSize: '0.78rem', lineHeight: 1.4, fontStyle: 'italic' }}>{scene.narration || '-'}</td>
+                                                </tr>
+                                              ))}
+                                            </tbody>
+                                          </table>
+                                        );
+                                      })()}
+                                    </div>
                                   </div>
                                 )}
 
@@ -652,64 +687,65 @@ function CampaignDetailPageContent() {
                                     )}
 
                                     {/* Clips edit rows */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                                       {storyboard.map((clip, cidx) => (
-                                        <div key={cidx} style={{ display: 'grid', gridTemplateColumns: '80px 2fr 2fr 1fr 1fr', gap: 12, background: 'var(--surface-interactive)', padding: 12, borderRadius: 6, border: '1px solid var(--border)' }}>
-                                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRight: '1px solid var(--border)' }}>
-                                            <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)' }}>Klip</span>
-                                            <span style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--accent-light)' }}>#{cidx + 1}</span>
+                                        <div key={cidx} style={{ display: 'flex', flexDirection: 'column', gap: 12, background: 'var(--surface-interactive)', padding: 16, borderRadius: 8, border: '1px solid var(--border)' }}>
+                                          <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--accent-light)', borderBottom: '1px solid var(--border)', paddingBottom: 6 }}>
+                                            🎬 Klip #{cidx + 1}
                                           </div>
-                                          <div>
-                                            <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'block', marginBottom: 2 }}>Naskah Voiceover (VO)</label>
-                                            <textarea
-                                              value={clip.narration || ''}
-                                              onChange={(e) => {
-                                                const updated = [...storyboard];
-                                                updated[cidx].narration = e.target.value;
-                                                setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
-                                              }}
-                                              rows={2}
-                                              style={{ width: '100%', padding: 6, fontSize: '0.78rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 4 }}
-                                            />
-                                          </div>
-                                          <div>
-                                            <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'block', marginBottom: 2 }}>Aksi Visual</label>
-                                            <textarea
-                                              value={clip.visual_description || ''}
-                                              onChange={(e) => {
-                                                const updated = [...storyboard];
-                                                updated[cidx].visual_description = e.target.value;
-                                                setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
-                                              }}
-                                              rows={2}
-                                              style={{ width: '100%', padding: 6, fontSize: '0.78rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 4 }}
-                                            />
-                                          </div>
-                                          <div>
-                                            <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'block', marginBottom: 2 }}>Prompt T2I</label>
-                                            <textarea
-                                              value={clip.t2i_prompt || ''}
-                                              onChange={(e) => {
-                                                const updated = [...storyboard];
-                                                updated[cidx].t2i_prompt = e.target.value;
-                                                setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
-                                              }}
-                                              rows={2}
-                                              style={{ width: '100%', padding: 6, fontSize: '0.75rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 4 }}
-                                            />
-                                          </div>
-                                          <div>
-                                            <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'block', marginBottom: 2 }}>Prompt I2V</label>
-                                            <textarea
-                                              value={clip.i2v_prompt || ''}
-                                              onChange={(e) => {
-                                                const updated = [...storyboard];
-                                                updated[cidx].i2v_prompt = e.target.value;
-                                                setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
-                                              }}
-                                              rows={2}
-                                              style={{ width: '100%', padding: 6, fontSize: '0.75rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 4 }}
-                                            />
+                                          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                            <div>
+                                              <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4, fontWeight: 600 }}>Naskah Voiceover (VO)</label>
+                                              <textarea
+                                                value={clip.narration || ''}
+                                                onChange={(e) => {
+                                                  const updated = [...storyboard];
+                                                  updated[cidx].narration = e.target.value;
+                                                  setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
+                                                }}
+                                                rows={2}
+                                                style={{ width: '100%', padding: 10, fontSize: '0.82rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
+                                              />
+                                            </div>
+                                            <div>
+                                              <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4, fontWeight: 600 }}>Aksi Visual</label>
+                                              <textarea
+                                                value={clip.visual_description || ''}
+                                                onChange={(e) => {
+                                                  const updated = [...storyboard];
+                                                  updated[cidx].visual_description = e.target.value;
+                                                  setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
+                                                }}
+                                                rows={2}
+                                                style={{ width: '100%', padding: 10, fontSize: '0.82rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
+                                              />
+                                            </div>
+                                            <div>
+                                              <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4, fontWeight: 600 }}>Prompt T2I</label>
+                                              <textarea
+                                                value={clip.t2i_prompt || ''}
+                                                onChange={(e) => {
+                                                  const updated = [...storyboard];
+                                                  updated[cidx].t2i_prompt = e.target.value;
+                                                  setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
+                                                }}
+                                                rows={2}
+                                                style={{ width: '100%', padding: 10, fontSize: '0.8rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
+                                              />
+                                            </div>
+                                            <div>
+                                              <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4, fontWeight: 600 }}>Prompt I2V</label>
+                                              <textarea
+                                                value={clip.i2v_prompt || ''}
+                                                onChange={(e) => {
+                                                  const updated = [...storyboard];
+                                                  updated[cidx].i2v_prompt = e.target.value;
+                                                  setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
+                                                }}
+                                                rows={2}
+                                                style={{ width: '100%', padding: 10, fontSize: '0.8rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
+                                              />
+                                            </div>
                                           </div>
                                         </div>
                                       ))}

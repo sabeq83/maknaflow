@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.74 — Fix deconstruct and storyboard layout details (18/08/2026)
+- Add original deconstruction storyboard table to Tab 1
+- Stack storyboard edit clips vertically in 1 column in Tab 2
+
 ## V2.14.73 — Remove terminal log from Multiplier Tab 5 (18/08/2026)
 - Clean up Tab 5 System Log by deleting terminal log preview
 
