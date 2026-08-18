@@ -521,36 +521,43 @@ function CampaignDetailPageContent() {
                               {renderPipelineStatus(task)}
                             </div>
 
-                            {/* Panel Grid & Sidebar Layout */}
-                            <div style={{ display: 'flex', gap: 24 }}>
-                              
-                              {/* Left tabs selector */}
-                              <div style={{ width: 220, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                {[
-                                  { id: 'deconstruct', label: '🔍 Dekonstruksi Asli' },
-                                  { id: 'storyboard', label: '📖 Storyboard & Visual Baru' },
-                                  { id: 'vault', label: '🗄️ Asset Vault Status' },
-                                  { id: 'dna', label: '🧬 DNA Metadata parameters' },
-                                  { id: 'logs', label: '💻 Terminal Log & Queue' }
-                                ].map(tab => (
+                            {/* Horizontal Tabs Navigation */}
+                            <div style={{ display: 'flex', borderBottom: '1px solid var(--border-subtle)', marginBottom: '14px', gap: '6px', flexWrap: 'wrap', overflowX: 'auto' }}>
+                              {[
+                                { id: 'deconstruct', label: '🔍 Dekonstruksi Asli' },
+                                { id: 'storyboard', label: '📖 Storyboard & Visual Baru' },
+                                { id: 'vault', label: '🗄️ Asset Vault Status' },
+                                { id: 'dna', label: '🧬 DNA Metadata parameters' },
+                                { id: 'logs', label: '💻 Terminal Log & Queue' }
+                              ].map(tab => {
+                                const isActive = activeTab === tab.id;
+                                return (
                                   <button
                                     key={tab.id}
                                     type="button"
                                     onClick={() => setActiveTabs(prev => ({ ...prev, [task.id]: tab.id }))}
                                     style={{
-                                      padding: '10px 14px', borderRadius: 6, border: 'none', textAlign: 'left',
-                                      fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
-                                      background: activeTab === tab.id ? 'var(--accent)' : 'var(--overlay-subtle)',
-                                      color: activeTab === tab.id ? 'var(--text-primary)' : 'var(--text-muted)'
+                                      padding: '8px 14px',
+                                      background: isActive ? 'var(--surface-interactive)' : 'transparent',
+                                      color: isActive ? 'var(--accent-light)' : 'var(--text-muted)',
+                                      border: 'none',
+                                      borderBottom: isActive ? '2px solid var(--accent-light)' : '2px solid transparent',
+                                      cursor: 'pointer',
+                                      fontSize: '0.78rem',
+                                      fontWeight: isActive ? '600' : '400',
+                                      transition: 'all 0.15s ease',
+                                      borderRadius: '4px 4px 0 0',
+                                      whiteSpace: 'nowrap'
                                     }}
                                   >
                                     {tab.label}
                                   </button>
-                                ))}
-                              </div>
+                                );
+                              })}
+                            </div>
 
-                              {/* Right Tab Content details */}
-                              <div style={{ flex: 1 }}>
+                            {/* Tab Content details in 1 column */}
+                            <div style={{ minHeight: '80px', padding: '4px 0' }}>
                                 
                                 {/* Tab 1: Dekonstruksi Asli */}
                                 {activeTab === 'deconstruct' && (
@@ -874,8 +881,6 @@ function CampaignDetailPageContent() {
                                 )}
 
                               </div>
-
-                            </div>
 
                           </div>
                         </td>

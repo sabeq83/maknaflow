@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.14.72 — Align Multiplier Lab detail layout to 1 column (18/08/2026)
+- Convert vertical sidebar tabs to horizontal top tabs matching OPC style
+
 ## V2.14.71 — Fix Multiplier Lab centering layout (18/08/2026)
 - Update layout wrappers to app-layout and main-content in campaigns list and detail pages
 
