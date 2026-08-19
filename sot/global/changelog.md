@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.84 — Implement product library search, details modal, and bridging auto-lock (19/08/2026)
+- Add searchbox inputs to filter products reactively
+- Implement product detail modal popup showcasing descriptions, images, product truth, and marketplace links
+- Auto-lock and display reference photo preview in bridging settings when product is selected
+
 ## V2.14.83 — Fix product recommendations parsing in Multiplier Lab detail modal (19/08/2026)
 - Expose product_ideas_json on deconstruct list API
 - Update page parsing to read from raw product_ideas_json instead of individual non-existent columns

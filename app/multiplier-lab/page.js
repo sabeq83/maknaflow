@@ -60,6 +60,8 @@ function MultiplierLabPageContent() {
   const [nicheFilter, setNicheFilter] = useState('');
   const [niches, setNiches] = useState([]);
   const [selectedBlueprintForModal, setSelectedBlueprintForModal] = useState(null);
+  const [productSearchQuery, setProductSearchQuery] = useState('');
+  const [selectedProductForModal, setSelectedProductForModal] = useState(null);
 
   const [tasks, setTasks] = useState([]);
   const [loadingTasks, setLoadingTasks] = useState(true);
@@ -422,6 +424,9 @@ function MultiplierLabPageContent() {
 
     setSubmitting(true);
     try {
+      const dbProduct = targetProductId ? products.find(p => p.id === targetProductId) : null;
+      const dbPhotoUrl = dbProduct ? (dbProduct.cleaned_photo_url || dbProduct.clean_photo_url || dbProduct.raw_photo_url) : null;
+
       const payload = {
         mode: workflowMode,
         rows: combinationRows.map(row => ({
@@ -446,7 +451,7 @@ function MultiplierLabPageContent() {
           mandatoryOutroLine, customInstruction
         }),
         enable_vo_audit: enableVoAudit ? 1 : 0,
-        product_ref_image_path: productRefImage
+        product_ref_image_path: dbPhotoUrl || productRefImage
       };
 
       const res = await fetch('/api/v2/multiplier', {
@@ -807,17 +812,44 @@ function MultiplierLabPageContent() {
                     </div>
 
                     {bridgingMode === 'select_existing' && (
-                      <div className="form-group">
-                        <select
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        <input
+                          type="text"
+                          placeholder="🔍 Cari produk..."
+                          value={productSearchQuery}
+                          onChange={e => setProductSearchQuery(e.target.value)}
                           className="form-input"
-                          value={targetProductId}
-                          onChange={e => setTargetProductId(e.target.value)}
-                        >
-                          <option value="">-- Pilih Produk Jualan --</option>
-                          {products.map(p => (
-                            <option key={p.id} value={p.id}>{p.product_name}</option>
-                          ))}
-                        </select>
+                          style={{ fontSize: '0.8rem' }}
+                        />
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10, maxHeight: 150, overflowY: 'auto', padding: 10, background: 'var(--surface-interactive)', borderRadius: 6, border: '1px solid var(--border)' }}>
+                          {products
+                            .filter(p => p.product_name.toLowerCase().includes(productSearchQuery.toLowerCase()))
+                            .map(p => {
+                              const isSelected = targetProductId === p.id;
+                              const selectProduct = () => {
+                                setTargetProductId(isSelected ? '' : p.id);
+                              };
+                              return (
+                                <div key={p.id} onClick={selectProduct} style={{ padding: 8, background: isSelected ? 'var(--status-info-soft)' : 'var(--bg-card)', border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`, borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' }}>
+                                    <input type="radio" checked={isSelected} readOnly style={{ pointerEvents: 'none' }} />
+                                    <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{p.product_name}</span>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      setSelectedProductForModal(p);
+                                    }}
+                                    style={{ background: 'transparent', border: 'none', color: 'var(--accent-light)', fontSize: '0.72rem', cursor: 'pointer', padding: 0, flexShrink: 0 }}
+                                    title="Detail Produk"
+                                  >
+                                    🔍 Detail
+                                  </button>
+                                </div>
+                              );
+                            })}
+                        </div>
                       </div>
                     )}
 
@@ -867,21 +899,46 @@ function MultiplierLabPageContent() {
                     </div>
 
                     {bridgingMode === 'select_existing' && (
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10, maxHeight: 150, overflowY: 'auto', padding: 10, background: 'var(--surface-interactive)', borderRadius: 6, border: '1px solid var(--border)' }}>
-                        {products.map(p => {
-                          const isSelected = selectedProductIds.includes(p.id);
-                          const toggleProduct = () => {
-                            setSelectedProductIds(prev =>
-                              prev.includes(p.id) ? prev.filter(id => id !== p.id) : [...prev, p.id]
-                            );
-                          };
-                          return (
-                            <div key={p.id} onClick={toggleProduct} style={{ padding: 8, background: isSelected ? 'var(--status-info-soft)' : 'var(--bg-card)', border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`, borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: 8 }}>
-                              <input type="checkbox" checked={isSelected} readOnly style={{ pointerEvents: 'none' }} />
-                              <span>{p.product_name}</span>
-                            </div>
-                          );
-                        })}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        <input
+                          type="text"
+                          placeholder="🔍 Cari produk..."
+                          value={productSearchQuery}
+                          onChange={e => setProductSearchQuery(e.target.value)}
+                          className="form-input"
+                          style={{ fontSize: '0.8rem' }}
+                        />
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10, maxHeight: 150, overflowY: 'auto', padding: 10, background: 'var(--surface-interactive)', borderRadius: 6, border: '1px solid var(--border)' }}>
+                          {products
+                            .filter(p => p.product_name.toLowerCase().includes(productSearchQuery.toLowerCase()))
+                            .map(p => {
+                              const isSelected = selectedProductIds.includes(p.id);
+                              const toggleProduct = () => {
+                                setSelectedProductIds(prev =>
+                                  prev.includes(p.id) ? prev.filter(id => id !== p.id) : [...prev, p.id]
+                                );
+                              };
+                              return (
+                                <div key={p.id} onClick={toggleProduct} style={{ padding: 8, background: isSelected ? 'var(--status-info-soft)' : 'var(--bg-card)', border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`, borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' }}>
+                                    <input type="checkbox" checked={isSelected} readOnly style={{ pointerEvents: 'none' }} />
+                                    <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{p.product_name}</span>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      setSelectedProductForModal(p);
+                                    }}
+                                    style={{ background: 'transparent', border: 'none', color: 'var(--accent-light)', fontSize: '0.72rem', cursor: 'pointer', padding: 0, flexShrink: 0 }}
+                                    title="Detail Produk"
+                                  >
+                                    🔍 Detail
+                                  </button>
+                                </div>
+                              );
+                            })}
+                        </div>
                       </div>
                     )}
 
@@ -1243,22 +1300,37 @@ function MultiplierLabPageContent() {
                             </select>
                           </div>
 
-                          {visualMode === 'hybrid_lock' && (
-                            <div style={{ background: 'var(--overlay-subtle)', padding: 16, borderRadius: 8, border: '1px solid var(--border)' }}>
-                              <h4 style={{ margin: '0 0 10px', fontSize: '0.85rem', fontWeight: 700 }}>📸 Upload Foto Acuan Produk (Optional)</h4>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                                <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} id="product-ref-upload-acc" />
-                                <button type="button" className="btn btn-secondary" onClick={() => document.getElementById('product-ref-upload-acc').click()} style={{ fontSize: '0.8rem' }}>
-                                  📤 Pilih Foto Produk
-                                </button>
-                                {productFilenameDeclare && (
-                                  <span style={{ fontSize: '0.75rem', color: 'var(--success)' }}>
-                                    ✓ Terunggah: {productFilenameDeclare}
-                                  </span>
+                          {visualMode === 'hybrid_lock' && (() => {
+                            const dbProduct = targetProductId ? products.find(p => p.id === targetProductId) : null;
+                            const dbPhotoUrl = dbProduct ? (dbProduct.cleaned_photo_url || dbProduct.clean_photo_url || dbProduct.raw_photo_url) : null;
+
+                            return (
+                              <div style={{ background: 'var(--overlay-subtle)', padding: 16, borderRadius: 8, border: '1px solid var(--border)' }}>
+                                <h4 style={{ margin: '0 0 10px', fontSize: '0.85rem', fontWeight: 700 }}>📸 Foto Acuan Produk (Optional)</h4>
+                                {dbPhotoUrl ? (
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, background: 'rgba(9, 14, 26, 0.4)', padding: 10, borderRadius: 6, border: '1px solid var(--border-subtle)' }}>
+                                    <img src={dbPhotoUrl} alt="Db Ref" style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 4, border: '1px solid var(--border)' }} />
+                                    <div>
+                                      <div style={{ fontSize: '0.78rem', color: 'var(--success)', fontWeight: 600 }}>🔒 Terkunci (Menggunakan Foto Pustaka)</div>
+                                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Produk: {dbProduct.product_name}</div>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                                    <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} id="product-ref-upload-acc" />
+                                    <button type="button" className="btn btn-secondary" onClick={() => document.getElementById('product-ref-upload-acc').click()} style={{ fontSize: '0.8rem' }}>
+                                      📤 Pilih Foto Produk
+                                    </button>
+                                    {productFilenameDeclare && (
+                                      <span style={{ fontSize: '0.75rem', color: 'var(--success)' }}>
+                                        ✓ Terunggah: {productFilenameDeclare}
+                                      </span>
+                                    )}
+                                  </div>
                                 )}
                               </div>
-                            </div>
-                          )}
+                            );
+                          })()}
                         </>
                       )}
                     </div>
@@ -1816,6 +1888,180 @@ function MultiplierLabPageContent() {
                           </div>
                         )}
                       </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
+        )}
+        {selectedProductForModal && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              background: 'rgba(0, 0, 0, 0.85)',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(8px)'
+            }}
+            onClick={() => setSelectedProductForModal(null)}
+          >
+            <div
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                width: '90%',
+                maxWidth: '760px',
+                maxHeight: '85vh',
+                borderRadius: 12,
+                display: 'flex',
+                flexDirection: 'column',
+                boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)'
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div
+                style={{
+                  padding: '20px 24px',
+                  borderBottom: '1px solid var(--border)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  background: 'rgba(17, 27, 45, 0.8)'
+                }}
+              >
+                <div>
+                  <span
+                    style={{
+                      fontSize: '0.65rem',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      background: 'rgba(108, 92, 231, 0.15)',
+                      color: '#a855f7',
+                      padding: '2px 6px',
+                      borderRadius: 4,
+                      marginBottom: 4,
+                      display: 'inline-block'
+                    }}
+                  >
+                    Kategori: {selectedProductForModal.category || 'General'}
+                  </span>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>
+                    🍫 Detail Produk: {selectedProductForModal.product_name}
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-muted)',
+                    fontSize: '1.5rem',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => setSelectedProductForModal(null)}
+                >
+                  &times;
+                </button>
+              </div>
+
+              <div style={{ padding: 24, overflowY: 'auto' }}>
+                {(() => {
+                  const displayPhotoUrl = selectedProductForModal.cleaned_photo_url || selectedProductForModal.clean_photo_url || selectedProductForModal.raw_photo_url;
+                  
+                  let uspPoints = [];
+                  if (selectedProductForModal.usp_points_json) {
+                    try {
+                      uspPoints = JSON.parse(selectedProductForModal.usp_points_json);
+                    } catch (_) {}
+                  } else if (selectedProductForModal.raw_usp) {
+                    try {
+                      uspPoints = JSON.parse(selectedProductForModal.raw_usp);
+                    } catch (_) {
+                      uspPoints = [selectedProductForModal.raw_usp];
+                    }
+                  }
+
+                  return (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 24 }}>
+                      
+                      {/* Left: Image preview & chemical metadata */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                        <div style={{ width: '100%', height: 240, border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', background: 'var(--overlay-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {displayPhotoUrl ? (
+                            <img src={displayPhotoUrl} alt="Product Ref" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ) : (
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', padding: 20 }}>Belum ada foto produk</div>
+                          )}
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textAlign: 'center', background: 'var(--overlay-subtle)', padding: 8, borderRadius: 4 }}>
+                          Wadah: <strong>{selectedProductForModal.packaging_type || 'Tanpa Wadah'}</strong> | Terbuka: <strong>{selectedProductForModal.is_in_packaging ? 'Di dalam Wadah' : 'Terbuka'}</strong>
+                        </div>
+                      </div>
+
+                      {/* Right: Description & features */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                        <div>
+                          <strong style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Deskripsi Produk</strong>
+                          <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                            {selectedProductForModal.product_description || selectedProductForModal.raw_description || 'Tidak ada deskripsi produk.'}
+                          </p>
+                        </div>
+
+                        {selectedProductForModal.product_truth && (
+                          <div style={{ background: 'rgba(245,158,11,0.04)', border: '1px solid var(--status-warning-soft)', padding: '12px 16px', borderRadius: 6, borderLeft: '4px solid var(--status-warning)' }}>
+                            <strong style={{ fontSize: '0.78rem', color: 'var(--status-warning)', display: 'block', marginBottom: 4 }}>🛡️ Fakta Produk (Product Truth)</strong>
+                            <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
+                              {selectedProductForModal.product_truth}
+                            </p>
+                          </div>
+                        )}
+
+                        {uspPoints.length > 0 && (
+                          <div>
+                            <strong style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: 6 }}>Keunggulan Utama (USP Points)</strong>
+                            <ul style={{ margin: 0, paddingLeft: 20, fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                              {uspPoints.map((pt, idx) => (
+                                <li key={idx}>{pt}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          {selectedProductForModal.source_url && (
+                            <div style={{ display: 'flex', alignItems: 'center', justify: 'space-between', background: 'var(--overlay-subtle)', padding: '8px 12px', borderRadius: 4, border: '1px solid var(--border-subtle)' }}>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>🛒 Toko Sumber</span>
+                              <a href={selectedProductForModal.source_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.75rem', color: 'var(--accent-light)' }}>Buka Store ➔</a>
+                            </div>
+                          )}
+                          {selectedProductForModal.affiliate_link && (
+                            <div style={{ display: 'flex', alignItems: 'center', justify: 'space-between', background: 'var(--overlay-subtle)', padding: '8px 12px', borderRadius: 4, border: '1px solid var(--border-subtle)' }}>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>🔗 Affiliate Link</span>
+                              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                <code style={{ fontSize: '0.7rem', color: 'var(--status-warning)' }}>{selectedProductForModal.affiliate_link}</code>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(selectedProductForModal.affiliate_link);
+                                    alert('Affiliate link berhasil disalin!');
+                                  }}
+                                  style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)', fontSize: '0.65rem', cursor: 'pointer', padding: '2px 6px', borderRadius: 3 }}
+                                >
+                                  Salin
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
                     </div>
                   );
                 })()}
