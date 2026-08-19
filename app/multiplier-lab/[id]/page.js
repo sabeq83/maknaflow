@@ -48,6 +48,7 @@ function CampaignDetailPageContent() {
   const [editedStoryboards, setEditedStoryboards] = useState({}); // { [taskId]: [clips] }
   const [editedCaptions, setEditedCaptions] = useState({}); // { [taskId]: string }
   const [editedDnas, setEditedDnas] = useState({}); // { [taskId]: dnaObj }
+  const [editedAudioConfigs, setEditedAudioConfigs] = useState({}); // { [taskId]: audioConfigObj }
   
   // Regeneration and replacement loadings
   const [regeneratingT2I, setRegeneratingT2I] = useState({}); // { [`${taskId}_${clipIndex}`]: boolean }
@@ -121,6 +122,13 @@ function CampaignDetailPageContent() {
               dna = JSON.parse(t.vso_config_json || '{}');
             } catch (_) {}
             setEditedDnas(prev => ({ ...prev, [t.id]: dna }));
+          }
+          if (!editedAudioConfigs[t.id]) {
+            let audioConfig = {};
+            try {
+              audioConfig = JSON.parse(t.audio_config_json || '{}');
+            } catch (_) {}
+            setEditedAudioConfigs(prev => ({ ...prev, [t.id]: audioConfig }));
           }
         });
       }
@@ -223,7 +231,7 @@ function CampaignDetailPageContent() {
           storyboard: editedStoryboards[taskId],
           vsoConfig: JSON.parse(task.vso_config_json || '{}'),
           bridgingConfig: JSON.parse(task.bridging_config_json || '{}'),
-          audioConfig: JSON.parse(task.audio_config_json || '{}'),
+          audioConfig: editedAudioConfigs[taskId] || JSON.parse(task.audio_config_json || '{}'),
           newCaption: editedCaptions[taskId]
         })
       });
@@ -245,7 +253,13 @@ function CampaignDetailPageContent() {
     if (!confirm('Apakah Anda yakin ingin menyetujui kreatif ini dan melanjutkan ke produksi video?')) return;
     setActionLoading(prev => ({ ...prev, [taskId]: true }));
     try {
-      const res = await fetch(`/api/v2/multiplier/${taskId}/approve`, { method: 'POST' });
+      const res = await fetch(`/api/v2/multiplier/${taskId}/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          audio_config_json: JSON.stringify(editedAudioConfigs[taskId] || {})
+        })
+      });
       const data = await res.json();
       if (data.success) {
         showToast('Kreatif disetujui! Memulai produksi video...');
@@ -893,8 +907,214 @@ function CampaignDetailPageContent() {
                                       />
                                     </div>
 
+                                    {/* 5. Workflow & Audio Settings (1 Column Layout) */}
+                                    {(() => {
+                                      const cfg = editedAudioConfigs[task.id] || {};
+                                      const setCfgValue = (key, value) => {
+                                        setEditedAudioConfigs(prev => ({
+                                          ...prev,
+                                          [task.id]: {
+                                            ...prev[task.id],
+                                            [key]: value
+                                          }
+                                        }));
+                                      };
+
+                                      return (
+                                        <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', background: 'rgba(9, 14, 26, 0.4)', marginTop: 20 }}>
+                                          <div style={{ padding: '12px 20px', background: 'var(--surface-interactive)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                              <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-primary)' }}>⚙️ 5. Workflow & Audio Settings (Fase 2 Rendering)</span>
+                                            </div>
+                                          </div>
+                                          
+                                          <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 20 }}>
+                                            
+                                            {/* Stage Checklists */}
+                                            <div>
+                                              <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600, marginBottom: 10, display: 'block' }}>
+                                                Tahapan Workflow Aktif untuk Video Rendering
+                                              </label>
+                                              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-interactive)', padding: '10px 14px', borderRadius: 6, border: '1px solid var(--border)' }}>
+                                                  <span style={{ fontSize: '0.8rem' }}>Enable TTS (Voiceover)</span>
+                                                  <input
+                                                    type="checkbox"
+                                                    checked={cfg.enable_tts !== false}
+                                                    onChange={e => setCfgValue('enable_tts', e.target.checked)}
+                                                    style={{ width: 16, height: 16, cursor: 'pointer' }}
+                                                  />
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-interactive)', padding: '10px 14px', borderRadius: 6, border: '1px solid var(--border)' }}>
+                                                  <span style={{ fontSize: '0.8rem' }}>Enable G-Labs (AI Video)</span>
+                                                  <input
+                                                    type="checkbox"
+                                                    checked={cfg.enable_glabs !== false}
+                                                    onChange={e => setCfgValue('enable_glabs', e.target.checked)}
+                                                    style={{ width: 16, height: 16, cursor: 'pointer' }}
+                                                  />
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-interactive)', padding: '10px 14px', borderRadius: 6, border: '1px solid var(--border)' }}>
+                                                  <span style={{ fontSize: '0.8rem' }}>Enable FFmpeg Muxing</span>
+                                                  <input
+                                                    type="checkbox"
+                                                    checked={cfg.enable_ffmpeg !== false}
+                                                    onChange={e => setCfgValue('enable_ffmpeg', e.target.checked)}
+                                                    style={{ width: 16, height: 16, cursor: 'pointer' }}
+                                                  />
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-interactive)', padding: '10px 14px', borderRadius: 6, border: '1px solid var(--border)' }}>
+                                                  <span style={{ fontSize: '0.8rem' }}>Enable Social Draft Post</span>
+                                                  <input
+                                                    type="checkbox"
+                                                    checked={!!cfg.enable_social_post}
+                                                    onChange={e => setCfgValue('enable_social_post', e.target.checked)}
+                                                    style={{ width: 16, height: 16, cursor: 'pointer' }}
+                                                  />
+                                                </div>
+                                              </div>
+                                            </div>
+
+                                            {/* TTS Settings */}
+                                            <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
+                                              <label style={{ fontWeight: 700, color: 'var(--accent-light)', display: 'block', fontSize: '0.82rem' }}>
+                                                🔊 TTS Audio Engine Settings
+                                              </label>
+                                              
+                                              <div className="form-group" style={{ marginBottom: 0 }}>
+                                                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Voice Provider</label>
+                                                <select
+                                                  className="form-input"
+                                                  value={cfg.voice_provider || 'minimax'}
+                                                  onChange={e => setCfgValue('voice_provider', e.target.value)}
+                                                >
+                                                  <option value="minimax">MiniMax VO Engine</option>
+                                                  <option value="gemini">Gemini TTS Engine</option>
+                                                </select>
+                                              </div>
+
+                                              <div className="form-group" style={{ marginBottom: 0 }}>
+                                                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Voice Persona</label>
+                                                <select
+                                                  className="form-input"
+                                                  value={cfg.voice_persona || 'Indonesian_casual_reporter_vv2'}
+                                                  onChange={e => setCfgValue('voice_persona', e.target.value)}
+                                                >
+                                                  <option value="Indonesian_casual_reporter_vv2">Indonesian casual reporter vv2</option>
+                                                  <option value="Indonesian_professional_anchor_vv2">Indonesian professional anchor vv2</option>
+                                                  <option value="English_causual_narrator_vv1">English causual narrator vv1</option>
+                                                  <option value="Kore">Kore (Gemini TTS default)</option>
+                                                </select>
+                                              </div>
+
+                                              <div className="form-group" style={{ marginBottom: 0 }}>
+                                                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>TTS Voice Speed ({cfg.voice_speed || '1.0'}x)</label>
+                                                <input
+                                                  type="range"
+                                                  min="0.5"
+                                                  max="2.0"
+                                                  step="0.1"
+                                                  value={cfg.voice_speed || 1.0}
+                                                  onChange={e => setCfgValue('voice_speed', parseFloat(e.target.value))}
+                                                  style={{ width: '100%' }}
+                                                />
+                                              </div>
+
+                                              <div className="form-group" style={{ marginBottom: 0 }}>
+                                                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>TTS Voice Volume ({cfg.voice_volume || '1.0'}x)</label>
+                                                <input
+                                                  type="range"
+                                                  min="0.0"
+                                                  max="1.0"
+                                                  step="0.1"
+                                                  value={cfg.voice_volume || 1.0}
+                                                  onChange={e => setCfgValue('voice_volume', parseFloat(e.target.value))}
+                                                  style={{ width: '100%' }}
+                                                />
+                                              </div>
+                                            </div>
+
+                                            {/* FFmpeg Video Studio Settings */}
+                                            <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
+                                              <label style={{ fontWeight: 700, color: 'var(--accent-light)', display: 'block', fontSize: '0.82rem' }}>
+                                                🎬 FFmpeg Video Studio Settings
+                                              </label>
+                                              
+                                              <div className="form-group" style={{ marginBottom: 0 }}>
+                                                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Mode Sinkronisasi Audio-Video</label>
+                                                <select
+                                                  className="form-input"
+                                                  value={cfg.sync_mode || 'auto'}
+                                                  onChange={e => setCfgValue('sync_mode', e.target.value)}
+                                                >
+                                                  <option value="auto">Auto-Pilot Smart Sync</option>
+                                                  <option value="manual">Kustom Manual</option>
+                                                </select>
+                                              </div>
+
+                                              {cfg.sync_mode === 'manual' && (
+                                                <div className="form-group" style={{ marginBottom: 0 }}>
+                                                  <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Kustom FFmpeg Option</label>
+                                                  <select
+                                                    className="form-input"
+                                                    value={cfg.ffmpeg_sync_option || 'smart_sync'}
+                                                    onChange={e => setCfgValue('ffmpeg_sync_option', e.target.value)}
+                                                  >
+                                                    <option value="smart_sync">smart_sync (shorten/loop)</option>
+                                                    <option value="shortest">shortest (force audio duration)</option>
+                                                    <option value="loop">loop (loop visual)</option>
+                                                    <option value="stretch">stretch (slow down visual)</option>
+                                                  </select>
+                                                </div>
+                                              )}
+
+                                              <div className="form-group" style={{ marginBottom: 0 }}>
+                                                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>SFX Volume ({cfg.ffmpeg_sfx_volume || '0.8'}x)</label>
+                                                <input
+                                                  type="range"
+                                                  min="0.0"
+                                                  max="1.0"
+                                                  step="0.1"
+                                                  value={cfg.ffmpeg_sfx_volume || 0.8}
+                                                  onChange={e => setCfgValue('ffmpeg_sfx_volume', parseFloat(e.target.value))}
+                                                  style={{ width: '100%' }}
+                                                />
+                                              </div>
+
+                                              <div className="form-group" style={{ marginBottom: 0 }}>
+                                                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>BGM Volume ({cfg.ffmpeg_bgm_volume || '0.3'}x)</label>
+                                                <input
+                                                  type="range"
+                                                  min="0.0"
+                                                  max="1.0"
+                                                  step="0.1"
+                                                  value={cfg.ffmpeg_bgm_volume || 0.3}
+                                                  onChange={e => setCfgValue('ffmpeg_bgm_volume', parseFloat(e.target.value))}
+                                                  style={{ width: '100%' }}
+                                                />
+                                              </div>
+
+                                              <div className="form-group" style={{ marginBottom: 0 }}>
+                                                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Video Scale ({cfg.ffmpeg_video_scale || '1.0'}x)</label>
+                                                <input
+                                                  type="range"
+                                                  min="1.0"
+                                                  max="2.0"
+                                                  step="0.05"
+                                                  value={cfg.ffmpeg_video_scale || 1.0}
+                                                  onChange={e => setCfgValue('ffmpeg_video_scale', parseFloat(e.target.value))}
+                                                  style={{ width: '100%' }}
+                                                />
+                                              </div>
+                                            </div>
+
+                                          </div>
+                                        </div>
+                                      );
+                                    })()}
+
                                     {/* Action buttons */}
-                                    <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+                                    <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 16 }}>
                                       <button
                                         type="button"
                                         className="btn btn-secondary"

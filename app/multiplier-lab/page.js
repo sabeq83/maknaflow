@@ -53,6 +53,12 @@ function MultiplierLabPageContent() {
   const [loadingAssets, setLoadingAssets] = useState(true);
   const [selectedAssetId, setSelectedAssetId] = useState('');
   const [assetSearchQuery, setAssetSearchQuery] = useState('');
+  const [workflowMode, setWorkflowMode] = useState('multi_blueprint_one_product'); // 'multi_blueprint_one_product' | 'one_blueprint_multi_product'
+  const [selectedBlueprintIds, setSelectedBlueprintIds] = useState([]);
+  const [selectedProductIds, setSelectedProductIds] = useState([]);
+  const [combinationRows, setCombinationRows] = useState([]);
+  const [nicheFilter, setNicheFilter] = useState('');
+  const [niches, setNiches] = useState([]);
 
   const [tasks, setTasks] = useState([]);
   const [loadingTasks, setLoadingTasks] = useState(true);
@@ -76,6 +82,12 @@ function MultiplierLabPageContent() {
   const [brandProfiles, setBrandProfiles] = useState([]);
   const [selectedBrandId, setSelectedBrandId] = useState('');
   const [filterBrandId, setFilterBrandId] = useState('all');
+  const [products, setProducts] = useState([]);
+  const [campaignName, setCampaignName] = useState('');
+  const [accountName, setAccountName] = useState('');
+  const [enableAudioSegment, setEnableAudioSegment] = useState(false);
+  const [sfxSetting, setSfxSetting] = useState('without_sfx');
+  const [targetProductId, setTargetProductId] = useState('');
 
   const [narrativeMode, setNarrativeMode] = useState('Storytelling');
   const [visualStyle, setVisualStyle] = useState('Cinematic');
@@ -131,10 +143,12 @@ function MultiplierLabPageContent() {
   const [customInstruction, setCustomInstruction] = useState('');
 
   useEffect(() => {
-    fetchAssets();
+    fetchAssets('', '');
     fetchTasks();
     pollLogs();
     fetch('/api/v2/brand-profiles').then(r => r.json()).then(d => { if (d.success) setBrandProfiles(d.data || []); }).catch(() => {});
+    fetch('/api/v2/deconstruct?limit=1').then(r => r.json()).then(d => { if (d.success) setNiches(d.niches || []); }).catch(() => {});
+    fetch('/api/v2/products').then(r => r.json()).then(d => { if (d.success) setProducts(d.data || []); }).catch(() => {});
 
     pollingRef.current = setInterval(() => {
       fetchTasks(true);
@@ -165,19 +179,135 @@ function MultiplierLabPageContent() {
     setTimeout(() => setToast(null), 4000);
   };
 
-  const fetchAssets = async () => {
+  const fetchAssets = async (query = '', niche = '') => {
     setLoadingAssets(true);
     try {
-      const res = await fetch('/api/v2/deconstruct?limit=100');
+      const res = await fetch(`/api/v2/deconstruct?assets=true&q=${encodeURIComponent(query)}&niche=${encodeURIComponent(niche)}`);
       const data = await res.json();
       if (data.success) {
-        setAssets(data.data || []);
+        setAssets(data.assets || []);
       }
     } catch (err) {
       console.error(err);
     } finally {
       setLoadingAssets(false);
     }
+  };
+
+  const generateCombinationRows = () => {
+    let rows = [];
+    const selectedBlueprints = assets.filter(a => selectedBlueprintIds.includes(a.id));
+
+    if (workflowMode === 'multi_blueprint_one_product') {
+      if (selectedBlueprintIds.length === 0) {
+        showToast('Pilih setidaknya satu blueprint video', 'error');
+        return;
+      }
+      
+      let singleProduct = {};
+      if (bridgingMode === 'select_existing') {
+        const prod = products.find(p => p.id === targetProductId);
+        if (!prod) {
+          showToast('Pilih produk dari pustaka terlebih dahulu', 'error');
+          return;
+        }
+        singleProduct = {
+          target_product_id: targetProductId,
+          product_name: prod.product_name,
+          target_product_url: prod.source_url || '',
+          affiliate_url: affiliateUrl || ''
+        };
+      } else if (bridgingMode === 'url_extract') {
+        if (!productUrl) {
+          showToast('Masukkan URL produk terlebih dahulu', 'error');
+          return;
+        }
+        singleProduct = {
+          target_product_id: null,
+          product_name: 'URL Extract Product',
+          target_product_url: productUrl,
+          affiliate_url: affiliateUrl || ''
+        };
+      } else {
+        if (!manualProductName) {
+          showToast('Masukkan nama produk terlebih dahulu', 'error');
+          return;
+        }
+        singleProduct = {
+          target_product_id: null,
+          product_name: manualProductName,
+          target_product_url: '',
+          affiliate_url: affiliateUrl || ''
+        };
+      }
+
+      for (const bp of selectedBlueprints) {
+        rows.push({
+          deconstruct_asset_id: bp.id,
+          deconstruct_asset_url: bp.source_url,
+          deconstruct_asset_title: bp.niche || bp.original_caption || bp.id,
+          target_product_id: singleProduct.target_product_id,
+          target_product_name: singleProduct.product_name,
+          target_product_url: singleProduct.target_product_url,
+          affiliate_url: singleProduct.affiliate_url
+        });
+      }
+    } else {
+      if (!selectedAssetId) {
+        showToast('Pilih satu blueprint video terlebih dahulu', 'error');
+        return;
+      }
+      const singleBp = assets.find(a => a.id === selectedAssetId);
+      if (!singleBp) return;
+
+      const libProducts = products.filter(p => selectedProductIds.includes(p.id)).map(p => ({
+        target_product_id: p.id,
+        product_name: p.product_name,
+        target_product_url: p.source_url || '',
+        affiliate_url: ''
+      }));
+
+      const textareaUrls = massUrlsText
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .map(url => {
+          let cleanUrl = url;
+          let cleanAff = '';
+          if (url.includes('|')) {
+            const parts = url.split('|');
+            cleanUrl = parts[0].trim();
+            cleanAff = parts[1].trim();
+          }
+          return {
+            target_product_id: null,
+            product_name: 'URL: ' + (cleanUrl.length > 30 ? cleanUrl.substring(0, 30) + '...' : cleanUrl),
+            target_product_url: cleanUrl,
+            affiliate_url: cleanAff
+          };
+        });
+
+      const allProducts = [...libProducts, ...textareaUrls];
+      if (allProducts.length === 0) {
+        showToast('Pilih setidaknya satu produk dari pustaka atau masukkan URL produk massal', 'error');
+        return;
+      }
+
+      for (const prod of allProducts) {
+        rows.push({
+          deconstruct_asset_id: singleBp.id,
+          deconstruct_asset_url: singleBp.source_url,
+          deconstruct_asset_title: singleBp.niche || singleBp.original_caption || singleBp.id,
+          target_product_id: prod.target_product_id,
+          target_product_name: prod.product_name,
+          target_product_url: prod.target_product_url,
+          affiliate_url: prod.affiliate_url
+        });
+      }
+    }
+
+    setCombinationRows(rows);
+    showToast('Tabel review kombinasi berhasil dibuat!');
   };
 
   const fetchTasks = async (isPoll = false) => {
@@ -283,24 +413,29 @@ function MultiplierLabPageContent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedAssetId) {
-      showToast('Harap pilih dekonstruksi referensi (blueprint).', 'error');
+
+    if (combinationRows.length === 0) {
+      showToast('Tabel tinjauan kombinasi kosong. Silakan buat tinjauan kombinasi terlebih dahulu.', 'error');
       return;
     }
 
     setSubmitting(true);
     try {
       const payload = {
-        deconstruct_asset_id: selectedAssetId,
-        production_mode: productionMode,
-        enable_vo_audit: enableVoAudit,
+        mode: workflowMode,
+        rows: combinationRows.map(row => ({
+          deconstruct_asset_id: row.deconstruct_asset_id,
+          target_product_id: row.target_product_id,
+          target_product_url: row.target_product_url,
+          affiliate_url: row.affiliate_url
+        })),
         vso_config_json: JSON.stringify({
           narrativeMode, visualStyle, targetAi, videoModel, aspectRatio, faceVisibility, wordsPerClip,
           isVsoActive, characterConcept, subjectDemographic, wardrobeStyle, wardrobeStyleCustom, lightingStyle, lightingStyleCustom
         }),
         bridging_config_json: JSON.stringify({
           isBridgingActive, targetClipsCount, bridgeAtClip, bridgeDurationClips, promotionStyle, bridgingMode,
-          manualProductName, manualProductDesc, manualProductUsp, visualMode
+          manualProductName, manualProductDesc, manualProductUsp, productUrl, visualMode
         }),
         audio_config_json: JSON.stringify({
           enableTts, voiceProvider, voicePersona, voiceSpeed, voiceVolume, ttsModelQuality,
@@ -309,23 +444,9 @@ function MultiplierLabPageContent() {
           nextcloudParentFolder, targetDemographic, targetDemographicCustom, aiDirective,
           mandatoryOutroLine, customInstruction
         }),
-        productRefImagePath: productRefImage
+        enable_vo_audit: enableVoAudit ? 1 : 0,
+        product_ref_image_path: productRefImage
       };
-
-      if (productionMode === 'single') {
-        payload.target_product_url = productUrl;
-        payload.affiliate_url = affiliateUrl;
-      } else {
-        const lines = massUrlsText.split('\n').map(l => l.trim()).filter(Boolean);
-        const rows = lines.map(line => {
-          const parts = line.split('|');
-          return {
-            target_product_url: parts[0],
-            affiliate_url: parts[1] || ''
-          };
-        });
-        payload.csv_data_json = JSON.stringify(rows);
-      }
 
       const res = await fetch('/api/v2/multiplier', {
         method: 'POST',
@@ -334,12 +455,15 @@ function MultiplierLabPageContent() {
       });
       const data = await res.json();
       if (data.success) {
-        showToast('Kampanye Multiplier baru berhasil didaftarkan!');
+        showToast(data.message || 'Kampanye Multiplier baru berhasil didaftarkan!');
         setShowConfigForm(false);
         setProductUrl('');
         setAffiliateUrl('');
         setMassUrlsText('');
         setProductRefImage(null);
+        setSelectedBlueprintIds([]);
+        setSelectedProductIds([]);
+        setCombinationRows([]);
         fetchTasks();
       } else {
         showToast(data.error || 'Gagal mendaftarkan kampanye.', 'error');
@@ -452,168 +576,754 @@ function MultiplierLabPageContent() {
 
         {/* Creation Config Form */}
         {showConfigForm && (
-          <div className="card" style={{ marginBottom: 28, border: '1px solid var(--border)', background: 'var(--bg-card)' }}>
-            <h3 style={{ margin: '0 0 16px', fontSize: '1.1rem', fontWeight: 700 }}>⚙️ Konfigurasi Kampanye Multiplier Baru</h3>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div className="card" style={{ marginBottom: 28, border: '1px solid var(--border)', background: 'var(--bg-card)', padding: 0 }}>
+            
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>⚙️ Konfigurasi Kampanye Multiplier Baru</strong>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ display: 'flex', gap: 6, background: 'var(--overlay-subtle)', padding: 3, borderRadius: 6 }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWorkflowMode('multi_blueprint_one_product');
+                      setProductionMode('single'); // backward sync
+                      setSelectedBlueprintIds([]);
+                      setSelectedProductIds([]);
+                      setCombinationRows([]);
+                    }}
+                    style={{
+                      border: 'none', background: workflowMode === 'multi_blueprint_one_product' ? 'var(--accent)' : 'transparent',
+                      color: 'var(--text-primary)', fontSize: '0.72rem', fontWeight: 600, padding: '5px 10px', borderRadius: 4, cursor: 'pointer'
+                    }}
+                  >
+                    Multi Blueprint → 1 Produk
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWorkflowMode('one_blueprint_multi_product');
+                      setProductionMode('mass'); // backward sync
+                      setSelectedBlueprintIds([]);
+                      setSelectedProductIds([]);
+                      setCombinationRows([]);
+                    }}
+                    style={{
+                      border: 'none', background: workflowMode === 'one_blueprint_multi_product' ? 'var(--accent)' : 'transparent',
+                      color: 'var(--text-primary)', fontSize: '0.72rem', fontWeight: 600, padding: '5px 10px', borderRadius: 4, cursor: 'pointer'
+                    }}
+                  >
+                    1 Blueprint → Multi Produk
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowConfigForm(false)}
+                  style={{
+                    border: 'none',
+                    background: 'var(--surface-interactive)',
+                    color: 'var(--text-muted)',
+                    fontSize: '0.75rem',
+                    padding: '5px 10px',
+                    borderRadius: 4,
+                    cursor: 'pointer',
+                    border: '1px solid var(--border)'
+                  }}
+                >
+                  ❌ Tutup Form
+                </button>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
               
-              {/* Accordion Configs */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                
-                {/* Accordion 1: Source Blueprint & Mode */}
-                <details open={activeAccordion === 0} onClick={(e) => { e.preventDefault(); setActiveAccordion(0); }} style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-                  <summary style={{ padding: '14px 20px', fontWeight: 600, cursor: 'pointer', background: 'var(--overlay-subtle)' }}>
-                    📂 1. Pilih Blueprint Referensi & Mode Produksi
-                  </summary>
-                  <div style={{ padding: 20, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    <div className="form-group">
-                      <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>
-                        Pilih Blueprint Dekonstruksi Referensi
+              {/* 1. Blueprint Card Picker with Search */}
+              <div style={{ padding: 24, borderBottom: '1px solid var(--border)' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                    📹 Pilih Blueprint Video Target ({workflowMode === 'multi_blueprint_one_product' ? 'Bisa Pilih Banyak' : 'Pilih Satu'})
+                  </label>
+                  
+                  <div style={{ display: 'flex', gap: 12, marginBottom: 12, marginTop: 8 }}>
+                    <input
+                      type="text"
+                      className="form-input"
+                      style={{ fontSize: '0.8rem', flex: 2 }}
+                      placeholder="🔍 Cari blueprint berdasarkan URL, niche, tags, resume..."
+                      value={assetSearchQuery}
+                      onChange={e => setAssetSearchQuery(e.target.value)}
+                    />
+                    <select
+                      className="form-input"
+                      style={{ fontSize: '0.8rem', flex: 1 }}
+                      value={nicheFilter}
+                      onChange={e => setNicheFilter(e.target.value)}
+                    >
+                      <option value="">-- Semua Niche --</option>
+                      {niches.map(n => (
+                        <option key={n} value={n}>{n}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => fetchAssets(assetSearchQuery, nicheFilter)}
+                      className="btn btn-secondary"
+                      style={{ fontSize: '0.8rem', padding: '6px 14px' }}
+                    >
+                      Cari
+                    </button>
+                  </div>
+
+                  {loadingAssets ? (
+                    <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)' }}>
+                      <div className="spinner" style={{ width: 24, height: 24, margin: '0 auto 8px' }}></div>
+                      Memuat blueprint...
+                    </div>
+                  ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16, maxHeight: '350px', overflowY: 'auto', padding: 8, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface-interactive)' }}>
+                      {assets.map(a => {
+                        const isSelected = workflowMode === 'multi_blueprint_one_product'
+                          ? selectedBlueprintIds.includes(a.id)
+                          : selectedAssetId === a.id;
+                        
+                        const handleToggle = () => {
+                          if (workflowMode === 'multi_blueprint_one_product') {
+                            setSelectedBlueprintIds(prev =>
+                              prev.includes(a.id) ? prev.filter(id => id !== a.id) : [...prev, a.id]
+                            );
+                          } else {
+                            setSelectedAssetId(a.id);
+                          }
+                        };
+
+                        return (
+                          <div
+                            key={a.id}
+                            onClick={handleToggle}
+                            style={{
+                              background: isSelected ? 'var(--status-info-soft)' : 'var(--bg-card)',
+                              border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`,
+                              borderRadius: 8,
+                              padding: 14,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              justifyContent: 'space-between',
+                              gap: 10,
+                              transition: 'all 0.2s ease',
+                              boxShadow: isSelected ? '0 0 10px rgba(0, 120, 255, 0.1)' : 'none'
+                            }}
+                          >
+                            <div style={{ display: 'flex', justify: 'space-between', alignItems: 'flex-start' }}>
+                              <span style={{ fontSize: '0.62rem', background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: 4, textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700 }}>
+                                niche: {a.niche || 'General'}
+                              </span>
+                              <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid var(--border)', background: isSelected ? 'var(--accent)' : 'transparent', display: 'flex', alignItems: 'center', justify: 'center', fontSize: '0.6rem', color: '#fff', fontWeight: 'bold' }}>
+                                {isSelected && '✓'}
+                              </div>
+                            </div>
+                            <div>
+                              <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                {a.original_caption || 'Blueprint s/d ' + a.id}
+                              </div>
+                              <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', margin: '4px 0 0' }}>
+                                {a.resume?.slice(0, 80)}...
+                              </p>
+                            </div>
+                            <div style={{ display: 'flex', justify: 'space-between', fontSize: '0.68rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border-subtle)', paddingTop: 8, marginTop: 4 }}>
+                              <span>📋 {a.original_storyboard_json ? JSON.parse(a.original_storyboard_json).length : 0} adegan</span>
+                              <span>⏱️ {a.duration_seconds || '0'}s</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 2. Product Selection */}
+              <div style={{ padding: 24, borderBottom: '1px solid var(--border)' }}>
+                <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem', display: 'block', marginBottom: 8 }}>
+                  📦 Pilih Produk Jualan ({workflowMode === 'multi_blueprint_one_product' ? 'Pilih Satu' : 'Bisa Pilih Banyak'})
+                </label>
+
+                {workflowMode === 'multi_blueprint_one_product' ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <div style={{ display: 'flex', gap: 16 }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.8rem' }}>
+                        <input type="radio" name="bridgingModeM" value="select_existing" checked={bridgingMode === 'select_existing'} onChange={e => setBridgingMode(e.target.value)} />
+                        Pilih dari Pustaka
                       </label>
-                      <select
-                        value={selectedAssetId}
-                        onChange={e => setSelectedAssetId(e.target.value)}
-                        className="form-input"
-                        required
-                        style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: 6 }}
-                      >
-                        <option value="">-- Pilih Blueprint --</option>
-                        {assets.map(a => (
-                          <option key={a.id} value={a.id}>
-                            [{a.niche || 'Niche'}] {a.original_caption?.slice(0, 60) || a.id}...
-                          </option>
-                        ))}
-                      </select>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.8rem' }}>
+                        <input type="radio" name="bridgingModeM" value="manual_input" checked={bridgingMode === 'manual_input'} onChange={e => setBridgingMode(e.target.value)} />
+                        Tulis Manual
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.8rem' }}>
+                        <input type="radio" name="bridgingModeM" value="url_extract" checked={bridgingMode === 'url_extract'} onChange={e => setBridgingMode(e.target.value)} />
+                        Ekstrak dari URL
+                      </label>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                      <div>
-                        <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Mode Produksi</label>
-                        <div style={{ display: 'flex', gap: 12 }}>
-                          <button type="button" onClick={() => setProductionMode('single')} className={`btn ${productionMode === 'single' ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: 1, padding: 10 }}>Single Task</button>
-                          <button type="button" onClick={() => setProductionMode('mass')} className={`btn ${productionMode === 'mass' ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: 1, padding: 10 }}>Mass Campaign</button>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Audit Voiceover Safe</label>
-                        <select value={enableVoAudit} onChange={e => setEnableVoAudit(Number(e.target.value))} className="form-input" style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: 6 }}>
-                          <option value={1}>Aktifkan (TikTok Safe)</option>
-                          <option value={0}>Matikan (Lewati)</option>
+                    {bridgingMode === 'select_existing' && (
+                      <div className="form-group">
+                        <select
+                          className="form-input"
+                          value={targetProductId}
+                          onChange={e => setTargetProductId(e.target.value)}
+                        >
+                          <option value="">-- Pilih Produk Jualan --</option>
+                          {products.map(p => (
+                            <option key={p.id} value={p.id}>{p.product_name}</option>
+                          ))}
                         </select>
                       </div>
-                    </div>
+                    )}
 
-                    {productionMode === 'single' ? (
+                    {bridgingMode === 'url_extract' && (
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                         <div className="form-group">
-                          <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>URL Detail Produk Tokopedia/Shopee</label>
-                          <input type="url" value={productUrl} onChange={e => setProductUrl(e.target.value)} placeholder="https://shopee.co.id/product-name" className="form-input" required={productionMode === 'single'} />
+                          <label className="form-label">URL Detail Produk Tokopedia/Shopee</label>
+                          <input type="url" value={productUrl} onChange={e => setProductUrl(e.target.value)} placeholder="https://shopee.co.id/product-name" className="form-input" />
                         </div>
                         <div className="form-group">
-                          <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>URL Affiliate Rekomendasi (Opsional)</label>
+                          <label className="form-label">URL Affiliate Rekomendasi (Opsional)</label>
                           <input type="url" value={affiliateUrl} onChange={e => setAffiliateUrl(e.target.value)} placeholder="https://shope.ee/xxxxx" className="form-input" />
                         </div>
                       </div>
-                    ) : (
+                    )}
+
+                    {bridgingMode === 'manual_input' && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                        <div className="form-group">
+                          <label className="form-label">Nama Produk</label>
+                          <input type="text" value={manualProductName} onChange={e => setManualProductName(e.target.value)} placeholder="Nama produk jualan" className="form-input" />
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                          <div className="form-group">
+                            <label className="form-label">Deskripsi USP Produk</label>
+                            <textarea value={manualProductDesc} onChange={e => setManualProductDesc(e.target.value)} placeholder="Keunggulan produk jualan Anda" className="form-input" rows={2} />
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">Keywords / Hashtags Produk</label>
+                            <input type="text" value={manualProductUsp} onChange={e => setManualProductUsp(e.target.value)} placeholder="Contoh: cokelat, sehat, organik" className="form-input" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <div style={{ display: 'flex', gap: 16 }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.8rem' }}>
+                        <input type="radio" name="massProductMode" value="select_existing" checked={bridgingMode === 'select_existing'} onChange={e => setBridgingMode(e.target.value)} />
+                        Pilih Banyak dari Pustaka
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.8rem' }}>
+                        <input type="radio" name="massProductMode" value="url_extract" checked={bridgingMode === 'url_extract'} onChange={e => setBridgingMode(e.target.value)} />
+                        Daftar URL Produk Massal
+                      </label>
+                    </div>
+
+                    {bridgingMode === 'select_existing' && (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10, maxHeight: 150, overflowY: 'auto', padding: 10, background: 'var(--surface-interactive)', borderRadius: 6, border: '1px solid var(--border)' }}>
+                        {products.map(p => {
+                          const isSelected = selectedProductIds.includes(p.id);
+                          const toggleProduct = () => {
+                            setSelectedProductIds(prev =>
+                              prev.includes(p.id) ? prev.filter(id => id !== p.id) : [...prev, p.id]
+                            );
+                          };
+                          return (
+                            <div key={p.id} onClick={toggleProduct} style={{ padding: 8, background: isSelected ? 'var(--status-info-soft)' : 'var(--bg-card)', border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`, borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <input type="checkbox" checked={isSelected} readOnly style={{ pointerEvents: 'none' }} />
+                              <span>{p.product_name}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {bridgingMode === 'url_extract' && (
                       <div className="form-group">
-                        <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>
-                          Daftar URL Produk Massal (Satu URL per Baris, Format: `url_produk|url_affiliate_opsional`)
-                        </label>
+                        <label className="form-label">Daftar URL Produk Massal (Satu URL per Baris, Format: `url_produk|url_affiliate_opsional`)</label>
                         <textarea
+                          className="form-input"
+                          rows={4}
                           value={massUrlsText}
                           onChange={e => setMassUrlsText(e.target.value)}
                           placeholder="https://tokopedia.com/product-a|https://tokopedia.link/aff-a&#10;https://shopee.co.id/product-b"
-                          rows={4}
-                          className="form-input"
-                          required={productionMode === 'mass'}
-                          style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: 6, fontFamily: 'monospace' }}
+                          style={{ fontFamily: 'monospace' }}
                         />
                       </div>
                     )}
                   </div>
-                </details>
+                )}
+                
+                <div style={{ marginTop: 16 }}>
+                  <button type="button" onClick={generateCombinationRows} className="btn btn-secondary" style={{ width: '100%', padding: '10px 14px', fontWeight: 700 }}>
+                    ⚡ Buat Tabel Tinjauan Kombinasi (Review Table)
+                  </button>
+                </div>
+              </div>
 
-                {/* Accordion 2: Aesthetics Strategy */}
-                <details open={activeAccordion === 1} onClick={(e) => { e.preventDefault(); setActiveAccordion(1); }} style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-                  <summary style={{ padding: '14px 20px', fontWeight: 600, cursor: 'pointer', background: 'var(--overlay-subtle)' }}>
-                    🎨 2. Aesthetics & Visual Style (VSO Overrides)
-                  </summary>
-                  <div style={{ padding: 20, borderTop: '1px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-                    <div>
-                      <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Visual Style Preset</label>
-                      <select value={visualStyle} onChange={e => setVisualStyle(e.target.value)} className="form-input" style={{ width: '100%' }}>
-                        <option value="Cinematic">Cinematic</option>
-                        <option value="Aesthetic Warm">Aesthetic Warm</option>
-                        <option value="Product Showcase">Product Showcase</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Video Model (G-Labs)</label>
-                      <select value={videoModel} onChange={e => setVideoModel(e.target.value)} className="form-input" style={{ width: '100%' }}>
-                        <option value="veo_31_lite">Google Veo (8s) Lite</option>
-                        <option value="veo_31">Google Veo (8s) High Quality</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Aspect Ratio</label>
-                      <select value={aspectRatio} onChange={e => setAspectRatio(e.target.value)} className="form-input" style={{ width: '100%' }}>
-                        <option value="9:16">Vertical 9:16 (TikTok/Shorts)</option>
-                        <option value="16:9">Landscape 16:9 (YouTube)</option>
-                      </select>
-                    </div>
+              {/* 3. Combination Review Table */}
+              {combinationRows.length > 0 && (
+                <div style={{ padding: 24, borderBottom: '1px solid var(--border)' }}>
+                  <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem', display: 'block', marginBottom: 8 }}>
+                    📋 Tinjauan Kombinasi Kampanye Yang Akan Dibuat ({combinationRows.length} Baris)
+                  </label>
+                  <div style={{ overflowX: 'auto', border: '1px solid var(--border)', borderRadius: 6 }}>
+                    <table className="ideas-table" style={{ width: '100%', fontSize: '0.78rem' }}>
+                      <thead>
+                        <tr style={{ background: 'var(--overlay-subtle)', borderBottom: '1px solid var(--border)' }}>
+                          <th style={{ padding: 8 }}>Blueprint</th>
+                          <th style={{ padding: 8 }}>Produk</th>
+                          <th style={{ padding: 8 }}>Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {combinationRows.map((row, idx) => (
+                          <tr key={idx} style={{ borderBottom: '1px solid var(--border)' }}>
+                            <td style={{ padding: 8 }}>{row.deconstruct_asset_title}</td>
+                            <td style={{ padding: 8 }}>{row.target_product_name}</td>
+                            <td style={{ padding: 8 }}>
+                              <button
+                                type="button"
+                                onClick={() => setCombinationRows(prev => prev.filter((_, i) => i !== idx))}
+                                style={{ background: 'transparent', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontWeight: 'bold' }}
+                              >
+                                Hapus
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                </details>
+                </div>
+              )}
 
-                {/* Accordion 3: Product Bridging */}
-                <details open={activeAccordion === 2} onClick={(e) => { e.preventDefault(); setActiveAccordion(2); }} style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-                  <summary style={{ padding: '14px 20px', fontWeight: 600, cursor: 'pointer', background: 'var(--overlay-subtle)' }}>
-                    🌉 3. Product Bridging & Start Frame Settings
-                  </summary>
-                  <div style={{ padding: 20, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-                      <div>
-                        <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Visual Mode</label>
-                        <select value={visualMode} onChange={e => setVisualMode(e.target.value)} className="form-input" style={{ width: '100%' }}>
-                          <option value="hybrid_lock">Hybrid Lock (Start Frame T2I + I2V)</option>
-                          <option value="pure_t2v">Pure Text-To-Video (T2V)</option>
+              {/* 4. Accordion Configs (OPC Aligned) */}
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                
+                {/* Accordion 1: Basic Creative Strategy */}
+                <div style={{ borderBottom: '1px solid var(--border)' }}>
+                  <div
+                    onClick={() => setActiveAccordion(activeAccordion === 0 ? -1 : 0)}
+                    style={{ padding: '16px 24px', background: activeAccordion === 0 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  >
+                    <span style={{ fontWeight: 600, fontSize: '0.92rem' }}>📋 1. Basic Creative Strategy</span>
+                    <span>{activeAccordion === 0 ? '▲' : '▼'}</span>
+                  </div>
+                  {activeAccordion === 0 && (
+                    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                      <div className="form-group">
+                        <label className="form-label">🏷️ Nama Akun (Brand Account)</label>
+                        <select
+                          className="form-input"
+                          value={selectedBrandId}
+                          onChange={e => {
+                            const matchingProfile = brandProfiles.find(bp => bp.id === e.target.value);
+                            const newAcc = matchingProfile?.brand_name || '';
+                            setSelectedBrandId(matchingProfile?.id || '');
+                            setAccountName(newAcc);
+                            const now = new Date();
+                            const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+                            setCampaignName(`[ MULTIPLIER ${dateStr} ] - ${newAcc ? newAcc + ' - ' : ''}`);
+                          }}
+                        >
+                          <option value="">-- Pilih Nama Akun Brand --</option>
+                          {brandProfiles.map(bp => (
+                            <option key={bp.id} value={bp.id}>{bp.brand_name}</option>
+                          ))}
                         </select>
                       </div>
-                      <div>
-                        <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Klip Target Promosi</label>
-                        <input type="number" min={1} max={10} value={bridgeAtClip} onChange={e => setBridgeAtClip(Number(e.target.value))} className="form-input" style={{ width: '100%' }} />
+
+                      <div className="form-group">
+                        <label className="form-label">Nama Kampanye</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          placeholder="Nama kampanye"
+                          value={campaignName}
+                          onChange={e => setCampaignName(e.target.value)}
+                        />
                       </div>
-                      <div>
-                        <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Gaya Promosi</label>
-                        <select value={promotionStyle} onChange={e => setPromotionStyle(e.target.value)} className="form-input" style={{ width: '100%' }}>
-                          <option value="Softselling">Softselling (Storytelling)</option>
-                          <option value="Hardselling">Hardselling (Direct USP)</option>
+
+                      <div className="form-group">
+                        <label className="form-label">Parent Folder Nextcloud</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          placeholder="/MAKNA_Assets"
+                          value={nextcloudParentFolder}
+                          onChange={e => setNextcloudParentFolder(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Bahasa Naskah Voiceover (Script Language)</label>
+                        <select className="form-input" value={targetLanguage} onChange={e => setTargetLanguage(e.target.value)}>
+                          <option value="id-ID">🇮🇩 Bahasa Indonesia (Lokal)</option>
+                          <option value="en-US">🇺🇸 English (Global / US Market)</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">🎯 Target Demografi & Tone Bahasa</label>
+                        <select className="form-input" value={targetDemographic} onChange={e => setTargetDemographic(e.target.value)}>
+                          <option value="genz_casual">Gen-Z & Milenial Muda (Santai, Gaul, Akrab "Kamu/Lo")</option>
+                          <option value="ibu_rumah_tangga">Ibu Rumah Tangga & Keluarga (Ramah, Mengayomi "Bunda/Moms")</option>
+                          <option value="professional_executive">Profesional & Worker (Lugas, Refined, Efisien "Anda/Kamu")</option>
+                          <option value="hijab_syari_family">Keluarga Hijrah & Syari (Santun, Islami Alami "Bunda/Ukhti")</option>
+                          <option value="fitness_health_enthusiast">Penggiat Olahraga & Kesehatan (Motivatif, Energik, Informatif)</option>
+                          <option value="custom">Custom Input Bebas...</option>
+                        </select>
+                        {targetDemographic === 'custom' && (
+                          <input
+                            type="text"
+                            className="form-input"
+                            style={{ marginTop: 8 }}
+                            placeholder="Contoh: Mahasiswa Rantau yang Hemat"
+                            value={targetDemographicCustom}
+                            onChange={e => setTargetDemographicCustom(e.target.value)}
+                          />
+                        )}
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">🎙 Audio Segment (per Klip)</label>
+                        <select className="form-input" value={enableAudioSegment ? 'enabled' : 'disabled'} onChange={e => setEnableAudioSegment(e.target.value === 'enabled')}>
+                          <option value="disabled">❌ Disabled (Default)</option>
+                          <option value="enabled">✅ Enabled — Embed Audio Segment per Beat</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">SFX Setting</label>
+                        <select className="form-input" value={sfxSetting} onChange={e => setSfxSetting(e.target.value)}>
+                          <option value="without_sfx">🔇 Without SFX (Default)</option>
+                          <option value="with_sfx">🔊 With SFX</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Audit Kepatuhan Voiceover (TikTok Safe)</label>
+                        <select className="form-input" value={enableVoAudit} onChange={e => setEnableVoAudit(Number(e.target.value))}>
+                          <option value={0}>❌ No (Tanpa Audit Kepatuhan)</option>
+                          <option value={1}>✅ Yes (Audit Kepatuhan & Tampilkan Dua Versi VO)</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">AI Directive / Guardrail (Staging Override)</label>
+                        <textarea
+                          className="form-input"
+                          style={{ minHeight: 60 }}
+                          placeholder="Instruksi kontrol AI internal..."
+                          value={aiDirective}
+                          onChange={e => setAiDirective(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Mandatory Outro Line (Staging Override)</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          placeholder="Kalimat wajib di akhir klip voiceover..."
+                          value={mandatoryOutroLine}
+                          onChange={e => setMandatoryOutroLine(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Custom Instruction (Opsional)</label>
+                        <textarea
+                          className="form-input"
+                          style={{ minHeight: 80 }}
+                          placeholder="Instruksi tambahan untuk Gemini AI..."
+                          value={customInstruction}
+                          onChange={e => setCustomInstruction(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Accordion 2: Aesthetics & Visual Settings */}
+                <div style={{ borderBottom: '1px solid var(--border)' }}>
+                  <div
+                    onClick={() => setActiveAccordion(activeAccordion === 1 ? -1 : 1)}
+                    style={{ padding: '16px 24px', background: activeAccordion === 1 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  >
+                    <span style={{ fontWeight: 600, fontSize: '0.92rem' }}>🎨 2. Aesthetics & Visual Settings</span>
+                    <span>{activeAccordion === 1 ? '▲' : '▼'}</span>
+                  </div>
+                  {activeAccordion === 1 && (
+                    <div style={{ padding: 24, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                      <div className="form-group">
+                        <label className="form-label">Narrative Mode</label>
+                        <select className="form-input" value={narrativeMode} onChange={e => setNarrativeMode(e.target.value)}>
+                          <option value="Storytelling">Storytelling (Bercerita / Daily-life)</option>
+                          <option value="Problem-Solution">Problem-Solution (Masalah & Solusi)</option>
+                          <option value="Educational">Educational (Tutorial / Penjelasan Ilmiah)</option>
+                          <option value="Pet-Story-Arc">🐾 Pet Story Arc (7-Beat Cartoon Universe)</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Aspect Ratio</label>
+                        <select className="form-input" value={aspectRatio} onChange={e => setAspectRatio(e.target.value)}>
+                          <option value="9:16">9:16 (Vertical TikTok/Reels)</option>
+                          <option value="16:9">16:9 (Horizontal YouTube)</option>
+                          <option value="1:1">1:1 (Square)</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Target AI</label>
+                        <select className="form-input" value={targetAi} onChange={e => setTargetAi(e.target.value)}>
+                          <option value="Google Veo (8s)">Google Veo (8s)</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Video Model</label>
+                        <select className="form-input" value={videoModel} onChange={e => setVideoModel(e.target.value)}>
+                          <option value="veo_31_lite">Veo 3.1 Lite</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Face Visibility</label>
+                        <select className="form-input" value={faceVisibility} onChange={e => setFaceVisibility(e.target.value)}>
+                          <option value="Faceless">Faceless (Tanpa Wajah - Fokus Aksi Tangan)</option>
+                          <option value="POV">POV (Sudut Pandang Kamera Utama)</option>
+                          <option value="Silhouette">Silhouette (Estetik Siluet)</option>
+                          <option value="cartoon_face">Cartoon Face (Kartun Ekspresif)</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Jumlah Klip Video (N)</label>
+                        <input
+                          type="number"
+                          className="form-input"
+                          min="3"
+                          max="10"
+                          value={targetClipsCount}
+                          onChange={e => setTargetClipsCount(Number(e.target.value))}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Jumlah Kata Per Klip</label>
+                        <select className="form-input" value={wordsPerClip} onChange={e => setWordsPerClip(e.target.value)}>
+                          <option value="15-16 kata">15-16 kata</option>
+                          <option value="17-19 kata">17-19 kata</option>
+                          <option value="20-24 kata">20-24 kata</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Visual Style</label>
+                        <select className="form-input" value={visualStyle} onChange={e => setVisualStyle(e.target.value)}>
+                          <option value="Cinematic">Cinematic</option>
+                          <option value="UGC">UGC</option>
+                          <option value="Macrophotography">Macrophotography</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                        <label className="form-label">Visual Mode</label>
+                        <select className="form-input" value={visualMode} onChange={e => setVisualMode(e.target.value)}>
+                          <option value="hybrid_lock">Double-Pass Pixel Lock (Nano Banana Pro T2I ➜ Veo 3.1 I2V)</option>
+                          <option value="pure_t2v">Pure Text-To-Video (T2V Langsung)</option>
                         </select>
                       </div>
                     </div>
+                  )}
+                </div>
 
-                    {visualMode === 'hybrid_lock' && (
-                      <div style={{ background: 'var(--overlay-subtle)', padding: 16, borderRadius: 8, border: '1px solid var(--border)' }}>
-                        <h4 style={{ margin: '0 0 10px', fontSize: '0.85rem', fontWeight: 700 }}>📸 Upload Foto Acuan Produk (Optional)</h4>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                          <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} id="product-ref-upload" />
-                          <button type="button" className="btn btn-secondary" onClick={() => document.getElementById('product-ref-upload').click()} style={{ fontSize: '0.8rem' }}>
-                            📤 Pilih Foto Produk
-                          </button>
-                          {productFilenameDeclare && (
-                            <span style={{ fontSize: '0.75rem', color: 'var(--success)' }}>
-                              ✓ Terunggah: {productFilenameDeclare}
-                            </span>
+                {/* Accordion 3: Product Bridging Settings */}
+                <div style={{ borderBottom: '1px solid var(--border)' }}>
+                  <div
+                    onClick={() => setActiveAccordion(activeAccordion === 2 ? -1 : 2)}
+                    style={{ padding: '16px 24px', background: activeAccordion === 2 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  >
+                    <span style={{ fontWeight: 600, fontSize: '0.92rem' }}>🔌 3. Product Bridging Settings</span>
+                    <span>{activeAccordion === 2 ? '▲' : '▼'}</span>
+                  </div>
+                  {activeAccordion === 2 && (
+                    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <input
+                          type="checkbox"
+                          checked={isBridgingActive}
+                          onChange={e => setIsBridgingActive(e.target.checked)}
+                          style={{ width: 18, height: 18, cursor: 'pointer' }}
+                        />
+                        <strong>🔌 Aktifkan Bridging Promosi Produk (Sandwich Protocol)</strong>
+                      </div>
+
+                      {isBridgingActive && (
+                        <>
+                          <div className="form-group">
+                            <label className="form-label">Sisipkan Transisi Promosi pada Klip Ke- (X)</label>
+                            <input
+                              type="number"
+                              className="form-input"
+                              min="2"
+                              max={targetClipsCount}
+                              value={bridgeAtClip}
+                              onChange={e => setBridgeAtClip(Number(e.target.value))}
+                            />
+                          </div>
+
+                          <div className="form-group">
+                            <label className="form-label">Durasi Bridging Produk (Klip)</label>
+                            <select className="form-input" value={bridgeDurationClips} onChange={e => setBridgeDurationClips(Number(e.target.value))}>
+                              <option value="0">0 (Sisa seluruh klip)</option>
+                              <option value="1">1 Klip</option>
+                              <option value="2">2 Klip</option>
+                              <option value="3">3 Klip</option>
+                              <option value="4">4 Klip</option>
+                            </select>
+                          </div>
+
+                          <div className="form-group">
+                            <label className="form-label">Gaya Promosi</label>
+                            <select className="form-input" value={promotionStyle} onChange={e => setPromotionStyle(e.target.value)}>
+                              <option value="Softselling">Softselling (Halus, Menyatu dengan Konten)</option>
+                              <option value="Hardsell">Hardsell (Jelas, Langsung Promosi USP)</option>
+                              <option value="Education">Education (Review Kinerja Produk Secara Logis)</option>
+                            </select>
+                          </div>
+
+                          {visualMode === 'hybrid_lock' && (
+                            <div style={{ background: 'var(--overlay-subtle)', padding: 16, borderRadius: 8, border: '1px solid var(--border)' }}>
+                              <h4 style={{ margin: '0 0 10px', fontSize: '0.85rem', fontWeight: 700 }}>📸 Upload Foto Acuan Produk (Optional)</h4>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                                <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} id="product-ref-upload-acc" />
+                                <button type="button" className="btn btn-secondary" onClick={() => document.getElementById('product-ref-upload-acc').click()} style={{ fontSize: '0.8rem' }}>
+                                  📤 Pilih Foto Produk
+                                </button>
+                                {productFilenameDeclare && (
+                                  <span style={{ fontSize: '0.75rem', color: 'var(--success)' }}>
+                                    ✓ Terunggah: {productFilenameDeclare}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           )}
-                        </div>
-                      </div>
-                    )}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Accordion 4: Visual Swap Overrides (VSO) */}
+                <div style={{ borderBottom: '1px solid var(--border)' }}>
+                  <div
+                    onClick={() => setActiveAccordion(activeAccordion === 3 ? -1 : 3)}
+                    style={{ padding: '16px 24px', background: activeAccordion === 3 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  >
+                    <span style={{ fontWeight: 600, fontSize: '0.92rem' }}>🎭 4. Visual Swap Overrides (VSO)</span>
+                    <span>{activeAccordion === 3 ? '▲' : '▼'}</span>
                   </div>
-                </details>
+                  {activeAccordion === 3 && (
+                    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <input
+                          type="checkbox"
+                          checked={isVsoActive}
+                          onChange={e => setIsVsoActive(e.target.checked)}
+                          style={{ width: 18, height: 18, cursor: 'pointer' }}
+                        />
+                        <strong>🎭 Aktifkan Visual Swap Overrides</strong>
+                      </div>
+
+                      {isVsoActive && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                            <div className="form-group">
+                              <label className="form-label">Konsep Karakter (Framing)</label>
+                              <select className="form-input" value={characterConcept} onChange={e => setCharacterConcept(e.target.value)}>
+                                <option value="faceless">Faceless (Wajah Terpotong - Fokus Tangan)</option>
+                                <option value="pov">POV (First Person View)</option>
+                                <option value="silhouette">Siluet Bayangan (Aesthetic Shadow)</option>
+                                <option value="stylized_3d">3D Stylized Claymation</option>
+                                <option value="cartoon_face">Mascot Universe (Cartoon Face)</option>
+                              </select>
+                            </div>
+
+                            <div className="form-group">
+                              <label className="form-label">Demografi Subjek / Model</label>
+                              <select
+                                className="form-input"
+                                value={subjectDemographic}
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  setSubjectDemographic(val);
+                                  setWardrobeStyle('random');
+                                  if (val.startsWith('mascot_universe_')) {
+                                    setCharacterConcept('cartoon_face');
+                                  } else if (val.startsWith('stylized_3d_')) {
+                                    setCharacterConcept('stylized_3d');
+                                  } else {
+                                    setCharacterConcept('faceless');
+                                  }
+                                }}
+                              >
+                                <optgroup label="── Manusia Terpercaya ──">
+                                  <option value="syari_classic">Wanita Gamis Syar'iy (Hanya Tangan)</option>
+                                  <option value="caucasian_male">Pria Kaukasia (Hanya Tangan)</option>
+                                  <option value="stylized_3d_muslimah">Wanita 3D Stylized (Clay Art)</option>
+                                  <option value="stylized_3d_male">Pria 3D Stylized (Clay Art)</option>
+                                  <option value="stylized_3d_duo">Duo 3D Stylized - 2 Karakter (Clay Art)</option>
+                                </optgroup>
+                                <optgroup label="── Semesta Maskot Otonom ──">
+                                  <option value="mascot_universe_herbal">🌿 Semesta Herbal (Jahe, Kunyit, Mint...)</option>
+                                  <option value="mascot_universe_kitchen">🍳 Semesta Dapur (Wajan, Blender, Tomat...)</option>
+                                  <option value="mascot_universe_home_living">🏠 Semesta Rumah (Vacuum, Sofa, Lampu...)</option>
+                                  <option value="mascot_universe_pet">🐾 Semesta Hewan Peliharaan (Kucing, Anjing...)</option>
+                                </optgroup>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                            <div className="form-group">
+                              <label className="form-label">Wardrobe Style</label>
+                              <input
+                                type="text"
+                                className="form-input"
+                                value={wardrobeStyle}
+                                onChange={e => setWardrobeStyle(e.target.value)}
+                              />
+                            </div>
+
+                            <div className="form-group">
+                              <label className="form-label">Lighting Style</label>
+                              <input
+                                type="text"
+                                className="form-input"
+                                value={lightingStyle}
+                                onChange={e => setLightingStyle(e.target.value)}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
 
               </div>
 
               {/* Action Form Footer */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, borderTop: '1px solid var(--border)', padding: 24 }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setShowConfigForm(false)}>Batal</button>
                 <button type="submit" className="btn btn-primary" disabled={submitting}>
                   {submitting ? '⏳ Mendaftarkan...' : '🚀 Daftarkan Kampanye'}

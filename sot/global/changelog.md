@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.14.81 — Multiplier Lab Workflows Restoration & Accordion Alignment (19/08/2026)
+- Restore Multiplier Lab dual workflows campaign creation form
+- Align accordions 1-4 with OPC campaigns
+- Move Workflow & Audio settings to Tab 2 of workbench detail in 1-column layout
+- Update backend approve API to save custom configurations
+
 ## V2.14.80 — Fix logger endpoint query param and text parsing (19/08/2026)
 - Change pollLogs parameter from service=multiplier to type=multiplier
 - Parse system-logs response as text instead of JSON in frontend page and detail page
