@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.15.1 — Fix status NOT NULL constraint on schedule update (19/08/2026)
+- Fix markPublishingResult status update to use COALESCE
+
 ## V2.15.0 — Add AIGC label flag, OpenAPI payload compliance & scrollbar modal (19/08/2026)
 - Add is_ai_generated column and UI checkbox
 - Align media payload schema compliance
