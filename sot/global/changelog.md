@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.15.3 — Fix Repliz schedule ID saving and worker polling (19/08/2026)
+- Fix markPublishingResult missing external_schedule_id parameter
+- Include processing status in claimDuePublishingJob query
+- Add tick log to Publishing Worker
+
 ## V2.15.2 — Fix error message silent overwrite in markPublishingResult (19/08/2026)
 - Prevent markPublishingResult from overriding lastErrorMessage with Unknown error when parameter is omitted
 
