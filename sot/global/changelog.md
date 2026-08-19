@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.14.99 — Fix accounts deduplication cleanup query (19/08/2026)
+- Fix cleanupDuplicatePublishingAccounts to split Meta and Repliz deduplication criteria
+
 ## V2.14.98 — Fix Repliz API response and payload mapping (19/08/2026)
 - Fix list accounts parsing docs field
 - Fix retry HTTP method to POST
