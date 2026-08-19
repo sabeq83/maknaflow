@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.16.2 — Detail modal selalu fetch status terbaru dari DB (19/08/2026)
+- openDetailModal kini async dan fetch data segar dari GET /api/content-flow/[id]
+- Status platform (tiktok/IG/FB) dan permalink selalu up-to-date tanpa perlu refresh halaman
+- Tambah endpoint GET /api/content-flow/[id] dan getContentFlowItemById di repository
+
 ## V2.16.1 — Tambah tombol Skedul langsung di kartu library (19/08/2026)
 - Tombol ⏱️ Skedul tersedia langsung di setiap kartu video di Library
 - Tidak perlu buka Detail modal terlebih dahulu untuk menjadwalkan

@@ -469,8 +469,8 @@ function ContentFlowHubPageContent() {
     }
   }
 
-  function openDetailModal(item) {
-    setActiveItem(item);
+  async function openDetailModal(item) {
+    setActiveItem(item); // set dulu untuk instant feedback
     setDirectDownloadUrl(null);
     setEditStatusForm({
       tiktok_status: item.tiktok_status || 'Not Published',
@@ -490,6 +490,39 @@ function ContentFlowHubPageContent() {
       link_affiliate: item.link_affiliate || '',
       catatan: item.catatan || ''
     });
+
+    // Fetch data terbaru dari DB (untuk status platform yang diupdate oleh publishing worker)
+    try {
+      const res = await fetch(`/api/content-flow/${item.id}`);
+      const data = await res.json();
+      if (data.success && data.item) {
+        const fresh = data.item;
+        setActiveItem(fresh);
+        setEditStatusForm({
+          tiktok_status: fresh.tiktok_status || 'Not Published',
+          tiktok_publish_date: fresh.tiktok_publish_date || '',
+          permalink_tiktok: fresh.permalink_tiktok || '',
+          facebook_status: fresh.facebook_status || 'Not Published',
+          facebook_publish_date: fresh.facebook_publish_date || '',
+          permalink_facebook: fresh.permalink_facebook || '',
+          instagram_status: fresh.instagram_status || 'Not Published',
+          instagram_publish_date: fresh.instagram_publish_date || '',
+          permalink_instagram: fresh.permalink_instagram || '',
+          account_name: fresh.account_name || '',
+          drive_link: fresh.drive_link || '',
+          nextcloud_url: fresh.nextcloud_url || '',
+          nama_produk: fresh.nama_produk || '',
+          link_produk: fresh.link_produk || '',
+          link_affiliate: fresh.link_affiliate || '',
+          catatan: fresh.catatan || ''
+        });
+        // Update local items state juga agar konsisten
+        setItems(prev => prev.map(it => String(it.id) === String(item.id) ? { ...it, ...fresh } : it));
+      }
+    } catch (e) {
+      // Gagal fetch fresh = tetap pakai data lokal, tidak crash
+      console.warn('[ContentFlow] Gagal fetch fresh item data:', e.message);
+    }
 
     if (item.nextcloud_url) {
       setLoadingDownloadUrl(true);

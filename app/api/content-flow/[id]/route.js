@@ -1,6 +1,20 @@
 import { NextResponse } from 'next/server';
-import { deleteContentFlowItem, updateContentFlowItem } from '@/lib/contentflow-repository';
+import { deleteContentFlowItem, updateContentFlowItem, getContentFlowItemById } from '@/lib/contentflow-repository';
 import { withTenantContext } from '@/lib/auth';
+
+export const GET = withTenantContext(async (request, { params }, currentUser) => {
+  try {
+    const resolvedParams = await params;
+    const id = resolvedParams?.id || params?.id;
+    const item = await getContentFlowItemById(currentUser.tenantId, id);
+    if (!item) return NextResponse.json({ success: false, error: 'Content not found' }, { status: 404 });
+    return NextResponse.json({ success: true, item });
+  } catch (error) {
+    console.error('[API /api/content-flow/[id] GET Error]', error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+});
+
 
 export const PATCH = withTenantContext(async (request, { params }, currentUser) => {
   try {
