@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.85 — Migrate product selection to server-side query (19/08/2026)
+- Implement fetchProducts server search integration
+- Connect search input button to trigger fetchProducts
+- Align product list selection maps to display queried items
+
 ## V2.14.84 — Implement product library search, details modal, and bridging auto-lock (19/08/2026)
 - Add searchbox inputs to filter products reactively
 - Implement product detail modal popup showcasing descriptions, images, product truth, and marketplace links

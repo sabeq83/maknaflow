@@ -145,13 +145,25 @@ function MultiplierLabPageContent() {
   const [mandatoryOutroLine, setMandatoryOutroLine] = useState('');
   const [customInstruction, setCustomInstruction] = useState('');
 
+  const fetchProducts = async (search = '') => {
+    try {
+      const res = await fetch(`/api/v2/products?search=${encodeURIComponent(search)}`);
+      const data = await res.json();
+      if (data.success) {
+        setProducts(data.data || []);
+      }
+    } catch (err) {
+      console.error('Fetch products error:', err);
+    }
+  };
+
   useEffect(() => {
     fetchAssets('', '');
     fetchTasks();
     pollLogs();
     fetch('/api/v2/brand-profiles').then(r => r.json()).then(d => { if (d.success) setBrandProfiles(d.data || []); }).catch(() => {});
     fetch('/api/v2/deconstruct?limit=1').then(r => r.json()).then(d => { if (d.success) setNiches(d.niches || []); }).catch(() => {});
-    fetch('/api/v2/products').then(r => r.json()).then(d => { if (d.success) setProducts(d.data || []); }).catch(() => {});
+    fetchProducts('');
 
     pollingRef.current = setInterval(() => {
       fetchTasks(true);
@@ -813,42 +825,56 @@ function MultiplierLabPageContent() {
 
                     {bridgingMode === 'select_existing' && (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                        <input
-                          type="text"
-                          placeholder="🔍 Cari produk..."
-                          value={productSearchQuery}
-                          onChange={e => setProductSearchQuery(e.target.value)}
-                          className="form-input"
-                          style={{ fontSize: '0.8rem' }}
-                        />
+                        <div style={{ display: 'flex', gap: 12 }}>
+                          <input
+                            type="text"
+                            placeholder="🔍 Cari produk..."
+                            value={productSearchQuery}
+                            onChange={e => setProductSearchQuery(e.target.value)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                fetchProducts(productSearchQuery);
+                              }
+                            }}
+                            className="form-input"
+                            style={{ fontSize: '0.8rem', flex: 2 }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => fetchProducts(productSearchQuery)}
+                            className="btn btn-secondary"
+                            style={{ fontSize: '0.8rem', padding: '6px 14px' }}
+                          >
+                            Cari
+                          </button>
+                        </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10, maxHeight: 150, overflowY: 'auto', padding: 10, background: 'var(--surface-interactive)', borderRadius: 6, border: '1px solid var(--border)' }}>
-                          {products
-                            .filter(p => p.product_name.toLowerCase().includes(productSearchQuery.toLowerCase()))
-                            .map(p => {
-                              const isSelected = targetProductId === p.id;
-                              const selectProduct = () => {
-                                setTargetProductId(isSelected ? '' : p.id);
-                              };
-                              return (
-                                <div key={p.id} onClick={selectProduct} style={{ padding: 8, background: isSelected ? 'var(--status-info-soft)' : 'var(--bg-card)', border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`, borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' }}>
-                                    <input type="radio" checked={isSelected} readOnly style={{ pointerEvents: 'none' }} />
-                                    <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{p.product_name}</span>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={e => {
-                                      e.stopPropagation();
-                                      setSelectedProductForModal(p);
-                                    }}
-                                    style={{ background: 'transparent', border: 'none', color: 'var(--accent-light)', fontSize: '0.72rem', cursor: 'pointer', padding: 0, flexShrink: 0 }}
-                                    title="Detail Produk"
-                                  >
-                                    🔍 Detail
-                                  </button>
+                          {products.map(p => {
+                            const isSelected = targetProductId === p.id;
+                            const selectProduct = () => {
+                              setTargetProductId(isSelected ? '' : p.id);
+                            };
+                            return (
+                              <div key={p.id} onClick={selectProduct} style={{ padding: 8, background: isSelected ? 'var(--status-info-soft)' : 'var(--bg-card)', border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`, borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' }}>
+                                  <input type="radio" checked={isSelected} readOnly style={{ pointerEvents: 'none' }} />
+                                  <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{p.product_name}</span>
                                 </div>
-                              );
-                            })}
+                                <button
+                                  type="button"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    setSelectedProductForModal(p);
+                                  }}
+                                  style={{ background: 'transparent', border: 'none', color: 'var(--accent-light)', fontSize: '0.72rem', cursor: 'pointer', padding: 0, flexShrink: 0 }}
+                                  title="Detail Produk"
+                                >
+                                  🔍 Detail
+                                </button>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
@@ -900,44 +926,58 @@ function MultiplierLabPageContent() {
 
                     {bridgingMode === 'select_existing' && (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                        <input
-                          type="text"
-                          placeholder="🔍 Cari produk..."
-                          value={productSearchQuery}
-                          onChange={e => setProductSearchQuery(e.target.value)}
-                          className="form-input"
-                          style={{ fontSize: '0.8rem' }}
-                        />
+                        <div style={{ display: 'flex', gap: 12 }}>
+                          <input
+                            type="text"
+                            placeholder="🔍 Cari produk..."
+                            value={productSearchQuery}
+                            onChange={e => setProductSearchQuery(e.target.value)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                fetchProducts(productSearchQuery);
+                              }
+                            }}
+                            className="form-input"
+                            style={{ fontSize: '0.8rem', flex: 2 }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => fetchProducts(productSearchQuery)}
+                            className="btn btn-secondary"
+                            style={{ fontSize: '0.8rem', padding: '6px 14px' }}
+                          >
+                            Cari
+                          </button>
+                        </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10, maxHeight: 150, overflowY: 'auto', padding: 10, background: 'var(--surface-interactive)', borderRadius: 6, border: '1px solid var(--border)' }}>
-                          {products
-                            .filter(p => p.product_name.toLowerCase().includes(productSearchQuery.toLowerCase()))
-                            .map(p => {
-                              const isSelected = selectedProductIds.includes(p.id);
-                              const toggleProduct = () => {
-                                setSelectedProductIds(prev =>
-                                  prev.includes(p.id) ? prev.filter(id => id !== p.id) : [...prev, p.id]
-                                );
-                              };
-                              return (
-                                <div key={p.id} onClick={toggleProduct} style={{ padding: 8, background: isSelected ? 'var(--status-info-soft)' : 'var(--bg-card)', border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`, borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' }}>
-                                    <input type="checkbox" checked={isSelected} readOnly style={{ pointerEvents: 'none' }} />
-                                    <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{p.product_name}</span>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={e => {
-                                      e.stopPropagation();
-                                      setSelectedProductForModal(p);
-                                    }}
-                                    style={{ background: 'transparent', border: 'none', color: 'var(--accent-light)', fontSize: '0.72rem', cursor: 'pointer', padding: 0, flexShrink: 0 }}
-                                    title="Detail Produk"
-                                  >
-                                    🔍 Detail
-                                  </button>
-                                </div>
+                          {products.map(p => {
+                            const isSelected = selectedProductIds.includes(p.id);
+                            const toggleProduct = () => {
+                              setSelectedProductIds(prev =>
+                                prev.includes(p.id) ? prev.filter(id => id !== p.id) : [...prev, p.id]
                               );
-                            })}
+                            };
+                            return (
+                              <div key={p.id} onClick={toggleProduct} style={{ padding: 8, background: isSelected ? 'var(--status-info-soft)' : 'var(--bg-card)', border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`, borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' }}>
+                                  <input type="checkbox" checked={isSelected} readOnly style={{ pointerEvents: 'none' }} />
+                                  <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{p.product_name}</span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    setSelectedProductForModal(p);
+                                  }}
+                                  style={{ background: 'transparent', border: 'none', color: 'var(--accent-light)', fontSize: '0.72rem', cursor: 'pointer', padding: 0, flexShrink: 0 }}
+                                  title="Detail Produk"
+                                >
+                                  🔍 Detail
+                                </button>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
