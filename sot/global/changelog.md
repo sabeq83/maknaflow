@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.17.1 — Fix middleware: izinkan /api/media-proxy dan /temp tanpa auth (20/08/2026)
+- Tambah /api/media-proxy ke public routes agar Repliz bisa download tanpa session cookie
+- Tambah /temp/ ke public routes
+
 ## V2.17.0 — Fix #3: Media Proxy via Cloudflare Tunnel untuk bypass robots.txt Nextcloud (20/08/2026)
 - Buat endpoint GET /api/media-proxy yang fetch Nextcloud via Tailscale internal
 - Tambah resolveToProxyUrl() di worker — URL Nextcloud otomatis dikonversi ke proxy URL
