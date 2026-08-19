@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.79 — Fix pause and resume buttons in Multiplier Lab (19/08/2026)
+- Add paused_previous_status column migration for re_multiplier_tasks
+- Implement campaign pause/resume PATCH handler in multiplier api route
+
 ## V2.14.78 — Fix pipeline status mapping and retry button (19/08/2026)
 - Fix getStageStatus status parsing in multiplier workbench UI
 - Add support for T2I stage retry in multiplier backend retry API

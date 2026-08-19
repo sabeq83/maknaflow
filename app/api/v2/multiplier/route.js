@@ -39,14 +39,33 @@ export const GET = withTenantContext(async (request) => {
 export const PATCH = withTenantContext(async (request) => {
   try {
     const body = await request.json();
-    const { schedulerActive } = body;
+    const { schedulerActive, action, batchId } = body;
 
     if (schedulerActive !== undefined) {
       await setSetting('multiplier_scheduler_active', schedulerActive ? 'true' : 'false');
       return NextResponse.json({ success: true, isSchedulerActive: schedulerActive });
     }
 
-    return NextResponse.json({ success: false, error: 'Field "schedulerActive" wajib diisi' }, { status: 400 });
+    if (action && batchId) {
+      const { dbRun } = await import('@/lib/db');
+      if (action === 'pause') {
+        await dbRun(`
+          UPDATE re_multiplier_tasks 
+          SET paused_previous_status = status, status = 'paused' 
+          WHERE batch_id = ? AND status NOT IN ('completed', 'failed', 'paused')
+        `, [batchId]);
+        return NextResponse.json({ success: true, message: 'Kampanye berhasil dijeda.' });
+      } else if (action === 'resume') {
+        await dbRun(`
+          UPDATE re_multiplier_tasks 
+          SET status = COALESCE(paused_previous_status, 'pending_resolution'), paused_previous_status = NULL 
+          WHERE batch_id = ? AND status = 'paused'
+        `, [batchId]);
+        return NextResponse.json({ success: true, message: 'Kampanye berhasil dilanjutkan.' });
+      }
+    }
+
+    return NextResponse.json({ success: false, error: 'Field "schedulerActive" atau "action" + "batchId" wajib diisi' }, { status: 400 });
   } catch (error) {
     console.error('[Multiplier API] PATCH error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
