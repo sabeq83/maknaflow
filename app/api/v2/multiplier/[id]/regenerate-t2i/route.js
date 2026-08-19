@@ -39,11 +39,15 @@ export const POST = withTenantContext(async (req, { params }) => {
 
     console.log(`[Multiplier UI Regenerate] Submitting T2I task for clip ${clipIndex}...`);
 
+    const isBridgeClip = (bridging.isBridgingActive !== false) &&
+                         Number(clipIndex) >= Number(bridging.bridgeAtClip || 0) &&
+                         Number(clipIndex) < (Number(bridging.bridgeAtClip || 0) + Number(bridging.bridgeDurationClips || 1));
+
     const t2iResult = await generateImage({
       prompt: t2i_prompt,
       model: imageModel,
       aspect_ratio: '9:16',
-      reference_images: productBase64 ? [productBase64] : undefined
+      reference_images: (isBridgeClip && productBase64) ? [productBase64] : undefined
     });
 
     if (!t2iResult || !t2iResult.task_id) {

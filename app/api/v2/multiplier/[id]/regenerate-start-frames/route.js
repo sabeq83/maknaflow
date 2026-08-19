@@ -81,11 +81,15 @@ async function runTaskRegenerateStartFramesBackground(taskId, task, prompts) {
 
       console.log(`[Multiplier SF Batch] Processing clip ${clipIndex} for task ${taskId}...`);
 
+      const isBridgeClip = (bridging.isBridgingActive !== false) &&
+                           Number(clipIndex) >= Number(bridging.bridgeAtClip || 0) &&
+                           Number(clipIndex) < (Number(bridging.bridgeAtClip || 0) + Number(bridging.bridgeDurationClips || 1));
+
       const t2iResult = await generateImage({
         prompt: promptText,
         model: imageModel,
         aspect_ratio: '9:16',
-        reference_images: productBase64 ? [productBase64] : undefined
+        reference_images: (isBridgeClip && productBase64) ? [productBase64] : undefined
       });
 
       if (!t2iResult?.task_id) {

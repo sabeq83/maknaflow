@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.92 — Restrict product reference images only to active bridge clips in Multiplier (19/08/2026)
+- In handleT2iGeneration only pass productBase64 to generateImage if clipIndex is within active bridge range
+- In manual regenerate-t2i API route restrict productBase64 to active bridgeAtClip
+- In batch regenerate-start-frames API route restrict productBase64 to active bridge range
+
 ## V2.14.91 — Implement live product metadata and base64 image path fallback for Multiplier (19/08/2026)
 - Add dynamic query fallback in handleProductResolution to read clean_photo_url and metadata from live DB
 - Add dynamic fallback in handleStoryboardRemake to fetch latest product truth and geometric truth
