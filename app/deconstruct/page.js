@@ -253,12 +253,7 @@ export default function DeconstructPage() {
   // --- Actions ---
   async function handleSaveUrls(e) {
     e.preventDefault();
-    if (!nicheInput.trim()) {
-      showToast('Niche wajib diisi', 'error');
-      return;
-    }
-
-    const body = { niche: nicheInput.trim() };
+    const body = { niche: nicheInput.trim() || 'Auto-Detect' };
     if (inputMode === 'csv') {
       if (csvData.length === 0) {
         showToast('Unggah CSV yang valid terlebih dahulu', 'error');
@@ -749,11 +744,10 @@ export default function DeconstructPage() {
                 {/* Niche Input */}
                 <div style={{ marginBottom: 14 }}>
                   <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>
-                    Niche Konten (Wajib)
+                    Niche Konten (Opsional - Kosongkan untuk Deteksi Otomatis)
                   </label>
                   <input
                     type="text"
-                    required
                     placeholder="Contoh: Skincare, Gadget, Kuliner"
                     value={nicheInput}
                     onChange={(e) => setNicheInput(e.target.value)}

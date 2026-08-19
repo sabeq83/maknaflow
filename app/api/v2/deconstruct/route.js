@@ -96,9 +96,7 @@ export const POST = withTenantContext(async (request) => {
     const { niche } = body;
     const tenantId = getActiveTenantId();
 
-    if (!niche || !niche.trim()) {
-      return NextResponse.json({ success: false, error: 'Niche wajib ditentukan' }, { status: 400 });
-    }
+    const nicheVal = (niche && niche.trim()) ? niche.trim() : 'Auto-Detect';
 
     let items = [];
 
@@ -144,7 +142,7 @@ export const POST = withTenantContext(async (request) => {
 
     const { savedCount, duplicateCount, savedIds } = await createSavedDeconstructAssets(
       items,
-      niche.trim(),
+      nicheVal,
       tenantId
     );
 

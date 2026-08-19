@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.89 — Implement auto-niche detection and keyword tags extraction in deconstruction pipeline (19/08/2026)
+- Add re_niches table migration and default data seeding in db-pg.js
+- Update deconstruct prompt builder to accept availableNiches list and prompt Gemini to auto-detect niche and tags
+- Support optional niche input in UI form and API route defaulting to Auto-Detect
+
 ## V2.14.88 — Fix Multiplier Lab product truth mapping and reference image casing (19/08/2026)
 - Copy product_truth and geometric_truth from DB snapshots to productDNA in worker
 - Resolve casing differences between product_ref_image_path and productRefImagePath in worker and regenerate endpoints
