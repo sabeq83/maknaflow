@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.15.5 — Fix 5 Repliz integration bugs from OpenAPI spec audit (19/08/2026)
+- Fix type mapping per platform — TikTok uses video not reel
+- Resolve Nextcloud 303 redirect URL before sending to Repliz
+- Fix retryReplizSchedule HTTP method POST→PUT per spec
+- Fix error status reconciliation — catch both failed and error
+- Increase API timeout from 10s to 30s
+
 ## V2.15.4 — Fix worker race condition on startup cache loading (19/08/2026)
 - Prevent runPublishingTick from claiming jobs if cachesLoaded is false
 - Export and set cachesLoaded boolean flag in db.js loadDbCaches
