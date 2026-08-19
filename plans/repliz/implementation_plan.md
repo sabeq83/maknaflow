@@ -350,11 +350,11 @@ Nama status aktual wajib diverifikasi dari respons akun Repliz pengguna sebelum 
 - [x] Perbarui UI Publishing Scheduler untuk akun dan platform Repliz.
 - [x] Tambahkan unit/integration tests dengan mock HTTP; jangan memakai akun riil dalam tes otomatis.
 - [x] Jalankan `npm run test:publishing-scheduler` dan tes Repliz.
-- [ ] Jalankan lint/build yang relevan dan perbaiki seluruh regresi.
-- [ ] Lakukan smoke test staging: sync account, schedule test, status sync, retry, dan cancel.
-- [ ] Perbarui checkbox dokumen ini menjadi `[x]` segera setelah setiap tahap selesai.
-- [ ] Setelah verifikasi berhasil, jalankan SOP release non-interaktif patch dengan judul dan changelog yang sesuai.
-- [ ] Verifikasi branch `main` dan tag rilis sudah terunggah ke remote yang benar.
+- [x] Jalankan lint/build yang relevan dan perbaiki seluruh regresi.
+- [x] Lakukan smoke test staging: sync account, schedule test, status sync, retry, dan cancel.
+- [x] Perbarui checkbox dokumen ini menjadi `[x]` segera setelah setiap tahap selesai.
+- [x] Setelah verifikasi berhasil, jalankan SOP release non-interaktif patch dengan judul dan changelog yang sesuai.
+- [x] Verifikasi branch `main` dan tag rilis sudah terunggah ke remote yang benar.
 
 ## Acceptance Criteria
 

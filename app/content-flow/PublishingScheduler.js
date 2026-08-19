@@ -73,7 +73,8 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
     caption: initialPreloadItem?.caption || '',
     media_url: initialPreloadItem?.url_asset || initialPreloadItem?.nextcloud_url || '',
     scheduled_at: new Date(Date.now() + 3600000).toISOString().slice(0, 16), // default +1 hour
-    timezone: 'Asia/Jakarta'
+    timezone: 'Asia/Jakarta',
+    activeTabProvider: 'meta'
   });
   const [submittingSchedule, setSubmittingSchedule] = useState(false);
   const [preflightResult, setPreflightResult] = useState(null);
@@ -1256,13 +1257,71 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
 
               {/* 2. Pilih Akun Publikasi */}
               <div style={{ marginBottom: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, flexWrap: 'wrap', gap: 6 }}>
                   <label style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700 }}>
                     Pilih Akun Publikasi <span style={{ color: 'var(--status-danger)' }}>*</span>
                   </label>
+
+                  {/* Segmented Tab Provider Selector */}
+                  <div style={{ display: 'flex', background: 'var(--surface-interactive)', padding: 2, borderRadius: 6, gap: 2 }}>
+                    <button
+                      type="button"
+                      onClick={() => setScheduleForm(prev => ({ ...prev, activeTabProvider: 'meta' }))}
+                      style={{
+                        background: (scheduleForm.activeTabProvider || 'meta') === 'meta' ? 'var(--surface)' : 'transparent',
+                        border: 'none', borderRadius: 4, padding: '2px 8px', fontSize: 10,
+                        color: (scheduleForm.activeTabProvider || 'meta') === 'meta' ? 'var(--text-primary)' : 'var(--text-muted)',
+                        cursor: 'pointer', fontWeight: (scheduleForm.activeTabProvider || 'meta') === 'meta' ? 800 : 500,
+                        transition: 'background 0.15s'
+                      }}
+                    >
+                      Meta Direct
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setScheduleForm(prev => ({ ...prev, activeTabProvider: 'repliz' }))}
+                      style={{
+                        background: (scheduleForm.activeTabProvider || 'meta') === 'repliz' ? 'var(--surface)' : 'transparent',
+                        border: 'none', borderRadius: 4, padding: '2px 8px', fontSize: 10,
+                        color: (scheduleForm.activeTabProvider || 'meta') === 'repliz' ? 'var(--text-primary)' : 'var(--text-muted)',
+                        cursor: 'pointer', fontWeight: (scheduleForm.activeTabProvider || 'meta') === 'repliz' ? 800 : 500,
+                        transition: 'background 0.15s'
+                      }}
+                    >
+                      Repliz Cloud
+                    </button>
+                  </div>
+
                   <button
                     type="button"
-                    onClick={() => fetchAccounts(true)}
+                    onClick={async () => {
+                      const prov = scheduleForm.activeTabProvider || 'meta';
+                      setSyncingAccounts(true);
+                      try {
+                        const res = await fetch(`/api/v2/publishing/accounts?sync=1&provider=${prov}`);
+                        const json = await res.json();
+                        if (json.success && Array.isArray(json.data)) {
+                          // Merge synced accounts with other provider's existing accounts
+                          const otherProv = prov === 'meta' ? 'repliz' : 'meta';
+                          const otherAccs = accounts.filter(acc => (acc.provider || 'meta') === otherProv);
+                          const merged = [...otherAccs, ...json.data];
+                          
+                          const seenKeys = new Set();
+                          const unique = merged.filter(acc => {
+                            const key = `${acc.platform}_${acc.facebook_page_id || ''}_${acc.instagram_user_id || ''}_${acc.provider || ''}_${acc.provider_account_id || ''}`;
+                            if (seenKeys.has(key)) return false;
+                            seenKeys.add(key);
+                            return true;
+                          });
+                          setAccounts(unique);
+                          showToast(`Berhasil sinkronisasi akun ${prov === 'meta' ? 'Meta' : 'Repliz'}! 🟢`);
+                        }
+                      } catch (err) {
+                        showToast('Gagal sinkronisasi');
+                      } finally {
+                        setSyncingAccounts(false);
+                      }
+                    }}
                     disabled={syncingAccounts}
                     style={{
                       background: 'transparent', border: 'none', color: 'var(--link)',
@@ -1270,16 +1329,16 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                     }}
                   >
                     <span>{syncingAccounts ? '⏳' : '🔄'}</span>
-                    <span>{syncingAccounts ? 'Menyinkronkan...' : 'Sinkronkan Akun'}</span>
+                    <span>{syncingAccounts ? 'Menyinkronkan...' : 'Sinkronkan'}</span>
                   </button>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 130, overflowY: 'auto', background: 'var(--surface)', padding: 8, borderRadius: 6, border: '1px solid var(--surface-interactive)' }}>
-                  {accounts.length === 0 ? (
+                  {accounts.filter(acc => (acc.provider || 'meta') === (scheduleForm.activeTabProvider || 'meta')).length === 0 ? (
                     <div style={{ color: 'var(--text-muted)', fontSize: 11, padding: 6, textAlign: 'center' }}>
-                      Belum ada akun Meta terdeteksi. <button type="button" onClick={() => fetchAccounts(true)} style={{ color: 'var(--link)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>Klik untuk menyinkronkan dari Pengaturan</button>.
+                      Belum ada akun {(scheduleForm.activeTabProvider || 'meta') === 'meta' ? 'Meta' : 'Repliz'} terdeteksi. Silakan klik tombol <strong>"Sinkronkan"</strong> di atas.
                     </div>
                   ) : (
-                    accounts.map(acc => (
+                    accounts.filter(acc => (acc.provider || 'meta') === (scheduleForm.activeTabProvider || 'meta')).map(acc => (
                       <label key={acc.id} style={{
                         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                         padding: '4px 8px', borderRadius: 4, background: scheduleForm.account_ids.includes(acc.id) ? 'var(--status-info-soft)' : 'transparent',

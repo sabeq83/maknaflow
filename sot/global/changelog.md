@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.97 — Publishing Scheduler Provider Segmented Control UI (19/08/2026)
+- Pilihan tab Meta Direct vs Repliz Cloud
+- Dukungan sync terpisah per provider di modal skeduler
+- Pembaruan visual checkbox target
+
 ## V2.14.96 — Repliz Content Flow Publishing (19/08/2026)
 - Integrasi akun dan scheduling Repliz
 - Sinkronisasi status, retry, dan cancel lintas platform
