@@ -42,7 +42,7 @@ const XIcon = ({ style }) => (
   </svg>
 );
 
-export default function PublishingScheduler({ initialPreloadItem = null, onBackToLibrary = null }) {
+export default function PublishingScheduler({ initialPreloadItem = null, onBackToLibrary = null, modalOnly = false }) {
   const [activeTab, setActiveTab] = useState('queue'); // 'queue', 'calendar', 'history'
   const [jobs, setJobs] = useState([]);
   const [metrics, setMetrics] = useState({ scheduled: 0, publishedToday: 0, retryWait: 0, needsAction: 0 });
@@ -74,7 +74,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
     media_url: initialPreloadItem?.url_asset || initialPreloadItem?.nextcloud_url || '',
     scheduled_at: new Date(Date.now() + 3600000).toISOString().slice(0, 16), // default +1 hour
     timezone: 'Asia/Jakarta',
-    activeTabProvider: 'meta',
+    activeTabProvider: 'repliz',  // Default Repliz Cloud
     is_ai_generated: false
   });
   const [submittingSchedule, setSubmittingSchedule] = useState(false);

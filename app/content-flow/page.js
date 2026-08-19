@@ -820,6 +820,26 @@ function ContentFlowHubPageContent() {
             <ContentFlowAnalytics accountQuery={accountQuery} />
           ) : (
             <>
+              {/* Modal Overlay Scheduler — tampil di atas library tanpa pindah tab */}
+              {schedulePreloadItem && (
+                <div style={{
+                  position: 'fixed', inset: 0, zIndex: 1000,
+                  background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)',
+                  display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+                  padding: '20px', overflowY: 'auto'
+                }}>
+                  <div style={{ width: '100%', maxWidth: '960px', position: 'relative' }}>
+                    <PublishingScheduler
+                      initialPreloadItem={schedulePreloadItem}
+                      modalOnly={true}
+                      onBackToLibrary={() => {
+                        setSchedulePreloadItem(null);
+                        loadContent();
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
               {/* Quick Metrics Bar */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '24px' }}>
             <div style={{ padding: '16px', borderRadius: '16px', background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
@@ -1565,17 +1585,17 @@ function ContentFlowHubPageContent() {
                     </h2>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <button
+                     <button
                       type="button"
                       onClick={() => {
                         const itemToSchedule = { ...activeItem };
                         setActiveItem(null);
                         setSchedulePreloadItem(itemToSchedule);
-                        handleSwitchView('publishing');
+                        // Buka modal overlay langsung di library (tidak perlu pindah tab)
                       }}
                       className="content-action content-action-neutral"
                       style={{ padding: '6px 12px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '6px' }}
-                      title="Jadwalkan publikasi Facebook / Instagram untuk konten ini"
+                      title="Jadwalkan publikasi via Repliz Cloud untuk konten ini"
                     >
                       <span>⏱️ Jadwalkan Publikasi</span>
                     </button>

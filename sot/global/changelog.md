@@ -1,5 +1,13 @@
 # Changelog
 
+## V2.16.0 — Integrasi Repliz CF: Auto-sync permalink & modal scheduler di Library (19/08/2026)
+- Migrasi kolom tiktok/youtube/threads/linkedin di content_flow_items
+- Refactor syncContentFlowSummary jadi generik untuk semua 6 platform
+- Helper buildPlatformPermalink konstruksi URL post dari postId + username
+- Repliz success handler auto-save permalink ke ContentFlow DB
+- Default provider Repliz Cloud di PublishingScheduler
+- Modal overlay scheduler langsung di atas Library tanpa pindah tab
+
 ## V2.15.5 — Fix 5 Repliz integration bugs from OpenAPI spec audit (19/08/2026)
 - Fix type mapping per platform — TikTok uses video not reel
 - Resolve Nextcloud 303 redirect URL before sending to Repliz
