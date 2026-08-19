@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.14.95 — Speedup Multiplier Lab & G-Labs Optimizations (19/08/2026)
+- Stage chaining status loop in worker
+- Auto sync completed tasks to Content Flow
+- Add G-Labs safety delay (10-20s) and webhook overrides
+- Enable G-Labs completed task reuse
+
 ## V2.14.94 — Align Multiplier Lab UI settings and background worker audio mappings (19/08/2026)
 - Remove SFX/BGM Volume sliders and Enable Social Draft Post checkbox from UI
 - Update Voice Persona select input to render options dynamically from GEMINI_VOICES and MINIMAX_VOICES
