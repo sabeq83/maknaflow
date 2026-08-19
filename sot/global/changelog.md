@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.91 — Implement live product metadata and base64 image path fallback for Multiplier (19/08/2026)
+- Add dynamic query fallback in handleProductResolution to read clean_photo_url and metadata from live DB
+- Add dynamic fallback in handleStoryboardRemake to fetch latest product truth and geometric truth
+- Add dynamic fallback in handleT2iGeneration to query and convert clean product photo to base64 if missing
+
 ## V2.14.90 — Implement hybrid context injection system for Content Planner (19/08/2026)
 - Add promotion_context and custom_instructions columns migration in db-pg.js and db.sqlite-backup.js
 - Map promotion_context and custom_instructions in createDraftContentPlanner
