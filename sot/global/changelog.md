@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.16.4 — Relayout tombol schedule di card ContentFlow (19/08/2026)
+- Pindahkan tombol schedule di bawah tombol detail
+- Ganti warna tombol schedule jadi hijau emerald
+- Ganti teks tombol jadi Schedule
+
 ## V2.16.3 — Sederhanakan status publikasi ContentFlow menjadi 3 nilai (19/08/2026)
 - Status platform hanya: Not Published / Scheduled / Published
 - ContentFlow langsung tampilkan Scheduled saat job dikirim ke Repliz

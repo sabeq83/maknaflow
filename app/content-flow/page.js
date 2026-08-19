@@ -1575,11 +1575,11 @@ function ContentFlowHubPageContent() {
                         </h3>
                       </div>
 
-                      <div style={{ display: 'flex', gap: '6px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%' }}>
                         <button
                           onClick={() => openDetailModal(item)}
                           style={{
-                            flex: 1, padding: '9px 10px', borderRadius: '10px',
+                            width: '100%', padding: '9px 14px', borderRadius: '10px',
                             background: 'linear-gradient(135deg, #2563eb 0%, var(--status-neutral) 100%)',
                             color: 'var(--text-primary)', fontSize: '12px', fontWeight: 700, border: 'none', cursor: 'pointer',
                             boxShadow: '0 4px 12px rgba(37, 99, 235, 0.35)', transition: 'all 0.2s ease'
@@ -1590,15 +1590,15 @@ function ContentFlowHubPageContent() {
                         <button
                           onClick={() => setSchedulePreloadItem(item)}
                           style={{
-                            padding: '9px 10px', borderRadius: '10px',
-                            background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+                            width: '100%', padding: '9px 14px', borderRadius: '10px',
+                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                             color: '#fff', fontSize: '12px', fontWeight: 700, border: 'none', cursor: 'pointer',
-                            boxShadow: '0 4px 12px rgba(124, 58, 237, 0.35)', transition: 'all 0.2s ease',
-                            whiteSpace: 'nowrap'
+                            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)', transition: 'all 0.2s ease',
+                            textAlign: 'center'
                           }}
                           title="Jadwalkan publikasi via Repliz Cloud"
                         >
-                          ⏱️ Skedul
+                          ⏱️ Schedule
                         </button>
                       </div>
                     </div>
