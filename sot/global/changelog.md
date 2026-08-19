@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.16.1 — Tambah tombol Skedul langsung di kartu library (19/08/2026)
+- Tombol ⏱️ Skedul tersedia langsung di setiap kartu video di Library
+- Tidak perlu buka Detail modal terlebih dahulu untuk menjadwalkan
+- Klik langsung membuka modal overlay scheduler Repliz Cloud
+
 ## V2.16.0 — Integrasi Repliz CF: Auto-sync permalink & modal scheduler di Library (19/08/2026)
 - Migrasi kolom tiktok/youtube/threads/linkedin di content_flow_items
 - Refactor syncContentFlowSummary jadi generik untuk semua 6 platform
