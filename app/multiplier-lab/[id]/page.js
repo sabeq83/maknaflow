@@ -128,6 +128,12 @@ function CampaignDetailPageContent() {
             try {
               audioConfig = JSON.parse(t.audio_config_json || '{}');
             } catch (_) {}
+            // Enforce staging requirements
+            audioConfig.ffmpeg_sfx_volume = 0.00;
+            audioConfig.ffmpeg_bgm_volume = 0.00;
+            if (audioConfig.ffmpeg_video_scale === undefined) {
+              audioConfig.ffmpeg_video_scale = 1.1;
+            }
             setEditedAudioConfigs(prev => ({ ...prev, [t.id]: audioConfig }));
           }
         });
@@ -963,15 +969,6 @@ function CampaignDetailPageContent() {
                                                     style={{ width: 16, height: 16, cursor: 'pointer' }}
                                                   />
                                                 </div>
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-interactive)', padding: '10px 14px', borderRadius: 6, border: '1px solid var(--border)' }}>
-                                                  <span style={{ fontSize: '0.8rem' }}>Enable Social Draft Post</span>
-                                                  <input
-                                                    type="checkbox"
-                                                    checked={!!cfg.enable_social_post}
-                                                    onChange={e => setCfgValue('enable_social_post', e.target.checked)}
-                                                    style={{ width: 16, height: 16, cursor: 'pointer' }}
-                                                  />
-                                                </div>
                                               </div>
                                             </div>
 
@@ -997,13 +994,13 @@ function CampaignDetailPageContent() {
                                                 <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Voice Persona</label>
                                                 <select
                                                   className="form-input"
-                                                  value={cfg.voice_persona || 'Indonesian_casual_reporter_vv2'}
+                                                  value={cfg.voice_persona || (cfg.voice_provider === 'gemini' ? 'Kore' : 'Indonesian_casual_reporter_vv2')}
                                                   onChange={e => setCfgValue('voice_persona', e.target.value)}
                                                 >
-                                                  <option value="Indonesian_casual_reporter_vv2">Indonesian casual reporter vv2</option>
-                                                  <option value="Indonesian_professional_anchor_vv2">Indonesian professional anchor vv2</option>
-                                                  <option value="English_causual_narrator_vv1">English causual narrator vv1</option>
-                                                  <option value="Kore">Kore (Gemini TTS default)</option>
+                                                  {cfg.voice_provider === 'gemini'
+                                                    ? GEMINI_VOICES.map(v => <option key={v.id} value={v.id}>{v.avatar} {v.name} - {v.desc}</option>)
+                                                    : MINIMAX_VOICES.map(v => <option key={v.id} value={v.id}>{v.avatar} {v.name} - {v.desc}</option>)
+                                                  }
                                                 </select>
                                               </div>
 
@@ -1069,39 +1066,13 @@ function CampaignDetailPageContent() {
                                               )}
 
                                               <div className="form-group" style={{ marginBottom: 0 }}>
-                                                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>SFX Volume ({cfg.ffmpeg_sfx_volume || '0.8'}x)</label>
-                                                <input
-                                                  type="range"
-                                                  min="0.0"
-                                                  max="1.0"
-                                                  step="0.1"
-                                                  value={cfg.ffmpeg_sfx_volume || 0.8}
-                                                  onChange={e => setCfgValue('ffmpeg_sfx_volume', parseFloat(e.target.value))}
-                                                  style={{ width: '100%' }}
-                                                />
-                                              </div>
-
-                                              <div className="form-group" style={{ marginBottom: 0 }}>
-                                                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>BGM Volume ({cfg.ffmpeg_bgm_volume || '0.3'}x)</label>
-                                                <input
-                                                  type="range"
-                                                  min="0.0"
-                                                  max="1.0"
-                                                  step="0.1"
-                                                  value={cfg.ffmpeg_bgm_volume || 0.3}
-                                                  onChange={e => setCfgValue('ffmpeg_bgm_volume', parseFloat(e.target.value))}
-                                                  style={{ width: '100%' }}
-                                                />
-                                              </div>
-
-                                              <div className="form-group" style={{ marginBottom: 0 }}>
-                                                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Video Scale ({cfg.ffmpeg_video_scale || '1.0'}x)</label>
+                                                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Video Scale ({cfg.ffmpeg_video_scale !== undefined ? cfg.ffmpeg_video_scale : '1.1'}x)</label>
                                                 <input
                                                   type="range"
                                                   min="1.0"
                                                   max="2.0"
                                                   step="0.05"
-                                                  value={cfg.ffmpeg_video_scale || 1.0}
+                                                  value={cfg.ffmpeg_video_scale !== undefined ? cfg.ffmpeg_video_scale : 1.1}
                                                   onChange={e => setCfgValue('ffmpeg_video_scale', parseFloat(e.target.value))}
                                                   style={{ width: '100%' }}
                                                 />

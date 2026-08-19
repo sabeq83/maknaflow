@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.14.94 — Align Multiplier Lab UI settings and background worker audio mappings (19/08/2026)
+- Remove SFX/BGM Volume sliders and Enable Social Draft Post checkbox from UI
+- Update Voice Persona select input to render options dynamically from GEMINI_VOICES and MINIMAX_VOICES
+- Enforce default 0.00 volume and 1.1 scale on page init
+- Modify background worker to support both camelCase and snake_case configs
+
 ## V2.14.93 — Optimize Multiplier Lab to process tasks in parallel (19/08/2026)
 - Replace getNextPendingMultiplierTask with getPendingMultiplierTasks(8) in processNextMultiplierTask
 - Use Promise.all to process up to 8 multiplier tasks concurrently in a single scheduler tick

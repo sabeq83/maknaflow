@@ -138,7 +138,7 @@ function MultiplierLabPageContent() {
   const [targetLanguage, setTargetLanguage] = useState('id-ID');
   const [ffmpegSyncOption, setFfmpegSyncOption] = useState('smart_sync');
   const [syncMode, setSyncMode] = useState('auto');
-  const [ffmpegVideoScale, setFfmpegVideoScale] = useState(1.0);
+  const [ffmpegVideoScale, setFfmpegVideoScale] = useState(1.1);
   const [ffmpegSfxVolume, setFfmpegSfxVolume] = useState(0.0);
   const [ffmpegBgmVolume, setFfmpegBgmVolume] = useState(0.0);
   const [enableSocialPost, setEnableSocialPost] = useState(false);
