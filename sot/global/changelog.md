@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.93 — Optimize Multiplier Lab to process tasks in parallel (19/08/2026)
+- Replace getNextPendingMultiplierTask with getPendingMultiplierTasks(8) in processNextMultiplierTask
+- Use Promise.all to process up to 8 multiplier tasks concurrently in a single scheduler tick
+
 ## V2.14.92 — Restrict product reference images only to active bridge clips in Multiplier (19/08/2026)
 - In handleT2iGeneration only pass productBase64 to generateImage if clipIndex is within active bridge range
 - In manual regenerate-t2i API route restrict productBase64 to active bridgeAtClip
