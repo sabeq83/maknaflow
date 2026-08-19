@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.16.3 — Sederhanakan status publikasi ContentFlow menjadi 3 nilai (19/08/2026)
+- Status platform hanya: Not Published / Scheduled / Published
+- ContentFlow langsung tampilkan Scheduled saat job dikirim ke Repliz
+- Gagal atau dibatalkan reset ke Not Published agar bisa dijadwalkan ulang
+
 ## V2.16.2 — Detail modal selalu fetch status terbaru dari DB (19/08/2026)
 - openDetailModal kini async dan fetch data segar dari GET /api/content-flow/[id]
 - Status platform (tiktok/IG/FB) dan permalink selalu up-to-date tanpa perlu refresh halaman
