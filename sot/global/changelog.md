@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.82 — Enhance Multiplier Lab blueprint card and modal details popup (19/08/2026)
+- Add shortened clickable source URL on card
+- Add hover tooltip for AI insights block
+- Implement interactive modal details popup with storyboard table and e-commerce recommendations
+
 ## V2.14.81 — Multiplier Lab Workflows Restoration & Accordion Alignment (19/08/2026)
 - Restore Multiplier Lab dual workflows campaign creation form
 - Align accordions 1-4 with OPC campaigns

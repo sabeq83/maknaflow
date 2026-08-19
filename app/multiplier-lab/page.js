@@ -59,6 +59,7 @@ function MultiplierLabPageContent() {
   const [combinationRows, setCombinationRows] = useState([]);
   const [nicheFilter, setNicheFilter] = useState('');
   const [niches, setNiches] = useState([]);
+  const [selectedBlueprintForModal, setSelectedBlueprintForModal] = useState(null);
 
   const [tasks, setTasks] = useState([]);
   const [loadingTasks, setLoadingTasks] = useState(true);
@@ -695,6 +696,8 @@ function MultiplierLabPageContent() {
                           }
                         };
 
+                        const shortUrl = a.source_url ? (a.source_url.length > 25 ? a.source_url.replace(/https?:\/\/(www\.)?/, '').substring(0, 22) + '...' : a.source_url.replace(/https?:\/\/(www\.)?/, '')) : 'Source URL';
+
                         return (
                           <div
                             key={a.id}
@@ -725,13 +728,52 @@ function MultiplierLabPageContent() {
                               <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                                 {a.original_caption || 'Blueprint s/d ' + a.id}
                               </div>
-                              <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', margin: '4px 0 0' }}>
-                                {a.resume?.slice(0, 80)}...
-                              </p>
+                              {a.source_url && (
+                                <a
+                                  href={a.source_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={e => e.stopPropagation()}
+                                  style={{ fontSize: '0.72rem', color: 'var(--accent-light)', textDecoration: 'underline', marginTop: 4, display: 'inline-block' }}
+                                >
+                                  {shortUrl} ➔
+                                </a>
+                              )}
+                              {a.viral_pattern_summary && (
+                                <div
+                                  title={a.viral_pattern_summary}
+                                  style={{
+                                    fontSize: '0.74rem',
+                                    color: 'var(--text-secondary)',
+                                    background: 'rgba(9, 14, 26, 0.3)',
+                                    padding: '6px 8px',
+                                    borderRadius: 4,
+                                    borderLeft: '3px solid var(--accent)',
+                                    marginTop: 8,
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                    lineHeight: '1.4',
+                                    cursor: 'help'
+                                  }}
+                                >
+                                  🧠 Insights: {a.viral_pattern_summary}
+                                </div>
+                              )}
                             </div>
-                            <div style={{ display: 'flex', justify: 'space-between', fontSize: '0.68rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border-subtle)', paddingTop: 8, marginTop: 4 }}>
-                              <span>📋 {a.original_storyboard_json ? JSON.parse(a.original_storyboard_json).length : 0} adegan</span>
-                              <span>⏱️ {a.duration_seconds || '0'}s</span>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.68rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border-subtle)', paddingTop: 8, marginTop: 4 }}>
+                              <span>📋 {a.original_storyboard_json ? JSON.parse(a.original_storyboard_json).length : 0} adegan | ⏱️ {a.duration_seconds || '0'}s</span>
+                              <button
+                                type="button"
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  setSelectedBlueprintForModal(a);
+                                }}
+                                style={{ background: 'transparent', border: 'none', color: 'var(--accent-light)', fontSize: '0.68rem', fontWeight: 700, cursor: 'pointer', padding: 0 }}
+                              >
+                                🔍 Detail Blueprint
+                              </button>
                             </div>
                           </div>
                         );
@@ -1519,6 +1561,267 @@ function MultiplierLabPageContent() {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {selectedBlueprintForModal && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              background: 'rgba(0, 0, 0, 0.85)',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(8px)'
+            }}
+            onClick={() => setSelectedBlueprintForModal(null)}
+          >
+            <div
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                width: '90%',
+                maxWidth: '850px',
+                maxHeight: '85vh',
+                borderRadius: 12,
+                display: 'flex',
+                flexDirection: 'column',
+                boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)'
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div
+                style={{
+                  padding: '20px 24px',
+                  borderBottom: '1px solid var(--border)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  background: 'rgba(17, 27, 45, 0.8)'
+                }}
+              >
+                <div>
+                  <span
+                    style={{
+                      fontSize: '0.65rem',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      background: 'rgba(45, 212, 191, 0.12)',
+                      color: 'var(--accent)',
+                      padding: '2px 6px',
+                      borderRadius: 4,
+                      marginBottom: 4,
+                      display: 'inline-block'
+                    }}
+                  >
+                    Niche: {selectedBlueprintForModal.niche || 'General'}
+                  </span>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>
+                    📄 Detail Blueprint: {selectedBlueprintForModal.original_caption?.slice(0, 60) || ('Blueprint #' + selectedBlueprintForModal.id)}
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-muted)',
+                    fontSize: '1.5rem',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => setSelectedBlueprintForModal(null)}
+                >
+                  &times;
+                </button>
+              </div>
+
+              <div style={{ padding: 24, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 20 }}>
+                {/* 1. AI Insights block */}
+                {selectedBlueprintForModal.viral_pattern_summary && (
+                  <div
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(45,212,191,0.06) 0%, rgba(45,212,191,0.01) 100%)',
+                      border: '1px solid rgba(45,212,191,0.2)',
+                      borderLeft: '4px solid var(--accent)',
+                      padding: '16px 20px',
+                      borderRadius: 8
+                    }}
+                  >
+                    <h4 style={{ margin: '0 0 8px 0', fontSize: '0.88rem', color: 'var(--accent-light)' }}>
+                      🧠 AI Viral Pattern & Insights
+                    </h4>
+                    <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                      {selectedBlueprintForModal.viral_pattern_summary}
+                    </p>
+                  </div>
+                )}
+
+                {/* 2. Detailed Storyboard Table */}
+                {(() => {
+                  let storyboard = [];
+                  try {
+                    storyboard = JSON.parse(selectedBlueprintForModal.original_storyboard_json || '[]');
+                  } catch (_) {}
+
+                  if (storyboard.length === 0) return null;
+
+                  return (
+                    <div>
+                      <h4 style={{ margin: '0 0 10px 0', fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                        📋 Detailed Storyboard ({storyboard.length} Scenes)
+                      </h4>
+                      <div style={{ overflowX: 'auto', border: '1px solid var(--border)', borderRadius: 8 }}>
+                        <table className="ideas-table" style={{ width: '100%', fontSize: '0.78rem', borderCollapse: 'collapse' }}>
+                          <thead>
+                            <tr style={{ background: 'var(--overlay-subtle)' }}>
+                              <th style={{ padding: 10, textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Scene</th>
+                              <th style={{ padding: 10, textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Visual Description</th>
+                              <th style={{ padding: 10, textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Emotional Hook</th>
+                              <th style={{ padding: 10, textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Camera Technique</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {storyboard.map((scene, idx) => (
+                              <tr key={idx} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                                <td style={{ padding: 10, fontWeight: 700, borderBottom: '1px solid var(--border-subtle)' }}>{scene.scene || idx + 1}</td>
+                                <td style={{ padding: 10, borderBottom: '1px solid var(--border-subtle)' }}>{scene.visual_description}</td>
+                                <td style={{ padding: 10, borderBottom: '1px solid var(--border-subtle)' }}>
+                                  {scene.emotional_hook ? scene.emotional_hook.split(',').map((hook, hi) => (
+                                    <span
+                                      key={hi}
+                                      style={{
+                                        fontSize: '0.65rem',
+                                        padding: '2px 6px',
+                                        borderRadius: 4,
+                                        background: 'rgba(253, 203, 110, 0.1)',
+                                        color: 'var(--warning)',
+                                        border: '1px solid rgba(253, 203, 110, 0.15)',
+                                        marginRight: 4,
+                                        display: 'inline-block',
+                                        marginTop: 2
+                                      }}
+                                    >
+                                      {hook.trim()}
+                                    </span>
+                                  )) : '—'}
+                                </td>
+                                <td style={{ padding: 10, borderBottom: '1px solid var(--border-subtle)' }}>{scene.camera_technique || '—'}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* 3. Voice Narration Audio Transcript */}
+                {(() => {
+                  let storyboard = [];
+                  try {
+                    storyboard = JSON.parse(selectedBlueprintForModal.original_storyboard_json || '[]');
+                  } catch (_) {}
+
+                  const narrationScenes = storyboard.filter(s => s.narration_transcript || s.voiceover || s.narration);
+                  if (narrationScenes.length === 0) return null;
+
+                  return (
+                    <div style={{ padding: '16px 20px', background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 8 }}>
+                      <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: 12 }}>
+                        🎙️ Voice Narration Audio Transcript
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {narrationScenes.map((s, si) => (
+                          <div key={si} style={{ fontSize: '0.82rem', lineHeight: 1.5, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                            <span
+                              style={{
+                                fontFamily: 'var(--font-mono)',
+                                fontSize: '0.7rem',
+                                color: 'var(--accent-light)',
+                                background: 'var(--overlay-subtle)',
+                                padding: '2px 6px',
+                                borderRadius: 3,
+                                flexShrink: 0
+                              }}
+                            >
+                              Scene {s.scene || si + 1}
+                            </span>
+                            <span style={{ color: 'var(--text-primary)', fontStyle: 'italic' }}>
+                              "{s.narration_transcript || s.voiceover || s.narration}"
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* 4. E-commerce Concepts */}
+                {(() => {
+                  let lowTicket = [];
+                  let highTicket = [];
+                  try {
+                    lowTicket = JSON.parse(selectedBlueprintForModal.low_ticket_product_ideas_json || '[]');
+                  } catch (_) {}
+                  try {
+                    highTicket = JSON.parse(selectedBlueprintForModal.high_ticket_product_ideas_json || '[]');
+                  } catch (_) {}
+
+                  if (lowTicket.length === 0 && highTicket.length === 0) return null;
+
+                  return (
+                    <div>
+                      <h4 style={{ margin: '0 0 10px 0', fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                        💡 E-commerce Product Concept Recommendations
+                      </h4>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
+                        {lowTicket.length > 0 && (
+                          <div style={{ background: 'rgba(74,222,128,0.02)', border: '1px solid var(--status-success-soft)', padding: 16, borderRadius: 8 }}>
+                            <strong style={{ color: 'var(--success)', fontSize: '0.8rem', display: 'block', marginBottom: 10 }}>
+                              💚 Low Ticket Concepts
+                            </strong>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                              {lowTicket.map((prod, idx) => (
+                                <div key={idx} style={{ fontSize: '0.78rem', borderBottom: idx < lowTicket.length - 1 ? '1px solid var(--border-subtle)' : 'none', paddingBottom: idx < lowTicket.length - 1 ? 8 : 0 }}>
+                                  <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{prod.product_name}</div>
+                                  <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', margin: '2px 0 4px' }}>
+                                    Category: {prod.category} | Search Query: <code style={{ color: 'var(--accent)' }}>{prod.marketplace_search_query}</code>
+                                  </div>
+                                  <div style={{ color: 'var(--text-secondary)' }}>{prod.reason}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {highTicket.length > 0 && (
+                          <div style={{ background: 'rgba(245,158,11,0.02)', border: '1px solid var(--status-warning-soft)', padding: 16, borderRadius: 8 }}>
+                            <strong style={{ color: 'var(--warning)', fontSize: '0.8rem', display: 'block', marginBottom: 10 }}>
+                              🔥 High Ticket Concepts
+                            </strong>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                              {highTicket.map((prod, idx) => (
+                                <div key={idx} style={{ fontSize: '0.78rem', borderBottom: idx < highTicket.length - 1 ? '1px solid var(--border-subtle)' : 'none', paddingBottom: idx < highTicket.length - 1 ? 8 : 0 }}>
+                                  <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{prod.product_name}</div>
+                                  <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', margin: '2px 0 4px' }}>
+                                    Category: {prod.category} | Search Query: <code style={{ color: 'var(--accent)' }}>{prod.marketplace_search_query}</code>
+                                  </div>
+                                  <div style={{ color: 'var(--text-secondary)' }}>{prod.reason}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
           </div>
         )}
 
