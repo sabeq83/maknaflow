@@ -62,8 +62,9 @@ async function runTaskRegenerateStartFramesBackground(taskId, task, prompts) {
       bridging = JSON.parse(task.bridging_config_json || '{}');
     } catch (_) {}
 
-    if (bridging.product_ref_image_path) {
-      const fullPath = path.join(process.cwd(), 'public', bridging.product_ref_image_path);
+    const imagePath = bridging.product_ref_image_path || bridging.productRefImagePath;
+    if (imagePath) {
+      const fullPath = path.join(process.cwd(), 'public', imagePath);
       if (fs.existsSync(fullPath)) {
         productBase64 = fs.readFileSync(fullPath).toString('base64');
       }

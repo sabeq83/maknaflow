@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.88 — Fix Multiplier Lab product truth mapping and reference image casing (19/08/2026)
+- Copy product_truth and geometric_truth from DB snapshots to productDNA in worker
+- Resolve casing differences between product_ref_image_path and productRefImagePath in worker and regenerate endpoints
+
 ## V2.14.87 — Fix automatic generated start frames path (19/08/2026)
 - Redirect background worker start frame saves from public/temp to public/uploads/start_frames
 - Enable dynamic Content-Type header matching based on requested extension in temp router
