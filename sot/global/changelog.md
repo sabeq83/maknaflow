@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.15.4 — Fix worker race condition on startup cache loading (19/08/2026)
+- Prevent runPublishingTick from claiming jobs if cachesLoaded is false
+- Export and set cachesLoaded boolean flag in db.js loadDbCaches
+
 ## V2.15.3 — Fix Repliz schedule ID saving and worker polling (19/08/2026)
 - Fix markPublishingResult missing external_schedule_id parameter
 - Include processing status in claimDuePublishingJob query
