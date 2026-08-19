@@ -16,6 +16,7 @@ export const POST = withTenantContext(async (req, { params }) => {
 
     let nextStatus = 'pending_resolution';
     if (stage === 'remaking') nextStatus = 'remaking';
+    else if (stage === 't2i') nextStatus = 'generating_t2i';
     else if (stage === 'tts') nextStatus = 'generating_audio';
     else if (stage === 'visuals') nextStatus = 'generating_visuals';
     else if (stage === 'ffmpeg') nextStatus = 'ffmpeg_muxing';

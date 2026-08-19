@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.78 — Fix pipeline status mapping and retry button (19/08/2026)
+- Fix getStageStatus status parsing in multiplier workbench UI
+- Add support for T2I stage retry in multiplier backend retry API
+
 ## V2.14.77 — Global Hybrid Lock & Lightweight Downloader (19/08/2026)
 - Penyelarasan global hybrid_lock visual mode untuk seluruh klip di Multiplier Lab
 - Implementasi lightweight HTTP fetch downloader menggantikan Playwright Chromium di multiplier worker

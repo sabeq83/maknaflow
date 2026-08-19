@@ -299,15 +299,79 @@ function CampaignDetailPageContent() {
     else if (tasks.some(t => t.status === 'paused')) overallStatus = 'paused';
   }
 
-  const getStageStatus = (taskStatus, stageName) => {
-    const stagesOrder = ['resolving', 'remaking', 't2i', 'tts', 'visuals', 'ffmpeg', 'cloud', 'social'];
-    const currentIdx = stagesOrder.indexOf(taskStatus);
-    const targetIdx = stagesOrder.indexOf(stageName);
+  const getStageStatus = (task, stageName) => {
+    const taskStatus = task.status;
+    let activeStage = 'resolving';
 
-    if (taskStatus === 'completed') return 'success';
-    if (taskStatus === 'failed' && currentIdx === targetIdx) return 'danger';
-    if (taskStatus === stageName || (stageName === 'resolving' && taskStatus === 'pending_resolution')) return 'active';
-    if (currentIdx > targetIdx) return 'success';
+    if (taskStatus === 'pending_resolution' || taskStatus === 'resolving_product') {
+      activeStage = 'resolving';
+    } else if (taskStatus === 'remaking') {
+      activeStage = 'remaking';
+    } else if (taskStatus === 'generating_t2i') {
+      activeStage = 't2i';
+    } else if (taskStatus === 'waiting_approval') {
+      activeStage = 'waiting_approval';
+    } else if (taskStatus === 'generating_audio') {
+      activeStage = 'tts';
+    } else if (taskStatus === 'generating_visuals') {
+      activeStage = 'visuals';
+    } else if (taskStatus === 'ffmpeg_muxing') {
+      activeStage = 'ffmpeg';
+    } else if (taskStatus === 'completed') {
+      activeStage = 'completed';
+    } else if (taskStatus === 'failed') {
+      if (!task.remake_storyboard_json || task.remake_storyboard_json === '[]') {
+        activeStage = 'remaking_failed';
+      } else {
+        let hasT2i = false;
+        try {
+          const t2iImgs = JSON.parse(task.t2i_images_json || '[]');
+          hasT2i = Array.isArray(t2iImgs) && t2iImgs.length > 0 && t2iImgs.some(img => img !== null);
+        } catch (_) {}
+
+        if (!hasT2i) {
+          activeStage = 't2i_failed';
+        } else {
+          let hasAudio = false;
+          try {
+            const audioConfig = JSON.parse(task.audio_config_json || '{}');
+            hasAudio = !!audioConfig.combined_audio_path;
+          } catch (_) {}
+
+          if (!hasAudio) {
+            activeStage = 'tts_failed';
+          } else if (!task.video_paths_json || task.video_paths_json === '[]') {
+            activeStage = 'visuals_failed';
+          } else if (!task.ffmpeg_output_path) {
+            activeStage = 'ffmpeg_failed';
+          } else {
+            activeStage = 'cloud_failed';
+          }
+        }
+      }
+    }
+
+    const stages = ['resolving', 'remaking', 't2i', 'tts', 'visuals', 'ffmpeg', 'cloud'];
+    const targetIdx = stages.indexOf(stageName);
+
+    if (activeStage === 'completed') return 'success';
+
+    if (activeStage.endsWith('_failed')) {
+      const failedStage = activeStage.replace('_failed', '');
+      const failedIdx = stages.indexOf(failedStage);
+      if (targetIdx === failedIdx) return 'danger';
+      if (targetIdx < failedIdx) return 'success';
+      return 'pending';
+    }
+
+    if (activeStage === 'waiting_approval') {
+      if (targetIdx <= 2) return 'success';
+      return 'pending';
+    }
+
+    const currentIdx = stages.indexOf(activeStage);
+    if (targetIdx === currentIdx) return 'active';
+    if (targetIdx < currentIdx) return 'success';
     return 'pending';
   };
 
@@ -325,7 +389,7 @@ function CampaignDetailPageContent() {
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
         {stages.map((stage) => {
-          const status = getStageStatus(task.status, stage.name);
+          const status = getStageStatus(task, stage.name);
           let color = 'var(--text-muted)';
           let bg = 'var(--surface-interactive)';
           let border = '1px solid var(--border-subtle)';
