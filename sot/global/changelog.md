@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.17.0 — Fix #3: Media Proxy via Cloudflare Tunnel untuk bypass robots.txt Nextcloud (20/08/2026)
+- Buat endpoint GET /api/media-proxy yang fetch Nextcloud via Tailscale internal
+- Tambah resolveToProxyUrl() di worker — URL Nextcloud otomatis dikonversi ke proxy URL
+- Repliz kini bisa download video Facebook/Instagram tanpa diblokir robots.txt
+- Tambah env var PUBLIC_MEDIA_PROXY_URL dan NEXTCLOUD_INTERNAL_BASE
+
 ## V2.16.6 — Fix Repliz: handle postId pending type & naikkan max_attempts ke 8 (20/08/2026)
 - Fix: postId bertipe object 'schedule' dari Repliz kini diperlakukan sebagai pending bukan error
 - Naikkan fallback max_attempts dari 3 ke 8 agar ada cukup polling cycles
