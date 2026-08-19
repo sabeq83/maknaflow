@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.15.0 — Add AIGC label flag, OpenAPI payload compliance & scrollbar modal (19/08/2026)
+- Add is_ai_generated column and UI checkbox
+- Align media payload schema compliance
+- Add scrollbar to scheduler modal
+
 ## V2.14.99 — Fix accounts deduplication cleanup query (19/08/2026)
 - Fix cleanupDuplicatePublishingAccounts to split Meta and Repliz deduplication criteria
 

@@ -68,7 +68,8 @@ export const POST = withTenantContext(async (request, user) => {
       caption: validated.caption,
       mediaUrl: validated.media_url,
       scheduledAt: validated.scheduled_at,
-      approvalStatus: validated.publish_mode === 'live' ? 'pending_approval' : 'not_required'
+      approvalStatus: validated.publish_mode === 'live' ? 'pending_approval' : 'not_required',
+      isAiGenerated: !!validated.is_ai_generated
     }));
 
     const createdJobs = await createPublishingJobs({

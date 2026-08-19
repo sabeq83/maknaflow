@@ -74,7 +74,8 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
     media_url: initialPreloadItem?.url_asset || initialPreloadItem?.nextcloud_url || '',
     scheduled_at: new Date(Date.now() + 3600000).toISOString().slice(0, 16), // default +1 hour
     timezone: 'Asia/Jakarta',
-    activeTabProvider: 'meta'
+    activeTabProvider: 'meta',
+    is_ai_generated: false
   });
   const [submittingSchedule, setSubmittingSchedule] = useState(false);
   const [preflightResult, setPreflightResult] = useState(null);
@@ -551,7 +552,8 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
         caption: scheduleForm.caption,
         media_url: scheduleForm.media_url,
         scheduled_at: new Date(scheduleForm.scheduled_at).toISOString(),
-        timezone: scheduleForm.timezone
+        timezone: scheduleForm.timezone,
+        is_ai_generated: !!scheduleForm.is_ai_generated
       };
 
       const res = await fetch('/api/v2/publishing/jobs', {
@@ -1181,7 +1183,8 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
         }}>
           <div style={{
             background: 'var(--surface)', border: '1px solid var(--surface-interactive)', borderRadius: 14,
-            width: '100%', maxWidth: 540, padding: 22, color: 'var(--text-primary)', boxShadow: '0 20px 40px rgba(0,0,0,0.6)'
+            width: '100%', maxWidth: 540, padding: 22, color: 'var(--text-primary)', boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+            maxHeight: '85vh', overflowY: 'auto'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Jadwalkan Publikasi Konten</h3>
@@ -1533,6 +1536,26 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                   style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12, resize: 'vertical' }}
                 />
               </div>
+
+              {/* Option: AI Generated Content (AIGC) - Repliz */}
+              {(scheduleForm.activeTabProvider || 'meta') === 'repliz' && (
+                <div style={{
+                  marginBottom: 12, padding: '10px 12px', background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid var(--surface-interactive)', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 10
+                }}>
+                  <input
+                    type="checkbox"
+                    id="is_ai_generated"
+                    checked={!!scheduleForm.is_ai_generated}
+                    onChange={(e) => setScheduleForm(prev => ({ ...prev, is_ai_generated: e.target.checked }))}
+                    style={{ cursor: 'pointer', width: 15, height: 15 }}
+                  />
+                  <label htmlFor="is_ai_generated" style={{ fontSize: 11, color: 'var(--text-primary)', fontWeight: 600, cursor: 'pointer', display: 'flex', flexDirection: 'column' }}>
+                    <span>Label AI-Generated Content (AIGC)</span>
+                    <span style={{ fontSize: 9, color: 'var(--text-muted)', fontWeight: 400, marginTop: 2 }}>Wajib dicentang jika mempublikasikan konten hasil buatan AI ke TikTok.</span>
+                  </label>
+                </div>
+              )}
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
                 <div>
