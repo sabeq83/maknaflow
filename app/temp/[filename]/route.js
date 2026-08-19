@@ -75,11 +75,23 @@ export async function GET(request, { params }) {
         }
       });
 
+      const ext = path.extname(safeFilename).toLowerCase();
+      let contentType = 'video/mp4';
+      if (ext === '.png') {
+        contentType = 'image/png';
+      } else if (ext === '.jpg' || ext === '.jpeg') {
+        contentType = 'image/jpeg';
+      } else if (ext === '.gif') {
+        contentType = 'image/gif';
+      } else if (ext === '.webp') {
+        contentType = 'image/webp';
+      }
+
       return new NextResponse(readableWebStream, {
         status: 200,
         headers: {
           'Content-Length': fileSize,
-          'Content-Type': 'video/mp4',
+          'Content-Type': contentType,
         },
       });
     }

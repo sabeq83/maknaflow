@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.87 — Fix automatic generated start frames path (19/08/2026)
+- Redirect background worker start frame saves from public/temp to public/uploads/start_frames
+- Enable dynamic Content-Type header matching based on requested extension in temp router
+
 ## V2.14.86 — Add Presets capability to Multiplier Lab (19/08/2026)
 - Add Gunakan Preset dropdown and save form as preset button
 - Map visualStylePreset dropdown for Mascot Universe mode in VSO Accordion
