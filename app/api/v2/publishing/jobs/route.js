@@ -6,6 +6,7 @@ import {
   createPublishingJobs
 } from '@/lib/publishing-repository';
 import { validateScheduleRequest } from '@/lib/publishing-contract';
+import { pgQuery } from '@/lib/db-pg';
 
 export const dynamic = 'force-dynamic';
 
@@ -78,6 +79,35 @@ export const POST = withTenantContext(async (request, user) => {
       contentId: validated.content_id,
       targets
     });
+
+    // === AUTO-SYNC ContentFlow: tandai 'Scheduled' segera setelah job dibuat ===
+    // Langkah ini memastikan status di library berubah TANPA menunggu worker pick up job.
+    if (validated.content_id && createdJobs.length > 0) {
+      try {
+        const platforms = [...new Set(createdJobs.map(j => j.platform).filter(Boolean))];
+        const platformColumnMap = {
+          facebook:  'facebook_status',
+          instagram: 'instagram_status',
+          tiktok:    'tiktok_status',
+          youtube:   'youtube_status',
+          threads:   'threads_status',
+          linkedin:  'linkedin_status'
+        };
+        for (const platform of platforms) {
+          const col = platformColumnMap[platform];
+          if (!col) continue;
+          await pgQuery(
+            `UPDATE content_flow_items
+             SET ${col} = 'Scheduled', updated_at = CURRENT_TIMESTAMP
+             WHERE video_id = $1 AND tenant_id = $2`,
+            [validated.content_id, tenantId]
+          );
+        }
+        console.log(`[Publishing Jobs] Auto-synced ContentFlow to Scheduled for ${validated.content_id} (${platforms.join(', ')})`);
+      } catch (syncErr) {
+        console.warn('[Publishing Jobs] Gagal auto-sync ContentFlow status:', syncErr.message);
+      }
+    }
 
     return NextResponse.json({
       success: true,

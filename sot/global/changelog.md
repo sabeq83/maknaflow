@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.16.5 — Auto-sync ContentFlow status Scheduled saat job dibuat (19/08/2026)
+- Perbaiki gap: status berubah ke Scheduled segera saat user submit schedule
+- Tidak perlu tunggu worker pick up job
+- Patch manual dapurbotani_opc_ir4y96_07 ke Scheduled
+
 ## V2.16.4 — Relayout tombol schedule di card ContentFlow (19/08/2026)
 - Pindahkan tombol schedule di bawah tombol detail
 - Ganti warna tombol schedule jadi hijau emerald
