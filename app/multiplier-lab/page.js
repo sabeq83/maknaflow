@@ -62,6 +62,12 @@ function MultiplierLabPageContent() {
   const [selectedBlueprintForModal, setSelectedBlueprintForModal] = useState(null);
   const [productSearchQuery, setProductSearchQuery] = useState('');
   const [selectedProductForModal, setSelectedProductForModal] = useState(null);
+  const [presets, setPresets] = useState([]);
+  const [selectedPresetKey, setSelectedPresetKey] = useState('');
+  const [showPresetSaveModal, setShowPresetSaveModal] = useState(false);
+  const [newPresetLabel, setNewPresetLabel] = useState('');
+  const [newPresetKey, setNewPresetKey] = useState('');
+  const [visualStylePreset, setVisualStylePreset] = useState('3d_claymation_cozy');
 
   const [tasks, setTasks] = useState([]);
   const [loadingTasks, setLoadingTasks] = useState(true);
@@ -157,6 +163,174 @@ function MultiplierLabPageContent() {
     }
   };
 
+  const fetchPresets = () => {
+    fetch('/api/v2/operator-presets')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) setPresets(d.presets || []);
+      })
+      .catch(() => {});
+  };
+
+  const applyPresetToForm = (preset) => {
+    if (!preset || !preset.config) return;
+    const config = preset.config;
+
+    // Accordion 1: Basic Creative Strategy
+    if (config.basic_strategy) {
+      setNarrativeMode(config.basic_strategy.narrative_mode || 'Storytelling');
+      setVoiceProvider(config.basic_strategy.voice_provider || 'minimax');
+      setVoicePersona(config.basic_strategy.voice_persona || 'Kore');
+      setVoiceSpeed(Number(config.basic_strategy.voice_speed ?? 1.0));
+      setVoiceVolume(Number(config.basic_strategy.voice_volume ?? 1.0));
+      setTtsModelQuality(config.basic_strategy.tts_model_quality || 'speech-2.8-turbo');
+      setTargetLanguage(config.basic_strategy.target_language || 'id-ID');
+      setTargetDemographic(config.basic_strategy.target_demographic || 'genz_casual');
+      setTargetDemographicCustom(config.basic_strategy.target_demographic_custom || '');
+      setCustomInstruction(config.basic_strategy.custom_instruction || '');
+      setAiDirective(config.basic_strategy.ai_directive || '');
+      setMandatoryOutroLine(config.basic_strategy.mandatory_outro_line || '');
+      setSfxSetting(config.basic_strategy.sfx_setting || 'without_sfx');
+      setEnableAudioSegment(config.basic_strategy.enable_audio_segment || false);
+      setEnableVoAudit(config.basic_strategy.enable_vo_audit ?? 1);
+      setNextcloudParentFolder(config.basic_strategy.nextcloud_parent_folder || '/MAKNA_Assets');
+      setPromotionStyle(config.basic_strategy.promotion_style || 'Softselling');
+    }
+
+    // Accordion 2: Aesthetics & Visual Settings
+    if (config.visual_engine) {
+      setVisualStyle(config.visual_engine.visual_style || 'Cinematic');
+      setVisualMode(config.visual_engine.visual_mode || 'pure_t2v');
+      setVideoModel(config.visual_engine.video_model || 'veo_31_lite');
+      setFaceVisibility(config.visual_engine.face_visibility || 'Faceless');
+      setTargetClipsCount(config.visual_engine.target_clips_count || 4);
+      setWordsPerClip(config.visual_engine.words_per_clip || '17-19 kata');
+      setAspectRatio(config.visual_engine.aspect_ratio || '9:16');
+      if (config.visual_engine.video_model === 'veo_31_lite') {
+        setTargetAi('Google Veo (8s)');
+      } else {
+        setTargetAi('Google Veo (5s)');
+      }
+    }
+
+    // Accordion 3: Product Bridging Settings
+    if (config.product_bridging) {
+      setIsBridgingActive(config.product_bridging.is_bridging_active || false);
+      setBridgeAtClip(config.product_bridging.bridge_at_clip || 2);
+      setBridgeDurationClips(config.product_bridging.bridge_duration_clips || 1);
+    }
+
+    // Accordion 4: Visual Swap Overrides (VSO)
+    if (config.visual_swap) {
+      setIsVsoActive(config.visual_swap.is_vso_active || false);
+      setCharacterConcept(config.visual_swap.character_concept || 'faceless');
+      setSubjectDemographic(config.visual_swap.subject_demographic || 'syari_classic');
+      setWardrobeStyle(config.visual_swap.wardrobe_style || 'random');
+      setWardrobeStyleCustom(config.visual_swap.wardrobe_style_custom || '');
+      setLightingStyle(config.visual_swap.lighting_style || 'random');
+      setLightingStyleCustom(config.visual_swap.lighting_style_custom || '');
+      setVisualStylePreset(config.visual_swap.visual_style_preset || '3d_claymation_cozy');
+    }
+
+    // Workflow Settings
+    if (config.workflow) {
+      setEnableTts(config.workflow.enable_tts || false);
+      setEnableGlabs(config.workflow.enable_glabs || false);
+      setEnableFfmpeg(config.workflow.enable_ffmpeg || false);
+      setEnableSocialPost(config.workflow.enable_social_post || false);
+      setFfmpegSyncOption(config.workflow.ffmpeg_sync_option || 'smart_sync');
+      setFfmpegVideoScale(Number(config.workflow.ffmpeg_video_scale ?? 1.0));
+      setFfmpegSfxVolume(Number(config.workflow.ffmpeg_sfx_volume ?? 0.0));
+      setFfmpegBgmVolume(Number(config.workflow.ffmpeg_bgm_volume ?? 0.0));
+    }
+  };
+
+  const handleSaveAsPreset = async (e) => {
+    e.preventDefault();
+    if (!newPresetLabel.trim() || !newPresetKey.trim()) {
+      showToast('Label dan Key preset wajib diisi.', 'error');
+      return;
+    }
+
+    const presetConfig = {
+      basic_strategy: {
+        narrative_mode: narrativeMode,
+        voice_provider: voiceProvider,
+        voice_persona: voicePersona,
+        voice_speed: Number(voiceSpeed),
+        voice_volume: Number(voiceVolume),
+        tts_model_quality: ttsModelQuality,
+        target_language: targetLanguage,
+        target_demographic: targetDemographic,
+        target_demographic_custom: targetDemographicCustom,
+        custom_instruction: customInstruction,
+        ai_directive: aiDirective,
+        mandatory_outro_line: mandatoryOutroLine,
+        sfx_setting: sfxSetting,
+        enable_audio_segment: enableAudioSegment,
+        enable_vo_audit: enableVoAudit ? 1 : 0,
+        nextcloud_parent_folder: nextcloudParentFolder,
+        promotion_style: promotionStyle
+      },
+      visual_engine: {
+        visual_style: visualStyle,
+        visual_mode: visualMode,
+        video_model: videoModel,
+        face_visibility: faceVisibility,
+        target_clips_count: targetClipsCount,
+        words_per_clip: wordsPerClip,
+        aspect_ratio: aspectRatio
+      },
+      product_bridging: {
+        is_bridging_active: isBridgingActive,
+        bridge_at_clip: bridgeAtClip,
+        bridge_duration_clips: Number(bridgeDurationClips)
+      },
+      visual_swap: {
+        is_vso_active: isVsoActive,
+        character_concept: characterConcept,
+        subject_demographic: subjectDemographic,
+        wardrobe_style: wardrobeStyle,
+        wardrobe_style_custom: wardrobeStyleCustom,
+        lighting_style: lightingStyle,
+        lighting_style_custom: lightingStyleCustom,
+        visual_style_preset: visualStylePreset
+      },
+      workflow: {
+        enable_tts: enableTts,
+        enable_glabs: enableGlabs,
+        enable_ffmpeg: enableFfmpeg,
+        enable_social_post: enableSocialPost,
+        ffmpeg_sync_option: ffmpegSyncOption,
+        ffmpeg_video_scale: Number(ffmpegVideoScale),
+        ffmpeg_sfx_volume: Number(ffmpegSfxVolume),
+        ffmpeg_bgm_volume: Number(ffmpegBgmVolume)
+      }
+    };
+
+    try {
+      const res = await fetch('/api/v2/operator-presets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: newPresetKey.trim().toLowerCase(),
+          label: newPresetLabel.trim(),
+          config: presetConfig
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      showToast(`Preset "${newPresetLabel}" berhasil disimpan.`);
+      setShowPresetSaveModal(false);
+      setNewPresetLabel('');
+      setNewPresetKey('');
+      fetchPresets();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
   useEffect(() => {
     fetchAssets('', '');
     fetchTasks();
@@ -164,6 +338,7 @@ function MultiplierLabPageContent() {
     fetch('/api/v2/brand-profiles').then(r => r.json()).then(d => { if (d.success) setBrandProfiles(d.data || []); }).catch(() => {});
     fetch('/api/v2/deconstruct?limit=1').then(r => r.json()).then(d => { if (d.success) setNiches(d.niches || []); }).catch(() => {});
     fetchProducts('');
+    fetchPresets();
 
     pollingRef.current = setInterval(() => {
       fetchTasks(true);
@@ -1044,7 +1219,42 @@ function MultiplierLabPageContent() {
 
               {/* 4. Accordion Configs (OPC Aligned) */}
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                
+
+                {/* PRESET SELECTOR */}
+                <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border)', background: 'rgba(59, 130, 246, 0.02)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent)' }}>📋 Gunakan Preset:</span>
+                    <select
+                      value={selectedPresetKey}
+                      onChange={(e) => {
+                        const key = e.target.value;
+                        setSelectedPresetKey(key);
+                        const preset = presets.find(p => p.key === key);
+                        if (preset) applyPresetToForm(preset);
+                      }}
+                      className="form-input"
+                      style={{ maxWidth: 300, background: 'var(--surface-interactive)', color: 'var(--text-color)', border: '1px solid var(--border)', borderRadius: 6, padding: '6px 12px', outline: 'none' }}
+                    >
+                      <option value="">-- Buat dari Awal (Tanpa Preset) --</option>
+                      {presets.map(p => (
+                        <option key={p.key} value={p.key}>{p.label}{p.is_system ? ' (System)' : ''}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewPresetLabel('');
+                      setNewPresetKey('');
+                      setShowPresetSaveModal(true);
+                    }}
+                    className="btn btn-secondary btn-sm"
+                    style={{ padding: '6px 12px', fontSize: '13px', background: 'var(--surface-interactive)', color: 'var(--text-color)', border: '1px solid var(--border)', borderRadius: '6px', cursor: 'pointer' }}
+                  >
+                    💾 Simpan Form sebagai Preset
+                  </button>
+                </div>
+
                 {/* Accordion 1: Basic Creative Strategy */}
                 <div style={{ borderBottom: '1px solid var(--border)' }}>
                   <div
@@ -1446,6 +1656,19 @@ function MultiplierLabPageContent() {
                               </select>
                             </div>
                           </div>
+
+                          {subjectDemographic.startsWith('mascot_universe_') && (
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                              <div className="form-group">
+                                <label className="form-label">🎨 Gaya Estetika Animasi Maskot</label>
+                                <select className="form-input" value={visualStylePreset} onChange={e => setVisualStylePreset(e.target.value)}>
+                                  <option value="3d_claymation_cozy">3D Claymation Cozy (Shaun the Sheep Look)</option>
+                                  <option value="kawaii_flat_vector">2D Kawaii Flat Vector (Minimalis Jepang)</option>
+                                  <option value="ghibli_watercolor">Studio Ghibli Watercolor (Cat Air Magis)</option>
+                                </select>
+                              </div>
+                            </div>
+                          )}
 
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                             <div className="form-group">
@@ -2107,6 +2330,94 @@ function MultiplierLabPageContent() {
                 })()}
               </div>
             </div>
+          </div>
+        )}
+        {showPresetSaveModal && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              background: 'rgba(0,0,0,0.8)',
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(4px)'
+            }}
+          >
+            <form
+              onSubmit={handleSaveAsPreset}
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                width: '100%',
+                maxWidth: '400px',
+                padding: '24px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 16,
+                borderRadius: 12,
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>💾 Simpan sebagai Preset</h3>
+                <button
+                  type="button"
+                  onClick={() => setShowPresetSaveModal(false)}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem' }}
+                >
+                  &times;
+                </button>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Nama / Label Preset</label>
+                <input
+                  type="text"
+                  placeholder="Contoh: Hijab Softsell Veo"
+                  value={newPresetLabel}
+                  onChange={e => {
+                    setNewPresetLabel(e.target.value);
+                    const k = e.target.value
+                      .toLowerCase()
+                      .replace(/[^a-z0-9]+/g, '_')
+                      .replace(/(^_+|_+$)/g, '');
+                    setNewPresetKey(k);
+                  }}
+                  className="form-input"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Key Preset (Unique ID)</label>
+                <input
+                  type="text"
+                  placeholder="contoh_hijab_softsell"
+                  value={newPresetKey}
+                  onChange={e => setNewPresetKey(e.target.value)}
+                  className="form-input"
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 8 }}>
+                <button
+                  type="button"
+                  onClick={() => setShowPresetSaveModal(false)}
+                  className="btn btn-secondary"
+                >
+                  Batal
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Simpan Preset
+                </button>
+              </div>
+            </form>
           </div>
         )}
 

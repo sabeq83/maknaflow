@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.86 — Add Presets capability to Multiplier Lab (19/08/2026)
+- Add Gunakan Preset dropdown and save form as preset button
+- Map visualStylePreset dropdown for Mascot Universe mode in VSO Accordion
+- Sync operator presets database pool between Pillar and Multiplier campaigns
+
 ## V2.14.85 — Migrate product selection to server-side query (19/08/2026)
 - Implement fetchProducts server search integration
 - Connect search input button to trigger fetchProducts
