@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.77 — Global Hybrid Lock & Lightweight Downloader (19/08/2026)
+- Penyelarasan global hybrid_lock visual mode untuk seluruh klip di Multiplier Lab
+- Implementasi lightweight HTTP fetch downloader menggantikan Playwright Chromium di multiplier worker
+- Sukses verifikasi regenerasi penuh start frame T2I untuk seluruh 4 klip
+
 ## V2.14.76 — Implement Generate All T2I and expose all retry buttons (18/08/2026)
 - Add bulk start frames regenerate API
 - Add Generate All T2I button to Grid Preview
