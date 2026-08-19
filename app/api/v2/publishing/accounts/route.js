@@ -20,11 +20,58 @@ export const GET = withTenantContext(async (request) => {
     const tenantId = getActiveTenantId();
     const { searchParams } = new URL(request.url);
     const forceSync = searchParams.get('sync') === '1' || searchParams.get('refresh') === 'true';
+    const provider = searchParams.get('provider') || 'meta';
 
     let accounts = await listPublishingAccounts(tenantId);
 
+    if (provider === 'repliz' && forceSync) {
+      try {
+        const { listReplizAccounts } = await import('@/lib/repliz-client');
+        const { PUBLISHING_PLATFORMS } = await import('@/lib/publishing-contract');
+        const url = await getSetting('repliz_api_url') || 'https://api.repliz.com';
+        const accessKey = await getSetting('repliz_access_key');
+        const secretKey = await getSetting('repliz_secret_key');
+
+        if (accessKey && secretKey) {
+          const replizAccs = await listReplizAccounts({ apiUrl: url, accessKey, secretKey });
+          const syncedIds = [];
+          for (const raw of replizAccs) {
+            const mappedPlatform = raw.platform?.toLowerCase();
+            if (PUBLISHING_PLATFORMS.includes(mappedPlatform)) {
+              const saved = await savePublishingAccount({
+                tenantId,
+                provider: 'repliz',
+                platform: mappedPlatform,
+                displayName: raw.name || raw.username || `Repliz ${mappedPlatform} #${raw.id}`,
+                providerAccountId: String(raw.id),
+                tokenCiphertext: null,
+                status: 'active'
+              });
+              syncedIds.push(saved.id);
+            }
+          }
+
+          // Mark disconnected for old Repliz accounts of this tenant that are no longer active in Repliz API
+          const allAccs = await listPublishingAccounts(tenantId);
+          const existingRepliz = allAccs.filter(a => a.provider === 'repliz');
+          for (const old of existingRepliz) {
+            if (!syncedIds.includes(old.id)) {
+              await savePublishingAccount({
+                ...old,
+                tenantId,
+                status: 'disconnected'
+              });
+            }
+          }
+          accounts = await listPublishingAccounts(tenantId);
+        }
+      } catch (replizSyncErr) {
+        console.warn('[Publishing Accounts] Repliz accounts sync warning:', replizSyncErr.message);
+      }
+    }
+
     // Auto-sync or force-sync connected Facebook pages & Instagram from settings
-    if (accounts.length === 0 || forceSync) {
+    if (provider === 'meta' && (accounts.length === 0 || forceSync)) {
       try {
         const { getConnectedFacebookPages } = await import('@/lib/facebook-helper');
         const fbResult = await getConnectedFacebookPages();

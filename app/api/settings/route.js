@@ -78,6 +78,11 @@ export const GET = withTenantContext(async (request, _context, user) => {
         product_photo_gemini_model: await getSetting('product_photo_gemini_model') || 'gemini-2.0-flash-exp-image-generation',
         product_photo_glabs_model: await getSetting('product_photo_glabs_model') || '',
         product_photo_auto_approve: Number(await getSetting('product_photo_auto_approve') || 0),
+        // Repliz API Credentials
+        repliz_api_url: await getSetting('repliz_api_url') || 'https://api.repliz.com',
+        repliz_access_key: maskSecret(await getSetting('repliz_access_key')),
+        repliz_secret_key: maskSecret(await getSetting('repliz_secret_key')),
+        has_repliz_credentials: !!(await getSetting('repliz_access_key') && await getSetting('repliz_secret_key')),
       }
     });
   } catch (error) {
@@ -99,7 +104,8 @@ export const POST = withTenantContext(async (request, _context, user) => {
       minimax_api_key, minimax_group_id, save_to_local_storage, local_storage_path,
       fb_page_id, fb_page_ids, fb_page_token, fb_server_url, scraper_headless_enabled, scraper_use_cdp, scraper_chrome_profile, ytdlp_cookies_from_browser,
       contentflow_api_key, contentflow_api_url,
-      product_photo_provider, product_photo_gemini_model, product_photo_glabs_model, product_photo_auto_approve } = body;
+      product_photo_provider, product_photo_gemini_model, product_photo_glabs_model, product_photo_auto_approve,
+      repliz_api_url, repliz_access_key, repliz_secret_key } = body;
     
     if (isNewSecret(gemini_api_key)) {
       await setSetting('gemini_api_key', gemini_api_key);
@@ -162,6 +168,9 @@ export const POST = withTenantContext(async (request, _context, user) => {
     if (product_photo_gemini_model !== undefined) await setSetting('product_photo_gemini_model', product_photo_gemini_model);
     if (product_photo_glabs_model !== undefined) await setSetting('product_photo_glabs_model', product_photo_glabs_model);
     if (product_photo_auto_approve !== undefined) await setSetting('product_photo_auto_approve', String(product_photo_auto_approve ? 1 : 0));
+    if (repliz_api_url !== undefined) await setSetting('repliz_api_url', repliz_api_url);
+    if (isNewSecret(repliz_access_key)) await setSetting('repliz_access_key', repliz_access_key);
+    if (isNewSecret(repliz_secret_key)) await setSetting('repliz_secret_key', repliz_secret_key);
 
     return NextResponse.json({ success: true, message: 'Settings saved' });
   } catch (error) {

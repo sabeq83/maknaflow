@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.96 — Repliz Content Flow Publishing (19/08/2026)
+- Integrasi akun dan scheduling Repliz
+- Sinkronisasi status, retry, dan cancel lintas platform
+- Preflight media dan perlindungan credential
+
 ## V2.14.95 — Speedup Multiplier Lab & G-Labs Optimizations (19/08/2026)
 - Stage chaining status loop in worker
 - Auto sync completed tasks to Content Flow

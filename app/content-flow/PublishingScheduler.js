@@ -124,23 +124,41 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
   const fetchAccounts = useCallback(async (isManualSync = false) => {
     if (isManualSync) setSyncingAccounts(true);
     try {
-      const url = isManualSync ? '/api/v2/publishing/accounts?sync=1' : '/api/v2/publishing/accounts';
-      const res = await fetch(url);
-      const json = await res.json();
-      if (json.success && Array.isArray(json.data)) {
+      if (isManualSync) {
+        // Sync Meta and Repliz accounts in parallel
+        const [resMeta, resRepliz] = await Promise.all([
+          fetch('/api/v2/publishing/accounts?sync=1&provider=meta').then(r => r.json().catch(() => ({ success: false }))),
+          fetch('/api/v2/publishing/accounts?sync=1&provider=repliz').then(r => r.json().catch(() => ({ success: false })))
+        ]);
+
+        const mergedData = [
+          ...(Array.isArray(resMeta?.data) ? resMeta.data : []),
+          ...(Array.isArray(resRepliz?.data) ? resRepliz.data : [])
+        ];
+
         const seenKeys = new Set();
-        const unique = json.data.filter(acc => {
-          const key = `${acc.platform}_${acc.facebook_page_id || ''}_${acc.instagram_user_id || ''}`;
+        const unique = mergedData.filter(acc => {
+          const key = `${acc.platform}_${acc.facebook_page_id || ''}_${acc.instagram_user_id || ''}_${acc.provider || ''}_${acc.provider_account_id || ''}`;
           if (seenKeys.has(key)) return false;
           seenKeys.add(key);
           return true;
         });
+
         setAccounts(unique);
-        if (isManualSync) {
-          showToast(`Berhasil menyinkronkan ${unique.length} akun Meta! 🟢`);
+        showToast(`Berhasil menyinkronkan ${unique.length} akun Meta & Repliz! 🟢`);
+      } else {
+        const res = await fetch('/api/v2/publishing/accounts');
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          const seenKeys = new Set();
+          const unique = json.data.filter(acc => {
+            const key = `${acc.platform}_${acc.facebook_page_id || ''}_${acc.instagram_user_id || ''}_${acc.provider || ''}_${acc.provider_account_id || ''}`;
+            if (seenKeys.has(key)) return false;
+            seenKeys.add(key);
+            return true;
+          });
+          setAccounts(unique);
         }
-      } else if (isManualSync) {
-        showToast(json.error || 'Gagal menyinkronkan akun ❌');
       }
     } catch (err) {
       console.error('Error fetching publishing accounts:', err);
@@ -776,6 +794,10 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
             <option value="all">Semua Platform</option>
             <option value="facebook">Facebook Page</option>
             <option value="instagram">Instagram</option>
+            <option value="threads">Threads</option>
+            <option value="tiktok">TikTok</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="youtube">YouTube</option>
           </select>
 
           <select
@@ -850,7 +872,12 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                                 width: 40, height: 40, borderRadius: 8, background: 'var(--surface)',
                                 display: 'grid', placeItems: 'center', color: '#a78bfa', fontWeight: 800, flexShrink: 0
                               }}>
-                                {job.platform === 'facebook' ? 'f' : '◎'}
+                                 {job.platform === 'facebook' ? 'FB' : 
+                                  job.platform === 'instagram' ? 'IG' :
+                                  job.platform === 'threads' ? 'TH' :
+                                  job.platform === 'tiktok' ? 'TK' :
+                                  job.platform === 'linkedin' ? 'LN' :
+                                  job.platform === 'youtube' ? 'YT' : '◎'}
                               </div>
                               <div>
                                 <div style={{ color: 'var(--text-primary)', fontWeight: 750, maxWidth: 220, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -1115,13 +1142,22 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                         onClick={() => { setSelectedJobId(j.id); setActiveTab('queue'); }}
                         style={{
                           padding: 7, borderRadius: 6,
-                          background: j.platform === 'instagram' ? '#2e1c3a' : '#16253d',
-                          borderLeft: `3px solid ${j.status === 'published' ? 'var(--status-success)' : (j.platform === 'instagram' ? 'var(--status-neutral)' : 'var(--status-info)')}`,
+                          background: j.platform === 'instagram' ? '#2e1c3a' : 
+                                      j.platform === 'facebook' ? '#16253d' :
+                                      j.platform === 'threads' ? '#1e1e1e' :
+                                      j.platform === 'tiktok' ? '#1c2d3a' :
+                                      j.platform === 'linkedin' ? '#1a2936' : '#2d1e1e',
+                          borderLeft: `3px solid ${j.status === 'published' ? 'var(--status-success)' : (j.platform === 'instagram' ? 'rgba(236, 72, 153, 0.8)' : 'var(--status-info)')}`,
                           fontSize: 10, color: 'var(--text-secondary)', cursor: 'pointer'
                         }}
                       >
                         <div style={{ fontWeight: 800, color: 'var(--text-primary)', marginBottom: 2 }}>
-                          {j.platform === 'facebook' ? 'f' : '◎'} {j.scheduled_at ? new Date(j.scheduled_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : ''}
+                          {j.platform === 'facebook' ? 'FB' : 
+                           j.platform === 'instagram' ? 'IG' :
+                           j.platform === 'threads' ? 'TH' :
+                           j.platform === 'tiktok' ? 'TK' :
+                           j.platform === 'linkedin' ? 'LN' :
+                           j.platform === 'youtube' ? 'YT' : '◎'} {j.scheduled_at ? new Date(j.scheduled_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : ''}
                         </div>
                         <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {j.content_title || j.content_id}
@@ -1264,11 +1300,25 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                         </div>
                         <span style={{
                           fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 10,
-                          background: acc.platform === 'instagram' ? 'rgba(236, 72, 153, 0.2)' : 'var(--status-info-soft)',
-                          color: acc.platform === 'instagram' ? '#f472b6' : '#93c5fd',
-                          border: `1px solid ${acc.platform === 'instagram' ? '#ec4899' : 'var(--status-info)'}`
+                          background: acc.platform === 'instagram' ? 'rgba(236, 72, 153, 0.2)' : 
+                                      acc.platform === 'facebook' ? 'rgba(59, 130, 246, 0.2)' :
+                                      acc.platform === 'threads' ? 'rgba(255, 255, 255, 0.1)' :
+                                      acc.platform === 'tiktok' ? 'rgba(0, 242, 254, 0.2)' :
+                                      acc.platform === 'linkedin' ? 'rgba(10, 102, 194, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                          color: acc.platform === 'instagram' ? '#f472b6' : 
+                                 acc.platform === 'facebook' ? '#60a5fa' :
+                                 acc.platform === 'threads' ? '#ffffff' :
+                                 acc.platform === 'tiktok' ? '#00F2FE' :
+                                 acc.platform === 'linkedin' ? '#0a66c2' : '#f87171',
+                          border: `1px solid ${
+                            acc.platform === 'instagram' ? '#ec4899' : 
+                            acc.platform === 'facebook' ? '#3b82f6' :
+                            acc.platform === 'threads' ? '#ffffff' :
+                            acc.platform === 'tiktok' ? '#00F2FE' :
+                            acc.platform === 'linkedin' ? '#0a66c2' : '#ef4444'
+                          }`
                         }}>
-                          {acc.platform === 'instagram' ? '📸 INSTAGRAM' : '📘 FACEBOOK'}
+                          {acc.platform ? acc.platform.toUpperCase() : ''}
                         </span>
                       </label>
                     ))

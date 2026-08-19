@@ -26,9 +26,45 @@ export const POST = withTenantContext(async (request) => {
         errors.push('Media URL wajib disediakan untuk tipe media ini.');
       } else {
         const cleanUrl = mediaUrl.trim();
-        if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
-          errors.push('Media URL harus menggunakan protokol http atau https publik.');
-        } else {
+        let urlObj;
+        try {
+          urlObj = new URL(cleanUrl);
+        } catch (_) {
+          errors.push('Format URL media tidak valid.');
+        }
+
+        if (urlObj) {
+          if (urlObj.protocol !== 'https:') {
+            errors.push('Media URL wajib menggunakan HTTPS agar dapat diakses oleh provider.');
+          }
+          const hostname = urlObj.hostname;
+          if (
+            hostname === 'localhost' ||
+            hostname === '127.0.0.1' ||
+            hostname.startsWith('192.168.') ||
+            hostname.startsWith('10.') ||
+            hostname.startsWith('172.16.') ||
+            hostname.startsWith('172.17.') ||
+            hostname.startsWith('172.18.') ||
+            hostname.startsWith('172.19.') ||
+            hostname.startsWith('172.20.') ||
+            hostname.startsWith('172.21.') ||
+            hostname.startsWith('172.22.') ||
+            hostname.startsWith('172.23.') ||
+            hostname.startsWith('172.24.') ||
+            hostname.startsWith('172.25.') ||
+            hostname.startsWith('172.26.') ||
+            hostname.startsWith('172.27.') ||
+            hostname.startsWith('172.28.') ||
+            hostname.startsWith('172.29.') ||
+            hostname.startsWith('172.30.') ||
+            hostname.startsWith('172.31.')
+          ) {
+            errors.push('Media URL tidak boleh berupa alamat local/private network.');
+          }
+        }
+
+        if (errors.length === 0) {
           // Preflight HEAD request untuk memeriksa accessibility & MIME type
           try {
             const headRes = await fetch(cleanUrl, { method: 'HEAD', signal: AbortSignal.timeout(6000) });

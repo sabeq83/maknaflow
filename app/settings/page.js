@@ -93,6 +93,16 @@ export default function SettingsPage() {
   const [manualInputPageId, setManualInputPageId] = useState('');
   const [addingManualPage, setAddingManualPage] = useState(false);
 
+  // Repliz API Settings
+  const [replizApiUrl, setReplizApiUrl] = useState('https://api.repliz.com');
+  const [replizAccessKey, setReplizAccessKey] = useState('');
+  const [replizSecretKey, setReplizSecretKey] = useState('');
+  const [hasReplizCredentials, setHasReplizCredentials] = useState(false);
+  const [testingRepliz, setTestingRepliz] = useState(false);
+  const [testReplizResult, setTestReplizResult] = useState(null);
+  const [savingReplizConfig, setSavingReplizConfig] = useState(false);
+  const [editingRepliz, setEditingRepliz] = useState(false);
+
   // Marketplace Scraper Settings
   const [scraperUseCdp, setScraperUseCdp] = useState(true);
   const [testingCdp, setTestingCdp] = useState(false);
@@ -152,7 +162,7 @@ export default function SettingsPage() {
   }
 
   function collapseAllCards() {
-    const allKeys = ['gemini_config', 'pool_manager', 'minimax', 'cloud_storage', 'google_workspace', 'kb', 'glabs_webhook', 'marketplace_scraper', 'facebook_page'];
+    const allKeys = ['gemini_config', 'pool_manager', 'minimax', 'cloud_storage', 'google_workspace', 'kb', 'glabs_webhook', 'marketplace_scraper', 'facebook_page', 'repliz_config'];
     const next = {};
     allKeys.forEach(k => next[k] = true);
     setCollapsedCards(next);
@@ -221,6 +231,11 @@ export default function SettingsPage() {
       setScraperUseCdp(true);
       setScraperChromeProfile(data.data.scraper_chrome_profile || 'Default');
       setYtdlpCookiesFromBrowser(data.data.ytdlp_cookies_from_browser || 'none');
+
+      setReplizApiUrl(data.data.repliz_api_url || 'https://api.repliz.com');
+      setReplizAccessKey(data.data.repliz_access_key || '');
+      setReplizSecretKey(data.data.repliz_secret_key || '');
+      setHasReplizCredentials(data.data.has_repliz_credentials || false);
     }
   }
 
@@ -246,6 +261,57 @@ export default function SettingsPage() {
         if (data.data.chromeProfile) setScraperChromeProfile(data.data.chromeProfile);
       }
     } catch (e) {}
+  }
+
+  async function saveReplizConfig() {
+    setSavingReplizConfig(true);
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          repliz_api_url: replizApiUrl,
+          repliz_access_key: replizAccessKey,
+          repliz_secret_key: replizSecretKey
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Pengaturan Repliz berhasil disimpan!');
+        setEditingRepliz(false);
+        setReplizAccessKey('');
+        setReplizSecretKey('');
+        fetchSettings();
+      } else {
+        alert('Gagal menyimpan pengaturan: ' + data.error);
+      }
+    } catch (err) {
+      alert('Gagal menyimpan: ' + err.message);
+    } finally {
+      setSavingReplizConfig(false);
+    }
+  }
+
+  async function testReplizConnection() {
+    setTestingRepliz(true);
+    setTestReplizResult(null);
+    try {
+      const res = await fetch('/api/settings/test-repliz', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          repliz_api_url: replizApiUrl,
+          repliz_access_key: replizAccessKey,
+          repliz_secret_key: replizSecretKey
+        })
+      });
+      const data = await res.json();
+      setTestReplizResult(data);
+    } catch (err) {
+      setTestReplizResult({ success: false, error: err.message });
+    } finally {
+      setTestingRepliz(false);
+    }
   }
 
   async function saveApiKey() {
@@ -2097,6 +2163,82 @@ export default function SettingsPage() {
                   {savingFb ? '⏳ Menyimpan...' : '💾 Simpan Konfigurasi Meta'}
                 </button>
               </div>
+            </div>
+          ))}
+
+          {/* 10. CARD: Repliz Publishing Integration */}
+          {renderCollapsibleCard('repliz_config', 'automation', 'Repliz Publishing Integration', '🚀', (
+            <div>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
+                Konfigurasi Access Key dan Secret Key Repliz API untuk mempublikasikan konten secara terjadwal lintas platform (TikTok, YouTube, Threads, LinkedIn, Facebook, Instagram).
+              </p>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label className="form-label">Repliz API URL</label>
+                <input
+                  className="form-input"
+                  value={replizApiUrl}
+                  onChange={e => setReplizApiUrl(e.target.value)}
+                />
+              </div>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label className="form-label">Access Key</label>
+                {hasReplizCredentials && !editingRepliz ? (
+                  <input className="form-input" value={replizAccessKey} disabled style={{ background: 'var(--bg-glass)', opacity: 0.8 }} />
+                ) : (
+                  <input
+                    type="password"
+                    className="form-input"
+                    placeholder="Masukkan Repliz Access Key..."
+                    value={replizAccessKey}
+                    onChange={e => setReplizAccessKey(e.target.value)}
+                  />
+                )}
+              </div>
+              <div className="form-group" style={{ marginBottom: '16px' }}>
+                <label className="form-label">Secret Key</label>
+                {hasReplizCredentials && !editingRepliz ? (
+                  <input className="form-input" value={replizSecretKey} disabled style={{ background: 'var(--bg-glass)', opacity: 0.8 }} />
+                ) : (
+                  <input
+                    type="password"
+                    className="form-input"
+                    placeholder="Masukkan Repliz Secret Key..."
+                    value={replizSecretKey}
+                    onChange={e => setReplizSecretKey(e.target.value)}
+                  />
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '16px' }}>
+                {hasReplizCredentials && !editingRepliz ? (
+                  <button className="btn btn-secondary" onClick={() => setEditingRepliz(true)}>Ganti Key</button>
+                ) : (
+                  <>
+                    <button className="btn btn-primary" onClick={saveReplizConfig} disabled={savingReplizConfig}>
+                      {savingReplizConfig ? 'Saving...' : 'Save Settings'}
+                    </button>
+                    {hasReplizCredentials && (
+                      <button className="btn btn-secondary" onClick={() => { setEditingRepliz(false); fetchSettings(); }}>Batal</button>
+                    )}
+                  </>
+                )}
+                <button className="btn btn-secondary" onClick={testReplizConnection} disabled={testingRepliz}>
+                  {testingRepliz ? 'Testing...' : 'Test Connection'}
+                </button>
+              </div>
+              {testReplizResult && (
+                <div style={{
+                  padding: '10px',
+                  borderRadius: '6px',
+                  background: testReplizResult.success ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+                  border: `1px solid ${testReplizResult.success ? '#10b981' : '#ef4444'}`,
+                  color: testReplizResult.success ? '#10b981' : '#ef4444',
+                  fontSize: '0.8rem'
+                }}>
+                  {testReplizResult.success 
+                    ? `✓ Koneksi sukses! Ditemukan ${testReplizResult.accountCount || 0} akun.` 
+                    : `✗ Koneksi gagal: ${testReplizResult.error}`}
+                </div>
+              )}
             </div>
           ))}
 
