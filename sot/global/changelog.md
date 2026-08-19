@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.15.2 — Fix error message silent overwrite in markPublishingResult (19/08/2026)
+- Prevent markPublishingResult from overriding lastErrorMessage with Unknown error when parameter is omitted
+
 ## V2.15.1 — Fix status NOT NULL constraint on schedule update (19/08/2026)
 - Fix markPublishingResult status update to use COALESCE
 
