@@ -38,6 +38,8 @@ export default function ContentPlannerDashboard() {
   const [editorialCountNotice, setEditorialCountNotice] = useState('');
   const [targetAudience, setTargetAudience] = useState('genz_casual');
   const [customTargetAudience, setCustomTargetAudience] = useState('');
+  const [promotionContext, setPromotionContext] = useState('');
+  const [customInstructions, setCustomInstructions] = useState('');
   const [isTitleManuallyEdited, setIsTitleManuallyEdited] = useState(false);
   const [editorialDirty, setEditorialDirty] = useState(false);
   const [editorialSource, setEditorialSource] = useState('empty');
@@ -338,6 +340,8 @@ export default function ContentPlannerDashboard() {
           objective,
           planner_count: effectivePlannerCount,
           target_audience: effectiveTargetAudience,
+          promotion_context: promotionContext.trim() || null,
+          custom_instructions: customInstructions.trim() || null,
           // World-Aware fields (Tahap 1)
           content_world: contentWorld,
           knowledge_domain: knowledgeDomain,
@@ -1030,6 +1034,28 @@ export default function ContentPlannerDashboard() {
                     placeholder="misal: 5X Ceramide, Halal MUI, Tekstur gel dingin instan"
                     value={productUsp}
                     onChange={e => setProductUsp(e.target.value)}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>Sudut Pandang / Konteks Promosi (Opsional):</label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: Weight Management, Ramadhan Hampers, Anti-Aging"
+                    value={promotionContext}
+                    onChange={e => setPromotionContext(e.target.value)}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>Instruksi Khusus Tambahan (Opsional):</label>
+                  <textarea
+                    rows={2}
+                    placeholder="Contoh: Gunakan bahasa gaul Jakarta Selatan, jangan sebutkan kata 'diet', dll."
+                    value={customInstructions}
+                    onChange={e => setCustomInstructions(e.target.value)}
                     style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
                   />
                 </div>

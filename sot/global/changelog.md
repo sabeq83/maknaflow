@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.14.90 — Implement hybrid context injection system for Content Planner (19/08/2026)
+- Add promotion_context and custom_instructions columns migration in db-pg.js and db.sqlite-backup.js
+- Map promotion_context and custom_instructions in createDraftContentPlanner
+- Assemble dynamic prompts with CONTEXT INTEGRATION GUARDRAIL in executeContentPlanner
+- Render promotionContext and customInstructions input fields in UI modal form
+
 ## V2.14.89 — Implement auto-niche detection and keyword tags extraction in deconstruction pipeline (19/08/2026)
 - Add re_niches table migration and default data seeding in db-pg.js
 - Update deconstruct prompt builder to accept availableNiches list and prompt Gemini to auto-detect niche and tags
