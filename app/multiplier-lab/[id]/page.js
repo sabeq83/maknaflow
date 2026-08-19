@@ -133,11 +133,9 @@ function CampaignDetailPageContent() {
 
   const pollLogs = async () => {
     try {
-      const res = await fetch('/api/system-logs?service=multiplier');
-      const data = await res.json();
-      if (data.success) {
-        setTerminalLogs(data.logs || '');
-      }
+      const res = await fetch(`/api/system-logs?type=multiplier&t=${Date.now()}`);
+      const text = await res.text();
+      setTerminalLogs(text);
     } catch (_) {}
   };
 

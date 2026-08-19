@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.80 — Fix logger endpoint query param and text parsing (19/08/2026)
+- Change pollLogs parameter from service=multiplier to type=multiplier
+- Parse system-logs response as text instead of JSON in frontend page and detail page
+
 ## V2.14.79 — Fix pause and resume buttons in Multiplier Lab (19/08/2026)
 - Add paused_previous_status column migration for re_multiplier_tasks
 - Implement campaign pause/resume PATCH handler in multiplier api route

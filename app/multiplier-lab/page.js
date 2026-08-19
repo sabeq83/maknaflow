@@ -209,23 +209,34 @@ function MultiplierLabPageContent() {
               created_at: t.created_at,
               status: t.status,
               tasks: [],
-              stats: { total: 0, completed: 0, failed: 0, processing: 0 }
+              stats: { total: 0, completed: 0, failed: 0, processing: 0, paused: 0 }
             };
           }
           groups[bid].tasks.push(t);
           groups[bid].stats.total++;
-          if (t.status === 'completed') groups[bid].stats.completed++;
-          else if (t.status === 'failed') groups[bid].stats.failed++;
-          else if (['remaking', 'generating_audio', 'generating_visuals', 'ffmpeg_muxing'].includes(t.status)) groups[bid].stats.processing++;
+          if (t.status === 'completed') {
+            groups[bid].stats.completed++;
+          } else if (t.status === 'failed') {
+            groups[bid].stats.failed++;
+          } else if (t.status === 'paused') {
+            groups[bid].stats.paused++;
+          } else {
+            groups[bid].stats.processing++;
+          }
         });
 
         // Determine aggregated campaign status
         const campaignList = Object.values(groups).map(g => {
-          let overallStatus = 'draft';
-          if (g.stats.completed === g.stats.total) overallStatus = 'completed';
-          else if (g.stats.failed > 0) overallStatus = 'failed';
-          else if (g.stats.processing > 0) overallStatus = 'running';
-          else if (g.tasks.some(t => t.status === 'paused')) overallStatus = 'paused';
+          let overallStatus = 'running';
+          if (g.stats.completed === g.stats.total) {
+            overallStatus = 'completed';
+          } else if (g.stats.processing > 0) {
+            overallStatus = 'running';
+          } else if (g.stats.failed > 0) {
+            overallStatus = 'failed';
+          } else if (g.stats.paused > 0) {
+            overallStatus = 'paused';
+          }
           
           return { ...g, status: overallStatus };
         });
@@ -241,11 +252,9 @@ function MultiplierLabPageContent() {
 
   const pollLogs = async () => {
     try {
-      const res = await fetch('/api/system-logs?service=multiplier');
-      const data = await res.json();
-      if (data.success) {
-        setTerminalLogs(data.logs || 'Memulai pemantauan sistem log...');
-      }
+      const res = await fetch(`/api/system-logs?type=multiplier&t=${Date.now()}`);
+      const text = await res.text();
+      setTerminalLogs(text);
     } catch (_) {}
   };
 
@@ -360,8 +369,13 @@ function MultiplierLabPageContent() {
   };
 
   const toggleStatus = async (campaign) => {
-    const isCurrentlyRunning = campaign.status === 'running';
-    const action = isCurrentlyRunning ? 'pause' : 'resume';
+    let action = 'resume';
+    if (campaign.status === 'running') {
+      action = 'pause';
+    } else if (campaign.status === 'failed') {
+      action = 'retry_failed';
+    }
+
     try {
       const res = await fetch('/api/v2/multiplier', {
         method: 'PATCH',
@@ -370,7 +384,10 @@ function MultiplierLabPageContent() {
       });
       const data = await res.json();
       if (data.success) {
-        showToast(`Berhasil mengubah status kampanye ke ${action.toUpperCase()}`);
+        const msg = action === 'pause' 
+          ? 'Berhasil menjeda kampanye' 
+          : (action === 'retry_failed' ? 'Berhasil memicu ulang tugas yang gagal' : 'Berhasil melanjutkan kampanye');
+        showToast(msg);
         fetchTasks();
       }
     } catch (err) {
@@ -770,8 +787,13 @@ function MultiplierLabPageContent() {
                       </button>
 
                       {c.status !== 'completed' && (
-                        <button type="button" className={`btn btn-sm ${c.status === 'running' ? 'btn-danger' : 'btn-success'}`} onClick={() => toggleStatus(c)} style={{ fontSize: '0.75rem', padding: '6px 12px' }}>
-                          {c.status === 'draft' ? '▶ Run' : (c.status === 'running' ? '⏸ Pause' : '▶ Resume')}
+                        <button
+                          type="button"
+                          className={`btn btn-sm ${c.status === 'running' ? 'btn-danger' : (c.status === 'failed' ? 'btn-warning' : 'btn-success')}`}
+                          onClick={() => toggleStatus(c)}
+                          style={{ fontSize: '0.75rem', padding: '6px 12px' }}
+                        >
+                          {c.status === 'running' ? '⏸ Pause' : (c.status === 'failed' ? '🔄 Retry Failed' : '▶ Resume')}
                         </button>
                       )}
 
