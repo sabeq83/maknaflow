@@ -36,14 +36,14 @@ export const GET = withTenantContext(async (request) => {
           const replizAccs = await listReplizAccounts({ apiUrl: url, accessKey, secretKey });
           const syncedIds = [];
           for (const raw of replizAccs) {
-            const mappedPlatform = raw.platform?.toLowerCase();
+            const mappedPlatform = (raw.platform || raw.type)?.toLowerCase();
             if (PUBLISHING_PLATFORMS.includes(mappedPlatform)) {
               const saved = await savePublishingAccount({
                 tenantId,
                 provider: 'repliz',
                 platform: mappedPlatform,
-                displayName: raw.name || raw.username || `Repliz ${mappedPlatform} #${raw.id}`,
-                providerAccountId: String(raw.id),
+                displayName: raw.name || raw.username || `Repliz ${mappedPlatform} #${raw.id || raw._id}`,
+                providerAccountId: String(raw.id || raw._id),
                 tokenCiphertext: null,
                 status: 'active'
               });

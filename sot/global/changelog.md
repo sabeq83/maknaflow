@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.14.98 — Fix Repliz API response and payload mapping (19/08/2026)
+- Fix list accounts parsing docs field
+- Fix retry HTTP method to POST
+- Correct schedule creation payload body properties
+
 ## V2.14.97 — Publishing Scheduler Provider Segmented Control UI (19/08/2026)
 - Pilihan tab Meta Direct vs Repliz Cloud
 - Dukungan sync terpisah per provider di modal skeduler

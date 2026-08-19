@@ -108,3 +108,32 @@ test('Validation Contract: validateProviderMediaContract enforces Repliz constra
     });
   }, /Repliz membutuhkan media image, video, atau reels/);
 });
+
+test('Repliz Client: parses paginated docs response', async () => {
+  const credentials = {
+    apiUrl: 'https://api.repliz.com',
+    accessKey: 'my-access-key',
+    secretKey: 'my-secret-key'
+  };
+
+  const mockResponse = {
+    docs: [
+      { id: 'acc_tiktok_1', type: 'tiktok', name: 'TikTok Channel' }
+    ],
+    totalDocs: 1
+  };
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url, options) => {
+    return new Response(JSON.stringify(mockResponse), { status: 200 });
+  };
+
+  try {
+    const res = await listReplizAccounts(credentials);
+    assert.equal(res.length, 1);
+    assert.equal(res[0].id, 'acc_tiktok_1');
+    assert.equal(res[0].type, 'tiktok');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
