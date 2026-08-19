@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.16.6 — Fix Repliz: handle postId pending type & naikkan max_attempts ke 8 (20/08/2026)
+- Fix: postId bertipe object 'schedule' dari Repliz kini diperlakukan sebagai pending bukan error
+- Naikkan fallback max_attempts dari 3 ke 8 agar ada cukup polling cycles
+- Reset job Instagram dan Facebook dapurbotani_opc_ir4y96_07 untuk retry otomatis
+
 ## V2.16.5 — Auto-sync ContentFlow status Scheduled saat job dibuat (19/08/2026)
 - Perbaiki gap: status berubah ke Scheduled segera saat user submit schedule
 - Tidak perlu tunggu worker pick up job
