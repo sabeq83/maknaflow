@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.14.83 — Fix product recommendations parsing in Multiplier Lab detail modal (19/08/2026)
+- Expose product_ideas_json on deconstruct list API
+- Update page parsing to read from raw product_ideas_json instead of individual non-existent columns
+
 ## V2.14.82 — Enhance Multiplier Lab blueprint card and modal details popup (19/08/2026)
 - Add shortened clickable source URL on card
 - Add hover tooltip for AI insights block

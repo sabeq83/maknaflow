@@ -1766,10 +1766,9 @@ function MultiplierLabPageContent() {
                   let lowTicket = [];
                   let highTicket = [];
                   try {
-                    lowTicket = JSON.parse(selectedBlueprintForModal.low_ticket_product_ideas_json || '[]');
-                  } catch (_) {}
-                  try {
-                    highTicket = JSON.parse(selectedBlueprintForModal.high_ticket_product_ideas_json || '[]');
+                    const parsedIdeas = JSON.parse(selectedBlueprintForModal.product_ideas_json || '{}');
+                    lowTicket = parsedIdeas.low_ticket || [];
+                    highTicket = parsedIdeas.high_ticket || [];
                   } catch (_) {}
 
                   if (lowTicket.length === 0 && highTicket.length === 0) return null;

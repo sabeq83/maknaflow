@@ -62,6 +62,7 @@ export const GET = withTenantContext(async (request) => {
           deconstructed_at: row.created_at,
           viral_pattern_summary: row.viral_pattern_summary,
           original_storyboard_json: row.original_storyboard_json,
+          product_ideas_json: row.product_ideas_json,
           scene_count,
           recommended_products
         };
