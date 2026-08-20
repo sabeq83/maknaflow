@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
+import AiUniverseBuilderModal from '@/app/components/AiUniverseBuilderModal';
 
 const emptyUniverseForm = {
   name: '',
@@ -126,6 +127,7 @@ export default function UniverseManagerPage() {
   const [pillarDraft, setPillarDraft] = useState('');
 
   // Tahap 3.6: Preset picker state
+  const [showAiBuilder, setShowAiBuilder] = useState(false);
   const [showStarterPicker, setShowStarterPicker] = useState(false);
   const [presets, setPresets] = useState([]);
   const [selectedPreset, setSelectedPreset] = useState(null);
@@ -1035,16 +1037,27 @@ export default function UniverseManagerPage() {
 
               {/* Mode: choice */}
               {pickerMode === 'choice' && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+                  <button
+                    onClick={() => { setShowStarterPicker(false); setShowAiBuilder(true); }}
+                    style={{
+                      background: 'linear-gradient(135deg, #1b5e20, #2e7d32)', color: '#ffffff',
+                      border: 'none', borderRadius: '12px', padding: '28px 20px',
+                      cursor: 'pointer', textAlign: 'left'
+                    }}>
+                    <div style={{ fontSize: '32px', marginBottom: '12px' }}>✨</div>
+                    <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '6px' }}>Build with AI</div>
+                    <div style={{ fontSize: '13px', opacity: 0.9 }}>Buat universe lengkap secara otomatis menggunakan AI Gemini. <span style={{ background: '#4caf50', borderRadius: '4px', padding: '1px 5px', fontSize: '10px', color: '#121212', fontWeight: 'bold', marginLeft: '4px' }}>Recommended</span></div>
+                  </button>
                   <button
                     onClick={() => setPickerMode('grid')}
                     style={{
-                      background: 'linear-gradient(135deg, var(--status-neutral), var(--status-neutral))', color: 'var(--text-primary)',
+                      background: 'linear-gradient(135deg, var(--status-neutral, #4c4c70), var(--status-neutral, #4c4c70))', color: 'var(--text-primary, #e0e0ff)',
                       border: 'none', borderRadius: '12px', padding: '28px 20px',
                       cursor: 'pointer', textAlign: 'left'
                     }}>
                     <div style={{ fontSize: '32px', marginBottom: '12px' }}>📦</div>
-                    <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '6px' }}>Create from Preset</div>
+                    <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '6px' }}>Use a Preset</div>
                     <div style={{ fontSize: '13px', opacity: 0.85 }}>Mulai dari 6 template siap pakai — lengkap dengan karakter dan lokasi starter.</div>
                   </button>
                   <button
@@ -1055,7 +1068,7 @@ export default function UniverseManagerPage() {
                       cursor: 'pointer', textAlign: 'left'
                     }}>
                     <div style={{ fontSize: '32px', marginBottom: '12px' }}>📝</div>
-                    <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '6px' }}>Start from Blank</div>
+                    <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '6px' }}>Manual Setup</div>
                     <div style={{ fontSize: '13px', opacity: 0.75 }}>Isi semua field secara manual. Cocok jika kamu punya konsep universe sendiri.</div>
                   </button>
                 </div>
@@ -1185,6 +1198,18 @@ export default function UniverseManagerPage() {
               )}
             </div>
           </div>
+        )}
+
+        {showAiBuilder && (
+          <AiUniverseBuilderModal
+            onClose={() => setShowAiBuilder(false)}
+            onCreated={async (created) => {
+              await fetchUniverses();
+              setShowAiBuilder(false);
+              setToast({ type: 'success', message: `Universe '${created.name}' berhasil dibuat dengan AI.` });
+              setTimeout(() => setToast(null), 4000);
+            }}
+          />
         )}
         </>
         )}

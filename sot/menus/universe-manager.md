@@ -89,7 +89,24 @@ Untuk universe bertipe human:
 1. **PawVille Pet Universe** (pawville) — Type: animal, Domain: pet_supplies
 2. **Jejak Peradaban Islam** (jejak-peradaban-islam) — Type: human, Domain: islamic_history, Historical Period: Abad ke-7 s.d. ke-15
 
-> User dapat membuat universe baru dari 6 System Preset (lihat seksi di bawah) atau dari blank form.
+> User dapat membuat universe baru dari Build with AI (Recommended), 6 System Preset (lihat seksi di bawah), atau Manual Setup secara manual.
+
+## AI Universe Builder — Fase 1 MVP
+
+Fitur **Build with AI** memungkinkan perancangan konsep universe lengkap secara otomatis menggunakan AI Gemini dalam satu panggilan API tunggal (Single-Pass generation).
+
+### API Endpoints AI Builder
+- `POST /api/v2/universe-ai/generate`: Mengirim creative brief ringkas untuk menghasilkan draft terstruktur dalam bentuk JSON (profile, characters, dan locations). Draft dikembalikan ke client tanpa langsung disimpan ke database.
+- `POST /api/v2/universe-ai/instantiate`: Menyimpan draft yang disetujui (dapat diedit oleh user) ke database secara atomik dalam satu transaksi PostgreSQL.
+
+### Kebijakan Faceless Deterministik (Human Universe)
+Untuk menjaga keselarasan konten, universe bertipe `human` (manusia) dilindungi dengan aturan faceless wajib di level server:
+- `human_presence` dipaksa bernilai `allowed`.
+- `depiction_policy` wajib diisi dan tidak boleh kosong.
+- Semua karakter manusia dilarang menggunakan depiction mode `normal` (mode yang valid adalah `faceless`, `back_view`, `silhouette`, atau `environment_only`).
+- Prompt negatif wajib melarang penggambaran wajah secara eksplisit (`visible face`, `facial features`, `reflection showing face`, dll.).
+- Canonical prompt untuk karakter otomatis diinjeksi dengan detail faceless sesuai depiction mode yang dipilih.
+
 
 ## System Presets — Tahap 3.6
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.18.6 — AI Universe Builder MVP (20/08/2026)
+- Tambah AI Universe Builder single-pass
+- Tambah review dan atomic save universe
+- Tambah faceless guardrail untuk human universe
+
 ## V2.18.5 — Tampilkan Tombol Simpan di Repliz Settings (20/08/2026)
 - Menampilkan tombol Save Settings setiap saat di Repliz Publishing Integration
 - Memungkinkan penyimpanan API URL dan GDrive Folder ID tanpa membuka kunci credentials
