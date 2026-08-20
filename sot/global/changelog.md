@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.18.0 — Auto-upload Nextcloud media ke Google Drive sebelum kirim ke Repliz (20/08/2026)
+- Tambah uploadUrlToPublicDrive() di drive-uploader.js — stream langsung ke GDrive tanpa simpan ke disk
+- Tambah ensurePublicMediaUrl() di publishing-worker.js — otomatis upload jika media dari Nextcloud
+- Worker update media_url_snapshot di DB ke GDrive URL agar retry tidak upload ulang
+- Fallback ke proxy URL jika GDrive folder tidak dikonfigurasi
+
 ## V2.17.2 — Fix Instagram type: gunakan video bukan reel untuk Repliz (20/08/2026)
 - Instagram type diubah dari reel ke video agar Repliz tidak menggunakan Instagram native scheduling
 - Native scheduling mengembalikan type:schedule postId yang tidak bisa di-resolve
