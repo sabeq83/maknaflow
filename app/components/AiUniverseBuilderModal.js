@@ -244,7 +244,7 @@ export default function AiUniverseBuilderModal({ onClose, onCreated }) {
         {/* Global Error Display */}
         {errorMsg && (
           <div style={modalStyles.errorBox}>
-            <strong style={{ color: '#ff7b7b' }}>⚠️ Terjadi Error</strong>
+            <strong style={{ color: 'var(--status-danger)' }}>⚠️ Terjadi Error</strong>
             <p style={{ margin: '4px 0 0 0', fontSize: '13px' }}>{errorMsg}</p>
             {errorDetails.length > 0 && (
               <ul style={{ margin: '8px 0 0 0', paddingLeft: '16px', fontSize: '12px' }}>
@@ -461,7 +461,7 @@ export default function AiUniverseBuilderModal({ onClose, onCreated }) {
               {draft.profile.universe_type === 'human' && (
                 <div style={modalStyles.warningNotice}>
                   <strong>⚠️ Depiction Guardrail Aktif: Human Universe</strong>
-                  <div style={{ fontSize: '12px', marginTop: '4px', color: '#ffb0b0' }}>
+                  <div style={{ fontSize: '12px', marginTop: '4px', color: 'var(--text-primary)' }}>
                     Karakter manusia dilarang menampilkan wajah secara penuh (harus faceless, silhouette, back view, atau env-only) untuk menjaga keselarasan konten.
                   </div>
                 </div>
@@ -475,8 +475,8 @@ export default function AiUniverseBuilderModal({ onClose, onCreated }) {
                     onClick={() => setActiveReviewSection(section)}
                     style={{
                       ...modalStyles.tabButton,
-                      background: activeReviewSection === section ? 'var(--status-neutral, #4caf50)' : '#2d2d4e',
-                      color: activeReviewSection === section ? '#121212' : '#e0e0ff'
+                      background: activeReviewSection === section ? 'var(--status-neutral)' : 'var(--surface-raised)',
+                      color: activeReviewSection === section ? 'var(--on-action-primary)' : 'var(--text-secondary)'
                     }}
                   >
                     {section === 'profile' ? '📁 Profile' : section === 'characters' ? '👥 Characters' : '📍 Locations'}
@@ -487,7 +487,7 @@ export default function AiUniverseBuilderModal({ onClose, onCreated }) {
               {/* Tab: Profile */}
               {activeReviewSection === 'profile' && (
                 <div style={modalStyles.card}>
-                  <div style={{ fontWeight: 700, fontSize: '15px', color: '#e0e0ff', marginBottom: '12px', borderBottom: '1px solid #3d3d6e', paddingBottom: '6px' }}>
+                  <div style={{ fontWeight: 700, fontSize: '15px', color: 'var(--text-primary)', marginBottom: '12px', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
                     Identitas Universe
                   </div>
                   
@@ -583,8 +583,8 @@ export default function AiUniverseBuilderModal({ onClose, onCreated }) {
                 <div>
                   {draft.characters.map((char, index) => (
                     <div key={index} style={modalStyles.card}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', borderBottom: '1px solid #3d3d6e', paddingBottom: '6px' }}>
-                        <div style={{ fontWeight: 700, color: '#ffb74d' }}>👥 Karakter #{index + 1}: {char.name}</div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
+                        <div style={{ fontWeight: 700, color: 'var(--status-warning)' }}>👥 Karakter #{index + 1}: {char.name}</div>
                         <button
                           onClick={() => deleteCharacterFromDraft(index)}
                           style={modalStyles.deleteButton}
@@ -723,8 +723,8 @@ export default function AiUniverseBuilderModal({ onClose, onCreated }) {
                 <div>
                   {draft.locations.map((loc, index) => (
                     <div key={index} style={modalStyles.card}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', borderBottom: '1px solid #3d3d6e', paddingBottom: '6px' }}>
-                        <div style={{ fontWeight: 700, color: '#4fc3f7' }}>📍 Lokasi #{index + 1}: {loc.name}</div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
+                        <div style={{ fontWeight: 700, color: 'var(--status-info)' }}>📍 Lokasi #{index + 1}: {loc.name}</div>
                         <button
                           onClick={() => deleteLocationFromDraft(index)}
                           style={modalStyles.deleteButton}
@@ -848,7 +848,7 @@ const modalStyles = {
   overlay: {
     position: 'fixed',
     inset: 0,
-    background: 'rgba(10, 10, 20, 0.85)',
+    background: 'var(--overlay-backdrop)',
     backdropFilter: 'blur(8px)',
     display: 'flex',
     alignItems: 'center',
@@ -857,15 +857,15 @@ const modalStyles = {
     padding: '20px'
   },
   container: {
-    background: '#1a1a2e',
-    border: '1px solid #3d3d6e',
-    borderRadius: '16px',
+    background: 'var(--surface)',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-lg, 16px)',
     width: '100%',
     maxWidth: '850px',
     maxHeight: '90vh',
     display: 'flex',
     flexDirection: 'column',
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
+    boxShadow: 'var(--shadow-modal)',
     overflow: 'hidden'
   },
   header: {
@@ -873,10 +873,10 @@ const modalStyles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '20px 24px',
-    borderBottom: '1px solid #3d3d6e'
+    borderBottom: '1px solid var(--border)'
   },
   headerTitle: {
-    color: '#e0e0ff',
+    color: 'var(--text-primary)',
     margin: 0,
     fontSize: '20px',
     fontWeight: 700
@@ -884,7 +884,7 @@ const modalStyles = {
   closeButton: {
     background: 'none',
     border: 'none',
-    color: '#8c8cb6',
+    color: 'var(--text-muted)',
     fontSize: '20px',
     cursor: 'pointer',
     padding: '4px'
@@ -895,17 +895,17 @@ const modalStyles = {
     flex: 1
   },
   errorBox: {
-    background: '#2d1a1a',
-    border: '1px solid #6e3d3d',
-    borderRadius: '8px',
+    background: 'var(--status-danger-soft)',
+    border: '1px solid var(--status-danger)',
+    borderRadius: 'var(--radius-sm, 8px)',
     padding: '12px 16px',
     margin: '16px 24px 0 24px',
-    color: '#ffb0b0'
+    color: 'var(--status-danger)'
   },
   formSectionTitle: {
     fontSize: '16px',
     fontWeight: 700,
-    color: '#e0e0ff',
+    color: 'var(--text-primary)',
     marginBottom: '20px'
   },
   row: {
@@ -920,7 +920,7 @@ const modalStyles = {
   },
   label: {
     fontSize: '12px',
-    color: '#8c8cb6',
+    color: 'var(--text-muted)',
     marginBottom: '6px',
     fontWeight: 600
   },
@@ -928,10 +928,10 @@ const modalStyles = {
     width: '100%',
     boxSizing: 'border-box',
     padding: '10px 12px',
-    background: '#121225',
-    border: '1px solid #3d3d6e',
-    borderRadius: '6px',
-    color: '#e0e0ff',
+    background: 'var(--bg-input)',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-xs, 6px)',
+    color: 'var(--text-primary)',
     fontSize: '14px',
     outline: 'none'
   },
@@ -939,10 +939,10 @@ const modalStyles = {
     width: '100%',
     boxSizing: 'border-box',
     padding: '10px 12px',
-    background: '#121225',
-    border: '1px solid #3d3d6e',
-    borderRadius: '6px',
-    color: '#e0e0ff',
+    background: 'var(--bg-input)',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-xs, 6px)',
+    color: 'var(--text-primary)',
     fontSize: '14px',
     outline: 'none'
   },
@@ -951,46 +951,46 @@ const modalStyles = {
     boxSizing: 'border-box',
     minHeight: '120px',
     padding: '10px 12px',
-    background: '#121225',
-    border: '1px solid #3d3d6e',
-    borderRadius: '6px',
-    color: '#e0e0ff',
+    background: 'var(--bg-input)',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-xs, 6px)',
+    color: 'var(--text-primary)',
     fontSize: '14px',
     outline: 'none',
     resize: 'vertical',
     fontFamily: 'inherit'
   },
   warningNotice: {
-    background: '#2d1c12',
-    border: '1px solid #6e463d',
-    borderRadius: '8px',
+    background: 'var(--status-warning-soft)',
+    border: '1px solid var(--status-warning)',
+    borderRadius: 'var(--radius-sm, 8px)',
     padding: '12px',
     marginBottom: '20px',
-    color: '#ffb74d'
+    color: 'var(--status-warning)'
   },
   tabButton: {
     border: 'none',
-    borderRadius: '6px',
+    borderRadius: 'var(--radius-xs, 6px)',
     padding: '8px 16px',
     fontSize: '13px',
     fontWeight: 700,
     cursor: 'pointer',
-    transition: 'all 0.2s'
+    transition: 'all var(--transition)'
   },
   card: {
-    background: '#242444',
-    border: '1px solid #3d3d6e',
-    borderRadius: '10px',
+    background: 'var(--surface-raised)',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-sm, 10px)',
     padding: '18px',
     marginBottom: '16px'
   },
   primaryButton: {
     flex: 1,
     padding: '12px 24px',
-    background: 'linear-gradient(135deg, #4caf50, #2e7d32)',
-    color: '#ffffff',
+    background: 'linear-gradient(135deg, var(--accent), var(--accent-light))',
+    color: 'var(--on-action-primary)',
     border: 'none',
-    borderRadius: '6px',
+    borderRadius: 'var(--radius-xs, 6px)',
     fontSize: '14px',
     fontWeight: 700,
     cursor: 'pointer',
@@ -999,9 +999,9 @@ const modalStyles = {
   secondaryButton: {
     padding: '12px 24px',
     background: 'none',
-    border: '1px solid #3d3d6e',
-    color: '#e0e0ff',
-    borderRadius: '6px',
+    border: '1px solid var(--border)',
+    color: 'var(--text-primary)',
+    borderRadius: 'var(--radius-xs, 6px)',
     fontSize: '14px',
     fontWeight: 600,
     cursor: 'pointer',
@@ -1009,8 +1009,8 @@ const modalStyles = {
   },
   deleteButton: {
     background: 'none',
-    border: '1px solid #ff7b7b',
-    color: '#ff7b7b',
+    border: '1px solid var(--status-danger)',
+    color: 'var(--status-danger)',
     padding: '4px 10px',
     borderRadius: '4px',
     fontSize: '11px',
@@ -1019,15 +1019,15 @@ const modalStyles = {
   addButton: {
     width: '100%',
     padding: '12px',
-    background: '#2d2d4e',
-    border: '1px dashed #4caf50',
-    color: '#4caf50',
-    borderRadius: '8px',
+    background: 'var(--surface-raised)',
+    border: '1px dashed var(--accent)',
+    color: 'var(--accent)',
+    borderRadius: 'var(--radius-sm, 8px)',
     fontSize: '13px',
     fontWeight: 700,
     cursor: 'pointer',
     marginBottom: '20px',
-    transition: 'all 0.2s'
+    transition: 'all var(--transition)'
   },
   centeredState: {
     display: 'flex',
@@ -1040,8 +1040,8 @@ const modalStyles = {
   spinner: {
     width: '40px',
     height: '40px',
-    border: '4px solid rgba(255, 255, 255, 0.1)',
-    borderTop: '4px solid #4caf50',
+    border: '4px solid var(--border-subtle)',
+    borderTop: '4px solid var(--accent)',
     borderRadius: '50%',
     animation: 'spin 1s linear infinite',
     marginBottom: '20px'
@@ -1049,12 +1049,12 @@ const modalStyles = {
   loadingTitle: {
     fontSize: '18px',
     fontWeight: 700,
-    color: '#e0e0ff',
+    color: 'var(--text-primary)',
     marginBottom: '10px'
   },
   loadingSubtitle: {
     fontSize: '13px',
-    color: '#8c8cb6',
+    color: 'var(--text-muted)',
     maxWidth: '450px',
     lineHeight: '1.5',
     margin: 0
@@ -1063,8 +1063,8 @@ const modalStyles = {
     width: '60px',
     height: '60px',
     borderRadius: '50%',
-    background: '#4caf50',
-    color: '#ffffff',
+    background: 'var(--status-success)',
+    color: 'var(--on-action-primary)',
     fontSize: '32px',
     display: 'flex',
     alignItems: 'center',

@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.18.8 — Refactor AI builder modal styles to semantic CSS (20/08/2026)
+- Ganti semua hex color hardcoded di modalStyles dengan CSS variables standar
+- Ganti hex inline JSX di modal dengan semantic CSS tokens untuk theme-awareness
+
 ## V2.18.7 — Fix AI builder textarea styling (20/08/2026)
 - Lebarkan box brief tambahan hingga 100%
 - Perbesar tinggi textarea untuk brief tambahan menjadi nyaman
