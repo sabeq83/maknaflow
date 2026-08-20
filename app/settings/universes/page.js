@@ -137,6 +137,11 @@ export default function UniverseManagerPage() {
   const [presetInstantiating, setPresetInstantiating] = useState(false);
   const [presetError, setPresetError] = useState('');
 
+  // States for Character T2I generation
+  const [painting, setPainting] = useState(false);
+  const [paintingProgress, setPaintingProgress] = useState('');
+  const [generatingPrompt, setGeneratingPrompt] = useState(false);
+
   useEffect(() => {
     fetch('/api/auth/me')
       .then(res => res.json())
@@ -213,6 +218,56 @@ export default function UniverseManagerPage() {
       console.error(e);
     }
   }
+
+  const pollGlabsImage = async (taskId) => {
+    setPainting(true);
+    setPaintingProgress('Tugas lukis diajukan...');
+    let attempts = 0;
+    const maxAttempts = 60; // 5 menit maks
+
+    const interval = setInterval(async () => {
+      attempts++;
+      if (attempts > maxAttempts) {
+        clearInterval(interval);
+        alert('Tugas lukis gambar AI melebihi batas waktu (timeout). Silakan coba lagi.');
+        setPainting(false);
+        setPaintingProgress('');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/webhook/status?task_id=${taskId}`);
+        const data = await res.json();
+
+        if (data.success && data.data) {
+          const taskStatus = (data.data.status || '').toLowerCase();
+          setPaintingProgress(`Status lukis: ${taskStatus}...`);
+
+          if (taskStatus === 'completed') {
+            clearInterval(interval);
+            const urls = data.data.results || data.data.files || [];
+            const imageUrl = urls.find(u => u.endsWith('.png') || u.endsWith('.jpg') || u.endsWith('.jpeg') || u.endsWith('.webp')) || urls[0];
+
+            if (imageUrl) {
+              setCharFormData(prev => ({ ...prev, reference_image: imageUrl }));
+              setToast({ type: 'success', message: 'Karakter berhasil dilukis!' });
+            } else {
+              alert('Gagal mendapatkan file hasil lukis.');
+            }
+            setPainting(false);
+            setPaintingProgress('');
+          } else if (taskStatus === 'failed') {
+            clearInterval(interval);
+            alert('Proses lukis gagal: ' + (data.data.error || 'Terjadi kesalahan sistem'));
+            setPainting(false);
+            setPaintingProgress('');
+          }
+        }
+      } catch (err) {
+        console.error('Polling status error:', err);
+      }
+    }, 5000);
+  };
 
   // API Call: Fetch Locations
   async function fetchLocations(universeId) {
@@ -783,16 +838,95 @@ export default function UniverseManagerPage() {
                       style={{ width: '100%', padding: '8px', background: 'var(--bg-secondary)', color: '#e0e0ff', border: '1px solid var(--surface-interactive)', borderRadius: '6px', boxSizing: 'border-box' }}
                     />
                   </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Canonical Prompt</label>
+                  <div style={{ display: 'grid', gap: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <label style={{ fontSize: '14px', fontWeight: 600 }}>Canonical Prompt (T2I)</label>
+                      <button
+                        type="button"
+                        disabled={generatingPrompt}
+                        onClick={async () => {
+                          setGeneratingPrompt(true);
+                          try {
+                            const res = await fetch(`/api/v2/universe-profiles/${selectedUniverse.id}/characters/suggest-prompt`, {
+                              method: 'POST',
+                              headers: { 'content-type': 'application/json' },
+                              body: JSON.stringify({
+                                character: charFormData,
+                                visual_style: selectedUniverse.default_visual_style
+                              })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                              setCharFormData(prev => ({ ...prev, canonical_prompt: data.prompt }));
+                            } else {
+                              alert('Gagal membuat prompt: ' + data.error);
+                            }
+                          } catch (err) {
+                            alert('Error: ' + err.message);
+                          } finally {
+                            setGeneratingPrompt(false);
+                          }
+                        }}
+                        style={{ padding: '4px 10px', fontSize: '12px', border: 'none', borderRadius: '4px', backgroundColor: 'var(--status-info)', color: 'var(--text-primary)', cursor: 'pointer', opacity: generatingPrompt ? 0.6 : 1 }}
+                      >
+                        {generatingPrompt ? '⏳ Menulis...' : '✨ Auto-Write Prompt'}
+                      </button>
+                    </div>
                     <textarea name="canonical_prompt" value={charFormData.canonical_prompt} onChange={handleCharChange} rows="3" style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--surface)', color: 'var(--text-primary)', borderRadius: '4px' }} />
                   </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Reference Image</label>
-                    <input type="file" onChange={handleCharFileChange} style={{ color: 'var(--text-secondary)' }} />
+                  <div style={{ display: 'grid', gap: '8px' }}>
+                    <label style={{ fontSize: '14px', fontWeight: 600 }}>Reference Image</label>
+                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                      <input type="file" onChange={handleCharFileChange} style={{ color: 'var(--text-secondary)', flex: 1 }} />
+                      <button
+                        type="button"
+                        disabled={painting || !charFormData.canonical_prompt}
+                        onClick={async () => {
+                          setPainting(true);
+                          setPaintingProgress('Memulai G-Labs T2I...');
+                          try {
+                            const res = await fetch('/api/webhook/generate', {
+                              method: 'POST',
+                              headers: { 'content-type': 'application/json' },
+                              body: JSON.stringify({
+                                type: 'image',
+                                prompt: charFormData.canonical_prompt,
+                                aspect_ratio: '1:1'
+                              })
+                            });
+                            const data = await res.json();
+                            if (data.success && data.data?.task_id) {
+                              pollGlabsImage(data.data.task_id);
+                            } else {
+                              alert('Gagal memulai tugas lukis: ' + (data.error || 'Server offline'));
+                              setPainting(false);
+                              setPaintingProgress('');
+                            }
+                          } catch (err) {
+                            alert('Error: ' + err.message);
+                            setPainting(false);
+                            setPaintingProgress('');
+                          }
+                        }}
+                        style={{ padding: '8px 14px', border: 'none', borderRadius: '6px', backgroundColor: 'var(--status-neutral)', color: 'var(--text-primary)', cursor: 'pointer', opacity: (!charFormData.canonical_prompt || painting) ? 0.6 : 1 }}
+                      >
+                        {painting ? '⏳ Lukis...' : '🎨 Paint Image (AI)'}
+                      </button>
+                    </div>
+                    {paintingProgress && (
+                      <div style={{ fontSize: '12px', color: 'var(--status-warning)', fontWeight: 600 }}>
+                        {paintingProgress}
+                      </div>
+                    )}
+                    {(charFormData.reference_image || charFormData.reference_image_path) && (
+                      <div style={{ marginTop: '8px' }}>
+                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Preview / Gambar Terpilih:</div>
+                        <img src={charFormData.reference_image || charFormData.reference_image_path} alt="Preview" style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--border)' }} />
+                      </div>
+                    )}
                   </div>
-                  <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                    <button type="submit" style={{ backgroundColor: 'var(--status-neutral)', color: 'var(--text-primary)', border: 'none', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer' }}>Save Character</button>
+                  <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+                    <button type="submit" disabled={painting} style={{ backgroundColor: 'var(--status-neutral)', color: 'var(--text-primary)', border: 'none', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer', opacity: painting ? 0.6 : 1 }}>Save Character</button>
                     <button type="button" onClick={() => setShowCharForm(false)} style={{ backgroundColor: '#34495e', color: 'var(--text-primary)', border: 'none', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer' }}>Cancel</button>
                   </div>
                 </form>
@@ -805,8 +939,8 @@ export default function UniverseManagerPage() {
               ) : characters.map(c => (
                 <div key={c.id} style={{ backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--surface)' }}>
                   <div style={{ height: '160px', backgroundColor: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid var(--surface)' }}>
-                    {c.reference_image_url ? (
-                      <img src={c.reference_image_url} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {c.reference_image_url || c.reference_image_path ? (
+                      <img src={c.reference_image_url || c.reference_image_path} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
                       <span style={{ fontSize: '48px' }}>🐾</span>
                     )}

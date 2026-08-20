@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.18.10 — Implement Character AI Image Generation via G-Labs (20/08/2026)
+- Buat route handler suggest-prompt untuk Gemini T2I prompt
+- Integrasikan tombol Auto-Write Prompt dan Paint Image (AI) ke form karakter
+- Tambahkan polling loop status G-Labs di frontend dan dukung binding path gambar
+
 ## V2.18.9 — Implement Creative Brief Generator feature (Fase 2) (20/08/2026)
 - Buat service generator lib/universe-ai-suggest.js untuk memanggil Gemini
 - Buat API route handler POST /api/v2/universe-ai/suggest-briefs
