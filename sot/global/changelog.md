@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.17.2 — Fix Instagram type: gunakan video bukan reel untuk Repliz (20/08/2026)
+- Instagram type diubah dari reel ke video agar Repliz tidak menggunakan Instagram native scheduling
+- Native scheduling mengembalikan type:schedule postId yang tidak bisa di-resolve
+- Mengikuti pattern TikTok yang berhasil menggunakan type video
+
 ## V2.17.1 — Fix middleware: izinkan /api/media-proxy dan /temp tanpa auth (20/08/2026)
 - Tambah /api/media-proxy ke public routes agar Repliz bisa download tanpa session cookie
 - Tambah /temp/ ke public routes
