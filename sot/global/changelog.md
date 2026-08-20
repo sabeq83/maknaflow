@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.18.2 — Fix: Simpan media_url_snapshot di DB via markPublishingResult (20/08/2026)
+- Update markPublishingResult di publishing-repository.js untuk mendukung update media_url_snapshot
+- Ini memastikan URL Google Drive yang terbuat disimpan secara permanen di database
+
 ## V2.18.1 — Fix: Evaluasi env vars publishing-worker secara dinamis (20/08/2026)
 - Pindahkan pembacaan env vars ke dalam fungsi ensurePublicMediaUrl dan resolveToProxyUrl
 - Ini memperbaiki race condition di mana Next.js Next start belum selesai memuat .env ketika file di-import
