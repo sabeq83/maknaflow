@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.18.9 — Implement Creative Brief Generator feature (Fase 2) (20/08/2026)
+- Buat service generator lib/universe-ai-suggest.js untuk memanggil Gemini
+- Buat API route handler POST /api/v2/universe-ai/suggest-briefs
+- Integrasikan input ide dasar, loading state, dan kartu opsi brief di modal UI
+
 ## V2.18.8 — Refactor AI builder modal styles to semantic CSS (20/08/2026)
 - Ganti semua hex color hardcoded di modalStyles dengan CSS variables standar
 - Ganti hex inline JSX di modal dengan semantic CSS tokens untuk theme-awareness

@@ -54,6 +54,37 @@ export default function AiUniverseBuilderModal({ onClose, onCreated }) {
   // States for accordion expand/collapse in review
   const [activeReviewSection, setActiveReviewSection] = useState('profile'); // profile | characters | locations | rules
 
+  // States for Creative Brief Generator (AI Suggestions)
+  const [seedInput, setSeedInput] = useState('');
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggestedOptions, setSuggestedOptions] = useState(null);
+  const [suggestError, setSuggestError] = useState('');
+
+  const handleSuggestBriefs = async () => {
+    if (!seedInput.trim()) return;
+    setSuggesting(true);
+    setSuggestError('');
+    setSuggestedOptions(null);
+
+    try {
+      const res = await fetch('/api/v2/universe-ai/suggest-briefs', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ seed: seedInput })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSuggestedOptions(data.options);
+      } else {
+        setSuggestError(data.message || 'Gagal menghasilkan opsi brief.');
+      }
+    } catch (err) {
+      setSuggestError('Error: ' + err.message);
+    } finally {
+      setSuggesting(false);
+    }
+  };
+
   const isHistorical = brief.knowledge_domain === 'history' || brief.knowledge_domain === 'islamic_history' || brief.universe_type === 'human';
 
   const handleBriefChange = (field, value) => {
@@ -260,6 +291,129 @@ export default function AiUniverseBuilderModal({ onClose, onCreated }) {
           {/* STEP 1: Brief Form */}
           {step === 'brief' && (
             <div>
+              {/* Creative Brief Generator Option */}
+              <div style={{
+                background: 'var(--surface-raised)',
+                border: '1px solid var(--border)',
+                borderRadius: '8px',
+                padding: '16px',
+                marginBottom: '24px'
+              }}>
+                <div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--text-primary)', marginBottom: '8px' }}>
+                  💡 Belum Punya Ide Detail? Biarkan AI Melengkapi Brief Anda
+                </div>
+                <p style={{ margin: '0 0 12px 0', fontSize: '12px', color: 'var(--text-muted)' }}>
+                  Ketik ide dasarmu di sini (contoh: "claymation tentang ekonomi kapitalisme"), lalu AI akan menghasilkan 3 draf brief kreatif terstruktur yang bisa Anda pilih.
+                </p>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input
+                    type="text"
+                    placeholder="Masukkan ide dasarmu..."
+                    value={seedInput}
+                    onChange={e => setSeedInput(e.target.value)}
+                    disabled={suggesting}
+                    style={{ ...modalStyles.input, flex: 1 }}
+                  />
+                  <button
+                    disabled={suggesting || !seedInput.trim()}
+                    onClick={handleSuggestBriefs}
+                    style={{
+                      ...modalStyles.primaryButton,
+                      flex: 'none',
+                      padding: '0 20px',
+                      background: 'linear-gradient(135deg, var(--status-neutral), var(--status-neutral))',
+                      color: 'var(--text-primary)',
+                      opacity: (suggesting || !seedInput.trim()) ? 0.6 : 1,
+                      cursor: (suggesting || !seedInput.trim()) ? 'not-allowed' : 'pointer'
+                    }}
+                  >
+                    {suggesting ? '⏳ Memproses...' : 'Dapatkan Ide Brief (AI)'}
+                  </button>
+                </div>
+
+                {suggestError && (
+                  <div style={{ color: 'var(--status-danger)', fontSize: '12px', marginTop: '8px', fontWeight: 600 }}>
+                    ❌ {suggestError}
+                  </div>
+                )}
+
+                {/* Suggestions Selection Grid */}
+                {suggestedOptions && (
+                  <div style={{ marginTop: '16px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+                    <div style={{ fontWeight: 600, fontSize: '13px', color: 'var(--text-primary)', marginBottom: '12px' }}>
+                      Pilih salah satu dari 3 opsi brief kreatif buatan AI:
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {suggestedOptions.map((opt, idx) => (
+                        <div
+                          key={idx}
+                          style={{
+                            background: 'var(--surface)',
+                            border: '1px solid var(--border)',
+                            borderRadius: '8px',
+                            padding: '12px 16px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '6px'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontWeight: 700, fontSize: '14px', color: 'var(--accent)' }}>
+                              Opsi #{idx + 1}: {opt.name}
+                            </span>
+                            <span style={{
+                              fontSize: '11px',
+                              background: 'var(--status-neutral-soft)',
+                              color: 'var(--status-neutral)',
+                              padding: '2px 8px',
+                              borderRadius: '12px',
+                              fontWeight: 600
+                            }}>
+                              {opt.universe_type} • {opt.knowledge_domain}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                            <strong>Premis:</strong> {opt.premise_seed}
+                          </div>
+                          <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                            <strong>Tone & Visual:</strong> {opt.tone} ({opt.visual_direction})
+                          </div>
+                          <button
+                            onClick={() => {
+                              setBrief({
+                                name: opt.name,
+                                purpose: opt.purpose,
+                                knowledge_domain: opt.knowledge_domain,
+                                universe_type: opt.universe_type,
+                                target_audience: opt.target_audience,
+                                premise_seed: opt.premise_seed,
+                                tone: opt.tone,
+                                visual_direction: opt.visual_direction,
+                                character_count: opt.character_count,
+                                location_count: opt.location_count,
+                                content_pillars: opt.content_pillars,
+                                special_constraints: opt.special_constraints,
+                                historical_period: '',
+                                freeform_brief: ''
+                              });
+                              setSuggestedOptions(null);
+                            }}
+                            style={{
+                              ...modalStyles.primaryButton,
+                              marginTop: '8px',
+                              padding: '8px 12px',
+                              fontSize: '12px'
+                            }}
+                          >
+                            ✓ Gunakan Brief Ini
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div style={modalStyles.formSectionTitle}>Lengkapi Creative Brief</div>
               
               <div style={modalStyles.row}>

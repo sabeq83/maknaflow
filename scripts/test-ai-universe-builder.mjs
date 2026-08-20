@@ -148,10 +148,12 @@ assert(normalizedHuman.characters[0].canonical_prompt.includes('(depicted as fac
 assert.equal(normalizedHuman.profile.rules_json.anti_anachronism, 'wajib menghindari anakronisme visual dan verbal, pakaian dan teknologi harus sesuai periode historis');
 console.log('✅ Draft validation & Faceless guardrail tests passed.');
 
+
 // 4. Database Integration Tests
+import { generateBriefSuggestions } from '../lib/universe-ai-suggest.js';
 import { instantiateAiUniverse, SlugConflictError } from '../lib/universe-ai-repository.js';
 import { tenantContext } from '../lib/tenant-context.js';
-import { dbGet, dbAll } from '../lib/db.js';
+import { dbGet, dbAll, tenantSettingsCache } from '../lib/db.js';
 import { closePgPool, getPgPool } from '../lib/db-pg.js';
 import * as contractModule from '../lib/universe-ai-contract.js';
 
@@ -162,6 +164,55 @@ async function runDbIntegrationTests() {
   const testTenant = 'test_tenant_ai_builder_' + Math.random().toString(36).slice(2, 7);
 
   await tenantContext.run(testTenant, async () => {
+    // 3. Creative Brief Generator unit test
+    console.log('🔄 Running Creative Brief suggestion unit tests...');
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = async (url, options) => {
+      if (url.includes('generativelanguage.googleapis.com')) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            candidates: [
+              {
+                content: {
+                  parts: [
+                    {
+                      text: JSON.stringify({
+                        options: [
+                          { name: 'Mock Suggest 1', universe_type: 'animal', knowledge_domain: 'general', purpose: 'Marketing', target_audience: 'Kids', premise_seed: 'Seed', tone: 'Satire', visual_direction: 'Claymation', character_count: 2, location_count: 2, content_pillars: 'Pillar', special_constraints: 'None' },
+                          { name: 'Mock Suggest 2', universe_type: 'human', knowledge_domain: 'history', purpose: 'Marketing', target_audience: 'Kids', premise_seed: 'Seed', tone: 'Satire', visual_direction: 'Claymation', character_count: 2, location_count: 2, content_pillars: 'Pillar', special_constraints: 'None' },
+                          { name: 'Mock Suggest 3', universe_type: 'invalid_type', knowledge_domain: 'invalid_domain', purpose: 'Marketing', target_audience: 'Kids', premise_seed: 'Seed', tone: 'Satire', visual_direction: 'Claymation', character_count: 2, location_count: 2, content_pillars: 'Pillar', special_constraints: 'None' }
+                        ]
+                      })
+                    }
+                  ]
+                }
+              }
+            ]
+          })
+        };
+      }
+      return originalFetch(url, options);
+    };
+
+    let suggestions;
+    tenantSettingsCache['default_tenant'] = tenantSettingsCache['default_tenant'] || {};
+    tenantSettingsCache['default_tenant']['gemini_api_key'] = 'mocked_key_for_unit_tests';
+
+    await tenantContext.run('default_tenant', async () => {
+      suggestions = await generateBriefSuggestions('test seed');
+    });
+
+    assert.equal(suggestions.length, 3);
+    assert.equal(suggestions[0].name, 'Mock Suggest 1');
+    assert.equal(suggestions[1].universe_type, 'human');
+    // Verify normalization of invalid values to default fallbacks
+    assert.equal(suggestions[2].universe_type, 'animal'); // Normalized from invalid_type
+    assert.equal(suggestions[2].knowledge_domain, 'general'); // Normalized from invalid_domain
+    globalThis.fetch = originalFetch;
+    console.log('✅ Creative Brief suggestion tests passed.');
+
     const uniqueSlug = 'test-univ-' + Math.random().toString(36).slice(2, 7);
     const draftToSave = {
       profile: {
