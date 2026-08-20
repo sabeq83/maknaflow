@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.18.3 — Perbaikan UI Publishing Scheduler (20/08/2026)
+- Warna log status dinamis di CSS
+- Penyederhanaan tombol aksi menjadi ikon panah saja
+
 ## V2.18.2 — Fix: Simpan media_url_snapshot di DB via markPublishingResult (20/08/2026)
 - Update markPublishingResult di publishing-repository.js untuk mendukung update media_url_snapshot
 - Ini memastikan URL Google Drive yang terbuat disimpan secara permanen di database

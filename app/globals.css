@@ -625,3 +625,17 @@ body {
   box-shadow: 0 0 4px var(--accent-glow);
 }
 
+/* ===== LOG PERCOBAAN OUTCOME STATUS COLORS ===== */
+.outcome-processing {
+  color: var(--status-info) !important;
+}
+.outcome-published,
+.outcome-success {
+  color: var(--status-success) !important;
+}
+.outcome-failed,
+.outcome-error {
+  color: var(--status-danger) !important;
+}
+
+

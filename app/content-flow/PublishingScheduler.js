@@ -958,15 +958,30 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                                   href={job.external_permalink}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  title={`Buka postingan di ${job.platform === 'instagram' ? 'Instagram' : 'Facebook'}`}
+                                  title={`Buka postingan di ${
+                                    job.platform === 'instagram' ? 'Instagram' : 
+                                    job.platform === 'tiktok' ? 'TikTok' : 
+                                    job.platform === 'threads' ? 'Threads' : 
+                                    job.platform === 'linkedin' ? 'LinkedIn' : 'Facebook'
+                                  }`}
                                   style={{
-                                    background: job.platform === 'instagram' ? 'rgba(236,72,153,0.2)' : 'rgba(37,99,235,0.2)',
-                                    border: `1px solid ${job.platform === 'instagram' ? '#ec4899' : 'var(--status-info)'}`,
-                                    color: job.platform === 'instagram' ? '#f472b6' : '#93c5fd',
+                                    background: 
+                                      job.platform === 'instagram' ? 'rgba(236,72,153,0.2)' : 
+                                      job.platform === 'tiktok' ? 'rgba(0, 242, 254, 0.2)' : 
+                                      'rgba(37,99,235,0.2)',
+                                    border: `1px solid ${
+                                      job.platform === 'instagram' ? '#ec4899' : 
+                                      job.platform === 'tiktok' ? '#00F2FE' : 
+                                      'var(--status-info)'
+                                    }`,
+                                    color: 
+                                      job.platform === 'instagram' ? '#f472b6' : 
+                                      job.platform === 'tiktok' ? '#00F2FE' : 
+                                      '#93c5fd',
                                     padding: '5px 8px', borderRadius: 6, fontSize: 11, textDecoration: 'none', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 2
                                   }}
                                 >
-                                  ↗️ {job.platform === 'instagram' ? 'IG' : 'FB'}
+                                  ↗️
                                 </a>
                               )}
                             </div>
@@ -1062,11 +1077,19 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                       rel="noopener noreferrer"
                       style={{
                         display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 8,
-                        background: selectedJobDetail.platform === 'instagram' ? 'linear-gradient(135deg, #ec4899, var(--status-neutral))' : '#2563eb',
+                        background: 
+                          selectedJobDetail.platform === 'instagram' ? 'linear-gradient(135deg, #ec4899, var(--status-neutral))' : 
+                          selectedJobDetail.platform === 'tiktok' ? 'linear-gradient(135deg, #00f2fe, #fe0979)' : 
+                          '#2563eb',
                         color: 'var(--text-primary)', fontSize: 11, fontWeight: 700, padding: '6px 12px', borderRadius: 6, textDecoration: 'none'
                       }}
                     >
-                      <span>↗️ Buka di {selectedJobDetail.platform === 'instagram' ? 'Instagram' : 'Facebook'}</span>
+                      <span>↗️ Buka di {
+                        selectedJobDetail.platform === 'instagram' ? 'Instagram' : 
+                        selectedJobDetail.platform === 'tiktok' ? 'TikTok' : 
+                        selectedJobDetail.platform === 'threads' ? 'Threads' : 
+                        selectedJobDetail.platform === 'linkedin' ? 'LinkedIn' : 'Facebook'
+                      }</span>
                     </a>
                   ) : (
                     <div style={{ color: 'var(--text-muted)', fontSize: 10, marginTop: 4 }}>
@@ -1102,7 +1125,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                       <div key={att.id || idx} style={{ background: '#0b111d', padding: 8, borderRadius: 6, fontSize: 10 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontWeight: 700 }}>
                           <span>Percobaan #{att.attempt_number} · {att.stage}</span>
-                          <span style={{ color: att.outcome === 'success' ? 'var(--status-success)' : '#fb7185' }}>{att.outcome.toUpperCase()}</span>
+                          <span className={`outcome-${(att.outcome || '').toLowerCase()}`}>{att.outcome.toUpperCase()}</span>
                         </div>
                         {att.sanitized_message && (
                           <div style={{ color: 'var(--text-muted)', marginTop: 2 }}>{att.sanitized_message}</div>
