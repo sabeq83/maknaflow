@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.18.1 — Fix: Evaluasi env vars publishing-worker secara dinamis (20/08/2026)
+- Pindahkan pembacaan env vars ke dalam fungsi ensurePublicMediaUrl dan resolveToProxyUrl
+- Ini memperbaiki race condition di mana Next.js Next start belum selesai memuat .env ketika file di-import
+
 ## V2.18.0 — Auto-upload Nextcloud media ke Google Drive sebelum kirim ke Repliz (20/08/2026)
 - Tambah uploadUrlToPublicDrive() di drive-uploader.js — stream langsung ke GDrive tanpa simpan ke disk
 - Tambah ensurePublicMediaUrl() di publishing-worker.js — otomatis upload jika media dari Nextcloud
