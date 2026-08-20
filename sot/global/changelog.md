@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.18.7 — Fix AI builder textarea styling (20/08/2026)
+- Lebarkan box brief tambahan hingga 100%
+- Perbesar tinggi textarea untuk brief tambahan menjadi nyaman
+
 ## V2.18.6 — AI Universe Builder MVP (20/08/2026)
 - Tambah AI Universe Builder single-pass
 - Tambah review dan atomic save universe

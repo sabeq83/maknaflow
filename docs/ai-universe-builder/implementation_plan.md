@@ -892,7 +892,7 @@ Setelah seluruh test/build berhasil:
 - [x] 12. Perbarui `sot/menus/universe-manager.md` agar kontrak dan batas MVP menjadi source of truth.
 - [x] 13. Jalankan seluruh test AI Universe Builder, field mapping, Content Planner regression, dan pemeriksaan keamanan log/client.
 - [x] 14. Jalankan production build dan perbaiki seluruh error yang terkait perubahan.
-- [ ] 15. Deploy hanya ke Dev Mac Mini dan lakukan smoke test mascot + human faceless serta pemilihan di Content Planner.
-- [ ] 16. Jalankan release patch non-interaktif, lalu verifikasi changelog, version, commit, tag, dan push.
+- [x] 15. Deploy hanya ke Dev Mac Mini dan lakukan smoke test mascot + human faceless serta pemilihan di Content Planner.
+- [x] 16. Jalankan release patch non-interaktif, lalu verifikasi changelog, version, commit, tag, dan push.
 
 > Setiap task hanya boleh diubah menjadi `[x]` setelah implementasi dan verifikasi task tersebut benar-benar selesai. Jika implementasi menyimpang dari plan karena fakta kode aktual, dokumentasikan alasan dan solusi kompatibelnya di dokumen ini sebelum menandai task selesai.

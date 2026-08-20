@@ -925,6 +925,8 @@ const modalStyles = {
     fontWeight: 600
   },
   input: {
+    width: '100%',
+    boxSizing: 'border-box',
     padding: '10px 12px',
     background: '#121225',
     border: '1px solid #3d3d6e',
@@ -934,6 +936,8 @@ const modalStyles = {
     outline: 'none'
   },
   select: {
+    width: '100%',
+    boxSizing: 'border-box',
     padding: '10px 12px',
     background: '#121225',
     border: '1px solid #3d3d6e',
@@ -943,6 +947,9 @@ const modalStyles = {
     outline: 'none'
   },
   textarea: {
+    width: '100%',
+    boxSizing: 'border-box',
+    minHeight: '120px',
     padding: '10px 12px',
     background: '#121225',
     border: '1px solid #3d3d6e',
