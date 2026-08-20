@@ -82,6 +82,7 @@ export const GET = withTenantContext(async (request, _context, user) => {
         repliz_api_url: await getSetting('repliz_api_url') || 'https://api.repliz.com',
         repliz_access_key: maskSecret(await getSetting('repliz_access_key')),
         repliz_secret_key: maskSecret(await getSetting('repliz_secret_key')),
+        repliz_drive_folder_id: await getSetting('repliz_drive_folder_id') || '',
         has_repliz_credentials: !!(await getSetting('repliz_access_key') && await getSetting('repliz_secret_key')),
       }
     });
@@ -105,7 +106,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       fb_page_id, fb_page_ids, fb_page_token, fb_server_url, scraper_headless_enabled, scraper_use_cdp, scraper_chrome_profile, ytdlp_cookies_from_browser,
       contentflow_api_key, contentflow_api_url,
       product_photo_provider, product_photo_gemini_model, product_photo_glabs_model, product_photo_auto_approve,
-      repliz_api_url, repliz_access_key, repliz_secret_key } = body;
+      repliz_api_url, repliz_access_key, repliz_secret_key, repliz_drive_folder_id } = body;
     
     if (isNewSecret(gemini_api_key)) {
       await setSetting('gemini_api_key', gemini_api_key);
@@ -171,6 +172,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
     if (repliz_api_url !== undefined) await setSetting('repliz_api_url', repliz_api_url);
     if (isNewSecret(repliz_access_key)) await setSetting('repliz_access_key', repliz_access_key);
     if (isNewSecret(repliz_secret_key)) await setSetting('repliz_secret_key', repliz_secret_key);
+    if (repliz_drive_folder_id !== undefined) await setSetting('repliz_drive_folder_id', repliz_drive_folder_id);
 
     return NextResponse.json({ success: true, message: 'Settings saved' });
   } catch (error) {

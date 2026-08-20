@@ -97,6 +97,7 @@ export default function SettingsPage() {
   const [replizApiUrl, setReplizApiUrl] = useState('https://api.repliz.com');
   const [replizAccessKey, setReplizAccessKey] = useState('');
   const [replizSecretKey, setReplizSecretKey] = useState('');
+  const [replizDriveFolderId, setReplizDriveFolderId] = useState('');
   const [hasReplizCredentials, setHasReplizCredentials] = useState(false);
   const [testingRepliz, setTestingRepliz] = useState(false);
   const [testReplizResult, setTestReplizResult] = useState(null);
@@ -235,6 +236,7 @@ export default function SettingsPage() {
       setReplizApiUrl(data.data.repliz_api_url || 'https://api.repliz.com');
       setReplizAccessKey(data.data.repliz_access_key || '');
       setReplizSecretKey(data.data.repliz_secret_key || '');
+      setReplizDriveFolderId(data.data.repliz_drive_folder_id || '');
       setHasReplizCredentials(data.data.has_repliz_credentials || false);
     }
   }
@@ -272,7 +274,8 @@ export default function SettingsPage() {
         body: JSON.stringify({
           repliz_api_url: replizApiUrl,
           repliz_access_key: replizAccessKey,
-          repliz_secret_key: replizSecretKey
+          repliz_secret_key: replizSecretKey,
+          repliz_drive_folder_id: replizDriveFolderId
         })
       });
       const data = await res.json();
@@ -2179,6 +2182,18 @@ export default function SettingsPage() {
                   value={replizApiUrl}
                   onChange={e => setReplizApiUrl(e.target.value)}
                 />
+              </div>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label className="form-label">Google Drive Folder ID (Repliz)</label>
+                <input
+                  className="form-input"
+                  placeholder="Masukkan Folder ID Google Drive..."
+                  value={replizDriveFolderId}
+                  onChange={e => setReplizDriveFolderId(e.target.value)}
+                />
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  Folder ID Google Drive yang digunakan untuk mengunggah media agar dapat dibaca oleh Repliz.
+                </div>
               </div>
               <div className="form-group" style={{ marginBottom: '12px' }}>
                 <label className="form-label">Access Key</label>

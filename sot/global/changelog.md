@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.18.4 — Migrasi GDrive Folder ID ke Settings (20/08/2026)
+- Migrasi config GDrive Folder ID Repliz ke database settings
+- Menambahkan input Google Drive Folder ID di menu settings
+
 ## V2.18.3 — Perbaikan UI Publishing Scheduler (20/08/2026)
 - Warna log status dinamis di CSS
 - Penyederhanaan tombol aksi menjadi ikon panah saja
