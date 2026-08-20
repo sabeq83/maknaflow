@@ -55,6 +55,7 @@ export const PUT = withTenantContext(async (req, { params }, user) => {
     body = await req.json();
   }
 
+  console.log('PUT Character Request Body:', JSON.stringify(body, null, 2));
   await updateUniverseCharacter(charId, body);
   return new Response(JSON.stringify({ success: true, message: 'Character updated' }), {
     status: 200,

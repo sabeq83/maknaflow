@@ -249,7 +249,11 @@ export default function UniverseManagerPage() {
             const imageUrl = urls.find(u => u.endsWith('.png') || u.endsWith('.jpg') || u.endsWith('.jpeg') || u.endsWith('.webp')) || urls[0];
 
             if (imageUrl) {
-              setCharFormData(prev => ({ ...prev, reference_image: imageUrl }));
+              setCharFormData(prev => ({ 
+                ...prev, 
+                reference_image: imageUrl,
+                reference_image_path: imageUrl
+              }));
               setToast({ type: 'success', message: 'Karakter berhasil dilukis!' });
             } else {
               alert('Gagal mendapatkan file hasil lukis.');
@@ -961,7 +965,9 @@ export default function UniverseManagerPage() {
                           name: c.name || '', character_key: c.character_key || '', species: c.species || '', breed: c.breed || '',
                           body_shape: c.body_shape || '', fur_color: c.fur_color || '', eye_color: c.eye_color || '', wardrobe: c.wardrobe || '',
                           personality: c.personality || '', movement_style: c.movement_style || '', relative_size: c.relative_size || 'medium',
-                          role: c.role || 'supporting', canonical_prompt: c.canonical_prompt || '', reference_image: null,
+                          role: c.role || 'supporting', canonical_prompt: c.canonical_prompt || '', 
+                          reference_image: c.reference_image_path || null,
+                          reference_image_path: c.reference_image_path || null,
                           depiction_mode: c.depiction_mode || 'normal', reference_type: c.reference_type || 'identity', historical_period: c.historical_period || ''
                         });
                         setShowCharForm(true);

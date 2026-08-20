@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.18.11 — Fix Character AI Image reference_image_path saving binding (20/08/2026)
+- Load c.reference_image_path on character edit form load
+- Set reference_image_path in charFormData when G-Labs T2I completed
+
 ## V2.18.10 — Implement Character AI Image Generation via G-Labs (20/08/2026)
 - Buat route handler suggest-prompt untuk Gemini T2I prompt
 - Integrasikan tombol Auto-Write Prompt dan Paint Image (AI) ke form karakter
