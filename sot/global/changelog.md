@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.18.5 — Tampilkan Tombol Simpan di Repliz Settings (20/08/2026)
+- Menampilkan tombol Save Settings setiap saat di Repliz Publishing Integration
+- Memungkinkan penyimpanan API URL dan GDrive Folder ID tanpa membuka kunci credentials
+
 ## V2.18.4 — Migrasi GDrive Folder ID ke Settings (20/08/2026)
 - Migrasi config GDrive Folder ID Repliz ke database settings
 - Menambahkan input Google Drive Folder ID di menu settings

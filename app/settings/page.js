@@ -2224,17 +2224,14 @@ export default function SettingsPage() {
                 )}
               </div>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '16px' }}>
-                {hasReplizCredentials && !editingRepliz ? (
+                <button className="btn btn-primary" onClick={saveReplizConfig} disabled={savingReplizConfig}>
+                  {savingReplizConfig ? 'Saving...' : 'Save Settings'}
+                </button>
+                {hasReplizCredentials && !editingRepliz && (
                   <button className="btn btn-secondary" onClick={() => setEditingRepliz(true)}>Ganti Key</button>
-                ) : (
-                  <>
-                    <button className="btn btn-primary" onClick={saveReplizConfig} disabled={savingReplizConfig}>
-                      {savingReplizConfig ? 'Saving...' : 'Save Settings'}
-                    </button>
-                    {hasReplizCredentials && (
-                      <button className="btn btn-secondary" onClick={() => { setEditingRepliz(false); fetchSettings(); }}>Batal</button>
-                    )}
-                  </>
+                )}
+                {hasReplizCredentials && editingRepliz && (
+                  <button className="btn btn-secondary" onClick={() => { setEditingRepliz(false); fetchSettings(); }}>Batal</button>
                 )}
                 <button className="btn btn-secondary" onClick={testReplizConnection} disabled={testingRepliz}>
                   {testingRepliz ? 'Testing...' : 'Test Connection'}
