@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.20.3 — YouTube Studio Editorial Workflow (21/08/2026)
+- Tambah AI Channel Strategy dengan review dan activation
+- Tambah series serta backlog ide episode AI
+- Tambah workflow episode Planned yang tenant-safe
+
 ## V2.20.2 — YouTube Studio Checklist Sync (21/08/2026)
 - Checklist updates in implementation plan SOT document
 
