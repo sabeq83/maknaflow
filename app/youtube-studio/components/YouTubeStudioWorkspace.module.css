@@ -563,3 +563,12 @@
   color: var(--text-secondary);
 }
 
+.durationControl {
+  margin-top: 4px;
+}
+
+.inheritanceHint {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+

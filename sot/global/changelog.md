@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.20.10 — YouTube Studio Flexible Duration Profiles (22/08/2026)
+- Tambah hierarchy durasi Channel Series dan Episode
+- Tambah generation profile Google Flow berbasis capability
+- Validasi durasi generated shot sebelum Production Factory
+
 ## V2.20.9 — YouTube Studio AI Series Suggestion (22/08/2026)
 - Tambah saran konsep Content Series berbasis AI
 - Integrasi tombol AI Suggestion dan kartu konsep di Langkah 3

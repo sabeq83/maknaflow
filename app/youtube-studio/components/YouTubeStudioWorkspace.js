@@ -19,7 +19,8 @@ export function YouTubeStudioWorkspace() {
     universe_id: '',
     visual_identity_preset_id: '',
     brand_constraints: '',
-    forbidden_claims: ''
+    forbidden_claims: '',
+    default_target_duration_seconds: 600
   });
   const [refineInstruction, setRefineInstruction] = useState('');
   const [isGeneratingStrategy, setIsGeneratingStrategy] = useState(false);
@@ -69,6 +70,13 @@ export function YouTubeStudioWorkspace() {
   const [seriesSuggestions, setSeriesSuggestions] = useState([]);
   const [isGeneratingSeriesSuggestions, setIsGeneratingSeriesSuggestions] = useState(false);
 
+  // Phase 2.5 Duration & Profiles States
+  const [newSeriesDurationMode, setNewSeriesDurationMode] = useState('inherit');
+  const [newSeriesDuration, setNewSeriesDuration] = useState(600);
+  const [overrideEpDuration, setOverrideEpDuration] = useState('');
+  const [profilesList, setProfilesList] = useState([]);
+  const [selectedProfileKey, setSelectedProfileKey] = useState('');
+
   useEffect(() => {
     fetchChannels();
     fetchBriefPresets();
@@ -101,6 +109,10 @@ export function YouTubeStudioWorkspace() {
       const viRes = await fetch('/api/v2/visual-identities');
       const viData = await viRes.json();
       if (viData.success) setVisualIdentities(viData.data || []);
+
+      const pRes = await fetch('/api/v2/youtube-studio/generation-profiles');
+      const pData = await pRes.json();
+      if (pData.success) setProfilesList(pData.data || []);
     } catch (e) {
       console.error('Failed to load brief presets', e);
     }
@@ -118,6 +130,19 @@ export function YouTubeStudioWorkspace() {
       }
     } catch (e) {
       setErrorMsg('Failed to load channels.');
+    }
+  }
+
+  async function refreshEpisodesList() {
+    if (!selectedChannel) return;
+    try {
+      const epRes = await fetch(`/api/v2/youtube-studio/episodes?channel_id=${selectedChannel.id}`);
+      const epData = await epRes.json();
+      if (epData.success) {
+        setEpisodes(epData.data);
+      }
+    } catch (e) {
+      console.error('Failed to refresh episodes list', e);
     }
   }
 
@@ -322,7 +347,14 @@ export function YouTubeStudioWorkspace() {
       const res = await fetch(`/api/v2/youtube-studio/channels/${selectedChannel.id}/series`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newSeriesName, pillar: newSeriesPillar })
+        body: JSON.stringify({ 
+          name: newSeriesName, 
+          pillar: newSeriesPillar,
+          config: {
+            duration_mode: newSeriesDurationMode,
+            target_duration_seconds: newSeriesDurationMode === 'override' ? newSeriesDuration : null
+          }
+        })
       });
       const data = await res.json();
       if (data.success) {
@@ -491,10 +523,14 @@ export function YouTubeStudioWorkspace() {
   useEffect(() => {
     if (selectedEpisode) {
       loadEpisodeEditorialData(selectedEpisode.id);
+      setOverrideEpDuration(selectedEpisode.target_duration_seconds || '');
+      setSelectedProfileKey(selectedEpisode.generation_profile_key || '');
     } else {
       setSelectedEpisodeResearch(null);
       setSelectedEpisodeBlueprint(null);
       setSelectedEpisodeScript(null);
+      setOverrideEpDuration('');
+      setSelectedProfileKey('');
     }
   }, [selectedEpisode]);
 
@@ -681,6 +717,61 @@ export function YouTubeStudioWorkspace() {
       }
     } catch (e) {
       setErrorMsg('Failed to adopt series.');
+    }
+  }
+
+  async function handleOverrideEpisodeDuration() {
+    if (!selectedEpisode) return;
+    setErrorMsg('');
+    setNotice(null);
+    try {
+      const res = await fetch(`/api/v2/youtube-studio/episodes/${selectedEpisode.id}/duration`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target_duration_seconds: parseInt(overrideEpDuration, 10) })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSelectedEpisode(prev => ({ 
+          ...prev, 
+          target_duration_seconds: data.data.target_duration_seconds, 
+          duration_source: data.data.duration_source 
+        }));
+        await refreshEpisodesList();
+        triggerNotice('success', 'Episode target duration updated successfully!');
+      } else {
+        setErrorMsg(data.error || 'Failed to update duration.');
+      }
+    } catch (e) {
+      setErrorMsg('Failed to update duration.');
+    }
+  }
+
+  async function handleSetGenerationProfile(profileKey) {
+    if (!selectedEpisode) return;
+    setSelectedProfileKey(profileKey);
+    setErrorMsg('');
+    setNotice(null);
+    if (!profileKey) return;
+    try {
+      const res = await fetch(`/api/v2/youtube-studio/episodes/${selectedEpisode.id}/generation-profile`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ generation_profile_key: profileKey })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSelectedEpisode(prev => ({
+          ...prev,
+          generation_profile_key: data.data.generation_profile_key
+        }));
+        await refreshEpisodesList();
+        triggerNotice('success', 'Generation profile saved successfully!');
+      } else {
+        setErrorMsg(data.error || 'Failed to set generation profile.');
+      }
+    } catch (e) {
+      setErrorMsg('Failed to set generation profile.');
     }
   }
 
@@ -1166,6 +1257,23 @@ export function YouTubeStudioWorkspace() {
                     {visualIdentities.map(vi => <option key={vi.id} value={vi.id}>{vi.name || vi.brand_name}</option>)}
                   </select>
                 </div>
+                <div className={styles.formGroup}>
+                  <label htmlFor="brief-duration">DEFAULT VIDEO DURATION</label>
+                  <select 
+                    id="brief-duration" 
+                    className={styles.select} 
+                    value={brief.default_target_duration_seconds || 600} 
+                    onChange={(e) => setBrief({ ...brief, default_target_duration_seconds: parseInt(e.target.value, 10) })}
+                  >
+                    <option value={300}>5 Menit (300s)</option>
+                    <option value={480}>8 Menit (480s)</option>
+                    <option value={600}>10 Menit (600s)</option>
+                    <option value={720}>12 Menit (720s)</option>
+                    <option value={900}>15 Menit (900s)</option>
+                    <option value={1200}>20 Menit (1200s)</option>
+                    <option value={1800}>30 Menit (1800s)</option>
+                  </select>
+                </div>
 
                 <div className={styles.formGroup} style={{ gridColumn: 'span 2' }}>
                   <button 
@@ -1288,6 +1396,30 @@ export function YouTubeStudioWorkspace() {
                   onChange={(e) => setNewSeriesPillar(e.target.value)}
                 />
               </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="new-series-duration-mode">Duration Mode</label>
+                <select 
+                  id="new-series-duration-mode" 
+                  className={styles.select} 
+                  value={newSeriesDurationMode} 
+                  onChange={(e) => setNewSeriesDurationMode(e.target.value)}
+                >
+                  <option value="inherit">Inherit Channel default</option>
+                  <option value="override">Override Series duration</option>
+                </select>
+              </div>
+              {newSeriesDurationMode === 'override' && (
+                <div className={styles.formGroup}>
+                  <label htmlFor="new-series-duration">Series Target Duration (s)</label>
+                  <input 
+                    id="new-series-duration" 
+                    className={styles.input} 
+                    type="number" 
+                    value={newSeriesDuration} 
+                    onChange={(e) => setNewSeriesDuration(parseInt(e.target.value, 10))} 
+                  />
+                </div>
+              )}
               <div className={styles.formGroup} style={{ justifyContent: 'flex-end' }}>
                 <button 
                   type="button" 
@@ -1482,6 +1614,36 @@ export function YouTubeStudioWorkspace() {
                       Status: {selectedEpisode.status}
                     </span>
                   </div>
+                  
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center', margin: '12px 0', fontSize: '0.85rem' }}>
+                    <div>
+                      Resolved Duration: <strong>{selectedEpisode.target_duration_seconds} detik</strong> 
+                      <span className={styles.inheritanceHint} style={{ marginLeft: '6px', color: 'var(--text-secondary)' }}>
+                        (Source: {selectedEpisode.duration_source})
+                      </span>
+                    </div>
+                    {selectedEpisode.status === 'Planned' && (
+                      <div className={styles.durationControl} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <label htmlFor="ep-duration-override">Override (s):</label>
+                        <input 
+                          id="ep-duration-override" 
+                          className={styles.input} 
+                          type="number" 
+                          style={{ width: '80px', padding: '4px 8px' }} 
+                          value={overrideEpDuration} 
+                          onChange={(e) => setOverrideEpDuration(e.target.value)} 
+                        />
+                        <button 
+                          type="button" 
+                          className="btn btn-secondary" 
+                          style={{ padding: '4px 10px', fontSize: '0.78rem' }}
+                          onClick={handleOverrideEpisodeDuration}
+                        >
+                          Save
+                        </button>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Section 5.1: Research Brief */}
                   <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -1551,6 +1713,39 @@ export function YouTubeStudioWorkspace() {
                     ) : (
                       <div className={styles.prereqNotice}>
                         Voice-over script is not yet generated. (Prerequisite: Blueprint must be Approved).
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Step 6: Model Generation Profile Selection */}
+                  <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '12px', borderTop: '1px dashed var(--border-subtle)', paddingTop: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <h4 style={{ margin: 0, fontSize: '1rem' }}>Step 6: Model Generation Profile Selection</h4>
+                    </div>
+                    {selectedEpisode.status === 'Script Approved' ? (
+                      <div className={styles.durationControl} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <label htmlFor="profile-select" style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Choose Model Generation Profile</label>
+                        <select 
+                          id="profile-select" 
+                          className={styles.select} 
+                          style={{ maxWidth: '300px' }}
+                          value={selectedProfileKey} 
+                          onChange={(e) => handleSetGenerationProfile(e.target.value)}
+                        >
+                          <option value="">-- Select Profile --</option>
+                          {profilesList.map(p => (
+                            <option key={p.key} value={p.key}>{p.label} ({p.provider})</option>
+                          ))}
+                        </select>
+                        {selectedProfileKey && (
+                          <div className={styles.inheritanceHint} style={{ marginTop: '4px', fontSize: '0.8rem' }}>
+                            ✓ Profile active. Allowed durations per clip: <strong>{profilesList.find(p => p.key === selectedProfileKey)?.generatedShotDurations.join(', ')}s</strong>.
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className={styles.prereqNotice}>
+                        Generation profile can be configured once the script is Approved. (Prerequisite: Episode must be in 'Script Approved' status).
                       </div>
                     )}
                   </div>
