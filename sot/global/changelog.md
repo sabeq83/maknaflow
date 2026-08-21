@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.20.1 — YouTube Studio MVP (21/08/2026)
+- Implementasi youtube_studio permission dan sidebar mapping
+- Migrasi database schema PostgreSQL untuk YouTube Studio MVP
+- Membuat repository, snapshot-service, planner, render-adapter, dan background worker
+- Implementasi premium workspace UI dengan monitoring render job dan upload draft ke YouTube
+
 ## V2.20.0 — Visual Consistency Assets (21/08/2026)
 - Ditambahkan tabel visual_reference_assets untuk registry subjek, wardrobe, dan style
 - Diintegrasikan ReferenceAssetManager UI di Universe Manager dan Visual Identity Studio

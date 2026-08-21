@@ -6,6 +6,7 @@ import { useState, useEffect, Suspense } from 'react';
 import ThemeToggle from './ThemeToggle';
 
 const menuKeyMap = {
+  '/youtube-studio': 'youtube_studio',
   '/content-flow': 'content_flow',
   '/instant-factory': 'instant_campaign',
   '/re-campaigns': 're_campaign',
@@ -44,6 +45,7 @@ const navItems = [
   { label: 'Universe Manager', href: '/settings/universes', icon: '🏰' },
 
   { section: 'WORKFLOW' },
+  { label: 'YouTube Studio', href: '/youtube-studio', icon: '▶️' },
   { label: 'RE Campaign', href: '/re-campaigns', icon: '🎬' },
   { label: 'Pillar Campaign', href: '/pillar-campaigns', icon: '🌱' },
   { label: 'Sheets Autopilot', href: '/sheets-autopilot', icon: '🤖' },
