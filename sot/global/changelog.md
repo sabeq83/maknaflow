@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.20.4 — Fix Channel API import warning (21/08/2026)
+- Hapus dependency updateChannelStrategy yang usang di route channel id
+
 ## V2.20.3 — YouTube Studio Editorial Workflow (21/08/2026)
 - Tambah AI Channel Strategy dengan review dan activation
 - Tambah series serta backlog ide episode AI
