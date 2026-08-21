@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.20.2 — YouTube Studio Checklist Sync (21/08/2026)
+- Checklist updates in implementation plan SOT document
+
 ## V2.20.1 — YouTube Studio MVP (21/08/2026)
 - Implementasi youtube_studio permission dan sidebar mapping
 - Migrasi database schema PostgreSQL untuk YouTube Studio MVP

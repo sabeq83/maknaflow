@@ -129,19 +129,20 @@ No API may skip an invalid transition. A rejected script returns the episode to 
 
 ## 4. Execution Task List
 
-- [ ] Confirm provider architecture through a bounded technical spike: AI script, TTS, visual/video generation, storage, FFmpeg/render worker, and YouTube OAuth/upload.
-- [ ] Add RBAC menu key, sidebar route, tenant disable behavior, and page-level/API-level authorization for `youtube_studio`.
-- [ ] Add PostgreSQL migrations, indexes, constraints, and idempotent migration tests for all MVP YouTube Studio tables.
-- [ ] Implement tenant-scoped contracts and repositories for channel, strategy, series, episode, blueprint, script, render job, publishing package, and derivative.
-- [ ] Implement Channel Strategy/Series/Episode API routes and create the YouTube Studio workspace UI.
-- [ ] Implement multilingual blueprint/script generation, versioning, review, and approval gate.
-- [ ] Implement Universe and Visual Identity snapshot resolver for production start.
-- [ ] Implement durable production queue/orchestrator and provider adapters with quota, artifact, logging, retry, and cancellation behavior.
-- [ ] Implement timeline assembly, subtitles, preview/final render, in-app preview, selective scene regeneration, and final approval.
-- [ ] Implement publishing package editor, pre-publish checklist, secure YouTube connection, and private/unlisted upload.
-- [ ] Implement the parent episode → short-form derivative bridge and derivative status visibility.
-- [ ] Add unit, repository, route, authorization, job-state, integration, and end-to-end acceptance tests.
-- [ ] Run staging verification, publish a test private/unlisted video, verify tenant isolation, then execute the required release procedure.
+- [x] Confirm provider architecture through a bounded technical spike: AI script, TTS, visual/video generation, storage, FFmpeg/render worker, and YouTube OAuth/upload.
+- [x] Add RBAC menu key, sidebar route, tenant disable behavior, and page-level/API-level authorization for `youtube_studio`.
+- [x] Add PostgreSQL migrations, indexes, constraints, and idempotent migration tests for all MVP YouTube Studio tables.
+- [x] Implement tenant-scoped contracts and repositories for channel, strategy, series, episode, blueprint, script, render job, publishing package, and derivative.
+- [x] Implement Channel Strategy/Series/Episode API routes and create the YouTube Studio workspace UI.
+- [x] Implement multilingual blueprint/script generation, versioning, review, and approval gate.
+- [x] Implement Universe and Visual Identity snapshot resolver for production start.
+- [x] Implement durable production queue/orchestrator and provider adapters with quota, artifact, logging, retry, and cancellation behavior.
+- [x] Implement timeline assembly, subtitles, preview/final render, in-app preview, selective scene regeneration, and final approval.
+- [x] Implement publishing package editor, pre-publish checklist, secure YouTube connection, and private/unlisted upload.
+- [x] Implement the parent episode → short-form derivative bridge and derivative status visibility.
+- [x] Add unit, repository, route, authorization, job-state, integration, and end-to-end acceptance tests.
+- [x] Run staging verification, publish a test private/unlisted video, verify tenant isolation, then execute the required release procedure.
+
 
 ## 5. Planned File Changes
 
