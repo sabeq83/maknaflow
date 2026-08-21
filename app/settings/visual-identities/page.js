@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Sidebar from '../../components/Sidebar';
 
 const SUBJECT_KINDS = ['human', 'blank_face_3d', 'animal', 'mascot_object'];
 const HUMAN_FACELESS_MODES = ['hands_only', 'crop_below_neck', 'back_view', 'silhouette', 'first_person_pov', 'blank_face_3d'];
@@ -183,37 +184,40 @@ export default function VisualIdentityStudioPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-8 font-sans">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800 pb-6 mb-8">
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-teal-400 via-emerald-400 to-indigo-400 bg-clip-text text-transparent">
-              Visual Identity Studio
-            </h1>
-            <p className="text-slate-400 mt-2 text-sm max-w-xl">
-              Create, edit, and manage reusable visual identity presets to lock faceless parameters, wardrobe colors, and scene styling.
-            </p>
+    <div className="app-layout">
+      <Sidebar />
+      <main className="main-content">
+        <div className="page-container">
+          {/* Header */}
+          <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+            <div>
+              <h1>🎭 Visual Identity Studio</h1>
+              <p className="page-subtitle">Kelola preset identitas visual terpadu, spesifikasi model faceless, wardrobe, dan scene styling.</p>
+            </div>
+            {!editingPreset && !previewPreset && (
+              <button className="btn btn-primary" onClick={handleOpenCreate}>+ Create Preset</button>
+            )}
           </div>
-          <button
-            onClick={handleOpenCreate}
-            className="flex items-center gap-2 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-teal-500/10 transition duration-300 transform active:scale-95"
-          >
-            <span className="text-xl">+</span> New Visual Identity
-          </button>
-        </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-1.5 p-1 bg-slate-900 border border-slate-800 rounded-2xl w-fit mb-6">
+        <div style={{ display: 'inline-flex', gap: 6, padding: 6, background: 'var(--sidebar)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius)', marginBottom: 24 }}>
           {['system', 'user', 'archived'].map(tab => (
             <button
               key={tab}
               onClick={() => { setActiveTab(tab); setEditingPreset(null); setPreviewPreset(null); }}
-              className={`px-6 py-2.5 rounded-xl font-bold transition duration-300 text-sm capitalize ${
-                activeTab === tab
-                  ? 'bg-slate-850 text-teal-400 border border-slate-800 shadow-md'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: '10px 20px',
+                fontFamily: 'inherit',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                color: activeTab === tab ? 'var(--action-primary)' : 'var(--text-muted)',
+                backgroundColor: activeTab === tab ? 'var(--surface-interactive)' : 'transparent',
+                borderRadius: 'var(--radius-sm)',
+                cursor: 'pointer',
+                transition: 'var(--transition)'
+              }}
             >
               {tab === 'system' ? 'System Presets' : tab === 'user' ? 'My Presets' : 'Archived'}
             </button>
@@ -242,59 +246,68 @@ export default function VisualIdentityStudioPage() {
               No presets found in this category.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 24 }}>
               {presets.map(preset => (
                 <div
                   key={preset.id}
-                  className="bg-slate-900 border border-slate-850 hover:border-slate-700 p-6 rounded-2xl shadow-xl flex flex-col justify-between transition duration-300 hover:shadow-teal-950/5 group"
+                  className="card"
+                  style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: 24 }}
                 >
                   <div>
-                    <div className="flex justify-between items-start mb-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${
-                        preset.source === 'system' 
-                          ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/25'
-                          : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/25'
-                      }`}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', items: 'center', marginBottom: 16 }}>
+                      <span style={{ 
+                        padding: '4px 10px', 
+                        borderRadius: 20, 
+                        fontSize: '0.7rem', 
+                        fontWeight: 700, 
+                        textTransform: 'uppercase', 
+                        background: preset.source === 'system' ? 'var(--status-info-soft)' : 'var(--status-success-soft)', 
+                        color: preset.source === 'system' ? 'var(--status-info)' : 'var(--status-success)', 
+                        border: `1px solid ${preset.source === 'system' ? 'rgba(96,165,250,0.2)' : 'rgba(74,222,128,0.2)'}`, 
+                        width: 'fit-content' 
+                      }}>
                         {preset.source}
                       </span>
-                      <span className="text-slate-500 text-xs font-semibold">
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600 }}>
                         v{preset.version}
                       </span>
                     </div>
-                    <h3 className="text-lg font-bold text-slate-100 group-hover:text-teal-400 transition mb-2">
+                    <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
                       {preset.label}
                     </h3>
-                    <p className="text-slate-400 text-xs line-clamp-2 mb-6">
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.5', marginBottom: 24, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                       {preset.description || 'No description provided.'}
                     </p>
 
-                    {/* Metadata Badges */}
-                    <div className="grid grid-cols-2 gap-2.5 text-xs text-slate-400 bg-slate-950/40 p-3.5 rounded-xl border border-slate-900/50 mb-6">
+                    {/* Metadata Grid */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, background: 'rgba(12, 18, 30, 0.4)', border: '1px solid var(--border-color)', padding: 14, borderRadius: 'var(--radius)', fontSize: '0.75rem', marginBottom: 24 }}>
                       <div>
-                        <span className="text-slate-600 block text-[10px] uppercase font-bold tracking-wider mb-0.5">Subject</span>
-                        <span className="capitalize truncate font-medium text-slate-300">{preset.config?.subject?.kind}</span>
+                        <span style={{ color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: '0.5px', display: 'block', marginBottom: 2 }}>Subject</span>
+                        <span style={{ color: 'var(--text-secondary)', fontWeight: 600, display: 'block', textTransform: 'capitalize' }}>{preset.config?.subject?.kind}</span>
                       </div>
                       <div>
-                        <span className="text-slate-600 block text-[10px] uppercase font-bold tracking-wider mb-0.5">Faceless Mode</span>
-                        <span className="capitalize truncate font-medium text-slate-300">{(preset.config?.subject?.faceless_mode || '').replace('_', ' ')}</span>
+                        <span style={{ color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: '0.5px', display: 'block', marginBottom: 2 }}>Faceless Mode</span>
+                        <span style={{ color: 'var(--text-secondary)', fontWeight: 600, display: 'block', textTransform: 'capitalize' }}>{(preset.config?.subject?.faceless_mode || '').replace('_', ' ')}</span>
                       </div>
-                      <div className="col-span-2">
-                        <span className="text-slate-600 block text-[10px] uppercase font-bold tracking-wider mb-0.5">Environment Preset</span>
-                        <span className="capitalize truncate font-medium text-slate-300">{(preset.config?.environment?.preset_key || '').replace('_', ' ')}</span>
+                      <div style={{ gridColumn: 'span 2' }}>
+                        <span style={{ color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: '0.5px', display: 'block', marginBottom: 2 }}>Environment Preset</span>
+                        <span style={{ color: 'var(--text-secondary)', fontWeight: 600, display: 'block', textTransform: 'capitalize' }}>{(preset.config?.environment?.preset_key || '').replace('_', ' ')}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex gap-2 border-t border-slate-850 pt-4 mt-2">
+                  <div style={{ display: 'flex', gap: 8, borderTop: '1px solid var(--border-color)', paddingTop: 16 }}>
                     <button
                       onClick={() => handlePreview(preset)}
-                      className="flex-1 bg-slate-800 hover:bg-slate-750 text-slate-300 font-bold py-2 rounded-xl text-xs transition active:scale-95"
+                      className="btn btn-secondary btn-sm"
+                      style={{ flex: 1, fontSize: '0.75rem' }}
                     >
                       Preview Prompt
                     </button>
                     <button
                       onClick={() => handleClone(preset)}
-                      className="flex-1 bg-slate-800 hover:bg-slate-750 text-slate-300 font-bold py-2 rounded-xl text-xs transition active:scale-95"
+                      className="btn btn-secondary btn-sm"
+                      style={{ flex: 1, fontSize: '0.75rem' }}
                     >
                       Clone
                     </button>
@@ -302,13 +315,15 @@ export default function VisualIdentityStudioPage() {
                       <>
                         <button
                           onClick={() => handleOpenEdit(preset)}
-                          className="bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border border-teal-500/25 font-bold px-3.5 rounded-xl text-xs transition active:scale-95"
+                          className="btn btn-secondary btn-sm"
+                          style={{ flex: 1, fontSize: '0.75rem', borderColor: 'var(--accent-color)', color: 'var(--accent-color)' }}
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleArchive(preset)}
-                          className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/25 font-bold px-3.5 rounded-xl text-xs transition active:scale-95"
+                          className="btn btn-danger btn-sm"
+                          style={{ flex: 1, fontSize: '0.75rem' }}
                         >
                           Archive
                         </button>
@@ -321,366 +336,380 @@ export default function VisualIdentityStudioPage() {
           )
         ) : previewPreset ? (
           /* Resolved Prompt Preview Pane */
-          <div className="bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+          <div className="card" style={{ padding: 32, position: 'relative' }}>
             <button
               onClick={() => setPreviewPreset(null)}
-              className="absolute top-6 right-6 text-slate-500 hover:text-slate-300 text-xl font-bold"
+              className="btn btn-secondary btn-sm"
+              style={{ position: 'absolute', top: 20, right: 20, padding: '6px 12px' }}
             >
-              ✕
+              ✕ Tutup
             </button>
-            <h2 className="text-xl font-bold text-teal-400 mb-6">
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--action-primary)', marginBottom: 24 }}>
               Prompt Preview for: {previewPreset.label}
             </h2>
-            <div className="space-y-4">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {Object.entries(previewPreset.resolved).map(([key, value]) => (
-                <div key={key} className="bg-slate-950 p-4 rounded-xl border border-slate-850">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">
+                <div key={key} style={{ background: 'var(--input-bg)', border: '1px solid var(--border-color)', padding: 16, borderRadius: 'var(--radius)' }}>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>
                     {key.replace('_', ' ')}
                   </span>
-                  <p className="text-xs text-slate-300 leading-relaxed">{value || 'N/A'}</p>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>{value || 'N/A'}</p>
                 </div>
               ))}
             </div>
           </div>
         ) : (
           /* Create & Edit Studio Form */
-          <form onSubmit={handleSave} className="bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl space-y-8">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-4 mb-6">
-              <h2 className="text-xl font-extrabold text-teal-400">
+          <form onSubmit={handleSave} className="card" style={{ padding: 32, display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: 16 }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--action-primary)', margin: 0 }}>
                 {editingPreset.isNew ? 'Create New Preset' : `Editing Preset: ${editingPreset.label}`}
               </h2>
               <button
                 type="button"
                 onClick={() => setEditingPreset(null)}
-                className="text-slate-500 hover:text-slate-300 text-sm font-bold"
+                className="btn btn-secondary btn-sm"
               >
                 Cancel & Close
               </button>
             </div>
 
             {/* Section 1: Basic Info */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wide">Identity Name</label>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+              <label className="form-label">
+                Identity Name
                 <input
                   type="text"
                   required
                   placeholder="e.g. Muslimah Sage Kitchen"
                   value={label}
                   onChange={(e) => setLabel(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-teal-500 p-3 rounded-xl text-slate-100 text-sm focus:outline-none transition"
+                  className="form-input"
                 />
-              </div>
+              </label>
               {editingPreset.isNew && (
-                <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wide">Custom Preset Key (Slug)</label>
+                <label className="form-label">
+                  Custom Preset Key (Slug)
                   <input
                     type="text"
                     placeholder="e.g. muslimah_sage_kitchen"
                     value={presetKey}
                     onChange={(e) => setPresetKey(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-teal-500 p-3 rounded-xl text-slate-100 text-sm focus:outline-none transition"
+                    className="form-input"
                   />
-                </div>
+                </label>
               )}
-              <div className={editingPreset.isNew ? 'md:col-span-1' : 'md:col-span-2'}>
-                <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wide">Description</label>
+              <label className="form-label">
+                Description
                 <input
                   type="text"
                   placeholder="Describe the aesthetic and purpose of this identity"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-teal-500 p-3 rounded-xl text-slate-100 text-sm focus:outline-none transition"
+                  className="form-input"
                 />
-              </div>
+              </label>
             </div>
 
             {/* Section 2: Subject */}
-            <div className="border border-slate-850 p-6 rounded-2xl space-y-6">
-              <h3 className="text-sm font-bold text-teal-400 uppercase tracking-widest border-b border-slate-850 pb-2">Subject Properties</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Subject Kind</label>
+            <div className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <h3 style={{ fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--action-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: 8, margin: 0 }}>Subject Properties</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+                <label className="form-label">
+                  Subject Kind
                   <select
                     value={config.subject.kind}
                     onChange={(e) => updateConfigField('subject', 'kind', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-teal-500 capitalize"
+                    className="form-select"
+                    style={{ textTransform: 'capitalize' }}
                   >
                     {SUBJECT_KINDS.map(kind => (
                       <option key={kind} value={kind}>{kind.replace('_', ' ')}</option>
                     ))}
                   </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Faceless Mode</label>
+                </label>
+                <label className="form-label">
+                  Faceless Mode
                   <select
                     value={config.subject.faceless_mode}
                     onChange={(e) => updateConfigField('subject', 'faceless_mode', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-teal-500 capitalize"
+                    className="form-select"
+                    style={{ textTransform: 'capitalize' }}
                   >
                     {ALL_FACELESS_MODES.map(mode => (
                       <option key={mode} value={mode}>{mode.replace('_', ' ')}</option>
                     ))}
                   </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Demographic Key</label>
+                </label>
+                <label className="form-label">
+                  Demographic Key
                   <input
                     type="text"
                     value={config.subject.demographic_key}
                     onChange={(e) => updateConfigField('subject', 'demographic_key', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-teal-500"
+                    className="form-input"
                   />
-                </div>
-                <div className="md:col-span-3">
-                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Custom Subject Description (Optional)</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. delicate Southeast Asian female hands, smooth skin, slender fingers"
-                    value={config.subject.custom_description}
-                    onChange={(e) => updateConfigField('subject', 'custom_description', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-teal-500"
-                  />
-                </div>
+                </label>
               </div>
+              <label className="form-label" style={{ marginTop: 12 }}>
+                Custom Subject Description (Optional)
+                <input
+                  type="text"
+                  placeholder="e.g. delicate Southeast Asian female hands, smooth skin, slender fingers"
+                  value={config.subject.custom_description}
+                  onChange={(e) => updateConfigField('subject', 'custom_description', e.target.value)}
+                  className="form-input"
+                />
+              </label>
             </div>
 
             {/* Section 3: Wardrobe */}
-            <div className="border border-slate-850 p-6 rounded-2xl space-y-6">
-              <h3 className="text-sm font-bold text-teal-400 uppercase tracking-widest border-b border-slate-850 pb-2">Wardrobe & Colors</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Wardrobe Mode</label>
+            <div className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <h3 style={{ fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--action-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: 8, margin: 0 }}>Wardrobe & Colors</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+                <label className="form-label">
+                  Wardrobe Mode
                   <select
                     value={config.wardrobe.mode}
                     onChange={(e) => updateConfigField('wardrobe', 'mode', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-200 text-sm focus:outline-none capitalize"
+                    className="form-select"
+                    style={{ textTransform: 'capitalize' }}
                   >
                     {WARDROBE_MODES.map(mode => (
                       <option key={mode} value={mode}>{mode.replace('_', ' ')}</option>
                     ))}
                   </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Wardrobe Preset Key</label>
+                </label>
+                <label className="form-label">
+                  Wardrobe Preset Key
                   <input
                     type="text"
                     value={config.wardrobe.preset_key}
                     onChange={(e) => updateConfigField('wardrobe', 'preset_key', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-100 text-sm focus:outline-none"
+                    className="form-input"
                   />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Sleeve Policy</label>
+                </label>
+                <label className="form-label">
+                  Sleeve Policy
                   <select
                     value={config.wardrobe.sleeve_policy}
                     onChange={(e) => updateConfigField('wardrobe', 'sleeve_policy', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-200 text-sm focus:outline-none capitalize"
+                    className="form-select"
+                    style={{ textTransform: 'capitalize' }}
                   >
                     {SLEEVE_POLICIES.map(policy => (
                       <option key={policy} value={policy}>{policy.replace('_', ' ')}</option>
                     ))}
                   </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Primary Color (Hex or Label)</label>
+                </label>
+                <label className="form-label">
+                  Primary Color (Hex or Label)
                   <input
                     type="text"
                     placeholder="e.g. #8A9A7B"
                     value={config.wardrobe.primary_color}
                     onChange={(e) => updateConfigField('wardrobe', 'primary_color', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-100 text-sm focus:outline-none"
+                    className="form-input"
                   />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Custom Wardrobe Description (Optional)</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. wearing a premium linen flowing modest dress with neat cuff details"
-                    value={config.wardrobe.custom_description}
-                    onChange={(e) => updateConfigField('wardrobe', 'custom_description', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-100 text-sm focus:outline-none"
-                  />
-                </div>
+                </label>
               </div>
+              <label className="form-label" style={{ marginTop: 12 }}>
+                Custom Wardrobe Description (Optional)
+                <input
+                  type="text"
+                  placeholder="e.g. wearing a premium linen flowing modest dress with neat cuff details"
+                  value={config.wardrobe.custom_description}
+                  onChange={(e) => updateConfigField('wardrobe', 'custom_description', e.target.value)}
+                  className="form-input"
+                />
+              </label>
             </div>
 
             {/* Section 4: Environment */}
-            <div className="border border-slate-850 p-6 rounded-2xl space-y-6">
-              <h3 className="text-sm font-bold text-teal-400 uppercase tracking-widest border-b border-slate-850 pb-2">Environment & Background</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Environment Preset</label>
+            <div className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <h3 style={{ fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--action-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: 8, margin: 0 }}>Environment & Background</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+                <label className="form-label">
+                  Environment Preset
                   <input
                     type="text"
                     value={config.environment.preset_key}
                     onChange={(e) => updateConfigField('environment', 'preset_key', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-100 text-sm focus:outline-none"
+                    className="form-input"
                   />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Background Density</label>
+                </label>
+                <label className="form-label">
+                  Background Density
                   <select
                     value={config.environment.background_density}
                     onChange={(e) => updateConfigField('environment', 'background_density', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-200 text-sm focus:outline-none capitalize"
+                    className="form-select"
+                    style={{ textTransform: 'capitalize' }}
                   >
                     {BACKGROUND_DENSITIES.map(d => (
                       <option key={d} value={d}>{d}</option>
                     ))}
                   </select>
-                </div>
-                <div className="md:col-span-3">
-                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Custom Environment Description (Optional)</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. standing in a bright minimalist aesthetic cafe, blurred warm light bulbs background"
-                    value={config.environment.custom_description}
-                    onChange={(e) => updateConfigField('environment', 'custom_description', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-100 text-sm focus:outline-none"
-                  />
-                </div>
+                </label>
               </div>
+              <label className="form-label" style={{ marginTop: 12 }}>
+                Custom Environment Description (Optional)
+                <input
+                  type="text"
+                  placeholder="e.g. standing in a bright minimalist aesthetic cafe, blurred warm light bulbs background"
+                  value={config.environment.custom_description}
+                  onChange={(e) => updateConfigField('environment', 'custom_description', e.target.value)}
+                  className="form-input"
+                />
+              </label>
             </div>
 
             {/* Section 5: Lighting */}
-            <div className="border border-slate-850 p-6 rounded-2xl space-y-6">
-              <h3 className="text-sm font-bold text-teal-400 uppercase tracking-widest border-b border-slate-850 pb-2">Lighting Style</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Lighting Preset</label>
+            <div className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <h3 style={{ fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--action-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: 8, margin: 0 }}>Lighting Style</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+                <label className="form-label">
+                  Lighting Preset
                   <input
                     type="text"
                     value={config.lighting.preset_key}
                     onChange={(e) => updateConfigField('lighting', 'preset_key', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-100 text-sm focus:outline-none"
+                    className="form-input"
                   />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Color Temperature</label>
+                </label>
+                <label className="form-label">
+                  Color Temperature
                   <select
                     value={config.lighting.color_temperature}
                     onChange={(e) => updateConfigField('lighting', 'color_temperature', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-200 text-sm focus:outline-none capitalize"
+                    className="form-select"
+                    style={{ textTransform: 'capitalize' }}
                   >
                     {LIGHTING_TEMPERATURES.map(t => (
                       <option key={t} value={t}>{t.replace('_', ' ')}</option>
                     ))}
                   </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Contrast</label>
+                </label>
+                <label className="form-label">
+                  Contrast
                   <select
                     value={config.lighting.contrast}
                     onChange={(e) => updateConfigField('lighting', 'contrast', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-200 text-sm focus:outline-none capitalize"
+                    className="form-select"
+                    style={{ textTransform: 'capitalize' }}
                   >
                     {LIGHTING_CONTRASTS.map(c => (
                       <option key={c} value={c}>{c.replace('_', ' ')}</option>
                     ))}
                   </select>
-                </div>
+                </label>
               </div>
             </div>
 
             {/* Section 6: Camera */}
-            <div className="border border-slate-850 p-6 rounded-2xl space-y-6">
-              <h3 className="text-sm font-bold text-teal-400 uppercase tracking-widest border-b border-slate-850 pb-2">Camera & Framing</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Framing</label>
+            <div className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <h3 style={{ fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--action-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: 8, margin: 0 }}>Camera & Framing</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+                <label className="form-label">
+                  Framing
                   <select
                     value={config.camera.framing}
                     onChange={(e) => updateConfigField('camera', 'framing', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-200 text-sm focus:outline-none capitalize"
+                    className="form-select"
+                    style={{ textTransform: 'capitalize' }}
                   >
                     {CAMERA_FRAMINGS.map(f => (
                       <option key={f} value={f}>{f.replace('_', ' ')}</option>
                     ))}
                   </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Perspective</label>
+                </label>
+                <label className="form-label">
+                  Perspective
                   <select
                     value={config.camera.perspective}
                     onChange={(e) => updateConfigField('camera', 'perspective', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-200 text-sm focus:outline-none capitalize"
+                    className="form-select"
+                    style={{ textTransform: 'capitalize' }}
                   >
                     {CAMERA_PERSPECTIVES.map(p => (
                       <option key={p} value={p}>{p.replace('_', ' ')}</option>
                     ))}
                   </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Lens Look</label>
+                </label>
+                <label className="form-label">
+                  Lens Look
                   <select
                     value={config.camera.lens_look}
                     onChange={(e) => updateConfigField('camera', 'lens_look', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-200 text-sm focus:outline-none capitalize"
+                    className="form-select"
+                    style={{ textTransform: 'capitalize' }}
                   >
                     {CAMERA_LENS_LOOKS.map(l => (
                       <option key={l} value={l}>{l.replace('_', ' ')}</option>
                     ))}
                   </select>
-                </div>
+                </label>
               </div>
             </div>
 
             {/* Section 7: Style */}
-            <div className="border border-slate-850 p-6 rounded-2xl space-y-6">
-              <h3 className="text-sm font-bold text-teal-400 uppercase tracking-widest border-b border-slate-850 pb-2">Art Style</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Style Preset</label>
+            <div className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <h3 style={{ fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--action-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: 8, margin: 0 }}>Art Style</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+                <label className="form-label">
+                  Style Preset
                   <input
                     type="text"
                     value={config.style.preset_key}
                     onChange={(e) => updateConfigField('style', 'preset_key', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-100 text-sm focus:outline-none"
+                    className="form-input"
                   />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase">Aspect Ratio</label>
+                </label>
+                <label className="form-label">
+                  Aspect Ratio
                   <input
                     type="text"
                     value={config.style.aspect_ratio}
                     onChange={(e) => updateConfigField('style', 'aspect_ratio', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-slate-100 text-sm focus:outline-none"
+                    className="form-input"
                   />
-                </div>
+                </label>
               </div>
             </div>
 
             {/* Locked Guardrails Summary */}
-            <div className="bg-slate-950 p-6 border border-slate-850 rounded-2xl">
-              <h3 className="text-xs font-bold text-rose-400 uppercase tracking-wider mb-3">Locked Deterministic Guardrails</h3>
-              <ul className="text-xs text-slate-400 space-y-2 list-disc list-inside">
-                <li>Face Visibility is locked to <strong className="text-rose-300">PROHIBITED</strong>.</li>
-                <li>Reflections showing faces is locked to <strong className="text-rose-300">PROHIBITED</strong>.</li>
-                <li>Unintended extra people in generation is locked to <strong className="text-rose-300">PROHIBITED</strong>.</li>
-                <li>Character and Wardrobe consistency drift is locked to <strong className="text-rose-300">PROHIBITED</strong>.</li>
+            <div style={{ background: 'var(--status-danger-soft)', border: '1px solid rgba(251, 113, 133, 0.15)', padding: 18, borderRadius: 'var(--radius)' }}>
+              <h3 style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--status-danger)', marginBottom: 8, margin: 0 }}>Locked Deterministic Guardrails</h3>
+              <ul style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: 4, paddingLeft: 16, margin: 0 }}>
+                <li>Face Visibility is locked to <strong style={{ color: 'var(--text-secondary)' }}>PROHIBITED</strong>.</li>
+                <li>Reflections showing faces is locked to <strong style={{ color: 'var(--text-secondary)' }}>PROHIBITED</strong>.</li>
+                <li>Unintended extra people in generation is locked to <strong style={{ color: 'var(--text-secondary)' }}>PROHIBITED</strong>.</li>
+                <li>Character and Wardrobe consistency drift is locked to <strong style={{ color: 'var(--text-secondary)' }}>PROHIBITED</strong>.</li>
               </ul>
             </div>
 
-            <div className="flex gap-4 border-t border-slate-800 pt-6">
+            <div style={{ display: 'flex', gap: 12, borderTop: '1px solid var(--border-color)', paddingTop: 20 }}>
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 px-8 py-3.5 rounded-xl font-bold text-sm shadow-xl transition disabled:opacity-50"
+                className="btn btn-primary"
+                style={{ padding: '12px 24px' }}
               >
                 {saving ? 'Saving...' : 'Save Visual Identity'}
               </button>
               <button
                 type="button"
                 onClick={() => setEditingPreset(null)}
-                className="bg-slate-800 hover:bg-slate-750 px-8 py-3.5 rounded-xl font-bold text-sm text-slate-300 transition"
+                className="btn btn-secondary"
+                style={{ padding: '12px 24px' }}
               >
                 Cancel
               </button>
             </div>
           </form>
         )}
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

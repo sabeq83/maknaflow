@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.18.13 — Redesign Visual Identity Studio UI (21/08/2026)
+- Add Sidebar layout component
+- Redesign tabs and catalog cards with semantic CSS variables
+- Restyle edit and create forms to follow theme styles
+- Verify compile and reload on Dev Mac Mini
+
 ## V2.18.12 — Visual Identity Foundation Phase 2 (21/08/2026)
 - Integrate operator presets and Preset Manager with visual identity reference
 - Update export, detail, and regenerate consumers to display visual lineage
