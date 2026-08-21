@@ -1664,12 +1664,12 @@ export default function RecipeLabsPage() {
                       {activeAccordion === 3 && (
                         <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', background: 'var(--overlay-subtle)' }}>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: '1px solid var(--surface-interactive)' }}>
-                            <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '600' }}>Aktifkan Karakter & Setting Visual Overrides</span>
-                            <label style={{ position: 'relative', display: 'inline-block', width: '50px', height: '26px', cursor: 'pointer' }}>
-                              <input type="checkbox" checked={isVsoActive} onChange={e => setIsVsoActive(e.target.checked)} style={{ opacity: 0, width: 0, height: 0 }} />
-                              <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: isVsoActive ? 'var(--accent)' : 'var(--surface-interactive)', transition: 'var(--transition)', borderRadius: '34px' }}>
-                                <span style={{ position: 'absolute', content: '""', height: '20px', width: '20px', left: isVsoActive ? '26px' : '3px', bottom: '3px', backgroundColor: 'white', transition: 'var(--transition)', borderRadius: '50%' }} />
-                              </span>
+                            <strong style={{ fontSize: '14px', color: 'var(--text-primary)', cursor: 'pointer' }} onClick={() => setIsVsoActive(!isVsoActive)}>
+                              🎭 Aktifkan Visual Swap Overrides
+                            </strong>
+                            <label className="switch">
+                              <input type="checkbox" checked={isVsoActive} onChange={e => setIsVsoActive(e.target.checked)} />
+                              <span className="slider"></span>
                             </label>
                           </div>
 

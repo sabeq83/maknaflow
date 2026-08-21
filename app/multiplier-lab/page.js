@@ -1613,13 +1613,17 @@ function MultiplierLabPageContent() {
                   {activeAccordion === 3 && (
                     <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <input
-                          type="checkbox"
-                          checked={isVsoActive}
-                          onChange={e => setIsVsoActive(e.target.checked)}
-                          style={{ width: 18, height: 18, cursor: 'pointer' }}
-                        />
-                        <strong>🎭 Aktifkan Visual Swap Overrides</strong>
+                        <label className="switch">
+                          <input
+                            type="checkbox"
+                            checked={isVsoActive}
+                            onChange={e => setIsVsoActive(e.target.checked)}
+                          />
+                          <span className="slider"></span>
+                        </label>
+                        <strong style={{ fontSize: '14px', color: 'var(--text-primary)', cursor: 'pointer' }} onClick={() => setIsVsoActive(!isVsoActive)}>
+                          🎭 Aktifkan Visual Swap Overrides
+                        </strong>
                       </div>
 
                       {isVsoActive && (

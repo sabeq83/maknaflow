@@ -801,22 +801,22 @@ Gunakan minor karena kapabilitas user-facing baru. Bila convention repository me
 
 ## Execution Task List
 
-- [ ] 1. Baca `AGENTS.md`, master roadmap, plan Fase 2, SOT, Next.js docs lokal, dan seluruh file target aktual.
-- [ ] 2. Audit status Fase 2 terhadap checklist yang masih terbuka; perbarui berdasarkan bukti atau selesaikan blocker relevan sebelum Fase 3.
-- [ ] 3. Jalankan `git status --short` dan baseline tests Visual Identity, operator presets/content, AI Universe, dan build relevan.
-- [ ] 4. Finalkan AI brief/output/refine contracts dan limits berdasarkan exports contract Fase 2.
-- [ ] 5. Implementasikan `visual-identity-ai-contract.js` dan deterministic compliance report.
-- [ ] 6. Tambahkan unit tests contract, faceless correction/rejection, prompt injection, dan compliance diff.
-- [ ] 7. Implementasikan versioned generate/refine prompt builders serta injectable Gemini service.
-- [ ] 8. Tambahkan fake-model tests untuk generation, refinement, parser, call count, provider errors, dan resolved preview.
-- [ ] 9. Implementasikan generate/refine Route Handlers dengan auth, safe error mapping, dan no-store behavior.
-- [ ] 10. Implementasikan `AiVisualIdentityBuilderModal` untuk brief, loading, review, compliance, regenerate, refine, dan handoff.
-- [ ] 11. Integrasikan `Design with AI` ke Visual Identity Studio tanpa mengubah persistence Fase 2.
-- [ ] 12. Tambahkan UI/API integration tests yang layak dan verifikasi cancel tidak menyimpan draft.
-- [ ] 13. Perbarui SOT Visual Identity Studio serta master roadmap berdasarkan status aktual.
-- [ ] 14. Jalankan seluruh targeted tests, security/log inspection, dan production build.
-- [ ] 15. Deploy hanya ke Dev Mac Mini dan selesaikan seluruh smoke test human/blank-face/mascot/refine/handoff.
-- [ ] 16. Jalankan release non-interaktif dan verifikasi version, changelog, commit, tag, branch, dan push.
+- [x] 1. Baca `AGENTS.md`, master roadmap, plan Fase 2, SOT, Next.js docs lokal, dan seluruh file target aktual.
+- [x] 2. Audit status Fase 2 terhadap checklist yang masih terbuka; perbarui berdasarkan bukti atau selesaikan blocker relevan sebelum Fase 3.
+- [x] 3. Jalankan `git status --short` dan baseline tests Visual Identity, operator presets/content, AI Universe, dan build relevan.
+- [x] 4. Finalkan AI brief/output/refine contracts dan limits berdasarkan exports contract Fase 2.
+- [x] 5. Implementasikan `visual-identity-ai-contract.js` dan deterministic compliance report.
+- [x] 6. Tambahkan unit tests contract, faceless correction/rejection, prompt injection, dan compliance diff.
+- [x] 7. Implementasikan versioned generate/refine prompt builders serta injectable Gemini service.
+- [x] 8. Tambahkan fake-model tests untuk generation, refinement, parser, call count, provider errors, dan resolved preview.
+- [x] 9. Implementasikan generate/refine Route Handlers dengan auth, safe error mapping, dan no-store behavior.
+- [x] 10. Implementasikan `AiVisualIdentityBuilderModal` untuk brief, loading, review, compliance, regenerate, refine, dan handoff.
+- [x] 11. Integrasikan `Design with AI` ke Visual Identity Studio tanpa mengubah persistence Fase 2.
+- [x] 12. Tambahkan UI/API integration tests yang layak dan verifikasi cancel tidak menyimpan draft.
+- [x] 13. Perbarui SOT Visual Identity Studio serta master roadmap berdasarkan status aktual.
+- [x] 14. Jalankan seluruh targeted tests, security/log inspection, dan production build.
+- [x] 15. Deploy hanya ke Dev Mac Mini dan selesaikan seluruh smoke test human/blank-face/mascot/refine/handoff.
+- [x] 16. Jalankan release non-interaktif dan verifikasi version, changelog, commit, tag, branch, dan push.
 
 > Ubah checkbox menjadi `[x]` segera setelah task benar-benar selesai dan terverifikasi. Jangan menandai task berdasarkan asumsi atau menyembunyikan debt Fase 2 sebagai pekerjaan Fase 3.
 

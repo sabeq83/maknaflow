@@ -1359,13 +1359,15 @@ export default function ImportPlannerModal({
               {activeAccordion === 3 && (
                 <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <input
-                      type="checkbox"
-                      id="vsoToggleModal"
-                      checked={isVsoActive}
-                      onChange={e => setIsVsoActive(e.target.checked)}
-                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-                    />
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        id="vsoToggleModal"
+                        checked={isVsoActive}
+                        onChange={e => setIsVsoActive(e.target.checked)}
+                      />
+                      <span className="slider"></span>
+                    </label>
                     <label htmlFor="vsoToggleModal" style={{ cursor: 'pointer', fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>
                       🎭 Aktifkan Visual Swap Overrides
                     </label>

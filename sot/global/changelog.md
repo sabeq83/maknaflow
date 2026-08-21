@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.19.1 — Redesign & Standarisasi VSO UI (21/08/2026)
+- Refaktor VisualIdentitySelector.js ke Vanilla CSS
+- Standardisasi premium switch toggle di seluruh form kampanye
+- Menambahkan cursor pointer dan klik interaktif pada toggle labels
+
 ## V2.19.0 — AI Visual Identity Builder (21/08/2026)
 - Tambah Design with AI untuk Visual Identity
 - Tambah compliance report dan faceless enforcement

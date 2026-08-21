@@ -1898,7 +1898,9 @@ export default function RECampaignsPage() {
                         />
                         <span className="slider"></span>
                       </label>
-                      <strong style={{ fontSize: '0.95rem' }}>🎭 Aktifkan Visual Swap Overrides</strong>
+                      <strong style={{ fontSize: '14px', color: 'var(--text-primary)', cursor: 'pointer' }} onClick={() => setIsVsoActive(!isVsoActive)}>
+                        🎭 Aktifkan Visual Swap Overrides
+                      </strong>
                     </div>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0 }}>
                       Pilih dari preset kurasi MAKNA untuk mengubah estetika visual video kompetitor secara instan tanpa perlu mengetik prompt dari nol.

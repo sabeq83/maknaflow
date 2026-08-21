@@ -96,41 +96,101 @@ export default function VisualIdentitySelector({ value, onChange, allowLegacyCus
   };
 
   if (loading) {
-    return <div className="text-slate-500 text-xs animate-pulse">Loading Visual Catalog...</div>;
+    return <div style={{ color: 'var(--text-muted)', fontSize: '12px', padding: '8px 0' }}>Loading Visual Catalog...</div>;
   }
 
   return (
-    <div className="bg-slate-900 border border-slate-850 p-5 rounded-2xl space-y-4">
+    <div style={{
+      background: 'var(--surface-raised)',
+      border: '1px solid var(--border-subtle)',
+      borderRadius: 'var(--radius)',
+      padding: '20px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '16px'
+    }}>
       {/* Header and Compliance Badge */}
-      <div className="flex justify-between items-center border-b border-slate-850 pb-3 mb-2">
-        <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block">Visual Identity Settings</span>
-        <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 shadow-sm shadow-emerald-500/5">
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderBottom: '1px solid var(--border-subtle)',
+        paddingBottom: '12px',
+        marginBottom: '4px'
+      }}>
+        <span style={{
+          fontSize: '11px',
+          fontWeight: '700',
+          color: 'var(--text-muted)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em'
+        }}>Visual Identity Settings</span>
+        <span style={{
+          background: 'var(--status-success-soft)',
+          color: 'var(--status-success)',
+          border: '1px solid rgba(74, 222, 128, 0.2)',
+          fontSize: '10px',
+          fontWeight: '800',
+          padding: '3px 10px',
+          borderRadius: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px'
+        }}>
+          <span style={{
+            width: '6px',
+            height: '6px',
+            backgroundColor: 'var(--status-success)',
+            borderRadius: '50%',
+            display: 'inline-block',
+            boxShadow: '0 0 8px var(--status-success)'
+          }}></span>
           Faceless Compliant
         </span>
       </div>
 
       {/* Mode Switches */}
-      <div className="flex gap-2">
+      <div style={{
+        display: 'flex',
+        background: 'var(--input-bg)',
+        border: '1px solid var(--border-subtle)',
+        padding: '4px',
+        borderRadius: 'var(--radius)',
+        gap: '4px'
+      }}>
         <button
           type="button"
           onClick={() => handleModeChange('preset')}
-          className={`flex-1 py-2 rounded-xl text-xs font-bold transition border ${
-            customizingMode === 'preset'
-              ? 'bg-slate-800 text-teal-400 border-slate-700'
-              : 'bg-slate-950 text-slate-400 border-slate-900 hover:text-slate-200'
-          }`}
+          style={{
+            flex: 1,
+            background: customizingMode === 'preset' ? 'var(--surface-interactive)' : 'transparent',
+            border: 'none',
+            color: customizingMode === 'preset' ? 'var(--action-primary)' : 'var(--text-muted)',
+            padding: '8px 12px',
+            fontSize: '12px',
+            fontWeight: '600',
+            borderRadius: 'var(--radius-sm)',
+            cursor: 'pointer',
+            transition: 'var(--transition)'
+          }}
         >
           Preset Mode
         </button>
         <button
           type="button"
           onClick={() => handleModeChange('inline')}
-          className={`flex-1 py-2 rounded-xl text-xs font-bold transition border ${
-            customizingMode === 'inline'
-              ? 'bg-slate-800 text-teal-400 border-slate-700'
-              : 'bg-slate-950 text-slate-400 border-slate-900 hover:text-slate-200'
-          }`}
+          style={{
+            flex: 1,
+            background: customizingMode === 'inline' ? 'var(--surface-interactive)' : 'transparent',
+            border: 'none',
+            color: customizingMode === 'inline' ? 'var(--action-primary)' : 'var(--text-muted)',
+            padding: '8px 12px',
+            fontSize: '12px',
+            fontWeight: '600',
+            borderRadius: 'var(--radius-sm)',
+            cursor: 'pointer',
+            transition: 'var(--transition)'
+          }}
         >
           Inline Custom
         </button>
@@ -138,11 +198,18 @@ export default function VisualIdentitySelector({ value, onChange, allowLegacyCus
           <button
             type="button"
             onClick={() => handleModeChange('legacy')}
-            className={`flex-1 py-2 rounded-xl text-xs font-bold transition border ${
-              customizingMode === 'legacy'
-                ? 'bg-slate-800 text-teal-400 border-slate-700'
-                : 'bg-slate-950 text-slate-400 border-slate-900 hover:text-slate-200'
-            }`}
+            style={{
+              flex: 1,
+              background: customizingMode === 'legacy' ? 'var(--surface-interactive)' : 'transparent',
+              border: 'none',
+              color: customizingMode === 'legacy' ? 'var(--action-primary)' : 'var(--text-muted)',
+              padding: '8px 12px',
+              fontSize: '12px',
+              fontWeight: '600',
+              borderRadius: 'var(--radius-sm)',
+              cursor: 'pointer',
+              transition: 'var(--transition)'
+            }}
           >
             Legacy Custom
           </button>
@@ -151,13 +218,19 @@ export default function VisualIdentitySelector({ value, onChange, allowLegacyCus
 
       {/* Preset Selection Selector */}
       {customizingMode === 'preset' && (
-        <div className="space-y-3">
-          <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Select Preset</label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{
+              fontSize: '10px',
+              fontWeight: '700',
+              color: 'var(--text-muted)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}>Select Preset</label>
             <select
               value={value.preset_id || ''}
               onChange={(e) => onChange({ ...value, preset_id: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 p-3 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-teal-500"
+              className="form-select"
             >
               {presets.map(p => (
                 <option key={p.id} value={p.id}>{p.label} ({p.source})</option>
@@ -165,10 +238,27 @@ export default function VisualIdentitySelector({ value, onChange, allowLegacyCus
             </select>
           </div>
           {activePreset && (
-            <div className="bg-slate-950/60 p-3.5 border border-slate-850 rounded-xl text-xs text-slate-400 space-y-1">
-              <div><span className="text-slate-600 font-bold mr-1">Subject Kind:</span> <span className="capitalize">{activePreset.config?.subject?.kind}</span></div>
-              <div><span className="text-slate-600 font-bold mr-1">Faceless Mode:</span> <span className="capitalize">{(activePreset.config?.subject?.faceless_mode || '').replace('_', ' ')}</span></div>
-              <div><span className="text-slate-600 font-bold mr-1">Wardrobe:</span> <span className="capitalize">{(activePreset.config?.wardrobe?.preset_key || '').replace('_', ' ')}</span></div>
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(28, 42, 64, 0.4) 0%, rgba(16, 24, 39, 0.6) 100%)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--radius)',
+              padding: '16px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid rgba(38, 53, 74, 0.4)', paddingBottom: '6px' }}>
+                <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Subject Kind:</span>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 600, textTransform: 'capitalize' }}>{activePreset.config?.subject?.kind}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', borderBottom: '1px solid rgba(38, 53, 74, 0.4)', paddingBottom: '6px' }}>
+                <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Faceless Mode:</span>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 600, textTransform: 'capitalize' }}>{(activePreset.config?.subject?.faceless_mode || '').replace('_', ' ')}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Wardrobe:</span>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 600, textTransform: 'capitalize' }}>{(activePreset.config?.wardrobe?.preset_key || '').replace('_', ' ')}</span>
+              </div>
             </div>
           )}
         </div>
@@ -176,135 +266,191 @@ export default function VisualIdentitySelector({ value, onChange, allowLegacyCus
 
       {/* Inline Customization Section */}
       {customizingMode === 'inline' && value.inline_config && (
-        <div className="space-y-4 max-h-[350px] overflow-y-auto pr-1">
+        <div style={{
+          maxHeight: '290px',
+          overflowY: 'auto',
+          paddingRight: '6px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px'
+        }}>
           {/* Subject */}
-          <div className="space-y-2 border-b border-slate-850 pb-3">
-            <span className="text-[10px] font-bold text-teal-400 uppercase tracking-widest block">Subject Properties</span>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-[9px] text-slate-500 uppercase mb-0.5">Kind</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <span style={{
+              fontSize: '10px',
+              fontWeight: '800',
+              color: 'var(--action-primary)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              borderBottom: '1px solid var(--border-subtle)',
+              paddingBottom: '4px',
+              marginTop: '6px'
+            }}>Subject Properties</span>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Kind</label>
                 <select
                   value={value.inline_config.subject.kind}
                   onChange={(e) => updateInlineField('subject', 'kind', e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-850 p-2 rounded-lg text-xs focus:outline-none"
+                  className="form-select"
                 >
                   {SUBJECT_KINDS.map(k => (
                     <option key={k} value={k}>{k.replace('_', ' ')}</option>
                   ))}
                 </select>
               </div>
-              <div>
-                <label className="block text-[9px] text-slate-500 uppercase mb-0.5">Faceless Mode</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Faceless Mode</label>
                 <select
                   value={value.inline_config.subject.faceless_mode}
                   onChange={(e) => updateInlineField('subject', 'faceless_mode', e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-850 p-2 rounded-lg text-xs focus:outline-none"
+                  className="form-select"
                 >
                   {ALL_FACELESS_MODES.map(fm => (
                     <option key={fm} value={fm}>{fm.replace('_', ' ')}</option>
                   ))}
                 </select>
               </div>
-              <div className="col-span-2">
-                <label className="block text-[9px] text-slate-500 uppercase mb-0.5">Demographic Key</label>
+              <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Demographic Key</label>
                 <input
                   type="text"
                   value={value.inline_config.subject.demographic_key}
                   onChange={(e) => updateInlineField('subject', 'demographic_key', e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-850 p-2 rounded-lg text-xs focus:outline-none"
+                  className="form-input"
                 />
               </div>
             </div>
           </div>
 
           {/* Wardrobe */}
-          <div className="space-y-2 border-b border-slate-850 pb-3">
-            <span className="text-[10px] font-bold text-teal-400 uppercase tracking-widest block">Wardrobe Details</span>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-[9px] text-slate-500 uppercase mb-0.5">Mode</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <span style={{
+              fontSize: '10px',
+              fontWeight: '800',
+              color: 'var(--action-primary)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              borderBottom: '1px solid var(--border-subtle)',
+              paddingBottom: '4px',
+              marginTop: '6px'
+            }}>Wardrobe Details</span>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Mode</label>
                 <select
                   value={value.inline_config.wardrobe.mode}
                   onChange={(e) => updateInlineField('wardrobe', 'mode', e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-850 p-2 rounded-lg text-xs focus:outline-none"
+                  className="form-select"
                 >
                   {WARDROBE_MODES.map(wm => (
                     <option key={wm} value={wm}>{wm.replace('_', ' ')}</option>
                   ))}
                 </select>
               </div>
-              <div>
-                <label className="block text-[9px] text-slate-500 uppercase mb-0.5">Preset Key</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Preset Key</label>
                 <input
                   type="text"
                   value={value.inline_config.wardrobe.preset_key}
                   onChange={(e) => updateInlineField('wardrobe', 'preset_key', e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-850 p-2 rounded-lg text-xs focus:outline-none"
+                  className="form-input"
                 />
               </div>
-              <div>
-                <label className="block text-[9px] text-slate-500 uppercase mb-0.5">Sleeve Policy</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sleeve Policy</label>
                 <select
                   value={value.inline_config.wardrobe.sleeve_policy}
                   onChange={(e) => updateInlineField('wardrobe', 'sleeve_policy', e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-850 p-2 rounded-lg text-xs focus:outline-none"
+                  className="form-select"
                 >
                   {SLEEVE_POLICIES.map(sp => (
                     <option key={sp} value={sp}>{sp.replace('_', ' ')}</option>
                   ))}
                 </select>
               </div>
-              <div>
-                <label className="block text-[9px] text-slate-500 uppercase mb-0.5">Primary Color (Hex)</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Primary Color (Hex)</label>
                 <input
                   type="text"
                   value={value.inline_config.wardrobe.primary_color}
                   onChange={(e) => updateInlineField('wardrobe', 'primary_color', e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-850 p-2 rounded-lg text-xs focus:outline-none"
+                  className="form-input"
                 />
               </div>
             </div>
           </div>
 
           {/* Environment */}
-          <div className="space-y-2 border-b border-slate-850 pb-3">
-            <span className="text-[10px] font-bold text-teal-400 uppercase tracking-widest block">Environment & Lighting</span>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-[9px] text-slate-500 uppercase mb-0.5">Environment Key</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <span style={{
+              fontSize: '10px',
+              fontWeight: '800',
+              color: 'var(--action-primary)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              borderBottom: '1px solid var(--border-subtle)',
+              paddingBottom: '4px',
+              marginTop: '6px'
+            }}>Environment & Lighting</span>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Environment Key</label>
                 <input
                   type="text"
                   value={value.inline_config.environment.preset_key}
                   onChange={(e) => updateInlineField('environment', 'preset_key', e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-850 p-2 rounded-lg text-xs focus:outline-none"
+                  className="form-input"
                 />
               </div>
-              <div>
-                <label className="block text-[9px] text-slate-500 uppercase mb-0.5">Lighting Key</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Lighting Key</label>
                 <input
                   type="text"
                   value={value.inline_config.lighting.preset_key}
                   onChange={(e) => updateInlineField('lighting', 'preset_key', e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-850 p-2 rounded-lg text-xs focus:outline-none"
+                  className="form-input"
                 />
               </div>
             </div>
           </div>
 
           {/* Camera framing */}
-          <div className="space-y-2">
-            <span className="text-[10px] font-bold text-teal-400 uppercase tracking-widest block">Camera Settings</span>
-            <div>
-              <label className="block text-[9px] text-slate-500 uppercase mb-0.5">Framing</label>
-              <select
-                value={value.inline_config.camera.framing}
-                onChange={(e) => updateInlineField('camera', 'framing', e.target.value)}
-                className="w-full bg-slate-950 border border-slate-850 p-2 rounded-lg text-xs focus:outline-none"
-              >
-                {CAMERA_FRAMINGS.map(f => (
-                  <option key={f} value={f}>{f.replace('_', ' ')}</option>
-                ))}
-              </select>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <span style={{
+              fontSize: '10px',
+              fontWeight: '800',
+              color: 'var(--action-primary)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              borderBottom: '1px solid var(--border-subtle)',
+              paddingBottom: '4px',
+              marginTop: '6px'
+            }}>Camera Settings</span>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Framing</label>
+                <select
+                  value={value.inline_config.camera.framing}
+                  onChange={(e) => updateInlineField('camera', 'framing', e.target.value)}
+                  className="form-select"
+                >
+                  {CAMERA_FRAMINGS.map(f => (
+                    <option key={f} value={f}>{f.replace('_', ' ')}</option>
+                  ))}
+                </select>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Camera Perspective</label>
+                <select
+                  value={value.inline_config.camera.perspective}
+                  onChange={(e) => updateInlineField('camera', 'perspective', e.target.value)}
+                  className="form-select"
+                >
+                  <option value="third_person">third person</option>
+                  <option value="first_person_pov">first person pov</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
@@ -312,13 +458,14 @@ export default function VisualIdentitySelector({ value, onChange, allowLegacyCus
 
       {/* Legacy Custom Selection dropdowns */}
       {customizingMode === 'legacy' && value.visual_overrides_json && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <label className="block text-[10px] text-slate-500 uppercase font-bold mb-1">Legacy Demographic</label>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Legacy Demographic</label>
             <select
               value={value.visual_overrides_json.subject_demographic}
               onChange={(e) => updateLegacyField('subject_demographic', e.target.value)}
-              className="w-full bg-slate-950 border border-slate-850 p-2.5 rounded-xl text-xs text-slate-200 focus:outline-none capitalize"
+              className="form-select"
+              style={{ textTransform: 'capitalize' }}
             >
               <option value="syari_classic">Southeast Asian Muslimah (Syar'i)</option>
               <option value="caucasian_male">Caucasian Male</option>
@@ -326,12 +473,12 @@ export default function VisualIdentitySelector({ value, onChange, allowLegacyCus
               <option value="stylized_3d_male">3D Male (Blank Head)</option>
             </select>
           </div>
-          <div>
-            <label className="block text-[10px] text-slate-500 uppercase font-bold mb-1">Wardrobe Mode / Key</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Wardrobe Mode / Key</label>
             <select
               value={value.visual_overrides_json.wardrobe_style}
               onChange={(e) => updateLegacyField('wardrobe_style', e.target.value)}
-              className="w-full bg-slate-950 border border-slate-850 p-2.5 rounded-xl text-xs text-slate-200 focus:outline-none"
+              className="form-select"
             >
               <option value="sequential">Sequential Rotation</option>
               <option value="random">Stable Random</option>
@@ -341,14 +488,14 @@ export default function VisualIdentitySelector({ value, onChange, allowLegacyCus
             </select>
           </div>
           {value.visual_overrides_json.wardrobe_style === 'custom' && (
-            <div className="md:col-span-2">
-              <label className="block text-[10px] text-slate-500 uppercase font-bold mb-1">Custom Wardrobe Prompt</label>
+            <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Custom Wardrobe Prompt</label>
               <input
                 type="text"
                 placeholder="e.g. wearing a lavender soft textured sleeve, showing clean hands"
                 value={value.visual_overrides_json.wardrobe_style_custom || ''}
                 onChange={(e) => updateLegacyField('wardrobe_style_custom', e.target.value)}
-                className="w-full bg-slate-950 border border-slate-850 p-2.5 rounded-xl text-xs text-slate-200 focus:outline-none"
+                className="form-input"
               />
             </div>
           )}

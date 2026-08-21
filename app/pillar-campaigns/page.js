@@ -2035,7 +2035,9 @@ export default function OrganicPillarPage() {
                           />
                           <span className="slider"></span>
                         </label>
-                        <strong>🎭 Aktifkan Visual Swap Overrides</strong>
+                        <strong style={{ fontSize: '14px', color: 'var(--text-primary)', cursor: 'pointer' }} onClick={() => setIsVsoActive(!isVsoActive)}>
+                          🎭 Aktifkan Visual Swap Overrides
+                        </strong>
                       </div>
 
                       {isVsoActive && (

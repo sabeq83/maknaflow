@@ -1019,11 +1019,11 @@ export default function SheetsAutopilotDashboard() {
                                 checked={isVsoActive}
                                 onChange={e => setIsVsoActive(e.target.checked)}
                               />
-                              <span className="slider round"></span>
+                              <span className="slider"></span>
                             </label>
-                            <label style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-primary)', cursor: 'pointer' }} onClick={() => setIsVsoActive(!isVsoActive)}>
-                              Aktifkan Visual Swap Overrides
-                            </label>
+                            <strong style={{ fontSize: '14px', color: 'var(--text-primary)', cursor: 'pointer' }} onClick={() => setIsVsoActive(!isVsoActive)}>
+                              🎭 Aktifkan Visual Swap Overrides
+                            </strong>
                           </div>
                           <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>
                             Pilih dari preset kurasi MAKNA untuk mengubah estetika visual video kompetitor secara instan tanpa perlu mengetik prompt dari nol.
