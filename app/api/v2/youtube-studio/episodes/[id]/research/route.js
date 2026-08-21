@@ -1,9 +1,18 @@
 import { withTenantContext } from '@/lib/auth';
-import { getEpisode, getChannelStrategy, getLatestResearchBrief, saveBlueprintDraft } from '@/lib/youtube-studio-repository';
-import { generateBlueprint } from '@/lib/youtube-studio-planner';
+import { getEpisode, getChannelStrategy, getLatestResearchBrief, saveResearchBrief } from '@/lib/youtube-studio-repository';
+import { generateResearchBrief } from '@/lib/youtube-studio-planner';
 import { pgQuery } from '@/lib/db-pg';
 
 export const dynamic = 'force-dynamic';
+
+export const GET = withTenantContext(async (req, { params }, user) => {
+  const { id } = await params;
+  const brief = await getLatestResearchBrief(id);
+  return new Response(JSON.stringify({ success: true, data: brief }), {
+    status: 200,
+    headers: { 'content-type': 'application/json' }
+  });
+});
 
 export const POST = withTenantContext(async (req, { params }, user) => {
   const { id } = await params;
@@ -11,14 +20,6 @@ export const POST = withTenantContext(async (req, { params }, user) => {
   if (!episode) {
     return new Response(JSON.stringify({ success: false, error: 'Episode not found' }), {
       status: 404,
-      headers: { 'content-type': 'application/json' }
-    });
-  }
-
-  const research = await getLatestResearchBrief(id);
-  if (!research) {
-    return new Response(JSON.stringify({ success: false, error: 'Research brief must be generated first.' }), {
-      status: 400,
       headers: { 'content-type': 'application/json' }
     });
   }
@@ -36,18 +37,9 @@ export const POST = withTenantContext(async (req, { params }, user) => {
     visualIdentity = viRes.rows[0];
   }
 
-  const snapshot = {
-    strategy_id: strategy?.id,
-    universe_id: strategy?.universe_id,
-    universe_snapshot: universe,
-    visual_identity_preset_id: strategy?.visual_identity_preset_id,
-    visual_identity_snapshot: visualIdentity
-  };
-
   try {
-    const generated = await generateBlueprint(episode, strategy, research.content_json, universe, visualIdentity);
-    const saved = await saveBlueprintDraft(id, generated, snapshot, user);
-
+    const generated = await generateResearchBrief(episode, strategy, universe, visualIdentity);
+    const saved = await saveResearchBrief(id, generated, user);
     return new Response(JSON.stringify({ success: true, data: saved }), {
       status: 200,
       headers: { 'content-type': 'application/json' }

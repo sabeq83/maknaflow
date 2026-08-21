@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.20.8 — YouTube Studio AI Blueprint and Script (22/08/2026)
+- Tambah research brief AI dan blueprint episode tervalidasi
+- Tambah script scene-by-scene dengan approval gate
+- Tambah versioning editorial dan workflow Script Approved
+
 ## V2.20.7 — YouTube Studio Strategy Dashboard Refinement (21/08/2026)
 - Ganti visualisasi JSON kasar dengan strategy dashboard berbasis kartu
 - Tampilkan positioning, persona, format, pilar konten, dan monetisasi dengan rapi

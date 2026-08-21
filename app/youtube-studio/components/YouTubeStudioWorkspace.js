@@ -55,6 +55,16 @@ export function YouTubeStudioWorkspace() {
   const [showRawActive, setShowRawActive] = useState(false);
   const [showRawDraft, setShowRawDraft] = useState(false);
 
+  // Phase 2 Editorial States
+  const [selectedEpisodeResearch, setSelectedEpisodeResearch] = useState(null);
+  const [selectedEpisodeBlueprint, setSelectedEpisodeBlueprint] = useState(null);
+  const [selectedEpisodeScript, setSelectedEpisodeScript] = useState(null);
+  const [isGeneratingResearch, setIsGeneratingResearch] = useState(false);
+  const [isGeneratingBlueprint, setIsGeneratingBlueprint] = useState(false);
+  const [isGeneratingScript, setIsGeneratingScript] = useState(false);
+  const [isApprovingBlueprint, setIsApprovingBlueprint] = useState(false);
+  const [isApprovingScript, setIsApprovingScript] = useState(false);
+
   useEffect(() => {
     fetchChannels();
     fetchBriefPresets();
@@ -425,6 +435,394 @@ export function YouTubeStudioWorkspace() {
     } catch (e) {
       setErrorMsg('Failed to manually plan episode.');
     }
+  }
+
+  async function refreshEpisodesList() {
+    if (!selectedChannel) return;
+    try {
+      const epRes = await fetch(`/api/v2/youtube-studio/episodes?channel_id=${selectedChannel.id}`);
+      const epData = await epRes.json();
+      if (epData.success) {
+        setEpisodes(epData.data);
+      }
+    } catch (e) {
+      console.error('Failed to refresh episodes list', e);
+    }
+  }
+
+  async function loadEpisodeEditorialData(episodeId) {
+    if (!episodeId) return;
+    try {
+      // 1. Fetch Research Brief
+      const rRes = await fetch(`/api/v2/youtube-studio/episodes/${episodeId}/research`);
+      const rData = await rRes.json();
+      if (rData.success) {
+        setSelectedEpisodeResearch(rData.data);
+      } else {
+        setSelectedEpisodeResearch(null);
+      }
+
+      // 2. Fetch Blueprint
+      const bRes = await fetch(`/api/v2/youtube-studio/episodes/${episodeId}/blueprint/approve`);
+      const bData = await bRes.json();
+      if (bData.success) {
+        setSelectedEpisodeBlueprint(bData.data);
+      } else {
+        setSelectedEpisodeBlueprint(null);
+      }
+
+      // 3. Fetch Script
+      const sRes = await fetch(`/api/v2/youtube-studio/episodes/${episodeId}/scripts/approve`);
+      const sData = await sRes.json();
+      if (sData.success) {
+        setSelectedEpisodeScript(sData.data);
+      } else {
+        setSelectedEpisodeScript(null);
+      }
+    } catch (e) {
+      setErrorMsg('Failed to load editorial workflow data.');
+    }
+  }
+
+  useEffect(() => {
+    if (selectedEpisode) {
+      loadEpisodeEditorialData(selectedEpisode.id);
+    } else {
+      setSelectedEpisodeResearch(null);
+      setSelectedEpisodeBlueprint(null);
+      setSelectedEpisodeScript(null);
+    }
+  }, [selectedEpisode]);
+
+  async function handleGenerateResearch() {
+    if (!selectedEpisode) return;
+    setErrorMsg('');
+    setNotice(null);
+    setIsGeneratingResearch(true);
+    try {
+      const res = await fetch(`/api/v2/youtube-studio/episodes/${selectedEpisode.id}/research`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSelectedEpisodeResearch(data.data);
+        await refreshEpisodesList();
+        setSelectedEpisode(prev => ({ ...prev, status: 'Researching' }));
+        triggerNotice('success', 'AI Research Brief generated successfully.');
+      } else {
+        setErrorMsg(data.error || 'Failed to generate research brief.');
+      }
+    } catch (e) {
+      setErrorMsg('Failed to generate research brief.');
+    } finally {
+      setIsGeneratingResearch(false);
+    }
+  }
+
+  async function handleGenerateBlueprint() {
+    if (!selectedEpisode) return;
+    setErrorMsg('');
+    setNotice(null);
+    setIsGeneratingBlueprint(true);
+    try {
+      const res = await fetch(`/api/v2/youtube-studio/episodes/${selectedEpisode.id}/blueprint/generate`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSelectedEpisodeBlueprint(data.data);
+        await refreshEpisodesList();
+        setSelectedEpisode(prev => ({ ...prev, status: 'Blueprint Draft' }));
+        triggerNotice('success', 'AI Blueprint Draft generated successfully.');
+      } else {
+        setErrorMsg(data.error || 'Failed to generate blueprint.');
+      }
+    } catch (e) {
+      setErrorMsg('Failed to generate blueprint.');
+    } finally {
+      setIsGeneratingBlueprint(false);
+    }
+  }
+
+  async function handleApproveBlueprint() {
+    if (!selectedEpisode || !selectedEpisodeBlueprint) return;
+    setErrorMsg('');
+    setNotice(null);
+    setIsApprovingBlueprint(true);
+    try {
+      const res = await fetch(`/api/v2/youtube-studio/episodes/${selectedEpisode.id}/blueprint/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ blueprint_id: selectedEpisodeBlueprint.id })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSelectedEpisodeBlueprint(data.data);
+        await refreshEpisodesList();
+        setSelectedEpisode(prev => ({ ...prev, status: 'Blueprint Approved' }));
+        setSelectedEpisodeScript(null);
+        triggerNotice('success', 'Blueprint approved successfully!');
+      } else {
+        setErrorMsg(data.error || 'Failed to approve blueprint.');
+      }
+    } catch (e) {
+      setErrorMsg('Failed to approve blueprint.');
+    } finally {
+      setIsApprovingBlueprint(false);
+    }
+  }
+
+  async function handleGenerateScript() {
+    if (!selectedEpisode) return;
+    setErrorMsg('');
+    setNotice(null);
+    setIsGeneratingScript(true);
+    try {
+      const res = await fetch(`/api/v2/youtube-studio/episodes/${selectedEpisode.id}/scripts/generate`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSelectedEpisodeScript(data.data);
+        await refreshEpisodesList();
+        setSelectedEpisode(prev => ({ ...prev, status: 'Script Draft' }));
+        triggerNotice('success', 'AI Script Draft generated successfully.');
+      } else {
+        setErrorMsg(data.error || 'Failed to generate script.');
+      }
+    } catch (e) {
+      setErrorMsg('Failed to generate script.');
+    } finally {
+      setIsGeneratingScript(false);
+    }
+  }
+
+  async function handleApproveScript() {
+    if (!selectedEpisode || !selectedEpisodeScript) return;
+    setErrorMsg('');
+    setNotice(null);
+    setIsApprovingScript(true);
+    try {
+      const res = await fetch(`/api/v2/youtube-studio/episodes/${selectedEpisode.id}/scripts/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ script_id: selectedEpisodeScript.id })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSelectedEpisodeScript(data.data);
+        await refreshEpisodesList();
+        setSelectedEpisode(prev => ({ ...prev, status: 'Script Approved' }));
+        triggerNotice('success', 'Script approved! Episode is ready for production.');
+      } else {
+        setErrorMsg(data.error || 'Failed to approve script.');
+      }
+    } catch (e) {
+      setErrorMsg('Failed to approve script.');
+    } finally {
+      setIsApprovingScript(false);
+    }
+  }
+
+  function renderResearchBrief(brief) {
+    if (!brief) return null;
+    const data = brief.content_json;
+    return (
+      <div className={styles.editorialDocument}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h4 className={styles.strategyLabel} style={{ fontSize: '0.8rem' }}>Research Brief (v{brief.version})</h4>
+          <span className={styles.reviewStatus} style={{ background: 'var(--status-success-soft)', color: 'var(--status-success)' }}>
+            {brief.status}
+          </span>
+        </div>
+        
+        {data.episode_angle && (
+          <div>
+            <h5 className={styles.strategyLabel} style={{ fontSize: '0.65rem', marginTop: '8px' }}>Episode Angle & Narrative Hook</h5>
+            <p className={styles.strategyText}>{data.episode_angle}</p>
+          </div>
+        )}
+
+        {data.audience_intent && (
+          <div>
+            <h5 className={styles.strategyLabel} style={{ fontSize: '0.65rem', marginTop: '8px' }}>Audience Intent</h5>
+            <p className={styles.strategyText}>{data.audience_intent}</p>
+          </div>
+        )}
+
+        {data.viewer_questions && data.viewer_questions.length > 0 && (
+          <div>
+            <h5 className={styles.strategyLabel} style={{ fontSize: '0.65rem', marginTop: '8px' }}>Key Viewer Questions</h5>
+            <ul style={{ margin: '4px 0 0 0', paddingLeft: '20px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              {data.viewer_questions.map((q, idx) => <li key={idx}>{q}</li>)}
+            </ul>
+          </div>
+        )}
+
+        {data.key_claims && data.key_claims.length > 0 && (
+          <div>
+            <h5 className={styles.strategyLabel} style={{ fontSize: '0.65rem', marginTop: '8px' }}>Key Factual Claims & Risks</h5>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '6px' }}>
+              {data.key_claims.map((claimObj, idx) => (
+                <div key={idx} style={{ background: 'var(--surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '10px' }}>
+                  <p className={styles.strategyText} style={{ fontWeight: 600 }}>{claimObj.claim}</p>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '4px', fontSize: '0.72rem' }}>
+                    <span className={styles.badge} style={{ 
+                      background: claimObj.risk === 'high' ? 'var(--status-danger-soft)' : claimObj.risk === 'medium' ? 'var(--status-warning-soft)' : 'var(--status-success-soft)',
+                      color: claimObj.risk === 'high' ? 'var(--status-danger)' : claimObj.risk === 'medium' ? 'var(--status-warning)' : 'var(--status-success)'
+                    }}>
+                      Risk: {claimObj.risk}
+                    </span>
+                    {claimObj.source_note && <span style={{ color: 'var(--text-muted)' }}>Source: {claimObj.source_note}</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  function renderBlueprint(bp) {
+    if (!bp) return null;
+    const data = bp.content_json;
+    return (
+      <div className={styles.editorialDocument}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h4 className={styles.strategyLabel} style={{ fontSize: '0.8rem' }}>Video Blueprint (v{bp.version})</h4>
+          <span className={styles.reviewStatus} style={{ 
+            background: bp.status === 'approved' ? 'var(--status-success-soft)' : 'var(--status-info-soft)', 
+            color: bp.status === 'approved' ? 'var(--status-success)' : 'var(--link)' 
+          }}>
+            {bp.status}
+          </span>
+        </div>
+
+        {data.content_promise && (
+          <div>
+            <h5 className={styles.strategyLabel} style={{ fontSize: '0.65rem', marginTop: '8px' }}>Content Promise (First 5 Seconds)</h5>
+            <p className={styles.strategyText} style={{ fontWeight: 600, color: 'var(--link)' }}>"{data.content_promise}"</p>
+          </div>
+        )}
+
+        {data.hook && (
+          <div>
+            <h5 className={styles.strategyLabel} style={{ fontSize: '0.65rem', marginTop: '8px' }}>Hook Script ({data.hook.target_duration_seconds}s)</h5>
+            <p className={styles.strategyText} style={{ fontStyle: 'italic' }}>{data.hook.text}</p>
+          </div>
+        )}
+
+        {data.chapters && data.chapters.length > 0 && (
+          <div>
+            <h5 className={styles.strategyLabel} style={{ fontSize: '0.65rem', marginTop: '8px' }}>Chapters Timing & Narrative Flow</h5>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '6px' }}>
+              {data.chapters.map((ch, idx) => (
+                <div key={idx} style={{ background: 'var(--surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                    <span>{ch.order}. {ch.title}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)' }}>{ch.target_duration_seconds}s</span>
+                  </div>
+                  {ch.narrative_focus && <p className={styles.strategyText} style={{ fontSize: '0.82rem', marginTop: '4px', color: 'var(--text-secondary)' }}>{ch.narrative_focus}</p>}
+                  {ch.retention_moment && <p className={styles.strategyText} style={{ fontSize: '0.8rem', marginTop: '4px', color: 'var(--text-muted)' }}><strong>Retention:</strong> {ch.retention_moment}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {data.cta && (
+          <div>
+            <h5 className={styles.strategyLabel} style={{ fontSize: '0.65rem', marginTop: '8px' }}>Outro CTA Strategy ({data.cta.placement})</h5>
+            <p className={styles.strategyText}>{data.cta.text}</p>
+          </div>
+        )}
+
+        {bp.status === 'draft' && (
+          <div style={{ marginTop: '12px' }}>
+            <button 
+              type="button" 
+              className="btn btn-success" 
+              onClick={handleApproveBlueprint}
+              disabled={isApprovingBlueprint}
+            >
+              {isApprovingBlueprint ? 'Approving Blueprint...' : '✓ Approve Blueprint Draft'}
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  function renderScript(script) {
+    if (!script) return null;
+    const data = script.script_json;
+    const scenes = data.scenes || [];
+    return (
+      <div className={styles.editorialDocument}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h4 className={styles.strategyLabel} style={{ fontSize: '0.8rem' }}>Scene Script (v{script.version})</h4>
+          <span className={styles.reviewStatus} style={{ 
+            background: script.status === 'approved' ? 'var(--status-success-soft)' : 'var(--status-info-soft)', 
+            color: script.status === 'approved' ? 'var(--status-success)' : 'var(--link)' 
+          }}>
+            {script.status}
+          </span>
+        </div>
+
+        {data.title && (
+          <div style={{ marginBottom: '8px' }}>
+            <h5 className={styles.strategyLabel} style={{ fontSize: '0.65rem', marginTop: '8px' }}>Script Title</h5>
+            <p className={styles.strategyText} style={{ fontWeight: 600 }}>{data.title}</p>
+          </div>
+        )}
+
+        <div className={styles.sceneList} style={{ marginTop: '12px' }}>
+          {scenes.map((scene, idx) => (
+            <div key={idx} className={styles.sceneItem}>
+              <div className={styles.sceneHeader}>
+                <span>Scene {scene.scene_index} (Chapter {scene.chapter_order || idx + 1})</span>
+                <span className={styles.badge} style={{ background: 'var(--surface-interactive)', color: 'var(--link)', border: '1px solid var(--border-subtle)' }}>
+                  {scene.scene_type}
+                </span>
+                <span style={{ fontFamily: 'var(--font-mono)' }}>{scene.estimated_duration_seconds}s</span>
+              </div>
+              
+              <div>
+                <h6 className={styles.strategyLabel} style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>Voice-Over / Narration</h6>
+                <p className={styles.strategyText} style={{ fontStyle: 'italic', color: 'var(--text-primary)' }}>{scene.voiceover}</p>
+              </div>
+
+              <div>
+                <h6 className={styles.strategyLabel} style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>Visual Direction</h6>
+                <p className={styles.strategyText} style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{scene.visual_direction}</p>
+              </div>
+
+              {(scene.subtitle_cue || scene.transition_note || scene.audio_cue) && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', fontSize: '0.75rem', marginTop: '6px', color: 'var(--text-muted)', borderTop: '1px dashed var(--border-subtle)', paddingTop: '6px' }}>
+                  {scene.subtitle_cue && <span><strong>Subtitle:</strong> "{scene.subtitle_cue}"</span>}
+                  {scene.transition_note && <span><strong>Transition:</strong> {scene.transition_note}</span>}
+                  {scene.audio_cue && <span><strong>Audio:</strong> {scene.audio_cue}</span>}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {script.status === 'draft' && (
+          <div style={{ marginTop: '16px' }}>
+            <button 
+              type="button" 
+              className="btn btn-success" 
+              onClick={handleApproveScript}
+              disabled={isApprovingScript}
+            >
+              {isApprovingScript ? 'Approving Script...' : '✓ Approve Voice-Over Script Draft'}
+            </button>
+          </div>
+        )}
+      </div>
+    );
   }
 
   function renderStrategyConfig(config, isDraft = false) {
@@ -983,10 +1381,85 @@ export function YouTubeStudioWorkspace() {
 
               {selectedEpisode && (
                 <div className={styles.subSection}>
-                  <h3>Episode Detail View (Read-Only)</h3>
-                  <div className={styles.detailPanel}>
-                    <pre>{JSON.stringify(selectedEpisode, null, 2)}</pre>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '8px' }}>
+                    <h3 style={{ margin: 0 }}>Editorial Workflow: {selectedEpisode.title}</h3>
+                    <span className={styles.badge} style={{ background: 'var(--status-success-soft)', color: 'var(--status-success)', fontSize: '0.8rem', padding: '4px 10px' }}>
+                      Status: {selectedEpisode.status}
+                    </span>
                   </div>
+
+                  {/* Section 5.1: Research Brief */}
+                  <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <h4 style={{ margin: 0, fontSize: '1rem' }}>Step 5.1: AI Research & Background</h4>
+                      {!selectedEpisodeResearch && (
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          onClick={handleGenerateResearch}
+                          disabled={isGeneratingResearch || selectedEpisode.status !== 'Planned'}
+                        >
+                          {isGeneratingResearch ? '⚡ Researching...' : 'Start AI Research'}
+                        </button>
+                      )}
+                    </div>
+                    {selectedEpisodeResearch ? (
+                      renderResearchBrief(selectedEpisodeResearch)
+                    ) : (
+                      <div className={styles.prereqNotice}>
+                        Research brief is not yet generated. Click "Start AI Research" above to begin. (Prerequisite: Episode must be in 'Planned' status).
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Section 5.2: Video Blueprint */}
+                  <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '12px', borderTop: '1px dashed var(--border-subtle)', paddingTop: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <h4 style={{ margin: 0, fontSize: '1rem' }}>Step 5.2: Timing & Narrative Blueprint</h4>
+                      {selectedEpisodeResearch && !selectedEpisodeBlueprint && (
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          onClick={handleGenerateBlueprint}
+                          disabled={isGeneratingBlueprint}
+                        >
+                          {isGeneratingBlueprint ? '⚡ Generating Blueprint...' : 'Generate AI Blueprint'}
+                        </button>
+                      )}
+                    </div>
+                    {selectedEpisodeBlueprint ? (
+                      renderBlueprint(selectedEpisodeBlueprint)
+                    ) : (
+                      <div className={styles.prereqNotice}>
+                        Blueprint draft is not yet generated. (Prerequisite: Research brief must be completed).
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Section 5.3: Voice-Over Script */}
+                  <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '12px', borderTop: '1px dashed var(--border-subtle)', paddingTop: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <h4 style={{ margin: 0, fontSize: '1rem' }}>Step 5.3: Voice-Over & Visual Direction Script</h4>
+                      {selectedEpisodeBlueprint && selectedEpisodeBlueprint.status === 'approved' && !selectedEpisodeScript && (
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          onClick={handleGenerateScript}
+                          disabled={isGeneratingScript}
+                        >
+                          {isGeneratingScript ? '⚡ Generating Script...' : 'Generate AI Script'}
+                        </button>
+                      )}
+                    </div>
+                    {selectedEpisodeScript ? (
+                      renderScript(selectedEpisodeScript)
+                    ) : (
+                      <div className={styles.prereqNotice}>
+                        Voice-over script is not yet generated. (Prerequisite: Blueprint must be Approved).
+                      </div>
+                    )}
+                  </div>
+
                 </div>
               )}
             </div>
