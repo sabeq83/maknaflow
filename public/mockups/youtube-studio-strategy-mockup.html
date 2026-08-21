@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAKNA Flow — YouTube Studio Strategy Mockup</title>
+  <style>
+    /* Simulated MAKNA Flow theme tokens */
+    :root {
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.1);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+
+    body {
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      margin: 0;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 1000px;
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.3);
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-active {
+      color: var(--status-success);
+    }
+
+    /* Dashboard Layout */
+    .strategy-details {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .strategy-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .strategy-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .strategy-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 0;
+    }
+
+    .strategy-text {
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .strategy-badge {
+      font-size: 0.72rem;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      background: var(--status-success-soft);
+      border: 1px solid var(--status-success);
+      color: var(--status-success);
+      font-weight: 700;
+      text-transform: uppercase;
+      display: inline-block;
+    }
+
+    /* Content Pillars styling */
+    .pillars-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .pillar-item {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+    }
+
+    .pillar-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 0 0 8px 0;
+      color: var(--link);
+    }
+
+    .pillar-purpose {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      margin: 0 0 12px 0;
+      line-height: 1.4;
+    }
+
+    .pillar-angles {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    /* Guardrails */
+    .guardrails-list {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      line-height: 1.4;
+    }
+
+    .collapsible-toggle {
+      background: transparent;
+      border: none;
+      color: var(--link);
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0;
+      margin-top: 12px;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2 class="title-active">✓ ACTIVE CHANNEL STRATEGY (MOCKUP DEMO)</h2>
+
+    <div class="strategy-details">
+      <div class="strategy-grid">
+        <!-- Positioning Card -->
+        <div class="strategy-card" style="grid-column: span 2;">
+          <h4 class="strategy-label">Positioning & Brand Identity</h4>
+          <p class="strategy-text" style="font-size: 1.1rem; font-weight: 600;">
+            Otoritas Utama dalam AI Automation dan Workflow Efisiensi untuk Tech Professionals
+          </p>
+          <div style="margin-top: 8px; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+            <h4 class="strategy-label" style="font-size: 0.68rem; margin-bottom: 4px;">Tone of Voice</h4>
+            <p class="strategy-text" style="font-size: 0.9rem; color: var(--text-secondary);">
+              Informatif, praktikal, percaya diri, berorientasi kode, tanpa gimmick
+            </p>
+          </div>
+        </div>
+
+        <!-- Target Audience Card -->
+        <div class="strategy-card">
+          <h4 class="strategy-label">Target Audience & Persona</h4>
+          <p class="strategy-text"><strong>Target:</strong> Software Engineers, DevOps, dan Technical Founders</p>
+          <p class="strategy-text"><strong>Need:</strong> Mengotomatiskan tugas berulang dan meningkatkan kecepatan rilis program</p>
+          <p class="strategy-text"><strong>Geography:</strong> Global (Bahasa pengantar Inggris/Indonesia)</p>
+        </div>
+
+        <!-- Video Format & Objective -->
+        <div class="strategy-card">
+          <h4 class="strategy-label">Video Format & Cadence</h4>
+          <p class="strategy-text"><strong>Duration:</strong> 10m (600s) target duration</p>
+          <p class="strategy-text"><strong>Cadence:</strong> Weekly publishing schedule</p>
+          <p class="strategy-text" style="margin-top: 8px;"><strong>CTA Strategy:</strong> Arahkan ke link repositori GitHub dan pendaftaran newsletter gratis</p>
+        </div>
+      </div>
+
+      <!-- Content Pillars Card -->
+      <div class="strategy-card">
+        <h4 class="strategy-label">Content Pillars</h4>
+        <div class="pillars-grid">
+          <!-- Pillar 1 -->
+          <div class="pillar-item">
+            <h5 class="pillar-title">1. AI Coding Assistants Deep Dive</h5>
+            <p class="pillar-purpose">Membahas integrasi tools Copilot/Gemini di real-world project development.</p>
+            <ul class="pillar-angles">
+              <li>Membangun aplikasi full-stack dalam 1 jam menggunakan Next.js + Gemini API</li>
+              <li>Trik debugging kode legacy super cepat dengan model LLM lokal</li>
+            </ul>
+          </div>
+          <!-- Pillar 2 -->
+          <div class="pillar-item">
+            <h5 class="pillar-title">2. Production Workflow Automation</h5>
+            <p class="pillar-purpose">Panduan implementasi n8n, GitHub Actions, dan serverless scripting untuk auto-deployment.</p>
+            <ul class="pillar-angles">
+              <li>Membangun pipeline CI/CD zero-downtime untuk Mac Mini clustering</li>
+              <li>Otomatisasi laporan deployment ke Slack dan Telegram</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monetization & Guardrails Grid -->
+      <div class="strategy-grid">
+        <div class="strategy-card">
+          <h4 class="strategy-label">Monetization Paths</h4>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px;">
+            <span class="strategy-badge">AdSense Revenue</span>
+            <span class="strategy-badge">Sponsorships</span>
+            <span class="strategy-badge">Digital Products</span>
+          </div>
+        </div>
+
+        <div class="strategy-card">
+          <h4 class="strategy-label">Risk Guardrails</h4>
+          <ul class="guardrails-list">
+            <li>Dilarang menjanjikan kekayaan instan lewat bot trading otomatis</li>
+            <li>Selalu sertakan disclaimer bahwa efisiensi workflow bergantung pada kompleksitas basis kode</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- JSON toggle button -->
+      <button class="collapsible-toggle" type="button">Show Raw JSON Configuration</button>
+    </div>
+  </div>
+
+</body>
+</html>

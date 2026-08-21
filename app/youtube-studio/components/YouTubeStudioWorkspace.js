@@ -52,6 +52,8 @@ export function YouTubeStudioWorkspace() {
   const [newChannelLocale, setNewChannelLocale] = useState('id-ID');
   const [errorMsg, setErrorMsg] = useState('');
   const [notice, setNotice] = useState(null); // { tone: 'success'|'info'|'danger', message: '...' }
+  const [showRawActive, setShowRawActive] = useState(false);
+  const [showRawDraft, setShowRawDraft] = useState(false);
 
   useEffect(() => {
     fetchChannels();
@@ -425,6 +427,118 @@ export function YouTubeStudioWorkspace() {
     }
   }
 
+  function renderStrategyConfig(config, isDraft = false) {
+    if (!config) return null;
+    const pillars = config.content_pillars || [];
+    const persona = config.audience_persona || {};
+    const format = config.video_format || {};
+    const monetization = config.monetization_path || [];
+    const guardrails = config.risk_guardrails || [];
+    const showRaw = isDraft ? showRawDraft : showRawActive;
+    const setShowRaw = isDraft ? setShowRawDraft : setShowRawActive;
+
+    return (
+      <div className={styles.strategyDetails}>
+        <div className={styles.strategyGrid}>
+          {/* Core Positioning */}
+          {config.positioning && (
+            <div className={styles.strategyCard} style={{ gridColumn: 'span 2' }}>
+              <h4 className={styles.strategyLabel}>Positioning & Brand Identity</h4>
+              <p className={styles.strategyText} style={{ fontSize: '1.05rem', fontWeight: 600 }}>{config.positioning}</p>
+              {config.editorial_tone && (
+                <div style={{ marginTop: '8px' }}>
+                  <h4 className={styles.strategyLabel} style={{ fontSize: '0.65rem' }}>Tone of Voice</h4>
+                  <p className={styles.strategyText} style={{ margin: '2px 0 0 0' }}>{config.editorial_tone}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Target Audience */}
+          {(persona.who || persona.need || persona.geography) && (
+            <div className={styles.strategyCard}>
+              <h4 className={styles.strategyLabel}>Target Audience & Persona</h4>
+              {persona.who && <p className={styles.strategyText}><strong>Target:</strong> {persona.who}</p>}
+              {persona.need && <p className={styles.strategyText}><strong>Need:</strong> {persona.need}</p>}
+              {persona.geography && <p className={styles.strategyText}><strong>Geography:</strong> {persona.geography}</p>}
+            </div>
+          )}
+
+          {/* Format & Cadence */}
+          <div className={styles.strategyCard}>
+            <h4 className={styles.strategyLabel}>Video Format & Cadence</h4>
+            <p className={styles.strategyText}><strong>Duration:</strong> {format.target_duration_seconds ? `${Math.floor(format.target_duration_seconds / 60)}m` : 'N/A'} ({format.target_duration_seconds || 0}s)</p>
+            <p className={styles.strategyText}><strong>Cadence:</strong> {format.cadence || 'N/A'}</p>
+            {config.cta_strategy && <p className={styles.strategyText} style={{ marginTop: '8px' }}><strong>CTA Strategy:</strong> {config.cta_strategy}</p>}
+          </div>
+        </div>
+
+        {/* Content Pillars */}
+        {pillars.length > 0 && (
+          <div className={styles.strategyCard}>
+            <h4 className={styles.strategyLabel}>Content Pillars</h4>
+            <div className={styles.pillarsGrid}>
+              {pillars.map((pillar, idx) => (
+                <div key={idx} className={styles.pillarItem}>
+                  <h5 className={styles.pillarTitle}>{pillar.name}</h5>
+                  {pillar.purpose && <p className={styles.pillarPurpose}>{pillar.purpose}</p>}
+                  {pillar.example_angles && pillar.example_angles.length > 0 && (
+                    <ul className={styles.pillarAngles}>
+                      {pillar.example_angles.map((angle, aidx) => (
+                        <li key={aidx}>{angle}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Monetization & Guardrails */}
+        <div className={styles.strategyGrid}>
+          {monetization.length > 0 && (
+            <div className={styles.strategyCard}>
+              <h4 className={styles.strategyLabel}>Monetization Paths</h4>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
+                {monetization.map((m, idx) => (
+                  <span key={idx} className={styles.strategyBadge}>{m}</span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {guardrails.length > 0 && (
+            <div className={styles.strategyCard}>
+              <h4 className={styles.strategyLabel}>Risk Guardrails</h4>
+              <ul className={styles.guardrailsList}>
+                {guardrails.map((g, idx) => (
+                  <li key={idx}>{g}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+
+        {/* Toggle Raw JSON block */}
+        <div style={{ alignSelf: 'flex-start', marginTop: '8px' }}>
+          <button 
+            type="button" 
+            className={styles.collapsibleToggle} 
+            onClick={() => setShowRaw(!showRaw)}
+          >
+            {showRaw ? 'Hide Raw JSON Configuration' : 'Show Raw JSON Configuration'}
+          </button>
+          {showRaw && (
+            <div className={styles.detailPanel} style={{ marginTop: '10px' }}>
+              <pre>{JSON.stringify(config, null, 2)}</pre>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   // Stepper logic
   let activeStep = 1;
   if (selectedChannel) {
@@ -614,9 +728,7 @@ export function YouTubeStudioWorkspace() {
                 <h3 style={{ color: 'var(--status-success)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   ✓ ACTIVE CHANNEL STRATEGY
                 </h3>
-                <div className={styles.detailPanel}>
-                  <pre>{JSON.stringify(activeStrategy.config_json, null, 2)}</pre>
-                </div>
+                {renderStrategyConfig(activeStrategy.config_json, false)}
               </div>
             )}
 
@@ -638,9 +750,7 @@ export function YouTubeStudioWorkspace() {
                   </button>
                 </div>
 
-                <div className={styles.detailPanel} style={{ marginBottom: '16px' }}>
-                  <pre>{JSON.stringify(draftStrategy.config_json, null, 2)}</pre>
-                </div>
+                {renderStrategyConfig(draftStrategy.config_json, true)}
 
                 <div className={styles.formGroup}>
                   <label htmlFor="ai-refine">AI Refinement Copilot Instructions</label>

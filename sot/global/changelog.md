@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.20.7 — YouTube Studio Strategy Dashboard Refinement (21/08/2026)
+- Ganti visualisasi JSON kasar dengan strategy dashboard berbasis kartu
+- Tampilkan positioning, persona, format, pilar konten, dan monetisasi dengan rapi
+- Sediakan toggle opsional untuk menampilkan config JSON asli
+
 ## V2.20.6 — YouTube Studio One-Column Workflow (21/08/2026)
 - Refactor workflow editorial menjadi satu kolom vertikal
 - Gunakan CSS Module semantik berbasis theme MAKNA Flow
