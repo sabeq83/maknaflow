@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.20.9 — YouTube Studio AI Series Suggestion (22/08/2026)
+- Tambah saran konsep Content Series berbasis AI
+- Integrasi tombol AI Suggestion dan kartu konsep di Langkah 3
+- Gunakan Opsi A stateless components untuk local browser state
+
 ## V2.20.8 — YouTube Studio AI Blueprint and Script (22/08/2026)
 - Tambah research brief AI dan blueprint episode tervalidasi
 - Tambah script scene-by-scene dengan approval gate

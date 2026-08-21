@@ -65,6 +65,10 @@ export function YouTubeStudioWorkspace() {
   const [isApprovingBlueprint, setIsApprovingBlueprint] = useState(false);
   const [isApprovingScript, setIsApprovingScript] = useState(false);
 
+  // Step 3 AI Suggestions
+  const [seriesSuggestions, setSeriesSuggestions] = useState([]);
+  const [isGeneratingSeriesSuggestions, setIsGeneratingSeriesSuggestions] = useState(false);
+
   useEffect(() => {
     fetchChannels();
     fetchBriefPresets();
@@ -621,6 +625,62 @@ export function YouTubeStudioWorkspace() {
       setErrorMsg('Failed to approve script.');
     } finally {
       setIsApprovingScript(false);
+    }
+  }
+
+  async function handleGenerateSeriesSuggestions() {
+    if (!selectedChannel) return;
+    setErrorMsg('');
+    setNotice(null);
+    setIsGeneratingSeriesSuggestions(true);
+    try {
+      const res = await fetch(`/api/v2/youtube-studio/channels/${selectedChannel.id}/series/ideas/generate`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSeriesSuggestions(data.data);
+        triggerNotice('success', 'AI Series concept pitches generated successfully.');
+      } else {
+        setErrorMsg(data.error || 'Failed to suggest series concepts.');
+      }
+    } catch (e) {
+      setErrorMsg('Failed to suggest series concepts.');
+    } finally {
+      setIsGeneratingSeriesSuggestions(false);
+    }
+  }
+
+  async function handleAdoptSeriesConcept(concept) {
+    if (!selectedChannel) return;
+    setErrorMsg('');
+    setNotice(null);
+    try {
+      const res = await fetch('/api/v2/youtube-studio/series', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channel_id: selectedChannel.id,
+          name: concept.name,
+          pillar: concept.pillar,
+          config: {
+            description: concept.description,
+            concept_angle: concept.concept_angle
+          }
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        const created = data.data;
+        setSeries(current => [...current, created].sort((a, b) => a.name.localeCompare(b.name)));
+        await selectSeries(created);
+        setSeriesSuggestions([]);
+        triggerNotice('success', `AI pitched series "${created.name}" adopted successfully!`);
+      } else {
+        setErrorMsg(data.error || 'Failed to adopt series.');
+      }
+    } catch (e) {
+      setErrorMsg('Failed to adopt series.');
     }
   }
 
@@ -1182,6 +1242,16 @@ export function YouTubeStudioWorkspace() {
       <section className={styles.workflowStep} aria-labelledby="step-series-title">
         <div className={styles.stepHeader}>
           <h2 id="step-series-title">Step 3: Content Series</h2>
+          {selectedChannel && activeStrategy && (
+            <button 
+              type="button" 
+              className="btn btn-primary" 
+              onClick={handleGenerateSeriesSuggestions}
+              disabled={isGeneratingSeriesSuggestions}
+            >
+              {isGeneratingSeriesSuggestions ? '⚡ Generating...' : 'Suggest Series Concepts (AI)'}
+            </button>
+          )}
         </div>
 
         {!selectedChannel ? (
@@ -1228,6 +1298,31 @@ export function YouTubeStudioWorkspace() {
                 </button>
               </div>
             </div>
+
+            {/* AI Pitched Series Concepts */}
+            {seriesSuggestions.length > 0 && (
+              <div className={styles.subSection} style={{ borderTop: '1px dashed var(--border-subtle)', paddingTop: '20px', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <h3 style={{ margin: 0 }}>Saran Konsep Series (AI Suggestions)</h3>
+                  <button type="button" className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '0.78rem' }} onClick={() => setSeriesSuggestions([])}>Clear Suggestions</button>
+                </div>
+                <div className={styles.cardsList} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {seriesSuggestions.map((concept, idx) => (
+                    <div key={idx} className={styles.ideaCard} style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', padding: '16px' }}>
+                      <div className={styles.ideaCardInfo} style={{ flex: 1 }}>
+                        <h4 style={{ margin: '0 0 6px 0' }}>{concept.name}</h4>
+                        <p style={{ margin: '0 0 6px 0', fontSize: '0.85rem' }}><strong>Pillar:</strong> {concept.pillar}</p>
+                        <p style={{ margin: '0 0 6px 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{concept.description}</p>
+                        {concept.concept_angle && <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}><strong>Angle:</strong> {concept.concept_angle}</p>}
+                      </div>
+                      <div className={styles.ideaActions} style={{ display: 'flex', alignItems: 'center' }}>
+                        <button type="button" className="btn btn-success" onClick={() => handleAdoptSeriesConcept(concept)}>Adopt</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* List Series */}
             <div className={styles.seriesGrid}>

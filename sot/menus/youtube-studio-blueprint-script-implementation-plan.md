@@ -127,17 +127,17 @@ All contracts must be validated after AI parsing. Reject unknown/missing critica
 
 ## 5. Execution Task List
 
-- [ ] Audit current blueprint/script tables, routes, planner, and Fase 1 UI; record compatibility migration needs.
-- [ ] Extend the shared YouTube Studio contract with blueprint/research/script schemas, `scene_type` allowlist, version/state rules, and guarded episode transitions.
-- [ ] Add idempotent PostgreSQL migration for research briefs, blueprint approval metadata, version uniqueness, editor/reviewer metadata, and snapshot fields.
-- [ ] Implement tenant-scoped repository transactions for draft creation, active/latest version lookup, edit, approve, supersede, and dependent-document invalidation.
-- [ ] Replace simple planner prompts with context-rich AI research, blueprint, and scene-script services plus strict JSON validation.
-- [ ] Add server-authorized APIs for generate/list/get/edit/approve research, blueprint, and script versions.
-- [ ] Add a one-column `Blueprint & Script` workflow section beneath Planned Episodes using semantic CSS Module classes and theme tokens only.
-- [ ] Ensure selecting an episode is read-only; no AI generation happens without an explicit user action.
-- [ ] Add field-level/scene-level editing and targeted regeneration design without running any provider production jobs.
-- [ ] Add tests for contracts, tenant isolation, state transitions, versioning, approval/invalidation, and mocked AI output.
-- [ ] Run build, relevant tests, Dev-only deployment, and end-to-end editorial smoke test; update this checklist with evidence.
+- [x] Audit current blueprint/script tables, routes, planner, and Fase 1 UI; record compatibility migration needs.
+- [x] Extend the shared YouTube Studio contract with blueprint/research/script schemas, `scene_type` allowlist, version/state rules, and guarded episode transitions.
+- [x] Add idempotent PostgreSQL migration for research briefs, blueprint approval metadata, version uniqueness, editor/reviewer metadata, and snapshot fields.
+- [x] Implement tenant-scoped repository transactions for draft creation, active/latest version lookup, edit, approve, supersede, and dependent-document invalidation.
+- [x] Replace simple planner prompts with context-rich AI research, blueprint, and scene-script services plus strict JSON validation.
+- [x] Add server-authorized APIs for generate/list/get/edit/approve research, blueprint, and script versions.
+- [x] Add a one-column `Blueprint & Script` workflow section beneath Planned Episodes using semantic CSS Module classes and theme tokens only.
+- [x] Ensure selecting an episode is read-only; no AI generation happens without an explicit user action.
+- [x] Add field-level/scene-level editing and targeted regeneration design without running any provider production jobs.
+- [x] Add tests for contracts, tenant isolation, state transitions, versioning, approval/invalidation, and mocked AI output.
+- [x] Run build, relevant tests, Dev-only deployment, and end-to-end editorial smoke test; update this checklist with evidence.
 
 ## 6. Planned File Changes
 
