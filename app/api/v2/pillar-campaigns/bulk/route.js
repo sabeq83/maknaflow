@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createPillarCampaignBundle, getDb } from '@/lib/db';
 import { generateCampaignId } from '@/lib/id-generator';
+import { resolveVisualIdentitySubmission } from '@/lib/visual-override-resolver';
 
 function extractSpreadsheetId(input) {
   if (!input) return null;
@@ -22,6 +23,13 @@ export const POST = withTenantContext(async (request) => {
     }
 
     const campaignId = generateCampaignId('opc');
+
+    const identityResult = await resolveVisualIdentitySubmission({
+      preset_id: global_settings.visual_identity_preset_id || null,
+      inline_config: global_settings.visual_identity_inline_config || null,
+      legacy_overrides_json: global_settings.visual_overrides_json || null
+    });
+
     const db = getDb();
     let accountName = global_settings.account_name || null;
     if (global_settings.brand_profile_id) {
@@ -60,7 +68,9 @@ export const POST = withTenantContext(async (request) => {
       visual_mode: (global_settings.execution_mode === 'full_autopilot') ? 'pure_t2v' : (global_settings.visual_mode || 'pure_t2v'),
       product_ref_image_path: null,
       product_filename_declare: null,
-      visual_overrides_json: global_settings.visual_overrides_json || null,
+      visual_overrides_json: identityResult.snapshot ? JSON.stringify(identityResult.snapshot) : null,
+      visual_identity_preset_id: identityResult.ref?.id || null,
+      visual_identity_preset_version: identityResult.ref?.version || null,
       enable_tts: global_settings.enable_tts ? 1 : 0,
       enable_glabs: global_settings.enable_glabs ? 1 : 0,
       enable_ffmpeg: global_settings.enable_ffmpeg ? 1 : 0,

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
+import VisualIdentitySelector from '../../components/VisualIdentitySelector';
 
 const GEMINI_VOICES = [
   { id: 'Kore', name: 'Kore (Female)', avatar: '👩', desc: 'Standard Female (Skincare/Cosmetic)' },
@@ -75,6 +76,9 @@ const initialForm = {
 
   // Section 4: visual_swap
   is_vso_active: false,
+  visual_identity_preset_id: 'hands_only_muslimah_sage_kitchen',
+  visual_identity_inline_config: null,
+  visual_overrides_json: null,
   character_concept: 'faceless',
   subject_demographic: 'syari_classic',
   wardrobe_style: 'random',
@@ -138,6 +142,9 @@ function mapPresetToForm(p) {
 
     // visual_swap
     is_vso_active: vs.is_vso_active || false,
+    visual_identity_preset_id: vs.visual_identity_preset_id || 'hands_only_muslimah_sage_kitchen',
+    visual_identity_inline_config: vs.visual_identity_inline_config || null,
+    visual_overrides_json: vs.visual_overrides_json || null,
     character_concept: vs.character_concept || 'faceless',
     subject_demographic: vs.subject_demographic || 'syari_classic',
     wardrobe_style: vs.wardrobe_style || 'random',
@@ -209,7 +216,10 @@ function mapFormToPayload(f) {
         wardrobe_style_custom: f.wardrobe_style_custom,
         lighting_style: f.lighting_style,
         lighting_style_custom: f.lighting_style_custom,
-        visual_style_preset: f.visual_style_preset
+        visual_style_preset: f.visual_style_preset,
+        visual_identity_preset_id: f.is_vso_active ? f.visual_identity_preset_id : null,
+        visual_identity_inline_config: f.is_vso_active && f.visual_identity_preset_id === 'inline' ? f.visual_identity_inline_config : null,
+        visual_overrides_json: f.is_vso_active && f.visual_identity_preset_id === 'custom' ? f.visual_overrides_json : null
       },
       workflow: {
         approval_mode: f.approval_mode,
@@ -630,94 +640,21 @@ export default function PresetsPage() {
                     </label>
 
                     {form.is_vso_active && (
-                      <>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                          <label className="form-label">
-                            Character Concept
-                            <select className="form-select" value={form.character_concept} onChange={e => setForm({ ...form, character_concept: e.target.value })}>
-                              <option value="faceless">Faceless Character</option>
-                              <option value="mascot">Mascot Mode</option>
-                              <option value="custom">Custom Prompt Override</option>
-                            </select>
-                          </label>
-                          <label className="form-label">
-                            Subject Demographic
-                            <select className="form-select" value={form.subject_demographic} onChange={e => {
-                              const val = e.target.value;
-                              let concept = form.character_concept;
-                              if (val.startsWith('mascot_universe_')) {
-                                concept = 'cartoon_face';
-                              } else if (val.startsWith('stylized_3d_')) {
-                                concept = 'stylized_3d';
-                              } else {
-                                concept = 'faceless';
-                              }
-                              setForm({ ...form, subject_demographic: val, character_concept: concept, wardrobe_style: 'random' });
-                            }}>
-                              <optgroup label="── Manusia Terpercaya ──">
-                                <option value="syari_classic">Wanita Gamis Syar'iy (Hanya Tangan)</option>
-                                <option value="caucasian_male">Pria Kaukasia (Hanya Tangan)</option>
-                                <option value="stylized_3d_muslimah">Wanita 3D Stylized (Clay Art)</option>
-                                <option value="stylized_3d_male">Pria 3D Stylized (Clay Art)</option>
-                                <option value="stylized_3d_duo">Duo 3D Stylized - 2 Karakter (Clay Art)</option>
-                              </optgroup>
-                              <optgroup label="── Semesta Maskot Otonom ──">
-                                <option value="mascot_universe_herbal">🌿 Semesta Herbal (Jahe, Kunyit, Mint...)</option>
-                                <option value="mascot_universe_kitchen">🍳 Semesta Dapur (Wajan, Blender, Tomat...)</option>
-                                <option value="mascot_universe_home_living">🏠 Semesta Rumah (Vacuum, Sofa, Lampu...)</option>
-                                <option value="mascot_universe_pet">🐾 Semesta Hewan Peliharaan (Kucing, Anjing...)</option>
-                              </optgroup>
-                            </select>
-                          </label>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                          <label className="form-label">
-                            Wardrobe Style
-                            <select className="form-select" value={form.wardrobe_style} onChange={e => setForm({ ...form, wardrobe_style: e.target.value })}>
-                              <option value="random">Randomized</option>
-                              <option value="amber_terracotta">Amber Terracotta</option>
-                              <option value="pastel_blue">Pastel Blue Cozy</option>
-                              <option value="custom">Custom Wardrobe</option>
-                            </select>
-                          </label>
-                          {form.wardrobe_style === 'custom' && (
-                            <label className="form-label">
-                              Custom Wardrobe Prompt
-                              <input type="text" className="form-input" value={form.wardrobe_style_custom} onChange={e => setForm({ ...form, wardrobe_style_custom: e.target.value })} />
-                            </label>
-                          )}
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                          <label className="form-label">
-                            Lighting Style
-                            <select className="form-select" value={form.lighting_style} onChange={e => setForm({ ...form, lighting_style: e.target.value })}>
-                              <option value="random">Randomized</option>
-                              <option value="window_daylight">Window Daylight</option>
-                              <option value="studio_softbox">Studio Softbox</option>
-                              <option value="custom">Custom Lighting</option>
-                            </select>
-                          </label>
-                          {form.lighting_style === 'custom' && (
-                            <label className="form-label">
-                              Custom Lighting Prompt
-                              <input type="text" className="form-input" value={form.lighting_style_custom} onChange={e => setForm({ ...form, lighting_style_custom: e.target.value })} />
-                            </label>
-                          )}
-                        </div>
-
-                        {form.subject_demographic.startsWith('mascot_universe_') && (
-                          <label className="form-label">
-                            🎨 Gaya Estetika Animasi Maskot
-                            <select className="form-select" value={form.visual_style_preset} onChange={e => setForm({ ...form, visual_style_preset: e.target.value })}>
-                              <option value="3d_claymation_cozy">3D Claymation Cozy (Shaun the Sheep Look)</option>
-                              <option value="kawaii_flat_vector">2D Kawaii Flat Vector (Minimalis Jepang)</option>
-                              <option value="ghibli_watercolor">Studio Ghibli Watercolor (Cat Air Magis)</option>
-                            </select>
-                          </label>
-                        )}
-                      </>
+                      <VisualIdentitySelector
+                        value={{
+                          preset_id: form.visual_identity_preset_id,
+                          inline_config: form.visual_identity_inline_config,
+                          visual_overrides_json: form.visual_overrides_json
+                        }}
+                        onChange={(val) => setForm({
+                          ...form,
+                          visual_identity_preset_id: val.preset_id,
+                          visual_identity_inline_config: val.inline_config,
+                          visual_overrides_json: val.visual_overrides_json
+                        })}
+                        allowLegacyCustom={true}
+                        campaignKind="brand_editorial"
+                      />
                     )}
                   </div>
                 )}

@@ -9,6 +9,7 @@ import {
 } from '../../../../lib/db';
 import { generateCampaignId } from '../../../../lib/id-generator';
 import { withTenantContext } from '../../../../lib/auth';
+import { resolveVisualIdentitySubmission } from '../../../../lib/visual-override-resolver';
 
 function extractSpreadsheetId(input) {
   if (!input) return null;
@@ -80,6 +81,8 @@ export const POST = withTenantContext(async (request, _context, user) => {
         visual_mode: formData.get('visual_mode') || 'hybrid_lock',
         product_filename_declare: formData.get('product_filename_declare') || null,
         visual_overrides_json: formData.get('visual_overrides_json') || null,
+        visual_identity_preset_id: formData.get('visual_identity_preset_id') || null,
+        visual_identity_inline_config: formData.get('visual_identity_inline_config') || null,
         enable_tts: Number(formData.get('enable_tts') || 0),
         enable_glabs: Number(formData.get('enable_glabs') || 0),
         enable_ffmpeg: Number(formData.get('enable_ffmpeg') || 0),
@@ -197,6 +200,8 @@ export const POST = withTenantContext(async (request, _context, user) => {
       video_model,
       visual_mode,
       visual_overrides_json,
+      visual_identity_preset_id,
+      visual_identity_inline_config,
       enable_tts,
       enable_glabs,
       enable_ffmpeg,
@@ -242,6 +247,12 @@ export const POST = withTenantContext(async (request, _context, user) => {
       return NextResponse.json({ error: 'visual_action_guideline is required' }, { status: 400 });
     }
 
+    const identityResult = await resolveVisualIdentitySubmission({
+      preset_id: visual_identity_preset_id || null,
+      inline_config: visual_identity_inline_config ? (typeof visual_identity_inline_config === 'string' ? JSON.parse(visual_identity_inline_config) : visual_identity_inline_config) : null,
+      legacy_overrides_json: visual_overrides_json || null
+    });
+
     let accountName = parsedBody.account_name || null;
     if (brand_profile_id) {
       const brand = await getDb().prepare('SELECT id, brand_name FROM brand_profiles WHERE id = ?').get(brand_profile_id);
@@ -276,7 +287,9 @@ export const POST = withTenantContext(async (request, _context, user) => {
       visual_mode: (parsedBody.execution_mode === 'full_autopilot') ? 'pure_t2v' : (visual_mode || 'pure_t2v'),
       product_ref_image_path: productRefImagePath,
       product_filename_declare: productFilenameDeclare,
-      visual_overrides_json: visual_overrides_json || null,
+      visual_overrides_json: identityResult.snapshot ? JSON.stringify(identityResult.snapshot) : null,
+      visual_identity_preset_id: identityResult.ref?.id || null,
+      visual_identity_preset_version: identityResult.ref?.version || null,
       enable_tts: enable_tts !== undefined ? Number(enable_tts) : 0,
       enable_glabs: enable_glabs !== undefined ? Number(enable_glabs) : 0,
       enable_ffmpeg: enable_ffmpeg !== undefined ? Number(enable_ffmpeg) : 0,

@@ -5,6 +5,7 @@ import path from 'path';
 import { createReCampaign, addReCampaignItems, listReCampaigns, getReCampaignStats, getSetting } from '../../../../lib/db';
 import { generateCampaignId } from '../../../../lib/id-generator';
 import { withTenantContext } from '../../../../lib/auth';
+import { resolveVisualIdentitySubmission } from '../../../../lib/visual-override-resolver';
 
 function extractSpreadsheetId(input) {
   if (!input) return null;
@@ -73,6 +74,8 @@ export const POST = withTenantContext(async (request, _context, user) => {
         product_filename_declare: formData.get('product_filename_declare') || null,
         angle_multiplier: Number(formData.get('angle_multiplier') || 0),
         visual_overrides_json: formData.get('visual_overrides_json') || null,
+        visual_identity_preset_id: formData.get('visual_identity_preset_id') || null,
+        visual_identity_inline_config: formData.get('visual_identity_inline_config') || null,
         tts_model_quality: formData.get('tts_model_quality') || 'speech-2.8-turbo',
         target_language: formData.get('target_language') || 'id-ID',
         visual_style: formData.get('visual_style') || 'Cinematic',
@@ -183,6 +186,8 @@ export const POST = withTenantContext(async (request, _context, user) => {
       visual_mode,
       angle_multiplier,
       visual_overrides_json,
+      visual_identity_preset_id,
+      visual_identity_inline_config,
       tts_model_quality,
       target_language,
       visual_style,
@@ -205,6 +210,12 @@ export const POST = withTenantContext(async (request, _context, user) => {
     if (!Array.isArray(urls) || urls.length === 0) {
       return NextResponse.json({ error: 'urls must be a non-empty array' }, { status: 400 });
     }
+
+    const identityResult = await resolveVisualIdentitySubmission({
+      preset_id: visual_identity_preset_id || null,
+      inline_config: visual_identity_inline_config ? (typeof visual_identity_inline_config === 'string' ? JSON.parse(visual_identity_inline_config) : visual_identity_inline_config) : null,
+      legacy_overrides_json: visual_overrides_json || null
+    });
 
       const effectiveProvider = voice_provider || 'minimax';
       let effectivePersona = voice_persona;
@@ -258,7 +269,9 @@ export const POST = withTenantContext(async (request, _context, user) => {
       product_ref_image_path: productRefImagePath,
       product_filename_declare: productFilenameDeclare,
       angle_multiplier: angle_multiplier !== undefined ? Number(angle_multiplier) : 0,
-      visual_overrides_json: visual_overrides_json || null,
+      visual_overrides_json: identityResult.snapshot ? JSON.stringify(identityResult.snapshot) : null,
+      visual_identity_preset_id: identityResult.ref?.id || null,
+      visual_identity_preset_version: identityResult.ref?.version || null,
       visual_style: visual_style || 'Cinematic',
       nextcloud_parent_folder: nextcloud_parent_folder || 'MAKNA_Production_Final',
       fb_draft_mode: fb_draft_mode || 'auto',

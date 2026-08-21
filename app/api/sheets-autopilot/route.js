@@ -3,6 +3,7 @@ import { getSheetsCampaigns, createSheetsCampaign, deleteSheetsCampaign, getSett
 import { getAuthorizedClient } from '@/lib/google-auth';
 import { google } from 'googleapis';
 import { generateCampaignId } from '@/lib/id-generator';
+import { resolveVisualIdentitySubmission } from '@/lib/visual-override-resolver';
 
 import { withTenantContext } from '@/lib/auth';
 
@@ -36,7 +37,10 @@ export const POST = withTenantContext(async (request) => {
       campaign_name, campaign_type, spreadsheet_id, gdrive_folder_id,
       aspect_ratio, target_language, target_ai, video_model, visual_mode,
       words_per_clip, face_visibility, custom_instruction, brand_profile_id,
-      visual_overrides_json, is_bridging_active, target_clips_count, bridge_at_clip,
+      visual_overrides_json,
+      visual_identity_preset_id,
+      visual_identity_inline_config,
+      is_bridging_active, target_clips_count, bridge_at_clip,
       bridge_duration_clips, bridging_mode, target_product_id, promotion_style,
       enable_tts, enable_glabs, enable_ffmpeg, enable_social_post, voice_provider,
       voice_persona, voice_speed, voice_volume, ffmpeg_sync_option, ffmpeg_video_scale,
@@ -67,6 +71,12 @@ export const POST = withTenantContext(async (request) => {
     }
 
     // 3. Save to database
+    const identityResult = await resolveVisualIdentitySubmission({
+      preset_id: visual_identity_preset_id || null,
+      inline_config: visual_identity_inline_config ? (typeof visual_identity_inline_config === 'string' ? JSON.parse(visual_identity_inline_config) : visual_identity_inline_config) : null,
+      legacy_overrides_json: visual_overrides_json || null
+    });
+
     const campaignId = generateCampaignId('sheets');
     const newCampaign = {
       id: campaignId,
@@ -83,7 +93,9 @@ export const POST = withTenantContext(async (request) => {
       face_visibility: face_visibility || 'Faceless',
       custom_instruction: custom_instruction || '',
       brand_profile_id: brand_profile_id || null,
-      visual_overrides_json: visual_overrides_json || null,
+      visual_overrides_json: identityResult.snapshot ? JSON.stringify(identityResult.snapshot) : null,
+      visual_identity_preset_id: identityResult.ref?.id || null,
+      visual_identity_preset_version: identityResult.ref?.version || null,
       is_bridging_active: is_bridging_active ? 1 : 0,
       target_clips_count: target_clips_count || 4,
       bridge_at_clip: bridge_at_clip || 2,

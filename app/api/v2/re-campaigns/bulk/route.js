@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 import { createReCampaign, addReCampaignItems, getDb } from '@/lib/db';
 import { generateCampaignId } from '@/lib/id-generator';
+import { resolveVisualIdentitySubmission } from '@/lib/visual-override-resolver';
 
 function extractSpreadsheetId(input) {
   if (!input) return null;
@@ -23,6 +24,12 @@ export const POST = withTenantContext(async (request) => {
     }
 
     const campaignId = generateCampaignId('re');
+
+    const identityResult = await resolveVisualIdentitySubmission({
+      preset_id: global_settings.visual_identity_preset_id || null,
+      inline_config: global_settings.visual_identity_inline_config || null,
+      legacy_overrides_json: global_settings.visual_overrides_json || null
+    });
 
     // 1. Create the global campaign row
     await createReCampaign({
@@ -65,7 +72,9 @@ export const POST = withTenantContext(async (request) => {
       enable_social_post: global_settings.enable_social_post ? 1 : 0,
       visual_mode: (global_settings.execution_mode === 'full_autopilot') ? 'pure_t2v' : (global_settings.visual_mode || 'pure_t2v'),
       angle_multiplier: global_settings.angle_multiplier !== undefined ? Number(global_settings.angle_multiplier) : 0,
-      visual_overrides_json: global_settings.visual_overrides_json || null,
+      visual_overrides_json: identityResult.snapshot ? JSON.stringify(identityResult.snapshot) : null,
+      visual_identity_preset_id: identityResult.ref?.id || null,
+      visual_identity_preset_version: identityResult.ref?.version || null,
       tts_model_quality: global_settings.tts_model_quality || 'speech-2.8-turbo',
       target_language: global_settings.target_language || 'id-ID',
       visual_style: global_settings.visual_style || 'Cinematic',

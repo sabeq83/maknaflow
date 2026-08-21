@@ -348,6 +348,38 @@ Untuk menjamin ketaatan G Labs dalam membedakan detail visual asli dengan visual
 | **Latar Belakang** | Dapur pedesaan kayu klasik dengan cobek batu. | Dapur modern bergaya Nordik/Skandinavian sesuai preset **nordic_kitchen**. |
 | **Pacing Narasi** | Kecepatan bicara 2.5 kata per detik (Jelas). | Kecepatan sama, namun dihiasi warna baju baru yang kontras. |
 
+---
+
+## **7\. DEPRECATION NOTICE & ARCHITECTURE UPGRADE: VISUAL IDENTITY V2**
+
+> [!WARNING]
+> **PENTING / CRITICAL DEPRECATION NOTICE:**
+> Mulai dari MAKNA Flow V2.18.x, pencarian konstanta langsung (Direct Constant Lookup) dari objek `overrides` flat (seperti `WARDROBE_PRESETS[overrides.wardrobe_style]`) di prompt builder atau worker **RESMI DINATAKAN SEBAGAI DEPRECATED (USANG)**. Pipa pemrosesan visual wajib menggunakan **Single-Pass Visual Identity Snapshot V1**.
+
+### **Mengapa Diubah ke Visual Identity V2?**
+1. **Aesthetic Immutability (Kekekalan Estetika):** Preset yang digunakan oleh sebuah kampanye disimpan dalam bentuk snapshot JSON permanen pada kolom `visual_overrides_json` di database. Jika admin memperbarui preset asli di kemudian hari, video/audio yang diregenerasi atau diproses ulang tetap memakai prompt estetik awal (lineage terjamin).
+2. **Deterministic Faceless Guardrails:** Mencegah kebocoran visual wajah model secara otonom melalui runtime validation schema yang sangat ketat (Mandate 67).
+3. **Multi-Tenant Preset Isolation:** Memisahkan katalog preset visual kustom antar tenant secara aman.
+
+### **Cara Kerja Baru (Central Resolver)**
+Seluruh pemanggilan visual identity disalurkan melalui resolver terpusat di [visual-override-resolver.js](file:///Users/sabeqmmursyid/_maknaflow-staging/lib/visual-override-resolver.js):
+
+```javascript
+import { resolveVisualOverrides } from './visual-override-resolver.js';
+
+// Mengambil konfigurasi visual yang teresolusi (Mendukung V1 Snapshot & Legacy Fallback)
+const visualOverrides = resolveVisualOverrides({
+  visualOverrides: campaign.visual_overrides_json,
+  itemIndex: 0,
+  stableSeed: campaign.id
+});
+
+// Prompt visual dapat langsung diakses dari objek resolved:
+const subjectPrompt = visualOverrides.resolved.subject_prompt;
+const wardrobePrompt = visualOverrides.resolved.wardrobe_prompt;
+const lightingPrompt = visualOverrides.resolved.lighting_prompt;
+```
+
 **EOF (End of Blueprint Document)**
 
 *Sistem VSO MAKNA Engine V9.3.1 memberikan kemudahan operasional tertinggi melalui kurasi preset, sembari mempertahankan fleksibilitas kustomisasi visual iklan bagi pengguna.*

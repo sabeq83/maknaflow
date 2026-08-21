@@ -93,7 +93,7 @@ assert.deepEqual(randomA, randomRetry);
 
 const oldToken = process.env.MAKNA_OPERATOR_API_TOKEN;
 const oldTenant = process.env.MAKNA_OPERATOR_TENANT_ID;
-if (process.env.USE_EXISTING_TEST_DB !== 'true') Object.assign(process.env, loadStagingEnv());
+Object.assign(process.env, loadStagingEnv());
 const { authenticateOperator } = await import('../lib/operator-auth.js');
 process.env.MAKNA_OPERATOR_API_TOKEN = 'operator-test-secret';
 process.env.MAKNA_OPERATOR_TENANT_ID = 'tenant_test';

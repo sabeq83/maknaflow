@@ -24,6 +24,7 @@ const menuKeyMap = {
   '/settings/brand-profiles': 'brand_profiles',
   '/settings/universes': 'universe_manager',
   '/settings/presets': 'operator_presets',
+  '/settings/visual-identities': 'operator_presets',
   '/settings/users': 'admin_only',
   '/settings/tenants': 'superadmin_only',
   '/settings': 'system_settings',
@@ -38,6 +39,7 @@ const navItems = [
   { label: 'Product Database', href: '/products', icon: '📦' },
   { label: 'Deconstruct Lab', href: '/deconstruct', icon: '🔬' },
   { label: 'Preset Manager', href: '/settings/presets', icon: '🎛️' },
+  { label: 'Visual Identity', href: '/settings/visual-identities', icon: '🎨' },
   { label: 'Brand Profile Manager', href: '/settings/brand-profiles', icon: '🧬' },
   { label: 'Universe Manager', href: '/settings/universes', icon: '🏰' },
 

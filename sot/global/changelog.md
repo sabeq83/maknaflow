@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.18.12 — Visual Identity Foundation Phase 2 (21/08/2026)
+- Integrate operator presets and Preset Manager with visual identity reference
+- Update export, detail, and regenerate consumers to display visual lineage
+- Add regression and immutability tests
+- Clean up direct constant lookups and update SOT docs
+
 ## V2.18.11 — Fix Character AI Image reference_image_path saving binding (20/08/2026)
 - Load c.reference_image_path on character edit form load
 - Set reference_image_path in charFormData when G-Labs T2I completed

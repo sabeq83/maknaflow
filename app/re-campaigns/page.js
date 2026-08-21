@@ -1,6 +1,7 @@
 'use client';
 
 import Sidebar from '../components/Sidebar';
+import VisualIdentitySelector from '../components/VisualIdentitySelector';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 
@@ -145,6 +146,11 @@ export default function RECampaignsPage() {
 
   // Visual Swap Overrides (VSO) states
   const [isVsoActive, setIsVsoActive] = useState(false);
+  const [visualIdentity, setVisualIdentity] = useState({
+    preset_id: 'hands_only_muslimah_sage_kitchen',
+    inline_config: null,
+    visual_overrides_json: null
+  });
   const [characterConcept, setCharacterConcept] = useState('faceless');
   const [subjectDemographic, setSubjectDemographic] = useState('syari_classic');
   const [wardrobeStyle, setWardrobeStyle] = useState('amber_terracotta');
@@ -438,15 +444,9 @@ export default function RECampaignsPage() {
         enable_social_post: enableSocialPost ? 1 : 0,
         visual_mode: visualMode,
         angle_multiplier: Number(angleMultiplier),
-        visual_overrides_json: isVsoActive ? JSON.stringify({
-          character_concept: characterConcept,
-          subject_demographic: subjectDemographic,
-          visual_style_preset: subjectDemographic.startsWith('mascot_universe_') ? visualStylePreset : null,
-          wardrobe_style: wardrobeStyle,
-          wardrobe_style_custom: wardrobeStyleCustom,
-          lighting_style: lightingStyle,
-          lighting_style_custom: lightingStyleCustom
-        }) : null,
+        visual_overrides_json: isVsoActive && visualIdentity.preset_id === 'custom' ? JSON.stringify(visualIdentity.visual_overrides_json) : null,
+        visual_identity_preset_id: isVsoActive ? visualIdentity.preset_id : null,
+        visual_identity_inline_config: isVsoActive && visualIdentity.preset_id === 'inline' ? JSON.stringify(visualIdentity.inline_config) : null,
         tts_model_quality: ttsModelQuality,
         target_language: targetLanguage,
         visual_style: visualStyle,
@@ -1905,200 +1905,12 @@ export default function RECampaignsPage() {
                     </p>
 
                     {isVsoActive && (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                        <div style={{ display: 'flex', gap: 16 }}>
-                          <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
-                            <label className="form-label">Konsep Karakter (Framing)</label>
-                            <select
-                              className="form-input"
-                              value={characterConcept}
-                              onChange={e => setCharacterConcept(e.target.value)}
-                            >
-                              <option value="faceless">Faceless (Wajah Terpotong - Mandate 67)</option>
-                              <option value="pov">POV (Sudut Pandang Orang Pertama)</option>
-                              <option value="silhouette">Siluet Bayangan (Moody/Mysterious)</option>
-                              <option value="stylized_3d">3D Stylized Claymation</option>
-                            <option value="cartoon_face">Cartoon Face (Kartun Ekspresif)</option>
-                            </select>
-                          </div>
-
-                          <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
-                            <label className="form-label">Demografi Subjek / Model</label>
-                            <select
-                              className="form-input"
-                              value={subjectDemographic}
-                              onChange={e => {
-                                const val = e.target.value;
-                                setSubjectDemographic(val);
-                                setWardrobeStyle('random');
-                                if (val.startsWith('mascot_universe_')) {
-                                  setCharacterConcept('cartoon_face');
-                                } else if (val.startsWith('stylized_3d_')) {
-                                  setCharacterConcept('stylized_3d');
-                                } else {
-                                  setCharacterConcept('faceless');
-                                }
-                              }}
-                            >
-                              <optgroup label="── Manusia Terpercaya ──">
-                                <option value="syari_classic">Wanita Gamis Syar'iy (Hanya Tangan)</option>
-                                <option value="caucasian_male">Pria Kaukasia (Hanya Tangan)</option>
-                                <option value="stylized_3d_muslimah">Wanita 3D Stylized (Clay Art)</option>
-                                <option value="stylized_3d_male">Pria 3D Stylized (Clay Art)</option>
-                                <option value="stylized_3d_duo">Duo 3D Stylized - 2 Karakter (Clay Art)</option>
-                              </optgroup>
-                              <optgroup label="── Semesta Maskot Otonom ──">
-                                <option value="mascot_universe_herbal">🌿 Semesta Herbal (Jahe, Kunyit, Mint...)</option>
-                                <option value="mascot_universe_kitchen">🍳 Semesta Dapur (Wajan, Blender, Tomat...)</option>
-                                <option value="mascot_universe_home_living">🏠 Semesta Rumah (Vacuum, Sofa, Lampu...)</option>
-                                <option value="mascot_universe_pet">🐾 Semesta Hewan Peliharaan (Kucing, Anjing...)</option>
-                              </optgroup>
-                            </select>
-                          </div>
-                        </div>
-
-                        {/* Dropdown Gaya Animasi - hanya muncul saat mode Semesta Maskot */}
-                        {subjectDemographic.startsWith('mascot_universe_') && (
-                          <div style={{ display: 'flex', gap: 16 }}>
-                            <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
-                              <label className="form-label">🎨 Gaya Estetika Animasi Maskot</label>
-                              <select
-                                className="form-input"
-                                value={visualStylePreset}
-                                onChange={e => setVisualStylePreset(e.target.value)}
-                              >
-                                <option value="3d_claymation_cozy">3D Claymation Cozy (Shaun the Sheep Look)</option>
-                                <option value="kawaii_flat_vector">2D Kawaii Flat Vector (Minimalis Jepang)</option>
-                                <option value="ghibli_watercolor">Studio Ghibli Watercolor (Cat Air Magis)</option>
-                              </select>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Wardrobe — disembunyikan saat mode Semesta Maskot */}
-                        {!subjectDemographic.startsWith('mascot_universe_') && (
-                        <div style={{ display: 'flex', gap: 16 }}>
-                          <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
-                            <label className="form-label">Pakaian / Wardrobe</label>
-                            <select
-                              className="form-input"
-                              value={wardrobeStyle}
-                              onChange={e => setWardrobeStyle(e.target.value)}
-                            >
-                              <option value="random">🎲 Random (Acak)</option>
-                              <option value="sequential">🔄 Sequential (Urut per baris)</option>
-                              {subjectDemographic === 'stylized_3d_muslimah' ? (
-                                <optgroup label="Pakaian 3D Muslimah">
-                                  <option value="3d_fem_emerald">Gamis Hijau Emerald 3D</option>
-                                  <option value="3d_fem_pastel_pink">Gamis Pastel Pink 3D</option>
-                                  <option value="3d_fem_jetblack">Abaya Hitam Legam 3D</option>
-                                  <option value="3d_fem_mocca">Gamis Mocca 3D</option>
-                                </optgroup>
-                              ) : subjectDemographic === 'stylized_3d_male' ? (
-                                <optgroup label="Pakaian 3D Pria">
-                                  <option value="3d_male_tan_knit">Sweater Tan Rajut 3D</option>
-                                  <option value="3d_male_sage_jacket">Jaket Kasual Sage Green 3D</option>
-                                  <option value="3d_male_charcoal_tshirt">Kaos Charcoal Katun 3D</option>
-                                  <option value="3d_male_terracotta_flannel">Kemeja Flanel Terracotta 3D</option>
-                                </optgroup>
-                              ) : subjectDemographic === 'stylized_3d_duo' ? (
-                                <optgroup label="Harmoni Pakaian Duo Terkoordinasi">
-                                  <option value="3d_duo_earth">Tema 1: Earthy Warmth (Tan Sweater & Cream Abaya)</option>
-                                  <option value="3d_duo_contrast">Tema 2: Urban Contrast (Terracotta Jacket & Sage Abaya)</option>
-                                  <option value="3d_duo_monochrome">Tema 3: Minimalist Monochrome (Off-White T-shirt & Black Abaya)</option>
-                                  <option value="3d_duo_pastel">Tema 4: Soft Pastel Harmony (Mint Polo & Lilac Abaya)</option>
-                                  <option value="3d_duo_cool">Tema 5: Professional Cool Tones (Grey Flannel & Teal Abaya)</option>
-                                </optgroup>
-                              ) : subjectDemographic === 'caucasian_male' ? (
-                                <optgroup label="Preset Warna Pria Kaukasia">
-                                  <option value="male_terracotta">Pria: Terracotta</option>
-                                  <option value="male_caramel">Pria: Caramel Latte</option>
-                                  <option value="male_khaki_tan">Pria: Khaki / Tan</option>
-                                  <option value="male_navy_blue">Pria: Navy Blue</option>
-                                  <option value="male_forest_green">Pria: Forest Green</option>
-                                  <option value="male_charcoal">Pria: Charcoal Grey</option>
-                                  <option value="male_burgundy">Pria: Burgundy Maroon</option>
-                                  <option value="male_sage_muted">Pria: Sage Green Muted</option>
-                                  <option value="male_steel_blue">Pria: Steel Blue</option>
-                                  <option value="male_cloud_dancer">Pria: Off-White (Cloud Dancer)</option>
-                                </optgroup>
-                              ) : (
-                                <>
-                                  <optgroup label="1. Earth Tones & Warm Neutrals">
-                                    <option value="amber_terracotta">Amber Haze & Terracotta</option>
-                                    <option value="mocca_caramel">Mocca, Taupe & Caramel Latte</option>
-                                    <option value="warm_grey">Warm Grey</option>
-                                  </optgroup>
-                                  <optgroup label="2. Muted Pastels (Pastel Refined)">
-                                    <option value="sage_muted">Sage Green Muted</option>
-                                    <option value="lavender_lilac">Lavender Soft & Soft Lilac</option>
-                                    <option value="butter_yellow">Butter Yellow (Butter Cream)</option>
-                                  </optgroup>
-                                  <optgroup label="3. Modern Cool & Deep Tones">
-                                    <option value="teal_navy">Transformative Teal & Navy Blue</option>
-                                    <option value="olive_modern">Olive Green Modern</option>
-                                    <option value="mahogany_maroon">Mahogany & Maroon</option>
-                                  </optgroup>
-                                  <optgroup label="4. Netral Klasik Modern">
-                                    <option value="cloud_dancer">Cloud Dancer (Off-White Modern)</option>
-                                  </optgroup>
-                                </>
-                              )}
-                              <option value="custom">-- Tulis Custom Sendiri --</option>
-                            </select>
-                            {wardrobeStyle === 'custom' && (
-                              <input
-                                type="text"
-                                className="form-input"
-                                style={{ marginTop: 8 }}
-                                placeholder={
-                                  subjectDemographic.startsWith('stylized_3d_')
-                                    ? "Ketik pakaian 3D kustom..."
-                                    : subjectDemographic === 'caucasian_male'
-                                      ? "Ketik pakaian kustom..."
-                                      : "Ketik warna hijab kustom..."
-                                }
-                                value={wardrobeStyleCustom}
-                                onChange={e => setWardrobeStyleCustom(e.target.value)}
-                                required={isVsoActive && wardrobeStyle === 'custom'}
-                              />
-                            )}
-                          </div>
-                        </div>
-                        )}
-
-                        <div style={{ display: 'flex', gap: 16 }}>
-                          <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
-                            <label className="form-label">Pencahayaan & Gaya Sinematik (Lighting Ambiance)</label>
-                            <select
-                              className="form-input"
-                              value={lightingStyle}
-                              onChange={e => setLightingStyle(e.target.value)}
-                            >
-                              <option value="random">🎲 Random (Acak)</option>
-                              <option value="window_daylight">Soft Window Daylight (Cahaya jendela natural)</option>
-                              <option value="golden_hour">Golden Hour Warm Sunset (Sorot sore keemasan)</option>
-                              <option value="moody_shadow">Moody Cinematic Shadow (Kontras chiaroscuro dramatis)</option>
-                              <option value="studio_softbox">Clean Professional Studio Softbox (Sangat bersih)</option>
-                              <option value="lab_cold">Clinical Cold White (Putih lab bersih terang)</option>
-                              <option value="cyber_neon">Moody Cyberpunk Blue-Pink Neon (Warna glow modern)</option>
-                              <option value="candle_warm">Cozy Dim Candlelight Ambiance (Sangat syahdu hangat)</option>
-                              <option value="custom">-- Tulis Custom Sendiri --</option>
-                            </select>
-                            {lightingStyle === 'custom' && (
-                              <input
-                                type="text"
-                                className="form-input"
-                                style={{ marginTop: 8 }}
-                                placeholder="Ketik gaya pencahayaan kustom di sini..."
-                                value={lightingStyleCustom}
-                                onChange={e => setLightingStyleCustom(e.target.value)}
-                                required={isVsoActive && lightingStyle === 'custom'}
-                              />
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                      <VisualIdentitySelector
+                        value={visualIdentity}
+                        onChange={setVisualIdentity}
+                        allowLegacyCustom={true}
+                        campaignKind="re_campaign"
+                      />
                     )}
                   </div>
                 )}

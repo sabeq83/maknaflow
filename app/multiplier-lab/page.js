@@ -1,6 +1,7 @@
 'use client';
 
 import Sidebar from '../components/Sidebar';
+import VisualIdentitySelector from '../components/VisualIdentitySelector';
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 
@@ -107,6 +108,11 @@ function MultiplierLabPageContent() {
   const [wordsPerClip, setWordsPerClip] = useState('17-19 kata');
 
   const [isVsoActive, setIsVsoActive] = useState(false);
+  const [visualIdentity, setVisualIdentity] = useState({
+    preset_id: 'hands_only_muslimah_sage_kitchen',
+    inline_config: null,
+    visual_overrides_json: null
+  });
   const [characterConcept, setCharacterConcept] = useState('faceless');
   const [subjectDemographic, setSubjectDemographic] = useState('syari_classic');
   const [wardrobeStyle, setWardrobeStyle] = useState('random');
@@ -223,6 +229,11 @@ function MultiplierLabPageContent() {
     // Accordion 4: Visual Swap Overrides (VSO)
     if (config.visual_swap) {
       setIsVsoActive(config.visual_swap.is_vso_active || false);
+      setVisualIdentity({
+        preset_id: config.visual_swap.visual_identity_preset_id || 'hands_only_muslimah_sage_kitchen',
+        inline_config: config.visual_swap.visual_identity_inline_config || null,
+        visual_overrides_json: config.visual_swap.visual_overrides_json || null
+      });
       setCharacterConcept(config.visual_swap.character_concept || 'faceless');
       setSubjectDemographic(config.visual_swap.subject_demographic || 'syari_classic');
       setWardrobeStyle(config.visual_swap.wardrobe_style || 'random');
@@ -294,7 +305,10 @@ function MultiplierLabPageContent() {
         wardrobe_style_custom: wardrobeStyleCustom,
         lighting_style: lightingStyle,
         lighting_style_custom: lightingStyleCustom,
-        visual_style_preset: visualStylePreset
+        visual_style_preset: visualStylePreset,
+        visual_identity_preset_id: isVsoActive ? visualIdentity.preset_id : null,
+        visual_identity_inline_config: isVsoActive && visualIdentity.preset_id === 'inline' ? visualIdentity.inline_config : null,
+        visual_overrides_json: isVsoActive && visualIdentity.preset_id === 'custom' ? visualIdentity.visual_overrides_json : null
       },
       workflow: {
         enable_tts: enableTts,
@@ -1609,89 +1623,12 @@ function MultiplierLabPageContent() {
                       </div>
 
                       {isVsoActive && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                            <div className="form-group">
-                              <label className="form-label">Konsep Karakter (Framing)</label>
-                              <select className="form-input" value={characterConcept} onChange={e => setCharacterConcept(e.target.value)}>
-                                <option value="faceless">Faceless (Wajah Terpotong - Fokus Tangan)</option>
-                                <option value="pov">POV (First Person View)</option>
-                                <option value="silhouette">Siluet Bayangan (Aesthetic Shadow)</option>
-                                <option value="stylized_3d">3D Stylized Claymation</option>
-                                <option value="cartoon_face">Mascot Universe (Cartoon Face)</option>
-                              </select>
-                            </div>
-
-                            <div className="form-group">
-                              <label className="form-label">Demografi Subjek / Model</label>
-                              <select
-                                className="form-input"
-                                value={subjectDemographic}
-                                onChange={e => {
-                                  const val = e.target.value;
-                                  setSubjectDemographic(val);
-                                  setWardrobeStyle('random');
-                                  if (val.startsWith('mascot_universe_')) {
-                                    setCharacterConcept('cartoon_face');
-                                  } else if (val.startsWith('stylized_3d_')) {
-                                    setCharacterConcept('stylized_3d');
-                                  } else {
-                                    setCharacterConcept('faceless');
-                                  }
-                                }}
-                              >
-                                <optgroup label="── Manusia Terpercaya ──">
-                                  <option value="syari_classic">Wanita Gamis Syar'iy (Hanya Tangan)</option>
-                                  <option value="caucasian_male">Pria Kaukasia (Hanya Tangan)</option>
-                                  <option value="stylized_3d_muslimah">Wanita 3D Stylized (Clay Art)</option>
-                                  <option value="stylized_3d_male">Pria 3D Stylized (Clay Art)</option>
-                                  <option value="stylized_3d_duo">Duo 3D Stylized - 2 Karakter (Clay Art)</option>
-                                </optgroup>
-                                <optgroup label="── Semesta Maskot Otonom ──">
-                                  <option value="mascot_universe_herbal">🌿 Semesta Herbal (Jahe, Kunyit, Mint...)</option>
-                                  <option value="mascot_universe_kitchen">🍳 Semesta Dapur (Wajan, Blender, Tomat...)</option>
-                                  <option value="mascot_universe_home_living">🏠 Semesta Rumah (Vacuum, Sofa, Lampu...)</option>
-                                  <option value="mascot_universe_pet">🐾 Semesta Hewan Peliharaan (Kucing, Anjing...)</option>
-                                </optgroup>
-                              </select>
-                            </div>
-                          </div>
-
-                          {subjectDemographic.startsWith('mascot_universe_') && (
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                              <div className="form-group">
-                                <label className="form-label">🎨 Gaya Estetika Animasi Maskot</label>
-                                <select className="form-input" value={visualStylePreset} onChange={e => setVisualStylePreset(e.target.value)}>
-                                  <option value="3d_claymation_cozy">3D Claymation Cozy (Shaun the Sheep Look)</option>
-                                  <option value="kawaii_flat_vector">2D Kawaii Flat Vector (Minimalis Jepang)</option>
-                                  <option value="ghibli_watercolor">Studio Ghibli Watercolor (Cat Air Magis)</option>
-                                </select>
-                              </div>
-                            </div>
-                          )}
-
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                            <div className="form-group">
-                              <label className="form-label">Wardrobe Style</label>
-                              <input
-                                type="text"
-                                className="form-input"
-                                value={wardrobeStyle}
-                                onChange={e => setWardrobeStyle(e.target.value)}
-                              />
-                            </div>
-
-                            <div className="form-group">
-                              <label className="form-label">Lighting Style</label>
-                              <input
-                                type="text"
-                                className="form-input"
-                                value={lightingStyle}
-                                onChange={e => setLightingStyle(e.target.value)}
-                              />
-                            </div>
-                          </div>
-                        </div>
+                        <VisualIdentitySelector
+                          value={visualIdentity}
+                          onChange={setVisualIdentity}
+                          allowLegacyCustom={true}
+                          campaignKind="multiplier_campaign"
+                        />
                       )}
                     </div>
                   )}

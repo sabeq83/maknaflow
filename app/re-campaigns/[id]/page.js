@@ -2,6 +2,7 @@
 
 import Sidebar from '../../components/Sidebar';
 import Link from 'next/link';
+import { getVisualOverrideLabel, parseVisualOverrides } from '../../../lib/campaign-config-labels';
 import { useEffect, useState, Fragment } from 'react';
 import { useParams } from 'next/navigation';
 
@@ -4463,6 +4464,7 @@ export default function RECampaignDetailPage() {
   );
 
   const pct = stats && stats.total > 0 ? Math.round((stats.analyzed / stats.total) * 100) : 0;
+  const visualOverrides = parseVisualOverrides(campaign.visual_overrides_json);
 
   return (
     <div className="app-layout">
@@ -4747,18 +4749,42 @@ export default function RECampaignDetailPage() {
                   <span>🎭 Info Konfigurasi Visual Swap Overrides</span>
                 </summary>
                 <div style={{ padding: '20px', borderTop: '1px solid var(--border-color)', background: 'var(--overlay-subtle)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                  {visualOverrides.identity_ref && (
+                    <div style={{ gridColumn: 'span 2', padding: '8px 12px', background: 'var(--status-info-soft)', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--text-primary)' }}>
+                      <span>🧬 <strong>Visual Lineage:</strong> {visualOverrides.identity_ref.id === 'custom' ? 'Inline Customization' : `Preset: ${visualOverrides.identity_ref.id} (v${visualOverrides.identity_ref.version})`}</span>
+                      <span style={{ textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 700, opacity: 0.8 }}>Source: {visualOverrides.identity_ref.source}</span>
+                    </div>
+                  )}
+
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>Konsep Karakter (Framing)</span>
-                    <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{campaign.face_visibility || 'Faceless Close-Up Shot'}</span>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{getVisualOverrideLabel('character', visualOverrides.character_concept) || campaign.face_visibility || 'Faceless Close-Up Shot'}</span>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>Demografi Subjek / Model</span>
-                    <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{getDemographicLabel(campaign.target_demographic, campaign.target_demographic_custom)}</span>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{getVisualOverrideLabel('subject', visualOverrides.subject_demographic) || getDemographicLabel(campaign.target_demographic, campaign.target_demographic_custom)}</span>
                   </div>
                   <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>Pencahayaan & Gaya Sinematik (Lighting Ambiance)</span>
-                    <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{campaign.visual_style || 'Cinematic Warm Moody Accent'}</span>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{getVisualOverrideLabel('lighting', visualOverrides.lighting_style) || campaign.visual_style || 'Cinematic Warm Moody Accent'}</span>
                   </div>
+
+                  {visualOverrides.resolved && (
+                    <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid var(--border)' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Resolved Subject Prompt</span>
+                        <code style={{ fontSize: '0.8rem', background: 'var(--surface-interactive)', padding: '6px', borderRadius: '4px', wordBreak: 'break-all' }}>{visualOverrides.resolved.subject_prompt}</code>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Resolved Wardrobe Prompt</span>
+                        <code style={{ fontSize: '0.8rem', background: 'var(--surface-interactive)', padding: '6px', borderRadius: '4px', wordBreak: 'break-all' }}>{visualOverrides.resolved.wardrobe_prompt}</code>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>Resolved Lighting Prompt</span>
+                        <code style={{ fontSize: '0.8rem', background: 'var(--surface-interactive)', padding: '6px', borderRadius: '4px', wordBreak: 'break-all' }}>{visualOverrides.resolved.lighting_prompt}</code>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </details>
 
