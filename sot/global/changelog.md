@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.19.0 — AI Visual Identity Builder (21/08/2026)
+- Tambah Design with AI untuk Visual Identity
+- Tambah compliance report dan faceless enforcement
+- Tambah AI refinement dan handoff ke Studio editor
+
 ## V2.18.13 — Redesign Visual Identity Studio UI (21/08/2026)
 - Add Sidebar layout component
 - Redesign tabs and catalog cards with semantic CSS variables
