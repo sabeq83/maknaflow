@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.20.5 — Fix client-side normalizeLocale import crash (21/08/2026)
+- Tambah import normalizeLocale di YouTubeStudioWorkspace.js
+
 ## V2.20.4 — Fix Channel API import warning (21/08/2026)
 - Hapus dependency updateChannelStrategy yang usang di route channel id
 

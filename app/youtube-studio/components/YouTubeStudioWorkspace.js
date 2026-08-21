@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { normalizeLocale } from '@/lib/youtube-studio-contract';
 
 export function YouTubeStudioWorkspace() {
   const [channels, setChannels] = useState([]);
