@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.20.6 — YouTube Studio One-Column Workflow (21/08/2026)
+- Refactor workflow editorial menjadi satu kolom vertikal
+- Gunakan CSS Module semantik berbasis theme MAKNA Flow
+- Perbaiki feedback dan pemilihan channel baru
+
 ## V2.20.5 — Fix client-side normalizeLocale import crash (21/08/2026)
 - Tambah import normalizeLocale di YouTubeStudioWorkspace.js
 
