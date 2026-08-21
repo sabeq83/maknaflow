@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
 import AiVisualIdentityBuilderModal from '../../components/AiVisualIdentityBuilderModal';
+import ReferenceAssetManager from '../../components/ReferenceAssetManager';
 
 const SUBJECT_KINDS = ['human', 'blank_face_3d', 'animal', 'mascot_object'];
 const HUMAN_FACELESS_MODES = ['hands_only', 'crop_below_neck', 'back_view', 'silhouette', 'first_person_pov', 'blank_face_3d'];
@@ -696,6 +697,14 @@ export default function VisualIdentityStudioPage() {
                 <li>Character and Wardrobe consistency drift is locked to <strong style={{ color: 'var(--text-secondary)' }}>PROHIBITED</strong>.</li>
               </ul>
             </div>
+
+            {editingPreset && !editingPreset.isNew && editingPreset.source === 'user' && (
+              <ReferenceAssetManager
+                ownerType="visual_identity"
+                ownerId={editingPreset.id}
+                allowedRoles={['wardrobe', 'visual_style', 'palette_sheet', 'character_sheet']}
+              />
+            )}
 
             <div style={{ display: 'flex', gap: 12, borderTop: '1px solid var(--border-color)', paddingTop: 20 }}>
               <button

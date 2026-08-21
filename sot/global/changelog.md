@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.20.0 — Visual Consistency Assets (21/08/2026)
+- Ditambahkan tabel visual_reference_assets untuk registry subjek, wardrobe, dan style
+- Diintegrasikan ReferenceAssetManager UI di Universe Manager dan Visual Identity Studio
+- Dibuat secure managed storage dengan magic bytes check dan SSRF protection
+- Dijalankan preflight check dan snapshot campaign untuk konsistensi pipeline
+
 ## V2.19.1 — Redesign & Standarisasi VSO UI (21/08/2026)
 - Refaktor VisualIdentitySelector.js ke Vanilla CSS
 - Standardisasi premium switch toggle di seluruh form kampanye

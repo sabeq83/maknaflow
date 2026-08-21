@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
 import AiUniverseBuilderModal from '@/app/components/AiUniverseBuilderModal';
+import ReferenceAssetManager from '../../components/ReferenceAssetManager';
 
 const emptyUniverseForm = {
   name: '',
@@ -666,6 +667,16 @@ export default function UniverseManagerPage() {
                       ))}
                     </div>
                   </div>
+
+                  {editingId && (
+                    <ReferenceAssetManager
+                      ownerType="universe"
+                      ownerId={editingId}
+                      universeId={editingId}
+                      allowedRoles={['visual_style', 'palette_sheet']}
+                    />
+                  )}
+
                   <div style={{ display: 'flex', gap: '12px' }}>
                     <button type="submit" style={{ backgroundColor: 'var(--status-neutral)', color: 'var(--text-primary)', border: 'none', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer' }}>Save Universe</button>
                     <button type="button" onClick={() => setShowForm(false)} style={{ backgroundColor: '#34495e', color: 'var(--text-primary)', border: 'none', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer' }}>Cancel</button>
@@ -929,6 +940,16 @@ export default function UniverseManagerPage() {
                       </div>
                     )}
                   </div>
+
+                  {editingId && (
+                    <ReferenceAssetManager
+                      ownerType="character"
+                      ownerId={editingId}
+                      universeId={selectedUniverse.id}
+                      allowedRoles={['identity', 'wardrobe', 'character_sheet']}
+                    />
+                  )}
+
                   <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
                     <button type="submit" disabled={painting} style={{ backgroundColor: 'var(--status-neutral)', color: 'var(--text-primary)', border: 'none', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer', opacity: painting ? 0.6 : 1 }}>Save Character</button>
                     <button type="button" onClick={() => setShowCharForm(false)} style={{ backgroundColor: '#34495e', color: 'var(--text-primary)', border: 'none', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer' }}>Cancel</button>
@@ -1041,6 +1062,16 @@ export default function UniverseManagerPage() {
                       </select>
                     </div>
                   </div>
+
+                  {editingId && (
+                    <ReferenceAssetManager
+                      ownerType="location"
+                      ownerId={editingId}
+                      universeId={selectedUniverse.id}
+                      allowedRoles={['location']}
+                    />
+                  )}
+
                   <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
                     <button type="submit" style={{ backgroundColor: 'var(--status-neutral)', color: 'var(--text-primary)', border: 'none', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer' }}>Save Location</button>
                     <button type="button" onClick={() => setShowLocForm(false)} style={{ backgroundColor: '#34495e', color: 'var(--text-primary)', border: 'none', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer' }}>Cancel</button>
