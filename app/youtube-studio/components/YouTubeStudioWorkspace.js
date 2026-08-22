@@ -84,6 +84,19 @@ export function YouTubeStudioWorkspace() {
   const [isApprovingPlan, setIsApprovingPlan] = useState(false);
   const [isRenderingFinal, setIsRenderingFinal] = useState(false);
 
+  // Phase 3.5A KB Foundation States
+  const [kbItems, setKbItems] = useState([]);
+  const [kbLoading, setKbLoading] = useState(false);
+  const [kbSelectedId, setKbSelectedId] = useState(null);
+  const [kbRevisions, setKbRevisions] = useState([]);
+  const [kbShowCreate, setKbShowCreate] = useState(false);
+  const [kbCreateType, setKbCreateType] = useState('channel_profile');
+  const [kbCreateTitle, setKbCreateTitle] = useState('');
+  const [kbCreateScope, setKbCreateScope] = useState('channel');
+  const [kbCreateBrief, setKbCreateBrief] = useState('');
+  const [kbIsGenerating, setKbIsGenerating] = useState(false);
+  const [kbBindings, setKbBindings] = useState([]);
+
   useEffect(() => {
     fetchChannels();
     fetchBriefPresets();
@@ -1295,6 +1308,222 @@ export function YouTubeStudioWorkspace() {
           <span>Episode Planning</span>
         </div>
       </nav>
+
+      {/* ─── KB LIBRARY SECTION (Fase 3.5A) ───────────────────────────────────── */}
+      <section className={styles.kbStep} aria-labelledby="kb-step-title">
+        <div className={styles.stepHeader}>
+          <h2 id="kb-step-title">Knowledge Base Library</h2>
+          <span className={styles.kbStepBadge}>Channel &amp; Series Context</span>
+        </div>
+        <p className={styles.kbStepDesc}>
+          Kelola KB versioned untuk Channel dan Series. AI membuat draft — Anda yang approve. KB aktif diinjeksikan secara otomatis ke Research, Blueprint, Script, dan Production Plan.
+        </p>
+
+        {/* KB Filters & List */}
+        <div className={styles.kbToolbar}>
+          <button
+            id="kb-load-btn"
+            className={styles.btnSecondary}
+            disabled={kbLoading}
+            onClick={async () => {
+              setKbLoading(true);
+              try {
+                const res = await fetch('/api/v2/youtube-studio/knowledge-bases');
+                const data = await res.json();
+                setKbItems(data.items || []);
+              } catch (e) { setErrorMsg('Gagal memuat KB Library'); }
+              setKbLoading(false);
+            }}
+          >
+            {kbLoading ? 'Memuat...' : '↻ Muat KB Library'}
+          </button>
+          <button
+            id="kb-create-toggle-btn"
+            className={styles.btnPrimary}
+            onClick={() => setKbShowCreate(v => !v)}
+          >
+            {kbShowCreate ? '✕ Batal' : '+ Buat KB Baru'}
+          </button>
+        </div>
+
+        {/* Create KB Form */}
+        {kbShowCreate && (
+          <div className={styles.kbCreateForm}>
+            <h3 className={styles.kbCreateTitle}>Buat Knowledge Base Baru</h3>
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <label htmlFor="kb-type-select">TIPE KB</label>
+                <select id="kb-type-select" className={styles.select} value={kbCreateType} onChange={e => setKbCreateType(e.target.value)}>
+                  <option value="channel_profile">Channel Profile</option>
+                  <option value="series_content_guide">Series Content Guide</option>
+                  <option value="longform_editorial_playbook">Editorial Playbook</option>
+                  <option value="research_source_policy">Research Source Policy</option>
+                  <option value="visual_continuity_guide">Visual Continuity Guide</option>
+                  <option value="prompt_production_playbook">Prompt Production Playbook</option>
+                  <option value="voice_audio_guide">Voice &amp; Audio Guide</option>
+                  <option value="rights_disclosure_policy">Rights &amp; Disclosure Policy</option>
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="kb-scope-select">SCOPE</label>
+                <select id="kb-scope-select" className={styles.select} value={kbCreateScope} onChange={e => setKbCreateScope(e.target.value)}>
+                  <option value="channel">Channel</option>
+                  <option value="series">Series</option>
+                  <option value="tenant">Tenant</option>
+                </select>
+              </div>
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="kb-title-input">JUDUL KB</label>
+              <input id="kb-title-input" className={styles.input} type="text" placeholder="e.g. Channel Profile MAKNA Flow" value={kbCreateTitle} onChange={e => setKbCreateTitle(e.target.value)} />
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="kb-brief-input">BRIEF KONTEKS UNTUK AI</label>
+              <textarea
+                id="kb-brief-input"
+                className={styles.textarea}
+                rows={4}
+                placeholder="Deskripsikan channel/series Anda: niche, audience, tone, visual style, dll."
+                value={kbCreateBrief}
+                onChange={e => setKbCreateBrief(e.target.value)}
+              />
+            </div>
+            <div className={styles.kbCreateActions}>
+              <button
+                id="kb-ai-draft-btn"
+                className={styles.btnPrimary}
+                disabled={kbIsGenerating || !kbCreateTitle || !kbCreateBrief}
+                onClick={async () => {
+                  if (!selectedChannel && kbCreateScope === 'channel') {
+                    setErrorMsg('Pilih channel terlebih dahulu'); return;
+                  }
+                  setKbIsGenerating(true);
+                  try {
+                    const scopeId = kbCreateScope === 'channel' ? selectedChannel?.id
+                      : kbCreateScope === 'series' ? selectedSeries?.id
+                      : 'tenant';
+                    const res = await fetch('/api/v2/youtube-studio/knowledge-bases', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        kbType: kbCreateType,
+                        scope: kbCreateScope,
+                        scopeId,
+                        title: kbCreateTitle,
+                        brief: { description: kbCreateBrief },
+                        locale: newChannelLocale || 'id-ID',
+                        aiAssisted: true,
+                      }),
+                    });
+                    const data = await res.json();
+                    if (!data.success) throw new Error(data.error);
+                    setNotice({ tone: 'success', message: `KB draft "${data.kb?.title}" berhasil dibuat oleh AI. Review dan activate sebelum digunakan.` });
+                    setKbShowCreate(false);
+                    setKbCreateTitle(''); setKbCreateBrief('');
+                    // Refresh list
+                    const listRes = await fetch('/api/v2/youtube-studio/knowledge-bases');
+                    const listData = await listRes.json();
+                    setKbItems(listData.items || []);
+                  } catch (e) { setErrorMsg('Gagal membuat KB: ' + e.message); }
+                  setKbIsGenerating(false);
+                }}
+              >
+                {kbIsGenerating ? '⏳ AI Sedang Membuat Draft...' : '✨ Generate AI Draft'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* KB List */}
+        {kbItems.length === 0 && !kbLoading && (
+          <p className={styles.kbEmptyState}>Belum ada Knowledge Base. Klik "Muat KB Library" atau buat baru.</p>
+        )}
+        <div className={styles.kbList}>
+          {kbItems.map(kb => (
+            <div
+              key={kb.id}
+              className={`${styles.kbCard} ${kbSelectedId === kb.id ? styles.kbCardActive : ''}`}
+              onClick={async () => {
+                setKbSelectedId(kb.id);
+                const res = await fetch(`/api/v2/youtube-studio/knowledge-bases/${kb.id}`);
+                const data = await res.json();
+                setKbRevisions(data.revisions || []);
+              }}
+              role="button"
+              tabIndex={0}
+            >
+              <div className={styles.kbCardHeader}>
+                <span className={styles.kbTypeTag}>{kb.kb_type?.replace(/_/g, ' ')}</span>
+                <span className={`${styles.revisionBadge} ${styles[`kbStatus_${kb.status}`]}`}>{kb.status}</span>
+              </div>
+              <p className={styles.kbCardTitle}>{kb.title}</p>
+              <p className={styles.bindingSummary}>Scope: {kb.scope} · {kb.scope_id}</p>
+
+              {/* Revision actions */}
+              {kbSelectedId === kb.id && kbRevisions.length > 0 && (
+                <div className={styles.kbRevisionPanel}>
+                  <h4 className={styles.kbRevisionTitle}>Revision History</h4>
+                  {kbRevisions.map(rev => (
+                    <div key={rev.id} className={styles.kbRevisionRow}>
+                      <span className={styles.kbRevNum}>Rev #{rev.revision_number}</span>
+                      <span className={`${styles.revisionBadge} ${styles[`kbStatus_${rev.status}`]}`}>{rev.status}</span>
+                      {rev.ai_generated && <span className={styles.kbAiBadge}>AI</span>}
+                      {rev.status === 'draft' || rev.status === 'review' ? (
+                        <button
+                          id={`kb-activate-${rev.id}`}
+                          className={styles.btnMini}
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            const res = await fetch(`/api/v2/youtube-studio/knowledge-bases/${kb.id}/activate`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ revision_id: rev.id }),
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                              setNotice({ tone: 'success', message: 'KB revision activated.' });
+                              const refreshRes = await fetch(`/api/v2/youtube-studio/knowledge-bases/${kb.id}`);
+                              const refreshData = await refreshRes.json();
+                              setKbRevisions(refreshData.revisions || []);
+                              // Refresh list
+                              const listRes = await fetch('/api/v2/youtube-studio/knowledge-bases');
+                              setKbItems((await listRes.json()).items || []);
+                            } else { setErrorMsg(data.error); }
+                          }}
+                        >
+                          ✓ Activate
+                        </button>
+                      ) : null}
+                    </div>
+                  ))}
+
+                  {/* Channel Binding */}
+                  {selectedChannel && (
+                    <button
+                      id={`kb-bind-channel-${kb.id}`}
+                      className={styles.btnSecondary}
+                      style={{ marginTop: 'var(--space-2)' }}
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        const res = await fetch(`/api/v2/youtube-studio/channels/${selectedChannel.id}/kb-bindings`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ kb_id: kb.id }),
+                        });
+                        const data = await res.json();
+                        if (data.success) setNotice({ tone: 'success', message: `KB "${kb.title}" diikat ke channel.` });
+                        else setErrorMsg(data.error);
+                      }}
+                    >
+                      🔗 Bind ke Channel
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* STEP 1: Channel Switcher & Creation */}
       <section className={styles.workflowStep} aria-labelledby="step-channel-title">

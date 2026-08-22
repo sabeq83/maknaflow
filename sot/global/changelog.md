@@ -1,5 +1,15 @@
 # Changelog
 
+## V2.22.0 — YouTube Studio Knowledge Base Foundation (22/08/2026)
+- Tambah KB mandiri versioned 8-type untuk Channel dan Series
+- Tambah DB migration 3 tabel baru dengan advisory lock dan revision history
+- Tambah AI KB drafting dengan Gemini dan approval workflow (draft never auto-activate)
+- Tambah scope resolver channel→series inheritance dan snapshot immutable
+- Inject bounded KB context ke Research Blueprint Script dan Production Plan
+- Tambah 7 KB API routes dengan tenant-safe permission
+- Tambah UI KB Library one-column semantic CSS di YouTube Studio Workspace
+- Tambah 9 automated tests schema lifecycle tenant-isolation snapshot
+
 ## V2.21.0 — YouTube Studio Production Factory (22/08/2026)
 - Tambah production plan AI berbasis generation profile Google Flow
 - Tambah visual asset dan voiceover jobs tenant-safe dengan preview render

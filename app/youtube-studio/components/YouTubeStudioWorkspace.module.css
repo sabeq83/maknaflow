@@ -586,3 +586,220 @@
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
 }
+
+/* ─── KB Foundation (Fase 3.5A) ───────────────────────────────────────────── */
+
+.kbStep {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.kbStepBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--status-neutral);
+  background: var(--status-neutral-soft);
+  padding: 3px 10px;
+  border-radius: var(--radius-xs);
+}
+
+.kbStepDesc {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.kbToolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.kbEmptyState {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  padding: 16px;
+  text-align: center;
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.kbList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.kbCard {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.kbCard:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-interactive);
+}
+
+.kbCardActive {
+  border-color: var(--action-primary);
+  background: var(--surface-interactive);
+}
+
+.kbCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.kbCardTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+
+.kbTypeTag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--action-primary);
+  background: var(--accent-glow);
+  padding: 2px 8px;
+  border-radius: var(--radius-xs);
+}
+
+.revisionBadge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
+  color: var(--status-neutral);
+  background: var(--status-neutral-soft);
+}
+
+.kbStatus_active {
+  color: var(--status-success);
+  background: var(--status-success-soft);
+}
+
+.kbStatus_draft {
+  color: var(--status-warning);
+  background: var(--status-warning-soft);
+}
+
+.kbStatus_review {
+  color: var(--status-info);
+  background: var(--status-info-soft);
+}
+
+.kbStatus_superseded {
+  color: var(--text-muted);
+  background: var(--surface-hover);
+}
+
+.kbStatus_archived {
+  color: var(--text-disabled);
+  background: var(--surface);
+}
+
+.bindingSummary {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.kbRevisionPanel {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kbRevisionTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin: 0 0 4px;
+}
+
+.kbRevisionRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.kbRevNum {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.kbAiBadge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  color: var(--status-info);
+  background: var(--status-info-soft);
+}
+
+.kbCreateForm {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.kbCreateTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.kbCreateActions {
+  display: flex;
+  gap: 10px;
+}
+
+.btnMini {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--action-primary);
+  background: transparent;
+  color: var(--action-primary);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+
+.btnMini:hover {
+  background: var(--action-primary);
+  color: var(--on-action-primary);
+}
