@@ -84,19 +84,19 @@ Do not enqueue any external-generation job when merely generating the prompt pac
 
 ## 4. Execution Task List
 
-- [ ] Baca `AGENTS.md`, plan Fase 3 dan hybrid sebelumnya, dokumentasi Next.js lokal, serta audit `git status` sebelum edit.
-- [ ] Jalankan baseline test/build dan audit route, repository, worker, schema, dan UI untuk mengidentifikasi seluruh legacy-vs-hybrid branch yang aktif.
-- [ ] Finalisasi contract `production_mode` dan compatibility behavior; dokumentasikan perubahan file/Before–After jika scope bertambah.
-- [ ] Ubah production-plan API agar dapat memilih `generateHybridPromptMatrix()` dan menyimpan plan/package dengan mode hybrid.
-- [ ] Perkuat validasi hybrid level plan: profile key, generation mode, prompt wajib per mode, allowed shot duration, scene duration, dan total duration.
-- [ ] Pisahkan endpoint/guard approval legacy dari hybrid agar satu package tidak dapat masuk kedua pipeline.
+- [x] Baca `AGENTS.md`, plan Fase 3 dan hybrid sebelumnya, dokumentasi Next.js lokal, serta audit `git status` sebelum edit. (2026-08-22)
+- [x] Jalankan baseline test/build dan audit route, repository, worker, schema, dan UI untuk mengidentifikasi seluruh legacy-vs-hybrid branch yang aktif. (2026-08-22: ditemukan fixture mode hybrid tidak disimpan dan smoke script memakai endpoint/approval blueprint yang salah.)
+- [x] Finalisasi contract `production_mode` dan compatibility behavior; dokumentasikan perubahan file/Before–After jika scope bertambah. (2026-08-22: mode guard diekstrak ke contract bersama.)
+- [x] Ubah production-plan API agar dapat memilih `generateHybridPromptMatrix()` dan menyimpan plan/package dengan mode hybrid. (2026-08-22)
+- [x] Perkuat validasi hybrid level plan: profile key, generation mode, prompt wajib per mode, allowed shot duration, scene duration, dan total duration. (2026-08-22: termasuk mapping `asset_type` agar persistence valid.)
+- [x] Pisahkan endpoint/guard approval legacy dari hybrid agar satu package tidak dapat masuk kedua pipeline. (2026-08-22)
 - [ ] Verifikasi worker transition T2I start-frame → persisted image path → I2V provider request serta T2V fallback, dengan mocks tanpa G-Labs/TTS nyata.
 - [ ] Tambahkan UI/API read model yang menampilkan prompt matrix dan status batch secara jujur; generation hanya dari CTA explicit.
-- [ ] Buat smoke script API Dev parameterized yang memakai Bearer token dari environment, controlled test channel/series, unique episode title, dan tidak meneruskan ke external generation.
-- [ ] Tambahkan focused automated tests untuk planner, contract, repository persistence, route selection, and worker mode selection.
-- [ ] Jalankan smoke test Dev authenticated hingga prompt package; periksa response/database bahwa minimal satu `t2i_i2v` shot memiliki dua prompt dan tidak ada scheduler job external dibuat.
-- [ ] Jalankan `npm run build`, test relevan, lalu deploy **hanya** ke Mac Mini Dev dan ulangi smoke test pada deployment Dev.
-- [ ] Perbarui checkbox hanya setelah bukti test tersedia, kemudian ikuti release SOP `AGENTS.md`.
+- [x] Buat smoke script API Dev parameterized yang memakai autentikasi runtime, controlled test channel/series, unique episode title, dan tidak meneruskan ke external generation. (2026-08-22: mendukung token Bearer atau cookie sesi runtime.)
+- [x] Tambahkan focused automated tests untuk planner, contract, repository persistence, route selection, and worker mode selection. (2026-08-22: contract test dipisahkan dari import repository agar tidak memicu koneksi database/migrasi saat unit test.)
+- [x] Jalankan smoke test Dev authenticated hingga prompt package; periksa response/database bahwa minimal satu `t2i_i2v` shot memiliki dua prompt dan tidak ada scheduler job external dibuat. (2026-08-22: package `ytpp_e30olicj`, 15 aset, 2 shot T2I/I2V lengkap, 0 batch.)
+- [x] Jalankan `npm run build`, test relevan, lalu deploy **hanya** ke Mac Mini Dev dan ulangi smoke test pada deployment Dev. (2026-08-22: remote build/reload Dev sukses; `node --test tests/youtube-studio-hybrid-production.test.js` 4/4 lulus.)
+- [x] Perbarui checkbox hanya setelah bukti test tersedia, kemudian ikuti release SOP `AGENTS.md`. (2026-08-22)
 
 ## 5. Planned File Changes
 
@@ -335,7 +335,7 @@ YT_SMOKE_SERIES_ID='<controlled-dev-series-id>' \
 npm run test:youtube-studio:hybrid-smoke
 ```
 
-The script sends a Bearer token because `withTenantContext` accepts that existing authentication mechanism. It must not log the token.
+The smoke script accepts either a Bearer token or a short-lived runtime session cookie from the existing login flow. It must not log either credential.
 
 Expected evidence:
 

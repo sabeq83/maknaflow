@@ -2,19 +2,21 @@ import assert from 'node:assert/strict';
 
 const baseUrl = process.env.YT_SMOKE_BASE_URL || 'http://100.95.245.55:5020';
 const token = process.env.YT_SMOKE_TOKEN;
+const authCookie = process.env.YT_SMOKE_AUTH_COOKIE;
 const channelId = process.env.YT_SMOKE_CHANNEL_ID;
 const seriesId = process.env.YT_SMOKE_SERIES_ID;
+const targetDurationSeconds = Number(process.env.YT_SMOKE_DURATION_SECONDS || 60);
 
-if (!token || !channelId || !seriesId) {
+if ((!token && !authCookie) || !channelId || !seriesId) {
   console.log('⚠️ [SMOKE TEST] Pending runtime credentials:');
-  console.log('  YT_SMOKE_TOKEN, YT_SMOKE_CHANNEL_ID, or YT_SMOKE_SERIES_ID is missing.');
+  console.log('  YT_SMOKE_TOKEN or YT_SMOKE_AUTH_COOKIE, YT_SMOKE_CHANNEL_ID, or YT_SMOKE_SERIES_ID is missing.');
   console.log('  Automated unit tests have run, smoke test is PENDING credentials.');
   process.exit(0);
 }
 
 const headers = {
   'Content-Type': 'application/json',
-  'Authorization': `Bearer ${token}`
+  ...(authCookie ? { Cookie: authCookie } : { Authorization: `Bearer ${token}` })
 };
 
 async function req(url, options = {}) {
@@ -54,50 +56,29 @@ async function runSmokeTest() {
   console.log(`     Episode created with ID: ${episodeId}`);
 
   // Set default target duration override
-  console.log('  2. Setting episode target duration (60 seconds)...');
+  console.log(`  2. Setting episode target duration (${targetDurationSeconds} seconds)...`);
   await req(`/api/v2/youtube-studio/episodes/${episodeId}/duration`, {
     method: 'POST',
     body: JSON.stringify({
-      target_duration_seconds: 60
+      target_duration_seconds: targetDurationSeconds
     })
   });
 
-  // 3. Save research brief
-  console.log('  3. Saving research brief...');
-  await req(`/api/v2/youtube-studio/episodes/${episodeId}/research`, {
-    method: 'POST',
-    body: JSON.stringify({
-      episode_angle: "Menelusuri sejarah kopi Nusantara secara detail",
-      audience_intent: "Mengetahui sejarah singkat penyebaran kopi di Indonesia",
-      viewer_questions: ["Bagaimana sejarah kopi masuk ke Nusantara?"],
-      key_claims: [{ claim: "Kopi pertama kali dibawa VOC ke Batavia pada abad ke-17", risk: "low", source_note: "Arsip Batavia" }],
-      editorial_risks: [],
-      recommended_structure: "Intro VOC, penyebaran ke daerah",
-      source_requests: []
-    })
-  });
+  // 3. Generate research with the real route contract.
+  console.log('  3. Generating research brief (AI)...');
+  await req(`/api/v2/youtube-studio/episodes/${episodeId}/research`, { method: 'POST' });
 
-  // 4. Save blueprint draft
-  console.log('  4. Saving blueprint draft...');
-  await req(`/api/v2/youtube-studio/episodes/${episodeId}/blueprint`, {
-    method: 'POST',
-    body: JSON.stringify({
-      content_promise: "Menyelidiki sejarah emas kopi Nusantara",
-      hook: { text: "Tahukah Anda kalau kopi favorit Anda punya sejarah kelam?", target_duration_seconds: 10 },
-      chapters: [
-        { order: 1, title: "VOC membawa bibit kopi ke Batavia", target_duration_seconds: 25, narrative_focus: "VOC menanam kopi", retention_moment: "Peta pelayaran", pattern_interrupt: "Zoom" },
-        { order: 2, title: "Penyebaran ke pelosok", target_duration_seconds: 25, narrative_focus: "Menyebar ke Gayo/Toraja", retention_moment: "Penyeduhan kopi", pattern_interrupt: "Highlight" }
-      ],
-      cta: { text: "Subscribe untuk fakta seru lainnya", placement: "outro" },
-      next_video_bridge: "Video teh berikutnya"
-    })
-  });
+  // 4. Generate blueprint with the real route contract.
+  console.log('  4. Generating blueprint (AI)...');
+  const blueprintRes = await req(`/api/v2/youtube-studio/episodes/${episodeId}/blueprint/generate`, { method: 'POST' });
+  const blueprintId = blueprintRes.id;
+  assert.ok(blueprintId, 'Blueprint ID must be returned by blueprint generation');
 
   // 5. Approve blueprint
   console.log('  5. Approving blueprint...');
   await req(`/api/v2/youtube-studio/episodes/${episodeId}/blueprint/approve`, {
     method: 'POST',
-    body: JSON.stringify({})
+    body: JSON.stringify({ blueprint_id: blueprintId })
   });
 
   // 6. Generate script

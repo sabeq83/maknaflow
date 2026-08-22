@@ -2,9 +2,7 @@ process.env.NODE_ENV = 'test';
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { validateProductionPlanByMode, validateHybridShot } from '../lib/youtube-studio-contract.js';
-import { assertPackageProductionMode } from '../lib/youtube-studio-production-repository.js';
-import { generateVisualShot } from '../lib/youtube-studio-visual-adapter.js';
+import { assertProductionMode, validateProductionPlanByMode } from '../lib/youtube-studio-contract.js';
 
 const mockProfile = {
   key: 'google_flow_omni_flash',
@@ -126,34 +124,11 @@ test('validateProductionPlanByMode: rejects t2i_i2v shot missing prompts', () =>
   }, /t2i_prompt is required/);
 });
 
-test('assertPackageProductionMode: validates correctly', () => {
-  const hybridPkg = {
-    plan_json: { production_mode: 'hybrid' }
-  };
-  const legacyPkg = {
-    plan_json: { production_mode: 'legacy_t2v' }
-  };
-  const defaultPkg = {
-    plan_json: {}
-  };
+test('assertProductionMode: validates correctly', () => {
+  assert.doesNotThrow(() => assertProductionMode({ production_mode: 'hybrid' }, 'hybrid'));
+  assert.doesNotThrow(() => assertProductionMode({ production_mode: 'legacy_t2v' }, 'legacy_t2v'));
+  assert.doesNotThrow(() => assertProductionMode({}, 'legacy_t2v'));
 
-  assert.doesNotThrow(() => assertPackageProductionMode(hybridPkg, 'hybrid'));
-  assert.doesNotThrow(() => assertPackageProductionMode(legacyPkg, 'legacy_t2v'));
-  assert.doesNotThrow(() => assertPackageProductionMode(defaultPkg, 'legacy_t2v'));
-
-  assert.throws(() => assertPackageProductionMode(hybridPkg, 'legacy_t2v'), /Invalid package production mode/);
-  assert.throws(() => assertPackageProductionMode(legacyPkg, 'hybrid'), /Invalid package production mode/);
-});
-
-test('worker: visual adapter handles mock execution env', async () => {
-  const asset = {
-    generation_mode: 't2i_i2v',
-    i2v_prompt: 'Move camera left',
-    output_asset_json: {
-      image_path: 'temp/start_frame_1.png'
-    }
-  };
-
-  const res = await generateVisualShot({ asset, profile: mockProfile });
-  assert.equal(res.provider_task_id, 'task_mock_vis_123');
+  assert.throws(() => assertProductionMode({ production_mode: 'hybrid' }, 'legacy_t2v'), /Invalid package production mode/);
+  assert.throws(() => assertProductionMode({ production_mode: 'legacy_t2v' }, 'hybrid'), /Invalid package production mode/);
 });

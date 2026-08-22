@@ -6,10 +6,14 @@
  */
 
 process.env.NODE_ENV = 'test';
-import './local-staging/env.js';
 import assert from 'node:assert/strict';
 import fs from 'fs';
 import path from 'path';
+import { loadStagingEnv } from './local-staging/env.js';
+
+// Integration fixtures must never fall back to the workspace .env.local, which
+// can point to a shared schema. The local-staging environment is loopback-only.
+Object.assign(process.env, loadStagingEnv());
 
 // ── Mock Global Fetch ──────────────────────────────────────────────────────────
 globalThis.fetch = async (url, options) => {
@@ -26,26 +30,25 @@ globalThis.fetch = async (url, options) => {
   return { ok: true, json: async () => ({ success: true }) };
 };
 
-import {
+const {
   GENERATION_MODES,
   validateHybridShot,
   assertHybridBatchTransition,
-} from '../lib/youtube-studio-contract.js';
+} = await import('../lib/youtube-studio-contract.js');
 
-import {
+const {
   createProductionPlanDraft,
-  getProductionPackageByEpisode,
   getProductionAssets,
   getBatches,
   approvePromptPackage,
   approveStartFrameBatch,
   approveVoiceoverBatch,
-} from '../lib/youtube-studio-production-repository.js';
+} = await import('../lib/youtube-studio-production-repository.js');
 
-import { processProductionJob } from '../lib/youtube-studio-production-worker.js';
-import { pgQuery, closePgPool } from '../lib/db-pg.js';
-import { tenantContext } from '../lib/tenant-context.js';
-import { setSetting } from '../lib/db.js';
+const { processProductionJob } = await import('../lib/youtube-studio-production-worker.js');
+const { pgQuery, closePgPool } = await import('../lib/db-pg.js');
+const { tenantContext } = await import('../lib/tenant-context.js');
+const { setSetting } = await import('../lib/db.js');
 
 const TENANT_A = 'hybrid_test_tenant_a';
 const TENANT_B = 'hybrid_test_tenant_b';
@@ -54,6 +57,7 @@ console.log('🔄 Running YouTube Studio Hybrid Production tests...');
 
 const samplePlan = {
   generation_profile_key: 'google_flow_omni_flash',
+  production_mode: 'hybrid',
   scenes: [
     {
       voiceover: 'Halo selamat datang di Makna Flow.',

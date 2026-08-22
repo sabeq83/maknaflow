@@ -18,7 +18,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 export const GET = withYouTubeStudioAccess('read', async (request, ctx, user) => {
-  const { id: episodeId } = ctx.params;
+  const { id: episodeId } = await ctx.params;
 
   const pkg = await getProductionPackageByEpisode(episodeId);
   if (!pkg) {
@@ -38,7 +38,7 @@ export const GET = withYouTubeStudioAccess('read', async (request, ctx, user) =>
 });
 
 export const POST = withYouTubeStudioAccess('write', async (request, ctx, user) => {
-  const { id: episodeId } = ctx.params;
+  const { id: episodeId } = await ctx.params;
   const body = await request.json();
   const { action, batch_id } = body;
 

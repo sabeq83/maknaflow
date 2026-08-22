@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.23.17 — YouTube Studio Hybrid Prompt Smoke (22/08/2026)
+- Fix hybrid prompt asset typing and status route parameters
+- Verify Dev episode pipeline through T2I and I2V prompt package
+
 ## V2.23.16 — YouTube Studio Hybrid Prompt API (22/08/2026)
 - Connect hybrid T2I I2V prompt matrix to production API
 - Guard legacy and hybrid approval paths
