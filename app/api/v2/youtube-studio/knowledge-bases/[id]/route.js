@@ -16,7 +16,7 @@ import { refineKnowledgeBaseDraft } from '@/lib/youtube-studio-kb-ai';
 export const dynamic = 'force-dynamic';
 
 export const GET = withYouTubeStudioAccess('read', async (request, ctx, user) => {
-  const { id } = ctx.params;
+  const { id } = await ctx.params;
   const kb = await getKnowledgeBase(id);
   if (!kb) return NextResponse.json({ success: false, error: 'KB not found' }, { status: 404 });
   const revisions = await getKbRevisions(id);
@@ -24,7 +24,7 @@ export const GET = withYouTubeStudioAccess('read', async (request, ctx, user) =>
 });
 
 export const PATCH = withYouTubeStudioAccess('write', async (request, ctx, user) => {
-  const { id } = ctx.params;
+  const { id } = await ctx.params;
   const body = await request.json();
   const { title, content, instruction, locale, aiRefine } = body;
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.23.8 — Fix Next.js 16 async route parameters resolution (22/08/2026)
+- Await ctx.params pada dynamic route GET dan PATCH knowledge-bases
+- [id]
+- Mengatasi bug database query gagal akibat Promise params unresolved yang memicu error tidak ada revisi ditemukan
+
 ## V2.23.7 — YouTube Studio KB Card Instant Archive Support (22/08/2026)
 - Tambah tombol ✕ Archive langsung pada card header utama KB Library
 - Hubungkan tombol untuk memicu pencarian dan pengarsipan revisi teratas secara aman
