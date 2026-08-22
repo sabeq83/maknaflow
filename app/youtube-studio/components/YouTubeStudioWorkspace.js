@@ -96,6 +96,9 @@ export function YouTubeStudioWorkspace() {
   const [kbCreateBrief, setKbCreateBrief] = useState('');
   const [kbIsGenerating, setKbIsGenerating] = useState(false);
   const [kbBindings, setKbBindings] = useState([]);
+  const [kbUploadMode, setKbUploadMode] = useState('ai'); // 'ai' or 'upload'
+  const [kbUploadFile, setKbUploadFile] = useState(null);
+  const [kbIsUploading, setKbIsUploading] = useState(false);
 
   useEffect(() => {
     fetchChannels();
@@ -1350,6 +1353,25 @@ export function YouTubeStudioWorkspace() {
         {kbShowCreate && (
           <div className={styles.kbCreateForm}>
             <h3 className={styles.kbCreateTitle}>Buat Knowledge Base Baru</h3>
+            
+            {/* Tab Container */}
+            <div className={styles.kbTabContainer}>
+              <button
+                type="button"
+                className={`${styles.kbTab} ${kbUploadMode === 'ai' ? styles.kbTabActive : ''}`}
+                onClick={() => setKbUploadMode('ai')}
+              >
+                ✨ AI Draft Generator
+              </button>
+              <button
+                type="button"
+                className={`${styles.kbTab} ${kbUploadMode === 'upload' ? styles.kbTabActive : ''}`}
+                onClick={() => setKbUploadMode('upload')}
+              >
+                📤 Upload &amp; Parse File
+              </button>
+            </div>
+
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
                 <label htmlFor="kb-type-select">TIPE KB</label>
@@ -1377,60 +1399,143 @@ export function YouTubeStudioWorkspace() {
               <label htmlFor="kb-title-input">JUDUL KB</label>
               <input id="kb-title-input" className={styles.input} type="text" placeholder="e.g. Channel Profile MAKNA Flow" value={kbCreateTitle} onChange={e => setKbCreateTitle(e.target.value)} />
             </div>
-            <div className={styles.formGroup}>
-              <label htmlFor="kb-brief-input">BRIEF KONTEKS UNTUK AI</label>
-              <textarea
-                id="kb-brief-input"
-                className={styles.textarea}
-                rows={4}
-                placeholder="Deskripsikan channel/series Anda: niche, audience, tone, visual style, dll."
-                value={kbCreateBrief}
-                onChange={e => setKbCreateBrief(e.target.value)}
-              />
-            </div>
-            <div className={styles.kbCreateActions}>
-              <button
-                id="kb-ai-draft-btn"
-                className={styles.btnPrimary}
-                disabled={kbIsGenerating || !kbCreateTitle || !kbCreateBrief}
-                onClick={async () => {
-                  if (!selectedChannel && kbCreateScope === 'channel') {
-                    setErrorMsg('Pilih channel terlebih dahulu'); return;
-                  }
-                  setKbIsGenerating(true);
-                  try {
-                    const scopeId = kbCreateScope === 'channel' ? selectedChannel?.id
-                      : kbCreateScope === 'series' ? selectedSeries?.id
-                      : 'tenant';
-                    const res = await fetch('/api/v2/youtube-studio/knowledge-bases', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        kbType: kbCreateType,
-                        scope: kbCreateScope,
-                        scopeId,
-                        title: kbCreateTitle,
-                        brief: { description: kbCreateBrief },
-                        locale: newChannelLocale || 'id-ID',
-                        aiAssisted: true,
-                      }),
-                    });
-                    const data = await res.json();
-                    if (!data.success) throw new Error(data.error);
-                    setNotice({ tone: 'success', message: `KB draft "${data.kb?.title}" berhasil dibuat oleh AI. Review dan activate sebelum digunakan.` });
-                    setKbShowCreate(false);
-                    setKbCreateTitle(''); setKbCreateBrief('');
-                    // Refresh list
-                    const listRes = await fetch('/api/v2/youtube-studio/knowledge-bases');
-                    const listData = await listRes.json();
-                    setKbItems(listData.items || []);
-                  } catch (e) { setErrorMsg('Gagal membuat KB: ' + e.message); }
-                  setKbIsGenerating(false);
-                }}
-              >
-                {kbIsGenerating ? '⏳ AI Sedang Membuat Draft...' : '✨ Generate AI Draft'}
-              </button>
-            </div>
+
+            {kbUploadMode === 'ai' ? (
+              <>
+                <div className={styles.formGroup}>
+                  <label htmlFor="kb-brief-input">BRIEF KONTEKS UNTUK AI</label>
+                  <textarea
+                    id="kb-brief-input"
+                    className={styles.textarea}
+                    rows={4}
+                    placeholder="Deskripsikan channel/series Anda: niche, audience, tone, visual style, dll."
+                    value={kbCreateBrief}
+                    onChange={e => setKbCreateBrief(e.target.value)}
+                  />
+                </div>
+                <div className={styles.kbCreateActions}>
+                  <button
+                    id="kb-ai-draft-btn"
+                    className={styles.btnPrimary}
+                    disabled={kbIsGenerating || !kbCreateTitle || !kbCreateBrief}
+                    onClick={async () => {
+                      if (!selectedChannel && kbCreateScope === 'channel') {
+                        setErrorMsg('Pilih channel terlebih dahulu'); return;
+                      }
+                      setKbIsGenerating(true);
+                      try {
+                        const scopeId = kbCreateScope === 'channel' ? selectedChannel?.id
+                          : kbCreateScope === 'series' ? selectedSeries?.id
+                          : 'tenant';
+                        const res = await fetch('/api/v2/youtube-studio/knowledge-bases', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            kbType: kbCreateType,
+                            scope: kbCreateScope,
+                            scopeId,
+                            title: kbCreateTitle,
+                            brief: { description: kbCreateBrief },
+                            locale: newChannelLocale || 'id-ID',
+                            aiAssisted: true,
+                          }),
+                        });
+                        const data = await res.json();
+                        if (!data.success) throw new Error(data.error);
+                        setNotice({ tone: 'success', message: `KB draft "${data.kb?.title}" berhasil dibuat oleh AI. Review dan activate sebelum digunakan.` });
+                        setKbShowCreate(false);
+                        setKbCreateTitle(''); setKbCreateBrief('');
+                        // Refresh list
+                        const listRes = await fetch('/api/v2/youtube-studio/knowledge-bases');
+                        const listData = await listRes.json();
+                        setKbItems(listData.items || []);
+                      } catch (e) { setErrorMsg('Gagal membuat KB: ' + e.message); }
+                      setKbIsGenerating(false);
+                    }}
+                  >
+                    {kbIsGenerating ? '⏳ AI Sedang Membuat Draft...' : '✨ Generate AI Draft'}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className={styles.formGroup}>
+                  <label htmlFor="kb-file-upload">UPLOAD FILE KB (.json, .txt, .md)</label>
+                  <input
+                    id="kb-file-upload"
+                    type="file"
+                    accept=".json,.txt,.md"
+                    onChange={e => setKbUploadFile(e.target.files[0])}
+                  />
+                  <p className={styles.kbStepDesc} style={{ marginTop: 'var(--space-1)', fontSize: '0.75rem' }}>
+                    * File .json harus sesuai schema terstruktur. File .txt / .md akan diproses oleh AI untuk diselaraskan dengan skema target.
+                  </p>
+                </div>
+                <div className={styles.kbCreateActions}>
+                  <button
+                    id="kb-upload-draft-btn"
+                    className={styles.btnPrimary}
+                    disabled={kbIsUploading || !kbCreateTitle || !kbUploadFile}
+                    onClick={async () => {
+                      if (!selectedChannel && kbCreateScope === 'channel') {
+                        setErrorMsg('Pilih channel terlebih dahulu'); return;
+                      }
+                      setKbIsUploading(true);
+                      try {
+                        const fileReader = new FileReader();
+                        fileReader.onload = async (event) => {
+                          try {
+                            const fileContent = event.target.result;
+                            const scopeId = kbCreateScope === 'channel' ? selectedChannel?.id
+                              : kbCreateScope === 'series' ? selectedSeries?.id
+                              : 'tenant';
+
+                            let payload = {
+                              kbType: kbCreateType,
+                              scope: kbCreateScope,
+                              scopeId,
+                              title: kbCreateTitle,
+                              locale: newChannelLocale || 'id-ID'
+                            };
+
+                            if (kbUploadFile.name.endsWith('.json')) {
+                              // direct JSON import
+                              const parsedContent = JSON.parse(fileContent);
+                              payload.content = parsedContent;
+                              payload.aiAssisted = false;
+                            } else {
+                              // txt/md AI extraction
+                              payload.brief = { description: fileContent };
+                              payload.aiAssisted = true;
+                            }
+
+                            const res = await fetch('/api/v2/youtube-studio/knowledge-bases', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify(payload),
+                            });
+                            const data = await res.json();
+                            if (!data.success) throw new Error(data.error);
+
+                            setNotice({ tone: 'success', message: `KB draft dari file "${data.kb?.title}" berhasil diimport. Review dan activate sebelum digunakan.` });
+                            setKbShowCreate(false);
+                            setKbCreateTitle(''); setKbUploadFile(null);
+                            
+                            // Refresh list
+                            const listRes = await fetch('/api/v2/youtube-studio/knowledge-bases');
+                            setKbItems((await listRes.json()).items || []);
+                          } catch (e) { setErrorMsg('Gagal parsing file: ' + e.message); }
+                        };
+                        fileReader.readAsText(kbUploadFile);
+                      } catch (e) { setErrorMsg('Gagal membaca file: ' + e.message); }
+                      setKbIsUploading(false);
+                    }}
+                  >
+                    {kbIsUploading ? '⏳ Sedang Mengunggah &amp; Memproses...' : '📤 Upload &amp; Buat Draft'}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         )}
 

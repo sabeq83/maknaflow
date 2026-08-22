@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.23.1 — YouTube Studio KB File Upload (22/08/2026)
+- Tambah tab form selector AI Draft vs File Upload di KB Library
+- Tambah parser file JSON terstruktur serta extraction bridge txt/md menggunakan AI
+- Tambah styling dan error handling untuk file loader
+
 ## V2.23.0 — YouTube Studio Hybrid Production (22/08/2026)
 - Tambah prompt matrix T2I I2V dan T2V
 - Tambah approval start frame dan VO berbasis batch
