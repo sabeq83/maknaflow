@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.23.12 — YouTube Studio Workspace Architecture (22/08/2026)
+- Restructure YouTube Studio around channels series and episodes
+- Add focused episode workspace and production hubs
+- Align UI with semantic MAKNA Flow theme
+
 ## V2.23.11 — Fix sync-templates scope compatibility validation (22/08/2026)
 - Definisikan pemetaan default scope-type untuk 8 jenis template KB lokal
 - Sesuaikan relational scope properties saat batch insert draft
