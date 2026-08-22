@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.23.6 — YouTube Studio KB Card Quick Activation Support (22/08/2026)
+- Tambah tombol ✓ Activate Draft langsung di header card utama KB draft
+- Hubungkan tombol untuk memicu pencarian revisi draft terbaru dan mengaktifkannya
+- Sederhanakan alur kerja aktivasi draft KB
+
 ## V2.23.5 — YouTube Studio KB Preview Content Support (22/08/2026)
 - Tambah area pratinjau JSON terformat di bawah riwayat revisi KB
 - Buka detail revisi langsung setelah card utama diklik
