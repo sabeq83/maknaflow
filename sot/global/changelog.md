@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.23.9 — Fix KB Library list browser caching (22/08/2026)
+- Tambah cache-busting timestamp pada semua URL fetch KB Library list di front-end
+- Memaksa refresh status KB secara instan setelah aksi aktivasi dan pengarsipan
+
 ## V2.23.8 — Fix Next.js 16 async route parameters resolution (22/08/2026)
 - Await ctx.params pada dynamic route GET dan PATCH knowledge-bases
 - [id]

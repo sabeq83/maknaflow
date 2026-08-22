@@ -1331,7 +1331,7 @@ export function YouTubeStudioWorkspace() {
             onClick={async () => {
               setKbLoading(true);
               try {
-                const res = await fetch('/api/v2/youtube-studio/knowledge-bases');
+                const res = await fetch(`/api/v2/youtube-studio/knowledge-bases?t=${Date.now()}`);
                 const data = await res.json();
                 setKbItems(data.items || []);
               } catch (e) { setErrorMsg('Gagal memuat KB Library'); }
@@ -1446,7 +1446,7 @@ export function YouTubeStudioWorkspace() {
                         setKbShowCreate(false);
                         setKbCreateTitle(''); setKbCreateBrief('');
                         // Refresh list
-                        const listRes = await fetch('/api/v2/youtube-studio/knowledge-bases');
+                        const listRes = await fetch(`/api/v2/youtube-studio/knowledge-bases?t=${Date.now()}`);
                         const listData = await listRes.json();
                         setKbItems(listData.items || []);
                       } catch (e) { setErrorMsg('Gagal membuat KB: ' + e.message); }
@@ -1533,7 +1533,7 @@ export function YouTubeStudioWorkspace() {
                             setKbCreateTitle(''); setKbUploadFile(null);
                             
                             // Refresh list
-                            const listRes = await fetch('/api/v2/youtube-studio/knowledge-bases');
+                            const listRes = await fetch(`/api/v2/youtube-studio/knowledge-bases?t=${Date.now()}`);
                             setKbItems((await listRes.json()).items || []);
                           } catch (e) { setErrorMsg('Gagal parsing file: ' + e.message); }
                         };
@@ -1594,7 +1594,7 @@ export function YouTubeStudioWorkspace() {
                           const data = await res.json();
                           if (data.success) {
                             setNotice({ tone: 'success', message: `Knowledge Base "${kb.title}" berhasil diaktifkan.` });
-                            const listRes = await fetch('/api/v2/youtube-studio/knowledge-bases');
+                            const listRes = await fetch(`/api/v2/youtube-studio/knowledge-bases?t=${Date.now()}`);
                             setKbItems((await listRes.json()).items || []);
                           } else { setErrorMsg(data.error); }
                         } catch (err) { setErrorMsg('Gagal aktivasi: ' + err.message); }
@@ -1626,7 +1626,7 @@ export function YouTubeStudioWorkspace() {
                           const data = await res.json();
                           if (data.success) {
                             setNotice({ tone: 'success', message: `Knowledge Base "${kb.title}" berhasil diarsipkan.` });
-                            const listRes = await fetch('/api/v2/youtube-studio/knowledge-bases');
+                            const listRes = await fetch(`/api/v2/youtube-studio/knowledge-bases?t=${Date.now()}`);
                             setKbItems((await listRes.json()).items || []);
                             setKbSelectedId(null);
                           } else { setErrorMsg(data.error); }
