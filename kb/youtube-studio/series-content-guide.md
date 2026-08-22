@@ -4,6 +4,7 @@
 > Scope: Per Content Series  
 > Status: Draft template  
 > Version: 1.0  
+> AI context language: English  
 > Parent Channel Profile: _Tautkan Channel Profile aktif_  
 > Primary locale: _Contoh: id-ID_  
 > Last reviewed: _YYYY-MM-DD_
@@ -151,22 +152,22 @@ Setiap kandidat episode dinilai dari:
 
 ## 9. AI Context Summary
 
-> Isi setelah guide disetujui. Digunakan sebagai context terbatas untuk ide episode, Research, Blueprint, Script, dan Production Plan.
+> Machine-facing summary. Complete every value in English after this guide is approved. Use it as bounded context for episode ideas, Research, Blueprint, Script, and Production Plan.
 
 ```text
-Series: [nama]
-Channel: [nama channel]
-Promise: [ringkasan]
-Audience: [ringkasan]
-Pillar: [pillar]
-Locale: [locale]
-Target duration: [seconds + inheritance source]
-Episode format: [ringkasan]
-Eligible topics: [ringkasan]
-Editorial continuity: [ringkasan]
-Visual/audio override: [ringkasan]
-Production defaults: [ringkasan]
-Packaging rules: [ringkasan]
+Series: [English series name]
+Channel: [channel name]
+Viewer promise: [English summary]
+Audience: [English summary]
+Content pillar: [English pillar name]
+Locale: [BCP 47 locale]
+Target duration: [seconds and inheritance source]
+Episode format: [English summary]
+Eligible topics: [English summary]
+Editorial continuity: [English summary]
+Visual/audio overrides: [English summary]
+Production defaults: [English summary]
+Packaging rules: [English summary]
 ```
 
 ## 10. Review and Activation Record
@@ -179,4 +180,3 @@ Packaging rules: [ringkasan]
 | Activated at | _Timestamp_ |
 | Supersedes version | _Versi sebelumnya atau —_ |
 | Change summary | _Ringkasan perubahan_ |
-

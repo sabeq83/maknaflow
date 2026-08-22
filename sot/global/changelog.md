@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.23.3 — YouTube Studio KB Custom Upload Dropzone UI (22/08/2026)
+- Ganti input file basic browser dengan custom dropzone card UI yang premium
+- Tambah hover translation effect dan file stats info (filename dan filesize)
+- Perbarui CSS layout uploader agar konsisten dengan tema MAKNA Flow
+
 ## V2.23.2 — Fix KB upload schema prompt constraints (22/08/2026)
 - Perketat prompt AI untuk draft generation dengan instruksi JSON schema rigid per-type
 - Mencegah error validation missing required fields positioning saat parse file md

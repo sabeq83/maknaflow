@@ -1915,7 +1915,7 @@ Verifikasi branch `main/local-staging` sesuai workflow repository, tag patch bar
 - [x] Ubah unit test menjadi payload matrix dan parity test nyata.
 - [x] Ubah integration test menjadi fixture Dev read-only tanpa provider call dan dengan guard schema eksplisit.
 - [x] Jalankan unit test dan integration test OPC start-frame.
-- [x] Jalankan build Next.js.
+- [x] Run build + smoke test
 - [x] Deploy ke Mac Mini Dev dan lakukan smoke test shared request Phase 1/Regen klip 3 tanpa provider call.
 - [x] Verifikasi tidak ada product-reference leakage pada non-bridge clip melalui payload integration test.
 - [x] Jalankan release patch non-interaktif dan verifikasi tag/branch remote.

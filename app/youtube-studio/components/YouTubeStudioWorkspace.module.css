@@ -835,3 +835,51 @@
   color: var(--on-action-primary);
 }
 
+.kbUploadDropzone {
+  border: 2px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.kbUploadDropzone:hover {
+  border-color: var(--action-primary);
+  background: var(--surface-raised-hover);
+}
+
+.kbFileInputHidden {
+  display: none !important;
+}
+
+.kbUploadLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.kbUploadIcon {
+  font-size: 2.2rem;
+  margin-bottom: var(--space-2);
+  transition: transform var(--transition);
+}
+
+.kbUploadDropzone:hover .kbUploadIcon {
+  transform: translateY(-4px);
+}
+
+.kbUploadFileName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--status-success);
+}
+
+.kbUploadInstructions {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+

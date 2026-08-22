@@ -4,6 +4,7 @@
 > Scope: Channel atau Series  
 > Status: Draft template  
 > Version: 1.0  
+> AI context language: English  
 > Depends on: `visual_continuity_guide`, `voice_audio_guide`, and Generation Profile  
 > Last reviewed: _YYYY-MM-DD_
 
@@ -234,6 +235,8 @@ Sebelum Prompt Package disetujui:
 
 ## 11. AI Context Summary
 
+> Machine-facing summary. Complete values in English; all generated T2I, I2V, and T2V prompt fields must be English unless a provider capability explicitly requires otherwise.
+
 ```text
 Generation mode selection rules: [summary]
 T2I prompt grammar: [summary]
@@ -255,4 +258,3 @@ Prompt review criteria: [summary]
 | Activated at | _Timestamp_ |
 | Supersedes version | _Versi sebelumnya atau —_ |
 | Change summary | _Ringkasan perubahan_ |
-

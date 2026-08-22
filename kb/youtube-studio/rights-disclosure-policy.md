@@ -4,6 +4,7 @@
 > Scope: Tenant atau Channel  
 > Status: Draft template  
 > Version: 1.0  
+> AI context language: English  
 > Jurisdiction / audience: _Isi negara atau wilayah utama_  
 > Last reviewed: _YYYY-MM-DD_
 
@@ -174,6 +175,8 @@ Unclear asset/source
 
 ## 12. AI Context Summary
 
+> Machine-facing summary. Complete values in English for consistent rights/disclosure decisions across providers and locales.
+
 ```text
 Asset rights principles: [summary]
 Allowed asset categories: [summary]
@@ -194,4 +197,3 @@ Blocking conditions: [summary]
 | Activated at | _Timestamp_ |
 | Supersedes version | _Versi sebelumnya atau —_ |
 | Change summary | _Ringkasan perubahan_ |
-

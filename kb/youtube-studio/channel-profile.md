@@ -4,6 +4,7 @@
 > Scope: Per Channel YouTube  
 > Status: Draft template  
 > Version: 1.0  
+> AI context language: English  
 > Owner: _Belum ditetapkan_  
 > Primary locale: _Contoh: id-ID_  
 > Last reviewed: _YYYY-MM-DD_
@@ -142,20 +143,20 @@ Hook (0–60 detik)
 
 ## 9. AI Context Summary
 
-> Bagian ini adalah ringkasan singkat yang dapat diinjeksi ke prompt AI. Isi hanya setelah seluruh bagian di atas disetujui.
+> Machine-facing summary. Complete every value in English after the reviewer-facing sections above are approved. The episode script itself must still follow the channel locale.
 
 ```text
-Channel: [nama]
-Positioning: [one-line positioning]
-Audience: [audience summary]
-Locale: [locale]
+Channel: [channel name]
+Positioning: [one-line English positioning]
+Audience: [English audience summary]
+Locale: [BCP 47 locale]
 Default duration: [seconds]
-Tone: [tone]
-Content pillars: [pillar names]
-Narrative format: [summary]
-Visual/voice defaults: [summary]
-Editorial guardrails: [summary]
-CTA direction: [summary]
+Tone: [English tone summary]
+Content pillars: [English pillar names]
+Narrative format: [English summary]
+Visual and voice defaults: [English summary]
+Editorial guardrails: [English summary]
+CTA direction: [English summary]
 ```
 
 ## 10. Review and Activation Record
@@ -168,4 +169,3 @@ CTA direction: [summary]
 | Activated at | _Timestamp_ |
 | Supersedes version | _Versi sebelumnya atau —_ |
 | Change summary | _Ringkasan perubahan_ |
-

@@ -4,6 +4,7 @@
 > Scope: Tenant atau Channel  
 > Status: Draft template  
 > Version: 1.0  
+> AI context language: English  
 > Applies to: _Semua series / daftar series tertentu_  
 > Primary locale: _Contoh: id-ID_  
 > Last reviewed: _YYYY-MM-DD_
@@ -206,6 +207,8 @@ Sebelum Blueprint atau Script disetujui, reviewer menilai:
 
 ## 10. AI Context Summary
 
+> Machine-facing summary. Complete values in English; reviewer-facing policy may remain in Bahasa Indonesia.
+
 ```text
 Editorial principles: [summary]
 Hook rules: [summary]
@@ -227,4 +230,3 @@ Review rubric: [summary]
 | Activated at | _Timestamp_ |
 | Supersedes version | _Versi sebelumnya atau —_ |
 | Change summary | _Ringkasan perubahan_ |
-

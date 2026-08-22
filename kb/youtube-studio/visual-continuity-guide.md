@@ -4,6 +4,7 @@
 > Scope: Channel atau Series  
 > Status: Draft template  
 > Version: 1.0  
+> AI context language: English  
 > Parent Visual Identity: _Tautkan preset aktif bila tersedia_  
 > Aspect ratio default: `16:9`  
 > Last reviewed: _YYYY-MM-DD_
@@ -154,6 +155,8 @@ Negative tokens: [ ... ]
 
 ## 11. AI Context Summary
 
+> Machine-facing summary. Complete canonical visual descriptions, tokens, and constraints in English for consistent T2I, I2V, and T2V prompts.
+
 ```text
 Global style: [summary]
 Subject continuity: [IDs + canonical tokens]
@@ -175,4 +178,3 @@ Drift review criteria: [summary]
 | Activated at | _Timestamp_ |
 | Supersedes version | _Versi sebelumnya atau —_ |
 | Change summary | _Ringkasan perubahan_ |
-

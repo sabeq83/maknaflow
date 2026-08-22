@@ -4,6 +4,7 @@
 > Scope: Channel atau Series  
 > Status: Draft template  
 > Version: 1.0  
+> AI context language: English  
 > Primary locale: _Contoh: id-ID_  
 > Last reviewed: _YYYY-MM-DD_
 
@@ -156,6 +157,8 @@ Gunakan format cue yang didukung provider/adapter aktual. Jika tidak didukung, c
 
 ## 11. AI Context Summary
 
+> Machine-facing summary. Complete persona, pacing, pronunciation, music, and approval rules in English. The generated voice-over script remains in the episode locale.
+
 ```text
 Voice persona: [summary]
 Locale/localisation: [summary]
@@ -177,4 +180,3 @@ Audio approval triggers: [summary]
 | Activated at | _Timestamp_ |
 | Supersedes version | _Versi sebelumnya atau —_ |
 | Change summary | _Ringkasan perubahan_ |
-

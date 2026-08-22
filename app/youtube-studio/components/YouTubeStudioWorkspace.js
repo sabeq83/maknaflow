@@ -1460,14 +1460,25 @@ export function YouTubeStudioWorkspace() {
             ) : (
               <>
                 <div className={styles.formGroup}>
-                  <label htmlFor="kb-file-upload">UPLOAD FILE KB (.json, .txt, .md)</label>
-                  <input
-                    id="kb-file-upload"
-                    type="file"
-                    accept=".json,.txt,.md"
-                    onChange={e => setKbUploadFile(e.target.files[0])}
-                  />
-                  <p className={styles.kbStepDesc} style={{ marginTop: 'var(--space-1)', fontSize: '0.75rem' }}>
+                  <label>UNGGAH DOKUMEN KB (.json, .txt, .md)</label>
+                  <div className={styles.kbUploadDropzone}>
+                    <input
+                      id="kb-file-upload"
+                      type="file"
+                      accept=".json,.txt,.md"
+                      className={styles.kbFileInputHidden}
+                      onChange={e => setKbUploadFile(e.target.files[0])}
+                    />
+                    <label htmlFor="kb-file-upload" className={styles.kbUploadLabel}>
+                      <span className={styles.kbUploadIcon}>📁</span>
+                      {kbUploadFile ? (
+                        <span className={styles.kbUploadFileName}>{kbUploadFile.name} ({(kbUploadFile.size / 1024).toFixed(1)} KB)</span>
+                      ) : (
+                        <span className={styles.kbUploadInstructions}>Klik di sini untuk memilih file dokumen</span>
+                      )}
+                    </label>
+                  </div>
+                  <p className={styles.kbStepDesc} style={{ marginTop: 'var(--space-2)', fontSize: '0.75rem' }}>
                     * File .json harus sesuai schema terstruktur. File .txt / .md akan diproses oleh AI untuk diselaraskan dengan skema target.
                   </p>
                 </div>
