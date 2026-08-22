@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.23.20 — Affiliate Studio Foundation (22/08/2026)
+- Tambah kontrak dan boundary additive-only Affiliate Studio
+- Tambah permission dan tenant feature flag default-deny
+- Tambah capability API registry kosong dan regression tests
+
 ## V2.23.19 — Fix RE Campaign INSERT placeholder mismatch (22/08/2026)
 - Fix mismatch between target columns (57) and placeholders (56) in INSERT INTO re_campaigns query
 
