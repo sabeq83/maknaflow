@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.23.15 — YouTube Studio Max Width 1200px (22/08/2026)
+- Expand workspace container width to 1200px to align with Visual Identity Studio
+
 ## V2.23.14 — YouTube Studio Align Widths (22/08/2026)
 - Align single-column vertical layout max-width constraints with header title starting boundary
 
