@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.21.0 — YouTube Studio Production Factory (22/08/2026)
+- Tambah production plan AI berbasis generation profile Google Flow
+- Tambah visual asset dan voiceover jobs tenant-safe dengan preview render
+- Tambah selective shot revision dan final render workflow
+- Perbaiki scheduler_jobs enqueue ke native PostgreSQL
+- Perbaiki migrasi ALTER TABLE youtube_production_packages untuk environment existing
+
 ## V2.20.10 — YouTube Studio Flexible Duration Profiles (22/08/2026)
 - Tambah hierarchy durasi Channel Series dan Episode
 - Tambah generation profile Google Flow berbasis capability

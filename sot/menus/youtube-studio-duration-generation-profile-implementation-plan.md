@@ -121,17 +121,17 @@ For `asset_type === 'generated_visual'`, `generation_duration_seconds` must be o
 
 ## 5. Execution Task List
 
-- [ ] Audit all current 600-second fallback, UI fields, prompts, ideas, blueprint, script, and migrations; identify legacy compatibility path.
-- [ ] Add duration and generation profile validation to the shared contract, including safe bounds and inheritance resolver.
-- [ ] Create config-driven generation profile registry and read-only capability API.
-- [ ] Add idempotent migration/backfill for series duration config, episode duration source, and generation profile key.
-- [ ] Update repository transactions so Series/Episode resolve duration server-side and do not trust client-provided source/strategy values.
-- [ ] Update AI Strategy, Series suggestions, Episode Idea, Blueprint, and Script prompts to use resolved duration rather than literal 600.
-- [ ] Refactor one-column UI to edit/display Channel, Series, and Episode duration inheritance/override with accessible custom input validation.
-- [ ] Add Generation Profile selector available only at Script Approved, backed by server registry and persisted per episode.
-- [ ] Add production-plan duration validator and tests, but do not call generation providers or create render jobs.
-- [ ] Add contract/repository/API/UI smoke tests for duration inheritance, overrides, invalid model durations, and legacy data.
-- [ ] Run build, relevant tests, Dev-only deployment, and workflow smoke test; update checklist with evidence.
+- [x] Audit all current 600-second fallback, UI fields, prompts, ideas, blueprint, script, and migrations; identify legacy compatibility path.
+- [x] Add duration and generation profile validation to the shared contract, including safe bounds and inheritance resolver.
+- [x] Create config-driven generation profile registry and read-only capability API.
+- [x] Add idempotent migration/backfill for series duration config, episode duration source, and generation profile key.
+- [x] Update repository transactions so Series/Episode resolve duration server-side and do not trust client-provided source/strategy values.
+- [x] Update AI Strategy, Series suggestions, Episode Idea, Blueprint, and Script prompts to use resolved duration rather than literal 600.
+- [x] Refactor one-column UI to edit/display Channel, Series, and Episode duration inheritance/override with accessible custom input validation.
+- [x] Add Generation Profile selector available only at Script Approved, backed by server registry and persisted per episode.
+- [x] Add production-plan duration validator and tests, but do not call generation providers or create render jobs.
+- [x] Add contract/repository/API/UI smoke tests for duration inheritance, overrides, invalid model durations, and legacy data.
+- [x] Run build, relevant tests, Dev-only deployment, and workflow smoke test; update checklist with evidence.
 
 ## 6. Planned File Changes
 

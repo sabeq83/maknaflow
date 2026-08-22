@@ -572,3 +572,17 @@
   font-size: 0.78rem;
 }
 
+.productionPlan {
+  background: var(--surface-raised);
+}
+
+.assetProgress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.previewPlayer {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}

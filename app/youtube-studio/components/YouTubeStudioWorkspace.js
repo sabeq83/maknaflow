@@ -77,6 +77,13 @@ export function YouTubeStudioWorkspace() {
   const [profilesList, setProfilesList] = useState([]);
   const [selectedProfileKey, setSelectedProfileKey] = useState('');
 
+  // Phase 3 Production Factory States
+  const [activePackage, setActivePackage] = useState(null);
+  const [packageAssets, setPackageAssets] = useState([]);
+  const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
+  const [isApprovingPlan, setIsApprovingPlan] = useState(false);
+  const [isRenderingFinal, setIsRenderingFinal] = useState(false);
+
   useEffect(() => {
     fetchChannels();
     fetchBriefPresets();
@@ -515,6 +522,17 @@ export function YouTubeStudioWorkspace() {
       } else {
         setSelectedEpisodeScript(null);
       }
+
+      // 4. Fetch Production Plan package
+      const pRes = await fetch(`/api/v2/youtube-studio/episodes/${episodeId}/production-plan`);
+      const pData = await pRes.json();
+      if (pData.success && pData.data) {
+        setActivePackage(pData.data.package);
+        setPackageAssets(pData.data.assets || []);
+      } else {
+        setActivePackage(null);
+        setPackageAssets([]);
+      }
     } catch (e) {
       setErrorMsg('Failed to load editorial workflow data.');
     }
@@ -531,6 +549,8 @@ export function YouTubeStudioWorkspace() {
       setSelectedEpisodeScript(null);
       setOverrideEpDuration('');
       setSelectedProfileKey('');
+      setActivePackage(null);
+      setPackageAssets([]);
     }
   }, [selectedEpisode]);
 
@@ -663,6 +683,136 @@ export function YouTubeStudioWorkspace() {
       setIsApprovingScript(false);
     }
   }
+
+  async function handleGenerateProductionPlan() {
+    if (!selectedEpisode) return;
+    setErrorMsg('');
+    setNotice(null);
+    setIsGeneratingPlan(true);
+    try {
+      const res = await fetch(`/api/v2/youtube-studio/episodes/${selectedEpisode.id}/production-plan`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      if (data.success) {
+        setActivePackage(data.data.package);
+        setPackageAssets(data.data.assets || []);
+        triggerNotice('success', 'AI Production Plan Draft generated successfully.');
+      } else {
+        setErrorMsg(data.error || 'Failed to generate Production Plan.');
+      }
+    } catch (e) {
+      setErrorMsg('Failed to generate Production Plan.');
+    } finally {
+      setIsGeneratingPlan(false);
+    }
+  }
+
+  async function handleApproveProductionPlan() {
+    if (!selectedEpisode || !activePackage) return;
+    setErrorMsg('');
+    setNotice(null);
+    setIsApprovingPlan(true);
+    try {
+      const res = await fetch(`/api/v2/youtube-studio/production-packages/${activePackage.id}/approve`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      if (data.success) {
+        setActivePackage(data.data);
+        await refreshEpisodesList();
+        setSelectedEpisode(prev => ({ ...prev, status: 'In Production' }));
+        triggerNotice('success', 'Production Plan approved! Asset generation has started.');
+      } else {
+        setErrorMsg(data.error || 'Failed to approve Production Plan.');
+      }
+    } catch (e) {
+      setErrorMsg('Failed to approve Production Plan.');
+    } finally {
+      setIsApprovingPlan(false);
+    }
+  }
+
+  async function handleRegenerateAsset(assetId) {
+    setErrorMsg('');
+    setNotice(null);
+    try {
+      const res = await fetch(`/api/v2/youtube-studio/production-assets/${assetId}/regenerate`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      if (data.success) {
+        const pRes = await fetch(`/api/v2/youtube-studio/episodes/${selectedEpisode.id}/production-plan`);
+        const pData = await pRes.json();
+        if (pData.success && pData.data) {
+          setActivePackage(pData.data.package);
+          setPackageAssets(pData.data.assets || []);
+        }
+        triggerNotice('success', 'Asset regeneration scheduled successfully.');
+      } else {
+        setErrorMsg(data.error || 'Failed to regenerate asset.');
+      }
+    } catch (e) {
+      setErrorMsg('Failed to regenerate asset.');
+    }
+  }
+
+  async function handleFinalRender() {
+    if (!selectedEpisode || !activePackage) return;
+    setErrorMsg('');
+    setNotice(null);
+    setIsRenderingFinal(true);
+    try {
+      const res = await fetch(`/api/v2/youtube-studio/production-packages/${activePackage.id}/final-render`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      if (data.success) {
+        const pRes = await fetch(`/api/v2/youtube-studio/episodes/${selectedEpisode.id}/production-plan`);
+        const pData = await pRes.json();
+        if (pData.success && pData.data) {
+          setActivePackage(pData.data.package);
+          setPackageAssets(pData.data.assets || []);
+        }
+        triggerNotice('success', 'Final rendering started.');
+      } else {
+        setErrorMsg(data.error || 'Failed to trigger final render.');
+      }
+    } catch (e) {
+      setErrorMsg('Failed to trigger final render.');
+    } finally {
+      setIsRenderingFinal(false);
+    }
+  }
+
+  useEffect(() => {
+    let interval;
+    if (selectedEpisode && activePackage && ['generating', 'approved', 'final_rendering'].includes(activePackage.status)) {
+      interval = setInterval(async () => {
+        try {
+          const pRes = await fetch(`/api/v2/youtube-studio/episodes/${selectedEpisode.id}/production-plan`);
+          const pData = await pRes.json();
+          if (pData.success && pData.data) {
+            setActivePackage(pData.data.package);
+            setPackageAssets(pData.data.assets || []);
+            if (pData.data.package.status === 'preview_ready' || pData.data.package.status === 'completed') {
+              await refreshEpisodesList();
+              const epRes = await fetch(`/api/v2/youtube-studio/episodes?channel_id=${selectedChannel.id}`);
+              const epData = await epRes.json();
+              if (epData.success) {
+                setEpisodes(epData.data);
+                const updated = epData.data.find(e => e.id === selectedEpisode.id);
+                if (updated) setSelectedEpisode(updated);
+              }
+            }
+          }
+        } catch (e) {
+          console.error('Polling error', e);
+        }
+      }, 3000);
+    }
+    return () => clearInterval(interval);
+  }, [activePackage, selectedEpisode, selectedChannel]);
 
   async function handleGenerateSeriesSuggestions() {
     if (!selectedChannel) return;
@@ -1749,6 +1899,167 @@ export function YouTubeStudioWorkspace() {
                       </div>
                     )}
                   </div>
+
+                  {/* Step 7: AI Production Plan */}
+                  <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '12px', borderTop: '1px dashed var(--border-subtle)', paddingTop: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <h4 style={{ margin: 0, fontSize: '1rem' }}>Step 7: AI Production Plan</h4>
+                      {selectedEpisode.generation_profile_key && !activePackage && (
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          onClick={handleGenerateProductionPlan}
+                          disabled={isGeneratingPlan}
+                        >
+                          {isGeneratingPlan ? '⚡ Generating Plan...' : 'Generate AI Production Plan'}
+                        </button>
+                      )}
+                    </div>
+
+                    {!selectedEpisode.generation_profile_key ? (
+                      <div className={styles.prereqNotice}>
+                        Select a model generation profile first. (Prerequisite: Generation Profile Selection).
+                      </div>
+                    ) : !activePackage ? (
+                      <div className={styles.prereqNotice}>
+                        No production plan generated yet. Click the button to start.
+                      </div>
+                    ) : (
+                      <div className={styles.productionPlan} style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: 'var(--surface-raised)', padding: '16px', borderRadius: '8px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '0.85rem' }}>Package Status: <strong>{activePackage.status.toUpperCase()}</strong></span>
+                          {activePackage.status === 'draft' && (
+                            <button
+                              type="button"
+                              className="btn btn-primary"
+                              onClick={handleApproveProductionPlan}
+                              disabled={isApprovingPlan}
+                            >
+                              {isApprovingPlan ? '⚡ Approving...' : 'Approve & Start Production'}
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Plan Details */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <h5 style={{ margin: 0, fontSize: '0.9rem' }}>Visual & Voice Assets Blueprint:</h5>
+                          {activePackage.plan_json?.scenes?.map((scene, idx) => (
+                            <div key={idx} style={{ background: 'var(--background)', padding: '12px', borderRadius: '6px', borderLeft: '3px solid var(--accent)', marginTop: '8px' }}>
+                              <div style={{ fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '4px' }}>Scene {idx + 1} ({scene.narrative_duration_seconds}s)</div>
+                              <div style={{ fontStyle: 'italic', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '8px' }}>VO: "{scene.voiceover}"</div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                {scene.shots?.map((shot, shotIdx) => (
+                                  <div key={shotIdx} style={{ fontSize: '0.8rem', background: 'var(--surface-raised)', padding: '6px 10px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                                    <span>🎬 Shot {shotIdx + 1}: [{shot.asset_type}] - <em>"{shot.prompt}"</em></span>
+                                    <span style={{ fontWeight: '600' }}>{shot.generation_duration_seconds}s</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Step 8: Asset & VO Generation Progress */}
+                  {activePackage && activePackage.status !== 'draft' && (
+                    <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '12px', borderTop: '1px dashed var(--border-subtle)', paddingTop: '20px' }}>
+                      <h4 style={{ margin: 0, fontSize: '1rem' }}>Step 8: Asset & VO Generation Progress</h4>
+                      <div className={styles.assetProgress} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {packageAssets.map((asset, idx) => (
+                          <div key={asset.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-raised)', padding: '10px 14px', borderRadius: '6px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                              <span style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                {asset.asset_type === 'voiceover' ? '🎙️ Voiceover' : '🎬 Visual Shot'} (Scene {asset.scene_index + 1}{asset.shot_index >= 0 ? `, Shot ${asset.shot_index + 1}` : ''})
+                              </span>
+                              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                {asset.prompt_snapshot?.substring(0, 80)}...
+                              </span>
+                              {asset.error_message && (
+                                <span style={{ fontSize: '0.75rem', color: 'var(--error)' }}>
+                                  Error: {asset.error_message}
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <span className={`badge badge-${asset.status === 'succeeded' ? 'success' : asset.status === 'failed' ? 'danger' : 'warning'}`} style={{ fontSize: '0.75rem' }}>
+                                {asset.status.toUpperCase()}
+                              </span>
+                              {asset.status !== 'draft' && (
+                                <button
+                                  type="button"
+                                  className="btn btn-secondary btn-sm"
+                                  onClick={() => handleRegenerateAsset(asset.id)}
+                                  style={{ padding: '2px 8px', fontSize: '0.75rem' }}
+                                >
+                                  Regenerate
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Step 9: Preview & Final Render */}
+                  {activePackage && ['preview_ready', 'final_rendering', 'completed'].includes(activePackage.status) && (
+                    <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '12px', borderTop: '1px dashed var(--border-subtle)', paddingTop: '20px' }}>
+                      <h4 style={{ margin: 0, fontSize: '1rem' }}>Step 9: Preview & Final Render</h4>
+                      
+                      {/* Preview Player */}
+                      {activePackage.preview_asset_json && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Timeline Preview</label>
+                          <video 
+                            src={activePackage.preview_asset_json.videoAsset} 
+                            controls 
+                            width="100%" 
+                            style={{ borderRadius: '8px', border: '1px solid var(--border-subtle)', background: '#000' }}
+                          />
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                            Subtitles track generated: <code>{activePackage.preview_asset_json.subtitleAsset}</code>
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Final Render Player */}
+                      {activePackage.status === 'completed' && activePackage.final_asset_json && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
+                          <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--success)' }}>✓ Final YouTube Video</label>
+                          <video 
+                            src={activePackage.final_asset_json.videoAsset} 
+                            controls 
+                            width="100%" 
+                            style={{ borderRadius: '8px', border: '1px solid var(--success)', background: '#000' }}
+                          />
+                          <div className={styles.inheritanceHint} style={{ fontSize: '0.85rem', color: 'var(--success)', fontWeight: 'bold' }}>
+                            🎉 Video is compiled and ready to publish!
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Trigger Final Render Actions */}
+                      {activePackage.status === 'preview_ready' && (
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          onClick={handleFinalRender}
+                          disabled={isRenderingFinal}
+                          style={{ alignSelf: 'flex-start' }}
+                        >
+                          {isRenderingFinal ? '⚡ Rendering...' : 'Final Render Video'}
+                        </button>
+                      )}
+
+                      {activePackage.status === 'final_rendering' && (
+                        <div className={styles.prereqNotice}>
+                          ⚡ Final video is rendering on GPU Node... (Please wait).
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                 </div>
               )}
