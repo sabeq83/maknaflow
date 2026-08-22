@@ -1374,8 +1374,66 @@
     min-width: 150px;
   }
 }
+/* --- Single Column Workspace Overrides --- */
+.channelsView,
+.channelDetailView,
+.seriesDetailView,
+.episodeWorkspace,
+.productionQueue,
+.publishingHub {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
 
+/* Horizontal stage rail on top */
+.workspaceLayoutOneColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
 
+.stageRailHorizontal {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  background: var(--surface-raised);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  scrollbar-width: thin;
+}
 
+.railItemHorizontal {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  padding: 6px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  flex-shrink: 0;
+}
 
+.railItemHorizontal:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
 
+.railItemHorizontalActive {
+  background: var(--surface-interactive);
+  border-color: var(--link);
+  color: var(--link);
+}
+
+.railItemHorizontal:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

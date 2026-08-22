@@ -279,9 +279,9 @@ export function EpisodeWorkspace({
         <span className={styles.kbStepBadge}>Status: {episode.status}</span>
       </div>
 
-      <div className={styles.workspaceLayout}>
-        {/* Stage Rail Navigation */}
-        <aside className={styles.episodeStageRail} aria-label="Episode Stages">
+      <div className={styles.workspaceLayoutOneColumn}>
+        {/* Stage Rail Navigation on top */}
+        <nav className={styles.stageRailHorizontal} aria-label="Episode Stages">
           {stages.map((stg) => {
             const isCurrent = stg.key === activeStageKey;
             const statusClass = getStatusBadgeClass(stg.status);
@@ -289,7 +289,7 @@ export function EpisodeWorkspace({
               <button
                 key={stg.key}
                 type="button"
-                className={`${styles.railItem} ${isCurrent ? styles.railItemActive : ''}`}
+                className={`${styles.railItemHorizontal} ${isCurrent ? styles.railItemHorizontalActive : ''}`}
                 disabled={stg.status === 'blocked'}
                 onClick={() => onStageChange(stg.key)}
               >
@@ -299,13 +299,10 @@ export function EpisodeWorkspace({
                     {getStatusLabel(stg.status)}
                   </span>
                 </div>
-                {stg.status === 'blocked' && stg.reason && (
-                  <span className={styles.railItemReason}>{stg.reason}</span>
-                )}
               </button>
             );
           })}
-        </aside>
+        </nav>
 
         {/* Active Stage Panel */}
         <main className={styles.stagePanel}>

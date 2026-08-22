@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.23.13 — YouTube Studio One-Column Layout (22/08/2026)
+- Redesign all YouTube Studio views into a central single-column vertical flow
+- Reposition Episode stage rail to a horizontal selector on top
+
 ## V2.23.12 — YouTube Studio Workspace Architecture (22/08/2026)
 - Restructure YouTube Studio around channels series and episodes
 - Add focused episode workspace and production hubs
