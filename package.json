@@ -1,6 +1,6 @@
 {
   "name": "maknaflow",
-  "version": "2.23.15",
+  "version": "2.23.16",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack -p 3005",
@@ -44,6 +44,7 @@
     "test:contentflow-migration": "node scripts/test-contentflow-legacy-migration.mjs",
     "test:brand-editorial-defaults": "node scripts/test-brand-editorial-defaults.mjs",
     "test:content-planner-counts": "node scripts/test-content-planner-counts.mjs",
+    "test:youtube-studio:hybrid-smoke": "node scripts/test-youtube-studio-hybrid-prompt-api.mjs",
     "test:publishing-scheduler": "node --test tests/publishing-scheduler.test.js",
     "test:ai-universe-builder": "node scripts/test-ai-universe-builder.mjs",
     "test:visual-identity": "node scripts/test-visual-identity-foundation.mjs",

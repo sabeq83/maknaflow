@@ -74,14 +74,52 @@ export const POST = withYouTubeStudioAccess('write', async (req, { params }, use
     const universe = strategy.brief_json?.universe_id ? await getUniverseProfile(strategy.brief_json.universe_id) : null;
     const visualIdentity = strategy.brief_json?.visual_identity_preset_id ? await getVisualIdentityPreset(strategy.brief_json.visual_identity_preset_id) : null;
 
-    // Generate plan
-    const plan = await generateProductionPlan({
-      episode,
-      script,
-      profile,
-      visualIdentity,
-      universe
-    });
+    let productionMode = 'legacy_t2v';
+    try {
+      const body = await req.json();
+      if (body?.production_mode) {
+        productionMode = body.production_mode;
+      }
+    } catch (e) {}
+
+    if (productionMode !== 'legacy_t2v' && productionMode !== 'hybrid') {
+      return new Response(JSON.stringify({ success: false, error: 'Invalid production mode' }), {
+        status: 400,
+        headers: { 'content-type': 'application/json' }
+      });
+    }
+
+    let plan;
+    if (productionMode === 'hybrid') {
+      const { createKbSnapshot } = await import('@/lib/youtube-studio-kb-repository');
+      const { generateHybridPromptMatrix } = await import('@/lib/youtube-studio-hybrid-planner');
+      const kbSnapshot = await createKbSnapshot({
+        channelId: episode.channel_id,
+        seriesId: episode.series_id,
+        stage: 'production'
+      });
+      
+      plan = await generateHybridPromptMatrix({
+        episode,
+        script,
+        profile,
+        visualIdentity,
+        universe,
+        kbSnapshot
+      });
+    } else {
+      plan = await generateProductionPlan({
+        episode,
+        script,
+        profile,
+        visualIdentity,
+        universe
+      });
+    }
+
+    // Validate using the unified contract resolver
+    const { validateProductionPlanByMode } = await import('@/lib/youtube-studio-contract');
+    validateProductionPlanByMode(plan, { profile, episode, productionMode });
 
     const snapshot = {
       strategy_positioning: strategy.config_json?.positioning,
@@ -92,7 +130,7 @@ export const POST = withYouTubeStudioAccess('write', async (req, { params }, use
     // Save as draft
     const draft = await createProductionPlanDraft({
       episodeId: id,
-      plan,
+      plan: { ...plan, production_mode: productionMode },
       snapshot,
       approvedScriptId: script.id,
       actor: user

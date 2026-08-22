@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.23.16 — YouTube Studio Hybrid Prompt API (22/08/2026)
+- Connect hybrid T2I I2V prompt matrix to production API
+- Guard legacy and hybrid approval paths
+- Add authenticated Dev smoke test through prompt package
+
 ## V2.23.15 — YouTube Studio Max Width 1200px (22/08/2026)
 - Expand workspace container width to 1200px to align with Visual Identity Studio
 

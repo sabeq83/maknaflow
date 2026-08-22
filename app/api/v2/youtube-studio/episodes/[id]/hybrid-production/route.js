@@ -47,6 +47,13 @@ export const POST = withYouTubeStudioAccess('write', async (request, ctx, user) 
     return NextResponse.json({ success: false, error: 'Production package not found' }, { status: 404 });
   }
 
+  const { assertPackageProductionMode } = await import('@/lib/youtube-studio-production-repository');
+  try {
+    assertPackageProductionMode(pkg, 'hybrid');
+  } catch (e) {
+    return NextResponse.json({ success: false, error: e.message }, { status: 400 });
+  }
+
   const actor = { username: user?.username || 'system' };
 
   try {

@@ -468,14 +468,24 @@ export function EpisodeWorkspace({
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <h4 style={{ margin: 0 }}>AI Production Plan</h4>
                   {episode.generation_profile_key && !activePackage && (
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={handleGenerateProductionPlan}
-                      disabled={isGeneratingPlan}
-                    >
-                      {isGeneratingPlan ? '⚡ Generating Plan...' : 'Generate AI Production Plan'}
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => handleGenerateProductionPlan('legacy_t2v')}
+                        disabled={isGeneratingPlan}
+                      >
+                        {isGeneratingPlan ? '⚡ Generating...' : 'Generate Plan (Legacy T2V)'}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={() => handleGenerateProductionPlan('hybrid')}
+                        disabled={isGeneratingPlan}
+                      >
+                        {isGeneratingPlan ? '⚡ Generating...' : 'Generate Plan (Hybrid T2I/I2V)'}
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -491,7 +501,7 @@ export function EpisodeWorkspace({
                   <>
                     <div className={styles.productionPlan} style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: 'var(--surface-raised)', padding: '16px', borderRadius: '8px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.85rem' }}>Package Status: <strong>{activePackage.status.toUpperCase()}</strong></span>
+                        <span style={{ fontSize: '0.85rem' }}>Package Status: <strong>{activePackage.status.toUpperCase()}</strong> (Mode: <strong>{activePackage.plan_json?.production_mode || 'legacy_t2v'}</strong>)</span>
                         {activePackage.status === 'draft' && (
                           <button
                             type="button"
@@ -512,9 +522,26 @@ export function EpisodeWorkspace({
                             <div style={{ fontStyle: 'italic', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '8px' }}>VO: "{scene.voiceover}"</div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                               {scene.shots?.map((shot, shotIdx) => (
-                                <div key={shotIdx} style={{ fontSize: '0.8rem', background: 'var(--surface-raised)', padding: '6px 10px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between' }}>
-                                  <span>🎬 Shot {shotIdx + 1}: [{shot.asset_type}] - <em>"{shot.prompt}"</em></span>
-                                  <span style={{ fontWeight: '600' }}>{shot.generation_duration_seconds}s</span>
+                                <div key={shotIdx} style={{ fontSize: '0.8rem', background: 'var(--surface-raised)', padding: '8px 10px', borderRadius: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span>🎬 Shot {shotIdx + 1}: <strong>[{shot.generation_mode || shot.asset_type}]</strong> - <em>"{shot.prompt || 'Visual Clip'}"</em></span>
+                                    <span style={{ fontWeight: '600' }}>{shot.generation_duration_seconds}s</span>
+                                  </div>
+                                  {shot.t2i_prompt && (
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'var(--background)', padding: '4px 8px', borderRadius: '4px', marginTop: '2px' }}>
+                                      <strong>T2I (Start Frame):</strong> {shot.t2i_prompt}
+                                    </div>
+                                  )}
+                                  {shot.i2v_prompt && (
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'var(--background)', padding: '4px 8px', borderRadius: '4px' }}>
+                                      <strong>I2V (Movement):</strong> {shot.i2v_prompt}
+                                    </div>
+                                  )}
+                                  {shot.t2v_prompt && (
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'var(--background)', padding: '4px 8px', borderRadius: '4px', marginTop: '2px' }}>
+                                      <strong>T2V (Text to Video):</strong> {shot.t2v_prompt}
+                                    </div>
+                                  )}
                                 </div>
                               ))}
                             </div>

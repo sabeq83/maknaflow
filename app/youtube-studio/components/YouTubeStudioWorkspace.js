@@ -732,14 +732,16 @@ export function YouTubeStudioWorkspace() {
     }
   }
 
-  async function handleGenerateProductionPlan() {
+  async function handleGenerateProductionPlan(mode = 'legacy_t2v') {
     if (!selectedEpisode) return;
     setErrorMsg('');
     setNotice(null);
     setIsGeneratingPlan(true);
     try {
       const res = await fetch(`/api/v2/youtube-studio/episodes/${selectedEpisode.id}/production-plan`, {
-        method: 'POST'
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ production_mode: mode })
       });
       const data = await res.json();
       if (data.success) {
@@ -761,13 +763,29 @@ export function YouTubeStudioWorkspace() {
     setErrorMsg('');
     setNotice(null);
     setIsApprovingPlan(true);
+    const mode = activePackage.plan_json?.production_mode || 'legacy_t2v';
     try {
-      const res = await fetch(`/api/v2/youtube-studio/production-packages/${activePackage.id}/approve`, {
-        method: 'POST'
-      });
+      let res;
+      if (mode === 'hybrid') {
+        res = await fetch(`/api/v2/youtube-studio/episodes/${selectedEpisode.id}/hybrid-production`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'approve_prompt_package' })
+        });
+      } else {
+        res = await fetch(`/api/v2/youtube-studio/production-packages/${activePackage.id}/approve`, {
+          method: 'POST'
+        });
+      }
       const data = await res.json();
       if (data.success) {
-        setActivePackage(data.data);
+        // Fetch updated draft
+        const planRes = await fetch(`/api/v2/youtube-studio/episodes/${selectedEpisode.id}/production-plan`);
+        const planData = await planRes.json();
+        if (planData.success && planData.data) {
+          setActivePackage(planData.data.package);
+          setPackageAssets(planData.data.assets || []);
+        }
         await refreshEpisodesList();
         setSelectedEpisode(prev => ({ ...prev, status: 'In Production' }));
         triggerNotice('success', 'Production Plan approved! Asset generation has started.');
