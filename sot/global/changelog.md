@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.23.11 — Fix sync-templates scope compatibility validation (22/08/2026)
+- Definisikan pemetaan default scope-type untuk 8 jenis template KB lokal
+- Sesuaikan relational scope properties saat batch insert draft
+- Menyelesaikan kendala kegagalan import massal
+
 ## V2.23.10 — YouTube Studio KB Bulk Template Sync Support (22/08/2026)
 - Implementasi route API sync-templates untuk import massal file KB dari local folder
 - Tambah auto-fill judul KB dari nama file uploader di UI

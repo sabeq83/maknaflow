@@ -62,6 +62,17 @@ const FALLBACK_SCHEMAS = {
   },
 };
 
+const TYPE_DEFAULT_SCOPE = {
+  channel_profile:            { scope: 'channel', scopeId: 'channel_default' },
+  series_content_guide:       { scope: 'series',  scopeId: 'series_default' },
+  longform_editorial_playbook:{ scope: 'tenant',  scopeId: 'tenant' },
+  research_source_policy:     { scope: 'tenant',  scopeId: 'tenant' },
+  visual_continuity_guide:    { scope: 'channel', scopeId: 'channel_default' },
+  prompt_production_playbook: { scope: 'channel', scopeId: 'channel_default' },
+  voice_audio_guide:          { scope: 'channel', scopeId: 'channel_default' },
+  rights_disclosure_policy:   { scope: 'tenant',  scopeId: 'tenant' },
+};
+
 export const POST = withYouTubeStudioAccess('write', async (request, ctx, user) => {
   try {
     const workspaceRoot = process.cwd();
@@ -80,6 +91,7 @@ export const POST = withYouTubeStudioAccess('write', async (request, ctx, user) 
     // Process each template file
     const promises = mdFiles.map(async (filename) => {
       const kbType = FILE_TYPE_MAP[filename];
+      const { scope, scopeId } = TYPE_DEFAULT_SCOPE[kbType] || { scope: 'tenant', scopeId: 'tenant' };
       
       // Skip if this KB type already exists to prevent duplication
       if (existingTypes.has(kbType)) return;
@@ -92,7 +104,7 @@ export const POST = withYouTubeStudioAccess('write', async (request, ctx, user) 
         // AI extraction from markdown content
         const aiDraft = await generateKnowledgeBaseDraft({
           kbType,
-          scope: 'tenant',
+          scope,
           brief: { description: fileContent },
           locale: 'id-ID'
         });
@@ -106,8 +118,8 @@ export const POST = withYouTubeStudioAccess('write', async (request, ctx, user) 
         const title = filename.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ").toUpperCase();
         await createKnowledgeBaseDraft({
           kbType,
-          scope: 'tenant',
-          scopeId: 'tenant',
+          scope,
+          scopeId,
           title,
           content: resolvedContent,
           actor: { username: user?.username || 'system' }
