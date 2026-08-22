@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.23.19 — Fix RE Campaign INSERT placeholder mismatch (22/08/2026)
+- Fix mismatch between target columns (57) and placeholders (56) in INSERT INTO re_campaigns query
+
 ## V2.23.18 — Fix Gemini SDK systemInstruction placement (22/08/2026)
 - Fix systemInstruction placement in suggest-briefs and suggest-prompt routes
 - Add systemInstruction support in getGeminiModel and makeModelResilient wrapper
