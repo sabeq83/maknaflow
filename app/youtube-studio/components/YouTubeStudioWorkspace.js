@@ -1340,6 +1340,29 @@ export function YouTubeStudioWorkspace() {
           >
             {kbLoading ? 'Memuat...' : '↻ Muat KB Library'}
           </button>
+          
+          <button
+            id="kb-sync-templates-btn"
+            className={styles.btnSecondary}
+            disabled={kbLoading}
+            onClick={async () => {
+              if (!confirm('Apakah Anda ingin memuat secara otomatis semua template KB dari folder lokal "kb/youtube-studio/"?')) return;
+              setKbLoading(true);
+              try {
+                const res = await fetch('/api/v2/youtube-studio/knowledge-bases/sync-templates', { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                  setNotice({ tone: 'success', message: `Berhasil menyelaraskan ${data.count} template KB lokal sebagai Draft.` });
+                  const listRes = await fetch(`/api/v2/youtube-studio/knowledge-bases?t=${Date.now()}`);
+                  setKbItems((await listRes.json()).items || []);
+                } else { setErrorMsg(data.error); }
+              } catch (e) { setErrorMsg('Gagal melakukan sinkronisasi templates: ' + e.message); }
+              setKbLoading(false);
+            }}
+          >
+            🔄 Sync Templates Folder
+          </button>
+
           <button
             id="kb-create-toggle-btn"
             className={styles.btnPrimary}
@@ -1467,7 +1490,14 @@ export function YouTubeStudioWorkspace() {
                       type="file"
                       accept=".json,.txt,.md"
                       className={styles.kbFileInputHidden}
-                      onChange={e => setKbUploadFile(e.target.files[0])}
+                      onChange={e => {
+                        const file = e.target.files[0];
+                        setKbUploadFile(file);
+                        if (file) {
+                          const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+                          setKbCreateTitle(cleanName);
+                        }
+                      }}
                     />
                     <label htmlFor="kb-file-upload" className={styles.kbUploadLabel}>
                       <span className={styles.kbUploadIcon}>📁</span>

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.23.10 — YouTube Studio KB Bulk Template Sync Support (22/08/2026)
+- Implementasi route API sync-templates untuk import massal file KB dari local folder
+- Tambah auto-fill judul KB dari nama file uploader di UI
+- Tambah tombol Sync Templates Folder di toolbar utama Library
+
 ## V2.23.9 — Fix KB Library list browser caching (22/08/2026)
 - Tambah cache-busting timestamp pada semua URL fetch KB Library list di front-end
 - Memaksa refresh status KB secara instan setelah aksi aktivasi dan pengarsipan
