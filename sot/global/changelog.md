@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.22.1 — Fix KB API route dynamic slug conflict (22/08/2026)
+- Fix Next.js dynamic slug conflict channelId vs id pada channels route
+- Fix Next.js dynamic slug conflict seriesId vs id pada series route
+- Pindahkan kb-bindings routes ke bawah segment id yang sudah ada
+
 ## V2.22.0 — YouTube Studio Knowledge Base Foundation (22/08/2026)
 - Tambah KB mandiri versioned 8-type untuk Channel dan Series
 - Tambah DB migration 3 tabel baru dengan advisory lock dan revision history
