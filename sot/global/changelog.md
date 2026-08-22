@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.23.5 — YouTube Studio KB Preview Content Support (22/08/2026)
+- Tambah area pratinjau JSON terformat di bawah riwayat revisi KB
+- Buka detail revisi langsung setelah card utama diklik
+- Rapikan peletakan tombol Activate dan Archive revisi
+
 ## V2.23.4 — YouTube Studio KB Archive & Beautification (22/08/2026)
 - Sembunyikan KB status archived dari list default library
 - Tambah tombol Archive (Hapus) pada riwayat revisi KB di UI

@@ -929,5 +929,42 @@
   color: var(--white, #ffffff);
 }
 
+.kbRevisionWrapper {
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.kbRevisionWrapper:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.kbRevisionActionsGroup {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.kbContentPreview {
+  max-height: 220px;
+  overflow-y: auto;
+  font-size: 0.75rem;
+  font-family: var(--font-mono, monospace);
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin: 0;
+}
+
+
 
 

@@ -1580,63 +1580,73 @@ export function YouTubeStudioWorkspace() {
                 <div className={styles.kbRevisionPanel}>
                   <h4 className={styles.kbRevisionTitle}>Revision History</h4>
                   {kbRevisions.map(rev => (
-                    <div key={rev.id} className={styles.kbRevisionRow}>
-                      <span className={styles.kbRevNum}>Rev #{rev.revision_number}</span>
-                      <span className={`${styles.revisionBadge} ${styles[`kbStatus_${rev.status}`]}`}>{rev.status}</span>
-                      {rev.ai_generated && <span className={styles.kbAiBadge}>AI</span>}
-                      {rev.status === 'draft' || rev.status === 'review' ? (
-                        <button
-                          id={`kb-activate-${rev.id}`}
-                          className={styles.btnMini}
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            const res = await fetch(`/api/v2/youtube-studio/knowledge-bases/${kb.id}/activate`, {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ revision_id: rev.id }),
-                            });
-                            const data = await res.json();
-                            if (data.success) {
-                              setNotice({ tone: 'success', message: 'KB revision activated.' });
-                              const refreshRes = await fetch(`/api/v2/youtube-studio/knowledge-bases/${kb.id}`);
-                              const refreshData = await refreshRes.json();
-                              setKbRevisions(refreshData.revisions || []);
-                              // Refresh list
-                              const listRes = await fetch('/api/v2/youtube-studio/knowledge-bases');
-                              setKbItems((await listRes.json()).items || []);
-                            } else { setErrorMsg(data.error); }
-                          }}
-                        >
-                          ✓ Activate
-                        </button>
-                      ) : null}
-                      {rev.status !== 'archived' ? (
-                        <button
-                          id={`kb-archive-${rev.id}`}
-                          className={styles.btnMiniDanger}
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            if (!confirm('Apakah Anda yakin ingin mengarsipkan (menghapus) revisi KB ini?')) return;
-                            const res = await fetch(`/api/v2/youtube-studio/knowledge-bases/${kb.id}/archive`, {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ revision_id: rev.id }),
-                            });
-                            const data = await res.json();
-                            if (data.success) {
-                              setNotice({ tone: 'success', message: 'Revisi KB berhasil diarsipkan.' });
-                              const refreshRes = await fetch(`/api/v2/youtube-studio/knowledge-bases/${kb.id}`);
-                              const refreshData = await refreshRes.json();
-                              setKbRevisions(refreshData.revisions || []);
-                              // Refresh list
-                              const listRes = await fetch('/api/v2/youtube-studio/knowledge-bases');
-                              setKbItems((await listRes.json()).items || []);
-                            } else { setErrorMsg(data.error); }
-                          }}
-                        >
-                          ✕ Archive
-                        </button>
-                      ) : null}
+                    <div key={rev.id} className={styles.kbRevisionWrapper}>
+                      <div className={styles.kbRevisionRow}>
+                        <span className={styles.kbRevNum}>Rev #{rev.revision_number}</span>
+                        <span className={`${styles.revisionBadge} ${styles[`kbStatus_${rev.status}`]}`}>{rev.status}</span>
+                        {rev.ai_generated && <span className={styles.kbAiBadge}>AI</span>}
+                        
+                        <div className={styles.kbRevisionActionsGroup}>
+                          {rev.status === 'draft' || rev.status === 'review' ? (
+                            <button
+                              id={`kb-activate-${rev.id}`}
+                              className={styles.btnMini}
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                const res = await fetch(`/api/v2/youtube-studio/knowledge-bases/${kb.id}/activate`, {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ revision_id: rev.id }),
+                                });
+                                const data = await res.json();
+                                if (data.success) {
+                                  setNotice({ tone: 'success', message: 'KB revision activated.' });
+                                  const refreshRes = await fetch(`/api/v2/youtube-studio/knowledge-bases/${kb.id}`);
+                                  const refreshData = await refreshRes.json();
+                                  setKbRevisions(refreshData.revisions || []);
+                                  // Refresh list
+                                  const listRes = await fetch('/api/v2/youtube-studio/knowledge-bases');
+                                  setKbItems((await listRes.json()).items || []);
+                                } else { setErrorMsg(data.error); }
+                              }}
+                            >
+                              ✓ Activate
+                            </button>
+                          ) : null}
+                          {rev.status !== 'archived' ? (
+                            <button
+                              id={`kb-archive-${rev.id}`}
+                              className={styles.btnMiniDanger}
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                if (!confirm('Apakah Anda yakin ingin mengarsipkan (menghapus) revisi KB ini?')) return;
+                                const res = await fetch(`/api/v2/youtube-studio/knowledge-bases/${kb.id}/archive`, {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ revision_id: rev.id }),
+                                });
+                                const data = await res.json();
+                                if (data.success) {
+                                  setNotice({ tone: 'success', message: 'Revisi KB berhasil diarsipkan.' });
+                                  const refreshRes = await fetch(`/api/v2/youtube-studio/knowledge-bases/${kb.id}`);
+                                  const refreshData = await refreshRes.json();
+                                  setKbRevisions(refreshData.revisions || []);
+                                  // Refresh list
+                                  const listRes = await fetch('/api/v2/youtube-studio/knowledge-bases');
+                                  setKbItems((await listRes.json()).items || []);
+                                } else { setErrorMsg(data.error); }
+                              }}
+                            >
+                              ✕ Archive
+                            </button>
+                          ) : null}
+                        </div>
+                      </div>
+
+                      {/* Content Preview Block */}
+                      <pre className={styles.kbContentPreview}>
+                        {JSON.stringify(rev.content_json || {}, null, 2)}
+                      </pre>
                     </div>
                   ))}
 
