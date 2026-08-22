@@ -1416,7 +1416,7 @@ export function YouTubeStudioWorkspace() {
                 <div className={styles.kbCreateActions}>
                   <button
                     id="kb-ai-draft-btn"
-                    className={styles.btnPrimary}
+                    className={styles.btnPrimaryLarge}
                     disabled={kbIsGenerating || !kbCreateTitle || !kbCreateBrief}
                     onClick={async () => {
                       if (!selectedChannel && kbCreateScope === 'channel') {
@@ -1485,7 +1485,7 @@ export function YouTubeStudioWorkspace() {
                 <div className={styles.kbCreateActions}>
                   <button
                     id="kb-upload-draft-btn"
-                    className={styles.btnPrimary}
+                    className={styles.btnPrimaryLarge}
                     disabled={kbIsUploading || !kbCreateTitle || !kbUploadFile}
                     onClick={async () => {
                       if (!selectedChannel && kbCreateScope === 'channel') {
@@ -1608,6 +1608,33 @@ export function YouTubeStudioWorkspace() {
                           }}
                         >
                           ✓ Activate
+                        </button>
+                      ) : null}
+                      {rev.status !== 'archived' ? (
+                        <button
+                          id={`kb-archive-${rev.id}`}
+                          className={styles.btnMiniDanger}
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            if (!confirm('Apakah Anda yakin ingin mengarsipkan (menghapus) revisi KB ini?')) return;
+                            const res = await fetch(`/api/v2/youtube-studio/knowledge-bases/${kb.id}/archive`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ revision_id: rev.id }),
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                              setNotice({ tone: 'success', message: 'Revisi KB berhasil diarsipkan.' });
+                              const refreshRes = await fetch(`/api/v2/youtube-studio/knowledge-bases/${kb.id}`);
+                              const refreshData = await refreshRes.json();
+                              setKbRevisions(refreshData.revisions || []);
+                              // Refresh list
+                              const listRes = await fetch('/api/v2/youtube-studio/knowledge-bases');
+                              setKbItems((await listRes.json()).items || []);
+                            } else { setErrorMsg(data.error); }
+                          }}
+                        >
+                          ✕ Archive
                         </button>
                       ) : null}
                     </div>

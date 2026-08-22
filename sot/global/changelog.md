@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.23.4 — YouTube Studio KB Archive & Beautification (22/08/2026)
+- Sembunyikan KB status archived dari list default library
+- Tambah tombol Archive (Hapus) pada riwayat revisi KB di UI
+- Percantik tombol Buat Draft di tab AI dengan layout full-width premium
+
 ## V2.23.3 — YouTube Studio KB Custom Upload Dropzone UI (22/08/2026)
 - Ganti input file basic browser dengan custom dropzone card UI yang premium
 - Tambah hover translation effect dan file stats info (filename dan filesize)
