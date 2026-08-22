@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.23.18 — Fix Gemini SDK systemInstruction placement (22/08/2026)
+- Fix systemInstruction placement in suggest-briefs and suggest-prompt routes
+- Add systemInstruction support in getGeminiModel and makeModelResilient wrapper
+
 ## V2.23.17 — YouTube Studio Hybrid Prompt Smoke (22/08/2026)
 - Fix hybrid prompt asset typing and status route parameters
 - Verify Dev episode pipeline through T2I and I2V prompt package
