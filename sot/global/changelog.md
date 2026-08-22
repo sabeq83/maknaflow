@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.23.14 — YouTube Studio Align Widths (22/08/2026)
+- Align single-column vertical layout max-width constraints with header title starting boundary
+
 ## V2.23.13 — YouTube Studio One-Column Layout (22/08/2026)
 - Redesign all YouTube Studio views into a central single-column vertical flow
 - Reposition Episode stage rail to a horizontal selector on top
