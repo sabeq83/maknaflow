@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.23.2 — Fix KB upload schema prompt constraints (22/08/2026)
+- Perketat prompt AI untuk draft generation dengan instruksi JSON schema rigid per-type
+- Mencegah error validation missing required fields positioning saat parse file md
+
 ## V2.23.1 — YouTube Studio KB File Upload (22/08/2026)
 - Tambah tab form selector AI Draft vs File Upload di KB Library
 - Tambah parser file JSON terstruktur serta extraction bridge txt/md menggunakan AI
