@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.23.0 — YouTube Studio Hybrid Production (22/08/2026)
+- Tambah prompt matrix T2I I2V dan T2V
+- Tambah approval start frame dan VO berbasis batch
+- Tambah generation visual hybrid dengan selective revision
+
 ## V2.22.1 — Fix KB API route dynamic slug conflict (22/08/2026)
 - Fix Next.js dynamic slug conflict channelId vs id pada channels route
 - Fix Next.js dynamic slug conflict seriesId vs id pada series route
