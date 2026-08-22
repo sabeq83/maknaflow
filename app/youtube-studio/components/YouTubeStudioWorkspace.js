@@ -1572,37 +1572,71 @@ export function YouTubeStudioWorkspace() {
                 <span className={styles.kbTypeTag}>{kb.kb_type?.replace(/_/g, ' ')}</span>
                 <span className={`${styles.revisionBadge} ${styles[`kbStatus_${kb.status}`]}`}>{kb.status}</span>
                 
-                {kb.status === 'draft' && (
-                  <button
-                    type="button"
-                    className={styles.btnMini}
-                    style={{ marginLeft: 'auto' }}
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      try {
-                        const detailRes = await fetch(`/api/v2/youtube-studio/knowledge-bases/${kb.id}`);
-                        const detailData = await detailRes.json();
-                        const latestRev = detailData.revisions?.[0];
-                        if (!latestRev) {
-                          setErrorMsg('Tidak ada revisi draft ditemukan.'); return;
-                        }
-                        const res = await fetch(`/api/v2/youtube-studio/knowledge-bases/${kb.id}/activate`, {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ revision_id: latestRev.id }),
-                        });
-                        const data = await res.json();
-                        if (data.success) {
-                          setNotice({ tone: 'success', message: `Knowledge Base "${kb.title}" berhasil diaktifkan.` });
-                          const listRes = await fetch('/api/v2/youtube-studio/knowledge-bases');
-                          setKbItems((await listRes.json()).items || []);
-                        } else { setErrorMsg(data.error); }
-                      } catch (err) { setErrorMsg('Gagal aktivasi: ' + err.message); }
-                    }}
-                  >
-                    ✓ Activate Draft
-                  </button>
-                )}
+                <div className={styles.kbCardHeaderActions} style={{ marginLeft: 'auto', display: 'flex', gap: '6px' }}>
+                  {kb.status === 'draft' && (
+                    <button
+                      type="button"
+                      className={styles.btnMini}
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        try {
+                          const detailRes = await fetch(`/api/v2/youtube-studio/knowledge-bases/${kb.id}`);
+                          const detailData = await detailRes.json();
+                          const latestRev = detailData.revisions?.[0];
+                          if (!latestRev) {
+                            setErrorMsg('Tidak ada revisi draft ditemukan.'); return;
+                          }
+                          const res = await fetch(`/api/v2/youtube-studio/knowledge-bases/${kb.id}/activate`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ revision_id: latestRev.id }),
+                          });
+                          const data = await res.json();
+                          if (data.success) {
+                            setNotice({ tone: 'success', message: `Knowledge Base "${kb.title}" berhasil diaktifkan.` });
+                            const listRes = await fetch('/api/v2/youtube-studio/knowledge-bases');
+                            setKbItems((await listRes.json()).items || []);
+                          } else { setErrorMsg(data.error); }
+                        } catch (err) { setErrorMsg('Gagal aktivasi: ' + err.message); }
+                      }}
+                    >
+                      ✓ Activate
+                    </button>
+                  )}
+                  
+                  {kb.status !== 'archived' && (
+                    <button
+                      type="button"
+                      className={styles.btnMiniDanger}
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        if (!confirm('Apakah Anda yakin ingin mengarsipkan (menghapus) dokumen KB ini?')) return;
+                        try {
+                          const detailRes = await fetch(`/api/v2/youtube-studio/knowledge-bases/${kb.id}`);
+                          const detailData = await detailRes.json();
+                          const latestRev = detailData.revisions?.[0];
+                          if (!latestRev) {
+                            setErrorMsg('Tidak ada revisi ditemukan.'); return;
+                          }
+                          const res = await fetch(`/api/v2/youtube-studio/knowledge-bases/${kb.id}/archive`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ revision_id: latestRev.id }),
+                          });
+                          const data = await res.json();
+                          if (data.success) {
+                            setNotice({ tone: 'success', message: `Knowledge Base "${kb.title}" berhasil diarsipkan.` });
+                            const listRes = await fetch('/api/v2/youtube-studio/knowledge-bases');
+                            setKbItems((await listRes.json()).items || []);
+                            setKbSelectedId(null);
+                          } else { setErrorMsg(data.error); }
+                        } catch (err) { setErrorMsg('Gagal mengarsipkan: ' + err.message); }
+                      }}
+                    >
+                      ✕ Archive
+                    </button>
+                  )}
+                </div>
               </div>
               <p className={styles.kbCardTitle}>{kb.title}</p>
               <p className={styles.bindingSummary}>Scope: {kb.scope} · {kb.scope_id}</p>

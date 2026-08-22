@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.23.7 — YouTube Studio KB Card Instant Archive Support (22/08/2026)
+- Tambah tombol ✕ Archive langsung pada card header utama KB Library
+- Hubungkan tombol untuk memicu pencarian dan pengarsipan revisi teratas secara aman
+- Pembaruan UX untuk eliminasi data draft/active KB ganda
+
 ## V2.23.6 — YouTube Studio KB Card Quick Activation Support (22/08/2026)
 - Tambah tombol ✓ Activate Draft langsung di header card utama KB draft
 - Hubungkan tombol untuk memicu pencarian revisi draft terbaru dan mengaktifkannya
