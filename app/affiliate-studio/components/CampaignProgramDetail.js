@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { CampaignProgramPlanners } from './CampaignProgramPlanners';
+import { CampaignProgramRuns } from './CampaignProgramRuns';
 import styles from './AffiliateStudio.module.css';
 
 export function CampaignProgramDetail({
@@ -430,6 +431,13 @@ export function CampaignProgramDetail({
             >
               Content Plan ({program.coverage?.production.actual || 0})
             </button>
+            <button
+              type="button"
+              className={`${styles.detailTabButton} ${activeTab === 'runs' ? styles.activeDetailTab : ''}`}
+              onClick={() => setActiveTab('runs')}
+            >
+              Production Queue
+            </button>
           </div>
 
           {activeTab === 'products' && (
@@ -523,6 +531,13 @@ export function CampaignProgramDetail({
               brandId={brandId}
               program={program}
               onRefreshProgram={onRefresh}
+            />
+          )}
+
+          {activeTab === 'runs' && (
+            <CampaignProgramRuns
+              brandId={brandId}
+              program={program}
             />
           )}
 

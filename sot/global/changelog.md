@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.25.3 — Affiliate Studio Unified Production Visibility (23/08/2026)
+- Connect existing campaigns engines to Affiliate Studio via runs sidecars
+- Introduce affiliate_content_runs and affiliate_content_run_events
+- Expose unified Production Queue and status reconciliation endpoints
+- Complete boundary and integration tests validation
+
 ## V2.25.2 — Affiliate Studio Content Planner Connection (23/08/2026)
 - Connect Content Planner to Campaign Program via sidecar
 - Link/unlink content planners and map row-level products/funnels

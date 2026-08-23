@@ -1943,3 +1943,45 @@
   border-radius: 4px;
   width: 170px;
 }
+
+.runsWrapper {
+  margin-top: 1.5rem;
+}
+.reconcileBtn {
+  background: linear-gradient(135deg, #4f46e5, #4338ca);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+.reconcileBtn:hover {
+  opacity: 0.9;
+}
+.engineBadge {
+  background: #1f2937;
+  color: #9ca3af;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.runContextText {
+  font-style: italic;
+  color: #9ca3af;
+  margin-top: 0.25rem;
+}
+.statusBadge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+.status_Planned { background: #374151; color: #d1d5db; }
+.status_Queued { background: #b45309; color: #fef3c7; }
+.status_Generating { background: #1e3a8a; color: #dbeafe; }
+.status_Producing { background: #0369a1; color: #e0f2fe; }
+.status_Rendering { background: #6d28d9; color: #f3e8ff; }
+.status_Ready { background: #047857; color: #d1fae5; }
