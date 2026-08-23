@@ -1985,3 +1985,39 @@
 .status_Producing { background: #0369a1; color: #e0f2fe; }
 .status_Rendering { background: #6d28d9; color: #f3e8ff; }
 .status_Ready { background: #047857; color: #d1fae5; }
+
+.launchAreaRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  border-top: 1px dotted var(--border-subtle);
+  padding-top: 0.75rem;
+}
+.engineSelectInline {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  outline: none;
+}
+.launchRowBtn {
+  background: #0284c7;
+  color: #fff;
+  border: none;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.launchRowBtn:hover {
+  opacity: 0.9;
+}
+.launchRowBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

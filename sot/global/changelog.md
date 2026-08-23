@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.25.4 — Affiliate Studio Engine Launch Connectors (23/08/2026)
+- Introduce preflight check verifying product affiliate routing readiness
+- Introduce idempotency keys on campaign program planner rows trigger
+- Implement launch connectors for RE, Pillar, Recipe, Multiplier, Instant, and Bridging engines
+- Verify with unit and integration testing validation
+
 ## V2.25.3 — Affiliate Studio Unified Production Visibility (23/08/2026)
 - Connect existing campaigns engines to Affiliate Studio via runs sidecars
 - Introduce affiliate_content_runs and affiliate_content_run_events

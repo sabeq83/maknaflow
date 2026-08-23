@@ -160,6 +160,32 @@ export function CampaignProgramPlanners({
       });
   };
 
+  const handleLaunchCampaign = (rowId, engineType) => {
+    if (!confirm(`Are you sure you want to launch the ${engineType.toUpperCase()} campaign engine for this planner row?`)) {
+      return;
+    }
+
+    fetch(`/api/v2/affiliate-studio/brands/${brandId}/programs/${program.id}/runs/launch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        plannerId: activePlannerId,
+        rowId,
+        engineType
+      })
+    })
+      .then(res => res.json())
+      .then(body => {
+        if (body.success) {
+          alert('Campaign launched successfully and registered in production runs.');
+          onRefreshProgram();
+        } else {
+          throw new Error(body.error || 'Failed to launch campaign');
+        }
+      })
+      .catch(err => alert(err.message));
+  };
+
   const coverage = program.coverage || {
     production: { target: 0, actual: 0, progressPercent: 0 },
     funnel: { target: { tofu: 40, mofu: 40, bofu: 20 }, actual: { tofu: 0, mofu: 0, bofu: 0 } },
@@ -387,6 +413,32 @@ export function CampaignProgramPlanners({
                         disabled={savingRowId === r.id}
                       />
                     </div>
+                  </div>
+
+                  <div className={styles.launchAreaRow}>
+                    <select
+                      id={`engine-select-${r.id}`}
+                      defaultValue="re"
+                      className={styles.engineSelectInline}
+                    >
+                      <option value="re">RE Campaign</option>
+                      <option value="pillar">Pillar Campaign</option>
+                      <option value="recipe">Recipe Labs</option>
+                      <option value="multiplier">Multiplier Lab</option>
+                      <option value="instant">Instant Factory</option>
+                      <option value="bridge">Product Bridging</option>
+                    </select>
+                    <button
+                      type="button"
+                      className={styles.launchRowBtn}
+                      onClick={() => {
+                        const sel = document.getElementById(`engine-select-${r.id}`);
+                        handleLaunchCampaign(r.id, sel.value);
+                      }}
+                      disabled={!r.programProductId}
+                    >
+                      🚀 Launch Engine
+                    </button>
                   </div>
                 </div>
               ))}
