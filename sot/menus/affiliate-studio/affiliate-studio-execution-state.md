@@ -8,14 +8,14 @@
 
 ```yaml
 orchestration_status: planning
-current_phase: 6
-next_phase: 6
-last_completed_phase: 5
-current_task: plan_engine_launch_connectors
-current_plan: sot/menus/affiliate-studio/phase-06-engine-launch-connectors-implementation-plan.md
-last_release: v2.25.3
-last_release_title: Affiliate Studio Unified Production Visibility
-last_release_commit: 38ba15a
+current_phase: 7
+next_phase: 7
+last_completed_phase: 6
+current_task: plan_smart_route_recommendation
+current_plan: sot/menus/affiliate-studio/phase-07-smart-route-recommendation-implementation-plan.md
+last_release: v2.25.4
+last_release_title: Affiliate Studio Engine Launch Connectors
+last_release_commit: b76e687
 last_verified_branch: local-staging
 last_verified_remote_branch: origin/local-staging
 blocked: false
@@ -32,7 +32,7 @@ production_deployment_authorized: false
 - [x] Fase 3 — Campaign Program Domain
 - [x] Fase 4 — Content Planner Connection
 - [x] Fase 5 — Unified Production Visibility
-- [ ] Fase 6 — Engine Launch Connectors
+- [x] Fase 6 — Engine Launch Connectors
 - [ ] Fase 7 — Smart Route Recommendation
 - [ ] Fase 8 — Creative Intelligence Connection
 - [ ] Fase 9 — Publishing Connection
@@ -98,7 +98,7 @@ Agent must replace this block with live evidence at the start of every phase.
 
 ```yaml
 recorded_at: 2026-08-23
-focused_tests: node --experimental-test-module-mocks --test tests/affiliate-studio-production-visibility.test.js tests/affiliate-studio-phase-05-boundary.test.js (Passed)
+focused_tests: node --experimental-test-module-mocks --test tests/affiliate-studio-launch-connectors.test.js tests/affiliate-studio-phase-06-boundary.test.js (Passed)
 affiliate_regressions: node --experimental-test-module-mocks --test --test-concurrency=1 tests/affiliate-studio-*.test.js (Passed)
 legacy_regressions: not_required_no_legacy_touches
 diff_check: git diff --check (Passed)
@@ -149,6 +149,18 @@ API & Projection layer:
 UI integrations:
   - CampaignProgramDetail launches tab activeView = 'runs'
   - CampaignProgramRuns displays unified production queue and reconciles engine states on trigger
+
+### Fase 6 → Fase 7
+
+Launch connectors domain:
+  - Preflight validation engine requirements (Brand, Product link status, idempotency)
+  - Launch connectors dispatching payload inputs to legacy tables (re_campaigns, pillar_campaigns, recipe_campaigns, etc.)
+
+API layer:
+  - POST /api/v2/affiliate-studio/brands/[id]/programs/[programId]/runs/launch
+
+UI integrations:
+  - CampaignProgramPlanners mounts inline engine picker dropdown and launch campaign action
 
 ## Phase History
 
@@ -202,6 +214,23 @@ UI integrations:
 - Actual contracts: Production visibility sidecars, status projections mapping engine campaign and item records, and unified production queue view
 - Deferred intentionally: none
 - Next phase: 6
+
+### Fase 6 — Engine Launch Connectors
+
+- Status: Complete
+- Plan: `sot/menus/affiliate-studio/phase-06-engine-launch-connectors-implementation-plan.md`
+- Release: `v2.25.4`
+- Commit: `b76e687`
+- Tag pushed: yes
+- Branch pushed: yes
+- Focused tests: node --experimental-test-module-mocks --test tests/affiliate-studio-launch-connectors.test.js tests/affiliate-studio-phase-06-boundary.test.js (Passed)
+- Regression tests: All affiliate-studio suites (Passed)
+- Build: Passed
+- Dev smoke: not required
+- Files changed: lib/affiliate-studio-launch-adapter.js, app/api/v2/affiliate-studio/brands/[id]/programs/[programId]/runs/launch/route.js, app/affiliate-studio/components/CampaignProgramPlanners.js, app/affiliate-studio/components/AffiliateStudio.module.css
+- Actual contracts: Launch preflight checks, campaign trigger connectors, idempotency locks, and immediate runs queue updates
+- Deferred intentionally: none
+- Next phase: 7
 
 ## Phase History Template
 
