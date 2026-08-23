@@ -8,14 +8,14 @@
 
 ```yaml
 orchestration_status: planning
-current_phase: 9
-next_phase: 9
-last_completed_phase: 8
-current_task: plan_publishing_connection
-current_plan: sot/menus/affiliate-studio/phase-09-publishing-connection-implementation-plan.md
-last_release: v2.25.6
-last_release_title: Affiliate Studio Creative Intelligence Connection
-last_release_commit: c46cac2
+current_phase: 10
+next_phase: 10
+last_completed_phase: 9
+current_task: plan_performance_foundation
+current_plan: sot/menus/affiliate-studio/phase-10-performance-foundation-implementation-plan.md
+last_release: v2.25.7
+last_release_title: Affiliate Studio Publishing Connection
+last_release_commit: 3f26fbe
 last_verified_branch: local-staging
 last_verified_remote_branch: origin/local-staging
 blocked: false
@@ -35,7 +35,7 @@ production_deployment_authorized: false
 - [x] Fase 6 — Engine Launch Connectors
 - [x] Fase 7 — Smart Route Recommendation
 - [x] Fase 8 — Creative Intelligence Connection
-- [ ] Fase 9 — Publishing Connection
+- [x] Fase 9 — Publishing Connection
 - [ ] Fase 10 — Performance Foundation
 - [ ] Fase 11 — Insight and Learning Loop
 - [ ] Fase 12 — Assisted Campaign Program Builder
@@ -98,7 +98,7 @@ Agent must replace this block with live evidence at the start of every phase.
 
 ```yaml
 recorded_at: 2026-08-23
-focused_tests: node --experimental-test-module-mocks --test tests/affiliate-studio-creative-intelligence.test.js tests/affiliate-studio-phase-08-boundary.test.js (Passed)
+focused_tests: node --experimental-test-module-mocks --test tests/affiliate-studio-publishing.test.js tests/affiliate-studio-phase-09-boundary.test.js (Passed)
 affiliate_regressions: node --experimental-test-module-mocks --test --test-concurrency=1 tests/affiliate-studio-*.test.js (Passed)
 legacy_regressions: not_required_no_legacy_touches
 diff_check: git diff --check (Passed)
@@ -182,6 +182,18 @@ Creative Intelligence Connection domain:
 
 API/Database:
   - Table schema extensions target_demographic, ai_directive, and mandatory_outro_line
+
+### Fase 9 → Fase 10
+
+Publishing Connection domain:
+  - Preflight validation components check (affiliate links presence, disclosure default status, active publishing account check)
+  - ContentFlow status projections linking runs to publishing_jobs
+
+API layer:
+  - GET /api/v2/affiliate-studio/brands/[id]/programs/[programId]/runs/[runId]/publishing
+
+UI integrations:
+  - CampaignProgramRuns shows preflight status badges and Flow deep links
 
 ## Phase History
 
@@ -286,6 +298,23 @@ API/Database:
 - Actual contracts: Program database creative extensions, dynamic program creative parameter bindings on launch, and payload propagation to legacy engines
 - Deferred intentionally: none
 - Next phase: 9
+
+### Fase 9 — Publishing Connection
+
+- Status: Complete
+- Plan: `sot/menus/affiliate-studio/phase-09-publishing-connection-implementation-plan.md`
+- Release: `v2.25.7`
+- Commit: `3f26fbe`
+- Tag pushed: yes
+- Branch pushed: yes
+- Focused tests: node --experimental-test-module-mocks --test tests/affiliate-studio-publishing.test.js tests/affiliate-studio-phase-09-boundary.test.js (Passed)
+- Regression tests: All affiliate-studio suites (Passed)
+- Build: Passed
+- Dev smoke: not required
+- Files changed: lib/affiliate-studio-publishing-adapter.js, app/api/v2/affiliate-studio/brands/[id]/programs/[programId]/runs/[runId]/publishing/route.js, app/affiliate-studio/components/CampaignProgramRuns.js, app/affiliate-studio/components/AffiliateStudio.module.css
+- Actual contracts: Publishing preflight checks adapter, ContentFlow jobs status projections, and queue preflight/deep links UI components
+- Deferred intentionally: none
+- Next phase: 10
 
 ## Phase History Template
 
