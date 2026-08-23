@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.25.8 — Affiliate Studio Performance Foundation (23/08/2026)
+- Create table affiliate_performance_snapshots to host views, likes, clicks, conversions, and revenue metrics
+- Implement performance adapter with batch import and summaries methods
+- Mount Performance tab inside program detail UI to display aggregated campaign results
+- Add unit, integration, and boundary tests validating metrics pipeline
+
 ## V2.25.7 — Affiliate Studio Publishing Connection (23/08/2026)
 - Develop publishing adapter checking preflight and status projections
 - Map run state real-time with ContentFlow publishing jobs queue

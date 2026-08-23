@@ -47,6 +47,8 @@ export function CampaignProgramDetail({
   // Audit Events state
   const [events, setEvents] = useState([]);
   const [loadingEvents, setLoadingEvents] = useState(false);
+  const [performanceSummary, setPerformanceSummary] = useState(null);
+  const [loadingPerf, setLoadingPerf] = useState(false);
 
   const availablePlatforms = ['tiktok', 'youtube', 'instagram', 'facebook'];
 
@@ -72,6 +74,25 @@ export function CampaignProgramDetail({
       loadAuditEvents();
     }
   }, [program]);
+
+  useEffect(() => {
+    if (activeTab === 'performance') {
+      loadPerformanceSummary();
+    }
+  }, [activeTab]);
+
+  const loadPerformanceSummary = () => {
+    setLoadingPerf(true);
+    fetch(`/api/v2/affiliate-studio/brands/${brandId}/programs/${program.id}/performance`)
+      .then(res => res.json())
+      .then(body => {
+        if (body.success) {
+          setPerformanceSummary(body.data);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoadingPerf(false));
+  };
 
   const loadAuditEvents = () => {
     if (!program) return;
@@ -438,6 +459,13 @@ export function CampaignProgramDetail({
             >
               Production Queue
             </button>
+            <button
+              type="button"
+              className={`${styles.detailTabButton} ${activeTab === 'performance' ? styles.activeDetailTab : ''}`}
+              onClick={() => setActiveTab('performance')}
+            >
+              📈 Performance
+            </button>
           </div>
 
           {activeTab === 'products' && (
@@ -539,6 +567,36 @@ export function CampaignProgramDetail({
               brandId={brandId}
               program={program}
             />
+          )}
+
+          {activeTab === 'performance' && (
+            <div className={styles.performanceTabPanel}>
+              <h3>Campaign Program Performance Summary</h3>
+              {loadingPerf ? (
+                <div>Loading performance data...</div>
+              ) : performanceSummary ? (
+                <div className={styles.metricsSummaryGrid}>
+                  <div className={styles.metricCard}>
+                    <span className={styles.metricLabel}>Total Views</span>
+                    <span className={styles.metricValue}>{Number(performanceSummary.total_views).toLocaleString()}</span>
+                  </div>
+                  <div className={styles.metricCard}>
+                    <span className={styles.metricLabel}>Total Clicks</span>
+                    <span className={styles.metricValue}>{Number(performanceSummary.total_clicks).toLocaleString()}</span>
+                  </div>
+                  <div className={styles.metricCard}>
+                    <span className={styles.metricLabel}>Total Conversions</span>
+                    <span className={styles.metricValue}>{Number(performanceSummary.total_conversions).toLocaleString()}</span>
+                  </div>
+                  <div className={styles.metricCard}>
+                    <span className={styles.metricLabel}>Revenue (IDR)</span>
+                    <span className={styles.metricValue}>Rp {Number(performanceSummary.total_revenue).toLocaleString()}</span>
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.emptyStateLight}>No performance data imported yet.</div>
+              )}
+            </div>
           )}
 
           {/* Audit Events list */}
