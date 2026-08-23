@@ -10,12 +10,18 @@ test('assigned-brand and tenant isolation for listing', async () => {
   const testTenant = `tenant_test_${Date.now()}`;
   const otherTenant = `tenant_other_${Date.now()}`;
 
+  // Seed test tenants first
+  await pgQuery(
+    `INSERT INTO tenants (id, name) VALUES ($1, $2), ($3, $4)`,
+    [testTenant, 'Test Tenant A', otherTenant, 'Test Tenant B']
+  );
+
   // Seed brand profiles
   await pgQuery(
     `INSERT INTO brand_profiles (id, tenant_id, brand_name) VALUES
      ($1, $2, $3),
-     ($4, $2, $5),
-     ($6, $7, $8)`,
+     ($4, $5, $6),
+     ($7, $8, $9)`,
     [
       'bp_test_1', testTenant, 'Tenant brand 1',
       'bp_test_2', testTenant, 'Tenant brand 2',
@@ -60,5 +66,6 @@ test('assigned-brand and tenant isolation for listing', async () => {
   } finally {
     // Cleanup seeded data
     await pgQuery(`DELETE FROM brand_profiles WHERE tenant_id IN ($1, $2)`, [testTenant, otherTenant]);
+    await pgQuery(`DELETE FROM tenants WHERE id IN ($1, $2)`, [testTenant, otherTenant]);
   }
 });

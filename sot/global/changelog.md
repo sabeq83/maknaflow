@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.24.1 — Fix Affiliate Studio Projection Test (23/08/2026)
+- Perbaikan placeholder prepared statement pada test integrasi brand-projection
+- Penambahan seeding tenant test untuk memenuhi constraint asing PostgreSQL
+
 ## V2.24.0 — Affiliate Studio Brand Shell (23/08/2026)
 - Tambah application shell Affiliate Studio berbasis Brand Profile
 - Tambah overview read-only Product Planner Campaign dan ContentFlow
