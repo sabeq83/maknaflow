@@ -49,6 +49,8 @@ export function CampaignProgramDetail({
   const [loadingEvents, setLoadingEvents] = useState(false);
   const [performanceSummary, setPerformanceSummary] = useState(null);
   const [loadingPerf, setLoadingPerf] = useState(false);
+  const [creativeInsights, setCreativeInsights] = useState(null);
+  const [loadingInsights, setLoadingInsights] = useState(false);
 
   const availablePlatforms = ['tiktok', 'youtube', 'instagram', 'facebook'];
 
@@ -78,8 +80,22 @@ export function CampaignProgramDetail({
   useEffect(() => {
     if (activeTab === 'performance') {
       loadPerformanceSummary();
+      loadCreativeInsights();
     }
   }, [activeTab]);
+
+  const loadCreativeInsights = () => {
+    setLoadingInsights(true);
+    fetch(`/api/v2/affiliate-studio/brands/${brandId}/programs/${program.id}/insights`)
+      .then(res => res.json())
+      .then(body => {
+        if (body.success) {
+          setCreativeInsights(body.data);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoadingInsights(false));
+  };
 
   const loadPerformanceSummary = () => {
     setLoadingPerf(true);
@@ -575,24 +591,70 @@ export function CampaignProgramDetail({
               {loadingPerf ? (
                 <div>Loading performance data...</div>
               ) : performanceSummary ? (
-                <div className={styles.metricsSummaryGrid}>
-                  <div className={styles.metricCard}>
-                    <span className={styles.metricLabel}>Total Views</span>
-                    <span className={styles.metricValue}>{Number(performanceSummary.total_views).toLocaleString()}</span>
+                <>
+                  <div className={styles.metricsSummaryGrid}>
+                    <div className={styles.metricCard}>
+                      <span className={styles.metricLabel}>Total Views</span>
+                      <span className={styles.metricValue}>{Number(performanceSummary.total_views).toLocaleString()}</span>
+                    </div>
+                    <div className={styles.metricCard}>
+                      <span className={styles.metricLabel}>Total Clicks</span>
+                      <span className={styles.metricValue}>{Number(performanceSummary.total_clicks).toLocaleString()}</span>
+                    </div>
+                    <div className={styles.metricCard}>
+                      <span className={styles.metricLabel}>Total Conversions</span>
+                      <span className={styles.metricValue}>{Number(performanceSummary.total_conversions).toLocaleString()}</span>
+                    </div>
+                    <div className={styles.metricCard}>
+                      <span className={styles.metricLabel}>Revenue (IDR)</span>
+                      <span className={styles.metricValue}>Rp {Number(performanceSummary.total_revenue).toLocaleString()}</span>
+                    </div>
                   </div>
-                  <div className={styles.metricCard}>
-                    <span className={styles.metricLabel}>Total Clicks</span>
-                    <span className={styles.metricValue}>{Number(performanceSummary.total_clicks).toLocaleString()}</span>
+
+                  {/* Creative Insights Loop */}
+                  <div className={styles.insightsSection}>
+                    <h4>💡 Top Performing Creative DNA (Hook & Angle Correlation)</h4>
+                    {loadingInsights ? (
+                      <div>Loading DNA insights...</div>
+                    ) : creativeInsights ? (
+                      <div className={styles.insightsGrid}>
+                        <div className={styles.insightCard}>
+                          <h5>Top Hooks</h5>
+                          {creativeInsights.hooks.length === 0 ? (
+                            <p>No hook samples yet.</p>
+                          ) : (
+                            <ul className={styles.insightList}>
+                              {creativeInsights.hooks.map((h, i) => (
+                                <li key={i}>
+                                  <strong>&ldquo;{h.hook}&rdquo;</strong>
+                                  <div>Avg Views: {h.avgViews.toLocaleString()} | Revenue: Rp {Number(h.avgRevenue).toLocaleString()} ({h.sampleSize} samples)</div>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+
+                        <div className={styles.insightCard}>
+                          <h5>Top Strategic Angles</h5>
+                          {creativeInsights.angles.length === 0 ? (
+                            <p>No angle samples yet.</p>
+                          ) : (
+                            <ul className={styles.insightList}>
+                              {creativeInsights.angles.map((a, i) => (
+                                <li key={i}>
+                                  <strong>{a.strategicAngle}</strong>
+                                  <div>Avg Views: {a.avgViews.toLocaleString()} | Revenue: Rp {Number(a.avgRevenue).toLocaleString()} ({a.sampleSize} samples)</div>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <p>No insights generated yet.</p>
+                    )}
                   </div>
-                  <div className={styles.metricCard}>
-                    <span className={styles.metricLabel}>Total Conversions</span>
-                    <span className={styles.metricValue}>{Number(performanceSummary.total_conversions).toLocaleString()}</span>
-                  </div>
-                  <div className={styles.metricCard}>
-                    <span className={styles.metricLabel}>Revenue (IDR)</span>
-                    <span className={styles.metricValue}>Rp {Number(performanceSummary.total_revenue).toLocaleString()}</span>
-                  </div>
-                </div>
+                </>
               ) : (
                 <div className={styles.emptyStateLight}>No performance data imported yet.</div>
               )}

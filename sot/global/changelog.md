@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.25.9 — Affiliate Studio Insight & Learning Loop (23/08/2026)
+- Create insight adapter calculating average metrics grouped by Hook, Strategic Angle, and Pillar
+- Expose GET insights API route providing top creative assets details
+- Integrate visual insights DNA card grids on UI program performance view
+- Extend validations with integration and boundary tests
+
 ## V2.25.8 — Affiliate Studio Performance Foundation (23/08/2026)
 - Create table affiliate_performance_snapshots to host views, likes, clicks, conversions, and revenue metrics
 - Implement performance adapter with batch import and summaries methods
