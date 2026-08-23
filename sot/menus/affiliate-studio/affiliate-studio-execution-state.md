@@ -8,14 +8,14 @@
 
 ```yaml
 orchestration_status: planning
-current_phase: 8
-next_phase: 8
-last_completed_phase: 7
-current_task: plan_creative_intelligence_connection
-current_plan: sot/menus/affiliate-studio/phase-08-creative-intelligence-connection-implementation-plan.md
-last_release: v2.25.5
-last_release_title: Affiliate Studio Smart Route Recommendation
-last_release_commit: 9027f31
+current_phase: 9
+next_phase: 9
+last_completed_phase: 8
+current_task: plan_publishing_connection
+current_plan: sot/menus/affiliate-studio/phase-09-publishing-connection-implementation-plan.md
+last_release: v2.25.6
+last_release_title: Affiliate Studio Creative Intelligence Connection
+last_release_commit: c46cac2
 last_verified_branch: local-staging
 last_verified_remote_branch: origin/local-staging
 blocked: false
@@ -34,7 +34,7 @@ production_deployment_authorized: false
 - [x] Fase 5 — Unified Production Visibility
 - [x] Fase 6 — Engine Launch Connectors
 - [x] Fase 7 — Smart Route Recommendation
-- [ ] Fase 8 — Creative Intelligence Connection
+- [x] Fase 8 — Creative Intelligence Connection
 - [ ] Fase 9 — Publishing Connection
 - [ ] Fase 10 — Performance Foundation
 - [ ] Fase 11 — Insight and Learning Loop
@@ -98,7 +98,7 @@ Agent must replace this block with live evidence at the start of every phase.
 
 ```yaml
 recorded_at: 2026-08-23
-focused_tests: node --experimental-test-module-mocks --test tests/affiliate-studio-recommendations.test.js tests/affiliate-studio-phase-07-boundary.test.js (Passed)
+focused_tests: node --experimental-test-module-mocks --test tests/affiliate-studio-creative-intelligence.test.js tests/affiliate-studio-phase-08-boundary.test.js (Passed)
 affiliate_regressions: node --experimental-test-module-mocks --test --test-concurrency=1 tests/affiliate-studio-*.test.js (Passed)
 legacy_regressions: not_required_no_legacy_touches
 diff_check: git diff --check (Passed)
@@ -173,6 +173,15 @@ API layer:
 
 UI integrations:
   - CampaignProgramPlanners renders Recommend trigger, auto-selects engine, and mounts details reasoning popup modal
+
+### Fase 8 → Fase 9
+
+Creative Intelligence Connection domain:
+  - Integration of affiliate_programs target demographic, AI directive, and mandatory outro lines columns
+  - Dynamic parameter payload injection during launchEngineCampaign invocation
+
+API/Database:
+  - Table schema extensions target_demographic, ai_directive, and mandatory_outro_line
 
 ## Phase History
 
@@ -260,6 +269,23 @@ UI integrations:
 - Actual contracts: Program routing heuristics recommendations, audit program events routing trail, and interactive recommendation popup details UI
 - Deferred intentionally: none
 - Next phase: 8
+
+### Fase 8 — Creative Intelligence Connection
+
+- Status: Complete
+- Plan: `sot/menus/affiliate-studio/phase-08-creative-intelligence-connection-implementation-plan.md`
+- Release: `v2.25.6`
+- Commit: `c46cac2`
+- Tag pushed: yes
+- Branch pushed: yes
+- Focused tests: node --experimental-test-module-mocks --test tests/affiliate-studio-creative-intelligence.test.js tests/affiliate-studio-phase-08-boundary.test.js (Passed)
+- Regression tests: All affiliate-studio suites (Passed)
+- Build: Passed
+- Dev smoke: not required
+- Files changed: lib/db-pg.js, lib/affiliate-studio-campaign-program-adapter.js, lib/affiliate-studio-launch-adapter.js
+- Actual contracts: Program database creative extensions, dynamic program creative parameter bindings on launch, and payload propagation to legacy engines
+- Deferred intentionally: none
+- Next phase: 9
 
 ## Phase History Template
 
