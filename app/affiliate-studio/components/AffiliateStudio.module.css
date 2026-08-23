@@ -2068,3 +2068,26 @@
   border-radius: 6px;
   border: 1px solid var(--border-subtle);
 }
+
+.statusColWithLink {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.contentFlowDeepLink {
+  color: #38bdf8;
+  font-size: 0.75rem;
+  text-decoration: underline;
+}
+.preflightIndicators {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+.checkGreen {
+  opacity: 1;
+  filter: drop-shadow(0 0 2px rgba(34, 197, 94, 0.5));
+}
+.checkRed {
+  opacity: 0.35;
+}

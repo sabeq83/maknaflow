@@ -8,6 +8,7 @@ export function CampaignProgramRuns({ brandId, program }) {
   const [loading, setLoading] = useState(false);
   const [reconciling, setReconciling] = useState(false);
   const [error, setError] = useState(null);
+  const [publishingDetails, setPublishingDetails] = useState({});
 
   useEffect(() => {
     loadRuns();
@@ -28,6 +29,30 @@ export function CampaignProgramRuns({ brandId, program }) {
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
   };
+
+  const loadPublishingDetails = (runId) => {
+    fetch(`/api/v2/affiliate-studio/brands/${brandId}/programs/${program.id}/runs/${runId}/publishing`)
+      .then(res => res.json())
+      .then(body => {
+        if (body.success) {
+          setPublishingDetails(prev => ({
+            ...prev,
+            [runId]: body.data
+          }));
+        }
+      })
+      .catch(console.error);
+  };
+
+  useEffect(() => {
+    if (runs && runs.length > 0) {
+      runs.forEach(r => {
+        if (!publishingDetails[r.id]) {
+          loadPublishingDetails(r.id);
+        }
+      });
+    }
+  }, [runs]);
 
   const handleReconcile = () => {
     setReconciling(true);
@@ -77,6 +102,7 @@ export function CampaignProgramRuns({ brandId, program }) {
                 <th>Planner Context</th>
                 <th>Engine & IDs</th>
                 <th>Normalized Status</th>
+                <th>Preflight</th>
                 <th>Created At</th>
                 <th>Actions</th>
               </tr>
@@ -99,9 +125,32 @@ export function CampaignProgramRuns({ brandId, program }) {
                     </div>
                   </td>
                   <td>
-                    <span className={`${styles.statusBadge} ${styles['status_' + r.normalizedStatus]}`}>
-                      {r.normalizedStatus}
-                    </span>
+                    <div className={styles.statusColWithLink}>
+                      <span className={`${styles.statusBadge} ${styles['status_' + (publishingDetails[r.id]?.projection?.status || r.normalizedStatus)]}`}>
+                        {publishingDetails[r.id]?.projection?.status || r.normalizedStatus}
+                      </span>
+                      {publishingDetails[r.id]?.projection?.deepLink && (
+                        <a
+                          href={publishingDetails[r.id].projection.deepLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.contentFlowDeepLink}
+                        >
+                          🔗 Flow
+                        </a>
+                      )}
+                    </div>
+                  </td>
+                  <td>
+                    {publishingDetails[r.id]?.preflight ? (
+                      <div className={styles.preflightIndicators}>
+                        <span className={publishingDetails[r.id].preflight.affiliateLinkPresent ? styles.checkGreen : styles.checkRed} title="Affiliate Link">🔗</span>
+                        <span className={publishingDetails[r.id].preflight.accountReady ? styles.checkGreen : styles.checkRed} title="Account Ready">👤</span>
+                        <span className={publishingDetails[r.id].preflight.mediaReady ? styles.checkGreen : styles.checkRed} title="Media Ready">📹</span>
+                      </div>
+                    ) : (
+                      <div className={styles.mutedText}>Checking...</div>
+                    )}
                   </td>
                   <td>{new Date(r.createdAt).toLocaleString()}</td>
                   <td>

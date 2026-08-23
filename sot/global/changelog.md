@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.25.7 — Affiliate Studio Publishing Connection (23/08/2026)
+- Develop publishing adapter checking preflight and status projections
+- Map run state real-time with ContentFlow publishing jobs queue
+- Render publishing preflight check badges and job deep link in Runs UI
+- Complete validation with boundary and integration tests
+
 ## V2.25.6 — Affiliate Studio Creative Intelligence Connection (23/08/2026)
 - Link Affiliate Studio programs to Creative Intelligence database creative fields
 - Map program target demographic, AI directive, mandatory outro, and objective automatically on run launch
