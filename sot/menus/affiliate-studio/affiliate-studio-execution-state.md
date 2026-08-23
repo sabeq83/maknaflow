@@ -8,14 +8,14 @@
 
 ```yaml
 orchestration_status: planning
-current_phase: 11
-next_phase: 11
-last_completed_phase: 10
-current_task: plan_insight_learning_loop
-current_plan: sot/menus/affiliate-studio/phase-11-insight-learning-loop-implementation-plan.md
-last_release: v2.25.8
-last_release_title: Affiliate Studio Performance Foundation
-last_release_commit: 5dc2bffa
+current_phase: 12
+next_phase: 12
+last_completed_phase: 11
+current_task: plan_assisted_builder
+current_plan: sot/menus/affiliate-studio/phase-12-assisted-campaign-program-builder-implementation-plan.md
+last_release: v2.25.9
+last_release_title: Affiliate Studio Insight & Learning Loop
+last_release_commit: 57701b1
 last_verified_branch: local-staging
 last_verified_remote_branch: origin/local-staging
 blocked: false
@@ -37,7 +37,7 @@ production_deployment_authorized: false
 - [x] Fase 8 — Creative Intelligence Connection
 - [x] Fase 9 — Publishing Connection
 - [x] Fase 10 — Performance Foundation
-- [ ] Fase 11 — Insight and Learning Loop
+- [x] Fase 11 — Insight and Learning Loop
 - [ ] Fase 12 — Assisted Campaign Program Builder
 
 ## Baseline Evidence
@@ -98,7 +98,7 @@ Agent must replace this block with live evidence at the start of every phase.
 
 ```yaml
 recorded_at: 2026-08-23
-focused_tests: node --experimental-test-module-mocks --test tests/affiliate-studio-performance.test.js tests/affiliate-studio-phase-10-boundary.test.js (Passed)
+focused_tests: node --experimental-test-module-mocks --test tests/affiliate-studio-insights.test.js tests/affiliate-studio-phase-11-boundary.test.js (Passed)
 affiliate_regressions: node --experimental-test-module-mocks --test --test-concurrency=1 tests/affiliate-studio-*.test.js (Passed)
 legacy_regressions: not_required_no_legacy_touches
 diff_check: git diff --check (Passed)
@@ -208,6 +208,17 @@ API layer:
 
 UI integrations:
   - CampaignProgramDetail tab 'Performance' showing aggregated statistics card grid
+
+### Fase 11 → Fase 12
+
+Insight and Learning Loop domain:
+  - getProgramCreativeInsights (Top Hooks, Top Strategic Angles, Top Pillars)
+
+API layer:
+  - GET /api/v2/affiliate-studio/brands/[id]/programs/[programId]/insights
+
+UI integrations:
+  - CampaignProgramDetail tab 'Performance' showing Top Hooks and Top Strategic Angles list
 
 ## Phase History
 
@@ -346,6 +357,23 @@ UI integrations:
 - Actual contracts: Performance snapshots migration schema, import performance records, program metrics summary adapter, and detail dashboard UI metrics panel
 - Deferred intentionally: none
 - Next phase: 11
+
+### Fase 11 — Insight and Learning Loop
+
+- Status: Complete
+- Plan: `sot/menus/affiliate-studio/phase-11-insight-learning-loop-implementation-plan.md`
+- Release: `v2.25.9`
+- Commit: `57701b1`
+- Tag pushed: yes
+- Branch pushed: yes
+- Focused tests: node --experimental-test-module-mocks --test tests/affiliate-studio-insights.test.js tests/affiliate-studio-phase-11-boundary.test.js (Passed)
+- Regression tests: All affiliate-studio suites (Passed)
+- Build: Passed
+- Dev smoke: not required
+- Files changed: lib/affiliate-studio-insight-adapter.js, app/api/v2/affiliate-studio/brands/[id]/programs/[programId]/insights/route.js, app/affiliate-studio/components/CampaignProgramDetail.js, app/affiliate-studio/components/AffiliateStudio.module.css
+- Actual contracts: Creative insights adapter, insights API endpoint, and detail DNA performance recommendations UI panel
+- Deferred intentionally: none
+- Next phase: 12
 
 ## Phase History Template
 
