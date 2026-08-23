@@ -8,14 +8,14 @@
 
 ```yaml
 orchestration_status: planning
-current_phase: 5
-next_phase: 5
-last_completed_phase: 4
-current_task: plan_unified_production_visibility
-current_plan: sot/menus/affiliate-studio/phase-05-production-visibility-implementation-plan.md
-last_release: v2.25.2
-last_release_title: Affiliate Studio Content Planner Connection
-last_release_commit: 9c1c888
+current_phase: 6
+next_phase: 6
+last_completed_phase: 5
+current_task: plan_engine_launch_connectors
+current_plan: sot/menus/affiliate-studio/phase-06-engine-launch-connectors-implementation-plan.md
+last_release: v2.25.3
+last_release_title: Affiliate Studio Unified Production Visibility
+last_release_commit: 38ba15a
 last_verified_branch: local-staging
 last_verified_remote_branch: origin/local-staging
 blocked: false
@@ -31,7 +31,7 @@ production_deployment_authorized: false
 - [x] Fase 2 — Brand Product Portfolio — `v2.25.0` — commit `24edfba`
 - [x] Fase 3 — Campaign Program Domain
 - [x] Fase 4 — Content Planner Connection
-- [ ] Fase 5 — Unified Production Visibility
+- [x] Fase 5 — Unified Production Visibility
 - [ ] Fase 6 — Engine Launch Connectors
 - [ ] Fase 7 — Smart Route Recommendation
 - [ ] Fase 8 — Creative Intelligence Connection
@@ -98,7 +98,7 @@ Agent must replace this block with live evidence at the start of every phase.
 
 ```yaml
 recorded_at: 2026-08-23
-focused_tests: node --experimental-test-module-mocks --test tests/affiliate-studio-planner-connection.test.js tests/affiliate-studio-phase-04-boundary.test.js (Passed)
+focused_tests: node --experimental-test-module-mocks --test tests/affiliate-studio-production-visibility.test.js tests/affiliate-studio-phase-05-boundary.test.js (Passed)
 affiliate_regressions: node --experimental-test-module-mocks --test --test-concurrency=1 tests/affiliate-studio-*.test.js (Passed)
 legacy_regressions: not_required_no_legacy_touches
 diff_check: git diff --check (Passed)
@@ -135,6 +135,21 @@ UI / Metrics layer:
   - Visual Brand Calendar and Program Plan displaying mapped editorial schedule
   - Coverage summaries widget representing Funnel mix progress vs target, associated product coverage, platform specific videos count vs production target
 
+### Fase 5 → Fase 6
+
+Production Visibility & Runs domain:
+  - affiliate_content_runs (linked runs to campaign programs with snapshots of brand, product, and normalized status)
+  - affiliate_content_run_events (audit logs of run lifecycle events)
+
+API & Projection layer:
+  - GET/POST /api/v2/affiliate-studio/brands/[id]/programs/[programId]/runs
+  - POST /api/v2/affiliate-studio/brands/[id]/programs/[programId]/runs/reconcile
+  - Normalized status projections mapping raw engine states to standard lifecycle stages
+
+UI integrations:
+  - CampaignProgramDetail launches tab activeView = 'runs'
+  - CampaignProgramRuns displays unified production queue and reconciles engine states on trigger
+
 ## Phase History
 
 ### Fase 3 — Campaign Program Domain
@@ -170,6 +185,23 @@ UI / Metrics layer:
 - Actual contracts: Planner-program sidecars relasi, mapping baris planner editorial ke program produk, dan coverage visual progress dashboard
 - Deferred intentionally: none
 - Next phase: 5
+
+### Fase 5 — Unified Production Visibility
+
+- Status: Complete
+- Plan: `sot/menus/affiliate-studio/phase-05-production-visibility-implementation-plan.md`
+- Release: `v2.25.3`
+- Commit: `38ba15a`
+- Tag pushed: yes
+- Branch pushed: yes
+- Focused tests: node --experimental-test-module-mocks --test tests/affiliate-studio-production-visibility.test.js tests/affiliate-studio-phase-05-boundary.test.js (Passed)
+- Regression tests: All affiliate-studio suites (Passed)
+- Build: Passed
+- Dev smoke: not required
+- Files changed: lib/db-pg.js, lib/affiliate-studio-production-adapter.js, app/api/v2/affiliate-studio/brands/[id]/programs/[programId]/runs/route.js, app/api/v2/affiliate-studio/brands/[id]/programs/[programId]/runs/reconcile/route.js, app/affiliate-studio/components/CampaignProgramRuns.js, app/affiliate-studio/components/CampaignProgramDetail.js, app/affiliate-studio/components/AffiliateStudio.module.css
+- Actual contracts: Production visibility sidecars, status projections mapping engine campaign and item records, and unified production queue view
+- Deferred intentionally: none
+- Next phase: 6
 
 ## Phase History Template
 

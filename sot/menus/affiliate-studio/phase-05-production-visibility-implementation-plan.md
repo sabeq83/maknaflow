@@ -103,7 +103,7 @@ CREATE INDEX IF NOT EXISTS idx_aff_run_events_lookup
 - [x] Jalankan all tests & regressions.
 - [x] Jalankan `git diff --check`.
 - [x] Jalankan `npm run build`.
-- [ ] Lakukan release patch otomatis `v2.25.3`.
+- [x] Lakukan release patch otomatis `v2.25.3`.
 
 ## 6. Verification Plan
 
