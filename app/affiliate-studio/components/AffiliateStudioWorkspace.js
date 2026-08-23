@@ -383,6 +383,7 @@ export function AffiliateStudioWorkspace() {
       )}
       {activeView === 'campaigns' && !requestedProgramId && (
         <BrandCampaignPrograms
+          brandId={activeBrand?.id}
           programs={programs}
           loading={loadingPrograms}
           error={programsError}

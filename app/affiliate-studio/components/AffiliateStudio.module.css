@@ -2170,3 +2170,20 @@
   color: var(--text-muted);
   margin-top: 0.25rem;
 }
+
+.aiAssistBtn {
+  background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: opacity 0.2s ease;
+}
+.aiAssistBtn:hover {
+  opacity: 0.9;
+}

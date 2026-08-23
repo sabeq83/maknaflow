@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.25.10 — Affiliate Studio Assisted Campaign Program Builder (23/08/2026)
+- Implement assisted builder adapter calling Gemini AI model to suggest marketing campaign blueprints
+- Expose POST programs suggest API endpoint generating configurations
+- Mount interactive Ask AI Assistant overlay modal inside program list UI
+- Deploy boundary constraints and unit tests for campaign builder
+
 ## V2.25.9 — Affiliate Studio Insight & Learning Loop (23/08/2026)
 - Create insight adapter calculating average metrics grouped by Hook, Strategic Angle, and Pillar
 - Expose GET insights API route providing top creative assets details
