@@ -7,15 +7,15 @@
 ## Current State
 
 ```yaml
-orchestration_status: planning
+orchestration_status: completed
 current_phase: 12
-next_phase: 12
-last_completed_phase: 11
-current_task: plan_assisted_builder
-current_plan: sot/menus/affiliate-studio/phase-12-assisted-campaign-program-builder-implementation-plan.md
-last_release: v2.25.9
-last_release_title: Affiliate Studio Insight & Learning Loop
-last_release_commit: 57701b1
+next_phase: null
+last_completed_phase: 12
+current_task: done
+current_plan: null
+last_release: v2.25.10
+last_release_title: Affiliate Studio Assisted Campaign Program Builder
+last_release_commit: fd50427
 last_verified_branch: local-staging
 last_verified_remote_branch: origin/local-staging
 blocked: false
@@ -38,7 +38,7 @@ production_deployment_authorized: false
 - [x] Fase 9 — Publishing Connection
 - [x] Fase 10 — Performance Foundation
 - [x] Fase 11 — Insight and Learning Loop
-- [ ] Fase 12 — Assisted Campaign Program Builder
+- [x] Fase 12 — Assisted Campaign Program Builder
 
 ## Baseline Evidence
 
@@ -98,9 +98,8 @@ Agent must replace this block with live evidence at the start of every phase.
 
 ```yaml
 recorded_at: 2026-08-23
-focused_tests: node --experimental-test-module-mocks --test tests/affiliate-studio-insights.test.js tests/affiliate-studio-phase-11-boundary.test.js (Passed)
+focused_tests: node --experimental-test-module-mocks --test tests/affiliate-studio-builder.test.js tests/affiliate-studio-phase-12-boundary.test.js (Passed)
 affiliate_regressions: node --experimental-test-module-mocks --test --test-concurrency=1 tests/affiliate-studio-*.test.js (Passed)
-legacy_regressions: not_required_no_legacy_touches
 diff_check: git diff --check (Passed)
 build: npm run build (Passed)
 dev_smoke: not_required
@@ -370,10 +369,26 @@ UI integrations:
 - Regression tests: All affiliate-studio suites (Passed)
 - Build: Passed
 - Dev smoke: not required
-- Files changed: lib/affiliate-studio-insight-adapter.js, app/api/v2/affiliate-studio/brands/[id]/programs/[programId]/insights/route.js, app/affiliate-studio/components/CampaignProgramDetail.js, app/affiliate-studio/components/AffiliateStudio.module.css
 - Actual contracts: Creative insights adapter, insights API endpoint, and detail DNA performance recommendations UI panel
 - Deferred intentionally: none
 - Next phase: 12
+
+### Fase 12 — Assisted Campaign Program Builder
+
+- Status: Complete
+- Plan: `sot/menus/affiliate-studio/phase-12-assisted-campaign-program-builder-implementation-plan.md`
+- Release: `v2.25.10`
+- Commit: `fd50427`
+- Tag pushed: yes
+- Branch pushed: yes
+- Focused tests: node --experimental-test-module-mocks --test tests/affiliate-studio-builder.test.js tests/affiliate-studio-phase-12-boundary.test.js (Passed)
+- Regression tests: All affiliate-studio suites (Passed)
+- Build: Passed
+- Dev smoke: not required
+- Files changed: lib/affiliate-studio-builder-adapter.js, app/api/v2/affiliate-studio/brands/[id]/programs/suggest/route.js, app/affiliate-studio/components/BrandCampaignPrograms.js, app/affiliate-studio/components/AffiliateStudio.module.css
+- Actual contracts: campaign setup generation parameters, suggestion JSON API endpoint, and interactive preview modal adoption creation panel
+- Deferred intentionally: none
+- Next phase: none
 
 ## Phase History Template
 
