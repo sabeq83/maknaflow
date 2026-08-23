@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.25.6 — Affiliate Studio Creative Intelligence Connection (23/08/2026)
+- Link Affiliate Studio programs to Creative Intelligence database creative fields
+- Map program target demographic, AI directive, mandatory outro, and objective automatically on run launch
+- Propagate creative payload values to launched engine campaign tables
+- Verify with integration and boundary launch tests
+
 ## V2.25.5 — Affiliate Studio Smart Route Recommendation (23/08/2026)
 - Introduce heuristics engine analyzing planner row context against product snapshots
 - Expose smart route recommendation API endpoint
