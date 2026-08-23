@@ -8,14 +8,14 @@
 
 ```yaml
 orchestration_status: planning
-current_phase: 10
-next_phase: 10
-last_completed_phase: 9
-current_task: plan_performance_foundation
-current_plan: sot/menus/affiliate-studio/phase-10-performance-foundation-implementation-plan.md
-last_release: v2.25.7
-last_release_title: Affiliate Studio Publishing Connection
-last_release_commit: 3f26fbe
+current_phase: 11
+next_phase: 11
+last_completed_phase: 10
+current_task: plan_insight_learning_loop
+current_plan: sot/menus/affiliate-studio/phase-11-insight-learning-loop-implementation-plan.md
+last_release: v2.25.8
+last_release_title: Affiliate Studio Performance Foundation
+last_release_commit: 5dc2bffa
 last_verified_branch: local-staging
 last_verified_remote_branch: origin/local-staging
 blocked: false
@@ -36,7 +36,7 @@ production_deployment_authorized: false
 - [x] Fase 7 — Smart Route Recommendation
 - [x] Fase 8 — Creative Intelligence Connection
 - [x] Fase 9 — Publishing Connection
-- [ ] Fase 10 — Performance Foundation
+- [x] Fase 10 — Performance Foundation
 - [ ] Fase 11 — Insight and Learning Loop
 - [ ] Fase 12 — Assisted Campaign Program Builder
 
@@ -98,7 +98,7 @@ Agent must replace this block with live evidence at the start of every phase.
 
 ```yaml
 recorded_at: 2026-08-23
-focused_tests: node --experimental-test-module-mocks --test tests/affiliate-studio-publishing.test.js tests/affiliate-studio-phase-09-boundary.test.js (Passed)
+focused_tests: node --experimental-test-module-mocks --test tests/affiliate-studio-performance.test.js tests/affiliate-studio-phase-10-boundary.test.js (Passed)
 affiliate_regressions: node --experimental-test-module-mocks --test --test-concurrency=1 tests/affiliate-studio-*.test.js (Passed)
 legacy_regressions: not_required_no_legacy_touches
 diff_check: git diff --check (Passed)
@@ -194,6 +194,20 @@ API layer:
 
 UI integrations:
   - CampaignProgramRuns shows preflight status badges and Flow deep links
+
+### Fase 10 → Fase 11
+
+Performance Foundation domain:
+  - affiliate_performance_snapshots (views, likes, shares, clicks, conversions, revenue)
+  - importPerformanceSnapshots updating runs to 'Measured'
+  - getProgramPerformanceSummary aggregating metrics
+
+API layer:
+  - GET /api/v2/affiliate-studio/brands/[id]/programs/[programId]/performance
+  - POST /api/v2/affiliate-studio/brands/[id]/programs/[programId]/performance
+
+UI integrations:
+  - CampaignProgramDetail tab 'Performance' showing aggregated statistics card grid
 
 ## Phase History
 
@@ -315,6 +329,23 @@ UI integrations:
 - Actual contracts: Publishing preflight checks adapter, ContentFlow jobs status projections, and queue preflight/deep links UI components
 - Deferred intentionally: none
 - Next phase: 10
+
+### Fase 10 — Performance Foundation
+
+- Status: Complete
+- Plan: `sot/menus/affiliate-studio/phase-10-performance-foundation-implementation-plan.md`
+- Release: `v2.25.8`
+- Commit: `5dc2bffa`
+- Tag pushed: yes
+- Branch pushed: yes
+- Focused tests: node --experimental-test-module-mocks --test tests/affiliate-studio-performance.test.js tests/affiliate-studio-phase-10-boundary.test.js (Passed)
+- Regression tests: All affiliate-studio suites (Passed)
+- Build: Passed
+- Dev smoke: not required
+- Files changed: lib/db-pg.js, lib/affiliate-studio-performance-adapter.js, app/api/v2/affiliate-studio/brands/[id]/programs/[programId]/performance/route.js, app/affiliate-studio/components/CampaignProgramDetail.js, app/affiliate-studio/components/AffiliateStudio.module.css
+- Actual contracts: Performance snapshots migration schema, import performance records, program metrics summary adapter, and detail dashboard UI metrics panel
+- Deferred intentionally: none
+- Next phase: 11
 
 ## Phase History Template
 
