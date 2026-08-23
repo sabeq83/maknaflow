@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.25.2 — Affiliate Studio Content Planner Connection (23/08/2026)
+- Connect Content Planner to Campaign Program via sidecar
+- Link/unlink content planners and map row-level products/funnels
+- Expose Brand Calendar and coverage progress dashboard
+- Complete boundary and integration tests validation
+
 ## V2.25.1 — Affiliate Studio Campaign Program Domain (23/08/2026)
 - Add database tables for affiliate programs and audit events
 - Implement server-side campaign program adapter with CRUD and immutable snapshots

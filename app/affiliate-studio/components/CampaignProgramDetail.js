@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { CampaignProgramPlanners } from './CampaignProgramPlanners';
 import styles from './AffiliateStudio.module.css';
 
 export function CampaignProgramDetail({
@@ -16,6 +17,7 @@ export function CampaignProgramDetail({
   onRefresh
 }) {
   const [editing, setEditing] = useState(false);
+  const [activeTab, setActiveTab] = useState('products');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [objective, setObjective] = useState('');
@@ -413,86 +415,115 @@ export function CampaignProgramDetail({
         </div>
 
         <div className={styles.detailMain}>
-          <div className={styles.sectionHeader}>
-            <h3>Associated Products Portfolio Snapshot</h3>
-            <button type="button" className={styles.addProductsBtn} onClick={handleOpenProductPicker}>
-              Link Products
+          <div className={styles.detailTabsHeader}>
+            <button
+              type="button"
+              className={`${styles.detailTabButton} ${activeTab === 'products' ? styles.activeDetailTab : ''}`}
+              onClick={() => setActiveTab('products')}
+            >
+              Associated Products ({program.products?.length || 0})
+            </button>
+            <button
+              type="button"
+              className={`${styles.detailTabButton} ${activeTab === 'planners' ? styles.activeDetailTab : ''}`}
+              onClick={() => setActiveTab('planners')}
+            >
+              Content Plan ({program.coverage?.production.actual || 0})
             </button>
           </div>
 
-          {program.products?.length === 0 ? (
-            <div className={styles.emptySnapshotBlock}>
-              <p>Belum ada produk yang dikaitkan ke program kampanye ini.</p>
-              <button type="button" className={styles.addProductsBtnInline} onClick={handleOpenProductPicker}>
-                Link Products Now
-              </button>
-            </div>
-          ) : (
-            <div className={styles.snapshottedProductsTableContainer}>
-              <table className={styles.snapshotsTable}>
-                <thead>
-                  <tr>
-                    <th>Product Info</th>
-                    <th>Category</th>
-                    <th>Resolved Affiliate Link</th>
-                    <th>Capture Info</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {program.products?.map(p => {
-                    const snap = p.productSnapshot || {};
-                    const aff = snap.affiliate || {};
-                    return (
-                      <tr key={p.id}>
-                        <td>
-                          <div className={styles.tableProductInfo}>
-                            {snap.imageUrl && (
-                              <img src={snap.imageUrl} alt={snap.displayName} className={styles.tableProductThumb} />
-                            )}
-                            <div>
-                              <strong className={styles.tableProductDisplayName}>{snap.displayName}</strong>
-                              {snap.productName !== snap.displayName && (
-                                <div className={styles.tableProductOriginalName}>{snap.productName}</div>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-                        <td><span className={styles.tableCategory}>{snap.category || 'N/A'}</span></td>
-                        <td>
-                          <div className={styles.tableAffiliateInfo}>
-                            {aff.link ? (
-                              <a href={aff.link} target="_blank" rel="noopener noreferrer" className={styles.tableAffiliateLink}>
-                                {aff.link}
-                              </a>
-                            ) : (
-                              <span className={styles.mutedText}>Missing link</span>
-                            )}
-                            <div className={styles.tableAffiliateSource}>
-                              Source: <strong>{aff.source}</strong> ({aff.status})
-                            </div>
-                          </div>
-                        </td>
-                        <td>
-                          <div className={styles.tableCaptureDate}>
-                            {snap.capturedAt ? new Date(snap.capturedAt).toLocaleString() : 'N/A'}
-                          </div>
-                        </td>
-                        <td>
-                          <button
-                            type="button"
-                            className={styles.tableRemoveBtn}
-                            onClick={() => handleRemoveProduct(p.productId)}
-                          >
-                            Unlink
-                          </button>
-                        </td>
+          {activeTab === 'products' && (
+            <>
+              <div className={styles.sectionHeader}>
+                <h3>Associated Products Portfolio Snapshot</h3>
+                <button type="button" className={styles.addProductsBtn} onClick={handleOpenProductPicker}>
+                  Link Products
+                </button>
+              </div>
+
+              {program.products?.length === 0 ? (
+                <div className={styles.emptySnapshotBlock}>
+                  <p>Belum ada produk yang dikaitkan ke program kampanye ini.</p>
+                  <button type="button" className={styles.addProductsBtnInline} onClick={handleOpenProductPicker}>
+                    Link Products Now
+                  </button>
+                </div>
+              ) : (
+                <div className={styles.snapshottedProductsTableContainer}>
+                  <table className={styles.snapshotsTable}>
+                    <thead>
+                      <tr>
+                        <th>Product Info</th>
+                        <th>Category</th>
+                        <th>Resolved Affiliate Link</th>
+                        <th>Capture Info</th>
+                        <th>Actions</th>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                    </thead>
+                    <tbody>
+                      {program.products?.map(p => {
+                        const snap = p.productSnapshot || {};
+                        const aff = snap.affiliate || {};
+                        return (
+                          <tr key={p.id}>
+                            <td>
+                              <div className={styles.tableProductInfo}>
+                                {snap.imageUrl && (
+                                  <img src={snap.imageUrl} alt={snap.displayName} className={styles.tableProductThumb} />
+                                )}
+                                <div>
+                                  <strong className={styles.tableProductDisplayName}>{snap.displayName}</strong>
+                                  {snap.productName !== snap.displayName && (
+                                    <div className={styles.tableProductOriginalName}>{snap.productName}</div>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                            <td><span className={styles.tableCategory}>{snap.category || 'N/A'}</span></td>
+                            <td>
+                              <div className={styles.tableAffiliateInfo}>
+                                {aff.link ? (
+                                  <a href={aff.link} target="_blank" rel="noopener noreferrer" className={styles.tableAffiliateLink}>
+                                    {aff.link}
+                                  </a>
+                                ) : (
+                                  <span className={styles.mutedText}>Missing link</span>
+                                )}
+                                <div className={styles.tableAffiliateSource}>
+                                  Source: <strong>{aff.source}</strong> ({aff.status})
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <div className={styles.tableCaptureDate}>
+                                {snap.capturedAt ? new Date(snap.capturedAt).toLocaleString() : 'N/A'}
+                              </div>
+                            </td>
+                            <td>
+                              <button
+                                type="button"
+                                className={styles.tableRemoveBtn}
+                                onClick={() => handleRemoveProduct(p.productId)}
+                              >
+                                Unlink
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </>
+          )}
+
+          {activeTab === 'planners' && (
+            <CampaignProgramPlanners
+              brandId={brandId}
+              program={program}
+              onRefreshProgram={onRefresh}
+            />
           )}
 
           {/* Audit Events list */}
