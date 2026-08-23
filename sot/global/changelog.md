@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.25.0 — Affiliate Studio Product Portfolio (23/08/2026)
+- Tambah Brand Product Portfolio read-only di Affiliate Studio
+- Tambah readiness dan affiliate source berdasarkan resolver existing
+- Tambah filter pagination tenant isolation dan product boundary tests
+
 ## V2.24.1 — Fix Affiliate Studio Projection Test (23/08/2026)
 - Perbaikan placeholder prepared statement pada test integrasi brand-projection
 - Penambahan seeding tenant test untuk memenuhi constraint asing PostgreSQL

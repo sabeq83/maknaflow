@@ -1,14 +1,14 @@
 import styles from './AffiliateStudio.module.css';
 
-export function AffiliateStudioShell({ brands = [], activeBrand, onBrandChange, children }) {
+export function AffiliateStudioShell({ brands = [], activeBrand, activeView = 'overview', onBrandChange, onNavigate, children }) {
   const tabs = [
-    { label: 'Overview', enabled: true },
-    { label: 'Products', enabled: false },
-    { label: 'Campaigns', enabled: false },
-    { label: 'Planner', enabled: false },
-    { label: 'Production', enabled: false },
-    { label: 'Publishing', enabled: false },
-    { label: 'Performance', enabled: false }
+    { key: 'overview', label: 'Overview', enabled: true },
+    { key: 'products', label: 'Products', enabled: true },
+    { key: 'campaigns', label: 'Campaigns', enabled: false },
+    { key: 'planner', label: 'Planner', enabled: false },
+    { key: 'production', label: 'Production', enabled: false },
+    { key: 'publishing', label: 'Publishing', enabled: false },
+    { key: 'performance', label: 'Performance', enabled: false }
   ];
 
   return (
@@ -19,7 +19,7 @@ export function AffiliateStudioShell({ brands = [], activeBrand, onBrandChange, 
           <span className={styles.divider}>/</span>
           <span className={styles.activeLabel}>{activeBrand?.name || 'Loading'}</span>
           <span className={styles.divider}>/</span>
-          <span className={styles.activeSubLabel}>Overview</span>
+          <span className={styles.activeSubLabel}>{activeView === 'products' ? 'Products' : 'Overview'}</span>
         </div>
         
         <div className={styles.brandSelectorContainer}>
@@ -40,9 +40,11 @@ export function AffiliateStudioShell({ brands = [], activeBrand, onBrandChange, 
       <nav className={styles.localNavigation} aria-label="Affiliate Studio Navigation">
         {tabs.map(t => (
           <button
-            key={t.label}
+            key={t.key}
             disabled={!t.enabled}
-            className={`${styles.navTab} ${t.enabled ? styles.navTabActive : styles.navTabDisabled}`}
+            onClick={() => t.enabled && onNavigate && onNavigate(t.key)}
+            className={`${styles.navTab} ${!t.enabled ? styles.navTabDisabled : (activeView === t.key ? styles.navTabActive : '')}`}
+            aria-current={activeView === t.key ? 'page' : undefined}
             title={!t.enabled ? `${t.label} module is coming soon in later phases` : ''}
           >
             {t.label} {!t.enabled && <span className={styles.badge}>Later</span>}
