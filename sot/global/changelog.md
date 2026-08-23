@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.24.0 — Affiliate Studio Brand Shell (23/08/2026)
+- Tambah application shell Affiliate Studio berbasis Brand Profile
+- Tambah overview read-only Product Planner Campaign dan ContentFlow
+- Tambah assigned-brand isolation truthful projection dan deep links legacy
+
 ## V2.23.20 — Affiliate Studio Foundation (22/08/2026)
 - Tambah kontrak dan boundary additive-only Affiliate Studio
 - Tambah permission dan tenant feature flag default-deny
