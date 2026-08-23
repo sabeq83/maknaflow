@@ -23,6 +23,8 @@ export function CampaignProgramPlanners({
   const [loadingRows, setLoadingRows] = useState(false);
   const [rowsError, setRowsError] = useState(null);
   const [savingRowId, setSavingRowId] = useState(null);
+  const [recommendation, setRecommendation] = useState(null);
+  const [loadingRec, setLoadingRec] = useState(false);
 
   useEffect(() => {
     loadPlanners();
@@ -184,6 +186,24 @@ export function CampaignProgramPlanners({
         }
       })
       .catch(err => alert(err.message));
+  };
+
+  const handleGetRecommendation = (rowId) => {
+    setLoadingRec(true);
+    setRecommendation(null);
+    fetch(`/api/v2/affiliate-studio/brands/${brandId}/programs/${program.id}/runs/recommend?plannerId=${activePlannerId}&rowId=${rowId}`)
+      .then(res => res.json())
+      .then(body => {
+        if (body.success) {
+          setRecommendation(body.data);
+          const sel = document.getElementById(`engine-select-${rowId}`);
+          if (sel) sel.value = body.data.recommendedEngine;
+        } else {
+          throw new Error(body.error || 'Failed to get recommendation');
+        }
+      })
+      .catch(err => alert(err.message))
+      .finally(() => setLoadingRec(false));
   };
 
   const coverage = program.coverage || {
@@ -416,6 +436,14 @@ export function CampaignProgramPlanners({
                   </div>
 
                   <div className={styles.launchAreaRow}>
+                    <button
+                      type="button"
+                      className={styles.recommendBtn}
+                      onClick={() => handleGetRecommendation(r.id)}
+                      disabled={!r.programProductId || loadingRec}
+                    >
+                      {loadingRec ? 'Analyzing...' : '💡 Recommend'}
+                    </button>
                     <select
                       id={`engine-select-${r.id}`}
                       defaultValue="re"
@@ -502,6 +530,26 @@ export function CampaignProgramPlanners({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {recommendation && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <h3>Smart Route Recommendation Result</h3>
+              <button type="button" className={styles.closeModalBtn} onClick={() => setRecommendation(null)}>×</button>
+            </div>
+            <div className={styles.recommendationBody}>
+              <div className={styles.recScoreRow}>
+                <span className={styles.recEngineBadge}>{recommendation.recommendedEngine.toUpperCase()}</span>
+                <span className={styles.recConfidence}>Confidence: {(recommendation.confidence * 100).toFixed(0)}%</span>
+              </div>
+              <p className={styles.recReasoningText}>{recommendation.reasoning}</p>
+              <div className={styles.modalActions}>
+                <button type="button" className={styles.submitBtn} onClick={() => setRecommendation(null)}>Apply & Close</button>
+              </div>
+            </div>
           </div>
         </div>
       )}

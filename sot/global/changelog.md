@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.25.5 — Affiliate Studio Smart Route Recommendation (23/08/2026)
+- Introduce heuristics engine analyzing planner row context against product snapshots
+- Expose smart route recommendation API endpoint
+- Add inline Recommend trigger and popup modal detailed reasoning
+- Complete validation with unit and boundary tests
+
 ## V2.25.4 — Affiliate Studio Engine Launch Connectors (23/08/2026)
 - Introduce preflight check verifying product affiliate routing readiness
 - Introduce idempotency keys on campaign program planner rows trigger
