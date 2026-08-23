@@ -11,6 +11,8 @@ import {
 import { AffiliateStudioShell } from './AffiliateStudioShell';
 import { BrandOverview } from './BrandOverview';
 import { BrandProductPortfolio } from './BrandProductPortfolio';
+import { BrandCampaignPrograms } from './BrandCampaignPrograms';
+import { CampaignProgramDetail } from './CampaignProgramDetail';
 import styles from './AffiliateStudio.module.css';
 
 export function AffiliateStudioWorkspace() {
@@ -31,6 +33,16 @@ export function AffiliateStudioWorkspace() {
   const [overviewError, setOverviewError] = useState(null);
   const [portfolioError, setPortfolioError] = useState(null);
 
+  // Campaign Programs State
+  const [programs, setPrograms] = useState([]);
+  const [loadingPrograms, setLoadingPrograms] = useState(false);
+  const [programsError, setProgramsError] = useState(null);
+
+  const [programDetail, setProgramDetail] = useState(null);
+  const [loadingProgramDetail, setLoadingProgramDetail] = useState(false);
+  const [programDetailError, setProgramDetailError] = useState(null);
+
+  const requestedProgramId = searchParams ? searchParams.get('program') : null;
   const abortControllerRef = useRef(null);
 
   // Load authorized brands
@@ -154,10 +166,142 @@ export function AffiliateStudioWorkspace() {
       });
   };
 
+  const loadPrograms = (brandId) => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    setLoadingPrograms(true);
+    setProgramsError(null);
+
+    fetch(`/api/v2/affiliate-studio/brands/${brandId}/programs`, { signal: controller.signal })
+      .then(res => res.json())
+      .then(body => {
+        if (!body.success) throw new Error(body.error || 'Failed to load programs');
+        setPrograms(body.data || []);
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError') {
+          setProgramsError(err.message);
+        }
+      })
+      .finally(() => {
+        if (abortControllerRef.current === controller) {
+          setLoadingPrograms(false);
+          abortControllerRef.current = null;
+        }
+      });
+  };
+
+  const loadProgramDetail = (brandId, programId) => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    setLoadingProgramDetail(true);
+    setProgramDetailError(null);
+
+    fetch(`/api/v2/affiliate-studio/brands/${brandId}/programs/${programId}`, { signal: controller.signal })
+      .then(res => {
+        if (res.status === 404) throw new Error('Program not found or unauthorized');
+        return res.json();
+      })
+      .then(body => {
+        if (!body.success) throw new Error(body.error || 'Failed to load program details');
+        setProgramDetail(body.data);
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError') {
+          setProgramDetailError(err.message);
+        }
+      })
+      .finally(() => {
+        if (abortControllerRef.current === controller) {
+          setLoadingProgramDetail(false);
+          abortControllerRef.current = null;
+        }
+      });
+  };
+
+  const handleCreateProgram = (payload) => {
+    if (!activeBrand) return Promise.reject(new Error('No active brand selected'));
+    return fetch(`/api/v2/affiliate-studio/brands/${activeBrand.id}/programs`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+      .then(res => res.json())
+      .then(body => {
+        if (!body.success) throw new Error(body.error || 'Failed to create program');
+        loadPrograms(activeBrand.id);
+        return body.data;
+      });
+  };
+
+  const handleUpdateProgram = (programId, payload) => {
+    if (!activeBrand) return Promise.reject(new Error('No active brand selected'));
+    return fetch(`/api/v2/affiliate-studio/brands/${activeBrand.id}/programs/${programId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+      .then(res => res.json())
+      .then(body => {
+        if (!body.success) throw new Error(body.error || 'Failed to update program');
+        loadProgramDetail(activeBrand.id, programId);
+      });
+  };
+
+  const handleArchiveProgram = (programId) => {
+    if (!activeBrand) return Promise.resolve();
+    return fetch(`/api/v2/affiliate-studio/brands/${activeBrand.id}/programs/${programId}`, {
+      method: 'DELETE'
+    })
+      .then(res => res.json())
+      .then(body => {
+        if (!body.success) throw new Error(body.error || 'Failed to archive program');
+        router.push(buildAffiliateStudioUrl(activeBrand.id, { view: 'campaigns' }));
+      });
+  };
+
+  const handleAddProductsToProgram = (programId, productIds) => {
+    if (!activeBrand) return Promise.reject(new Error('No active brand selected'));
+    return fetch(`/api/v2/affiliate-studio/brands/${activeBrand.id}/programs/${programId}/products`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productIds })
+    })
+      .then(res => res.json())
+      .then(body => {
+        if (!body.success) throw new Error(body.error || 'Failed to add products');
+        loadProgramDetail(activeBrand.id, programId);
+      });
+  };
+
+  const handleRemoveProductsFromProgram = (programId, productIds) => {
+    if (!activeBrand) return Promise.reject(new Error('No active brand selected'));
+    return fetch(`/api/v2/affiliate-studio/brands/${activeBrand.id}/programs/${programId}/products`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productIds })
+    })
+      .then(res => res.json())
+      .then(body => {
+        if (!body.success) throw new Error(body.error || 'Failed to remove products');
+        loadProgramDetail(activeBrand.id, programId);
+      });
+  };
+
   useEffect(() => {
     if (!activeBrand) {
       setOverview(null);
       setPortfolio(null);
+      setPrograms([]);
+      setProgramDetail(null);
       return;
     }
 
@@ -165,6 +309,13 @@ export function AffiliateStudioWorkspace() {
       loadOverview(activeBrand.id);
     } else if (activeView === 'products') {
       loadProducts(activeBrand.id, productFilters);
+    } else if (activeView === 'campaigns') {
+      if (requestedProgramId) {
+        loadProgramDetail(activeBrand.id, requestedProgramId);
+      } else {
+        loadPrograms(activeBrand.id);
+        setProgramDetail(null);
+      }
     }
   }, [activeBrand, activeView, searchParams]);
 
@@ -228,6 +379,37 @@ export function AffiliateStudioWorkspace() {
             }
           }}
           onRefresh={() => activeBrand && loadProducts(activeBrand.id, productFilters)}
+        />
+      )}
+      {activeView === 'campaigns' && !requestedProgramId && (
+        <BrandCampaignPrograms
+          programs={programs}
+          loading={loadingPrograms}
+          error={programsError}
+          onCreate={handleCreateProgram}
+          onSelect={(programId) => {
+            router.push(buildAffiliateStudioUrl(activeBrand?.id, {
+              view: 'campaigns',
+              program: programId
+            }));
+          }}
+          onRefresh={() => activeBrand && loadPrograms(activeBrand.id)}
+        />
+      )}
+      {activeView === 'campaigns' && requestedProgramId && (
+        <CampaignProgramDetail
+          brandId={activeBrand?.id}
+          program={programDetail}
+          loading={loadingProgramDetail}
+          error={programDetailError}
+          onBack={() => {
+            router.push(buildAffiliateStudioUrl(activeBrand?.id, { view: 'campaigns' }));
+          }}
+          onUpdate={handleUpdateProgram}
+          onArchive={handleArchiveProgram}
+          onAddProducts={handleAddProductsToProgram}
+          onRemoveProducts={handleRemoveProductsFromProgram}
+          onRefresh={() => activeBrand && loadProgramDetail(activeBrand.id, requestedProgramId)}
         />
       )}
     </AffiliateStudioShell>

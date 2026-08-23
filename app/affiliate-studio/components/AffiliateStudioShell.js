@@ -4,7 +4,7 @@ export function AffiliateStudioShell({ brands = [], activeBrand, activeView = 'o
   const tabs = [
     { key: 'overview', label: 'Overview', enabled: true },
     { key: 'products', label: 'Products', enabled: true },
-    { key: 'campaigns', label: 'Campaigns', enabled: false },
+    { key: 'campaigns', label: 'Campaigns', enabled: true },
     { key: 'planner', label: 'Planner', enabled: false },
     { key: 'production', label: 'Production', enabled: false },
     { key: 'publishing', label: 'Publishing', enabled: false },
@@ -19,7 +19,9 @@ export function AffiliateStudioShell({ brands = [], activeBrand, activeView = 'o
           <span className={styles.divider}>/</span>
           <span className={styles.activeLabel}>{activeBrand?.name || 'Loading'}</span>
           <span className={styles.divider}>/</span>
-          <span className={styles.activeSubLabel}>{activeView === 'products' ? 'Products' : 'Overview'}</span>
+          <span className={styles.activeSubLabel}>
+            {activeView === 'products' ? 'Products' : activeView === 'campaigns' ? 'Campaigns' : 'Overview'}
+          </span>
         </div>
         
         <div className={styles.brandSelectorContainer}>

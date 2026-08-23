@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.25.1 — Affiliate Studio Campaign Program Domain (23/08/2026)
+- Add database tables for affiliate programs and audit events
+- Implement server-side campaign program adapter with CRUD and immutable snapshots
+- Create campaigns grid and detailed program views UI
+- All tests and Next build passed successfully
+
 ## V2.25.0 — Affiliate Studio Product Portfolio (23/08/2026)
 - Tambah Brand Product Portfolio read-only di Affiliate Studio
 - Tambah readiness dan affiliate source berdasarkan resolver existing
