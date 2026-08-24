@@ -19,10 +19,11 @@ async function check() {
     const activePkg = pkgRes.rows.find(p => p.status !== 'archived');
     
     if (activePkg) {
-      const assetRes = await pool.query('SELECT DISTINCT asset_type, COUNT(*) FROM youtube_production_assets WHERE production_package_id = $1 GROUP BY asset_type', [activePkg.id]);
-      console.log('Distinct asset types found:');
+      const assetRes = await pool.query('SELECT id, asset_type, status, output_asset_json FROM youtube_production_assets WHERE production_package_id = $1 AND status = \'succeeded\' LIMIT 5', [activePkg.id]);
+      console.log('Sample succeeded assets output_asset_json:');
       for (const row of assetRes.rows) {
-        console.log(`- Type: "${row.asset_type}", Count: ${row.count}`);
+        console.log(`\n- ID: ${row.id}, Type: ${row.asset_type}`);
+        console.log(`  JSON:`, JSON.stringify(row.output_asset_json, null, 2));
       }
     } else {
       console.log('No active production package found.');

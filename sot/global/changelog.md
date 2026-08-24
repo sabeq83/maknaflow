@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.25.27 — Fix Timeline Preview Label & Media URLs (24/08/2026)
+- Restored the deleted Timeline Preview Player label.
+- Unified media URL resolutions across video players, audio tracks, and gallery grid items using the getMediaUrl path helper.
+
 ## V2.25.26 — Fix Visual Assets Filter in YouTube Studio Workspace (24/08/2026)
 - Updated UI asset filter from 'visual' to any type that is not 'voiceover' to support 'generated_visual' asset types from database schema.
 

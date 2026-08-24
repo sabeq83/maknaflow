@@ -26,6 +26,12 @@ const MINIMAX_VOICES = [
   { id: 'Indonesian_crisp_reporter_vv2', name: 'Crisp Reporter (Female)', avatar: '👩', desc: 'Perempuan (Crisp Reporter - Vv2)' }
 ];
 
+const getMediaUrl = (pathString) => {
+  if (!pathString) return '';
+  if (pathString.startsWith('/')) return pathString;
+  return `/${pathString}`;
+};
+
 function ScenePlanConfig({ episode, profilesList, selectedProfileKey, handleSetGenerationProfile }) {
   const [profileKey, setProfileKey] = useState(selectedProfileKey || '');
   const [voiceProvider, setVoiceProvider] = useState(episode.voice_provider || 'google_tts');
@@ -714,7 +720,7 @@ export function EpisodeWorkspace({
                                     <div style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Scene {asset.scene_index + 1} Voiceover</div>
                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>"{asset.prompt_snapshot?.substring(0, 100)}..."</div>
                                     {asset.status === 'succeeded' && asset.output_asset_json?.audio_path && (
-                                      <audio src={`/${asset.output_asset_json.audio_path}`} controls style={{ height: '28px', marginTop: '6px' }} />
+                                      <audio src={getMediaUrl(asset.output_asset_json.audio_path)} controls style={{ height: '28px', marginTop: '6px' }} />
                                     )}
                                     {asset.error_message && (
                                       <div style={{ fontSize: '0.7rem', color: 'var(--status-danger)', marginTop: '4px' }}>Error: {asset.error_message}</div>
@@ -762,13 +768,13 @@ export function EpisodeWorkspace({
                                       {asset.status === 'succeeded' && asset.output_asset_json ? (
                                         asset.output_asset_json.video_path ? (
                                           <video 
-                                            src={`/${asset.output_asset_json.video_path}`} 
+                                            src={getMediaUrl(asset.output_asset_json.video_path)} 
                                             controls 
                                             style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                                           />
                                         ) : asset.output_asset_json.image_path ? (
                                           <img 
-                                            src={`/${asset.output_asset_json.image_path}`} 
+                                            src={getMediaUrl(asset.output_asset_json.image_path)} 
                                             alt="Start Frame" 
                                             style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                                           />
@@ -852,7 +858,7 @@ export function EpisodeWorkspace({
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Timeline Preview Player</label>
                         <video 
-                          src={activePackage.preview_asset_json.videoAsset} 
+                          src={getMediaUrl(activePackage.preview_asset_json.videoAsset)} 
                           controls 
                           width="100%" 
                           style={{ borderRadius: '8px', border: '1px solid var(--border-subtle)', background: '#000' }}
@@ -867,7 +873,7 @@ export function EpisodeWorkspace({
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
                         <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--status-success)' }}>✓ Final YouTube Video</label>
                         <video 
-                          src={activePackage.final_asset_json.videoAsset} 
+                          src={getMediaUrl(activePackage.final_asset_json.videoAsset)} 
                           controls 
                           width="100%" 
                           style={{ borderRadius: '8px', border: '1px solid var(--status-success)', background: '#000' }}
