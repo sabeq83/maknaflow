@@ -26,12 +26,13 @@ export const POST = withYouTubeStudioAccess('write', async (req, { params }, use
   const locale = normalizeLocale(channel.primary_locale);
 
   // Generate ideas
-  const suggestions = await generateEpisodeIdeas({
+  const suggestions = await generateEpisodeIdeas(
+    channel,
     strategy,
     series,
-    locale,
-    count: 5
-  });
+    5,
+    locale
+  );
 
   const inserted = [];
   for (const sug of suggestions) {

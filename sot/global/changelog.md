@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.25.13 — Fix YT Studio Episode Ideas Parameters (24/08/2026)
+- Fix generateEpisodeIdeas parameter list structure in generate route
+
 ## V2.25.12 — Fix YT Studio Series Adopt Button (24/08/2026)
 - Fix Content Series adopt concept URL endpoint
 
