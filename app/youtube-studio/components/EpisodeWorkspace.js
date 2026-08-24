@@ -36,6 +36,7 @@ function ScenePlanConfig({ episode, profilesList, selectedProfileKey, handleSetG
   const [profileKey, setProfileKey] = useState(selectedProfileKey || '');
   const [voiceProvider, setVoiceProvider] = useState(episode.voice_provider || 'google_tts');
   const [voicePersona, setVoicePersona] = useState(episode.voice_persona || 'Orus');
+  const [voiceSpeed, setVoiceSpeed] = useState(episode.voice_speed !== undefined ? episode.voice_speed : 1.0);
   const [isSaving, setIsSaving] = useState(false);
   const [saveNotice, setSaveNotice] = useState(null);
 
@@ -52,6 +53,9 @@ function ScenePlanConfig({ episode, profilesList, selectedProfileKey, handleSetG
     if (episode.voice_persona) {
       setVoicePersona(episode.voice_persona);
     }
+    if (episode.voice_speed !== undefined) {
+      setVoiceSpeed(episode.voice_speed);
+    }
   }, [episode]);
 
   const activeVoices = voiceProvider === 'minimax' ? MINIMAX_VOICES : GEMINI_VOICES;
@@ -67,7 +71,7 @@ function ScenePlanConfig({ episode, profilesList, selectedProfileKey, handleSetG
     setIsSaving(true);
     setSaveNotice(null);
     try {
-      await handleSetGenerationProfile(profileKey, voiceProvider, voicePersona);
+      await handleSetGenerationProfile(profileKey, voiceProvider, voicePersona, voiceSpeed);
       setSaveNotice({ type: 'success', msg: '✓ Configuration and voice settings saved successfully!' });
     } catch (e) {
       setSaveNotice({ type: 'error', msg: 'Failed to save configuration.' });
@@ -132,6 +136,23 @@ function ScenePlanConfig({ episode, profilesList, selectedProfileKey, handleSetG
                   <option key={v.id} value={v.id}>{v.avatar} {v.name} - {v.desc}</option>
                 ))}
               </select>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxWidth: '400px' }}>
+            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>TTS Voice Speed ({voiceSpeed}x)</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>0.5x</span>
+              <input 
+                type="range" 
+                min="0.5" 
+                max="2.0" 
+                step="0.1" 
+                value={voiceSpeed} 
+                onChange={(e) => setVoiceSpeed(Number(e.target.value))} 
+                style={{ flex: 1, accentColor: 'var(--accent)' }} 
+              />
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>2.0x</span>
             </div>
           </div>
 

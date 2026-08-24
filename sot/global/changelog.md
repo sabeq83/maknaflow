@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.25.32 — Add TTS Voice Speed Control Slider (24/08/2026)
+- Added voice_speed column auto-migration to youtube_episodes table.
+- Updated setEpisodeGenerationProfile and generation-profile API routes to store and return voice speed settings.
+- Integrated Voice Speed input slider in Model Generation & Voice Settings card in EpisodeWorkspace UI.
+
 ## V2.25.31 — Fix Rsync temp Exclusion & Gemini WAV conversion (24/08/2026)
 - Added --exclude 'public/temp' to all deploy-macmini scripts to prevent deleting dynamic files during code deployment.
 - Imported convertPcmToWav in youtube-studio-voice-adapter to wrap raw PCM buffer with WAV headers for Gemini TTS.

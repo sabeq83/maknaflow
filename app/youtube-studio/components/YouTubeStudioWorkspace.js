@@ -1020,7 +1020,7 @@ export function YouTubeStudioWorkspace() {
     }
   }
 
-  async function handleSetGenerationProfile(profileKey, voiceProvider, voicePersona) {
+  async function handleSetGenerationProfile(profileKey, voiceProvider, voicePersona, voiceSpeed) {
     if (!selectedEpisode) return;
     setSelectedProfileKey(profileKey);
     setErrorMsg('');
@@ -1033,7 +1033,8 @@ export function YouTubeStudioWorkspace() {
         body: JSON.stringify({ 
           generation_profile_key: profileKey,
           voice_provider: voiceProvider,
-          voice_persona: voicePersona
+          voice_persona: voicePersona,
+          voice_speed: voiceSpeed
         })
       });
       const data = await res.json();
@@ -1042,7 +1043,8 @@ export function YouTubeStudioWorkspace() {
           ...prev,
           generation_profile_key: data.data.generation_profile_key,
           voice_provider: data.data.voice_provider,
-          voice_persona: data.data.voice_persona
+          voice_persona: data.data.voice_persona,
+          voice_speed: data.data.voice_speed
         }));
         await refreshEpisodesList();
         triggerNotice('success', 'Generation profile and voice settings saved successfully!');

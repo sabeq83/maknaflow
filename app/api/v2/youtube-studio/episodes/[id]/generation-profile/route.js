@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 export const POST = withYouTubeStudioAccess('write', async (req, { params }, user) => {
   const { id } = await params;
   try {
-    const { generation_profile_key, voice_provider, voice_persona } = await req.json();
+    const { generation_profile_key, voice_provider, voice_persona, voice_speed } = await req.json();
     if (!generation_profile_key) {
       return new Response(JSON.stringify({ success: false, error: 'Profile key is required' }), {
         status: 400,
@@ -16,7 +16,8 @@ export const POST = withYouTubeStudioAccess('write', async (req, { params }, use
     const updated = await setEpisodeGenerationProfile(id, {
       profileKey: generation_profile_key,
       voiceProvider: voice_provider,
-      voicePersona: voice_persona
+      voicePersona: voice_persona,
+      voiceSpeed: voice_speed
     }, user);
     return new Response(JSON.stringify({ success: true, data: updated }), {
       status: 200,
