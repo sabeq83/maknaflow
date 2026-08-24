@@ -210,6 +210,7 @@ export function EpisodeWorkspace({
   isRenderingFinal,
   handleFinalRender
 }) {
+  const [activeAccordionSceneIdx, setActiveAccordionSceneIdx] = useState(0);
 
   const activeStage = stages.find(s => s.key === activeStageKey) || stages[0];
 
@@ -656,111 +657,183 @@ export function EpisodeWorkspace({
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <h5 style={{ margin: 0, fontSize: '0.9rem' }}>Visual &amp; Voice Assets Blueprint:</h5>
-                        {activePackage.plan_json?.scenes?.map((scene, idx) => (
-                          <div key={idx} style={{ background: 'var(--background)', padding: '12px', borderRadius: '6px', borderLeft: '3px solid var(--accent)', marginTop: '8px' }}>
-                            <div style={{ fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '4px' }}>Scene {idx + 1} ({scene.narrative_duration_seconds}s)</div>
-                            <div style={{ fontStyle: 'italic', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '8px' }}>VO: "{scene.voiceover}"</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                              {scene.shots?.map((shot, shotIdx) => (
-                                <div key={shotIdx} style={{ fontSize: '0.8rem', background: 'var(--surface-raised)', padding: '8px 10px', borderRadius: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span>🎬 Shot {shotIdx + 1}: <strong>[{shot.generation_mode || shot.asset_type}]</strong> - <em>"{shot.prompt || 'Visual Clip'}"</em></span>
-                                    <span style={{ fontWeight: '600' }}>{shot.generation_duration_seconds}s</span>
+                        {activePackage.plan_json?.scenes?.map((scene, idx) => {
+                          const isActive = activeAccordionSceneIdx === idx;
+                          return (
+                            <div key={idx} style={{ border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden', background: 'rgba(255,255,255,0.01)', marginTop: '8px', transition: 'all 0.2s ease' }}>
+                              <div 
+                                onClick={() => setActiveAccordionSceneIdx(isActive ? -1 : idx)}
+                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'var(--surface-raised)', cursor: 'pointer', borderLeft: '3px solid var(--accent)', userSelect: 'none' }}
+                              >
+                                <span style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>🎬 Scene {idx + 1} ({scene.narrative_duration_seconds}s)</span>
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{isActive ? '▲' : '▼'}</span>
+                              </div>
+                              {isActive && (
+                                <div style={{ background: 'var(--background)', padding: '16px', borderLeft: '3px solid var(--accent)', borderTop: '1px solid var(--border)' }}>
+                                  <div style={{ fontStyle: 'italic', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '12px', background: 'var(--surface-raised)', padding: '10px', borderRadius: '4px' }}>VO: "{scene.voiceover}"</div>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    {scene.shots?.map((shot, shotIdx) => (
+                                      <div key={shotIdx} style={{ fontSize: '0.8rem', background: 'var(--surface-raised)', padding: '8px 10px', borderRadius: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                          <span>🎬 Shot {shotIdx + 1}: <strong>[{shot.generation_mode || shot.asset_type}]</strong> - <em>"{shot.prompt || 'Visual Clip'}"</em></span>
+                                          <span style={{ fontWeight: '600' }}>{shot.generation_duration_seconds}s</span>
+                                        </div>
+                                        {shot.t2i_prompt && (
+                                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'var(--background)', padding: '4px 8px', borderRadius: '4px', marginTop: '2px' }}>
+                                            <strong>T2I (Start Frame):</strong> {shot.t2i_prompt}
+                                          </div>
+                                        )}
+                                        {shot.i2v_prompt && (
+                                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'var(--background)', padding: '4px 8px', borderRadius: '4px', marginTop: '2px' }}>
+                                            <strong>I2V (Animation):</strong> {shot.i2v_prompt}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
                                   </div>
-                                  {shot.t2i_prompt && (
-                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'var(--background)', padding: '4px 8px', borderRadius: '4px', marginTop: '2px' }}>
-                                      <strong>T2I (Start Frame):</strong> {shot.t2i_prompt}
-                                    </div>
-                                  )}
-                                  {shot.i2v_prompt && (
-                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'var(--background)', padding: '4px 8px', borderRadius: '4px' }}>
-                                      <strong>I2V (Movement):</strong> {shot.i2v_prompt}
-                                    </div>
-                                  )}
-                                  {shot.t2v_prompt && (
-                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'var(--background)', padding: '4px 8px', borderRadius: '4px', marginTop: '2px' }}>
-                                      <strong>T2V (Text to Video):</strong> {shot.t2v_prompt}
-                                    </div>
-                                  )}
                                 </div>
-                              ))}
+                              )}
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
 
                     {activePackage && activePackage.status !== 'draft' && (
                       <div style={{ marginTop: '12px' }}>
                         <h4 style={{ margin: '0 0 12px 0' }}>Asset &amp; VO Generation Progress</h4>
-                        <div className={styles.assetProgress}>
-                          {packageAssets.map((asset) => (
-                            <div key={asset.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)', padding: '10px 14px', borderRadius: '6px', border: '1px solid var(--border-subtle)', marginBottom: '8px' }}>
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                <span style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>
-                                  {asset.asset_type === 'voiceover' ? '🎙️ Voiceover' : '🎬 Visual Shot'} (Scene {asset.scene_index + 1}{asset.shot_index >= 0 ? `, Shot ${asset.shot_index + 1}` : ''})
-                                </span>
-                                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                  {asset.prompt_snapshot?.substring(0, 80)}...
-                                </span>
-                                {asset.error_message && (
-                                  <span style={{ fontSize: '0.75rem', color: 'var(--status-danger)' }}>
-                                    Error: {asset.error_message}
-                                  </span>
-                                )}
-                                {asset.status === 'succeeded' && asset.output_asset_json && (
-                                  <div style={{ marginTop: '8px', display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                    {asset.output_asset_json.image_path && (
-                                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Start Frame:</span>
-                                        <img 
-                                          src={asset.output_asset_json.image_path} 
-                                          alt="Start Frame" 
-                                          style={{ width: '160px', height: '90px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--border-subtle)' }} 
-                                        />
-                                      </div>
+                        <div className={styles.assetProgress} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                          
+                          {/* Segment 1: Voiceover List */}
+                          {packageAssets.filter(a => a.asset_type === 'voiceover').length > 0 && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                              <h5 style={{ margin: '0 0 4px 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>🎙️ Voiceover Audio Tracks</h5>
+                              {packageAssets.filter(a => a.asset_type === 'voiceover').map((asset) => (
+                                <div key={asset.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-raised)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Scene {asset.scene_index + 1} Voiceover</div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>"{asset.prompt_snapshot?.substring(0, 100)}..."</div>
+                                    {asset.status === 'succeeded' && asset.output_asset_json?.audio_path && (
+                                      <audio src={`/${asset.output_asset_json.audio_path}`} controls style={{ height: '28px', marginTop: '6px' }} />
                                     )}
-                                    {asset.output_asset_json.video_path && (
-                                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Video Clip:</span>
-                                        <video 
-                                          src={asset.output_asset_json.video_path} 
-                                          controls
-                                          style={{ width: '160px', height: '90px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--border-subtle)', background: '#000' }} 
-                                        />
-                                      </div>
+                                    {asset.error_message && (
+                                      <div style={{ fontSize: '0.7rem', color: 'var(--status-danger)', marginTop: '4px' }}>Error: {asset.error_message}</div>
                                     )}
                                   </div>
-                                )}
-                              </div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <span className={
-                                  asset.status === 'succeeded' ? `${styles.premiumBadge} ${styles.premiumBadgeSucceeded}` :
-                                  asset.status === 'failed' ? `${styles.premiumBadge} ${styles.premiumBadgeFailed}` :
-                                  `${styles.premiumBadge} ${styles.premiumBadgeQueued}`
-                                }>
-                                  {(asset.status === 'queued' || asset.status === 'pending') && (
-                                    <svg className={styles.spinner} style={{ animation: 'spin 1.5s linear infinite', width: '10px', height: '10px' }} viewBox="0 0 24 24" fill="none">
-                                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeDasharray="30 30" />
-                                    </svg>
-                                  )}
-                                  {asset.status.toUpperCase()}
-                                </span>
-                                {asset.status !== 'draft' && (
-                                  <button
-                                    type="button"
-                                    className={styles.btnPremiumRegen}
-                                    onClick={() => handleRegenerateAsset(asset.id)}
-                                  >
-                                    <svg style={{ width: '11px', height: '11px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                      <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
-                                    </svg>
-                                    Regenerate
-                                  </button>
-                                )}
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <span className={
+                                      asset.status === 'succeeded' ? `${styles.premiumBadge} ${styles.premiumBadgeSucceeded}` :
+                                      asset.status === 'failed' ? `${styles.premiumBadge} ${styles.premiumBadgeFailed}` :
+                                      `${styles.premiumBadge} ${styles.premiumBadgeQueued}`
+                                    }>
+                                      {(asset.status === 'queued' || asset.status === 'pending') && (
+                                        <svg className={styles.spinner} style={{ animation: 'spin 1.5s linear infinite', width: '10px', height: '10px' }} viewBox="0 0 24 24" fill="none">
+                                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeDasharray="30 30" />
+                                        </svg>
+                                      )}
+                                      {asset.status.toUpperCase()}
+                                    </span>
+                                    {asset.status !== 'draft' && (
+                                      <button
+                                        type="button"
+                                        className={styles.btnPremiumRegen}
+                                        onClick={() => handleRegenerateAsset(asset.id)}
+                                      >
+                                        <svg style={{ width: '11px', height: '11px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                                        </svg>
+                                        Regenerate
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Segment 2: Visual Gallery Grid */}
+                          {packageAssets.filter(a => a.asset_type === 'visual').length > 0 && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                              <h5 style={{ margin: '0 0 4px 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>🎬 Video &amp; Image Assets</h5>
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '16px' }}>
+                                {packageAssets.filter(a => a.asset_type === 'visual').map((asset) => (
+                                  <div key={asset.id} style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                                    <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#000', overflow: 'hidden' }}>
+                                      {asset.status === 'succeeded' && asset.output_asset_json ? (
+                                        asset.output_asset_json.video_path ? (
+                                          <video 
+                                            src={`/${asset.output_asset_json.video_path}`} 
+                                            controls 
+                                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                                          />
+                                        ) : asset.output_asset_json.image_path ? (
+                                          <img 
+                                            src={`/${asset.output_asset_json.image_path}`} 
+                                            alt="Start Frame" 
+                                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                                          />
+                                        ) : (
+                                          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.75rem' }}>No Media Path</div>
+                                        )
+                                      ) : asset.status === 'failed' ? (
+                                        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--status-danger)', background: 'rgba(239, 68, 68, 0.05)' }}>
+                                          <span style={{ fontSize: '1.2rem' }}>⚠️</span>
+                                          <span style={{ fontSize: '0.7rem', fontWeight: 'bold' }}>Failed</span>
+                                        </div>
+                                      ) : (
+                                        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                                          <svg className={styles.spinner} style={{ animation: 'spin 1.5s linear infinite', width: '20px', height: '20px', color: 'var(--link)', marginBottom: '8px' }} viewBox="0 0 24 24" fill="none">
+                                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeDasharray="30 30" />
+                                          </svg>
+                                          <span style={{ fontSize: '0.7rem' }}>Generating...</span>
+                                        </div>
+                                      )}
+
+                                      {/* Status Badge Overlay */}
+                                      <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10 }}>
+                                        <span className={
+                                          asset.status === 'succeeded' ? `${styles.premiumBadge} ${styles.premiumBadgeSucceeded}` :
+                                          asset.status === 'failed' ? `${styles.premiumBadge} ${styles.premiumBadgeFailed}` :
+                                          `${styles.premiumBadge} ${styles.premiumBadgeQueued}`
+                                        }>
+                                          {asset.status.toUpperCase()}
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, justifyContent: 'space-between' }}>
+                                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        <div style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Scene {asset.scene_index + 1}, Shot {asset.shot_index + 1}</div>
+                                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: '1.3', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }} title={asset.prompt_snapshot}>
+                                          {asset.prompt_snapshot}
+                                        </div>
+                                        {asset.error_message && (
+                                          <div style={{ fontSize: '0.68rem', color: 'var(--status-danger)' }}>
+                                            Error: {asset.error_message}
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
+                                        {asset.status !== 'draft' && (
+                                          <button
+                                            type="button"
+                                            className={styles.btnPremiumRegen}
+                                            onClick={() => handleRegenerateAsset(asset.id)}
+                                          >
+                                            <svg style={{ width: '10px', height: '10px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                                            </svg>
+                                            Regenerate
+                                          </button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
                             </div>
-                          ))}
+                          )}
                         </div>
                       </div>
                     )}

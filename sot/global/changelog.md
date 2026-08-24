@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.25.25 — Accordion Scenes & Media Gallery Layout in YouTube Studio (24/08/2026)
+- Implemented collapsible accordion dividers per scene under the Visual & Voice Assets Blueprint section.
+- Restructured the progress tracker by separating Voiceover audio tracks and rendering Video & Image assets inside a responsive media gallery grid layout.
+- Updated styling details to cleanly support 16:9 thumbnail previews, error panels, audio players, and glassmorphic overlays.
+
 ## V2.25.24 — Premium UI Badges & Voice Settings in YouTube Studio (24/08/2026)
 - Upgraded status badges and Regenerate buttons to premium glassmorphism styles with micro-animations.
 - Exposed Voice Provider (Google TTS & Minimax API) and corresponding dynamic Voice Persona selections under Scene Plan stage.

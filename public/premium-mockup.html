@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MAKNA Flow — Premium UI Mockup (Revised)</title>
+  <title>MAKNA Studio — Premium Layout Mockup</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -40,7 +40,7 @@
     }
 
     .container {
-      max-width: 800px;
+      max-width: 900px;
       width: 100%;
       display: flex;
       flex-direction: column;
@@ -76,16 +76,6 @@
       overflow: hidden;
     }
 
-    .panel-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
-    }
-
     .panel-title {
       font-size: 1.15rem;
       font-weight: 700;
@@ -95,67 +85,194 @@
       gap: 8px;
     }
 
-    /* Progress Rows */
-    .progress-list {
+    /* --- SECTION 1: ACCORDION BLUEPRINT --- */
+    .accordion-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .accordion-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.01);
+      overflow: hidden;
+      transition: all 0.25s ease;
+    }
+
+    .accordion-header {
+      padding: 14px 20px;
+      background: rgba(255, 255, 255, 0.03);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+      transition: background 0.2s ease;
+    }
+
+    .accordion-header:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .accordion-header-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .accordion-arrow {
+      transition: transform 0.25s ease;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease-out;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .accordion-item.active {
+      border-color: var(--accent-glow);
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.1);
+    }
+
+    .accordion-item.active .accordion-header {
+      background: rgba(99, 102, 241, 0.06);
+    }
+
+    .accordion-item.active .accordion-arrow {
+      transform: rotate(180deg);
+    }
+
+    .accordion-item.active .accordion-content {
+      max-height: 500px; /* Large enough threshold */
+    }
+
+    .accordion-body-padding {
+      padding: 18px 20px;
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
 
-    .progress-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .blueprint-vo-text {
+      background: rgba(255, 255, 255, 0.03);
+      border-left: 3px solid var(--accent);
+      padding: 10px 14px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-style: italic;
+    }
+
+    .blueprint-shot-card {
       background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+    }
+
+    /* --- SECTION 2: GALLERY GRID --- */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 18px;
+    }
+
+    .gallery-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 14px 18px;
-      transition: all 0.2s ease;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.25s ease;
+      position: relative;
     }
 
-    .progress-row:hover {
-      background: rgba(255, 255, 255, 0.04);
-      border-color: rgba(255, 255, 255, 0.08);
-      transform: translateX(2px);
+    .gallery-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent-glow);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
     }
 
-    .info-col {
+    .gallery-media-wrapper {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%; /* 16:9 Aspect Ratio */
+      background: #000;
+      overflow: hidden;
+    }
+
+    .gallery-media {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .gallery-badge-overlay {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 10;
+    }
+
+    .gallery-card-content {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      justify-content: space-between;
+    }
+
+    .gallery-card-info {
       display: flex;
       flex-direction: column;
       gap: 4px;
     }
 
-    .asset-title {
-      font-size: 0.9rem;
+    .gallery-card-title {
+      font-size: 0.85rem;
       font-weight: 700;
     }
 
-    .asset-prompt {
-      font-size: 0.8rem;
+    .gallery-card-desc {
+      font-size: 0.75rem;
       color: var(--text-muted);
-      max-width: 480px;
-      white-space: nowrap;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
       overflow: hidden;
-      text-overflow: ellipsis;
+      line-height: 1.3;
     }
 
-    .action-col {
+    .gallery-card-footer {
       display: flex;
+      justify-content: flex-end;
       align-items: center;
-      gap: 12px;
+      margin-top: 6px;
     }
 
     /* Premium Badges */
     .premium-badge {
-      font-size: 0.68rem;
-      padding: 5px 12px;
-      border-radius: 20px;
+      font-size: 0.65rem;
+      padding: 4px 8px;
+      border-radius: 8px;
       font-weight: 700;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       font-family: 'Outfit', sans-serif;
     }
 
@@ -163,21 +280,21 @@
       background: var(--success-bg);
       border: 1px solid var(--success-border);
       color: var(--success);
-      box-shadow: 0 0 12px rgba(16, 185, 129, 0.12);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.15);
     }
 
     .premium-badge-failed {
       background: var(--danger-bg);
       border: 1px solid var(--danger-border);
       color: var(--danger);
-      box-shadow: 0 0 12px rgba(239, 68, 68, 0.12);
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.15);
     }
 
     .premium-badge-queued {
       background: var(--info-bg);
       border: 1px solid var(--info-border);
       color: var(--info);
-      box-shadow: 0 0 12px rgba(59, 130, 246, 0.12);
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.15);
       animation: pulseGlow 2.5s infinite alternate ease-in-out;
     }
 
@@ -187,12 +304,11 @@
         border-color: rgba(59, 130, 246, 0.25);
       }
       100% {
-        box-shadow: 0 0 14px rgba(59, 130, 246, 0.3);
+        box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
         border-color: rgba(59, 130, 246, 0.6);
       }
     }
 
-    /* Spinner Animation */
     .spinner {
       animation: spin 1.4s linear infinite;
       width: 10px;
@@ -204,7 +320,6 @@
       to { transform: rotate(360deg); }
     }
 
-    /* Premium Buttons */
     .btn-premium-regen {
       display: inline-flex;
       align-items: center;
@@ -213,20 +328,19 @@
       border: 1px solid rgba(255, 255, 255, 0.15);
       color: var(--text-secondary);
       font-weight: 600;
-      font-size: 0.72rem;
-      padding: 5px 12px;
+      font-size: 0.7rem;
+      padding: 4px 10px;
       border-radius: 6px;
       cursor: pointer;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
     }
 
     .btn-premium-regen:hover {
       background: rgba(99, 102, 241, 0.18);
       border-color: rgba(99, 102, 241, 0.5);
       color: #a5b4fc;
-      box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
       transform: translateY(-1px);
     }
 
@@ -235,234 +349,184 @@
     }
 
     .btn-premium-regen svg {
-      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.5s ease;
     }
 
     .btn-premium-regen:hover svg {
       transform: rotate(360deg);
     }
-
-    /* Form Fields for Voice configuration */
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      flex: 1;
-    }
-
-    .form-label {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text-muted);
-    }
-
-    .form-row {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-
-    select.premium-select {
-      background: var(--surface-raised);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 14px;
-      color: var(--text);
-      font-family: inherit;
-      font-size: 0.85rem;
-      outline: none;
-      transition: all 0.2s ease;
-      cursor: pointer;
-    }
-
-    select.premium-select:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 8px var(--accent-glow);
-    }
-
-    /* Primary Accent Button */
-    .btn-premium-primary {
-      background: linear-gradient(135deg, var(--accent) 0%, #4f46e5 100%);
-      border: none;
-      color: white;
-      font-weight: 600;
-      font-size: 0.88rem;
-      padding: 12px 24px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-    }
-
-    .btn-premium-primary:hover {
-      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
-      transform: translateY(-1px);
-    }
-
-    .btn-premium-primary:active {
-      transform: translateY(1px);
-    }
-
-    .voice-preview-btn {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: var(--info);
-      transition: all 0.2s ease;
-    }
-
-    .voice-preview-btn:hover {
-      background: rgba(59, 130, 246, 0.2);
-      border-color: rgba(59, 130, 246, 0.4);
-      transform: scale(1.08);
-    }
   </style>
   <script>
-    const geminiVoices = [
-      { id: 'Kore', name: 'Kore (Female)', avatar: '👩', desc: 'Standard Female (Skincare/Cosmetic)' },
-      { id: 'Fenrir', name: 'Fenrir (Male)', avatar: '🧔', desc: 'Deep/Heavy Male (Otomotif/High-End)' },
-      { id: 'Puck', name: 'Puck (Male)', avatar: '👦', desc: 'Ceria, Playful (Makanan/Promo Kilat)' },
-      { id: 'Charon', name: 'Charon (Male)', avatar: '👨', desc: 'Formal, News Style (Review Tech/Finansial)' },
-      { id: 'Leda', name: 'Leda (Female)', avatar: '👵', desc: 'Hangat, Ramah (Edukasi/Ibu Anak)' },
-      { id: 'Zephyr', name: 'Zephyr (Male)', avatar: '🧔', desc: 'Kasual, Santai (Storytelling/Daily Vlog)' },
-      { id: 'Orus', name: 'Orus (Male)', avatar: '🧔', desc: 'Tegas, Optimis (Motivasi/Online Course)' },
-      { id: 'Aoede', name: 'Aoede (Female)', avatar: '👩‍🎨', desc: 'Artistik, Ekspresif (Fashion/Seni)' },
-      { id: 'Callirrhoe', name: 'Callirrhoe (Female)', avatar: '👩‍💼', desc: 'Berenergi, Dinamis (Olahraga/Lifestyle)' },
-      { id: 'Autonoe', name: 'Autonoe (Female)', avatar: '👩‍🎓', desc: 'Dewasa, Profesional (Bisnis/Corporate)' },
-      { id: 'Enceladus', name: 'Enceladus (Male)', avatar: '👨‍🎤', desc: 'Misterius, Berat (Teaser/Trailer)' }
-    ];
-
-    const minimaxVoices = [
-      { id: 'Indonesian_casual_reporter_vv2', name: 'Casual Reporter (Male)', avatar: '👨', desc: 'Laki-laki (Casual Reporter - Vv2)' },
-      { id: 'Indonesian_compelling_storyteller_vv2', name: 'Compelling Storyteller (Male)', avatar: '👨', desc: 'Laki-laki (Storyteller - Vv2)' },
-      { id: 'Indonesian_expressive_podcaster_vv2', name: 'Expressive Podcaster (Male)', avatar: '👨', desc: 'Laki-laki (Podcaster - Vv2)' },
-      { id: 'Indonesian_energetic_streamer_vv2', name: 'Energetic Streamer (Male)', avatar: '👨', desc: 'Laki-laki (Streamer - Vv2)' },
-      { id: 'Indonesian_intellectual_commentator_vv2', name: 'Intellectual Commentator (Female)', avatar: '👩', desc: 'Perempuan (Commentator - Vv2)' },
-      { id: 'Indonesian_professional_anchor_vv2', name: 'Professional Anchor (Female)', avatar: '👩', desc: 'Perempuan (Anchor - Vv2)' },
-      { id: 'Indonesian_crisp_reporter_vv2', name: 'Crisp Reporter (Female)', avatar: '👩', desc: 'Perempuan (Crisp Reporter - Vv2)' }
-    ];
-
-    function handleProviderChange() {
-      const provider = document.getElementById('voice-provider').value;
-      const personaSelect = document.getElementById('voice-persona');
-      personaSelect.innerHTML = '';
-      
-      const voices = provider === 'minimax' ? minimaxVoices : geminiVoices;
-      voices.forEach(v => {
-        const opt = document.createElement('option');
-        opt.value = v.id;
-        opt.textContent = `${v.avatar} ${v.name} - ${v.desc}`;
-        personaSelect.appendChild(opt);
+    function toggleAccordion(index) {
+      const items = document.querySelectorAll('.accordion-item');
+      items.forEach((item, idx) => {
+        if (idx === index) {
+          item.classList.toggle('active');
+        } else {
+          item.classList.remove('active');
+        }
       });
     }
-
-    window.onload = () => {
-      document.getElementById('voice-provider').addEventListener('change', handleProviderChange);
-      handleProviderChange(); // Initial load
-    };
   </script>
 </head>
 <body>
   <div class="container">
     <div>
-      <h1>MAKNA Studio Premium UI Mockup</h1>
-      <p class="subtitle">Mockup visual status badges, regenerate buttons, dan konfigurasi panel TTS/Voice.</p>
+      <h1>MAKNA Studio Layout Upgrade Mockup</h1>
+      <p class="subtitle">Accordion blueprint tiap scene &amp; visual gallery grid untuk status progress render.</p>
     </div>
 
-    <!-- PANEL 1: Voice & TTS Configuration -->
+    <!-- PANEL 1: ACCORDION BLUEPRINT -->
     <div class="panel-card">
       <div class="panel-title">
-        🎙️ Voice &amp; TTS Profile Settings
+        📂 Visual &amp; Voice Assets Blueprint (Accordion)
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" for="voice-provider">Voice Provider</label>
-          <select id="voice-provider" class="premium-select">
-            <option value="google_tts">Google TTS</option>
-            <option value="minimax">Minimax API</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="voice-persona">Voice Persona (Speaker Profile)</label>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <select id="voice-persona" class="premium-select" style="flex: 1;">
-              <!-- Loaded Dynamically -->
-            </select>
-            <button type="button" class="voice-preview-btn" title="Dengarkan Contoh Suara">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-      <div style="display: flex; justify-content: flex-end;">
-        <button type="button" class="btn-premium-primary">
-          ✓ Save &amp; Apply Voice Profile
-        </button>
-      </div>
-    </div>
-
-    <!-- PANEL 2: Production Progress Mockup -->
-    <div class="panel-card">
-      <div class="panel-title">
-        🎬 Asset &amp; VO Generation Progress
-      </div>
-      <div class="progress-list">
+      <div class="accordion-container">
         
-        <!-- Row 1: Succeeded Voiceover -->
-        <div class="progress-row">
-          <div class="info-col">
-            <div class="asset-title">🎙️ Voiceover (Scene 1)</div>
-            <div class="asset-title" style="font-weight: 400; font-size: 0.8rem; color: var(--accent);">Voice: Orus (Google TTS)</div>
-            <div class="asset-prompt">"Hai guys! Hari ini kita akan merapikan rumah bersama geng PawVille..."</div>
+        <!-- Scene 1 accordion -->
+        <div class="accordion-item active" id="sc-1">
+          <div class="accordion-header" onclick="toggleAccordion(0)">
+            <div class="accordion-header-title">
+              🎬 Scene 1: Mochi Perkenalan Rumah Baru
+            </div>
+            <div class="accordion-arrow">▼</div>
           </div>
-          <div class="action-col">
-            <span class="premium-badge premium-badge-succeeded">Succeeded</span>
+          <div class="accordion-content">
+            <div class="accordion-body-padding">
+              <div class="blueprint-vo-text">
+                🎙️ <strong>Voiceover Narration:</strong><br>
+                "Hai guys! Hari ini kita akan merapikan rumah baru bersama geng PawVille. Mochi kelihatan bersemangat banget nungguin kita beres-beres!"
+              </div>
+              <div class="blueprint-shot-card">
+                📸 <strong>Shot 1 Prompt:</strong> Mochi the chubby grey cat sitting happily inside a wooden moving box, bright sunny cozy living room, claymation 3d style.
+              </div>
+              <div class="blueprint-shot-card">
+                📸 <strong>Shot 2 Prompt:</strong> A wide shot of the new living room full of cardboard boxes, cinematic sunlight streaming through windows.
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Row 2: Queued Visual Shot -->
-        <div class="progress-row">
-          <div class="info-col">
-            <div class="asset-title">🎬 Visual Shot (Scene 1, Shot 2)</div>
-            <div class="asset-prompt">T2I / Image Prompt: Mochi the chubby grey cat looking happy in the living room...</div>
+        <!-- Scene 2 accordion -->
+        <div class="accordion-item" id="sc-2">
+          <div class="accordion-header" onclick="toggleAccordion(1)">
+            <div class="accordion-header-title">
+              🎬 Scene 2: Coco Membantu Beres-beres
+            </div>
+            <div class="accordion-arrow">▼</div>
           </div>
-          <div class="action-col">
-            <span class="premium-badge premium-badge-queued">
-              <svg class="spinner" viewBox="0 0 24 24" fill="none">
+          <div class="accordion-content">
+            <div class="accordion-body-padding">
+              <div class="blueprint-vo-text">
+                🎙️ <strong>Voiceover Narration:</strong><br>
+                "Tapi Coco malah sibuk sendiri mainin selotip. Aduh Coco, bukannya bantuin malah bikin berantakan!"
+              </div>
+              <div class="blueprint-shot-card">
+                📸 <strong>Shot 1 Prompt:</strong> Coco the cute corgi running with a roll of tape in his mouth, playful pose, green clean yard visible outside, claymation 3d style.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scene 3 accordion -->
+        <div class="accordion-item" id="sc-3">
+          <div class="accordion-header" onclick="toggleAccordion(2)">
+            <div class="accordion-header-title">
+              🎬 Scene 3: Hasil Akhir Merapikan Rumah
+            </div>
+            <div class="accordion-arrow">▼</div>
+          </div>
+          <div class="accordion-content">
+            <div class="accordion-body-padding">
+              <div class="blueprint-vo-text">
+                🎙️ <strong>Voiceover Narration:</strong><br>
+                "Akhirnya setelah seharian lelah, ruang tamu baru kita selesai dirapikan. Nyaman banget kan kalau bersih!"
+              </div>
+              <div class="blueprint-shot-card">
+                📸 <strong>Shot 1 Prompt:</strong> A cozy room with a gray cat and a corgi sleeping happily together on a fluffy rug, warm fireplace glow, claymation 3d style.
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PANEL 2: GALLERY GRID -->
+    <div class="panel-card">
+      <div class="panel-title">
+        🎬 Asset &amp; VO Generation Progress (Visual Gallery Grid)
+      </div>
+      <div class="gallery-grid">
+        
+        <!-- Card 1: Succeeded visual asset -->
+        <div class="gallery-card">
+          <div class="gallery-media-wrapper">
+            <img class="gallery-media" src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=600" alt="Succeeded Shot">
+            <div class="gallery-badge-overlay">
+              <span class="premium-badge premium-badge-succeeded">Succeeded</span>
+            </div>
+          </div>
+          <div class="gallery-card-content">
+            <div class="gallery-card-info">
+              <div class="gallery-card-title">🎬 Scene 1, Shot 1 (Visual)</div>
+              <div class="gallery-card-desc">Mochi the chubby grey cat sitting happily inside a wooden moving box...</div>
+            </div>
+            <div class="gallery-card-footer">
+              <span style="font-size: 0.7rem; color: var(--text-muted);">T2I/I2V Mode</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Queued visual asset -->
+        <div class="gallery-card">
+          <div class="gallery-media-wrapper" style="background: #111; display: flex; align-items: center; justify-content: center;">
+            <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem;">
+              <svg class="spinner" viewBox="0 0 24 24" fill="none" style="width: 24px; height: 24px; color: var(--info); margin-bottom: 8px;">
                 <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" stroke-dasharray="30 30" />
               </svg>
-              Queued
-            </span>
+              <div>Generating Frame...</div>
+            </div>
+            <div class="gallery-badge-overlay">
+              <span class="premium-badge premium-badge-queued">Queued</span>
+            </div>
+          </div>
+          <div class="gallery-card-content">
+            <div class="gallery-card-info">
+              <div class="gallery-card-title">🎬 Scene 1, Shot 2 (Visual)</div>
+              <div class="gallery-card-desc">A wide shot of the new living room full of cardboard boxes...</div>
+            </div>
+            <div class="gallery-card-footer">
+              <span style="font-size: 0.7rem; color: var(--text-muted);">T2I Mode</span>
+            </div>
           </div>
         </div>
 
-        <!-- Row 3: Failed Visual Shot with Premium Regen Button -->
-        <div class="progress-row">
-          <div class="info-col">
-            <div class="asset-title">🎬 Visual Shot (Scene 2, Shot 1)</div>
-            <div class="asset-prompt">T2I / Image Prompt: Coco the Corgi jumping energetically in the yard...</div>
-            <div class="asset-prompt" style="color: var(--danger); font-size: 0.72rem;">Error: Start-frame generation timed out after 60s</div>
+        <!-- Card 3: Failed visual asset with regen -->
+        <div class="gallery-card">
+          <div class="gallery-media-wrapper" style="background: #180c0d; display: flex; align-items: center; justify-content: center;">
+            <div style="text-align: center; color: var(--danger); font-size: 0.8rem;">
+              <span style="font-size: 1.5rem; display: block; margin-bottom: 4px;">⚠️</span>
+              <div>Generation Failed</div>
+            </div>
+            <div class="gallery-badge-overlay">
+              <span class="premium-badge premium-badge-failed">Failed</span>
+            </div>
           </div>
-          <div class="action-col">
-            <span class="premium-badge premium-badge-failed">Failed</span>
-            <button type="button" class="btn-premium-regen">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
-              </svg>
-              Regenerate
-            </button>
+          <div class="gallery-card-content">
+            <div class="gallery-card-info">
+              <div class="gallery-card-title">🎬 Scene 2, Shot 1 (Visual)</div>
+              <div class="gallery-card-desc">Coco the cute corgi running with a roll of tape in his mouth...</div>
+              <div style="color: var(--danger); font-size: 0.7rem; margin-top: 4px;">Timeout after 5m</div>
+            </div>
+            <div class="gallery-card-footer">
+              <button type="button" class="btn-premium-regen">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                </svg>
+                Regenerate
+              </button>
+            </div>
           </div>
         </div>
 
