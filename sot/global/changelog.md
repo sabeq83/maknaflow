@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.25.19 — Fix: Inject character canonical prompts into planned t2i/t2v database columns directly (24/08/2026)
+- Load universe characters and prepend canonical descriptions to visual shot prompts during production package creation
+- Ensure start frame and visual adapters safeguard against double-prepending
+
 ## V2.25.18 — Attach full universe context to Blueprint, Script, and Research routes (24/08/2026)
 - Load and inject universe characters and locations in blueprint/generate route
 - Load and inject universe characters and locations in scripts/generate route
