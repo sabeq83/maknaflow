@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.25.15 — Fix YT Studio Production Plan Scene Index Sequential (24/08/2026)
+- Fix prompt example and normalize scene and shot indices to be 1-indexed before validation
+
 ## V2.25.14 — Fix YT Studio Generate Plan Universe Import (24/08/2026)
 - Fix getUniverseProfile and getVisualIdentity imports in production-plan API route
 
