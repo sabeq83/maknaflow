@@ -717,6 +717,7 @@ export default function UniverseManagerPage() {
                           setEditingId(u.id);
                           setFormData(mapUniverseRecordToForm(u));
                           setShowForm(true);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
                         }} style={{ padding: '6px 12px', borderRadius: '4px', border: 'none', backgroundColor: 'var(--status-info)', color: 'var(--text-primary)', cursor: 'pointer' }}>Edit</button>
                         <button onClick={() => handleUniverseArchive(u.id)} style={{ padding: '6px 12px', borderRadius: '4px', border: 'none', backgroundColor: 'var(--status-danger)', color: 'var(--text-primary)', cursor: 'pointer' }}>Archive</button>
                       </td>
@@ -992,6 +993,7 @@ export default function UniverseManagerPage() {
                           depiction_mode: c.depiction_mode || 'normal', reference_type: c.reference_type || 'identity', historical_period: c.historical_period || ''
                         });
                         setShowCharForm(true);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
                       }} style={{ flex: 1, padding: '8px', borderRadius: '4px', border: 'none', backgroundColor: 'var(--status-info)', color: 'var(--text-primary)', cursor: 'pointer' }}>Edit</button>
                       <button onClick={() => handleCharDelete(c.id)} style={{ padding: '8px', borderRadius: '4px', border: 'none', backgroundColor: 'var(--status-danger)', color: 'var(--text-primary)', cursor: 'pointer' }}>Delete</button>
                     </div>
@@ -1109,6 +1111,7 @@ export default function UniverseManagerPage() {
                             historical_period: l.historical_period || '', reference_type: l.reference_type || 'location'
                           });
                           setShowLocForm(true);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
                         }} style={{ padding: '6px 12px', borderRadius: '4px', border: 'none', backgroundColor: 'var(--status-info)', color: 'var(--text-primary)', cursor: 'pointer' }}>Edit</button>
                         <button onClick={() => handleLocDelete(l.id)} style={{ padding: '6px 12px', borderRadius: '4px', border: 'none', backgroundColor: 'var(--status-danger)', color: 'var(--text-primary)', cursor: 'pointer' }}>Delete</button>
                       </td>

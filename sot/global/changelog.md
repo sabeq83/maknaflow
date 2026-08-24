@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.25.17 — Fix Universe Manager UI forms scrolling on Edit (24/08/2026)
+- Add smooth auto-scrolling to top of page when clicking Edit button on universe profiles, characters, or locations
+
 ## V2.25.16 — Implement Character Continuity and Hybrid Model in YT Studio (24/08/2026)
 - Load full universe data in production-plan route
 - Update planners to output subjects list and follow single line templates
