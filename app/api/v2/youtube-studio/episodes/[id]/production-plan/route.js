@@ -4,7 +4,7 @@ import {
   getLatestScript, 
   getChannelStrategy
 } from '@/lib/youtube-studio-repository';
-import { getUniverseProfile } from '@/lib/db';
+import { getUniverseProfile, getUniverseCharacters, getUniverseLocations } from '@/lib/db';
 import { getVisualIdentity } from '@/lib/visual-identity-repository';
 import { getGenerationProfile } from '@/lib/youtube-studio-generation-profiles';
 import { generateProductionPlan } from '@/lib/youtube-studio-production-planner';
@@ -71,7 +71,16 @@ export const POST = withYouTubeStudioAccess('write', async (req, { params }, use
       });
     }
 
-    const universe = strategy.brief_json?.universe_id ? await getUniverseProfile(strategy.brief_json.universe_id) : null;
+    let universe = null;
+    const universeId = strategy.brief_json?.universe_id;
+    if (universeId) {
+      const profile = await getUniverseProfile(universeId);
+      if (profile) {
+        const characters = await getUniverseCharacters(universeId) || [];
+        const locations = await getUniverseLocations(universeId) || [];
+        universe = { profile, characters, locations };
+      }
+    }
     const visualIdentity = strategy.brief_json?.visual_identity_preset_id ? await getVisualIdentity(strategy.brief_json.visual_identity_preset_id) : null;
 
     let productionMode = 'legacy_t2v';

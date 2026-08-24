@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.25.16 — Implement Character Continuity and Hybrid Model in YT Studio (24/08/2026)
+- Load full universe data in production-plan route
+- Update planners to output subjects list and follow single line templates
+- Dynamically resolve character references and inject canonical prompts into G-Labs webhook requests
+
 ## V2.25.15 — Fix YT Studio Production Plan Scene Index Sequential (24/08/2026)
 - Fix prompt example and normalize scene and shot indices to be 1-indexed before validation
 
