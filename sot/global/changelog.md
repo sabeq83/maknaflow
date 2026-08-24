@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.25.26 — Fix Visual Assets Filter in YouTube Studio Workspace (24/08/2026)
+- Updated UI asset filter from 'visual' to any type that is not 'voiceover' to support 'generated_visual' asset types from database schema.
+
 ## V2.25.25 — Accordion Scenes & Media Gallery Layout in YouTube Studio (24/08/2026)
 - Implemented collapsible accordion dividers per scene under the Visual & Voice Assets Blueprint section.
 - Restructured the progress tracker by separating Voiceover audio tracks and rendering Video & Image assets inside a responsive media gallery grid layout.

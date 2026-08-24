@@ -752,11 +752,11 @@ export function EpisodeWorkspace({
                           )}
 
                           {/* Segment 2: Visual Gallery Grid */}
-                          {packageAssets.filter(a => a.asset_type === 'visual').length > 0 && (
+                          {packageAssets.filter(a => a.asset_type !== 'voiceover').length > 0 && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                               <h5 style={{ margin: '0 0 4px 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>🎬 Video &amp; Image Assets</h5>
                               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '16px' }}>
-                                {packageAssets.filter(a => a.asset_type === 'visual').map((asset) => (
+                                {packageAssets.filter(a => a.asset_type !== 'voiceover').map((asset) => (
                                   <div key={asset.id} style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
                                     <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#000', overflow: 'hidden' }}>
                                       {asset.status === 'succeeded' && asset.output_asset_json ? (
