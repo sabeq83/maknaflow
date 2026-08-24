@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.25.14 — Fix YT Studio Generate Plan Universe Import (24/08/2026)
+- Fix getUniverseProfile and getVisualIdentity imports in production-plan API route
+
 ## V2.25.13 — Fix YT Studio Episode Ideas Parameters (24/08/2026)
 - Fix generateEpisodeIdeas parameter list structure in generate route
 

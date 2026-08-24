@@ -2,10 +2,10 @@ import { withYouTubeStudioAccess } from '@/lib/auth';
 import { 
   getEpisode, 
   getLatestScript, 
-  getChannelStrategy,
-  getUniverseProfile,
-  getVisualIdentityPreset
+  getChannelStrategy
 } from '@/lib/youtube-studio-repository';
+import { getUniverseProfile } from '@/lib/db';
+import { getVisualIdentity } from '@/lib/visual-identity-repository';
 import { getGenerationProfile } from '@/lib/youtube-studio-generation-profiles';
 import { generateProductionPlan } from '@/lib/youtube-studio-production-planner';
 import { 
@@ -72,7 +72,7 @@ export const POST = withYouTubeStudioAccess('write', async (req, { params }, use
     }
 
     const universe = strategy.brief_json?.universe_id ? await getUniverseProfile(strategy.brief_json.universe_id) : null;
-    const visualIdentity = strategy.brief_json?.visual_identity_preset_id ? await getVisualIdentityPreset(strategy.brief_json.visual_identity_preset_id) : null;
+    const visualIdentity = strategy.brief_json?.visual_identity_preset_id ? await getVisualIdentity(strategy.brief_json.visual_identity_preset_id) : null;
 
     let productionMode = 'legacy_t2v';
     try {
