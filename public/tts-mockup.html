@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAKNA Studio - TTS Control Mockup</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --background: #0b0f19;
+      --surface: #131b2e;
+      --surface-raised: #1e294b;
+      --surface-interactive: #2a3b68;
+      --accent: #3b82f6;
+      --accent-glow: rgba(59, 130, 246, 0.4);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: rgba(255, 255, 255, 0.08);
+      --status-success: #10b981;
+      --status-success-glow: rgba(16, 185, 129, 0.2);
+      --status-danger: #ef4444;
+      --status-danger-glow: rgba(239, 68, 68, 0.2);
+      --status-warning: #f59e0b;
+      --status-warning-glow: rgba(245, 158, 11, 0.2);
+    }
+
+    body {
+      margin: 0;
+      padding: 40px 20px;
+      background-color: var(--background);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background: rgba(19, 27, 46, 0.6);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    h4 {
+      margin: 0 0 20px 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .asset-progress-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .voiceover-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .voiceover-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    /* Bulk Action Button styling */
+    .btn-bulk-regen {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #93c5fd;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.05);
+    }
+
+    .btn-bulk-regen:hover {
+      background: var(--accent);
+      color: var(--text);
+      border-color: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+
+    .btn-bulk-regen:active {
+      transform: translateY(0);
+    }
+
+    .btn-bulk-regen svg {
+      transition: transform 0.6s ease;
+    }
+
+    .btn-bulk-regen:hover svg {
+      transform: rotate(360deg);
+    }
+
+    /* Voiceover list items */
+    .voiceover-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .vo-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(30, 41, 75, 0.35);
+      border: 1px solid var(--border);
+      padding: 12px 18px;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .vo-item:hover {
+      background: rgba(30, 41, 75, 0.6);
+      border-color: rgba(59, 130, 246, 0.2);
+    }
+
+    .vo-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      padding-right: 16px;
+    }
+
+    .vo-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .vo-preview {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-style: italic;
+      line-height: 1.4;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 420px;
+    }
+
+    .vo-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Custom play button styling */
+    .btn-play-vo {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.8rem;
+      padding: 0;
+    }
+
+    .btn-play-vo:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: scale(1.08);
+    }
+
+    .btn-play-vo.playing {
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    /* Premium Badges */
+    .premium-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.03em;
+      text-shadow: 0 0 8px currentColor;
+    }
+
+    .badge-succeeded {
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--status-success);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      box-shadow: 0 0 10px var(--status-success-glow);
+    }
+
+    .badge-failed {
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--status-danger);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      box-shadow: 0 0 10px var(--status-danger-glow);
+    }
+
+    .badge-queued {
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--status-warning);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      box-shadow: 0 0 10px var(--status-warning-glow);
+    }
+
+    /* Individual Regenerate button */
+    .btn-single-regen {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+
+    .btn-single-regen:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    /* Audio Context Dummy Message */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(30, 41, 75, 0.95);
+      border: 1px solid var(--accent);
+      color: var(--text);
+      padding: 12px 24px;
+      border-radius: 30px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Loading Spinner animation */
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+    .spinner {
+      animation: spin 1s linear infinite;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h4>Asset & VO Generation Progress</h4>
+
+    <div class="asset-progress-section">
+      <!-- Section header with title and the Bulk Action Button -->
+      <div class="voiceover-header">
+        <h5 class="voiceover-title">🎙️ Voiceover Audio Tracks</h5>
+        <button class="btn-bulk-regen" id="btnBulkRegen">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+          </svg>
+          Regenerate All TTS
+        </button>
+      </div>
+
+      <!-- Compact Audio list with inline Play/Pause and Badges -->
+      <div class="voiceover-list" id="voList">
+        
+        <!-- Row 1: Succeeded with Play -->
+        <div class="vo-item" data-id="1">
+          <div class="vo-info">
+            <span class="vo-label">Scene 1 Voiceover</span>
+            <span class="vo-preview">"Hai teman-teman! Hari ini kita akan menjelajahi keindahan desa magis PawVille..."</span>
+          </div>
+          <div class="vo-controls">
+            <span class="premium-badge badge-succeeded">SUCCEEDED</span>
+            <button class="btn-play-vo" title="Play Voiceover" onclick="togglePlay(1)">▶</button>
+            <button class="btn-single-regen" onclick="regenerateItem(1)">↻ Regenerate</button>
+          </div>
+        </div>
+
+        <!-- Row 2: Succeeded with Play -->
+        <div class="vo-item" data-id="2">
+          <div class="vo-info">
+            <span class="vo-label">Scene 2 Voiceover</span>
+            <span class="vo-preview">"Dahulu kala, hiduplah seekor anak kucing kecil yang penuh petualangan..."</span>
+          </div>
+          <div class="vo-controls">
+            <span class="premium-badge badge-succeeded">SUCCEEDED</span>
+            <button class="btn-play-vo" title="Play Voiceover" onclick="togglePlay(2)">▶</button>
+            <button class="btn-single-regen" onclick="regenerateItem(2)">↻ Regenerate</button>
+          </div>
+        </div>
+
+        <!-- Row 3: Failed status -->
+        <div class="vo-item" data-id="3">
+          <div class="vo-info">
+            <span class="vo-label">Scene 3 Voiceover</span>
+            <span class="vo-preview">"Namun di tengah jalan, awan mendung tiba-tiba menutupi seluruh desa..."</span>
+          </div>
+          <div class="vo-controls">
+            <span class="premium-badge badge-failed">FAILED</span>
+            <button class="btn-single-regen" onclick="regenerateItem(3)">↻ Regenerate</button>
+          </div>
+        </div>
+
+        <!-- Row 4: Queued status -->
+        <div class="vo-item" data-id="4">
+          <div class="vo-info">
+            <span class="vo-label">Scene 4 Voiceover</span>
+            <span class="vo-preview">"Akankah mereka berhasil menyelamatkan PawVille? Temukan jawabannya..."</span>
+          </div>
+          <div class="vo-controls">
+            <span class="premium-badge badge-queued">
+              <svg class="spinner" style="width: 10px; height: 10px; margin-right: 4px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4">
+                <circle cx="12" cy="12" r="10" stroke-dasharray="30 30" />
+              </svg>
+              QUEUED
+            </span>
+            <button class="btn-single-regen" disabled style="opacity: 0.5; cursor: not-allowed;">↻ Regenerate</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast">Playing Audio Preview...</div>
+
+  <script>
+    let activePlayingId = null;
+    let playingTimeout = null;
+
+    function togglePlay(id) {
+      const voItem = document.querySelector(`.vo-item[data-id="${id}"]`);
+      const playBtn = voItem.querySelector('.btn-play-vo');
+      const toast = document.getElementById('toast');
+
+      if (activePlayingId === id) {
+        // Pause
+        playBtn.innerHTML = '▶';
+        playBtn.classList.remove('playing');
+        activePlayingId = null;
+        toast.classList.remove('show');
+        clearTimeout(playingTimeout);
+      } else {
+        // Stop any current play
+        if (activePlayingId !== null) {
+          const oldVo = document.querySelector(`.vo-item[data-id="${activePlayingId}"]`);
+          if (oldVo) {
+            const oldBtn = oldVo.querySelector('.btn-play-vo');
+            if (oldBtn) {
+              oldBtn.innerHTML = '▶';
+              oldBtn.classList.remove('playing');
+            }
+          }
+        }
+
+        // Play
+        playBtn.innerHTML = '⏸';
+        playBtn.classList.add('playing');
+        activePlayingId = id;
+        toast.innerHTML = `🔊 Playing Scene ${id} Voiceover...`;
+        toast.classList.add('show');
+
+        // Simulate 4s audio play end
+        clearTimeout(playingTimeout);
+        playingTimeout = setTimeout(() => {
+          playBtn.innerHTML = '▶';
+          playBtn.classList.remove('playing');
+          activePlayingId = null;
+          toast.classList.remove('show');
+        }, 4000);
+      }
+    }
+
+    function regenerateItem(id) {
+      const voItem = document.querySelector(`.vo-item[data-id="${id}"]`);
+      const controls = voItem.querySelector('.vo-controls');
+      
+      // Change to Queued status
+      controls.innerHTML = `
+        <span class="premium-badge badge-queued">
+          <svg class="spinner" style="width: 10px; height: 10px; margin-right: 4px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4">
+            <circle cx="12" cy="12" r="10" stroke-dasharray="30 30" />
+          </svg>
+          QUEUED
+        </span>
+        <button class="btn-single-regen" disabled style="opacity: 0.5; cursor: not-allowed;">↻ Regenerate</button>
+      `;
+
+      // Return to Succeeded status after 2 seconds
+      setTimeout(() => {
+        controls.innerHTML = `
+          <span class="premium-badge badge-succeeded">SUCCEEDED</span>
+          <button class="btn-play-vo" title="Play Voiceover" onclick="togglePlay(${id})">▶</button>
+          <button class="btn-single-regen" onclick="regenerateItem(${id})">↻ Regenerate</button>
+        `;
+      }, 2000);
+    }
+
+    // Bulk action click animation simulation
+    document.getElementById('btnBulkRegen').addEventListener('click', function() {
+      const btn = this;
+      btn.style.opacity = '0.7';
+      btn.style.pointerEvents = 'none';
+      btn.innerHTML = `
+        <svg class="spinner" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10" stroke-dasharray="30 30"/>
+        </svg>
+        Regenerating All...
+      `;
+
+      // Trigger all to queued
+      const items = [1, 2, 3, 4];
+      items.forEach(id => {
+        const voItem = document.querySelector(`.vo-item[data-id="${id}"]`);
+        const controls = voItem.querySelector('.vo-controls');
+        controls.innerHTML = `
+          <span class="premium-badge badge-queued">
+            <svg class="spinner" style="width: 10px; height: 10px; margin-right: 4px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4">
+              <circle cx="12" cy="12" r="10" stroke-dasharray="30 30" />
+            </svg>
+            QUEUED
+          </span>
+          <button class="btn-single-regen" disabled style="opacity: 0.5; cursor: not-allowed;">↻ Regenerate</button>
+        `;
+      });
+
+      // Restore all to succeeded after 3.5 seconds
+      setTimeout(() => {
+        items.forEach(id => {
+          const voItem = document.querySelector(`.vo-item[data-id="${id}"]`);
+          const controls = voItem.querySelector('.vo-controls');
+          controls.innerHTML = `
+            <span class="premium-badge badge-succeeded">SUCCEEDED</span>
+            <button class="btn-play-vo" title="Play Voiceover" onclick="togglePlay(${id})">▶</button>
+            <button class="btn-single-regen" onclick="regenerateItem(${id})">↻ Regenerate</button>
+          `;
+        });
+
+        btn.style.opacity = '1';
+        btn.style.pointerEvents = 'auto';
+        btn.innerHTML = `
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+          </svg>
+          Regenerate All TTS
+        `;
+      }, 3500);
+    });
+  </script>
+</body>
+</html>

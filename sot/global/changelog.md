@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.25.29 — Bulk TTS Invalidation & Inline Play Controls (24/08/2026)
+- Created invalidateAllVoiceoverAssets database transaction logic and bulk-tts route API.
+- Replaced native audio player with inline premium custom Play/Pause toggle buttons inside Voiceover list.
+- Added Regenerate All TTS bulk button trigger to the progress tracks list.
+
 ## V2.25.28 — TTS Voice Summary on Video Production Tab (24/08/2026)
 - Added TTS Voice provider and persona summary to the production plan card header.
 - Included a navigation hint to the Scene Plan tab for draft packages.

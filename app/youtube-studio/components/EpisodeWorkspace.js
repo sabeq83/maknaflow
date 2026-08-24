@@ -214,7 +214,12 @@ export function EpisodeWorkspace({
   
   // Review props
   isRenderingFinal,
-  handleFinalRender
+  handleFinalRender,
+
+  // Custom play & bulk TTS props
+  playingAssetId,
+  handleTogglePlayVO,
+  handleBulkRegenerateTTS
 }) {
   const [activeAccordionSceneIdx, setActiveAccordionSceneIdx] = useState(0);
 
@@ -725,15 +730,25 @@ export function EpisodeWorkspace({
                           {/* Segment 1: Voiceover List */}
                           {packageAssets.filter(a => a.asset_type === 'voiceover').length > 0 && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                              <h5 style={{ margin: '0 0 4px 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>🎙️ Voiceover Audio Tracks</h5>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                                <h5 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>🎙️ Voiceover Audio Tracks</h5>
+                                <button
+                                  type="button"
+                                  className={styles.btnPremiumRegen}
+                                  onClick={handleBulkRegenerateTTS}
+                                  style={{ padding: '4px 10px', fontSize: '0.72rem' }}
+                                >
+                                  <svg style={{ width: '10px', height: '10px', marginRight: '4px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                                  </svg>
+                                  Regenerate All TTS
+                                </button>
+                              </div>
                               {packageAssets.filter(a => a.asset_type === 'voiceover').map((asset) => (
                                 <div key={asset.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-raised)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)' }}>
                                   <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                     <div style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Scene {asset.scene_index + 1} Voiceover</div>
                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>"{asset.prompt_snapshot?.substring(0, 100)}..."</div>
-                                    {asset.status === 'succeeded' && asset.output_asset_json?.audio_path && (
-                                      <audio src={getMediaUrl(asset.output_asset_json.audio_path)} controls style={{ height: '28px', marginTop: '6px' }} />
-                                    )}
                                     {asset.error_message && (
                                       <div style={{ fontSize: '0.7rem', color: 'var(--status-danger)', marginTop: '4px' }}>Error: {asset.error_message}</div>
                                     )}
@@ -751,6 +766,30 @@ export function EpisodeWorkspace({
                                       )}
                                       {asset.status.toUpperCase()}
                                     </span>
+                                    {asset.status === 'succeeded' && asset.output_asset_json?.audio_path && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleTogglePlayVO(asset)}
+                                        style={{
+                                          width: '28px',
+                                          height: '28px',
+                                          borderRadius: '50%',
+                                          background: playingAssetId === asset.id ? 'var(--accent)' : 'rgba(255, 255, 255, 0.05)',
+                                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                                          color: 'var(--text)',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          cursor: 'pointer',
+                                          fontSize: '0.75rem',
+                                          transition: 'all 0.2s',
+                                          padding: 0
+                                        }}
+                                        title={playingAssetId === asset.id ? 'Pause' : 'Play Voiceover'}
+                                      >
+                                        {playingAssetId === asset.id ? '⏸' : '▶'}
+                                      </button>
+                                    )}
                                     {asset.status !== 'draft' && (
                                       <button
                                         type="button"

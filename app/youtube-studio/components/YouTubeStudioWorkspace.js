@@ -799,6 +799,58 @@ export function YouTubeStudioWorkspace() {
     }
   }
 
+  const [playingAudio, setPlayingAudio] = useState(null);
+  const [playingAssetId, setPlayingAssetId] = useState(null);
+
+  const handleTogglePlayVO = (asset) => {
+    const audioUrl = getMediaUrl(asset.output_asset_json?.audio_path);
+    if (!audioUrl) return;
+
+    if (playingAssetId === asset.id) {
+      if (playingAudio) {
+        playingAudio.pause();
+        setPlayingAudio(null);
+        setPlayingAssetId(null);
+      }
+    } else {
+      if (playingAudio) {
+        playingAudio.pause();
+      }
+      const newAudio = new Audio(audioUrl);
+      newAudio.play();
+      newAudio.onended = () => {
+        setPlayingAudio(null);
+        setPlayingAssetId(null);
+      };
+      setPlayingAudio(newAudio);
+      setPlayingAssetId(asset.id);
+    }
+  };
+
+  async function handleBulkRegenerateTTS() {
+    setErrorMsg('');
+    setNotice(null);
+    try {
+      const res = await fetch(`/api/v2/youtube-studio/episodes/${selectedEpisode.id}/bulk-tts`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      if (data.success) {
+        const pRes = await fetch(`/api/v2/youtube-studio/episodes/${selectedEpisode.id}/production-plan`);
+        const pData = await pRes.json();
+        if (pData.success && pData.data) {
+          setActivePackage(pData.data.package);
+          setPackageAssets(pData.data.assets || []);
+        }
+        triggerNotice('success', `Bulk TTS regeneration scheduled successfully (${data.count} tracks).`);
+      } else {
+        setErrorMsg(data.error || 'Failed to trigger bulk TTS regeneration.');
+      }
+    } catch (e) {
+      setErrorMsg('Failed to trigger bulk TTS regeneration.');
+    }
+  }
+
   async function handleRegenerateAsset(assetId) {
     setErrorMsg('');
     setNotice(null);
@@ -1353,6 +1405,11 @@ export function YouTubeStudioWorkspace() {
             isApprovingPlan={isApprovingPlan}
             handleApproveProductionPlan={handleApproveProductionPlan}
             handleRegenerateAsset={handleRegenerateAsset}
+            
+            // Custom play & bulk TTS props
+            playingAssetId={playingAssetId}
+            handleTogglePlayVO={handleTogglePlayVO}
+            handleBulkRegenerateTTS={handleBulkRegenerateTTS}
             
             // Review props
             isRenderingFinal={isRenderingFinal}
