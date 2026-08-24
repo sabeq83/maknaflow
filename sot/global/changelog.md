@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.25.23 — Feat: Add inline visual previews to YouTube Studio progress tab (24/08/2026)
+- Add image & video preview elements to EpisodeWorkspace UI
+- Extend visual generation polling timeout to 5 minutes
+
 ## V2.25.22 — Fix: Add missing await to getAllSchedulerConfigs in scheduler.js (24/08/2026)
 - Await configs loading to fix TypeError inside V4 scheduler tick loop
 

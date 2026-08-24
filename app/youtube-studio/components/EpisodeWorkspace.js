@@ -568,6 +568,30 @@ export function EpisodeWorkspace({
                                     Error: {asset.error_message}
                                   </span>
                                 )}
+                                {asset.status === 'succeeded' && asset.output_asset_json && (
+                                  <div style={{ marginTop: '8px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                    {asset.output_asset_json.image_path && (
+                                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Start Frame:</span>
+                                        <img 
+                                          src={asset.output_asset_json.image_path} 
+                                          alt="Start Frame" 
+                                          style={{ width: '160px', height: '90px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--border-subtle)' }} 
+                                        />
+                                      </div>
+                                    )}
+                                    {asset.output_asset_json.video_path && (
+                                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Video Clip:</span>
+                                        <video 
+                                          src={asset.output_asset_json.video_path} 
+                                          controls
+                                          style={{ width: '160px', height: '90px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--border-subtle)', background: '#000' }} 
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
                               </div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <span className={`badge`} style={{ 
