@@ -14,6 +14,7 @@ async function deployMacMiniStaging() {
     --exclude 'logs' \
     --exclude '.next' \
     --exclude 'public/uploads' \
+    --exclude 'public/temp' \
     ./ masbenu@100.95.245.55:~/maknaflow-staging/`;
   execSync(rsyncCmd, { stdio: 'inherit' });
 

@@ -14,6 +14,7 @@ async function deployMacMiniDev() {
     --exclude 'logs' \
     --exclude '.next' \
     --exclude 'public/uploads' \
+    --exclude 'public/temp' \
     ./ masbenu@100.95.245.55:~/maknaflow-dev/`;
   execSync(rsyncCmd, { stdio: 'inherit' });
 

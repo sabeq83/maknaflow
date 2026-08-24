@@ -12,19 +12,13 @@ const pool = new Pool({
 
 async function check() {
   try {
-    const epId = 'ytep_3suyq35q';
     await pool.query('SET search_path TO dev');
-
-    const epRes = await pool.query('SELECT * FROM youtube_episodes WHERE id = $1', [epId]);
-    const ep = epRes.rows[0];
-    console.log(`Episode status: ${ep.status}`);
-    
-    const scriptRes = await pool.query('SELECT * FROM youtube_episode_scripts WHERE episode_id = $1', [epId]);
-    if (scriptRes.rows.length > 0) {
-      const script = scriptRes.rows[0];
-      console.log(`Script found. ID: ${script.id}, Status: ${script.status}`);
+    const assetId = 'ytpa_vo_cn2q39kr';
+    const res = await pool.query('SELECT id, status, output_asset_json, created_at, updated_at FROM youtube_production_assets WHERE id = $1', [assetId]);
+    if (res.rows.length > 0) {
+      console.log('Asset details:', JSON.stringify(res.rows[0], null, 2));
     } else {
-      console.log('No script found for this episode');
+      console.log('Asset not found');
     }
   } catch (err) {
     console.error(err);

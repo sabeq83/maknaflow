@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.25.31 — Fix Rsync temp Exclusion & Gemini WAV conversion (24/08/2026)
+- Added --exclude 'public/temp' to all deploy-macmini scripts to prevent deleting dynamic files during code deployment.
+- Imported convertPcmToWav in youtube-studio-voice-adapter to wrap raw PCM buffer with WAV headers for Gemini TTS.
+
 ## V2.25.30 — Fix getMediaUrl Reference in YouTubeStudioWorkspace (24/08/2026)
 - Defined the getMediaUrl utility helper in YouTubeStudioWorkspace.js to resolve ReferenceError during play actions.
 
