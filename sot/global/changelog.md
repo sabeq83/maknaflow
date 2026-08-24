@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.25.11 — Affiliate Studio Brand Level Navigation (24/08/2026)
+- Mengaktifkan tab navigasi Planner, Production, Publishing, dan Performance di tingkat Brand Profile
+- Menyediakan aggregated database adapter dan endpoint API tingkat brand
+- Mengintegrasikan komponen visual BrandCalendarView, BrandProductionRuns, BrandPublishingDashboard, dan BrandPerformanceOverview
+
 ## V2.25.10 — Affiliate Studio Assisted Campaign Program Builder (23/08/2026)
 - Implement assisted builder adapter calling Gemini AI model to suggest marketing campaign blueprints
 - Expose POST programs suggest API endpoint generating configurations

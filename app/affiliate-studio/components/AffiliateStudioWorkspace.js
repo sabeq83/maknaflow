@@ -13,6 +13,10 @@ import { BrandOverview } from './BrandOverview';
 import { BrandProductPortfolio } from './BrandProductPortfolio';
 import { BrandCampaignPrograms } from './BrandCampaignPrograms';
 import { CampaignProgramDetail } from './CampaignProgramDetail';
+import { BrandCalendarView } from './BrandCalendarView';
+import { BrandProductionRuns } from './BrandProductionRuns';
+import { BrandPublishingDashboard } from './BrandPublishingDashboard';
+import { BrandPerformanceOverview } from './BrandPerformanceOverview';
 import styles from './AffiliateStudio.module.css';
 
 export function AffiliateStudioWorkspace() {
@@ -41,6 +45,13 @@ export function AffiliateStudioWorkspace() {
   const [programDetail, setProgramDetail] = useState(null);
   const [loadingProgramDetail, setLoadingProgramDetail] = useState(false);
   const [programDetailError, setProgramDetailError] = useState(null);
+
+  // Brand-level Dashboard States
+  const [brandCalendar, setBrandCalendar] = useState([]);
+  const [brandRuns, setBrandRuns] = useState([]);
+  const [brandPerf, setBrandPerf] = useState(null);
+  const [loadingBrandData, setLoadingBrandData] = useState(false);
+  const [brandDataError, setBrandDataError] = useState(null);
 
   const requestedProgramId = searchParams ? searchParams.get('program') : null;
   const abortControllerRef = useRef(null);
@@ -296,12 +307,54 @@ export function AffiliateStudioWorkspace() {
       });
   };
 
+  const loadBrandCalendar = (brandId) => {
+    setLoadingBrandData(true);
+    setBrandDataError(null);
+    fetch(`/api/v2/affiliate-studio/brands/${brandId}/planners`)
+      .then(res => res.json())
+      .then(body => {
+        if (body.success) setBrandCalendar(body.data || []);
+        else throw new Error(body.error || 'Failed to load brand calendar');
+      })
+      .catch(err => setBrandDataError(err.message))
+      .finally(() => setLoadingBrandData(false));
+  };
+
+  const loadBrandRuns = (brandId) => {
+    setLoadingBrandData(true);
+    setBrandDataError(null);
+    fetch(`/api/v2/affiliate-studio/brands/${brandId}/runs`)
+      .then(res => res.json())
+      .then(body => {
+        if (body.success) setBrandRuns(body.data || []);
+        else throw new Error(body.error || 'Failed to load brand production queue');
+      })
+      .catch(err => setBrandDataError(err.message))
+      .finally(() => setLoadingBrandData(false));
+  };
+
+  const loadBrandPerformance = (brandId) => {
+    setLoadingBrandData(true);
+    setBrandDataError(null);
+    fetch(`/api/v2/affiliate-studio/brands/${brandId}/performance`)
+      .then(res => res.json())
+      .then(body => {
+        if (body.success) setBrandPerf(body.data);
+        else throw new Error(body.error || 'Failed to load brand performance data');
+      })
+      .catch(err => setBrandDataError(err.message))
+      .finally(() => setLoadingBrandData(false));
+  };
+
   useEffect(() => {
     if (!activeBrand) {
       setOverview(null);
       setPortfolio(null);
       setPrograms([]);
       setProgramDetail(null);
+      setBrandCalendar([]);
+      setBrandRuns([]);
+      setBrandPerf(null);
       return;
     }
 
@@ -316,6 +369,12 @@ export function AffiliateStudioWorkspace() {
         loadPrograms(activeBrand.id);
         setProgramDetail(null);
       }
+    } else if (activeView === 'planner') {
+      loadBrandCalendar(activeBrand.id);
+    } else if (activeView === 'production' || activeView === 'publishing') {
+      loadBrandRuns(activeBrand.id);
+    } else if (activeView === 'performance') {
+      loadBrandPerformance(activeBrand.id);
     }
   }, [activeBrand, activeView, searchParams]);
 
@@ -411,6 +470,33 @@ export function AffiliateStudioWorkspace() {
           onAddProducts={handleAddProductsToProgram}
           onRemoveProducts={handleRemoveProductsFromProgram}
           onRefresh={() => activeBrand && loadProgramDetail(activeBrand.id, requestedProgramId)}
+        />
+      )}
+      {activeView === 'planner' && (
+        <BrandCalendarView 
+          events={brandCalendar} 
+          loading={loadingBrandData} 
+        />
+      )}
+      {activeView === 'production' && (
+        <BrandProductionRuns 
+          brandId={activeBrand?.id} 
+          runs={brandRuns} 
+          loading={loadingBrandData} 
+          onRefresh={() => activeBrand && loadBrandRuns(activeBrand.id)} 
+        />
+      )}
+      {activeView === 'publishing' && (
+        <BrandPublishingDashboard 
+          brandId={activeBrand?.id} 
+          runs={brandRuns} 
+          loading={loadingBrandData} 
+        />
+      )}
+      {activeView === 'performance' && (
+        <BrandPerformanceOverview 
+          data={brandPerf} 
+          loading={loadingBrandData} 
         />
       )}
     </AffiliateStudioShell>

@@ -5,10 +5,10 @@ export function AffiliateStudioShell({ brands = [], activeBrand, activeView = 'o
     { key: 'overview', label: 'Overview', enabled: true },
     { key: 'products', label: 'Products', enabled: true },
     { key: 'campaigns', label: 'Campaigns', enabled: true },
-    { key: 'planner', label: 'Planner', enabled: false },
-    { key: 'production', label: 'Production', enabled: false },
-    { key: 'publishing', label: 'Publishing', enabled: false },
-    { key: 'performance', label: 'Performance', enabled: false }
+    { key: 'planner', label: 'Planner', enabled: true },
+    { key: 'production', label: 'Production', enabled: true },
+    { key: 'publishing', label: 'Publishing', enabled: true },
+    { key: 'performance', label: 'Performance', enabled: true }
   ];
 
   return (
@@ -20,7 +20,7 @@ export function AffiliateStudioShell({ brands = [], activeBrand, activeView = 'o
           <span className={styles.activeLabel}>{activeBrand?.name || 'Loading'}</span>
           <span className={styles.divider}>/</span>
           <span className={styles.activeSubLabel}>
-            {activeView === 'products' ? 'Products' : activeView === 'campaigns' ? 'Campaigns' : 'Overview'}
+            {activeView.charAt(0).toUpperCase() + activeView.slice(1)}
           </span>
         </div>
         
