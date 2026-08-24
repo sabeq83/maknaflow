@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.25.20 — Fix: Resolve HTTP reference image URLs in start frame adapter (24/08/2026)
+- Convert HTTP character reference image paths to base64 strings dynamically in generateStartFrame
+
 ## V2.25.19 — Fix: Inject character canonical prompts into planned t2i/t2v database columns directly (24/08/2026)
 - Load universe characters and prepend canonical descriptions to visual shot prompts during production package creation
 - Ensure start frame and visual adapters safeguard against double-prepending
