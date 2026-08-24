@@ -232,6 +232,7 @@ export function EpisodeWorkspace({
   isApprovingPlan,
   handleApproveProductionPlan,
   handleRegenerateAsset,
+  handleGenerateI2V,
   
   // Review props
   isRenderingFinal,
@@ -243,6 +244,7 @@ export function EpisodeWorkspace({
   handleBulkRegenerateTTS
 }) {
   const [activeAccordionSceneIdx, setActiveAccordionSceneIdx] = useState(0);
+  const [activeVisualTab, setActiveVisualTab] = useState('start-frames'); // 'start-frames' | 'videos'
 
   const activeStage = stages.find(s => s.key === activeStageKey) || stages[0];
 
@@ -829,86 +831,212 @@ export function EpisodeWorkspace({
                             </div>
                           )}
 
-                          {/* Segment 2: Visual Gallery Grid */}
+                          {/* Segment 2: Visual Gallery Grid — Tabbed */}
                           {packageAssets.filter(a => a.asset_type !== 'voiceover').length > 0 && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                              <h5 style={{ margin: '0 0 4px 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>🎬 Video &amp; Image Assets</h5>
-                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '16px' }}>
-                                {packageAssets.filter(a => a.asset_type !== 'voiceover').map((asset) => (
-                                  <div key={asset.id} style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                                    <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#000', overflow: 'hidden' }}>
-                                      {asset.status === 'succeeded' && asset.output_asset_json ? (
-                                        asset.output_asset_json.video_path ? (
-                                          <video 
-                                            src={getMediaUrl(asset.output_asset_json.video_path)} 
-                                            controls 
-                                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-                                          />
-                                        ) : asset.output_asset_json.image_path ? (
-                                          <img 
-                                            src={getMediaUrl(asset.output_asset_json.image_path)} 
-                                            alt="Start Frame" 
-                                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-                                          />
-                                        ) : (
-                                          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.75rem' }}>No Media Path</div>
-                                        )
-                                      ) : asset.status === 'failed' ? (
-                                        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--status-danger)', background: 'rgba(239, 68, 68, 0.05)' }}>
-                                          <span style={{ fontSize: '1.2rem' }}>⚠️</span>
-                                          <span style={{ fontSize: '0.7rem', fontWeight: 'bold' }}>Failed</span>
-                                        </div>
-                                      ) : (
-                                        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-                                          <svg className={styles.spinner} style={{ animation: 'spin 1.5s linear infinite', width: '20px', height: '20px', color: 'var(--link)', marginBottom: '8px' }} viewBox="0 0 24 24" fill="none">
-                                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeDasharray="30 30" />
-                                          </svg>
-                                          <span style={{ fontSize: '0.7rem' }}>Generating...</span>
-                                        </div>
-                                      )}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                              <h5 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>🎬 Video &amp; Image Assets</h5>
 
-                                      {/* Status Badge Overlay */}
-                                      <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10 }}>
-                                        <span className={
-                                          asset.status === 'succeeded' ? `${styles.premiumBadge} ${styles.premiumBadgeSucceeded}` :
-                                          asset.status === 'failed' ? `${styles.premiumBadge} ${styles.premiumBadgeFailed}` :
-                                          `${styles.premiumBadge} ${styles.premiumBadgeQueued}`
-                                        }>
-                                          {asset.status.toUpperCase()}
-                                        </span>
-                                      </div>
-                                    </div>
-
-                                    <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, justifyContent: 'space-between' }}>
-                                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                        <div style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Scene {asset.scene_index + 1}, Shot {asset.shot_index + 1}</div>
-                                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: '1.3', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }} title={asset.prompt_snapshot}>
-                                          {asset.prompt_snapshot}
-                                        </div>
-                                        {asset.error_message && (
-                                          <div style={{ fontSize: '0.68rem', color: 'var(--status-danger)' }}>
-                                            Error: {asset.error_message}
-                                          </div>
-                                        )}
-                                      </div>
-
-                                      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
-                                        {asset.status !== 'draft' && (
-                                          <button
-                                            type="button"
-                                            className={styles.btnPremiumRegen}
-                                            onClick={() => handleRegenerateAsset(asset.id)}
-                                          >
-                                            <svg style={{ width: '10px', height: '10px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
-                                            </svg>
-                                            Regenerate
-                                          </button>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </div>
+                              {/* Sub-tab selector */}
+                              <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', gap: '0' }}>
+                                {[
+                                  { key: 'start-frames', label: '🖼️ Start Frames (T2I)' },
+                                  { key: 'videos', label: '🎬 Video Clips (I2V / T2V)' }
+                                ].map(tab => (
+                                  <button
+                                    key={tab.key}
+                                    type="button"
+                                    onClick={() => setActiveVisualTab(tab.key)}
+                                    style={{
+                                      padding: '7px 16px',
+                                      background: 'none',
+                                      border: 'none',
+                                      borderBottom: activeVisualTab === tab.key ? '2px solid var(--accent)' : '2px solid transparent',
+                                      color: activeVisualTab === tab.key ? 'var(--text)' : 'var(--text-muted)',
+                                      fontWeight: activeVisualTab === tab.key ? 700 : 400,
+                                      cursor: 'pointer',
+                                      fontSize: '0.78rem',
+                                      transition: 'all 0.2s',
+                                      marginBottom: '-1px'
+                                    }}
+                                  >
+                                    {tab.label}
+                                  </button>
                                 ))}
+                              </div>
+
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '16px', marginTop: '4px' }}>
+                                {packageAssets.filter(a => a.asset_type !== 'voiceover').map((asset) => {
+                                  const hasImage = !!asset.output_asset_json?.image_path;
+                                  const hasVideo = !!asset.output_asset_json?.video_path;
+                                  const isT2iI2v = asset.generation_mode === 't2i_i2v';
+
+                                  return (
+                                    <div key={asset.id} style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                                      {/* Media Preview */}
+                                      <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#000', overflow: 'hidden' }}>
+                                        {activeVisualTab === 'start-frames' ? (
+                                          // 🖼️ START FRAMES TAB
+                                          hasImage ? (
+                                            <img
+                                              src={getMediaUrl(asset.output_asset_json.image_path)}
+                                              alt="Start Frame"
+                                              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                                            />
+                                          ) : asset.status === 'failed' ? (
+                                            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--status-danger)', background: 'rgba(239,68,68,0.05)' }}>
+                                              <span style={{ fontSize: '1.2rem' }}>⚠️</span>
+                                              <span style={{ fontSize: '0.7rem', fontWeight: 'bold' }}>T2I Failed</span>
+                                            </div>
+                                          ) : (
+                                            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                                              <svg className={styles.spinner} style={{ animation: 'spin 1.5s linear infinite', width: '20px', height: '20px', color: 'var(--link)', marginBottom: '8px' }} viewBox="0 0 24 24" fill="none">
+                                                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeDasharray="30 30" />
+                                              </svg>
+                                              <span style={{ fontSize: '0.7rem' }}>Generating T2I...</span>
+                                            </div>
+                                          )
+                                        ) : (
+                                          // 🎬 VIDEO CLIPS TAB
+                                          hasVideo ? (
+                                            <video
+                                              src={getMediaUrl(asset.output_asset_json.video_path)}
+                                              controls
+                                              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                                            />
+                                          ) : hasImage ? (
+                                            // Start frame ready but video not yet generated
+                                            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
+                                              <img
+                                                src={getMediaUrl(asset.output_asset_json.image_path)}
+                                                alt="Start Frame Locked"
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.45 }}
+                                              />
+                                              <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                                                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>🖼️ Start Frame Ready</span>
+                                                <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.7)' }}>Video not yet generated</span>
+                                              </div>
+                                            </div>
+                                          ) : asset.status === 'failed' ? (
+                                            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--status-danger)', background: 'rgba(239,68,68,0.05)' }}>
+                                              <span style={{ fontSize: '1.2rem' }}>⚠️</span>
+                                              <span style={{ fontSize: '0.7rem', fontWeight: 'bold' }}>I2V Failed</span>
+                                            </div>
+                                          ) : (
+                                            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                                              <svg className={styles.spinner} style={{ animation: 'spin 1.5s linear infinite', width: '20px', height: '20px', color: 'var(--link)', marginBottom: '8px' }} viewBox="0 0 24 24" fill="none">
+                                                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeDasharray="30 30" />
+                                              </svg>
+                                              <span style={{ fontSize: '0.7rem' }}>Animating I2V...</span>
+                                            </div>
+                                          )
+                                        )}
+
+                                        {/* Status Badge Overlay */}
+                                        <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10 }}>
+                                          <span className={
+                                            asset.status === 'succeeded' ? `${styles.premiumBadge} ${styles.premiumBadgeSucceeded}` :
+                                            asset.status === 'failed' ? `${styles.premiumBadge} ${styles.premiumBadgeFailed}` :
+                                            `${styles.premiumBadge} ${styles.premiumBadgeQueued}`
+                                          }>
+                                            {asset.status.toUpperCase()}
+                                          </span>
+                                        </div>
+                                      </div>
+
+                                      {/* Card Footer */}
+                                      <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, justifyContent: 'space-between' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                          <div style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Scene {asset.scene_index + 1}, Shot {asset.shot_index + 1}</div>
+                                          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: '1.3', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }} title={asset.prompt_snapshot}>
+                                            {activeVisualTab === 'start-frames'
+                                              ? (asset.t2i_prompt || asset.prompt_snapshot)
+                                              : (asset.i2v_prompt || asset.prompt_snapshot)}
+                                          </div>
+                                          {asset.error_message && (
+                                            <div style={{ fontSize: '0.68rem', color: 'var(--status-danger)' }}>Error: {asset.error_message}</div>
+                                          )}
+                                        </div>
+
+                                        {/* Action Buttons */}
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '6px' }}>
+                                          {activeVisualTab === 'start-frames' ? (
+                                            // Start Frame: Regen T2I
+                                            asset.status !== 'draft' && (
+                                              <button
+                                                type="button"
+                                                className={styles.btnPremiumRegen}
+                                                onClick={() => handleRegenerateAsset(asset.id)}
+                                                title="Regenerate Start Frame (T2I)"
+                                              >
+                                                <svg style={{ width: '10px', height: '10px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                                                </svg>
+                                                Regen Start Frame
+                                              </button>
+                                            )
+                                          ) : (
+                                            // Video Clips: context-aware I2V buttons
+                                            <>
+                                              {hasImage && !hasVideo && isT2iI2v && (
+                                                // Primary: generate video from existing start frame
+                                                <button
+                                                  type="button"
+                                                  onClick={() => handleGenerateI2V(asset.id)}
+                                                  style={{
+                                                    fontSize: '0.7rem',
+                                                    padding: '5px 12px',
+                                                    fontWeight: 700,
+                                                    background: 'linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%)',
+                                                    border: 'none',
+                                                    color: '#fff',
+                                                    borderRadius: '6px',
+                                                    cursor: 'pointer',
+                                                    boxShadow: '0 0 10px rgba(124,58,237,0.3)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '4px'
+                                                  }}
+                                                >
+                                                  ⚡ Generate Video (I2V)
+                                                </button>
+                                              )}
+                                              {hasVideo && isT2iI2v && (
+                                                // Regen video without touching start frame
+                                                <button
+                                                  type="button"
+                                                  className={styles.btnPremiumRegen}
+                                                  onClick={() => handleGenerateI2V(asset.id)}
+                                                  title="Re-animate video (keeps start frame image)"
+                                                >
+                                                  <svg style={{ width: '10px', height: '10px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                                                  </svg>
+                                                  Regen Video (I2V)
+                                                </button>
+                                              )}
+                                              {!isT2iI2v && asset.status !== 'draft' && (
+                                                // T2V mode: full regenerate
+                                                <button
+                                                  type="button"
+                                                  className={styles.btnPremiumRegen}
+                                                  onClick={() => handleRegenerateAsset(asset.id)}
+                                                >
+                                                  <svg style={{ width: '10px', height: '10px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                                                  </svg>
+                                                  Regen Video (T2V)
+                                                </button>
+                                              )}
+                                              {!hasImage && !hasVideo && (
+                                                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontStyle: 'italic', padding: '4px 0' }}>Waiting for Start Frame...</span>
+                                              )}
+                                            </>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
                               </div>
                             </div>
                           )}

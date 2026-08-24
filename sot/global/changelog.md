@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.25.33 — Visual Asset Tab — I2V Trigger (24/08/2026)
+- Pisahkan Visual Assets menjadi 2 tab: Start Frames (T2I) dan Video Clips (I2V/T2V)
+- Tambah tombol Generate I2V di tab Video Clips dengan konteks-aware logic
+- Tambah triggerI2VGeneration di repository (preserve image_path)
+- Tambah API route POST /production-assets/[id]/generate-i2v
+
 ## V2.25.32 — Add TTS Voice Speed Control Slider (24/08/2026)
 - Added voice_speed column auto-migration to youtube_episodes table.
 - Updated setEpisodeGenerationProfile and generation-profile API routes to store and return voice speed settings.

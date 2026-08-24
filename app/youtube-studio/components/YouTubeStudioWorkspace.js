@@ -881,6 +881,30 @@ export function YouTubeStudioWorkspace() {
     }
   }
 
+  async function handleGenerateI2V(assetId) {
+    setErrorMsg('');
+    setNotice(null);
+    try {
+      const res = await fetch(`/api/v2/youtube-studio/production-assets/${assetId}/generate-i2v`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      if (data.success) {
+        const pRes = await fetch(`/api/v2/youtube-studio/episodes/${selectedEpisode.id}/production-plan`);
+        const pData = await pRes.json();
+        if (pData.success && pData.data) {
+          setActivePackage(pData.data.package);
+          setPackageAssets(pData.data.assets || []);
+        }
+        triggerNotice('success', 'Video animation (I2V) job queued successfully.');
+      } else {
+        setErrorMsg(data.error || 'Failed to queue I2V job.');
+      }
+    } catch (e) {
+      setErrorMsg('Failed to queue I2V job.');
+    }
+  }
+
   async function handleFinalRender() {
     if (!selectedEpisode || !activePackage) return;
     setErrorMsg('');
@@ -1413,6 +1437,7 @@ export function YouTubeStudioWorkspace() {
             isApprovingPlan={isApprovingPlan}
             handleApproveProductionPlan={handleApproveProductionPlan}
             handleRegenerateAsset={handleRegenerateAsset}
+            handleGenerateI2V={handleGenerateI2V}
             
             // Custom play & bulk TTS props
             playingAssetId={playingAssetId}
