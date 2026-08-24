@@ -245,6 +245,15 @@ export function EpisodeWorkspace({
 }) {
   const [activeAccordionSceneIdx, setActiveAccordionSceneIdx] = useState(0);
   const [activeVisualTab, setActiveVisualTab] = useState('start-frames'); // 'start-frames' | 'videos'
+  const [videoModal, setVideoModal] = useState(null); // { src, title } | null
+
+  // Close modal on Escape key
+  useEffect(() => {
+    if (!videoModal) return;
+    const handler = (e) => { if (e.key === 'Escape') setVideoModal(null); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [videoModal]);
 
   const activeStage = stages.find(s => s.key === activeStageKey) || stages[0];
 
@@ -898,11 +907,27 @@ export function EpisodeWorkspace({
                                         ) : (
                                           // 🎬 VIDEO CLIPS TAB
                                           hasVideo ? (
-                                            <video
-                                              src={getMediaUrl(asset.output_asset_json.video_path)}
-                                              controls
-                                              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-                                            />
+                                            <div
+                                              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', cursor: 'pointer' }}
+                                              onClick={() => setVideoModal({
+                                                src: getMediaUrl(asset.output_asset_json.video_path),
+                                                title: `Scene ${asset.scene_index + 1}, Shot ${asset.shot_index + 1}`
+                                              })}
+                                            >
+                                              <video
+                                                src={getMediaUrl(asset.output_asset_json.video_path)}
+                                                muted
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }}
+                                              />
+                                              {/* Play button overlay */}
+                                              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.25)', transition: 'background 0.2s' }}>
+                                                <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(255,255,255,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.5)', transition: 'transform 0.2s' }}>
+                                                  <svg viewBox="0 0 24 24" fill="#111" width="18" height="18">
+                                                    <polygon points="7,4 21,12 7,20"/>
+                                                  </svg>
+                                                </div>
+                                              </div>
+                                            </div>
                                           ) : hasImage ? (
                                             // Start frame ready but video not yet generated
                                             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
@@ -1132,5 +1157,36 @@ export function EpisodeWorkspace({
         </main>
       </div>
     </div>
+
+    {/* ── Video Lightbox Modal ── */}
+    {videoModal && (
+      <div
+        className={styles.videoModalOverlay}
+        onClick={() => setVideoModal(null)}
+      >
+        <div
+          className={styles.videoModalBox}
+          onClick={e => e.stopPropagation()}
+        >
+          <button
+            className={styles.videoModalClose}
+            onClick={() => setVideoModal(null)}
+            aria-label="Close video"
+          >
+            ✕
+          </button>
+          {videoModal.title && (
+            <div className={styles.videoModalTitle}>{videoModal.title}</div>
+          )}
+          <div className={styles.videoModalPlayer}>
+            <video
+              src={videoModal.src}
+              controls
+              autoPlay
+            />
+          </div>
+        </div>
+      </div>
+    )}
   );
 }

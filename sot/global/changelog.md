@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.25.34 — Video Lightbox Modal 16:9 (24/08/2026)
+- Kartu video succeeded kini tampil thumbnail + tombol play
+- Klik play buka modal lightbox 16:9 dengan video autoplay
+- Tutup modal via klik ✕ backdrop atau Escape key
+- Animasi fadeIn + spring scaleIn pada modal
+
 ## V2.25.33 — Visual Asset Tab — I2V Trigger (24/08/2026)
 - Pisahkan Visual Assets menjadi 2 tab: Start Frames (T2I) dan Video Clips (I2V/T2V)
 - Tambah tombol Generate I2V di tab Video Clips dengan konteks-aware logic
