@@ -648,7 +648,19 @@ export function EpisodeWorkspace({
                   <>
                     <div className={styles.productionPlan} style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: 'var(--surface-raised)', padding: '16px', borderRadius: '8px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.85rem' }}>Package Status: <strong>{activePackage.status.toUpperCase()}</strong> (Mode: <strong>{activePackage.plan_json?.production_mode || 'legacy_t2v'}</strong>)</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          <span style={{ fontSize: '0.85rem' }}>
+                            Package Status: <strong>{activePackage.status.toUpperCase()}</strong> (Mode: <strong>{activePackage.plan_json?.production_mode || 'legacy_t2v'}</strong>)
+                          </span>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                            🎙️ TTS Voice: <strong>{episode.voice_provider === 'google_tts' ? 'Google TTS' : 'Minimax API'}</strong> (Persona: <strong>{episode.voice_persona}</strong>)
+                          </span>
+                          {activePackage.status === 'draft' && (
+                            <span style={{ fontSize: '0.75rem', color: 'var(--accent)', marginTop: '2px' }}>
+                              💡 Konfigurasi Voice Provider &amp; Persona dapat diubah di tab <strong>Scene Plan</strong> sebelum menyetujui rencana produksi.
+                            </span>
+                          )}
+                        </div>
                         {activePackage.status === 'draft' && (
                           <button
                             type="button"

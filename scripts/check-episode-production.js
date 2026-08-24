@@ -15,18 +15,16 @@ async function check() {
     const epId = 'ytep_3suyq35q';
     await pool.query('SET search_path TO dev');
 
-    const pkgRes = await pool.query('SELECT * FROM youtube_production_packages WHERE episode_id = $1', [epId]);
-    const activePkg = pkgRes.rows.find(p => p.status !== 'archived');
+    const epRes = await pool.query('SELECT * FROM youtube_episodes WHERE id = $1', [epId]);
+    const ep = epRes.rows[0];
+    console.log(`Episode status: ${ep.status}`);
     
-    if (activePkg) {
-      const assetRes = await pool.query('SELECT id, asset_type, status, output_asset_json FROM youtube_production_assets WHERE production_package_id = $1 AND status = \'succeeded\' LIMIT 5', [activePkg.id]);
-      console.log('Sample succeeded assets output_asset_json:');
-      for (const row of assetRes.rows) {
-        console.log(`\n- ID: ${row.id}, Type: ${row.asset_type}`);
-        console.log(`  JSON:`, JSON.stringify(row.output_asset_json, null, 2));
-      }
+    const scriptRes = await pool.query('SELECT * FROM youtube_episode_scripts WHERE episode_id = $1', [epId]);
+    if (scriptRes.rows.length > 0) {
+      const script = scriptRes.rows[0];
+      console.log(`Script found. ID: ${script.id}, Status: ${script.status}`);
     } else {
-      console.log('No active production package found.');
+      console.log('No script found for this episode');
     }
   } catch (err) {
     console.error(err);

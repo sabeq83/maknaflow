@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.25.28 — TTS Voice Summary on Video Production Tab (24/08/2026)
+- Added TTS Voice provider and persona summary to the production plan card header.
+- Included a navigation hint to the Scene Plan tab for draft packages.
+
 ## V2.25.27 — Fix Timeline Preview Label & Media URLs (24/08/2026)
 - Restored the deleted Timeline Preview Player label.
 - Unified media URL resolutions across video players, audio tracks, and gallery grid items using the getMediaUrl path helper.
