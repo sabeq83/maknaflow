@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.25.18 — Attach full universe context to Blueprint, Script, and Research routes (24/08/2026)
+- Load and inject universe characters and locations in blueprint/generate route
+- Load and inject universe characters and locations in scripts/generate route
+- Load and inject universe characters and locations in research route
+
 ## V2.25.17 — Fix Universe Manager UI forms scrolling on Edit (24/08/2026)
 - Add smooth auto-scrolling to top of page when clicking Edit button on universe profiles, characters, or locations
 

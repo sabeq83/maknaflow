@@ -2,6 +2,7 @@ import { withTenantContext } from '@/lib/auth';
 import { getEpisode, getChannelStrategy, getLatestResearchBrief, saveBlueprintDraft } from '@/lib/youtube-studio-repository';
 import { generateBlueprint } from '@/lib/youtube-studio-planner';
 import { pgQuery } from '@/lib/db-pg';
+import { getUniverseCharacters, getUniverseLocations } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +29,13 @@ export const POST = withTenantContext(async (req, { params }, user) => {
   let universe = null;
   if (strategy?.universe_id) {
     const uRes = await pgQuery('SELECT * FROM universe_profiles WHERE id = $1', [strategy.universe_id]);
-    universe = uRes.rows[0];
+    if (uRes.rows.length > 0) {
+      universe = uRes.rows[0];
+      const characters = await getUniverseCharacters(strategy.universe_id) || [];
+      const locations = await getUniverseLocations(strategy.universe_id) || [];
+      universe.characters = characters;
+      universe.locations = locations;
+    }
   }
   let visualIdentity = null;
   if (strategy?.visual_identity_preset_id) {
