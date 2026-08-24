@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.25.30 — Fix getMediaUrl Reference in YouTubeStudioWorkspace (24/08/2026)
+- Defined the getMediaUrl utility helper in YouTubeStudioWorkspace.js to resolve ReferenceError during play actions.
+
 ## V2.25.29 — Bulk TTS Invalidation & Inline Play Controls (24/08/2026)
 - Created invalidateAllVoiceoverAssets database transaction logic and bulk-tts route API.
 - Replaced native audio player with inline premium custom Play/Pause toggle buttons inside Voiceover list.

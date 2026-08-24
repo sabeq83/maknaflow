@@ -802,6 +802,12 @@ export function YouTubeStudioWorkspace() {
   const [playingAudio, setPlayingAudio] = useState(null);
   const [playingAssetId, setPlayingAssetId] = useState(null);
 
+  const getMediaUrl = (pathString) => {
+    if (!pathString) return '';
+    if (pathString.startsWith('/')) return pathString;
+    return `/${pathString}`;
+  };
+
   const handleTogglePlayVO = (asset) => {
     const audioUrl = getMediaUrl(asset.output_asset_json?.audio_path);
     if (!audioUrl) return;
