@@ -28,7 +28,11 @@ const MINIMAX_VOICES = [
 
 const getMediaUrl = (pathString) => {
   if (!pathString) return '';
+  // Absolute URL — keep as-is (backward-compat for existing external video paths)
+  if (pathString.startsWith('http://') || pathString.startsWith('https://')) return pathString;
+  // Already a root-relative path
   if (pathString.startsWith('/')) return pathString;
+  // Relative path — prepend /
   return `/${pathString}`;
 };
 

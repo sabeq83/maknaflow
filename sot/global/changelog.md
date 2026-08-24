@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.25.36 — Local Video Storage: download I2V sebelum simpan ke DB (24/08/2026)
+- Worker download video I2V/T2V ke public/uploads/videos/ sebelum simpan path di DB
+- Fix getMediaUrl untuk handle URL absolut http/https sebagai backward-compat
+- Backfill 3 video Scene 0: download dari G-Labs ke local storage dan update DB
+
 ## V2.25.35 — Fix: Fragment wrapper modal lightbox (24/08/2026)
 - Fix syntax error JSX sibling modal dengan Fragment wrapper
 
