@@ -908,11 +908,10 @@ export function YouTubeStudioWorkspace() {
     setErrorMsg('');
     setNotice(null);
     try {
-      const res = await fetch('/api/v2/youtube-studio/series', {
+      const res = await fetch(`/api/v2/youtube-studio/channels/${selectedChannel.id}/series`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          channel_id: selectedChannel.id,
           name: concept.name,
           pillar: concept.pillar,
           config: {

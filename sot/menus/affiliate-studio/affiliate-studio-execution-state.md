@@ -13,9 +13,9 @@ next_phase: null
 last_completed_phase: 12
 current_task: done
 current_plan: null
-last_release: v2.25.10
-last_release_title: Affiliate Studio Assisted Campaign Program Builder
-last_release_commit: fd50427
+last_release: v2.25.11
+last_release_title: Affiliate Studio Brand Level Navigation
+last_release_commit: f7fa18e
 last_verified_branch: local-staging
 last_verified_remote_branch: origin/local-staging
 blocked: false
@@ -387,6 +387,23 @@ UI integrations:
 - Dev smoke: not required
 - Files changed: lib/affiliate-studio-builder-adapter.js, app/api/v2/affiliate-studio/brands/[id]/programs/suggest/route.js, app/affiliate-studio/components/BrandCampaignPrograms.js, app/affiliate-studio/components/AffiliateStudio.module.css
 - Actual contracts: campaign setup generation parameters, suggestion JSON API endpoint, and interactive preview modal adoption creation panel
+- Deferred intentionally: none
+- Next phase: none
+
+### Rilis Tambahan — Brand-Level Navigation Activation
+
+- Status: Complete
+- Plan: `sot/menus/affiliate-studio/phase-12-brand-tabs-implementation-plan` (proposal)
+- Release: `v2.25.11`
+- Commit: `f7fa18e`
+- Tag pushed: yes
+- Branch pushed: yes
+- Focused tests: node --experimental-test-module-mocks --test tests/affiliate-studio-brand-tabs.test.js (Passed)
+- Regression tests: All 67 affiliate-studio suites (Passed)
+- Build: Passed
+- Dev smoke: dev macmini verified (port 5020)
+- Files changed: app/affiliate-studio/components/AffiliateStudioShell.js, app/affiliate-studio/components/AffiliateStudioWorkspace.js, lib/affiliate-studio-workspace-state.js, lib/affiliate-studio-planner-adapter.js, lib/affiliate-studio-production-adapter.js, lib/affiliate-studio-performance-adapter.js, app/api/v2/affiliate-studio/brands/[id]/planners/route.js, app/api/v2/affiliate-studio/brands/[id]/runs/route.js, app/api/v2/affiliate-studio/brands/[id]/runs/reconcile/route.js, app/api/v2/affiliate-studio/brands/[id]/performance/route.js, app/affiliate-studio/components/BrandCalendarView.js, app/affiliate-studio/components/BrandProductionRuns.js, app/affiliate-studio/components/BrandPublishingDashboard.js, app/affiliate-studio/components/BrandPerformanceOverview.js
+- Actual contracts: Brand-level consolidated calendars, runs queues, publishing indicators, and performance dashboards
 - Deferred intentionally: none
 - Next phase: none
 

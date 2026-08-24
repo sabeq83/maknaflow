@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.25.12 — Fix YT Studio Series Adopt Button (24/08/2026)
+- Fix Content Series adopt concept URL endpoint
+
 ## V2.25.11 — Affiliate Studio Brand Level Navigation (24/08/2026)
 - Mengaktifkan tab navigasi Planner, Production, Publishing, dan Performance di tingkat Brand Profile
 - Menyediakan aggregated database adapter dan endpoint API tingkat brand
