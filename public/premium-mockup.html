@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAKNA Flow — Premium UI Mockup (Revised)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --background: #0d0f12;
+      --surface: #14171c;
+      --surface-raised: #1a1e26;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(99, 102, 241, 0.3);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent: #6366f1;
+      --accent-glow: rgba(99, 102, 241, 0.4);
+      --success: #34d399;
+      --success-bg: rgba(16, 185, 129, 0.12);
+      --success-border: rgba(16, 185, 129, 0.35);
+      --danger: #f87171;
+      --danger-bg: rgba(239, 68, 68, 0.12);
+      --danger-border: rgba(239, 68, 68, 0.35);
+      --info: #60a5fa;
+      --info-bg: rgba(59, 130, 246, 0.12);
+      --info-border: rgba(59, 130, 246, 0.35);
+    }
+
+    body {
+      background-color: var(--background);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      margin: 0;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin: 0 0 10px 0;
+      background: linear-gradient(135deg, #fff 0%, var(--text-muted) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      margin: 0 0 20px 0;
+      font-size: 1rem;
+    }
+
+    /* Glassmorphic Panel Card */
+    .panel-card {
+      background: rgba(20, 23, 28, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
+    }
+
+    .panel-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 0 0 20px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Progress Rows */
+    .progress-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .progress-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+      padding: 14px 18px;
+      transition: all 0.2s ease;
+    }
+
+    .progress-row:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.08);
+      transform: translateX(2px);
+    }
+
+    .info-col {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .asset-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .asset-prompt {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      max-width: 480px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .action-col {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Premium Badges */
+    .premium-badge {
+      font-size: 0.68rem;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .premium-badge-succeeded {
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      color: var(--success);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.12);
+    }
+
+    .premium-badge-failed {
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      color: var(--danger);
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.12);
+    }
+
+    .premium-badge-queued {
+      background: var(--info-bg);
+      border: 1px solid var(--info-border);
+      color: var(--info);
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.12);
+      animation: pulseGlow 2.5s infinite alternate ease-in-out;
+    }
+
+    @keyframes pulseGlow {
+      0% {
+        box-shadow: 0 0 4px rgba(59, 130, 246, 0.08);
+        border-color: rgba(59, 130, 246, 0.25);
+      }
+      100% {
+        box-shadow: 0 0 14px rgba(59, 130, 246, 0.3);
+        border-color: rgba(59, 130, 246, 0.6);
+      }
+    }
+
+    /* Spinner Animation */
+    .spinner {
+      animation: spin 1.4s linear infinite;
+      width: 10px;
+      height: 10px;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Premium Buttons */
+    .btn-premium-regen {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.72rem;
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    .btn-premium-regen:hover {
+      background: rgba(99, 102, 241, 0.18);
+      border-color: rgba(99, 102, 241, 0.5);
+      color: #a5b4fc;
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-premium-regen:active {
+      transform: translateY(1px);
+    }
+
+    .btn-premium-regen svg {
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-premium-regen:hover svg {
+      transform: rotate(360deg);
+    }
+
+    /* Form Fields for Voice configuration */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    select.premium-select {
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.85rem;
+      outline: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    select.premium-select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    /* Primary Accent Button */
+    .btn-premium-primary {
+      background: linear-gradient(135deg, var(--accent) 0%, #4f46e5 100%);
+      border: none;
+      color: white;
+      font-weight: 600;
+      font-size: 0.88rem;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-premium-primary:hover {
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .btn-premium-primary:active {
+      transform: translateY(1px);
+    }
+
+    .voice-preview-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--info);
+      transition: all 0.2s ease;
+    }
+
+    .voice-preview-btn:hover {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: rgba(59, 130, 246, 0.4);
+      transform: scale(1.08);
+    }
+  </style>
+  <script>
+    const geminiVoices = [
+      { id: 'Kore', name: 'Kore (Female)', avatar: '👩', desc: 'Standard Female (Skincare/Cosmetic)' },
+      { id: 'Fenrir', name: 'Fenrir (Male)', avatar: '🧔', desc: 'Deep/Heavy Male (Otomotif/High-End)' },
+      { id: 'Puck', name: 'Puck (Male)', avatar: '👦', desc: 'Ceria, Playful (Makanan/Promo Kilat)' },
+      { id: 'Charon', name: 'Charon (Male)', avatar: '👨', desc: 'Formal, News Style (Review Tech/Finansial)' },
+      { id: 'Leda', name: 'Leda (Female)', avatar: '👵', desc: 'Hangat, Ramah (Edukasi/Ibu Anak)' },
+      { id: 'Zephyr', name: 'Zephyr (Male)', avatar: '🧔', desc: 'Kasual, Santai (Storytelling/Daily Vlog)' },
+      { id: 'Orus', name: 'Orus (Male)', avatar: '🧔', desc: 'Tegas, Optimis (Motivasi/Online Course)' },
+      { id: 'Aoede', name: 'Aoede (Female)', avatar: '👩‍🎨', desc: 'Artistik, Ekspresif (Fashion/Seni)' },
+      { id: 'Callirrhoe', name: 'Callirrhoe (Female)', avatar: '👩‍💼', desc: 'Berenergi, Dinamis (Olahraga/Lifestyle)' },
+      { id: 'Autonoe', name: 'Autonoe (Female)', avatar: '👩‍🎓', desc: 'Dewasa, Profesional (Bisnis/Corporate)' },
+      { id: 'Enceladus', name: 'Enceladus (Male)', avatar: '👨‍🎤', desc: 'Misterius, Berat (Teaser/Trailer)' }
+    ];
+
+    const minimaxVoices = [
+      { id: 'Indonesian_casual_reporter_vv2', name: 'Casual Reporter (Male)', avatar: '👨', desc: 'Laki-laki (Casual Reporter - Vv2)' },
+      { id: 'Indonesian_compelling_storyteller_vv2', name: 'Compelling Storyteller (Male)', avatar: '👨', desc: 'Laki-laki (Storyteller - Vv2)' },
+      { id: 'Indonesian_expressive_podcaster_vv2', name: 'Expressive Podcaster (Male)', avatar: '👨', desc: 'Laki-laki (Podcaster - Vv2)' },
+      { id: 'Indonesian_energetic_streamer_vv2', name: 'Energetic Streamer (Male)', avatar: '👨', desc: 'Laki-laki (Streamer - Vv2)' },
+      { id: 'Indonesian_intellectual_commentator_vv2', name: 'Intellectual Commentator (Female)', avatar: '👩', desc: 'Perempuan (Commentator - Vv2)' },
+      { id: 'Indonesian_professional_anchor_vv2', name: 'Professional Anchor (Female)', avatar: '👩', desc: 'Perempuan (Anchor - Vv2)' },
+      { id: 'Indonesian_crisp_reporter_vv2', name: 'Crisp Reporter (Female)', avatar: '👩', desc: 'Perempuan (Crisp Reporter - Vv2)' }
+    ];
+
+    function handleProviderChange() {
+      const provider = document.getElementById('voice-provider').value;
+      const personaSelect = document.getElementById('voice-persona');
+      personaSelect.innerHTML = '';
+      
+      const voices = provider === 'minimax' ? minimaxVoices : geminiVoices;
+      voices.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.id;
+        opt.textContent = `${v.avatar} ${v.name} - ${v.desc}`;
+        personaSelect.appendChild(opt);
+      });
+    }
+
+    window.onload = () => {
+      document.getElementById('voice-provider').addEventListener('change', handleProviderChange);
+      handleProviderChange(); // Initial load
+    };
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div>
+      <h1>MAKNA Studio Premium UI Mockup</h1>
+      <p class="subtitle">Mockup visual status badges, regenerate buttons, dan konfigurasi panel TTS/Voice.</p>
+    </div>
+
+    <!-- PANEL 1: Voice & TTS Configuration -->
+    <div class="panel-card">
+      <div class="panel-title">
+        🎙️ Voice &amp; TTS Profile Settings
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="voice-provider">Voice Provider</label>
+          <select id="voice-provider" class="premium-select">
+            <option value="google_tts">Google TTS</option>
+            <option value="minimax">Minimax API</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="voice-persona">Voice Persona (Speaker Profile)</label>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <select id="voice-persona" class="premium-select" style="flex: 1;">
+              <!-- Loaded Dynamically -->
+            </select>
+            <button type="button" class="voice-preview-btn" title="Dengarkan Contoh Suara">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end;">
+        <button type="button" class="btn-premium-primary">
+          ✓ Save &amp; Apply Voice Profile
+        </button>
+      </div>
+    </div>
+
+    <!-- PANEL 2: Production Progress Mockup -->
+    <div class="panel-card">
+      <div class="panel-title">
+        🎬 Asset &amp; VO Generation Progress
+      </div>
+      <div class="progress-list">
+        
+        <!-- Row 1: Succeeded Voiceover -->
+        <div class="progress-row">
+          <div class="info-col">
+            <div class="asset-title">🎙️ Voiceover (Scene 1)</div>
+            <div class="asset-title" style="font-weight: 400; font-size: 0.8rem; color: var(--accent);">Voice: Orus (Google TTS)</div>
+            <div class="asset-prompt">"Hai guys! Hari ini kita akan merapikan rumah bersama geng PawVille..."</div>
+          </div>
+          <div class="action-col">
+            <span class="premium-badge premium-badge-succeeded">Succeeded</span>
+          </div>
+        </div>
+
+        <!-- Row 2: Queued Visual Shot -->
+        <div class="progress-row">
+          <div class="info-col">
+            <div class="asset-title">🎬 Visual Shot (Scene 1, Shot 2)</div>
+            <div class="asset-prompt">T2I / Image Prompt: Mochi the chubby grey cat looking happy in the living room...</div>
+          </div>
+          <div class="action-col">
+            <span class="premium-badge premium-badge-queued">
+              <svg class="spinner" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" stroke-dasharray="30 30" />
+              </svg>
+              Queued
+            </span>
+          </div>
+        </div>
+
+        <!-- Row 3: Failed Visual Shot with Premium Regen Button -->
+        <div class="progress-row">
+          <div class="info-col">
+            <div class="asset-title">🎬 Visual Shot (Scene 2, Shot 1)</div>
+            <div class="asset-prompt">T2I / Image Prompt: Coco the Corgi jumping energetically in the yard...</div>
+            <div class="asset-prompt" style="color: var(--danger); font-size: 0.72rem;">Error: Start-frame generation timed out after 60s</div>
+          </div>
+          <div class="action-col">
+            <span class="premium-badge premium-badge-failed">Failed</span>
+            <button type="button" class="btn-premium-regen">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+              </svg>
+              Regenerate
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>

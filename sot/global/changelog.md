@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.25.24 — Premium UI Badges & Voice Settings in YouTube Studio (24/08/2026)
+- Upgraded status badges and Regenerate buttons to premium glassmorphism styles with micro-animations.
+- Exposed Voice Provider (Google TTS & Minimax API) and corresponding dynamic Voice Persona selections under Scene Plan stage.
+- Integrated database migration to store voice provider and persona settings per-episode.
+- Updated production worker to dynamically generate voiceover audio using chosen voice settings.
+
 ## V2.25.23 — Feat: Add inline visual previews to YouTube Studio progress tab (24/08/2026)
 - Add image & video preview elements to EpisodeWorkspace UI
 - Extend visual generation polling timeout to 5 minutes

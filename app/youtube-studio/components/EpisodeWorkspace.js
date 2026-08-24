@@ -1,5 +1,168 @@
 import { normalizeLocale } from '@/lib/youtube-studio-contract';
 import styles from './YouTubeStudioWorkspace.module.css';
+import { useState, useEffect } from 'react';
+
+const GEMINI_VOICES = [
+  { id: 'Kore', name: 'Kore (Female)', avatar: '👩', desc: 'Standard Female (Skincare/Cosmetic)' },
+  { id: 'Fenrir', name: 'Fenrir (Male)', avatar: '🧔', desc: 'Deep/Heavy Male (Otomotif/High-End)' },
+  { id: 'Puck', name: 'Puck (Male)', avatar: '👦', desc: 'Ceria, Playful (Makanan/Promo Kilat)' },
+  { id: 'Charon', name: 'Charon (Male)', avatar: '👨', desc: 'Formal, News Style (Review Tech/Finansial)' },
+  { id: 'Leda', name: 'Leda (Female)', avatar: '👵', desc: 'Hangat, Ramah (Edukasi/Ibu Anak)' },
+  { id: 'Zephyr', name: 'Zephyr (Male)', avatar: '🧔', desc: 'Kasual, Santai (Storytelling/Daily Vlog)' },
+  { id: 'Orus', name: 'Orus (Male)', avatar: '🧔', desc: 'Tegas, Optimis (Motivasi/Online Course)' },
+  { id: 'Aoede', name: 'Aoede (Female)', avatar: '👩‍🎨', desc: 'Artistik, Ekspresif (Fashion/Seni)' },
+  { id: 'Callirrhoe', name: 'Callirrhoe (Female)', avatar: '👩‍💼', desc: 'Berenergi, Dinamis (Olahraga/Lifestyle)' },
+  { id: 'Autonoe', name: 'Autonoe (Female)', avatar: '👩‍🎓', desc: 'Dewasa, Profesional (Bisnis/Corporate)' },
+  { id: 'Enceladus', name: 'Enceladus (Male)', avatar: '👨‍🎤', desc: 'Misterius, Berat (Teaser/Trailer)' }
+];
+
+const MINIMAX_VOICES = [
+  { id: 'Indonesian_casual_reporter_vv2', name: 'Casual Reporter (Male)', avatar: '👨', desc: 'Laki-laki (Casual Reporter - Vv2)' },
+  { id: 'Indonesian_compelling_storyteller_vv2', name: 'Compelling Storyteller (Male)', avatar: '👨', desc: 'Laki-laki (Storyteller - Vv2)' },
+  { id: 'Indonesian_expressive_podcaster_vv2', name: 'Expressive Podcaster (Male)', avatar: '👨', desc: 'Laki-laki (Podcaster - Vv2)' },
+  { id: 'Indonesian_energetic_streamer_vv2', name: 'Energetic Streamer (Male)', avatar: '👨', desc: 'Laki-laki (Streamer - Vv2)' },
+  { id: 'Indonesian_intellectual_commentator_vv2', name: 'Intellectual Commentator (Female)', avatar: '👩', desc: 'Perempuan (Commentator - Vv2)' },
+  { id: 'Indonesian_professional_anchor_vv2', name: 'Professional Anchor (Female)', avatar: '👩', desc: 'Perempuan (Anchor - Vv2)' },
+  { id: 'Indonesian_crisp_reporter_vv2', name: 'Crisp Reporter (Female)', avatar: '👩', desc: 'Perempuan (Crisp Reporter - Vv2)' }
+];
+
+function ScenePlanConfig({ episode, profilesList, selectedProfileKey, handleSetGenerationProfile }) {
+  const [profileKey, setProfileKey] = useState(selectedProfileKey || '');
+  const [voiceProvider, setVoiceProvider] = useState(episode.voice_provider || 'google_tts');
+  const [voicePersona, setVoicePersona] = useState(episode.voice_persona || 'Orus');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveNotice, setSaveNotice] = useState(null);
+
+  useEffect(() => {
+    if (selectedProfileKey) {
+      setProfileKey(selectedProfileKey);
+    }
+  }, [selectedProfileKey]);
+
+  useEffect(() => {
+    if (episode.voice_provider) {
+      setVoiceProvider(episode.voice_provider);
+    }
+    if (episode.voice_persona) {
+      setVoicePersona(episode.voice_persona);
+    }
+  }, [episode]);
+
+  const activeVoices = voiceProvider === 'minimax' ? MINIMAX_VOICES : GEMINI_VOICES;
+
+  useEffect(() => {
+    const isValid = activeVoices.some(v => v.id === voicePersona);
+    if (!isValid && activeVoices.length > 0) {
+      setVoicePersona(activeVoices[0].id);
+    }
+  }, [voiceProvider]);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    setSaveNotice(null);
+    try {
+      await handleSetGenerationProfile(profileKey, voiceProvider, voicePersona);
+      setSaveNotice({ type: 'success', msg: '✓ Configuration and voice settings saved successfully!' });
+    } catch (e) {
+      setSaveNotice({ type: 'error', msg: 'Failed to save configuration.' });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <h4 style={{ margin: 0 }}>Model Generation &amp; Voice Settings</h4>
+      
+      {['Script Approved', 'In Production', 'Rendering', 'Ready to Publish', 'Uploaded'].includes(episode.status) ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', background: 'rgba(255,255,255,0.02)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label htmlFor="profile-select" style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Choose Model Generation Profile</label>
+            <select 
+              id="profile-select" 
+              className={styles.select} 
+              style={{ maxWidth: '400px', background: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: '6px', padding: '8px 12px', color: 'var(--text)' }}
+              value={profileKey} 
+              onChange={(e) => setProfileKey(e.target.value)}
+            >
+              <option value="">-- Select Profile --</option>
+              {profilesList.map(p => (
+                <option key={p.key} value={p.key}>{p.label} ({p.provider})</option>
+              ))}
+            </select>
+            {profileKey && (
+              <div className={styles.inheritanceHint} style={{ marginTop: '4px', fontSize: '0.8rem' }}>
+                ✓ Profile active. Allowed durations per clip: <strong>{profilesList.find(p => p.key === profileKey)?.generatedShotDurations.join(', ')}s</strong>.
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, minWidth: '200px' }}>
+              <label htmlFor="voice-provider-select" style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Voice Provider</label>
+              <select 
+                id="voice-provider-select" 
+                className={styles.select} 
+                style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: '6px', padding: '8px 12px', color: 'var(--text)' }}
+                value={voiceProvider} 
+                onChange={(e) => setVoiceProvider(e.target.value)}
+              >
+                <option value="google_tts">Google TTS</option>
+                <option value="minimax">Minimax API</option>
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 2, minWidth: '300px' }}>
+              <label htmlFor="voice-persona-select" style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Voice Persona</label>
+              <select 
+                id="voice-persona-select" 
+                className={styles.select} 
+                style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: '6px', padding: '8px 12px', color: 'var(--text)' }}
+                value={voicePersona} 
+                onChange={(e) => setVoicePersona(e.target.value)}
+              >
+                {activeVoices.map(v => (
+                  <option key={v.id} value={v.id}>{v.avatar} {v.name} - {v.desc}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {saveNotice && (
+            <div style={{ 
+              padding: '10px 14px', 
+              borderRadius: '6px', 
+              fontSize: '0.85rem', 
+              background: saveNotice.type === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
+              color: saveNotice.type === 'success' ? '#34d399' : '#f87171',
+              border: saveNotice.type === 'success' ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(239, 68, 68, 0.2)'
+            }}>
+              {saveNotice.msg}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', justifycontent: 'flex-end', marginTop: '8px' }}>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={isSaving || !profileKey}
+              onClick={handleSave}
+              style={{ padding: '8px 20px', fontWeight: 600 }}
+            >
+              {isSaving ? 'Saving...' : '✓ Save Config & Voice Settings'}
+            </button>
+          </div>
+
+        </div>
+      ) : (
+        <div className={styles.prereqNotice}>
+          Model generation profile and voice settings can be configured once the script is Approved. (Prerequisite: Episode must be in 'Script Approved' status).
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function EpisodeWorkspace({
   episode,
@@ -422,35 +585,12 @@ export function EpisodeWorkspace({
 
             {/* 4. Scene Plan / Profile Selection */}
             {activeStageKey === 'scene-plan' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <h4 style={{ margin: 0 }}>Model Generation Profile Selection</h4>
-                {['Script Approved', 'In Production', 'Rendering', 'Ready to Publish', 'Uploaded'].includes(episode.status) ? (
-                  <div className={styles.durationControl} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label htmlFor="profile-select" style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Choose Model Generation Profile</label>
-                    <select 
-                      id="profile-select" 
-                      className={styles.select} 
-                      style={{ maxWidth: '300px' }}
-                      value={selectedProfileKey} 
-                      onChange={(e) => handleSetGenerationProfile(e.target.value)}
-                    >
-                      <option value="">-- Select Profile --</option>
-                      {profilesList.map(p => (
-                        <option key={p.key} value={p.key}>{p.label} ({p.provider})</option>
-                      ))}
-                    </select>
-                    {selectedProfileKey && (
-                      <div className={styles.inheritanceHint} style={{ marginTop: '4px', fontSize: '0.8rem' }}>
-                        ✓ Profile active. Allowed durations per clip: <strong>{profilesList.find(p => p.key === selectedProfileKey)?.generatedShotDurations.join(', ')}s</strong>.
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className={styles.prereqNotice}>
-                    Generation profile can be configured once the script is Approved. (Prerequisite: Episode must be in 'Script Approved' status).
-                  </div>
-                )}
-              </div>
+              <ScenePlanConfig
+                episode={episode}
+                profilesList={profilesList}
+                selectedProfileKey={selectedProfileKey}
+                handleSetGenerationProfile={handleSetGenerationProfile}
+              />
             )}
 
             {/* 5. Start Frames */}
@@ -594,19 +734,27 @@ export function EpisodeWorkspace({
                                 )}
                               </div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <span className={`badge`} style={{ 
-                                  background: asset.status === 'succeeded' ? 'var(--status-success-soft)' : asset.status === 'failed' ? 'var(--status-danger-soft)' : 'var(--status-warning-soft)',
-                                  color: asset.status === 'succeeded' ? 'var(--status-success)' : asset.status === 'failed' ? 'var(--status-danger)' : 'var(--status-warning)'
-                                }}>
+                                <span className={
+                                  asset.status === 'succeeded' ? `${styles.premiumBadge} ${styles.premiumBadgeSucceeded}` :
+                                  asset.status === 'failed' ? `${styles.premiumBadge} ${styles.premiumBadgeFailed}` :
+                                  `${styles.premiumBadge} ${styles.premiumBadgeQueued}`
+                                }>
+                                  {(asset.status === 'queued' || asset.status === 'pending') && (
+                                    <svg className={styles.spinner} style={{ animation: 'spin 1.5s linear infinite', width: '10px', height: '10px' }} viewBox="0 0 24 24" fill="none">
+                                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeDasharray="30 30" />
+                                    </svg>
+                                  )}
                                   {asset.status.toUpperCase()}
                                 </span>
                                 {asset.status !== 'draft' && (
                                   <button
                                     type="button"
-                                    className="btn btn-secondary btn-sm"
+                                    className={styles.btnPremiumRegen}
                                     onClick={() => handleRegenerateAsset(asset.id)}
-                                    style={{ padding: '2px 8px', fontSize: '0.75rem' }}
                                   >
+                                    <svg style={{ width: '11px', height: '11px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                      <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                                    </svg>
                                     Regenerate
                                   </button>
                                 )}

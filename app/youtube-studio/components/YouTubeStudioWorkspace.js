@@ -962,7 +962,7 @@ export function YouTubeStudioWorkspace() {
     }
   }
 
-  async function handleSetGenerationProfile(profileKey) {
+  async function handleSetGenerationProfile(profileKey, voiceProvider, voicePersona) {
     if (!selectedEpisode) return;
     setSelectedProfileKey(profileKey);
     setErrorMsg('');
@@ -972,21 +972,29 @@ export function YouTubeStudioWorkspace() {
       const res = await fetch(`/api/v2/youtube-studio/episodes/${selectedEpisode.id}/generation-profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ generation_profile_key: profileKey })
+        body: JSON.stringify({ 
+          generation_profile_key: profileKey,
+          voice_provider: voiceProvider,
+          voice_persona: voicePersona
+        })
       });
       const data = await res.json();
       if (data.success) {
         setSelectedEpisode(prev => ({
           ...prev,
-          generation_profile_key: data.data.generation_profile_key
+          generation_profile_key: data.data.generation_profile_key,
+          voice_provider: data.data.voice_provider,
+          voice_persona: data.data.voice_persona
         }));
         await refreshEpisodesList();
-        triggerNotice('success', 'Generation profile saved successfully!');
+        triggerNotice('success', 'Generation profile and voice settings saved successfully!');
       } else {
         setErrorMsg(data.error || 'Failed to set generation profile.');
+        throw new Error(data.error || 'Failed to save');
       }
     } catch (e) {
       setErrorMsg('Failed to set generation profile.');
+      throw e;
     }
   }
 
