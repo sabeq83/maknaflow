@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.25.22 — Fix: Add missing await to getAllSchedulerConfigs in scheduler.js (24/08/2026)
+- Await configs loading to fix TypeError inside V4 scheduler tick loop
+
 ## V2.25.21 — Fix: Restore missing DEFAULT_CONFIGS in lib/db.js (24/08/2026)
 - Prevent ReferenceError: DEFAULT_CONFIGS is not defined in scheduler V4 loop
 
