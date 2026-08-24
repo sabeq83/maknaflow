@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.25.21 — Fix: Restore missing DEFAULT_CONFIGS in lib/db.js (24/08/2026)
+- Prevent ReferenceError: DEFAULT_CONFIGS is not defined in scheduler V4 loop
+
 ## V2.25.20 — Fix: Resolve HTTP reference image URLs in start frame adapter (24/08/2026)
 - Convert HTTP character reference image paths to base64 strings dynamically in generateStartFrame
 
