@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.25.35 — Fix: Fragment wrapper modal lightbox (24/08/2026)
+- Fix syntax error JSX sibling modal dengan Fragment wrapper
+
 ## V2.25.34 — Video Lightbox Modal 16:9 (24/08/2026)
 - Kartu video succeeded kini tampil thumbnail + tombol play
 - Klik play buka modal lightbox 16:9 dengan video autoplay

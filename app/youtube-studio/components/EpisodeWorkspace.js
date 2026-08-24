@@ -480,6 +480,7 @@ export function EpisodeWorkspace({
   }
 
   return (
+    <>
     <div className={styles.episodeWorkspace}>
       <div className={styles.workspaceHeader}>
         <h2>{episode.title}</h2>
@@ -1188,5 +1189,6 @@ export function EpisodeWorkspace({
         </div>
       </div>
     )}
+    </>
   );
 }
