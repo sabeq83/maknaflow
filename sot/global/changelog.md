@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.26.3 — Fix Timeline Preview routing: write assembly files to public/uploads/rendered (25/08/2026)
+- Update youtube-studio-render-adapter to output assembly preview to public/uploads/rendered for dynamic caching bypass
+
 ## V2.26.2 — Fix resolveLocalPath for local videos and auto stage navigation (25/08/2026)
 - Fix resolveLocalPath to correctly map /uploads/ path to public folder
 - Add auto navigation to assemble-review tab upon successful queue compilation
