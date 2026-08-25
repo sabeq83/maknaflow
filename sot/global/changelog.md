@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.28.4 — Fix YouTube Assembly Completion Polling (25/08/2026)
+- Mengaktifkan polling selama job assembly queued atau running
+- Mereset status paket saat re-assembly agar UI otomatis membuka Assemble & Review
+
 ## V2.28.3 — Fix YouTube Studio Runtime Initialization (25/08/2026)
 - Memindahkan deklarasi view dan stage sebelum digunakan oleh polling effect
 - Memulihkan render halaman YouTube Studio di server Dev

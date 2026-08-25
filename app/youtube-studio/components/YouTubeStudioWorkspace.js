@@ -978,7 +978,12 @@ export function YouTubeStudioWorkspace() {
 
   useEffect(() => {
     let interval;
-    if (selectedEpisode && activePackage && ['generating', 'approved', 'final_rendering'].includes(activePackage.status)) {
+    const hasActiveAssemblyJob = assemblyJob && ['queued', 'running'].includes(assemblyJob.status);
+    if (
+      selectedEpisode &&
+      activePackage &&
+      (['generating', 'approved', 'final_rendering'].includes(activePackage.status) || hasActiveAssemblyJob)
+    ) {
       interval = setInterval(async () => {
         try {
           const pRes = await fetch(`/api/v2/youtube-studio/episodes/${selectedEpisode.id}/production-plan`);
@@ -1009,7 +1014,7 @@ export function YouTubeStudioWorkspace() {
       }, 3000);
     }
     return () => clearInterval(interval);
-  }, [activePackage, selectedEpisode, selectedChannel, selectedSeries, stage]);
+  }, [activePackage, assemblyJob?.status, selectedEpisode, selectedChannel, selectedSeries, stage]);
 
   async function handleGenerateSeriesSuggestions() {
     if (!selectedChannel) return;
