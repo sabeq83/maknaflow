@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.28.5 — Scope YouTube Assembly CTA (25/08/2026)
+- Menampilkan tombol Assemble & Preview hanya pada tab Video Production
+- Mencegah CTA assembly muncul pada Brief & Research dan tahap lain
+
 ## V2.28.4 — Fix YouTube Assembly Completion Polling (25/08/2026)
 - Mengaktifkan polling selama job assembly queued atau running
 - Mereset status paket saat re-assembly agar UI otomatis membuka Assemble & Review
