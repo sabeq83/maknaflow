@@ -229,7 +229,7 @@ function SidebarContent() {
           }
 
           const enabledMenusEnv = process.env.NEXT_PUBLIC_ENABLED_MENUS;
-          const enabledMenusSet = enabledMenusEnv
+          const enabledMenusSet = enabledMenusEnv ? new Set(enabledMenusEnv.split(',')) : null;
           const menuKey = menuKeyMap[item.href];
           const isTenantDisabled = user?.role !== 'superadmin' && menuKey && Array.isArray(user?.tenantDisabledMenus) && user.tenantDisabledMenus.includes(menuKey);
           const isMenuEnabled = (!enabledMenusSet || enabledMenusSet.has(item.href)) && !isTenantDisabled;

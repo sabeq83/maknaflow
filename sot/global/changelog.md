@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.28.1 — Fix: Convert enabledMenusEnv to Set in Sidebar to prevent TypeError crash (25/08/2026)
+- Fix enabledMenusSet.has TypeError crash by converting the NEXT_PUBLIC_ENABLED_MENUS comma-separated environment variable into a proper Set object
+
 ## V2.28.0 — Sync tab indicators and fix polling auto-redirect closures for assembly (25/08/2026)
 - Add stage to polling useEffect dependencies to resolve stale closure issue
 - Enable Assemble & Review tab during background assembly and show Muxing indicator with spinner
