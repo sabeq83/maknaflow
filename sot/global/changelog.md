@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.28.3 — Fix YouTube Studio Runtime Initialization (25/08/2026)
+- Memindahkan deklarasi view dan stage sebelum digunakan oleh polling effect
+- Memulihkan render halaman YouTube Studio di server Dev
+
 ## V2.28.2 — Fix Dev UI Blank Page (25/08/2026)
 - Memperbaiki error kompilasi global akibat reassignment variabel immutable pada scheduler processor
 - Memulihkan akses halaman login, dashboard, dan YouTube Studio di server Dev

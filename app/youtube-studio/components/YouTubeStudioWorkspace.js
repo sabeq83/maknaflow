@@ -19,6 +19,8 @@ import styles from './YouTubeStudioWorkspace.module.css';
 export function YouTubeStudioWorkspace() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const view = searchParams.get('view') || 'channels';
+  const stage = searchParams.get('stage') || 'research';
 
   const [channels, setChannels] = useState([]);
   const [selectedChannel, setSelectedChannel] = useState(null);
@@ -1298,9 +1300,6 @@ export function YouTubeStudioWorkspace() {
   }
 
   // Views rendering
-  const view = searchParams.get('view') || 'channels';
-  const stage = searchParams.get('stage') || 'research';
-
   const stages = resolveEpisodeStages({
     episode: selectedEpisode,
     research: selectedEpisodeResearch,
