@@ -1076,9 +1076,9 @@ export function EpisodeWorkspace({
                           )}
                         </div>
                       </div>
-                    </>
-                  )}
-                </div>
+                    )}
+                  </>
+                )}
               </div>
             )}
 

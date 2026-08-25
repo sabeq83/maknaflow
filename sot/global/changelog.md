@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.26.1 — Fix EpisodeWorkspace syntax compilation issue (25/08/2026)
+- Fix misplaced brackets at end of video-production stage in EpisodeWorkspace.js
+
 ## V2.26.0 — Assemble & Preview manual trigger + upgraded review UI (25/08/2026)
 - Tombol Assemble & Preview di Video Production saat ada asset succeeded
 - API route POST trigger-assembly untuk queue assembly job manual
