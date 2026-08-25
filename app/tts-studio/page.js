@@ -31,6 +31,54 @@ const MINIMAX_VOICES = [
   { id: 'Indonesian_crisp_reporter_vv2', name: 'Crisp Reporter (Female)', avatar: '👩', desc: 'Perempuan (Crisp Reporter - Vv2)' }
 ];
 
+const MINIMAX_ENGLISH_VOICES = [
+  { id: 'English_expressive_narrator', name: 'Expressive Narrator', avatar: '🎙️', desc: 'Expressive Narrator' },
+  { id: 'English_radiant_girl', name: 'Radiant Girl', avatar: '👩', desc: 'Radiant Girl' },
+  { id: 'English_magnetic_voiced_man', name: 'Magnetic Male', avatar: '👨', desc: 'Magnetic-voiced Male' },
+  { id: 'English_compelling_lady1', name: 'Compelling Lady', avatar: '👩', desc: 'Compelling Lady' },
+  { id: 'English_Aussie_Bloke', name: 'Aussie Bloke', avatar: '👨', desc: 'Aussie Bloke' },
+  { id: 'English_captivating_female1', name: 'Captivating Female', avatar: '👩', desc: 'Captivating Female' },
+  { id: 'English_Upbeat_Woman', name: 'Upbeat Woman', avatar: '👩', desc: 'Upbeat Woman' },
+  { id: 'English_Trustworth_Man', name: 'Trustworthy Man', avatar: '👨', desc: 'Trustworthy Man' },
+  { id: 'English_CalmWoman', name: 'Calm Woman', avatar: '👩', desc: 'Calm Woman' },
+  { id: 'English_UpsetGirl', name: 'Upset Girl', avatar: '👧', desc: 'Upset Girl' },
+  { id: 'English_Gentle-voiced_man', name: 'Gentle-voiced Man', avatar: '👨', desc: 'Gentle-voiced Man' },
+  { id: 'English_Whispering_girl', name: 'Whispering Girl', avatar: '👧', desc: 'Whispering girl' },
+  { id: 'English_Diligent_Man', name: 'Diligent Man', avatar: '👨', desc: 'Diligent Man' },
+  { id: 'English_Graceful_Lady', name: 'Graceful Lady', avatar: '👩', desc: 'Graceful Lady' },
+  { id: 'English_ReservedYoungMan', name: 'Reserved Young Man', avatar: '👨', desc: 'Reserved Young Man' },
+  { id: 'English_PlayfulGirl', name: 'Playful Girl', avatar: '👧', desc: 'Playful Girl' },
+  { id: 'English_ManWithDeepVoice', name: 'Deep Voice Man', avatar: '👨', desc: 'Man With Deep Voice' },
+  { id: 'English_MaturePartner', name: 'Mature Partner', avatar: '👨', desc: 'Mature Partner' },
+  { id: 'English_FriendlyPerson', name: 'Friendly Guy', avatar: '👨', desc: 'Friendly Guy' },
+  { id: 'English_MatureBoss', name: 'Bossy Lady', avatar: '👩', desc: 'Bossy Lady' },
+  { id: 'English_Debator', name: 'Male Debater', avatar: '👨', desc: 'Male Debater' },
+  { id: 'English_LovelyGirl', name: 'Lovely Girl', avatar: '👧', desc: 'Lovely Girl' },
+  { id: 'English_Steadymentor', name: 'Reliable Man', avatar: '👨', desc: 'Reliable Man' },
+  { id: 'English_Deep-VoicedGentleman', name: 'Deep Gentleman', avatar: '👨', desc: 'Deep-voiced Gentleman' },
+  { id: 'English_Wiselady', name: 'Wise Lady', avatar: '👩', desc: 'Wise Lady' },
+  { id: 'English_CaptivatingStoryteller', name: 'Captivating Storyteller', avatar: '📖', desc: 'Captivating Storyteller' },
+  { id: 'English_DecentYoungMan', name: 'Decent Young Man', avatar: '👨', desc: 'Decent Young Man' },
+  { id: 'English_SentimentalLady', name: 'Sentimental Lady', avatar: '👩', desc: 'Sentimental Lady' },
+  { id: 'English_ImposingManner', name: 'Imposing Queen', avatar: '👑', desc: 'Imposing Queen' },
+  { id: 'English_SadTeen', name: 'Teen Boy', avatar: '👦', desc: 'Teen Boy' },
+  { id: 'English_PassionateWarrior', name: 'Passionate Warrior', avatar: '⚔️', desc: 'Passionate Warrior' },
+  { id: 'English_WiseScholar', name: 'Wise Scholar', avatar: '🎓', desc: 'Wise Scholar' },
+  { id: 'English_Soft-spokenGirl', name: 'Soft-Spoken Girl', avatar: '👧', desc: 'Soft-Spoken Girl' },
+  { id: 'English_SereneWoman', name: 'Serene Woman', avatar: '👩', desc: 'Serene Woman' },
+  { id: 'English_ConfidentWoman', name: 'Confident Woman', avatar: '👩', desc: 'Confident Woman' },
+  { id: 'English_PatientMan', name: 'Patient Man', avatar: '👨', desc: 'Patient Man' },
+  { id: 'English_Comedian', name: 'Comedian', avatar: '🤡', desc: 'Comedian' },
+  { id: 'English_BossyLeader', name: 'Bossy Leader', avatar: '👨', desc: 'Bossy Leader' },
+  { id: 'English_Strong-WilledBoy', name: 'Strong-Willed Boy', avatar: '👦', desc: 'Strong-Willed Boy' },
+  { id: 'English_StressedLady', name: 'Stressed Lady', avatar: '👩', desc: 'Stressed Lady' },
+  { id: 'English_AssertiveQueen', name: 'Assertive Queen', avatar: '👑', desc: 'Assertive Queen' },
+  { id: 'English_AnimeCharacter', name: 'Female Narrator', avatar: '👩', desc: 'Female Narrator' },
+  { id: 'English_Jovialman', name: 'Jovial Man', avatar: '👨', desc: 'Jovial Man' },
+  { id: 'English_WhimsicalGirl', name: 'Whimsical Girl', avatar: '👧', desc: 'Whimsical Girl' },
+  { id: 'English_Kind-heartedGirl', name: 'Kind-Hearted Girl', avatar: '👧', desc: 'Kind-Hearted Girl' }
+];
+
 export default function TTSStudioPage() {
   const [sourceType, setSourceType] = useState('manual');
   const [manualText, setManualText] = useState('');
@@ -41,6 +89,7 @@ export default function TTSStudioPage() {
   const [selectedInstantCamp, setSelectedInstantCamp] = useState('');
   
   const [apiProvider, setApiProvider] = useState('minimax');
+  const [targetLanguage, setTargetLanguage] = useState('id-ID');
   const [voicePersona, setVoicePersona] = useState('Indonesian_casual_reporter_vv2');
   const [ttsModelQuality, setTtsModelQuality] = useState('speech-2.8-turbo');
   const [speed, setSpeed] = useState(1.0);
@@ -58,14 +107,17 @@ export default function TTSStudioPage() {
     fetchCampaignData();
   }, []);
 
-  // Update default voice persona when provider changes
   useEffect(() => {
     if (apiProvider === 'gemini') {
       setVoicePersona('Kore');
     } else {
-      setVoicePersona('Indonesian_casual_reporter_vv2');
+      if (targetLanguage === 'en-US') {
+        setVoicePersona('English_expressive_narrator');
+      } else {
+        setVoicePersona('Indonesian_casual_reporter_vv2');
+      }
     }
-  }, [apiProvider]);
+  }, [apiProvider, targetLanguage]);
 
   function showToast(msg, type = 'success') {
     setToast({ msg, type });
@@ -219,7 +271,9 @@ export default function TTSStudioPage() {
   }
 
   const activeClipsPreview = getActiveClips();
-  const currentVoices = apiProvider === 'gemini' ? GEMINI_VOICES : MINIMAX_VOICES;
+  const currentVoices = apiProvider === 'gemini' 
+    ? GEMINI_VOICES 
+    : (targetLanguage === 'en-US' ? MINIMAX_ENGLISH_VOICES : MINIMAX_VOICES);
 
   return (
     <div className="app-layout">
@@ -387,6 +441,26 @@ export default function TTSStudioPage() {
                         💡 <b>HD Model Actings Active:</b> Anda bisa menyisipkan tag emosi/jeda dalam naskah: <code>(breath)</code>, <code>(sighs)</code>, <code>(laughs)</code>, <code>(chuckle)</code>, <code>(emm)</code>, <code>(lip-smacking)</code>, atau jeda <code>&lt;#1.5#&gt;</code> (detik).
                       </div>
                     )}
+
+                    <label style={{ display: 'block', fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '12px', marginBottom: '8px' }}>
+                      Target Bahasa (MiniMax):
+                    </label>
+                    <select
+                      value={targetLanguage}
+                      onChange={e => {
+                        const lang = e.target.value;
+                        setTargetLanguage(lang);
+                        if (lang === 'en-US') {
+                          setVoicePersona('English_expressive_narrator');
+                        } else {
+                          setVoicePersona('Indonesian_casual_reporter_vv2');
+                        }
+                      }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '4px', background: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '0.88rem' }}
+                    >
+                      <option value="id-ID">Bahasa Indonesia (id-ID)</option>
+                      <option value="en-US">English (en-US)</option>
+                    </select>
                   </div>
                 )}
 
@@ -403,7 +477,7 @@ export default function TTSStudioPage() {
                     >
                       <div className="persona-avatar">{voice.avatar}</div>
                       <strong>{voice.name}</strong>
-                      <span className="persona-id">{voice.id.replace('Indonesian_', '')}</span>
+                      <span className="persona-id">{voice.id.replace('Indonesian_', '').replace('English_', '')}</span>
                     </div>
                   ))}
                 </div>

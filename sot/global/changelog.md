@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.28.7 — YouTube Standalone TTS and Episode Voice Persona English Support (25/08/2026)
+- Menambahkan 45 suara Bahasa Inggris premium MiniMax di Standalone TTS Studio
+- Menampilkan pilihan suara Inggris secara dinamis di YouTube Studio episode config sesuai locale
+- Menambahkan instruksi lokalisasi ketat pada prompt perencanaan naskah AI
+
 ## V2.28.6 — YouTube Narrative Timeline Duration Sync (25/08/2026)
 - Menambahkan narration budget dan duration validation
 - Menyimpan durasi TTS aktual dan menjaga timeline saat muxing

@@ -136,6 +136,54 @@ const MINIMAX_VOICES = [
   { id: 'Indonesian_crisp_reporter_vv2', name: 'Crisp Reporter (Female)', avatar: '👩', desc: 'Perempuan (Crisp Reporter - Vv2)' }
 ];
 
+const MINIMAX_ENGLISH_VOICES = [
+  { id: 'English_expressive_narrator', name: 'Expressive Narrator', avatar: '🎙️', desc: 'Expressive Narrator (Recommended)' },
+  { id: 'English_radiant_girl', name: 'Radiant Girl', avatar: '👩', desc: 'Radiant Girl' },
+  { id: 'English_magnetic_voiced_man', name: 'Magnetic Male', avatar: '👨', desc: 'Magnetic-voiced Male' },
+  { id: 'English_compelling_lady1', name: 'Compelling Lady', avatar: '👩', desc: 'Compelling Lady' },
+  { id: 'English_Aussie_Bloke', name: 'Aussie Bloke', avatar: '👨', desc: 'Aussie Bloke' },
+  { id: 'English_captivating_female1', name: 'Captivating Female', avatar: '👩', desc: 'Captivating Female' },
+  { id: 'English_Upbeat_Woman', name: 'Upbeat Woman', avatar: '👩', desc: 'Upbeat Woman' },
+  { id: 'English_Trustworth_Man', name: 'Trustworthy Man', avatar: '👨', desc: 'Trustworthy Man' },
+  { id: 'English_CalmWoman', name: 'Calm Woman', avatar: '👩', desc: 'Calm Woman' },
+  { id: 'English_UpsetGirl', name: 'Upset Girl', avatar: '👧', desc: 'Upset Girl' },
+  { id: 'English_Gentle-voiced_man', name: 'Gentle-voiced Man', avatar: '👨', desc: 'Gentle-voiced Man' },
+  { id: 'English_Whispering_girl', name: 'Whispering Girl', avatar: '👧', desc: 'Whispering girl' },
+  { id: 'English_Diligent_Man', name: 'Diligent Man', avatar: '👨', desc: 'Diligent Man' },
+  { id: 'English_Graceful_Lady', name: 'Graceful Lady', avatar: '👩', desc: 'Graceful Lady' },
+  { id: 'English_ReservedYoungMan', name: 'Reserved Young Man', avatar: '👨', desc: 'Reserved Young Man' },
+  { id: 'English_PlayfulGirl', name: 'Playful Girl', avatar: '👧', desc: 'Playful Girl' },
+  { id: 'English_ManWithDeepVoice', name: 'Deep Voice Man', avatar: '👨', desc: 'Man With Deep Voice' },
+  { id: 'English_MaturePartner', name: 'Mature Partner', avatar: '👨', desc: 'Mature Partner' },
+  { id: 'English_FriendlyPerson', name: 'Friendly Guy', avatar: '👨', desc: 'Friendly Guy' },
+  { id: 'English_MatureBoss', name: 'Bossy Lady', avatar: '👩', desc: 'Bossy Lady' },
+  { id: 'English_Debator', name: 'Male Debater', avatar: '👨', desc: 'Male Debater' },
+  { id: 'English_LovelyGirl', name: 'Lovely Girl', avatar: '👧', desc: 'Lovely Girl' },
+  { id: 'English_Steadymentor', name: 'Reliable Man', avatar: '👨', desc: 'Reliable Man' },
+  { id: 'English_Deep-VoicedGentleman', name: 'Deep Gentleman', avatar: '👨', desc: 'Deep-voiced Gentleman' },
+  { id: 'English_Wiselady', name: 'Wise Lady', avatar: '👩', desc: 'Wise Lady' },
+  { id: 'English_CaptivatingStoryteller', name: 'Captivating Storyteller', avatar: '📖', desc: 'Captivating Storyteller' },
+  { id: 'English_DecentYoungMan', name: 'Decent Young Man', avatar: '👨', desc: 'Decent Young Man' },
+  { id: 'English_SentimentalLady', name: 'Sentimental Lady', avatar: '👩', desc: 'Sentimental Lady' },
+  { id: 'English_ImposingManner', name: 'Imposing Queen', avatar: '👑', desc: 'Imposing Queen' },
+  { id: 'English_SadTeen', name: 'Teen Boy', avatar: '👦', desc: 'Teen Boy' },
+  { id: 'English_PassionateWarrior', name: 'Passionate Warrior', avatar: '⚔️', desc: 'Passionate Warrior' },
+  { id: 'English_WiseScholar', name: 'Wise Scholar', avatar: '🎓', desc: 'Wise Scholar' },
+  { id: 'English_Soft-spokenGirl', name: 'Soft-Spoken Girl', avatar: '👧', desc: 'Soft-Spoken Girl' },
+  { id: 'English_SereneWoman', name: 'Serene Woman', avatar: '👩', desc: 'Serene Woman' },
+  { id: 'English_ConfidentWoman', name: 'Confident Woman', avatar: '👩', desc: 'Confident Woman' },
+  { id: 'English_PatientMan', name: 'Patient Man', avatar: '👨', desc: 'Patient Man' },
+  { id: 'English_Comedian', name: 'Comedian', avatar: '🤡', desc: 'Comedian' },
+  { id: 'English_BossyLeader', name: 'Bossy Leader', avatar: '👨', desc: 'Bossy Leader' },
+  { id: 'English_Strong-WilledBoy', name: 'Strong-Willed Boy', avatar: '👦', desc: 'Strong-Willed Boy' },
+  { id: 'English_StressedLady', name: 'Stressed Lady', avatar: '👩', desc: 'Stressed Lady' },
+  { id: 'English_AssertiveQueen', name: 'Assertive Queen', avatar: '👑', desc: 'Assertive Queen' },
+  { id: 'English_AnimeCharacter', name: 'Female Narrator', avatar: '👩', desc: 'Female Narrator' },
+  { id: 'English_Jovialman', name: 'Jovial Man', avatar: '👨', desc: 'Jovial Man' },
+  { id: 'English_WhimsicalGirl', name: 'Whimsical Girl', avatar: '👧', desc: 'Whimsical Girl (Recommended for Kids)' },
+  { id: 'English_Kind-heartedGirl', name: 'Kind-Hearted Girl', avatar: '👧', desc: 'Kind-Hearted Girl (Recommended for Kids)' }
+];
+
 const getMediaUrl = (pathString) => {
   if (!pathString) return '';
   // Absolute URL — keep as-is (backward-compat for existing external video paths)
@@ -172,14 +220,17 @@ function ScenePlanConfig({ episode, profilesList, selectedProfileKey, handleSetG
     }
   }, [episode]);
 
-  const activeVoices = voiceProvider === 'minimax' ? MINIMAX_VOICES : GEMINI_VOICES;
+  const isEnglish = (episode?.locale || '').startsWith('en');
+  const activeVoices = voiceProvider === 'minimax'
+    ? (isEnglish ? MINIMAX_ENGLISH_VOICES : MINIMAX_VOICES)
+    : GEMINI_VOICES;
 
   useEffect(() => {
     const isValid = activeVoices.some(v => v.id === voicePersona);
     if (!isValid && activeVoices.length > 0) {
       setVoicePersona(activeVoices[0].id);
     }
-  }, [voiceProvider]);
+  }, [voiceProvider, activeVoices]);
 
   const handleSave = async () => {
     setIsSaving(true);
