@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.27.3 — Fix: Resolve local path normalization in resolveLocalPath for leading slash-less paths (25/08/2026)
+- Normalize paths with a leading slash in resolveLocalPath to properly resolve voiceover temp/ files inside public/ folder
+
 ## V2.27.2 — Fix: Resolve column updated_at does not exist error on youtube_production_jobs (25/08/2026)
 - Select created_at instead of non-existent updated_at column in getLatestAssemblyJob query
 
