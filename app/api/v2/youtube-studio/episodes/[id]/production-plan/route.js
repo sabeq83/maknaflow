@@ -26,8 +26,10 @@ export const GET = withYouTubeStudioAccess('read', async (req, { params }) => {
         headers: { 'content-type': 'application/json' }
       });
     }
+    const { getLatestAssemblyJob } = await import('@/lib/youtube-studio-production-repository');
     const assets = await getProductionAssets(pkg.id);
-    return new Response(JSON.stringify({ success: true, data: { package: pkg, assets } }), {
+    const assemblyJob = await getLatestAssemblyJob(pkg.id);
+    return new Response(JSON.stringify({ success: true, data: { package: pkg, assets, assemblyJob } }), {
       status: 200,
       headers: { 'content-type': 'application/json' }
     });

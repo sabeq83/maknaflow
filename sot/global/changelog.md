@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.27.0 — Interactive glowing spinner UI and auto tab transition for timeline assembly (25/08/2026)
+- Add getLatestAssemblyJob to repository and return it in production-plan API
+- Manage assemblyJob state in Workspace and trigger auto-redirect when completed
+- Render neon glowing circular spinner under Assemble button with inline CSS keyframe animations when assembly job is queued or running
+
 ## V2.26.4 — Fix: Keep Assemble button visible on preview_ready and completed statuses (25/08/2026)
 - Update condition to keep manual assembly button available for rebuilding timeline
 

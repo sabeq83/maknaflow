@@ -245,6 +245,7 @@ export function EpisodeWorkspace({
   // Assembly props
   handleTriggerAssembly,
   isTriggeringAssembly,
+  assemblyJob,
 
   // Custom play & bulk TTS props
   playingAssetId,
@@ -1096,39 +1097,83 @@ export function EpisodeWorkspace({
               const failedVisual = packageAssets.filter(
                 a => a.asset_type !== 'voiceover' && a.status === 'failed'
               ).length;
+              const isProcessing = isTriggeringAssembly || (assemblyJob && ['queued', 'running'].includes(assemblyJob.status));
+
               return hasVideo && hasVO ? (
                 <div style={{
                   marginTop: '20px',
-                  padding: '18px 24px',
-                  background: 'linear-gradient(135deg, rgba(99,102,241,0.10), rgba(168,85,247,0.07))',
+                  padding: '20px 24px',
+                  background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(168,85,247,0.05))',
                   border: '1px solid rgba(99,102,241,0.25)',
                   borderRadius: '14px',
                   display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  flexDirection: 'column',
                   gap: '16px'
                 }}>
-                  <div>
-                    <div style={{ fontWeight: '700', fontSize: '0.95rem', marginBottom: '6px' }}>
-                      🎬 Siap untuk Assembly?
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
+                    <div>
+                      <div style={{ fontWeight: '700', fontSize: '0.95rem', marginBottom: '6px' }}>
+                        🎬 Siap untuk Assembly?
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
+                        <strong style={{ color: 'var(--accent-light)' }}>{succeededVisual} shot</strong> berhasil &nbsp;·&nbsp;
+                        {failedVisual > 0 && (
+                          <span><strong style={{ color: 'var(--status-danger)' }}>{failedVisual} failed</strong> akan diganti placeholder &nbsp;·&nbsp;</span>
+                        )}
+                        Video dan audio akan digabungkan menjadi preview timeline.
+                      </div>
                     </div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
-                      <strong style={{ color: 'var(--accent-light)' }}>{succeededVisual} shot</strong> berhasil &nbsp;·&nbsp;
-                      {failedVisual > 0 && (
-                        <span><strong style={{ color: 'var(--status-danger)' }}>{failedVisual} failed</strong> akan diganti placeholder &nbsp;·&nbsp;</span>
-                      )}
-                      Video dan audio akan digabungkan menjadi preview timeline.
-                    </div>
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      style={{ whiteSpace: 'nowrap', minWidth: '180px', padding: '11px 20px', fontWeight: '700' }}
+                      onClick={handleTriggerAssembly}
+                      disabled={isProcessing}
+                    >
+                      {isProcessing ? '⚡ Processing...' : '🎞️ Assemble & Preview'}
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    style={{ whiteSpace: 'nowrap', minWidth: '180px', padding: '11px 20px', fontWeight: '700' }}
-                    onClick={handleTriggerAssembly}
-                    disabled={isTriggeringAssembly}
-                  >
-                    {isTriggeringAssembly ? '⚡ Queuing...' : '🎞️ Assemble & Preview'}
-                  </button>
+
+                  {/* Centered dramatic processing spinner */}
+                  {isProcessing && (
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '24px 0 8px',
+                      borderTop: '1px solid rgba(255,255,255,0.06)',
+                      animation: 'fadeIn 0.4s ease'
+                    }}>
+                      <style>{`
+                        @keyframes spin {
+                          to { transform: rotate(360deg); }
+                        }
+                        @keyframes fadeIn {
+                          from { opacity: 0; transform: translateY(8px); }
+                          to { opacity: 1; transform: translateY(0); }
+                        }
+                      `}</style>
+                      <div style={{
+                        width: '58px',
+                        height: '58px',
+                        borderRadius: '50%',
+                        border: '3px solid rgba(34, 211, 238, 0.08)',
+                        borderTopColor: 'var(--accent-light)',
+                        borderLeftColor: 'var(--accent-light)',
+                        animation: 'spin 0.9s cubic-bezier(0.53, 0.21, 0.29, 0.88) infinite',
+                        boxShadow: '0 0 15px rgba(34, 211, 238, 0.25)',
+                        position: 'relative',
+                        marginBottom: '16px'
+                      }} />
+                      <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '4px' }}>
+                        Mengeksekusi Muxing Audio &amp; Video Timeline...
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', maxWidth: '440px', lineHeight: '1.45' }}>
+                        ffmpeg sedang menggabungkan semua visual clips dengan track voiceover di GPU Node. Proses ini memerlukan waktu sekitar 30-45 detik.
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : null;
             })()}

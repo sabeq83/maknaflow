@@ -95,6 +95,7 @@ export function YouTubeStudioWorkspace() {
   // Phase 3 Production Factory States
   const [activePackage, setActivePackage] = useState(null);
   const [packageAssets, setPackageAssets] = useState([]);
+  const [assemblyJob, setAssemblyJob] = useState(null);
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
   const [isApprovingPlan, setIsApprovingPlan] = useState(false);
   const [isRenderingFinal, setIsRenderingFinal] = useState(false);
@@ -578,9 +579,11 @@ export function YouTubeStudioWorkspace() {
       if (pData.success && pData.data) {
         setActivePackage(pData.data.package);
         setPackageAssets(pData.data.assets || []);
+        setAssemblyJob(pData.data.assemblyJob || null);
       } else {
         setActivePackage(null);
         setPackageAssets([]);
+        setAssemblyJob(null);
       }
     } catch (e) {
       setErrorMsg('Failed to load editorial workflow data.');
@@ -954,6 +957,7 @@ export function YouTubeStudioWorkspace() {
           if (pData.success && pData.data) {
             setActivePackage(pData.data.package);
             setPackageAssets(pData.data.assets || []);
+            setAssemblyJob(pData.data.assemblyJob || null);
           }
         }, 2000);
       } else {
@@ -976,9 +980,10 @@ export function YouTubeStudioWorkspace() {
           if (pData.success && pData.data) {
             setActivePackage(pData.data.package);
             setPackageAssets(pData.data.assets || []);
+            setAssemblyJob(pData.data.assemblyJob || null);
             if (pData.data.package.status === 'preview_ready' || pData.data.package.status === 'completed') {
-              // Auto-redirect to assemble-review tab when transition from generating -> preview_ready happens
-              if (activePackage && activePackage.status === 'generating' && pData.data.package.status === 'preview_ready') {
+              // Auto-redirect to assemble-review tab when package becomes preview_ready and user is on video-production stage
+              if (stage === 'video-production' && pData.data.package.status === 'preview_ready') {
                 navigate('episode', selectedChannel?.id, selectedSeries?.id, selectedEpisode.id, 'assemble-review');
               }
 
@@ -1484,6 +1489,7 @@ export function YouTubeStudioWorkspace() {
             
             handleTriggerAssembly={handleTriggerAssembly}
             isTriggeringAssembly={isTriggeringAssembly}
+            assemblyJob={assemblyJob}
 
             // Review props
             isRenderingFinal={isRenderingFinal}
