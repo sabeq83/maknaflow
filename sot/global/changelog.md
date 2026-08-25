@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.28.8 — Audio Ducking support in YouTube Studio Render (25/08/2026)
+- Mengimplementasikan kompresor sidechain FFmpeg untuk Audio Ducking otomatis
+- Menyediakan fallback audio sunyi otomatis jika file video input tidak memiliki stream suara
+- Memastikan kestabilan filter graph dengan menggunakan filter asplit untuk menggandakan stream Voice-Over
+
 ## V2.28.7 — YouTube Standalone TTS and Episode Voice Persona English Support (25/08/2026)
 - Menambahkan 45 suara Bahasa Inggris premium MiniMax di Standalone TTS Studio
 - Menampilkan pilihan suara Inggris secara dinamis di YouTube Studio episode config sesuai locale
