@@ -270,6 +270,7 @@ export function EpisodeWorkspace({
     switch (status) {
       case 'complete': return styles.badgeComplete;
       case 'active': return styles.badgeActive;
+      case 'assembling': return styles.badgeActive; // Use active styling for assembling
       case 'blocked': return styles.badgeBlocked;
       case 'coming_next': return styles.badgeComingNext;
       default: return styles.badgePending;
@@ -280,6 +281,7 @@ export function EpisodeWorkspace({
     switch (status) {
       case 'complete': return '✓ Done';
       case 'active': return '● Active';
+      case 'assembling': return '⚡ Muxing...';
       case 'blocked': return '🔒 Locked';
       case 'coming_next': return '✨ Soon';
       default: return '○ Pending';
@@ -511,7 +513,14 @@ export function EpisodeWorkspace({
                 onClick={() => onStageChange(stg.key)}
               >
                 <div className={styles.railItemHeader}>
-                  <span className={styles.railItemLabel}>{stg.label}</span>
+                  <span className={styles.railItemLabel} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    {stg.key === 'assemble-review' && stg.status === 'assembling' && (
+                      <svg className={styles.spinner} style={{ animation: 'spin 1.5s linear infinite', width: '11px', height: '11px', color: 'var(--accent-light)' }} viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeDasharray="30 30" />
+                      </svg>
+                    )}
+                    {stg.label}
+                  </span>
                   <span className={`${styles.railStatusBadge} ${statusClass}`}>
                     {getStatusLabel(stg.status)}
                   </span>

@@ -1007,7 +1007,7 @@ export function YouTubeStudioWorkspace() {
       }, 3000);
     }
     return () => clearInterval(interval);
-  }, [activePackage, selectedEpisode, selectedChannel, selectedSeries]);
+  }, [activePackage, selectedEpisode, selectedChannel, selectedSeries, stage]);
 
   async function handleGenerateSeriesSuggestions() {
     if (!selectedChannel) return;
@@ -1306,7 +1306,8 @@ export function YouTubeStudioWorkspace() {
     research: selectedEpisodeResearch,
     blueprint: selectedEpisodeBlueprint,
     script: selectedEpisodeScript,
-    productionPackage: activePackage
+    productionPackage: activePackage,
+    assemblyJob: assemblyJob
   });
 
   return (

@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.28.0 — Sync tab indicators and fix polling auto-redirect closures for assembly (25/08/2026)
+- Add stage to polling useEffect dependencies to resolve stale closure issue
+- Enable Assemble & Review tab during background assembly and show Muxing indicator with spinner
+
 ## V2.27.3 — Fix: Resolve local path normalization in resolveLocalPath for leading slash-less paths (25/08/2026)
 - Normalize paths with a leading slash in resolveLocalPath to properly resolve voiceover temp/ files inside public/ folder
 
