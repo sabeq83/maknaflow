@@ -98,6 +98,7 @@ export function YouTubeStudioWorkspace() {
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
   const [isApprovingPlan, setIsApprovingPlan] = useState(false);
   const [isRenderingFinal, setIsRenderingFinal] = useState(false);
+  const [isTriggeringAssembly, setIsTriggeringAssembly] = useState(false);
 
   // Phase 3.5A KB Foundation States
   const [kbItems, setKbItems] = useState([]);
@@ -933,6 +934,38 @@ export function YouTubeStudioWorkspace() {
     }
   }
 
+  async function handleTriggerAssembly() {
+    if (!selectedEpisode || !activePackage) return;
+    setErrorMsg('');
+    setNotice(null);
+    setIsTriggeringAssembly(true);
+    try {
+      const res = await fetch(
+        `/api/v2/youtube-studio/production-packages/${activePackage.id}/trigger-assembly`,
+        { method: 'POST' }
+      );
+      const data = await res.json();
+      if (data.success) {
+        triggerNotice('success', '🎬 Assembly job antri! Preview timeline akan segera tersedia.');
+        // Refresh package state after a short delay
+        setTimeout(async () => {
+          const pRes = await fetch(`/api/v2/youtube-studio/episodes/${selectedEpisode.id}/production-plan`);
+          const pData = await pRes.json();
+          if (pData.success && pData.data) {
+            setActivePackage(pData.data.package);
+            setPackageAssets(pData.data.assets || []);
+          }
+        }, 2000);
+      } else {
+        setErrorMsg(data.error || 'Gagal trigger assembly.');
+      }
+    } catch (e) {
+      setErrorMsg('Gagal trigger assembly.');
+    } finally {
+      setIsTriggeringAssembly(false);
+    }
+  }
+
   useEffect(() => {
     let interval;
     if (selectedEpisode && activePackage && ['generating', 'approved', 'final_rendering'].includes(activePackage.status)) {
@@ -1444,6 +1477,9 @@ export function YouTubeStudioWorkspace() {
             handleTogglePlayVO={handleTogglePlayVO}
             handleBulkRegenerateTTS={handleBulkRegenerateTTS}
             
+            handleTriggerAssembly={handleTriggerAssembly}
+            isTriggeringAssembly={isTriggeringAssembly}
+
             // Review props
             isRenderingFinal={isRenderingFinal}
             handleFinalRender={handleFinalRender}

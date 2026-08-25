@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.26.0 — Assemble & Preview manual trigger + upgraded review UI (25/08/2026)
+- Tombol Assemble & Preview di Video Production saat ada asset succeeded
+- API route POST trigger-assembly untuk queue assembly job manual
+- Handler handleTriggerAssembly di Workspace dengan auto-refresh
+- Upgrade UI Assemble & Review: stats card, player card, subtitle download, completed banner
+
 ## V2.25.36 — Local Video Storage: download I2V sebelum simpan ke DB (24/08/2026)
 - Worker download video I2V/T2V ke public/uploads/videos/ sebelum simpan path di DB
 - Fix getMediaUrl untuk handle URL absolut http/https sebagai backward-compat

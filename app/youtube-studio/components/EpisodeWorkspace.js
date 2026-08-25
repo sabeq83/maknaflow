@@ -242,6 +242,10 @@ export function EpisodeWorkspace({
   isRenderingFinal,
   handleFinalRender,
 
+  // Assembly props
+  handleTriggerAssembly,
+  isTriggeringAssembly,
+
   // Custom play & bulk TTS props
   playingAssetId,
   handleTogglePlayVO,
@@ -1072,69 +1076,278 @@ export function EpisodeWorkspace({
                           )}
                         </div>
                       </div>
-                    )}
-                  </>
-                )}
+                    </>
+                  )}
+                </div>
               </div>
             )}
 
+            {/* ── Assemble & Preview CTA ── */}
+            {activePackage?.status === 'generating' && (() => {
+              const hasVideo = packageAssets.some(
+                a => a.asset_type !== 'voiceover' && a.status === 'succeeded' && a.output_asset_json?.video_path
+              );
+              const hasVO = packageAssets.some(
+                a => a.asset_type === 'voiceover' && a.status === 'succeeded'
+              );
+              const succeededVisual = packageAssets.filter(
+                a => a.asset_type !== 'voiceover' && a.status === 'succeeded'
+              ).length;
+              const failedVisual = packageAssets.filter(
+                a => a.asset_type !== 'voiceover' && a.status === 'failed'
+              ).length;
+              return hasVideo && hasVO ? (
+                <div style={{
+                  marginTop: '20px',
+                  padding: '18px 24px',
+                  background: 'linear-gradient(135deg, rgba(99,102,241,0.10), rgba(168,85,247,0.07))',
+                  border: '1px solid rgba(99,102,241,0.25)',
+                  borderRadius: '14px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: '16px'
+                }}>
+                  <div>
+                    <div style={{ fontWeight: '700', fontSize: '0.95rem', marginBottom: '6px' }}>
+                      🎬 Siap untuk Assembly?
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
+                      <strong style={{ color: 'var(--accent-light)' }}>{succeededVisual} shot</strong> berhasil &nbsp;·&nbsp;
+                      {failedVisual > 0 && (
+                        <span><strong style={{ color: 'var(--status-danger)' }}>{failedVisual} failed</strong> akan diganti placeholder &nbsp;·&nbsp;</span>
+                      )}
+                      Video dan audio akan digabungkan menjadi preview timeline.
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    style={{ whiteSpace: 'nowrap', minWidth: '180px', padding: '11px 20px', fontWeight: '700' }}
+                    onClick={handleTriggerAssembly}
+                    disabled={isTriggeringAssembly}
+                  >
+                    {isTriggeringAssembly ? '⚡ Queuing...' : '🎞️ Assemble & Preview'}
+                  </button>
+                </div>
+              ) : null;
+            })()}
+
             {/* 7. Assemble & Review */}
             {activeStageKey === 'assemble-review' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <h4 style={{ margin: 0 }}>Timeline Assembly &amp; Preview</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+                {/* Header */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <h4 style={{ margin: 0 }}>Timeline Assembly &amp; Review</h4>
+                  {activePackage && (
+                    <span style={{
+                      padding: '3px 10px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: '700',
+                      letterSpacing: '0.06em', textTransform: 'uppercase',
+                      background: activePackage.status === 'completed'
+                        ? 'rgba(74,222,128,0.12)' : 'rgba(99,102,241,0.15)',
+                      color: activePackage.status === 'completed' ? 'var(--status-success)' : '#818cf8',
+                      border: `1px solid ${ activePackage.status === 'completed'
+                        ? 'rgba(74,222,128,0.3)' : 'rgba(99,102,241,0.3)' }`
+                    }}>
+                      {activePackage.status === 'completed' ? '✓ Completed' : 'Preview Ready'}
+                    </span>
+                  )}
+                </div>
+
                 {activePackage && ['preview_ready', 'final_rendering', 'completed'].includes(activePackage.status) ? (
                   <>
-                    {activePackage.preview_asset_json && (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Timeline Preview Player</label>
-                        <video 
-                          src={getMediaUrl(activePackage.preview_asset_json.videoAsset)} 
-                          controls 
-                          width="100%" 
-                          style={{ borderRadius: '8px', border: '1px solid var(--border-subtle)', background: '#000' }}
-                        />
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                          Subtitles: <code>{activePackage.preview_asset_json.subtitleAsset}</code>
-                        </span>
-                      </div>
-                    )}
-
-                    {activePackage.status === 'completed' && activePackage.final_asset_json && (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
-                        <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--status-success)' }}>✓ Final YouTube Video</label>
-                        <video 
-                          src={getMediaUrl(activePackage.final_asset_json.videoAsset)} 
-                          controls 
-                          width="100%" 
-                          style={{ borderRadius: '8px', border: '1px solid var(--status-success)', background: '#000' }}
-                        />
-                        <div className={styles.inheritanceHint} style={{ fontSize: '0.85rem', color: 'var(--status-success)', fontWeight: 'bold' }}>
-                          🎉 Video is fully compiled and ready to publish!
+                    {/* Stats row */}
+                    {(() => {
+                      const succeededV = packageAssets.filter(a => a.asset_type !== 'voiceover' && a.status === 'succeeded').length;
+                      const failedV = packageAssets.filter(a => a.asset_type !== 'voiceover' && a.status === 'failed').length;
+                      const durationSec = activePackage.preview_asset_json?.durationSeconds || 0;
+                      const mm = String(Math.floor(durationSec / 60)).padStart(2, '0');
+                      const ss = String(Math.floor(durationSec % 60)).padStart(2, '0');
+                      return (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+                          {[{
+                            label: 'Durasi', value: `${mm}:${ss}`, color: 'var(--accent-light)'
+                          }, {
+                            label: 'Scenes', value: [...new Set(packageAssets.map(a => a.scene_index))].length, color: '#a78bfa'
+                          }, {
+                            label: 'Shots Sukses', value: succeededV, color: 'var(--status-success)'
+                          }, {
+                            label: failedV > 0 ? 'Placeholder' : 'Render', value: failedV > 0 ? failedV : '720p', color: failedV > 0 ? 'var(--status-danger)' : 'var(--status-success)'
+                          }].map((s, i) => (
+                            <div key={i} style={{
+                              background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)',
+                              borderRadius: '10px', padding: '12px 14px'
+                            }}>
+                              <div style={{ fontSize: '0.68rem', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>
+                                {s.label}
+                              </div>
+                              <div style={{ fontSize: '1.3rem', fontWeight: '700', fontFamily: 'monospace', color: s.color }}>
+                                {s.value}
+                              </div>
+                            </div>
+                          ))}
                         </div>
+                      );
+                    })()}
+
+                    {/* Preview Video Player */}
+                    {activePackage.preview_asset_json && (
+                      <div style={{
+                        background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)',
+                        borderRadius: '14px', overflow: 'hidden',
+                        ...(activePackage.status === 'completed' ? { opacity: 0.7 } : {})
+                      }}>
+                        <div style={{
+                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                          padding: '10px 16px', borderBottom: '1px solid var(--border-subtle)',
+                          background: 'rgba(255,255,255,0.02)'
+                        }}>
+                          <span style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#818cf8', display: 'inline-block' }} />
+                            Timeline Preview
+                          </span>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                            yt_preview_{activePackage.id?.slice(-8)}.mp4
+                          </span>
+                        </div>
+                        <video
+                          src={getMediaUrl(activePackage.preview_asset_json.videoAsset)}
+                          controls
+                          width="100%"
+                          style={{ display: 'block', background: '#000' }}
+                        />
                       </div>
                     )}
 
-                    {activePackage.status === 'preview_ready' && (
-                      <button
-                        type="button"
-                        className="btn btn-primary"
-                        onClick={handleFinalRender}
-                        disabled={isRenderingFinal}
-                        style={{ alignSelf: 'flex-start' }}
-                      >
-                        {isRenderingFinal ? '⚡ Rendering...' : 'Final Render Video'}
-                      </button>
+                    {/* Final Video Player */}
+                    {activePackage.status === 'completed' && activePackage.final_asset_json && (
+                      <div style={{
+                        background: 'var(--surface-raised)',
+                        border: '1px solid rgba(74,222,128,0.25)',
+                        borderRadius: '14px', overflow: 'hidden',
+                        boxShadow: '0 0 20px rgba(74,222,128,0.07)'
+                      }}>
+                        <div style={{
+                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                          padding: '10px 16px', borderBottom: '1px solid rgba(74,222,128,0.15)',
+                          background: 'rgba(74,222,128,0.05)'
+                        }}>
+                          <span style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--status-success)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: 'var(--status-success)', display: 'inline-block' }} />
+                            ✓ Final YouTube Video
+                          </span>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                            yt_final_{activePackage.id?.slice(-8)}.mp4
+                          </span>
+                        </div>
+                        <video
+                          src={getMediaUrl(activePackage.final_asset_json.videoAsset)}
+                          controls
+                          width="100%"
+                          style={{ display: 'block', background: '#000' }}
+                        />
+                      </div>
                     )}
 
+                    {/* Subtitle download */}
+                    {activePackage.preview_asset_json?.subtitleAsset && (
+                      <div style={{
+                        background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)',
+                        borderRadius: '12px', padding: '12px 16px',
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div style={{
+                            width: '34px', height: '34px', borderRadius: '8px', flexShrink: 0,
+                            background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px'
+                          }}>📄</div>
+                          <div>
+                            <div style={{ fontSize: '0.84rem', fontWeight: '600' }}>Subtitle / Transcript (SRT)</div>
+                            <div style={{ fontSize: '0.71rem', color: 'var(--text-muted)', fontFamily: 'monospace', marginTop: '2px' }}>
+                              {activePackage.preview_asset_json.subtitleAsset}
+                            </div>
+                          </div>
+                        </div>
+                        <a
+                          href={getMediaUrl(activePackage.preview_asset_json.subtitleAsset)}
+                          download
+                          style={{
+                            padding: '7px 14px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: '600',
+                            border: '1px solid rgba(99,102,241,0.35)', background: 'rgba(99,102,241,0.1)',
+                            color: '#818cf8', textDecoration: 'none', whiteSpace: 'nowrap',
+                            transition: 'all 0.2s', display: 'inline-flex', alignItems: 'center', gap: '5px'
+                          }}
+                        >
+                          ⬇ Download SRT
+                        </a>
+                      </div>
+                    )}
+
+                    {/* Action: Final Render button */}
+                    {activePackage.status === 'preview_ready' && (
+                      <div style={{
+                        padding: '18px 22px',
+                        background: 'linear-gradient(135deg, rgba(8,145,178,0.08), rgba(99,102,241,0.06))',
+                        border: '1px solid rgba(8,145,178,0.2)',
+                        borderRadius: '14px',
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px'
+                      }}>
+                        <div>
+                          <div style={{ fontWeight: '700', fontSize: '0.9rem', marginBottom: '5px' }}>🎬 Lanjut ke Final Render?</div>
+                          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.5', maxWidth: '480px' }}>
+                            Preview sudah tersedia. Klik <strong>Final Render Video</strong> untuk menghasilkan
+                            video final berkualitas penuh yang siap di-upload ke YouTube.
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          onClick={handleFinalRender}
+                          disabled={isRenderingFinal}
+                          style={{ whiteSpace: 'nowrap', minWidth: '170px', padding: '11px 20px', fontWeight: '700' }}
+                        >
+                          {isRenderingFinal ? '⚡ Rendering...' : '🎞️ Final Render Video'}
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Rendering in progress */}
                     {activePackage.status === 'final_rendering' && (
                       <div className={styles.prereqNotice}>
-                        ⚡ Final video render is in progress on GPU Node... (Please wait).
+                        ⚡ Final video render sedang berjalan di server... (Please wait).
+                      </div>
+                    )}
+
+                    {/* Completed banner */}
+                    {activePackage.status === 'completed' && (
+                      <div style={{
+                        padding: '18px 22px',
+                        background: 'linear-gradient(135deg, rgba(74,222,128,0.09), rgba(16,185,129,0.06))',
+                        border: '1px solid rgba(74,222,128,0.25)',
+                        borderRadius: '14px',
+                        display: 'flex', alignItems: 'center', gap: '16px'
+                      }}>
+                        <div style={{
+                          width: '44px', height: '44px', borderRadius: '12px', flexShrink: 0,
+                          background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.3)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px'
+                        }}>🎉</div>
+                        <div>
+                          <div style={{ fontWeight: '700', fontSize: '0.92rem', color: 'var(--status-success)' }}>
+                            Video fully compiled — ready to publish!
+                          </div>
+                          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '3px' }}>
+                            Video final tersimpan di server. Lanjut ke tahap Publishing untuk upload ke YouTube.
+                          </div>
+                        </div>
                       </div>
                     )}
                   </>
                 ) : (
                   <div className={styles.prereqNotice}>
-                    Video rendering preview is not ready. (Prerequisite: Production Plan Approved and shots compiled).
+                    Preview belum tersedia. Klik <strong>"🎞️ Assemble &amp; Preview"</strong> di tahap Video Production.
                   </div>
                 )}
               </div>
