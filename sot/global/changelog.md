@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.27.2 — Fix: Resolve column updated_at does not exist error on youtube_production_jobs (25/08/2026)
+- Select created_at instead of non-existent updated_at column in getLatestAssemblyJob query
+
 ## V2.27.1 — Fix: Resolve race condition in URL selectedEpisode and selectedSeries synchronization (25/08/2026)
 - Prevent URL sync logic from clearing active episode state during asynchronous list fetching
 
