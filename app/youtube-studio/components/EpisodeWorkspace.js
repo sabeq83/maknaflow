@@ -1083,7 +1083,7 @@ export function EpisodeWorkspace({
             )}
 
             {/* ── Assemble & Preview CTA ── */}
-            {activePackage?.status === 'generating' && (() => {
+            {activePackage && ['generating', 'preview_ready', 'completed'].includes(activePackage.status) && (() => {
               const hasVideo = packageAssets.some(
                 a => a.asset_type !== 'voiceover' && a.status === 'succeeded' && a.output_asset_json?.video_path
               );

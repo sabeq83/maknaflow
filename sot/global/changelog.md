@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.26.4 — Fix: Keep Assemble button visible on preview_ready and completed statuses (25/08/2026)
+- Update condition to keep manual assembly button available for rebuilding timeline
+
 ## V2.26.3 — Fix Timeline Preview routing: write assembly files to public/uploads/rendered (25/08/2026)
 - Update youtube-studio-render-adapter to output assembly preview to public/uploads/rendered for dynamic caching bypass
 
