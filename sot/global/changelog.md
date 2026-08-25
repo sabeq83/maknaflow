@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.26.2 — Fix resolveLocalPath for local videos and auto stage navigation (25/08/2026)
+- Fix resolveLocalPath to correctly map /uploads/ path to public folder
+- Add auto navigation to assemble-review tab upon successful queue compilation
+
 ## V2.26.1 — Fix EpisodeWorkspace syntax compilation issue (25/08/2026)
 - Fix misplaced brackets at end of video-production stage in EpisodeWorkspace.js
 

@@ -977,6 +977,11 @@ export function YouTubeStudioWorkspace() {
             setActivePackage(pData.data.package);
             setPackageAssets(pData.data.assets || []);
             if (pData.data.package.status === 'preview_ready' || pData.data.package.status === 'completed') {
+              // Auto-redirect to assemble-review tab when transition from generating -> preview_ready happens
+              if (activePackage && activePackage.status === 'generating' && pData.data.package.status === 'preview_ready') {
+                navigate('episode', selectedChannel?.id, selectedSeries?.id, selectedEpisode.id, 'assemble-review');
+              }
+
               await refreshEpisodesList();
               const epRes = await fetch(`/api/v2/youtube-studio/episodes?channel_id=${selectedChannel.id}`);
               const epData = await epRes.json();
@@ -993,7 +998,7 @@ export function YouTubeStudioWorkspace() {
       }, 3000);
     }
     return () => clearInterval(interval);
-  }, [activePackage, selectedEpisode, selectedChannel]);
+  }, [activePackage, selectedEpisode, selectedChannel, selectedSeries]);
 
   async function handleGenerateSeriesSuggestions() {
     if (!selectedChannel) return;
