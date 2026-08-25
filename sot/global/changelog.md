@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.28.2 — Fix Dev UI Blank Page (25/08/2026)
+- Memperbaiki error kompilasi global akibat reassignment variabel immutable pada scheduler processor
+- Memulihkan akses halaman login, dashboard, dan YouTube Studio di server Dev
+
 ## V2.28.1 — Fix: Convert enabledMenusEnv to Set in Sidebar to prevent TypeError crash (25/08/2026)
 - Fix enabledMenusSet.has TypeError crash by converting the NEXT_PUBLIC_ENABLED_MENUS comma-separated environment variable into a proper Set object
 
