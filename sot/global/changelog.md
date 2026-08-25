@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.28.6 — YouTube Narrative Timeline Duration Sync (25/08/2026)
+- Menambahkan narration budget dan duration validation
+- Menyimpan durasi TTS aktual dan menjaga timeline saat muxing
+- Memulihkan episode anak dengan narasi dan preview tersinkron
+
 ## V2.28.5 — Scope YouTube Assembly CTA (25/08/2026)
 - Menampilkan tombol Assemble & Preview hanya pada tab Video Production
 - Mencegah CTA assembly muncul pada Brief & Research dan tahap lain

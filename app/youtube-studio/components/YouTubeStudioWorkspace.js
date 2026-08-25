@@ -1475,6 +1475,7 @@ export function YouTubeStudioWorkspace() {
             handleGenerateScript={handleGenerateScript}
             isApprovingScript={isApprovingScript}
             handleApproveScript={handleApproveScript}
+            refreshEditorialData={async () => await loadEpisodeEditorialData(selectedEpisode.id)}
             
             // Profile props
             profilesList={profilesList}

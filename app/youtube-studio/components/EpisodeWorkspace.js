@@ -2,6 +2,116 @@ import { normalizeLocale } from '@/lib/youtube-studio-contract';
 import styles from './YouTubeStudioWorkspace.module.css';
 import { useState, useEffect } from 'react';
 
+function DurationHealthCard({ scriptId, episode, onAutoFitSuccess }) {
+  const [analysis, setAnalysis] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isFitting, setIsFitting] = useState(false);
+
+  const fetchAnalysis = async () => {
+    try {
+      const res = await fetch(`/api/v2/youtube-studio/scripts/${scriptId}/duration-analysis`);
+      const data = await res.json();
+      if (data.success) {
+        setAnalysis(data.data);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAnalysis();
+  }, [scriptId]);
+
+  const handleAutoFit = async () => {
+    setIsFitting(true);
+    try {
+      const res = await fetch(`/api/v2/youtube-studio/scripts/${scriptId}/auto-fit`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      if (data.success && onAutoFitSuccess) {
+        onAutoFitSuccess(data.data);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsFitting(false);
+    }
+  };
+
+  if (loading) return <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Loading duration analysis...</div>;
+  if (!analysis) return null;
+
+  const coveragePct = Math.round(analysis.coverage_ratio * 100);
+  const isOk = analysis.status === 'ready';
+  const isWarning = analysis.status === 'draft_warning';
+  const isDanger = analysis.status === 'revision_required';
+
+  const cardStyle = {
+    background: isOk ? 'rgba(16, 185, 129, 0.05)' : isWarning ? 'rgba(245, 158, 11, 0.05)' : 'rgba(239, 68, 68, 0.05)',
+    border: `1px solid ${isOk ? 'rgba(16, 185, 129, 0.2)' : isWarning ? 'rgba(245, 158, 11, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
+    borderRadius: '8px',
+    padding: '16px',
+    marginBottom: '16px'
+  };
+
+  return (
+    <div style={cardStyle}>
+      <h5 style={{ margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+        <span>⏱️ Duration &amp; Pacing Health</span>
+        <span style={{
+          fontSize: '0.75rem',
+          padding: '2px 8px',
+          borderRadius: '4px',
+          background: isOk ? '#10b981' : isWarning ? '#f59e0b' : '#ef4444',
+          color: '#fff'
+        }}>
+          {analysis.status.replace('_', ' ').toUpperCase()}
+        </span>
+      </h5>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+        <div>Target Duration: <strong>{analysis.target_timeline_seconds}s</strong></div>
+        <div>Predicted Duration: <strong>{analysis.predicted_narration_seconds}s</strong></div>
+        <div>Total Words: <strong>{analysis.total_words}</strong> (Ideal: ~{Math.round(analysis.target_timeline_seconds * (1 - analysis.pause_ratio) * analysis.target_wpm / 60)})</div>
+        <div>WPM Pacing: <strong>{analysis.target_wpm} WPM</strong> ({episode.narration_profile_key || 'general_id'})</div>
+        <div style={{ gridColumn: 'span 2' }}>
+          Pacing Coverage: <strong>{coveragePct}%</strong>
+          <div style={{ background: 'rgba(255,255,255,0.1)', height: '8px', borderRadius: '4px', marginTop: '6px', overflow: 'hidden' }}>
+            <div style={{
+              background: isOk ? '#10b981' : isWarning ? '#f59e0b' : '#ef4444',
+              height: '100%',
+              width: `${Math.min(100, coveragePct)}%`
+            }} />
+          </div>
+        </div>
+      </div>
+
+      {(isWarning || isDanger) && (
+        <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <p style={{ margin: 0, fontSize: '0.8rem', color: isWarning ? '#fcd34d' : '#fca5a5' }}>
+            {isDanger 
+              ? '⚠️ Severe narrative coverage gap! The audio and timeline durations deviate too far. Please use Auto-fit or manually adjust the script before approval.'
+              : '⚠️ Moderate coverage discrepancy. Verify the spacing is intentional.'}
+          </p>
+          <button
+            type="button"
+            className="btn btn-warning"
+            onClick={handleAutoFit}
+            disabled={isFitting}
+            style={{ fontSize: '0.8rem', padding: '6px 12px', width: 'fit-content' }}
+          >
+            {isFitting ? 'Fitting Narration Pacing...' : '✨ Auto-fit Narration to Timeline'}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 const GEMINI_VOICES = [
   { id: 'Kore', name: 'Kore (Female)', avatar: '👩', desc: 'Standard Female (Skincare/Cosmetic)' },
   { id: 'Fenrir', name: 'Fenrir (Male)', avatar: '🧔', desc: 'Deep/Heavy Male (Otomotif/High-End)' },
@@ -222,6 +332,7 @@ export function EpisodeWorkspace({
   handleGenerateScript,
   isApprovingScript,
   handleApproveScript,
+  refreshEditorialData,
   
   // Profile props
   profilesList,
@@ -475,7 +586,16 @@ export function EpisodeWorkspace({
         </div>
 
         {script.status === 'draft' && (
-          <div style={{ marginTop: '16px' }}>
+          <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <DurationHealthCard 
+              scriptId={script.id} 
+              episode={episode} 
+              onAutoFitSuccess={async () => {
+                if (refreshEditorialData) {
+                  await refreshEditorialData();
+                }
+              }} 
+            />
             <button 
               type="button" 
               className="btn btn-success" 

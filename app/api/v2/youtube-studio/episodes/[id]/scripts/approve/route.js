@@ -15,7 +15,7 @@ export const GET = withTenantContext(async (req, { params }, user) => {
 export const POST = withTenantContext(async (req, { params }, user) => {
   const { id } = await params;
   try {
-    const { script_id, review_note } = await req.json();
+    const { script_id, review_note, allow_duration_override, duration_override_reason } = await req.json();
     if (!script_id) {
       return new Response(JSON.stringify({ success: false, error: 'Script ID is required' }), {
         status: 400,
@@ -23,7 +23,10 @@ export const POST = withTenantContext(async (req, { params }, user) => {
       });
     }
 
-    const approved = await approveScript(script_id, user, review_note || null);
+    const approved = await approveScript(script_id, user, review_note || null, {
+      allowDurationOverride: allow_duration_override === true,
+      overrideReason: duration_override_reason || null
+    });
     return new Response(JSON.stringify({ success: true, data: approved }), {
       status: 200,
       headers: { 'content-type': 'application/json' }
@@ -35,3 +38,4 @@ export const POST = withTenantContext(async (req, { params }, user) => {
     });
   }
 });
+
