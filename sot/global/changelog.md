@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.27.1 — Fix: Resolve race condition in URL selectedEpisode and selectedSeries synchronization (25/08/2026)
+- Prevent URL sync logic from clearing active episode state during asynchronous list fetching
+
 ## V2.27.0 — Interactive glowing spinner UI and auto tab transition for timeline assembly (25/08/2026)
 - Add getLatestAssemblyJob to repository and return it in production-plan API
 - Manage assemblyJob state in Workspace and trigger auto-redirect when completed

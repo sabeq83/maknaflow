@@ -181,11 +181,13 @@ export function YouTubeStudioWorkspace() {
     }
 
     // 2. Sync Series selection
-    if (urlSeriesId && series.length > 0) {
-      if (!selectedSeries || selectedSeries.id !== urlSeriesId) {
-        const foundSer = series.find(s => s.id === urlSeriesId);
-        if (foundSer) {
-          selectSeries(foundSer);
+    if (urlSeriesId) {
+      if (series.length > 0) {
+        if (!selectedSeries || selectedSeries.id !== urlSeriesId) {
+          const foundSer = series.find(s => s.id === urlSeriesId);
+          if (foundSer) {
+            selectSeries(foundSer);
+          }
         }
       }
     } else {
@@ -196,11 +198,13 @@ export function YouTubeStudioWorkspace() {
     }
 
     // 3. Sync Episode selection
-    if (urlEpisodeId && episodes.length > 0) {
-      if (!selectedEpisode || selectedEpisode.id !== urlEpisodeId) {
-        const foundEp = episodes.find(e => e.id === urlEpisodeId);
-        if (foundEp) {
-          setSelectedEpisode(foundEp);
+    if (urlEpisodeId) {
+      if (episodes.length > 0) {
+        if (!selectedEpisode || selectedEpisode.id !== urlEpisodeId) {
+          const foundEp = episodes.find(e => e.id === urlEpisodeId);
+          if (foundEp) {
+            setSelectedEpisode(foundEp);
+          }
         }
       }
     } else {
