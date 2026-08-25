@@ -41,7 +41,7 @@ export const POST = withYouTubeStudioAccess('write', async (req, { params }, use
     `, [pkg.id]);
 
     const sqliteDb = getDb();
-    sqliteDb.prepare(`
+    await sqliteDb.prepare(`
       INSERT INTO scheduler_jobs (queue_name, payload, tenant_id) 
       VALUES ('youtube_production_final', ?, ?)
     `).run(JSON.stringify({ package_id: pkg.id, job_id: finalJobId }), tenantId);

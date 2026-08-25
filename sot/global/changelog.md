@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.28.9 — Fix unawaited final render DB queue execution (25/08/2026)
+- Menambahkan keyword await pada pemanggilan run() di route API final-render agar job diproses oleh scheduler
+
 ## V2.28.8 — Audio Ducking support in YouTube Studio Render (25/08/2026)
 - Mengimplementasikan kompresor sidechain FFmpeg untuk Audio Ducking otomatis
 - Menyediakan fallback audio sunyi otomatis jika file video input tidak memiliki stream suara
