@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.28.17 — Fix: Prepend character canonical prompts in plan_json of package draft (27/08/2026)
+- Pre-process visual shots to prepend character canonical prompts in plan_json during package draft creation
+- Support fallback values of t2i_prompt and t2v_prompt for legacy mode visuals
+- Deploy changes to Dev Mac Mini server
+
 ## V2.28.16 — Fix: Auto-round invalid shot durations in planners (27/08/2026)
 - Add roundToNearestAllowed utility function to hybrid and production planners
 - Normalize shot durations to the closest allowed profile durations before validation
