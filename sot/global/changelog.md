@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.28.16 — Fix: Auto-round invalid shot durations in planners (27/08/2026)
+- Add roundToNearestAllowed utility function to hybrid and production planners
+- Normalize shot durations to the closest allowed profile durations before validation
+- Deploy changes to Dev Mac Mini server
+
 ## V2.28.15 — Fix: Resolve character canonical prompts in T2I generation (27/08/2026)
 - Fix universe profile retrieval in production plan route to query PostgreSQL instead of SQLite
 - Fix duplicate variable shadowing on profile
