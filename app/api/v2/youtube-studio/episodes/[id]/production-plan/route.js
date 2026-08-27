@@ -4,8 +4,9 @@ import {
   getLatestScript, 
   getChannelStrategy
 } from '@/lib/youtube-studio-repository';
-import { getUniverseProfile, getUniverseCharacters, getUniverseLocations } from '@/lib/db';
+import { getUniverseCharacters, getUniverseLocations } from '@/lib/db';
 import { getVisualIdentity } from '@/lib/visual-identity-repository';
+import { pgQuery } from '@/lib/db-pg';
 import { getGenerationProfile } from '@/lib/youtube-studio-generation-profiles';
 import { generateProductionPlan } from '@/lib/youtube-studio-production-planner';
 import { 
@@ -74,13 +75,14 @@ export const POST = withYouTubeStudioAccess('write', async (req, { params }, use
     }
 
     let universe = null;
-    const universeId = strategy.brief_json?.universe_id;
+    const universeId = strategy.universe_id || strategy.brief_json?.universe_id;
     if (universeId) {
-      const profile = await getUniverseProfile(universeId);
-      if (profile) {
+      const uRes = await pgQuery('SELECT * FROM universe_profiles WHERE id = $1', [universeId]);
+      if (uRes.rows.length > 0) {
+        const universeProfile = uRes.rows[0];
         const characters = await getUniverseCharacters(universeId) || [];
         const locations = await getUniverseLocations(universeId) || [];
-        universe = { profile, characters, locations };
+        universe = { profile: universeProfile, characters, locations };
       }
     }
     const visualIdentity = strategy.brief_json?.visual_identity_preset_id ? await getVisualIdentity(strategy.brief_json.visual_identity_preset_id) : null;

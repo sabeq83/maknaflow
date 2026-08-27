@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.28.15 — Fix: Resolve character canonical prompts in T2I generation (27/08/2026)
+- Fix universe profile retrieval in production plan route to query PostgreSQL instead of SQLite
+- Fix duplicate variable shadowing on profile
+- Add active strategy checks to start-frame, visual adapters and production repository
+- Deploy changes to Dev Mac Mini server
+
 ## V2.28.14 — Fix: Increase Generative AI request timeout threshold to 180s (27/08/2026)
 - Raise default Gemini API timeout from 60s to 180s in gemini.js and affiliate-studio-builder-adapter.js to prevent timeout exceptions
 - Deploy changes to Dev Mac Mini server
