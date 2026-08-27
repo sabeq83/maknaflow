@@ -1432,9 +1432,24 @@ export function EpisodeWorkspace({
                             <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#818cf8', display: 'inline-block' }} />
                             Timeline Preview
                           </span>
-                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
-                            yt_preview_{activePackage.id?.slice(-8)}.mp4
-                          </span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                              yt_preview_{activePackage.id?.slice(-8)}.mp4
+                            </span>
+                            <a
+                              href={getMediaUrl(activePackage.preview_asset_json.videoAsset)}
+                              download={`yt_preview_${activePackage.id?.slice(-8)}.mp4`}
+                              style={{
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                padding: '4px 10px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '600',
+                                border: '1px solid rgba(129,140,248,0.3)', background: 'rgba(129,140,248,0.1)',
+                                color: '#818cf8', textDecoration: 'none', cursor: 'pointer',
+                                transition: 'all 0.2s'
+                              }}
+                            >
+                              ⬇ Download
+                            </a>
+                          </div>
                         </div>
                         <video
                           src={getMediaUrl(activePackage.preview_asset_json.videoAsset)}
@@ -1462,9 +1477,24 @@ export function EpisodeWorkspace({
                             <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: 'var(--status-success)', display: 'inline-block' }} />
                             ✓ Final YouTube Video
                           </span>
-                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
-                            yt_final_{activePackage.id?.slice(-8)}.mp4
-                          </span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                              yt_final_{activePackage.id?.slice(-8)}.mp4
+                            </span>
+                            <a
+                              href={getMediaUrl(activePackage.final_asset_json.videoAsset)}
+                              download={`yt_final_${activePackage.id?.slice(-8)}.mp4`}
+                              style={{
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                padding: '4px 10px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '600',
+                                border: '1px solid rgba(74,222,128,0.3)', background: 'rgba(74,222,128,0.1)',
+                                color: 'var(--status-success)', textDecoration: 'none', cursor: 'pointer',
+                                transition: 'all 0.2s'
+                              }}
+                            >
+                              ⬇ Download
+                            </a>
+                          </div>
                         </div>
                         <video
                           src={getMediaUrl(activePackage.final_asset_json.videoAsset)}
@@ -1472,6 +1502,42 @@ export function EpisodeWorkspace({
                           width="100%"
                           style={{ display: 'block', background: '#000' }}
                         />
+                      </div>
+                    )}
+
+                    {/* Video Final download */}
+                    {activePackage.status === 'completed' && activePackage.final_asset_json?.videoAsset && (
+                      <div style={{
+                        background: 'var(--surface-raised)', border: '1px solid rgba(74,222,128,0.25)',
+                        borderRadius: '12px', padding: '12px 16px',
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px',
+                        boxShadow: '0 0 15px rgba(74,222,128,0.05)'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div style={{
+                            width: '34px', height: '34px', borderRadius: '8px', flexShrink: 0,
+                            background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.3)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px'
+                          }}>🎬</div>
+                          <div>
+                            <div style={{ fontSize: '0.84rem', fontWeight: '600', color: 'var(--status-success)' }}>Video Final (MP4)</div>
+                            <div style={{ fontSize: '0.71rem', color: 'var(--text-muted)', fontFamily: 'monospace', marginTop: '2px' }}>
+                              yt_final_{activePackage.id?.slice(-8)}.mp4
+                            </div>
+                          </div>
+                        </div>
+                        <a
+                          href={getMediaUrl(activePackage.final_asset_json.videoAsset)}
+                          download={`yt_final_${activePackage.id?.slice(-8)}.mp4`}
+                          style={{
+                            padding: '7px 14px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: '600',
+                            border: '1px solid rgba(74,222,128,0.35)', background: 'rgba(74,222,128,0.1)',
+                            color: 'var(--status-success)', textDecoration: 'none', whiteSpace: 'nowrap',
+                            transition: 'all 0.2s', display: 'inline-flex', alignItems: 'center', gap: '5px'
+                          }}
+                        >
+                          ⬇ Download Video Final
+                        </a>
                       </div>
                     )}
 

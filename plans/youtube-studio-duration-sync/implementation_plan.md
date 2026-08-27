@@ -89,6 +89,78 @@ Kontrak mux YouTube Studio:
 
 ### 3.5 Recommendation 5 — Voice speed as style, not fitting
 
+Rencana ini bertujuan untuk menambahkan tombol unduh untuk Video Final yang dihasilkan di dalam menu **Assemble & Review** pada fitur YouTube Studio MAKNA Flow. 
+
+Untuk memastikan antarmuka yang sangat premium dan pengalaman pengguna (UX) yang optimal, kita akan menyediakan opsi pengunduhan di dua lokasi strategis:
+1. **Header Player Video Final**: Tombol download kecil terintegrasi langsung di sebelah nama file pada header pemutar video.
+2. **Kartu Unduhan Aset Khusus (Dedicated Assets Download Card)**: Kartu unduhan terdedikasi di bawah video player, sejajar dan selaras secara visual dengan kartu unduhan subtitle SRT yang sudah ada.
+3. **Header Player Video Preview (Opsional/Konsistensi)**: Tombol download kecil serupa untuk video preview agar antarmuka konsisten.
+
+---
+
+## Mockup Layout (Visualisasi Antarmuka)
+
+Berikut adalah visualisasi tata letak (mockup) menu **Assemble & Review** setelah perubahan. Perhatikan posisi tombol download pada header video player dan kartu download khusus di bagian bawah:
+
+```mermaid
+graph TD
+    subgraph Assemble_and_Review ["Stage: Assemble & Review"]
+        Header["Timeline Assembly & Review [Completed Badge]"] --> Stats["Stats Row: [Durasi] | [Scenes] | [Shots Sukses] | [Render: 720p]"]
+        
+        %% Video Players Section
+        Stats --> Players["Video Players"]
+        
+        subgraph Preview_Player ["Preview Video Player"]
+            PHeader["Header: Timeline Preview (yt_preview_xxxx.mp4)"]
+            PBtn["[⬇ Download Preview Button]"]
+            PVideo["[Video Player Box]"]
+            PHeader --- PBtn
+            PHeader --> PVideo
+        end
+        
+        subgraph Final_Player ["Final Video Player (Active when Completed)"]
+            FHeader["Header: ✓ Final YouTube Video (yt_final_xxxx.mp4)"]
+            FBtn["[⬇ Download Button (Green)]"]
+            FVideo["[Video Player Box]"]
+            FHeader --- FBtn
+            FHeader --> FVideo
+        end
+        
+        Players --> Preview_Player
+        Players --> Final_Player
+
+        %% Downloads Section
+        Players --> Downloads["Downloads / Assets Area"]
+        
+        subgraph Download_Cards ["Downloads / Assets Row"]
+            direction LR
+            subgraph Card_Video_Final ["Card: Video Final (Green Border)"]
+                VF_Icon["🎬"]
+                VF_Title["Video Final (MP4)"]
+                VF_File["yt_final_xxxx.mp4"]
+                VF_Download["[⬇ Download Video Final Button (Green)]"]
+            end
+            
+            subgraph Card_SRT ["Card: Subtitle / Transcript (SRT)"]
+                SRT_Icon["📄"]
+                SRT_Title["Subtitle / Transcript (SRT)"]
+                SRT_File["yt_subtitle_xxxx.srt"]
+                SRT_Download["[⬇ Download SRT Button (Indigo)]"]
+            end
+        end
+        
+        Downloads --> Download_Cards
+        
+        %% Status Banner
+        Downloads --> Banner["Banner: 🎉 Video fully compiled — ready to publish!"]
+    end
+    
+    style FBtn fill:#22c55e,stroke:#16a34a,color:#fff
+    style VF_Download fill:#22c55e,stroke:#16a34a,color:#fff
+    style Card_Video_Final stroke:#22c55e,stroke-width:2px
+    style Banner fill:#15803d,color:#fff
+```
+
 - `voice_speed` tetap menjadi pilihan kreatif pengguna.
 - Tambahkan batas profile, misalnya kids `0.85x–1.10x`.
 - Duration fitting hanya boleh mengaplikasikan correction kecil terpisah, misalnya effective tempo `0.92–1.08`, dan nilai tersebut dicatat di metadata.

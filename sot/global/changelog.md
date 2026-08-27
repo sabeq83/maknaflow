@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.28.10 — Feat: Add download button for final video in YouTube Studio (27/08/2026)
+- Add direct download link to final and preview video players
+- Add dedicated Video Final (MP4) download card next to SRT download
+- Deploy modifications to dev server
+
 ## V2.28.9 — Fix unawaited final render DB queue execution (25/08/2026)
 - Menambahkan keyword await pada pemanggilan run() di route API final-render agar job diproses oleh scheduler
 
