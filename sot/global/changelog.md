@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.28.19 — Fix: Remove static visual asset generation modes from hybrid planner (27/08/2026)
+- Remove static_asset and broll generation modes from hybrid planner instructions
+- Ensure all shots use t2i_i2v or t2v automatic AI generator modes
+- Deploy changes to Dev Mac Mini server
+
 ## V2.28.18 — Fix: Auto-succeed static visual assets during hybrid package approval (27/08/2026)
 - Auto-succeed diagram, map, and text_overlay static assets during approvePromptPackage
 - Prevent static visual assets from remaining in draft status indefinitely in hybrid mode
