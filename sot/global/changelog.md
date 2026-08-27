@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.28.14 — Fix: Increase Generative AI request timeout threshold to 180s (27/08/2026)
+- Raise default Gemini API timeout from 60s to 180s in gemini.js and affiliate-studio-builder-adapter.js to prevent timeout exceptions
+- Deploy changes to Dev Mac Mini server
+
 ## V2.28.13 — Feat: Use select dropdown for channel locale selection (27/08/2026)
 - Convert Channel Profile locale text input into a select dropdown with id-ID and en-US options
 - Deploy changes to Dev Mac Mini server
