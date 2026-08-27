@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.28.11 — Feat: Add collapsible sections to Channel view and fix backlog workspace navigation (27/08/2026)
+- Fix backlog workspace Open Workspace click routing to use ep.channel_id and ep.series_id
+- Add collapsible headers and Expand/Collapse states for Knowledge Base, AI Strategy, and Content Series
+- Deploy updates to Mac Mini dev
+
 ## V2.28.10 — Feat: Add download button for final video in YouTube Studio (27/08/2026)
 - Add direct download link to final and preview video players
 - Add dedicated Video Final (MP4) download card next to SRT download

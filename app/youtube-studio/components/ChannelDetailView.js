@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { normalizeLocale } from '@/lib/youtube-studio-contract';
 import styles from './YouTubeStudioWorkspace.module.css';
 
@@ -74,6 +75,9 @@ export function ChannelDetailView({
   handleArchiveKb,
   handleBindKbToChannel
 }) {
+  const [kbCollapsed, setKbCollapsed] = useState(false);
+  const [strategyCollapsed, setStrategyCollapsed] = useState(false);
+  const [seriesCollapsed, setSeriesCollapsed] = useState(false);
 
   function renderStrategyConfig(config, isDraft = false) {
     if (!config) return null;
@@ -186,13 +190,27 @@ export function ChannelDetailView({
       
       {/* ─── KNOWLEDGE BASE LIBRARY SECTION ───────────────────────────────────── */}
       <section className={styles.kbStep} aria-labelledby="kb-step-title">
-        <div className={styles.stepHeader}>
-          <h2 id="kb-step-title">Knowledge Base Library</h2>
-          <span className={styles.kbStepBadge}>Channel &amp; Series Context</span>
+        <div 
+          className={styles.stepHeader} 
+          style={{ cursor: 'pointer', userSelect: 'none' }}
+          onClick={() => setKbCollapsed(!kbCollapsed)}
+        >
+          <h2 id="kb-step-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            Knowledge Base Library <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{kbCollapsed ? '▶' : '▼'}</span>
+          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }} onClick={(e) => e.stopPropagation()}>
+            <span className={styles.kbStepBadge}>Channel &amp; Series Context</span>
+            <button type="button" className={styles.collapsibleToggle} onClick={() => setKbCollapsed(!kbCollapsed)}>
+              {kbCollapsed ? 'Expand' : 'Collapse'}
+            </button>
+          </div>
         </div>
-        <p className={styles.kbStepDesc}>
-          Manage versioned Knowledge Bases for this Channel. Active KBs are automatically injected during research, planning, script-writing, and production stages.
-        </p>
+        
+        {!kbCollapsed && (
+          <>
+            <p className={styles.kbStepDesc}>
+              Manage versioned Knowledge Bases for this Channel. Active KBs are automatically injected during research, planning, script-writing, and production stages.
+            </p>
 
         <div className={styles.kbToolbar}>
           <button
@@ -445,22 +463,38 @@ export function ChannelDetailView({
             </div>
           ))}
         </div>
+          </>
+        )}
       </section>
 
       {/* ─── CHANNEL STRATEGY SECTION ─────────────────────────────────────────── */}
       <section className={styles.workflowStep} aria-labelledby="step-strategy-title">
-        <div className={styles.stepHeader}>
-          <h2 id="step-strategy-title">Channel AI Strategy</h2>
-          {(activeStrategy || draftStrategy) && (
-            <button 
-              type="button"
-              className={styles.collapsibleToggle} 
-              onClick={() => setShowBriefForm(!showBriefForm)}
-            >
-              {showBriefForm ? 'Hide Brief Form' : 'Show/Edit Brief Form'}
+        <div 
+          className={styles.stepHeader} 
+          style={{ cursor: 'pointer', userSelect: 'none' }}
+          onClick={() => setStrategyCollapsed(!strategyCollapsed)}
+        >
+          <h2 id="step-strategy-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            Channel AI Strategy <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{strategyCollapsed ? '▶' : '▼'}</span>
+          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }} onClick={(e) => e.stopPropagation()}>
+            {(activeStrategy || draftStrategy) && !strategyCollapsed && (
+              <button 
+                type="button"
+                className={styles.collapsibleToggle} 
+                onClick={() => setShowBriefForm(!showBriefForm)}
+              >
+                {showBriefForm ? 'Hide Brief Form' : 'Show/Edit Brief Form'}
+              </button>
+            )}
+            <button type="button" className={styles.collapsibleToggle} onClick={() => setStrategyCollapsed(!strategyCollapsed)}>
+              {strategyCollapsed ? 'Expand' : 'Collapse'}
             </button>
-          )}
+          </div>
         </div>
+
+        {!strategyCollapsed && (
+          <>
 
         {showBriefForm && (
           <div className={styles.formGrid}>
@@ -581,23 +615,40 @@ export function ChannelDetailView({
             </div>
           </div>
         )}
+          </>
+        )}
       </section>
 
       {/* ─── CONTENT SERIES SECTION ──────────────────────────────────────────── */}
       <section className={styles.workflowStep} aria-labelledby="step-series-title">
-        <div className={styles.stepHeader}>
-          <h2 id="step-series-title">Content Series</h2>
-          {activeStrategy && (
-            <button 
-              type="button" 
-              className="btn btn-primary" 
-              onClick={handleGenerateSeriesSuggestions}
-              disabled={isGeneratingSeriesSuggestions}
-            >
-              {isGeneratingSeriesSuggestions ? '⚡ Generating...' : 'Suggest Series Concepts (AI)'}
+        <div 
+          className={styles.stepHeader} 
+          style={{ cursor: 'pointer', userSelect: 'none' }}
+          onClick={() => setSeriesCollapsed(!seriesCollapsed)}
+        >
+          <h2 id="step-series-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            Content Series <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{seriesCollapsed ? '▶' : '▼'}</span>
+          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }} onClick={(e) => e.stopPropagation()}>
+            {activeStrategy && !seriesCollapsed && (
+              <button 
+                type="button" 
+                className="btn btn-primary" 
+                onClick={handleGenerateSeriesSuggestions}
+                disabled={isGeneratingSeriesSuggestions}
+                style={{ padding: '6px 14px', fontSize: '0.8rem' }}
+              >
+                {isGeneratingSeriesSuggestions ? '⚡ Generating...' : 'Suggest Series Concepts (AI)'}
+              </button>
+            )}
+            <button type="button" className={styles.collapsibleToggle} onClick={() => setSeriesCollapsed(!seriesCollapsed)}>
+              {seriesCollapsed ? 'Expand' : 'Collapse'}
             </button>
-          )}
+          </div>
         </div>
+
+        {!seriesCollapsed && (
+          <>
 
         {!activeStrategy ? (
           <div className={styles.prereqNotice}>
@@ -705,6 +756,8 @@ export function ChannelDetailView({
                 </div>
               )}
             </div>
+          </>
+        )}
           </>
         )}
       </section>

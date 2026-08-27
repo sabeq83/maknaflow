@@ -1442,7 +1442,7 @@ export function YouTubeStudioWorkspace() {
             handleAdoptIdea={handleAdoptIdea}
             handleRejectIdea={handleRejectIdea}
             handleCreateEpisodeManual={handleCreateEpisodeManual}
-            onOpenEpisode={(ep) => navigate('episode', selectedChannel?.id, selectedSeries.id, ep.id, 'research')}
+            onOpenEpisode={(ep) => navigate('episode', ep.channel_id, ep.series_id, ep.id, 'research')}
             selectedChannel={selectedChannel}
           />
         )}
