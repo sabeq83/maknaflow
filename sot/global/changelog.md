@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.28.13 — Feat: Use select dropdown for channel locale selection (27/08/2026)
+- Convert Channel Profile locale text input into a select dropdown with id-ID and en-US options
+- Deploy changes to Dev Mac Mini server
+
 ## V2.28.12 — Feat: Localize YouTube Studio AI generator outputs based on channel and episode locale (27/08/2026)
 - Add target language directives to AI prompts for series concepts, episode suggestions, research brief, blueprint, and script writing
 - Verify locale-specific text output generation (English for en-US, Indonesian for id-ID)

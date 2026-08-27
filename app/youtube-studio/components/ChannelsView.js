@@ -66,14 +66,15 @@ export function ChannelsView({
           </div>
           <div className={styles.formGroup}>
             <label htmlFor="channel-locale">Locale</label>
-            <input
+            <select
               id="channel-locale"
-              className={styles.input}
-              type="text"
-              placeholder="e.g. id-ID"
+              className={styles.select}
               value={newChannelLocale}
               onChange={(e) => setNewChannelLocale(e.target.value)}
-            />
+            >
+              <option value="id-ID">id-ID (Indonesia)</option>
+              <option value="en-US">en-US (English)</option>
+            </select>
           </div>
           <button
             type="button"
