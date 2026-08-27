@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.28.12 — Feat: Localize YouTube Studio AI generator outputs based on channel and episode locale (27/08/2026)
+- Add target language directives to AI prompts for series concepts, episode suggestions, research brief, blueprint, and script writing
+- Verify locale-specific text output generation (English for en-US, Indonesian for id-ID)
+- Deploy changes to Dev Mac Mini server
+
 ## V2.28.11 — Feat: Add collapsible sections to Channel view and fix backlog workspace navigation (27/08/2026)
 - Fix backlog workspace Open Workspace click routing to use ep.channel_id and ep.series_id
 - Add collapsible headers and Expand/Collapse states for Knowledge Base, AI Strategy, and Content Series
