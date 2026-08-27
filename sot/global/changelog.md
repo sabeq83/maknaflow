@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.28.18 — Fix: Auto-succeed static visual assets during hybrid package approval (27/08/2026)
+- Auto-succeed diagram, map, and text_overlay static assets during approvePromptPackage
+- Prevent static visual assets from remaining in draft status indefinitely in hybrid mode
+- Deploy changes to Dev Mac Mini server
+
 ## V2.28.17 — Fix: Prepend character canonical prompts in plan_json of package draft (27/08/2026)
 - Pre-process visual shots to prepend character canonical prompts in plan_json during package draft creation
 - Support fallback values of t2i_prompt and t2v_prompt for legacy mode visuals
