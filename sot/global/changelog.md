@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.28.24 — Dynamically render compatible wardrobe colors in Legacy Mode dropdown (28/08/2026)
+- Define demographic-wardrobe mapping constants in VisualIdentitySelector.js
+- Render legacy wardrobe styles dynamically based on chosen demographic with optgroup
+- Deploy updated component to Dev server
+
 ## V2.28.23 — Integrate VisualIdentitySelector into ImportPlannerModal (28/08/2026)
 - Replace legacy kumu VSO form input in ImportPlannerModal with VisualIdentitySelector component
 - Implement dynamic loading of campaign configs into visualIdentity state

@@ -1,6 +1,62 @@
 import { useState, useEffect } from 'react';
 
 
+const WARDROBE_LABELS = {
+  amber_terracotta: "Amber Haze & Terracotta",
+  mocca_caramel: "Mocca, Taupe & Caramel Latte",
+  warm_grey: "Warm Grey",
+  sage_muted: "Sage Green Muted",
+  lavender_lilac: "Lavender Soft & Soft Lilac",
+  butter_yellow: "Butter Yellow (Butter Cream)",
+  teal_navy: "Transformative Teal & Navy Blue",
+  olive_modern: "Olive Green Modern",
+  mahogany_maroon: "Mahogany & Maroon",
+  cloud_dancer: "Cloud Dancer (Off-White Modern)",
+  male_terracotta: "Terracotta (Orange)",
+  male_caramel: "Caramel Latte (Brown)",
+  male_khaki_tan: "Khaki / Tan",
+  male_navy_blue: "Navy Blue",
+  male_forest_green: "Forest Green",
+  male_charcoal: "Charcoal Grey",
+  male_burgundy: "Burgundy Maroon",
+  male_sage_muted: "Sage Green Muted",
+  male_steel_blue: "Steel Blue",
+  male_cloud_dancer: "Cloud Dancer (Off-White)",
+  "3d_fem_emerald": "3D Emerald Green Abaya",
+  "3d_fem_pastel_pink": "3D Pastel Pink Abaya",
+  "3d_fem_jetblack": "3D Jet-Black Abaya",
+  "3d_fem_mocca": "3D Mocca Caramel Abaya",
+  "3d_male_tan_knit": "3D Tan Beige Sweater",
+  "3d_male_sage_jacket": "3D Sage Green Windbreaker",
+  "3d_male_charcoal_tshirt": "3D Charcoal Cotton T-Shirt",
+  "3d_male_terracotta_flannel": "3D Terracotta Flannel Shirt",
+  "3d_duo_earth": "3D Duo Earthy Harmony",
+  "3d_duo_contrast": "3D Duo Vibrant Contrast",
+  "3d_duo_monochrome": "3D Duo Monochrome",
+  "3d_duo_pastel": "3D Duo Soft Pastel Harmony",
+  "3d_duo_cool": "3D Duo Professional Cool Tones"
+};
+
+const DEMOGRAPHIC_WARDROBES = {
+  syari_classic: [
+    'amber_terracotta', 'mocca_caramel', 'warm_grey', 'sage_muted', 'lavender_lilac',
+    'butter_yellow', 'teal_navy', 'olive_modern', 'mahogany_maroon', 'cloud_dancer'
+  ],
+  caucasian_male: [
+    'male_terracotta', 'male_caramel', 'male_khaki_tan', 'male_navy_blue', 'male_forest_green',
+    'male_charcoal', 'male_burgundy', 'male_sage_muted', 'male_steel_blue', 'male_cloud_dancer'
+  ],
+  stylized_3d_muslimah: [
+    '3d_fem_emerald', '3d_fem_pastel_pink', '3d_fem_jetblack', '3d_fem_mocca'
+  ],
+  stylized_3d_male: [
+    '3d_male_tan_knit', '3d_male_sage_jacket', '3d_male_charcoal_tshirt', '3d_male_terracotta_flannel'
+  ],
+  stylized_3d_duo: [
+    '3d_duo_earth', '3d_duo_contrast', '3d_duo_monochrome', '3d_duo_pastel', '3d_duo_cool'
+  ]
+};
+
 export default function VisualIdentitySelector({ value, onChange, allowLegacyCustom = true, campaignKind = 're_campaign' }) {
   const [presets, setPresets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -248,11 +304,14 @@ export default function VisualIdentitySelector({ value, onChange, allowLegacyCus
               onChange={(e) => updateLegacyField('wardrobe_style', e.target.value)}
               className="form-select"
             >
-              <option value="sequential">Sequential Rotation</option>
-              <option value="random">Stable Random</option>
-              <option value="sage_muted">Sage Green (Fixed)</option>
-              <option value="mocca_caramel">Mocca Caramel (Fixed)</option>
-              <option value="custom">Custom Color / Wardrobe</option>
+              <option value="sequential">🔄 Sequential Rotation</option>
+              <option value="random">🎲 Stable Random</option>
+              <optgroup label="── Pilihan Warna (Fixed) ──">
+                {(DEMOGRAPHIC_WARDROBES[value.visual_overrides_json.subject_demographic] || DEMOGRAPHIC_WARDROBES.syari_classic).map(key => (
+                  <option key={key} value={key}>{WARDROBE_LABELS[key] || key}</option>
+                ))}
+              </optgroup>
+              <option value="custom">✍️ Custom Color / Wardrobe</option>
             </select>
           </div>
           {value.visual_overrides_json.wardrobe_style === 'custom' && (
