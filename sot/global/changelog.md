@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.28.22 — Simplify VisualIdentitySelector to 2 tabs and rename Visual Swap Overrides to Visual Identity (28/08/2026)
+- Remove Inline Custom tab from VisualIdentitySelector
+- Group visual presets into System and My Presets optgroups
+- Rename Visual Swap Overrides and VSO to Visual Identity in recipe, multiplier, sheets, and pillar campaigns views including ImportPlannerModal
+- Deploy to Dev server
+
 ## V2.28.21 — Fix: Bottom navigation rail and semantic CSS in EpisodeWorkspace (28/08/2026)
 - Add Back and Next tab navigation buttons to bottom of EpisodeWorkspace stages
 - Refactor hardcoded hex colors to semantic CSS variables

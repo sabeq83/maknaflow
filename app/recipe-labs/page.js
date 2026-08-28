@@ -1648,7 +1648,7 @@ export default function RecipeLabsPage() {
                         style={{ padding: '16px 20px', background: activeAccordion === 3 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                       >
                         <span style={{ fontWeight: 600, fontSize: '0.92rem', color: activeAccordion === 3 ? 'var(--accent-light)' : 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span>4. Visual Swap Overrides</span>
+                          <span>4. Visual Identity</span>
                           <span style={{
                             fontSize: '0.72rem',
                             padding: '2px 8px',
@@ -1665,7 +1665,7 @@ export default function RecipeLabsPage() {
                         <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', background: 'var(--overlay-subtle)' }}>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: '1px solid var(--surface-interactive)' }}>
                             <strong style={{ fontSize: '14px', color: 'var(--text-primary)', cursor: 'pointer' }} onClick={() => setIsVsoActive(!isVsoActive)}>
-                              🎭 Aktifkan Visual Swap Overrides
+                              🎭 Aktifkan Visual Identity
                             </strong>
                             <label className="switch">
                               <input type="checkbox" checked={isVsoActive} onChange={e => setIsVsoActive(e.target.checked)} />

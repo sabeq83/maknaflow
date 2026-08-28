@@ -2021,7 +2021,7 @@ export default function OrganicPillarPage() {
                     onClick={() => setActiveAccordion(3)}
                     style={{ padding: '16px 24px', background: activeAccordion === 3 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                   >
-                    <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>4. Visual Swap Overrides</span>
+                    <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>4. Visual Identity</span>
                     <span>{activeAccordion === 3 ? '▲' : '▼'}</span>
                   </div>
                   {activeAccordion === 3 && (
@@ -2036,7 +2036,7 @@ export default function OrganicPillarPage() {
                           <span className="slider"></span>
                         </label>
                         <strong style={{ fontSize: '14px', color: 'var(--text-primary)', cursor: 'pointer' }} onClick={() => setIsVsoActive(!isVsoActive)}>
-                          🎭 Aktifkan Visual Swap Overrides
+                          🎭 Aktifkan Visual Identity
                         </strong>
                       </div>
 

@@ -1,17 +1,14 @@
 import { useState, useEffect } from 'react';
 
-const SUBJECT_KINDS = ['human', 'blank_face_3d', 'animal', 'mascot_object'];
-const HUMAN_FACELESS_MODES = ['hands_only', 'crop_below_neck', 'back_view', 'silhouette', 'first_person_pov', 'blank_face_3d'];
-const ALL_FACELESS_MODES = [...HUMAN_FACELESS_MODES, 'not_applicable'];
-const WARDROBE_MODES = ['fixed', 'sequential', 'stable_random', 'custom'];
-const SLEEVE_POLICIES = ['wrists_covered', 'forearms_exposed', 'not_applicable'];
-const CAMERA_FRAMINGS = ['hands_closeup', 'forearms_and_hands', 'crop_below_neck', 'back_view', 'full_body_blank_face', 'object_or_animal'];
 
 export default function VisualIdentitySelector({ value, onChange, allowLegacyCustom = true, campaignKind = 're_campaign' }) {
   const [presets, setPresets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [customizingMode, setCustomizingMode] = useState('preset'); // 'preset' | 'inline' | 'legacy'
+  const [customizingMode, setCustomizingMode] = useState(() => {
+    if (value?.preset_id === 'custom' || value?.visual_overrides_json) return 'legacy';
+    return 'preset';
+  });
 
   useEffect(() => {
     fetchPresets();
@@ -40,21 +37,6 @@ export default function VisualIdentitySelector({ value, onChange, allowLegacyCus
         inline_config: null,
         visual_overrides_json: null
       });
-    } else if (mode === 'inline') {
-      const baseConfig = activePreset?.config || {};
-      onChange({
-        preset_id: 'inline',
-        inline_config: {
-          subject: { kind: 'human', faceless_mode: 'hands_only', demographic_key: 'syari_classic', custom_description: '', character_count: 1, ...baseConfig.subject },
-          wardrobe: { mode: 'fixed', preset_key: 'sage_muted', custom_description: '', sleeve_policy: 'wrists_covered', ...baseConfig.wardrobe },
-          environment: { preset_key: 'nordic_kitchen', custom_description: '', ...baseConfig.environment },
-          lighting: { preset_key: 'window_daylight', custom_description: '', ...baseConfig.lighting },
-          camera: { framing: 'forearms_and_hands', perspective: 'third_person', ...baseConfig.camera },
-          style: { preset_key: 'cinematic_realistic', custom_description: '', aspect_ratio: '9:16', ...baseConfig.style },
-          guardrails: { face_visibility: 'prohibited', reflection_face: 'prohibited', extra_people: 'prohibited', identity_drift: 'prohibited', wardrobe_drift: 'prohibited', required_negative_prompts: [] }
-        },
-        visual_overrides_json: null
-      });
     } else if (mode === 'legacy') {
       onChange({
         preset_id: 'custom',
@@ -72,18 +54,6 @@ export default function VisualIdentitySelector({ value, onChange, allowLegacyCus
     }
   };
 
-  const updateInlineField = (section, field, val) => {
-    onChange({
-      ...value,
-      inline_config: {
-        ...value.inline_config,
-        [section]: {
-          ...value.inline_config[section],
-          [field]: val
-        }
-      }
-    });
-  };
 
   const updateLegacyField = (field, val) => {
     onChange({
@@ -176,24 +146,6 @@ export default function VisualIdentitySelector({ value, onChange, allowLegacyCus
         >
           Preset Mode
         </button>
-        <button
-          type="button"
-          onClick={() => handleModeChange('inline')}
-          style={{
-            flex: 1,
-            background: customizingMode === 'inline' ? 'var(--surface-interactive)' : 'transparent',
-            border: 'none',
-            color: customizingMode === 'inline' ? 'var(--action-primary)' : 'var(--text-muted)',
-            padding: '8px 12px',
-            fontSize: '12px',
-            fontWeight: '600',
-            borderRadius: 'var(--radius-sm)',
-            cursor: 'pointer',
-            transition: 'var(--transition)'
-          }}
-        >
-          Inline Custom
-        </button>
         {allowLegacyCustom && (
           <button
             type="button"
@@ -211,7 +163,7 @@ export default function VisualIdentitySelector({ value, onChange, allowLegacyCus
               transition: 'var(--transition)'
             }}
           >
-            Legacy Custom
+            Legacy Mode
           </button>
         )}
       </div>
@@ -232,9 +184,16 @@ export default function VisualIdentitySelector({ value, onChange, allowLegacyCus
               onChange={(e) => onChange({ ...value, preset_id: e.target.value })}
               className="form-select"
             >
-              {presets.map(p => (
-                <option key={p.id} value={p.id}>{p.label} ({p.source})</option>
-              ))}
+              <optgroup label="System Presets">
+                {presets.filter(p => p.source === 'system').map(p => (
+                  <option key={p.id} value={p.id}>{p.label}</option>
+                ))}
+              </optgroup>
+              <optgroup label="My Presets (User)">
+                {presets.filter(p => p.source !== 'system').map(p => (
+                  <option key={p.id} value={p.id}>{p.label}</option>
+                ))}
+              </optgroup>
             </select>
           </div>
           {activePreset && (
@@ -264,197 +223,6 @@ export default function VisualIdentitySelector({ value, onChange, allowLegacyCus
         </div>
       )}
 
-      {/* Inline Customization Section */}
-      {customizingMode === 'inline' && value.inline_config && (
-        <div style={{
-          maxHeight: '290px',
-          overflowY: 'auto',
-          paddingRight: '6px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '16px'
-        }}>
-          {/* Subject */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <span style={{
-              fontSize: '10px',
-              fontWeight: '800',
-              color: 'var(--action-primary)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              borderBottom: '1px solid var(--border-subtle)',
-              paddingBottom: '4px',
-              marginTop: '6px'
-            }}>Subject Properties</span>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Kind</label>
-                <select
-                  value={value.inline_config.subject.kind}
-                  onChange={(e) => updateInlineField('subject', 'kind', e.target.value)}
-                  className="form-select"
-                >
-                  {SUBJECT_KINDS.map(k => (
-                    <option key={k} value={k}>{k.replace('_', ' ')}</option>
-                  ))}
-                </select>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Faceless Mode</label>
-                <select
-                  value={value.inline_config.subject.faceless_mode}
-                  onChange={(e) => updateInlineField('subject', 'faceless_mode', e.target.value)}
-                  className="form-select"
-                >
-                  {ALL_FACELESS_MODES.map(fm => (
-                    <option key={fm} value={fm}>{fm.replace('_', ' ')}</option>
-                  ))}
-                </select>
-              </div>
-              <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Demographic Key</label>
-                <input
-                  type="text"
-                  value={value.inline_config.subject.demographic_key}
-                  onChange={(e) => updateInlineField('subject', 'demographic_key', e.target.value)}
-                  className="form-input"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Wardrobe */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <span style={{
-              fontSize: '10px',
-              fontWeight: '800',
-              color: 'var(--action-primary)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              borderBottom: '1px solid var(--border-subtle)',
-              paddingBottom: '4px',
-              marginTop: '6px'
-            }}>Wardrobe Details</span>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Mode</label>
-                <select
-                  value={value.inline_config.wardrobe.mode}
-                  onChange={(e) => updateInlineField('wardrobe', 'mode', e.target.value)}
-                  className="form-select"
-                >
-                  {WARDROBE_MODES.map(wm => (
-                    <option key={wm} value={wm}>{wm.replace('_', ' ')}</option>
-                  ))}
-                </select>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Preset Key</label>
-                <input
-                  type="text"
-                  value={value.inline_config.wardrobe.preset_key}
-                  onChange={(e) => updateInlineField('wardrobe', 'preset_key', e.target.value)}
-                  className="form-input"
-                />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sleeve Policy</label>
-                <select
-                  value={value.inline_config.wardrobe.sleeve_policy}
-                  onChange={(e) => updateInlineField('wardrobe', 'sleeve_policy', e.target.value)}
-                  className="form-select"
-                >
-                  {SLEEVE_POLICIES.map(sp => (
-                    <option key={sp} value={sp}>{sp.replace('_', ' ')}</option>
-                  ))}
-                </select>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Primary Color (Hex)</label>
-                <input
-                  type="text"
-                  value={value.inline_config.wardrobe.primary_color}
-                  onChange={(e) => updateInlineField('wardrobe', 'primary_color', e.target.value)}
-                  className="form-input"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Environment */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <span style={{
-              fontSize: '10px',
-              fontWeight: '800',
-              color: 'var(--action-primary)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              borderBottom: '1px solid var(--border-subtle)',
-              paddingBottom: '4px',
-              marginTop: '6px'
-            }}>Environment & Lighting</span>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Environment Key</label>
-                <input
-                  type="text"
-                  value={value.inline_config.environment.preset_key}
-                  onChange={(e) => updateInlineField('environment', 'preset_key', e.target.value)}
-                  className="form-input"
-                />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Lighting Key</label>
-                <input
-                  type="text"
-                  value={value.inline_config.lighting.preset_key}
-                  onChange={(e) => updateInlineField('lighting', 'preset_key', e.target.value)}
-                  className="form-input"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Camera framing */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <span style={{
-              fontSize: '10px',
-              fontWeight: '800',
-              color: 'var(--action-primary)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              borderBottom: '1px solid var(--border-subtle)',
-              paddingBottom: '4px',
-              marginTop: '6px'
-            }}>Camera Settings</span>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Framing</label>
-                <select
-                  value={value.inline_config.camera.framing}
-                  onChange={(e) => updateInlineField('camera', 'framing', e.target.value)}
-                  className="form-select"
-                >
-                  {CAMERA_FRAMINGS.map(f => (
-                    <option key={f} value={f}>{f.replace('_', ' ')}</option>
-                  ))}
-                </select>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Camera Perspective</label>
-                <select
-                  value={value.inline_config.camera.perspective}
-                  onChange={(e) => updateInlineField('camera', 'perspective', e.target.value)}
-                  className="form-select"
-                >
-                  <option value="third_person">third person</option>
-                  <option value="first_person_pov">first person pov</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Legacy Custom Selection dropdowns */}
       {customizingMode === 'legacy' && value.visual_overrides_json && (

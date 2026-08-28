@@ -1352,7 +1352,7 @@ export default function ImportPlannerModal({
                   cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                 }}
               >
-                <span>4. Visual Swap Overrides</span>
+                <span>4. Visual Identity</span>
                 <span>{activeAccordion === 3 ? '▲' : '▼'}</span>
               </div>
 
@@ -1369,7 +1369,7 @@ export default function ImportPlannerModal({
                       <span className="slider"></span>
                     </label>
                     <label htmlFor="vsoToggleModal" style={{ cursor: 'pointer', fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>
-                      🎭 Aktifkan Visual Swap Overrides
+                      🎭 Aktifkan Visual Identity
                     </label>
                   </div>
 

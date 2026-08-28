@@ -3089,7 +3089,7 @@ export default function PillarCampaignDetailPage() {
             {/* Accordion D: Info Konfigurasi Visual Swap Overrides */}
             <details style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
               <summary style={{ padding: '16px 20px', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)' }}>
-                <span>🎭 Info Konfigurasi Visual Swap Overrides</span>
+                <span>🎭 Info Konfigurasi Visual Identity</span>
               </summary>
               <div style={{ padding: '20px', borderTop: '1px solid var(--border)', background: 'var(--overlay-subtle)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                 {visualOverrides.identity_ref && (
