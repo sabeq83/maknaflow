@@ -66,8 +66,8 @@ function DurationHealthCard({ scriptId, episode, onAutoFitSuccess }) {
           fontSize: '0.75rem',
           padding: '2px 8px',
           borderRadius: '4px',
-          background: isOk ? '#10b981' : isWarning ? '#f59e0b' : '#ef4444',
-          color: '#fff'
+          background: isOk ? 'var(--status-success)' : isWarning ? 'var(--status-warning)' : 'var(--status-danger)',
+          color: 'var(--text-primary)'
         }}>
           {analysis.status.replace('_', ' ').toUpperCase()}
         </span>
@@ -82,7 +82,7 @@ function DurationHealthCard({ scriptId, episode, onAutoFitSuccess }) {
           Pacing Coverage: <strong>{coveragePct}%</strong>
           <div style={{ background: 'rgba(255,255,255,0.1)', height: '8px', borderRadius: '4px', marginTop: '6px', overflow: 'hidden' }}>
             <div style={{
-              background: isOk ? '#10b981' : isWarning ? '#f59e0b' : '#ef4444',
+              background: isOk ? 'var(--status-success)' : isWarning ? 'var(--status-warning)' : 'var(--status-danger)',
               height: '100%',
               width: `${Math.min(100, coveragePct)}%`
             }} />
@@ -92,7 +92,7 @@ function DurationHealthCard({ scriptId, episode, onAutoFitSuccess }) {
 
       {(isWarning || isDanger) && (
         <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <p style={{ margin: 0, fontSize: '0.8rem', color: isWarning ? '#fcd34d' : '#fca5a5' }}>
+          <p style={{ margin: 0, fontSize: '0.8rem', color: isWarning ? 'var(--status-warning)' : 'var(--status-danger)' }}>
             {isDanger 
               ? '⚠️ Severe narrative coverage gap! The audio and timeline durations deviate too far. Please use Auto-fit or manually adjust the script before approval.'
               : '⚠️ Moderate coverage discrepancy. Verify the spacing is intentional.'}
@@ -326,9 +326,9 @@ function ScenePlanConfig({ episode, profilesList, selectedProfileKey, handleSetG
               padding: '10px 14px', 
               borderRadius: '6px', 
               fontSize: '0.85rem', 
-              background: saveNotice.type === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
-              color: saveNotice.type === 'success' ? '#34d399' : '#f87171',
-              border: saveNotice.type === 'success' ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(239, 68, 68, 0.2)'
+              background: saveNotice.type === 'success' ? 'var(--status-success-soft)' : 'var(--status-danger-soft)', 
+              color: saveNotice.type === 'success' ? 'var(--status-success)' : 'var(--status-danger)',
+              border: saveNotice.type === 'success' ? '1px solid var(--status-success-soft)' : '1px solid var(--status-danger-soft)'
             }}>
               {saveNotice.msg}
             </div>
@@ -650,6 +650,22 @@ export function EpisodeWorkspace({
             <button 
               type="button" 
               className="btn btn-success" 
+              style={{
+                backgroundColor: 'var(--status-success)',
+                borderColor: 'var(--status-success)',
+                color: '#ffffff',
+                fontWeight: '600',
+                padding: '10px 20px',
+                boxShadow: '0 4px 12px var(--status-success-soft)',
+                transition: 'all 0.2s ease',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.filter = 'brightness(0.9)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.filter = 'none';
+              }}
               onClick={handleApproveScript}
               disabled={isApprovingScript}
             >
@@ -1072,7 +1088,7 @@ export function EpisodeWorkspace({
                                   return (
                                     <div key={asset.id} style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
                                       {/* Media Preview */}
-                                      <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#000', overflow: 'hidden' }}>
+                                      <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: 'var(--canvas)', overflow: 'hidden' }}>
                                         {activeVisualTab === 'start-frames' ? (
                                           // 🖼️ START FRAMES TAB
                                           hasImage ? (
@@ -1112,7 +1128,7 @@ export function EpisodeWorkspace({
                                               {/* Play button overlay */}
                                               <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.25)', transition: 'background 0.2s' }}>
                                                 <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(255,255,255,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.5)', transition: 'transform 0.2s' }}>
-                                                  <svg viewBox="0 0 24 24" fill="#111" width="18" height="18">
+                                                  <svg viewBox="0 0 24 24" fill="var(--canvas)" width="18" height="18">
                                                     <polygon points="7,4 21,12 7,20"/>
                                                   </svg>
                                                 </div>
@@ -1127,7 +1143,7 @@ export function EpisodeWorkspace({
                                                 style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.45 }}
                                               />
                                               <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                                                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>🖼️ Start Frame Ready</span>
+                                                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>🖼️ Start Frame Ready</span>
                                                 <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.7)' }}>Video not yet generated</span>
                                               </div>
                                             </div>
@@ -1201,12 +1217,12 @@ export function EpisodeWorkspace({
                                                     fontSize: '0.7rem',
                                                     padding: '5px 12px',
                                                     fontWeight: 700,
-                                                    background: 'linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%)',
+                                                    background: 'linear-gradient(135deg, var(--accent) 0%, var(--status-neutral) 100%)',
                                                     border: 'none',
-                                                    color: '#fff',
+                                                    color: 'var(--text-primary)',
                                                     borderRadius: '6px',
                                                     cursor: 'pointer',
-                                                    boxShadow: '0 0 10px rgba(124,58,237,0.3)',
+                                                    boxShadow: '0 0 10px var(--status-neutral-soft)',
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     gap: '4px'
@@ -1370,10 +1386,10 @@ export function EpisodeWorkspace({
                       padding: '3px 10px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: '700',
                       letterSpacing: '0.06em', textTransform: 'uppercase',
                       background: activePackage.status === 'completed'
-                        ? 'rgba(74,222,128,0.12)' : 'rgba(99,102,241,0.15)',
-                      color: activePackage.status === 'completed' ? 'var(--status-success)' : '#818cf8',
+                        ? 'var(--status-success-soft)' : 'var(--status-info-soft)',
+                      color: activePackage.status === 'completed' ? 'var(--status-success)' : 'var(--status-info)',
                       border: `1px solid ${ activePackage.status === 'completed'
-                        ? 'rgba(74,222,128,0.3)' : 'rgba(99,102,241,0.3)' }`
+                        ? 'var(--status-success-soft)' : 'var(--status-info-soft)' }`
                     }}>
                       {activePackage.status === 'completed' ? '✓ Completed' : 'Preview Ready'}
                     </span>
@@ -1394,7 +1410,7 @@ export function EpisodeWorkspace({
                           {[{
                             label: 'Durasi', value: `${mm}:${ss}`, color: 'var(--accent-light)'
                           }, {
-                            label: 'Scenes', value: [...new Set(packageAssets.map(a => a.scene_index))].length, color: '#a78bfa'
+                            label: 'Scenes', value: [...new Set(packageAssets.map(a => a.scene_index))].length, color: 'var(--status-neutral)'
                           }, {
                             label: 'Shots Sukses', value: succeededV, color: 'var(--status-success)'
                           }, {
@@ -1429,7 +1445,7 @@ export function EpisodeWorkspace({
                           background: 'rgba(255,255,255,0.02)'
                         }}>
                           <span style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#818cf8', display: 'inline-block' }} />
+                            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: 'var(--status-info)', display: 'inline-block' }} />
                             Timeline Preview
                           </span>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -1442,8 +1458,8 @@ export function EpisodeWorkspace({
                               style={{
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 padding: '4px 10px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '600',
-                                border: '1px solid rgba(129,140,248,0.3)', background: 'rgba(129,140,248,0.1)',
-                                color: '#818cf8', textDecoration: 'none', cursor: 'pointer',
+                                border: '1px solid var(--status-info-soft)', background: 'var(--status-info-soft)',
+                                color: 'var(--status-info)', textDecoration: 'none', cursor: 'pointer',
                                 transition: 'all 0.2s'
                               }}
                             >
@@ -1455,7 +1471,7 @@ export function EpisodeWorkspace({
                           src={getMediaUrl(activePackage.preview_asset_json.videoAsset)}
                           controls
                           width="100%"
-                          style={{ display: 'block', background: '#000' }}
+                          style={{ display: 'block', background: 'var(--canvas)' }}
                         />
                       </div>
                     )}
@@ -1500,7 +1516,7 @@ export function EpisodeWorkspace({
                           src={getMediaUrl(activePackage.final_asset_json.videoAsset)}
                           controls
                           width="100%"
-                          style={{ display: 'block', background: '#000' }}
+                          style={{ display: 'block', background: 'var(--canvas)' }}
                         />
                       </div>
                     )}
@@ -1551,7 +1567,7 @@ export function EpisodeWorkspace({
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                           <div style={{
                             width: '34px', height: '34px', borderRadius: '8px', flexShrink: 0,
-                            background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)',
+                            background: 'var(--status-info-soft)', border: '1px solid var(--border-subtle)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px'
                           }}>📄</div>
                           <div>
@@ -1566,8 +1582,8 @@ export function EpisodeWorkspace({
                           download
                           style={{
                             padding: '7px 14px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: '600',
-                            border: '1px solid rgba(99,102,241,0.35)', background: 'rgba(99,102,241,0.1)',
-                            color: '#818cf8', textDecoration: 'none', whiteSpace: 'nowrap',
+                            border: '1px solid var(--status-info-soft)', background: 'var(--status-info-soft)',
+                            color: 'var(--status-info)', textDecoration: 'none', whiteSpace: 'nowrap',
                             transition: 'all 0.2s', display: 'inline-flex', alignItems: 'center', gap: '5px'
                           }}
                         >
@@ -1661,6 +1677,74 @@ export function EpisodeWorkspace({
                 <p>Direct scheduled upload integration with YouTube API channels will be available in future phases.</p>
               </div>
             )}
+
+            {/* Bottom Navigation Buttons */}
+            {(() => {
+              const currentIdx = stages.findIndex(s => s.key === activeStageKey);
+              if (currentIdx === -1) return null;
+
+              let prevStage = null;
+              for (let i = currentIdx - 1; i >= 0; i--) {
+                if (stages[i].status !== 'blocked') {
+                  prevStage = stages[i];
+                  break;
+                }
+              }
+
+              let nextStage = null;
+              for (let i = currentIdx + 1; i < stages.length; i++) {
+                if (stages[i].status !== 'blocked') {
+                  nextStage = stages[i];
+                  break;
+                }
+              }
+
+              return (
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginTop: '40px',
+                  paddingTop: '20px',
+                  borderTop: '1px solid var(--border-subtle)',
+                  gap: '16px'
+                }}>
+                  {prevStage ? (
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => onStageChange(prevStage.key)}
+                    >
+                      ← Back to {prevStage.label}
+                    </button>
+                  ) : (
+                    <div />
+                  )}
+
+                  {nextStage && (
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => onStageChange(nextStage.key)}
+                    >
+                      Next to {nextStage.label} →
+                    </button>
+                  )}
+                </div>
+              );
+            })()}
 
           </div>
         </main>
