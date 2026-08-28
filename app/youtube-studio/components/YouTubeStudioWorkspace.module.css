@@ -1613,3 +1613,14 @@
   to   { transform: scale(1);    opacity: 1; }
 }
 
+.guideContainer {
+  max-width: 900px;
+  margin: 0 auto;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(10px);
+}
+

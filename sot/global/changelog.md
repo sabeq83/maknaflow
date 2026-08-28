@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.28.27 — Tambah Panduan Menu YouTube Studio (28/08/2026)
+- Menambahkan tab Panduan di sebelah tab Analytics
+- Membuat komponen dokumentasi langkah-demi-langkah GuideView dalam bahasa Indonesia
+- Menerapkan style semantic CSS untuk kontainer panduan
+
 ## V2.28.26 — Integrasi Multi-Speaker Narrative & Audio Blocks (28/08/2026)
 - Stage A: Konfigurasi tingkat channel, series, dan episode overrides
 - Stage B: Ekstensi prompt research, blueprint, dan naskah Script v2

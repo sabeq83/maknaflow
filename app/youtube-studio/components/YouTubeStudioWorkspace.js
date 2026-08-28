@@ -13,6 +13,7 @@ import { EpisodeWorkspace } from './EpisodeWorkspace';
 import { ProductionQueue } from './ProductionQueue';
 import { PublishingHub } from './PublishingHub';
 import { AnalyticsPlaceholder } from './AnalyticsPlaceholder';
+import { GuideView } from './GuideView';
 
 import styles from './YouTubeStudioWorkspace.module.css';
 
@@ -1522,6 +1523,7 @@ export function YouTubeStudioWorkspace() {
         )}
 
         {view === 'analytics' && <AnalyticsPlaceholder />}
+        {view === 'guide' && <GuideView />}
       </YouTubeStudioShell>
     </div>
   );

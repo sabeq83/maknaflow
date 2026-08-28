@@ -79,6 +79,13 @@ export function YouTubeStudioShell({ activeView, selectedChannel, selectedSeries
         >
           Analytics
         </button>
+        <button
+          type="button"
+          className={`${styles.navTab} ${activeView === 'guide' ? styles.navTabActive : ''}`}
+          onClick={() => onNavigate('guide')}
+        >
+          Panduan
+        </button>
       </nav>
 
       <main className={styles.viewContent}>{children}</main>
