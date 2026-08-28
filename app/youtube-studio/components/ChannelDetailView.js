@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { normalizeLocale } from '@/lib/youtube-studio-contract';
 import styles from './YouTubeStudioWorkspace.module.css';
 
@@ -79,6 +79,47 @@ export function ChannelDetailView({
   const [strategyCollapsed, setStrategyCollapsed] = useState(false);
   const [seriesCollapsed, setSeriesCollapsed] = useState(false);
 
+  const [editingNarrative, setEditingNarrative] = useState(false);
+  const [navMode, setNavMode] = useState(activeStrategy?.config_json?.narrative_defaults?.mode || 'narration_only');
+  const [navPOV, setNavPOV] = useState(activeStrategy?.config_json?.narrative_defaults?.point_of_view || 'third_person_omniscient');
+  const [navRatio, setNavRatio] = useState(activeStrategy?.config_json?.narrative_defaults?.dialogue_ratio_target || 0.35);
+  const [isSavingNarrative, setIsSavingNarrative] = useState(false);
+
+  useEffect(() => {
+    if (activeStrategy?.config_json?.narrative_defaults) {
+      const nd = activeStrategy.config_json.narrative_defaults;
+      setNavMode(nd.mode || 'narration_only');
+      setNavPOV(nd.point_of_view || 'third_person_omniscient');
+      setNavRatio(nd.dialogue_ratio_target || 0.35);
+    }
+  }, [activeStrategy]);
+
+  const handleSaveNarrativeDefaults = async () => {
+    setIsSavingNarrative(true);
+    try {
+      const res = await fetch(`/api/v2/youtube-studio/channels/${channel.id}/strategy`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          narrative_defaults: {
+            mode: navMode,
+            point_of_view: navPOV,
+            dialogue_ratio_target: Number(navRatio)
+          }
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setEditingNarrative(false);
+        window.location.reload();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSavingNarrative(false);
+    }
+  };
+
   function renderStrategyConfig(config, isDraft = false) {
     if (!config) return null;
     const pillars = config.content_pillars || [];
@@ -119,6 +160,55 @@ export function ChannelDetailView({
             <p className={styles.strategyText}><strong>Duration:</strong> {format.target_duration_seconds ? `${Math.floor(format.target_duration_seconds / 60)}m` : 'N/A'} ({format.target_duration_seconds || 0}s)</p>
             <p className={styles.strategyText}><strong>Cadence:</strong> {format.cadence || 'N/A'}</p>
             {config.cta_strategy && <p className={styles.strategyText} style={{ marginTop: '8px' }}><strong>CTA Strategy:</strong> {config.cta_strategy}</p>}
+          </div>
+
+          <div className={styles.strategyCard} style={{ gridColumn: 'span 2' }}>
+            <h4 className={styles.strategyLabel}>Narrative &amp; Multi-Speaker Defaults</h4>
+            {!isDraft && editingNarrative ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '6px' }}>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>MODE</label>
+                    <select className={styles.select} value={navMode} onChange={e => setNavMode(e.target.value)}>
+                      <option value="narration_only">Narration Only</option>
+                      <option value="dialogue_driven">Dialogue Driven</option>
+                      <option value="hybrid_narration_dialogue">Hybrid (Narration + Dialogue)</option>
+                    </select>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>POV</label>
+                    <select className={styles.select} value={navPOV} onChange={e => setNavPOV(e.target.value)}>
+                      <option value="first_person">First Person</option>
+                      <option value="third_person_limited">Third Person Limited</option>
+                      <option value="third_person_omniscient">Third Person Omniscient</option>
+                    </select>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>DIALOGUE RATIO</label>
+                    <input className={styles.input} type="number" step="0.05" min="0.1" max="0.9" value={navRatio} onChange={e => setNavRatio(e.target.value)} />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+                  <button type="button" className="btn btn-success" style={{ padding: '4px 12px', fontSize: '0.8rem' }} onClick={handleSaveNarrativeDefaults} disabled={isSavingNarrative}>
+                    {isSavingNarrative ? 'Saving...' : 'Save'}
+                  </button>
+                  <button type="button" className="btn btn-secondary" style={{ padding: '4px 12px', fontSize: '0.8rem' }} onClick={() => setEditingNarrative(false)}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ marginTop: '6px' }}>
+                <p className={styles.strategyText}><strong>Narrative Mode:</strong> {config.narrative_defaults?.mode || 'narration_only'}</p>
+                <p className={styles.strategyText}><strong>Point of View:</strong> {config.narrative_defaults?.point_of_view || 'third_person_omniscient'}</p>
+                <p className={styles.strategyText}><strong>Dialogue Target Ratio:</strong> {config.narrative_defaults?.dialogue_ratio_target || 0.35}</p>
+                {!isDraft && (
+                  <button type="button" className={styles.btnMini} style={{ marginTop: '8px' }} onClick={() => setEditingNarrative(true)}>
+                    ✏️ Edit Narrative Defaults
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 

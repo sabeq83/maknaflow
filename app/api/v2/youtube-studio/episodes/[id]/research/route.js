@@ -1,5 +1,5 @@
 import { withTenantContext } from '@/lib/auth';
-import { getEpisode, getChannelStrategy, getLatestResearchBrief, saveResearchBrief } from '@/lib/youtube-studio-repository';
+import { getEpisode, getChannelStrategy, getLatestResearchBrief, saveResearchBrief, getResolvedNarrativeSnapshot } from '@/lib/youtube-studio-repository';
 import { generateResearchBrief } from '@/lib/youtube-studio-planner';
 import { pgQuery } from '@/lib/db-pg';
 import { getUniverseCharacters, getUniverseLocations } from '@/lib/db';
@@ -45,7 +45,8 @@ export const POST = withTenantContext(async (req, { params }, user) => {
   }
 
   try {
-    const generated = await generateResearchBrief(episode, strategy, universe, visualIdentity);
+    const resolvedNarrative = await getResolvedNarrativeSnapshot(id);
+    const generated = await generateResearchBrief(episode, strategy, universe, visualIdentity, resolvedNarrative);
     const saved = await saveResearchBrief(id, generated, user);
     return new Response(JSON.stringify({ success: true, data: saved }), {
       status: 200,

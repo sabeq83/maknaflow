@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.28.26 — Integrasi Multi-Speaker Narrative & Audio Blocks (28/08/2026)
+- Stage A: Konfigurasi tingkat channel, series, dan episode overrides
+- Stage B: Ekstensi prompt research, blueprint, dan naskah Script v2
+- Stage C: Segmented turns audio generator, auto-casting suara, dan FFmpeg audio block assembly
+- Stage D & E: Speaker-aware visual planning, universe canonical prompts, dan lip-sync indicator
+
 ## V2.28.25 — Fix early return in resolveVisualIdentitySnapshot for sequential rotation (28/08/2026)
 - Skip early return in resolveVisualIdentitySnapshot if structured config is present
 - Allows context parameters like itemIndex to correctly determine dynamic wardrobe choices

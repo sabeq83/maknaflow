@@ -1,5 +1,5 @@
 import { withYouTubeStudioAccess } from '@/lib/auth';
-import { getChannel, getChannelStrategy, getChannelDraftStrategy, createOrUpdateStrategyDraft } from '@/lib/youtube-studio-repository';
+import { getChannel, getChannelStrategy, getChannelDraftStrategy, createOrUpdateStrategyDraft, saveChannelNarrativeDefaults } from '@/lib/youtube-studio-repository';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +24,15 @@ export const PATCH = withYouTubeStudioAccess('write', async (req, { params }, us
   }
 
   const body = await req.json();
+  if (body.narrative_defaults) {
+    try {
+      const updated = await saveChannelNarrativeDefaults(id, body.narrative_defaults, user);
+      return new Response(JSON.stringify({ success: true, data: updated }), { status: 200 });
+    } catch (err) {
+      return new Response(JSON.stringify({ success: false, error: err.message }), { status: 400 });
+    }
+  }
+
   const draft = await createOrUpdateStrategyDraft(id, {
     config: body.config,
     brief: body.brief,

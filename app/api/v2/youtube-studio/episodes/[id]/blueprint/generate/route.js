@@ -1,5 +1,5 @@
 import { withTenantContext } from '@/lib/auth';
-import { getEpisode, getChannelStrategy, getLatestResearchBrief, saveBlueprintDraft } from '@/lib/youtube-studio-repository';
+import { getEpisode, getChannelStrategy, getLatestResearchBrief, saveBlueprintDraft, getResolvedNarrativeSnapshot } from '@/lib/youtube-studio-repository';
 import { generateBlueprint } from '@/lib/youtube-studio-planner';
 import { pgQuery } from '@/lib/db-pg';
 import { getUniverseCharacters, getUniverseLocations } from '@/lib/db';
@@ -52,7 +52,8 @@ export const POST = withTenantContext(async (req, { params }, user) => {
   };
 
   try {
-    const generated = await generateBlueprint(episode, strategy, research.content_json, universe, visualIdentity);
+    const resolvedNarrative = await getResolvedNarrativeSnapshot(id);
+    const generated = await generateBlueprint(episode, strategy, research.content_json, universe, visualIdentity, resolvedNarrative);
     const saved = await saveBlueprintDraft(id, generated, snapshot, user);
 
     return new Response(JSON.stringify({ success: true, data: saved }), {

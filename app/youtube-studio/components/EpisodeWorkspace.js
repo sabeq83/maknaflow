@@ -248,6 +248,12 @@ function ScenePlanConfig({ episode, profilesList, selectedProfileKey, handleSetG
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <h4 style={{ margin: 0 }}>Model Generation &amp; Voice Settings</h4>
+
+      {/* Lip-Sync Capability Status */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255, 69, 58, 0.05)', border: '1px solid rgba(255, 69, 58, 0.15)', padding: '10px 14px', borderRadius: '6px', fontSize: '0.8rem', color: 'var(--status-danger)' }}>
+        <span style={{ fontSize: '1rem' }}>⚠️</span>
+        <span><strong>Wav2Lip Lip-Sync:</strong> Currently disabled on dev-mini node (Requires Central Cluster GPU Node validation).</span>
+      </div>
       
       {['Script Approved', 'In Production', 'Rendering', 'Ready to Publish', 'Uploaded'].includes(episode.status) ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', background: 'rgba(255,255,255,0.02)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
@@ -417,6 +423,77 @@ export function EpisodeWorkspace({
   const [activeAccordionSceneIdx, setActiveAccordionSceneIdx] = useState(0);
   const [activeVisualTab, setActiveVisualTab] = useState('start-frames'); // 'start-frames' | 'videos'
   const [videoModal, setVideoModal] = useState(null); // { src, title } | null
+
+  // Stage A Multi-speaker states
+  const [storySetup, setStorySetup] = useState(null);
+  const [resolvedNarrative, setResolvedNarrative] = useState(null);
+  const [loadingStorySetup, setLoadingStorySetup] = useState(true);
+  const [isSavingStorySetup, setIsSavingStorySetup] = useState(false);
+
+  const [overrideMode, setOverrideMode] = useState('inherit');
+  const [overrideIntensity, setOverrideIntensity] = useState('balanced');
+  const [overridePOV, setOverridePOV] = useState('inherit');
+  const [overrideUsage, setOverrideUsage] = useState('inherit');
+  const [specialDirection, setSpecialDirection] = useState('');
+  const [episodeCast, setEpisodeCast] = useState([]);
+
+  useEffect(() => {
+    if (!episode?.id) return;
+    const loadStorySetup = async () => {
+      setLoadingStorySetup(true);
+      try {
+        const res = await fetch(`/api/v2/youtube-studio/episodes/${episode.id}/story-setup`);
+        const data = await res.json();
+        if (data.success) {
+          setStorySetup(data.story_setup);
+          setResolvedNarrative(data.resolved);
+
+          const override = data.story_setup?.narrative_override || {};
+          setOverrideMode(override.mode || 'inherit');
+          setOverrideIntensity(override.dialogue_intensity || 'balanced');
+          setOverridePOV(override.point_of_view || 'inherit');
+          setOverrideUsage(override.narrator_usage || 'inherit');
+          setSpecialDirection(override.special_direction || '');
+          setEpisodeCast(data.story_setup?.episode_cast || []);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingStorySetup(false);
+      }
+    };
+    loadStorySetup();
+  }, [episode?.id]);
+
+  const handleSaveStorySetup = async () => {
+    setIsSavingStorySetup(true);
+    try {
+      const res = await fetch(`/api/v2/youtube-studio/episodes/${episode.id}/story-setup`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          override: {
+            mode: overrideMode,
+            dialogue_intensity: overrideIntensity,
+            point_of_view: overridePOV,
+            narrator_usage: overrideUsage,
+            special_direction: specialDirection
+          },
+          cast: episodeCast
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStorySetup(data.data.narrative_config_json);
+        setResolvedNarrative(data.resolved);
+        alert('Story Setup saved successfully!');
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSavingStorySetup(false);
+    }
+  };
 
   // Close modal on Escape key
   useEffect(() => {
@@ -616,8 +693,25 @@ export function EpisodeWorkspace({
               </div>
               
               <div>
-                <h6 className={styles.strategyLabel} style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>Voice-Over / Narration</h6>
-                <p className={styles.strategyText} style={{ fontStyle: 'italic', color: 'var(--text-primary)' }}>{scene.voiceover}</p>
+                <h6 className={styles.strategyLabel} style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>Voice-Over / Audio Blocks</h6>
+                {scene.audio_blocks && scene.audio_blocks.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '6px' }}>
+                    {scene.audio_blocks.map((ab, abIdx) => (
+                      <div key={abIdx} style={{ background: 'rgba(255,255,255,0.02)', padding: '8px 12px', borderRadius: '6px', borderLeft: ab.type === 'narration' ? '3px solid var(--link)' : '3px solid var(--status-success)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{ab.speaker_id} ({ab.type})</span>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{ab.emotion} | {ab.delivery}</span>
+                        </div>
+                        <p className={styles.strategyText} style={{ fontStyle: 'italic', margin: 0, color: 'var(--text-primary)' }}>"{ab.text}"</p>
+                        {ab.pause_after_ms > 0 && (
+                          <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginTop: '4px' }}>⏸ Pause: {ab.pause_after_ms}ms</div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className={styles.strategyText} style={{ fontStyle: 'italic', color: 'var(--text-primary)' }}>{scene.voiceover}</p>
+                )}
               </div>
 
               <div>
@@ -753,6 +847,124 @@ export function EpisodeWorkspace({
                       >
                         Save
                       </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Story Setup Panel */}
+                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '16px' }}>
+                  <h4 style={{ margin: '0 0 12px 0', fontSize: '1.05rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    📖 Episode Story Setup &amp; Cast Overrides
+                  </h4>
+                  {loadingStorySetup ? (
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Loading story setup...</div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                        <div style={{ flex: '1 1 150px' }}>
+                          <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>NARRATIVE MODE</label>
+                          <select className={styles.select} value={overrideMode} onChange={e => setOverrideMode(e.target.value)} disabled={episode.status !== 'Planned' && episode.status !== 'Idea'}>
+                            <option value="inherit">Inherit ({resolvedNarrative?.resolved_mode || 'narration_only'})</option>
+                            <option value="narration_only">Narration Only</option>
+                            <option value="dialogue_driven">Dialogue Driven</option>
+                            <option value="hybrid_narration_dialogue">Hybrid</option>
+                          </select>
+                        </div>
+                        <div style={{ flex: '1 1 150px' }}>
+                          <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>DIALOGUE INTENSITY</label>
+                          <select className={styles.select} value={overrideIntensity} onChange={e => setOverrideIntensity(e.target.value)} disabled={episode.status !== 'Planned' && episode.status !== 'Idea'}>
+                            <option value="light">Light</option>
+                            <option value="balanced">Balanced</option>
+                            <option value="heavy">Heavy</option>
+                          </select>
+                        </div>
+                        <div style={{ flex: '1 1 150px' }}>
+                          <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>POINT OF VIEW</label>
+                          <select className={styles.select} value={overridePOV} onChange={e => setOverridePOV(e.target.value)} disabled={episode.status !== 'Planned' && episode.status !== 'Idea'}>
+                            <option value="inherit">Inherit ({resolvedNarrative?.point_of_view || 'third_person_omniscient'})</option>
+                            <option value="first_person">First Person</option>
+                            <option value="third_person_limited">Third Person Limited</option>
+                            <option value="third_person_omniscient">Third Person Omniscient</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>SPECIAL NARRATIVE INSTRUCTIONS</label>
+                        <textarea 
+                          className={styles.textarea} 
+                          rows={2} 
+                          placeholder="e.g. Keep exchanges tense and concise. Narrator must not explain the subtext." 
+                          value={specialDirection} 
+                          onChange={e => setSpecialDirection(e.target.value)}
+                          disabled={episode.status !== 'Planned' && episode.status !== 'Idea'}
+                        />
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '6px' }}>EPISODE CAST &amp; ROLES</label>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          {episodeCast.map((c, idx) => (
+                            <div key={idx} style={{ display: 'flex', gap: '10px', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '6px 10px', borderRadius: '4px' }}>
+                              <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 'bold' }}>{c.display_name}</span>
+                              <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>({c.speaker_id})</span>
+                              <span style={{ fontSize: '0.7rem', padding: '1px 4px', background: 'var(--status-neutral)', borderRadius: '3px' }}>{c.story_role}</span>
+                              {(episode.status === 'Planned' || episode.status === 'Idea') && (
+                                <button 
+                                  type="button" 
+                                  className={styles.btnMiniDanger} 
+                                  style={{ marginLeft: 'auto' }}
+                                  onClick={() => {
+                                    setEpisodeCast(episodeCast.filter((_, i) => i !== idx));
+                                  }}
+                                >
+                                  Remove
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                          
+                          {(episode.status === 'Planned' || episode.status === 'Idea') && (
+                            <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                              <input id="new-ep-cast-name" className={styles.input} type="text" placeholder="Name" style={{ flex: 1, padding: '4px 8px', fontSize: '0.8rem' }} />
+                              <input id="new-ep-cast-id" className={styles.input} type="text" placeholder="speaker_id" style={{ flex: 1, padding: '4px 8px', fontSize: '0.8rem' }} />
+                              <input id="new-ep-cast-role" className={styles.input} type="text" placeholder="Role (e.g. witness)" style={{ flex: 1, padding: '4px 8px', fontSize: '0.8rem' }} />
+                              <button 
+                                type="button" 
+                                className="btn btn-secondary" 
+                                style={{ padding: '4px 12px', fontSize: '0.8rem' }}
+                                onClick={() => {
+                                  const nameEl = document.getElementById('new-ep-cast-name');
+                                  const idEl = document.getElementById('new-ep-cast-id');
+                                  const roleEl = document.getElementById('new-ep-cast-role');
+                                  if (!nameEl?.value || !idEl?.value) return;
+                                  setEpisodeCast([
+                                    ...episodeCast,
+                                    { speaker_id: idEl.value.trim(), display_name: nameEl.value.trim(), story_role: roleEl.value.trim() || 'supporting', speaker_type: 'character' }
+                                  ]);
+                                  nameEl.value = '';
+                                  idEl.value = '';
+                                  roleEl.value = '';
+                                }}
+                              >
+                                Add
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {(episode.status === 'Planned' || episode.status === 'Idea') && (
+                        <button 
+                          type="button" 
+                          className="btn btn-success" 
+                          style={{ width: 'fit-content', padding: '6px 16px', fontSize: '0.8rem', marginTop: '4px' }}
+                          onClick={handleSaveStorySetup}
+                          disabled={isSavingStorySetup}
+                        >
+                          {isSavingStorySetup ? 'Saving...' : 'Save Story Setup'}
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -985,7 +1197,19 @@ export function EpisodeWorkspace({
                               {packageAssets.filter(a => a.asset_type === 'voiceover').map((asset) => (
                                 <div key={asset.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-raised)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)' }}>
                                   <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>Scene {asset.scene_index + 1} Voiceover</div>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                      <span>Scene {asset.scene_index + 1} Voiceover</span>
+                                      {asset.speaker_id && (
+                                        <span style={{ fontSize: '0.72rem', padding: '1px 6px', background: 'var(--surface-interactive)', color: 'var(--link)', borderRadius: '4px', border: '1px solid var(--border-subtle)', fontWeight: 600 }}>
+                                          🎙️ {asset.speaker_id}
+                                        </span>
+                                      )}
+                                      {asset.audio_block_id && (
+                                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                                          [{asset.audio_block_id}]
+                                        </span>
+                                      )}
+                                    </div>
                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>"{asset.prompt_snapshot?.substring(0, 100)}..."</div>
                                     {asset.error_message && (
                                       <div style={{ fontSize: '0.7rem', color: 'var(--status-danger)', marginTop: '4px' }}>Error: {asset.error_message}</div>
@@ -1004,6 +1228,21 @@ export function EpisodeWorkspace({
                                       )}
                                       {asset.status.toUpperCase()}
                                     </span>
+                                    
+                                    {(asset.status === 'succeeded' || asset.status === 'failed') && (
+                                      <button
+                                        type="button"
+                                        className={styles.btnPremiumRegen}
+                                        onClick={() => handleRegenerateAsset(asset.id)}
+                                        style={{ padding: '3px 8px', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                      >
+                                        <svg style={{ width: '9px', height: '9px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                                        </svg>
+                                        Regen
+                                      </button>
+                                    )}
+
                                     {asset.status === 'succeeded' && asset.output_asset_json?.audio_path && (
                                       <button
                                         type="button"
@@ -1026,18 +1265,6 @@ export function EpisodeWorkspace({
                                         title={playingAssetId === asset.id ? 'Pause' : 'Play Voiceover'}
                                       >
                                         {playingAssetId === asset.id ? '⏸' : '▶'}
-                                      </button>
-                                    )}
-                                    {asset.status !== 'draft' && (
-                                      <button
-                                        type="button"
-                                        className={styles.btnPremiumRegen}
-                                        onClick={() => handleRegenerateAsset(asset.id)}
-                                      >
-                                        <svg style={{ width: '11px', height: '11px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
-                                        </svg>
-                                        Regenerate
                                       </button>
                                     )}
                                   </div>
