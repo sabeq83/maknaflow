@@ -20,14 +20,18 @@ export function GuideView() {
           <p style={{ margin: '0 0 12px 0', fontSize: '0.9rem', lineHeight: '1.5' }}>
             Sebelum memulai produksi video, Anda wajib menyiapkan <strong>Universe (Dunia Cerita)</strong>. Universe berfungsi sebagai basis pengetahuan AI mengenai karakter, lokasi, dan latar belakang visual agar video yang dihasilkan konsisten.
           </p>
+          <p style={{ margin: '0 0 12px 0', fontSize: '0.9rem', lineHeight: '1.5', padding: '10px 14px', background: 'rgba(52, 199, 89, 0.05)', border: '1px solid rgba(52, 199, 89, 0.2)', borderRadius: '6px' }}>
+            <strong>💡 Fitur Unggulan: Build Universe with AI</strong><br />
+            Anda tidak perlu membuat semuanya manual. Klik tombol <strong>Build Universe with AI</strong>, masukkan creative brief ringkas (misal: dongeng detektif kucing di kota tua), dan Gemini AI akan secara instan menyusun draf profil universe, karakter lengkap dengan canonical prompts, dan lokasi yang siap di-review.
+          </p>
           <ol style={{ paddingLeft: '20px', margin: 0, display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.88rem' }}>
             <li>Buka menu <strong>Settings &gt; Universes</strong> di sidebar utama.</li>
-            <li>Klik <strong>Create New Universe</strong> dan berikan judul serta deskripsi latar belakang dunia cerita Anda.</li>
-            <li>Masuk ke tab <strong>Characters</strong>, lalu daftarkan karakter-karakter Anda:
+            <li>Klik <strong>Build Universe with AI</strong> untuk pembuatan otomatis, atau <strong>Create New Universe</strong> untuk manual.</li>
+            <li>Saat me-review atau membuat karakter di tab <strong>Characters</strong>, perhatikan bidang <strong>Key / Speaker ID</strong> (misal: <code>cat_detective</code>):
               <ul style={{ paddingLeft: '20px', marginTop: '4px', listStyleType: 'circle' }}>
-                <li>Masukkan <code>speaker_id</code> unik (misal: <code>detective_arya</code>).</li>
+                <li><strong>Sangat Penting:</strong> Nilai <code>character_key</code> ini berfungsi sebagai <code>speaker_id</code> unik saat naskah dihasilkan oleh AI.</li>
+                <li>Gunakan <code>speaker_id</code> ini pada konfigurasi <strong>Voice Overrides</strong> di series atau episode untuk menetapkan persona suara/TTS khusus bagi karakter tersebut.</li>
                 <li>Tulis <strong>Canonical Prompt</strong> (detail pakaian, wajah, dan gaya visual subjek) untuk konsistensi AI Image generator.</li>
-                <li>Pilih tipe <code>character</code> atau <code>narrator</code>.</li>
               </ul>
             </li>
             <li>Tambahkan <strong>Locations</strong> (Lokasi cerita) lengkap dengan deskripsi visual untuk memandu AI saat membuat scene.</li>

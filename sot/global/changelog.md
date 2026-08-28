@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.28.28 — Penyelarasan Key/Speaker ID Universe & Guide (28/08/2026)
+- Pemberian label Key/Speaker ID di form pembuatan karakter
+- Tampilan kolom Key/Speaker ID monospaced pada kartu detail karakter
+- Penjelasan fitur Build Universe dengan AI dan pemetaan Key/Speaker ID di halaman Panduan
+
 ## V2.28.27 — Tambah Panduan Menu YouTube Studio (28/08/2026)
 - Menambahkan tab Panduan di sebelah tab Analytics
 - Membuat komponen dokumentasi langkah-demi-langkah GuideView dalam bahasa Indonesia

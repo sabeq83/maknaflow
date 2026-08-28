@@ -756,7 +756,7 @@ export default function UniverseManagerPage() {
                       <input required name="name" value={charFormData.name} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--surface)', color: 'var(--text-primary)', borderRadius: '4px' }} />
                     </div>
                     <div>
-                      <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Character Key *</label>
+                      <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>Character Key / Speaker ID * (e.g. detective_arya)</label>
                       <input required name="character_key" value={charFormData.character_key} onChange={handleCharChange} style={{ width: '100%', padding: '10px', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--surface)', color: 'var(--text-primary)', borderRadius: '4px' }} />
                     </div>
                   </div>
@@ -979,6 +979,7 @@ export default function UniverseManagerPage() {
                     <div style={{ marginBottom: '16px' }}>
                       <span style={{ display: 'inline-block', backgroundColor: 'var(--border)', fontSize: '12px', padding: '4px 8px', borderRadius: '4px', marginBottom: '4px' }}>{c.role}</span>
                       <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--text-secondary)' }}>{c.species} • {c.breed}</p>
+                      <p style={{ margin: '4px 0 0', fontSize: '12.5px', fontFamily: 'var(--font-mono)', color: 'var(--link)' }}>Key/Speaker ID: {c.character_key}</p>
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button onClick={() => {

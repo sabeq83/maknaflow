@@ -759,7 +759,7 @@ export default function AiUniverseBuilderModal({ onClose, onCreated }) {
                           />
                         </div>
                         <div style={modalStyles.col}>
-                          <label style={modalStyles.label}>Key (Unik, Lowercase & Underscore)</label>
+                          <label style={modalStyles.label}>Key / Speaker ID (Unik, Lowercase & Underscore)</label>
                           <input
                             type="text"
                             value={char.character_key}
