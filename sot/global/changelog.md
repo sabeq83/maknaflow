@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.28.23 — Integrate VisualIdentitySelector into ImportPlannerModal (28/08/2026)
+- Replace legacy kumu VSO form input in ImportPlannerModal with VisualIdentitySelector component
+- Implement dynamic loading of campaign configs into visualIdentity state
+- Map new visualIdentity state to ingest payload and saved presetConfig
+- Deploy updated layout to Dev server
+
 ## V2.28.22 — Simplify VisualIdentitySelector to 2 tabs and rename Visual Swap Overrides to Visual Identity (28/08/2026)
 - Remove Inline Custom tab from VisualIdentitySelector
 - Group visual presets into System and My Presets optgroups
