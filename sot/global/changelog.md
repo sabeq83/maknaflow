@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.28.25 — Fix early return in resolveVisualIdentitySnapshot for sequential rotation (28/08/2026)
+- Skip early return in resolveVisualIdentitySnapshot if structured config is present
+- Allows context parameters like itemIndex to correctly determine dynamic wardrobe choices
+- Successfully verify sequential wardrobe cycling via test script
+
 ## V2.28.24 — Dynamically render compatible wardrobe colors in Legacy Mode dropdown (28/08/2026)
 - Define demographic-wardrobe mapping constants in VisualIdentitySelector.js
 - Render legacy wardrobe styles dynamically based on chosen demographic with optgroup
