@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.28.29 — Fix validateSeriesConcept array bug (28/08/2026)
+- Memperbaiki penanganan validateSeriesConcept di generateSeriesConcepts agar memetakan concepts array yang dihasilkan AI
+
 ## V2.28.28 — Penyelarasan Key/Speaker ID Universe & Guide (28/08/2026)
 - Pemberian label Key/Speaker ID di form pembuatan karakter
 - Tampilan kolom Key/Speaker ID monospaced pada kartu detail karakter
