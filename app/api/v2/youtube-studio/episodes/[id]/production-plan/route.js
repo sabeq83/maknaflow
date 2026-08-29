@@ -2,7 +2,8 @@ import { withYouTubeStudioAccess } from '@/lib/auth';
 import { 
   getEpisode, 
   getLatestScript, 
-  getChannelStrategy
+  getChannelStrategy,
+  getResolvedNarrativeSnapshot
 } from '@/lib/youtube-studio-repository';
 import { getUniverseCharacters, getUniverseLocations } from '@/lib/db';
 import { getVisualIdentity } from '@/lib/visual-identity-repository';
@@ -134,10 +135,17 @@ export const POST = withYouTubeStudioAccess('write', async (req, { params }, use
     const { validateProductionPlanByMode } = await import('@/lib/youtube-studio-contract');
     validateProductionPlanByMode(plan, { profile, episode, productionMode });
 
+    const resolvedNarrative = await getResolvedNarrativeSnapshot(id);
     const snapshot = {
       strategy_positioning: strategy.config_json?.positioning,
       universe_name: universe?.name || universe?.title,
-      visual_identity_name: visualIdentity?.name || visualIdentity?.brand_name
+      visual_identity_name: visualIdentity?.name || visualIdentity?.brand_name,
+      casting_snapshot: resolvedNarrative.speakers || null,
+      audio_production_snapshot: {
+        audio_production_mode: resolvedNarrative.audio_production_mode,
+        audio_experience: resolvedNarrative.audio_experience
+      },
+      sonic_identity_snapshot: resolvedNarrative.sonic_identity_snapshot || null
     };
 
     // Save as draft

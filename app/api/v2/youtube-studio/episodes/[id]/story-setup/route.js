@@ -1,5 +1,5 @@
 import { withYouTubeStudioAccess } from '@/lib/auth';
-import { saveEpisodeStorySetup, getResolvedNarrativeSnapshot, getEpisode } from '@/lib/youtube-studio-repository';
+import { saveEpisodeStorySetup, getResolvedNarrativeSnapshot, getEpisode, replaceEpisodeCastBindings } from '@/lib/youtube-studio-repository';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +25,10 @@ export const PATCH = withYouTubeStudioAccess('write', async (req, { params }, us
   const { id } = await params;
   const body = await req.json();
   try {
-    const updated = await saveEpisodeStorySetup(id, body.override, body.cast, user);
+    const updated = await saveEpisodeStorySetup(id, body.override, body.cast || [], user);
+    if (body.speaker_ids) {
+      await replaceEpisodeCastBindings(id, body.speaker_ids, user);
+    }
     const resolved = await getResolvedNarrativeSnapshot(id);
     return new Response(JSON.stringify({ success: true, data: updated, resolved }), { status: 200 });
   } catch (err) {

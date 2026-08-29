@@ -1,5 +1,13 @@
 # Changelog
 
+## V2.29.0 — Implement Channel-scoped Audio & Speaker Registry (29/08/2026)
+- Consolidate speaker castings and configuration at Channel level
+- Create tenant-scoped Speaker Registry and Castings
+- Introduce mutually exclusive standalone_tts and native_scene_audio modes
+- Add ASMR audio block validation and custom Sonic Identity profiles
+- Snapshot casting context in production package and skip voice jobs under native_scene_audio
+- Deploy to Dev Mac Mini server and verify smoke tests
+
 ## V2.28.29 — Fix validateSeriesConcept array bug (28/08/2026)
 - Memperbaiki penanganan validateSeriesConcept di generateSeriesConcepts agar memetakan concepts array yang dihasilkan AI
 

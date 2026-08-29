@@ -1,5 +1,5 @@
 import { withYouTubeStudioAccess } from '@/lib/auth';
-import { saveSeriesNarrativeFormatAndCast } from '@/lib/youtube-studio-repository';
+import { saveSeriesNarrativeFormatAndCast, replaceSeriesCastBindings } from '@/lib/youtube-studio-repository';
 import { pgQuery } from '@/lib/db-pg';
 import { getActiveTenantId } from '@/lib/tenant-context';
 
@@ -25,7 +25,10 @@ export const PATCH = withYouTubeStudioAccess('write', async (req, { params }, us
   const { id } = await params;
   const body = await req.json();
   try {
-    const updated = await saveSeriesNarrativeFormatAndCast(id, body.format, body.cast, user);
+    const updated = await saveSeriesNarrativeFormatAndCast(id, body.format, body.cast || [], user);
+    if (body.speaker_ids) {
+      await replaceSeriesCastBindings(id, body.speaker_ids, user);
+    }
     return new Response(JSON.stringify({ success: true, data: updated }), { status: 200 });
   } catch (err) {
     return new Response(JSON.stringify({ success: false, error: err.message }), { status: 400 });
