@@ -1,7 +1,13 @@
 import { withYouTubeStudioAccess } from '@/lib/auth';
-import { replaceSeriesCastBindings } from '@/lib/youtube-studio-repository';
+import { replaceSeriesCastBindings, getSeriesCastBindings } from '@/lib/youtube-studio-repository';
 
 export const dynamic = 'force-dynamic';
+
+export const GET = withYouTubeStudioAccess('read', async (req, { params }) => {
+  const { id } = await params;
+  const bindings = await getSeriesCastBindings(id);
+  return Response.json({ success: true, data: bindings });
+});
 
 export const PUT = withYouTubeStudioAccess('write', async (req, { params }, user) => {
   const { id } = await params;

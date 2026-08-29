@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { normalizeLocale } from '@/lib/youtube-studio-contract';
 import styles from './YouTubeStudioWorkspace.module.css';
+import { ChannelAudioRegistry } from './ChannelAudioRegistry';
 
 export function ChannelDetailView({
   channel,
@@ -277,6 +278,7 @@ export function ChannelDetailView({
 
   return (
     <div className={styles.channelDetailView}>
+      <ChannelAudioRegistry channel={channel} />
       
       {/* ─── KNOWLEDGE BASE LIBRARY SECTION ───────────────────────────────────── */}
       <section className={styles.kbStep} aria-labelledby="kb-step-title">

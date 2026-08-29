@@ -1099,7 +1099,7 @@ export function YouTubeStudioWorkspace() {
     }
   }
 
-  async function handleSetGenerationProfile(profileKey, voiceProvider, voicePersona, voiceSpeed) {
+  async function handleSetGenerationProfile(profileKey) {
     if (!selectedEpisode) return;
     setSelectedProfileKey(profileKey);
     setErrorMsg('');
@@ -1109,11 +1109,8 @@ export function YouTubeStudioWorkspace() {
       const res = await fetch(`/api/v2/youtube-studio/episodes/${selectedEpisode.id}/generation-profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          generation_profile_key: profileKey,
-          voice_provider: voiceProvider,
-          voice_persona: voicePersona,
-          voice_speed: voiceSpeed
+        body: JSON.stringify({
+          generation_profile_key: profileKey
         })
       });
       const data = await res.json();
@@ -1121,9 +1118,7 @@ export function YouTubeStudioWorkspace() {
         setSelectedEpisode(prev => ({
           ...prev,
           generation_profile_key: data.data.generation_profile_key,
-          voice_provider: data.data.voice_provider,
-          voice_persona: data.data.voice_persona,
-          voice_speed: data.data.voice_speed
+          generation_profile_key: data.data.generation_profile_key
         }));
         await refreshEpisodesList();
         triggerNotice('success', 'Generation profile and voice settings saved successfully!');

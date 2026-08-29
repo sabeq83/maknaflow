@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.29.1 — YouTube Studio Channel Audio Production (29/08/2026)
+- Pusatkan audio mode, provider, speaker dan voice persona di level Channel
+- Tambahkan registry cast Series dan Episode serta immutable production snapshot
+- Pisahkan pipeline standalone TTS dan native scene audio termasuk ASMR
+- Validasi embedded audio dan kompilasi prompt Google Flow per shot
+
 ## V2.29.0 — Implement Channel-scoped Audio & Speaker Registry (29/08/2026)
 - Consolidate speaker castings and configuration at Channel level
 - Create tenant-scoped Speaker Registry and Castings

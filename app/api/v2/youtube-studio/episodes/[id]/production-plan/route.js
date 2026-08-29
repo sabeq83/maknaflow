@@ -142,8 +142,13 @@ export const POST = withYouTubeStudioAccess('write', async (req, { params }, use
       visual_identity_name: visualIdentity?.name || visualIdentity?.brand_name,
       casting_snapshot: resolvedNarrative.speakers || null,
       audio_production_snapshot: {
+        config_id: resolvedNarrative.audio_config_id,
+        config_version: resolvedNarrative.audio_config_version,
         audio_production_mode: resolvedNarrative.audio_production_mode,
-        audio_experience: resolvedNarrative.audio_experience
+        audio_experience: resolvedNarrative.audio_experience,
+        provider: resolvedNarrative.audio_provider,
+        model_key: resolvedNarrative.audio_model_key,
+        native_voice_capability: resolvedNarrative.native_voice_capability
       },
       sonic_identity_snapshot: resolvedNarrative.sonic_identity_snapshot || null
     };

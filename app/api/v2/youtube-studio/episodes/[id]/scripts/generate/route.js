@@ -56,6 +56,17 @@ export const POST = withTenantContext(async (req, { params }, user) => {
 
   try {
     const resolvedNarrative = await getResolvedNarrativeSnapshot(id);
+    snapshot.resolved_narrative = resolvedNarrative;
+    snapshot.casting_snapshot = resolvedNarrative.speakers || [];
+    snapshot.audio_production_snapshot = {
+      config_id: resolvedNarrative.audio_config_id,
+      config_version: resolvedNarrative.audio_config_version,
+      audio_production_mode: resolvedNarrative.audio_production_mode,
+      audio_experience: resolvedNarrative.audio_experience,
+      provider: resolvedNarrative.audio_provider,
+      model_key: resolvedNarrative.audio_model_key
+    };
+    snapshot.sonic_identity_snapshot = resolvedNarrative.sonic_identity_snapshot;
     const generated = await generateScript(episode, approvedBp.content_json, research?.content_json, universe, visualIdentity, resolvedNarrative);
     const saved = await saveScriptDraft(id, approvedBp.id, generated, snapshot, user);
 

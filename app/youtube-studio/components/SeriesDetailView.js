@@ -1,5 +1,6 @@
 import { normalizeLocale } from '@/lib/youtube-studio-contract';
 import styles from './YouTubeStudioWorkspace.module.css';
+import { RegistryCastSelector } from './RegistryCastSelector';
 
 export function SeriesDetailView({
   series,
@@ -71,6 +72,8 @@ export function SeriesDetailView({
 
               <div>
                 <h4 style={{ fontSize: '0.9rem', color: 'var(--text-primary)', marginBottom: '8px' }}>Recurring Cast Roster</h4>
+                <RegistryCastSelector scope="series" id={series.id} />
+                {false && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {(series.config_json?.recurring_cast || []).map((member, idx) => (
                     <div key={idx} style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '8px 12px', borderRadius: '6px' }}>
@@ -135,6 +138,7 @@ export function SeriesDetailView({
                     </button>
                   </div>
                 </div>
+                )}
               </div>
             </div>
           </div>

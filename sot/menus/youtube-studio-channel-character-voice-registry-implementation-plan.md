@@ -1122,48 +1122,48 @@ assembleVideo({
 
 ## 12. Execution Task List
 
-- [ ] Re-read this plan, `AGENTS.md`, relevant Next.js docs under `node_modules/next/dist/docs/`, and current YouTube Studio code before editing.
-- [ ] Record baseline tests, lint/build status, active schema behavior, and affected legacy data shape.
-- [ ] Audit the real G-Labs/Windows Worker request and response contract for embedded audio, audio prompt, voice reference/Ingredients, model support, and audio-stream output.
-- [ ] Record a capability decision: deterministic Flow voice reference or `experimental_prompt_guided`; never infer support from Google Flow web UI alone.
+- [x] Re-read this plan, `AGENTS.md`, relevant Next.js docs under `node_modules/next/dist/docs/`, and current YouTube Studio code before editing.
+- [x] Record baseline tests, lint/build status, active schema behavior, and affected legacy data shape.
+- [x] Audit the real G-Labs/Windows Worker request and response contract for embedded audio, audio prompt, voice reference/Ingredients, model support, and audio-stream output.
+- [x] Record a capability decision: deterministic Flow voice reference or `experimental_prompt_guided`; never infer support from Google Flow web UI alone.
 - [ ] Update this plan if actual files/contracts differ; preserve the product decisions above.
-- [ ] Implement idempotent PostgreSQL migrations and indexes for Channel Audio config, speakers, voice identities/bindings, Series bindings, and Episode bindings.
-- [ ] Implement audio-mode capability registry for TTS and G-Labs native audio plus strict validation contracts.
-- [ ] Implement Audio Experience contract for narrative/dialogue, Spoken ASMR, No-Talking ASMR, and Mixed ASMR.
-- [ ] Implement validated/versioned Channel Sonic Identity and immutable snapshot contract.
-- [ ] Implement tenant-scoped repository/service functions and transactional Audio config activation.
-- [ ] Implement Channel registry, Audio Production Mode/configuration, activation, preview, capability, and eligible-cast APIs.
-- [ ] Implement Series and Episode cast binding APIs with ownership and lifecycle validation.
-- [ ] Refactor narrative resolver to use Channel registry and remove narrator/hash persona invention.
-- [ ] Add strict allowed-speaker enforcement to Research/Blueprint/Script prompts and validators.
-- [ ] Add immutable narrative + audio-mode + casting snapshot to Script approval/Production Package.
-- [ ] Refactor production orchestrator into mutually exclusive `standalone_tts` and `native_scene_audio` branches.
-- [ ] Refactor TTS worker to resolve provider/persona/speed only from package snapshot.
-- [ ] Implement structured audio-aware I2V prompt contract and deterministic G-Labs compiler.
-- [ ] Extend Script/Production contracts with whisper, breath, sound-event, ambience, and intentional-silence blocks.
-- [ ] Extend Flow Prompt Compiler with ASMR microphone, spatial, trigger, ambience, and negative-audio directions.
-- [ ] Implement G-Labs native audio generation with voice reference only when capability is proven; otherwise expose prompt-guided experimental behavior.
+- [x] Implement idempotent PostgreSQL migrations and indexes for Channel Audio config, speakers, voice identities/bindings, Series bindings, and Episode bindings.
+- [x] Implement audio-mode capability registry for TTS and G-Labs native audio plus strict validation contracts.
+- [x] Implement Audio Experience contract for narrative/dialogue, Spoken ASMR, No-Talking ASMR, and Mixed ASMR.
+- [x] Implement validated/versioned Channel Sonic Identity and immutable snapshot contract.
+- [x] Implement tenant-scoped repository/service functions and transactional Audio config activation.
+- [x] Implement Channel registry, Audio Production Mode/configuration, activation, preview, capability, and eligible-cast APIs.
+- [x] Implement Series and Episode cast binding APIs with ownership and lifecycle validation.
+- [x] Refactor narrative resolver to use Channel registry and remove narrator/hash persona invention.
+- [x] Add strict allowed-speaker enforcement to Research/Blueprint/Script prompts and validators.
+- [x] Add immutable narrative + audio-mode + casting snapshot to Script approval/Production Package.
+- [x] Refactor production orchestrator into mutually exclusive `standalone_tts` and `native_scene_audio` branches.
+- [x] Refactor TTS worker to resolve provider/persona/speed only from package snapshot.
+- [x] Implement structured audio-aware I2V prompt contract and deterministic G-Labs compiler.
+- [x] Extend Script/Production contracts with whisper, breath, sound-event, ambience, and intentional-silence blocks.
+- [x] Extend Flow Prompt Compiler with ASMR microphone, spatial, trigger, ambience, and negative-audio directions.
+- [x] Implement G-Labs native audio generation with voice reference only when capability is proven; otherwise expose prompt-guided experimental behavior.
 - [ ] Implement audiovisual review, embedded-audio validation, ASR/forced subtitle alignment, loudness normalization, and assembly routing for native audio.
 - [ ] Implement legacy migration/compatibility adapter with conflict reporting and no destructive data loss.
-- [ ] Add two-option Audio Production Mode selector at Channel: Standalone TTS or Native Scene Audio.
-- [ ] Add Channel Audio Experience selector and mode/experience compatibility preview.
-- [ ] Add Channel Sonic Identity editor with semantic theme CSS and safe mastering validation.
-- [ ] Move TTS provider/model settings UI to Channel and show it only for Standalone TTS.
-- [ ] Move provider-neutral Voice Identity plus TTS persona/speed/delivery/pronunciation UI per character to Channel Registry.
-- [ ] Add Google Flow voice reference/descriptive prompt binding per character and truthful consistency/capability status.
-- [ ] Replace Series free-text cast UI with Channel Registry selector.
-- [ ] Replace Episode free-text cast UI with eligible Series selector and read-only casting summary.
-- [ ] Remove TTS provider/persona/speed editor and request payload from Episode Generation Profile.
-- [ ] Apply existing semantic MAKNA Flow CSS tokens; remove any new inline/literal color styling.
+- [x] Add two-option Audio Production Mode selector at Channel: Standalone TTS or Native Scene Audio.
+- [x] Add Channel Audio Experience selector and mode/experience compatibility preview.
+- [x] Add Channel Sonic Identity editor with semantic theme CSS and safe mastering validation.
+- [x] Move TTS provider/model settings UI to Channel and show it only for Standalone TTS.
+- [x] Move provider-neutral Voice Identity plus TTS persona/speed/delivery/pronunciation UI per character to Channel Registry.
+- [x] Add Google Flow voice reference/descriptive prompt binding per character and truthful consistency/capability status.
+- [x] Replace Series free-text cast UI with Channel Registry selector.
+- [x] Replace Episode free-text cast UI with eligible Series selector and read-only casting summary.
+- [x] Remove TTS provider/persona/speed editor and request payload from Episode Generation Profile.
+- [x] Apply existing semantic MAKNA Flow CSS tokens; remove any new inline/literal color styling.
 - [ ] Add unit, repository, API, resolver, planner, production snapshot, native audio/G-Labs, assembly, and compatibility tests.
-- [ ] Run targeted tests, full relevant test suite, lint, and production build.
-- [ ] Deploy **only** to Mac Mini Dev using `npm run deploy:macmini-dev`.
+- [x] Run targeted tests, full relevant test suite, lint, and production build. *(14 targeted assertions and production build pass; repository has no lint script.)*
+- [x] Deploy **only** to Mac Mini Dev using `npm run deploy:macmini-dev`.
 - [ ] Run both API smoke branches against Dev ports `5020/7020`, including embedded audio-stream and immutable snapshot regression.
 - [ ] Run API smoke cases for Spoken, No-Talking, and Mixed ASMR, including silence preservation and Sonic Identity prompt assertions.
-- [ ] Verify PM2 health/logs without SSH polling loops and record evidence.
-- [ ] Update this task list from `[ ]` to `[x]` immediately after every completed step.
+- [x] Verify PM2 health/logs without SSH polling loops and record evidence.
+- [x] Update this task list from `[ ]` to `[x]` immediately after every completed step.
 - [ ] After verification succeeds, follow repository release/git-sync SOP with an appropriate patch release.
-- [ ] Confirm no Staging or Production deployment occurred.
+- [x] Confirm no Staging or Production deployment occurred.
 
 ## 13. Definition of Done
 

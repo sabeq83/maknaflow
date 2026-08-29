@@ -77,3 +77,23 @@ test('resolveNarrativeConfiguration merges cast lists correctly with default nar
   assert.ok(mira);
   assert.equal(mira.display_name, 'Mira');
 });
+
+test('registry-backed resolver never invents narrator and carries immutable audio context', () => {
+  const result = resolveNarrativeConfiguration({
+    channelStrategy: { id: 'strategy-1', config_json: { narrative_defaults: { mode: 'dialogue_driven' } } },
+    series: { id: 'series-1', config_json: {} },
+    episode: { id: 'episode-1', narrative_config_json: {} },
+    audioConfig: {
+      id: 'audio-1', version: 3, audio_production_mode: 'native_scene_audio',
+      audio_experience: 'no_talking_asmr', provider: 'glabs_google_flow',
+      model_key: 'google_flow_omni_flash', native_voice_capability: 'descriptive_prompt',
+      sonic_identity_json: { microphone_perspective: 'extreme_close_binaural' }
+    },
+    registrySpeakers: []
+  });
+  assert.equal(result.registry_backed, true);
+  assert.equal(result.audio_production_mode, 'native_scene_audio');
+  assert.equal(result.audio_experience, 'no_talking_asmr');
+  assert.deepEqual(result.speakers, []);
+  assert.equal(result.sonic_identity_snapshot.microphone_perspective, 'extreme_close_binaural');
+});

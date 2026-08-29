@@ -1,5 +1,6 @@
 import { normalizeLocale } from '@/lib/youtube-studio-contract';
 import styles from './YouTubeStudioWorkspace.module.css';
+import { RegistryCastSelector } from './RegistryCastSelector';
 import { useState, useEffect } from 'react';
 
 function DurationHealthCard({ scriptId, episode, onAutoFitSuccess }) {
@@ -196,9 +197,6 @@ const getMediaUrl = (pathString) => {
 
 function ScenePlanConfig({ episode, profilesList, selectedProfileKey, handleSetGenerationProfile }) {
   const [profileKey, setProfileKey] = useState(selectedProfileKey || '');
-  const [voiceProvider, setVoiceProvider] = useState(episode.voice_provider || 'google_tts');
-  const [voicePersona, setVoicePersona] = useState(episode.voice_persona || 'Orus');
-  const [voiceSpeed, setVoiceSpeed] = useState(episode.voice_speed !== undefined ? episode.voice_speed : 1.0);
   const [isSaving, setIsSaving] = useState(false);
   const [saveNotice, setSaveNotice] = useState(null);
 
@@ -208,36 +206,12 @@ function ScenePlanConfig({ episode, profilesList, selectedProfileKey, handleSetG
     }
   }, [selectedProfileKey]);
 
-  useEffect(() => {
-    if (episode.voice_provider) {
-      setVoiceProvider(episode.voice_provider);
-    }
-    if (episode.voice_persona) {
-      setVoicePersona(episode.voice_persona);
-    }
-    if (episode.voice_speed !== undefined) {
-      setVoiceSpeed(episode.voice_speed);
-    }
-  }, [episode]);
-
-  const isEnglish = (episode?.locale || '').startsWith('en');
-  const activeVoices = voiceProvider === 'minimax'
-    ? (isEnglish ? MINIMAX_ENGLISH_VOICES : MINIMAX_VOICES)
-    : GEMINI_VOICES;
-
-  useEffect(() => {
-    const isValid = activeVoices.some(v => v.id === voicePersona);
-    if (!isValid && activeVoices.length > 0) {
-      setVoicePersona(activeVoices[0].id);
-    }
-  }, [voiceProvider, activeVoices]);
-
   const handleSave = async () => {
     setIsSaving(true);
     setSaveNotice(null);
     try {
-      await handleSetGenerationProfile(profileKey, voiceProvider, voicePersona, voiceSpeed);
-      setSaveNotice({ type: 'success', msg: '✓ Configuration and voice settings saved successfully!' });
+      await handleSetGenerationProfile(profileKey);
+      setSaveNotice({ type: 'success', msg: '✓ Visual generation profile saved. Audio settings inherit from Channel.' });
     } catch (e) {
       setSaveNotice({ type: 'error', msg: 'Failed to save configuration.' });
     } finally {
@@ -247,7 +221,7 @@ function ScenePlanConfig({ episode, profilesList, selectedProfileKey, handleSetG
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <h4 style={{ margin: 0 }}>Model Generation &amp; Voice Settings</h4>
+      <h4 style={{ margin: 0 }}>Visual Generation Settings</h4>
 
       {/* Lip-Sync Capability Status */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255, 69, 58, 0.05)', border: '1px solid rgba(255, 69, 58, 0.15)', padding: '10px 14px', borderRadius: '6px', fontSize: '0.8rem', color: 'var(--status-danger)' }}>
@@ -279,53 +253,7 @@ function ScenePlanConfig({ episode, profilesList, selectedProfileKey, handleSetG
             )}
           </div>
 
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, minWidth: '200px' }}>
-              <label htmlFor="voice-provider-select" style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Voice Provider</label>
-              <select 
-                id="voice-provider-select" 
-                className={styles.select} 
-                style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: '6px', padding: '8px 12px', color: 'var(--text)' }}
-                value={voiceProvider} 
-                onChange={(e) => setVoiceProvider(e.target.value)}
-              >
-                <option value="google_tts">Google TTS</option>
-                <option value="minimax">Minimax API</option>
-              </select>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 2, minWidth: '300px' }}>
-              <label htmlFor="voice-persona-select" style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Voice Persona</label>
-              <select 
-                id="voice-persona-select" 
-                className={styles.select} 
-                style={{ background: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: '6px', padding: '8px 12px', color: 'var(--text)' }}
-                value={voicePersona} 
-                onChange={(e) => setVoicePersona(e.target.value)}
-              >
-                {activeVoices.map(v => (
-                  <option key={v.id} value={v.id}>{v.avatar} {v.name} - {v.desc}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxWidth: '400px' }}>
-            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>TTS Voice Speed ({voiceSpeed}x)</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>0.5x</span>
-              <input 
-                type="range" 
-                min="0.5" 
-                max="2.0" 
-                step="0.1" 
-                value={voiceSpeed} 
-                onChange={(e) => setVoiceSpeed(Number(e.target.value))} 
-                style={{ flex: 1, accentColor: 'var(--accent)' }} 
-              />
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>2.0x</span>
-            </div>
-          </div>
+          <div className={styles.inheritanceHint}>Audio production mode, provider, personas, and Sonic Identity are inherited from Channel Settings.</div>
 
           {saveNotice && (
             <div style={{ 
@@ -903,6 +831,8 @@ export function EpisodeWorkspace({
 
                       <div>
                         <label style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '6px' }}>EPISODE CAST &amp; ROLES</label>
+                        <RegistryCastSelector scope="episodes" id={episode.id} disabled={episode.status !== 'Planned' && episode.status !== 'Idea'} />
+                        {false && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                           {episodeCast.map((c, idx) => (
                             <div key={idx} style={{ display: 'flex', gap: '10px', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '6px 10px', borderRadius: '4px' }}>
@@ -952,6 +882,7 @@ export function EpisodeWorkspace({
                             </div>
                           )}
                         </div>
+                        )}
                       </div>
 
                       {(episode.status === 'Planned' || episode.status === 'Idea') && (
