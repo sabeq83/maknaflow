@@ -15,9 +15,10 @@ test('Orchestration state transition validation', () => {
   });
 });
 
-test('Research contract enforces exactly one production item', () => {
+test('Research contract supports bounded multi-video production', () => {
   assert.equal(normalizeResearchRequest({ query: 'Tren Nutribake', production_count: 1 }).production_count, 1);
-  assert.throws(() => normalizeResearchRequest({ query: 'Tren Nutribake', production_count: 2 }), /production_count=1/);
+  assert.equal(normalizeResearchRequest({ query: 'Tren Nutribake', production_count: 6 }).production_count, 6);
+  assert.throws(() => normalizeResearchRequest({ query: 'Tren Nutribake', production_count: 31 }), /1 sampai 30/);
 });
 
 test('Content Automation persists research and forces one selected production row', () => {

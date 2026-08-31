@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.4 — Add Hermes Conversational Automation Skill (01/09/2026)
+- Add Hermes skill for research video scheduling and review workflows
+- Expose tenant-scoped automation catalog and idempotent schedule creation
+- Support bounded multi-video research while keeping auto-publish disabled
+
 ## V2.29.3 — Harden Hermes Automation Integration (01/09/2026)
 - Persist research context and produce exactly one selected video
 - Secure Hermes callbacks with scoped signed tokens and idempotency

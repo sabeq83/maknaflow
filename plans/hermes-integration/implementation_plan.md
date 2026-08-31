@@ -716,6 +716,104 @@ ENABLE_HERMES_AUTO_PUBLISH=false
 
 Pause publishing worker/tenant control bila provider incident. Jangan drop tabel saat rollback; pertahankan audit trail.
 
+### 9.21 Skill percakapan dan API automation Hermes
+
+#### `plugins/makna-hermes/skills/makna-content-orchestrator/SKILL.md`
+
+Code Sebelum (Current/Before):
+
+```md
+# Skill Hermes: MAKNA Content Orchestrator
+Research only the requested query.
+```
+
+Code Sesudah (Proposed/After):
+
+```md
+---
+name: makna-content-orchestrator
+description: Buat dan jadwalkan workflow riset, video, review, dan publishing melalui MAKNA.
+---
+Parse instruksi pengguna, resolve katalog, konfirmasi mutation berisiko, lalu gunakan Operator API resmi.
+```
+
+#### `[NEW] app/api/operator/v2/content-automations/catalog/route.js`
+
+Code Sebelum (Current/Before):
+
+```js
+// Belum ada katalog tenant-scoped untuk Hermes.
+```
+
+Code Sesudah (Proposed/After):
+
+```js
+const identity = await authenticateOperator(request, 'automation:read');
+return runAsOperatorTenant(identity, () => list bounded brands, products, and presets);
+```
+
+#### `[NEW] plugins/makna-hermes/skills/makna-content-orchestrator/references/operator-api.md`
+
+Code Sebelum (Current/Before):
+
+```md
+Belum ada referensi API untuk membuat schedule dari percakapan Hermes.
+```
+
+Code Sesudah (Proposed/After):
+
+```md
+GET katalog untuk identifier resmi; POST automation memakai scope dan Idempotency-Key.
+```
+
+#### `[NEW] app/api/operator/v2/content-automations/route.js`
+
+Code Sebelum (Current/Before):
+
+```js
+// Belum ada mutation schedule resmi untuk Hermes.
+```
+
+Code Sesudah (Proposed/After):
+
+```js
+const identity = await authenticateOperator(request, 'automation:write');
+const data = normalizeContentAutomation(await prepareProductCampaignSchedule(body));
+return createAutomation(data, identity.actor);
+```
+
+#### `lib/content-automation-repository.js`
+
+Code Sebelum (Current/Before):
+
+```js
+export async function createAutomation(data, actor) {
+  // selalu INSERT schedule baru
+}
+```
+
+#### `lib/agent-automation-contract.js`
+
+Code Sebelum (Current/Before):
+
+```js
+if (productionCount !== 1) throw new Error('Pilot Hermes hanya mendukung production_count=1.');
+```
+
+Code Sesudah (Proposed/After):
+
+```js
+if (!Number.isInteger(productionCount) || productionCount < 1 || productionCount > 30) throw new Error(...);
+```
+
+Code Sesudah (Proposed/After):
+
+```js
+export async function createAutomationIdempotent(data, actor, idempotencyKey) {
+  // advisory lock, replay schedule lama untuk key yang sama, lalu INSERT + audit atomik
+}
+```
+
 ## 15. Execution Task List
 
 - [x] Baca ulang `AGENTS.md`, plan ini, instruksi Antigravity/Hermes, dan dokumentasi Next.js lokal untuk Route Handlers serta instrumentation.
@@ -735,6 +833,8 @@ Pause publishing worker/tenant control bila provider incident. Jangan drop tabel
 - [ ] Jalankan staging smoke `draft_only`; simpan bukti run IDs/status tanpa secret.
 - [ ] Dengan approval eksplisit pengguna, jalankan staging smoke `approval_required` non-live/draft target.
 - [ ] Pastikan `auto_publish` tetap off dan tidak ada production deployment.
+- [x] Tambahkan skill conversational Hermes dan Operator API tenant-scoped untuk melihat katalog serta membuat automation MAKNA.
+- [x] Uji kontrak skill/API: enam video, preset, manual review, jadwal harian, dan publishing policy aman.
 - [x] Update dokumentasi SoT dan changelog points berdasarkan implementasi aktual.
 - [ ] Jalankan SOP release patch setelah seluruh scope dan verifikasi berhasil.
 - [ ] Verifikasi branch `main` dan tag release terunggah ke remote repository.
