@@ -1,11 +1,32 @@
 ---
 name: makna-content-orchestrator
-description: "Orkestrasi campaign MAKNA Flow dari percakapan: riset tren, membuat satu atau banyak video produk/brand memakai preset, menjadwalkan workflow harian/mingguan/bulanan, meminta manual review, dan menyiapkan publishing sosial melalui Repliz. Gunakan ketika pengguna berkata seperti 'buat 6 video produk X preset Y', 'riset setiap hari lalu posting TikTok', 'mode manual review', 'run now', atau meminta status automation MAKNA."
+description: Orchestrate MAKNA research, video, review, and posting.
+version: 1.0.0
+author: Sabeq M. Mursyid, Hermes Agent
+license: MIT
+platforms: [macos]
+metadata:
+  hermes:
+    tags: [makna, research, video, scheduling, publishing]
+    related_skills: [hermes-agent, plan]
 ---
 
 # MAKNA Content Orchestrator
 
 Jadikan MAKNA Flow sebagai pemilik jadwal, produksi, approval, dan publishing. Gunakan hanya Operator API resmi. Jangan membuat cron Hermes kedua, memanggil Repliz, membuka database, memakai session browser, atau membaca secret.
+
+## When to Use
+
+- Gunakan untuk perintah membuat video produk/brand dengan preset MAKNA.
+- Gunakan untuk riset dan produksi yang berjalan terjadwal.
+- Gunakan untuk manual review atau persiapan posting sosial.
+- Jangan gunakan untuk mengubah feature flag, credential, atau database.
+
+## Prerequisites
+
+- `MAKNA_OPERATOR_BASE_URL` menunjuk ke MAKNA Dev/Staging yang disetujui.
+- `MAKNA_OPERATOR_API_TOKEN` tersedia di environment dan memiliki scope minimum yang diperlukan.
+- Skill dianggap belum siap jika `GET /api/operator/v2/whoami` gagal atau scope tidak mencukupi.
 
 ## Jalankan alur
 

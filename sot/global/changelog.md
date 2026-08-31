@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.29.5 — Align MAKNA Skill With Hermes Metadata (01/09/2026)
+- Add Hermes-native skill metadata and prerequisites
+- Keep conversational automation triggers concise and discoverable
+
 ## V2.29.4 — Add Hermes Conversational Automation Skill (01/09/2026)
 - Add Hermes skill for research video scheduling and review workflows
 - Expose tenant-scoped automation catalog and idempotent schedule creation
