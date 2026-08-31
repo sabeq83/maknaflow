@@ -9,6 +9,7 @@ export function middleware(req) {
     pathname.startsWith('/api/auth/login') ||
     pathname.startsWith('/api/auth/logout') ||
     pathname.startsWith('/api/operator/v1/') ||
+    pathname.startsWith('/api/operator/v2/') ||
     pathname.startsWith('/api/media-proxy') ||   // Public media proxy for Repliz downloads
     pathname.startsWith('/temp/') ||              // Temp file serving (public)
     pathname.startsWith('/_next') ||

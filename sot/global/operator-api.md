@@ -10,6 +10,7 @@ Operator API menyediakan jalur headless untuk membuat Content Planner, mengubah 
 - Approval storyboard tanpa perubahan melalui API/CLI.
 - Membaca output `video_final.mp4`, caption, dan URL Nextcloud dari status job.
 - Social posting sengaja dinonaktifkan pada v1.
+- Operator v2 mendukung research callback, status runs, dan exact revision approval untuk publishing.
 
 ## Konfigurasi
 

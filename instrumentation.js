@@ -85,6 +85,17 @@ export async function register() {
       console.log('ℹ️  Content Automation Worker disabled by environment.');
     }
 
+    if (backgroundServicesEnabled && process.env.ENABLE_AGENT_AUTOMATION_WORKER === 'true') {
+      try {
+        const { startAgentAutomationWorker } = await import('./lib/agent-automation-worker.js');
+        startAgentAutomationWorker();
+      } catch (err) {
+        console.error('❌ Failed to start Agent Automation Worker:', err.message);
+      }
+    } else {
+      console.log('ℹ️  Agent Automation Worker disabled by environment.');
+    }
+
     if (backgroundServicesEnabled && process.env.ENABLE_START_FRAME_WORKER !== 'false') {
       try {
         const { startStartFrameWorker } = await import('./lib/start-frame-worker.js');

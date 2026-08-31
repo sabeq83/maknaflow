@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.2 — Hermes Agent Content Automation (31/08/2026)
+- Tambah riset Hermes terstruktur dan orchestration run durable
+- Hubungkan produksi MAKNA ke publishing intent Repliz dengan approval policy
+- Tambah idempotency observability dan guardrail auto-publish
+
 ## V2.29.1 — YouTube Studio Channel Audio Production (29/08/2026)
 - Pusatkan audio mode, provider, speaker dan voice persona di level Channel
 - Tambahkan registry cast Series dan Episode serta immutable production snapshot
