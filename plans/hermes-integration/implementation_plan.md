@@ -730,12 +730,12 @@ Pause publishing worker/tenant control bila provider incident. Jangan drop tabel
 - [x] Implementasikan ContentFlow-to-publishing intent service tanpa internal HTTP ke session endpoint.
 - [x] Implementasikan exact-revision publishing approval dan policy gates.
 - [x] Tambahkan skill Hermes dan client script/API helper tanpa secret di source.
-- [x] Tambahkan observability, notification, health, retry, lease recovery, pause, dan stop behavior.
-- [x] Jalankan unit, boundary, integration, legacy regression, dan build tests; perbaiki sampai lulus.
+- [ ] Tambahkan observability, notification, health, retry, lease recovery, pause, dan stop behavior.
+- [ ] Jalankan unit, boundary, integration, legacy regression, dan build tests; perbaiki sampai lulus. Unit Hermes/automation, Content Automation, Publishing Scheduler, dan build sudah lulus; suite Operator berbasis DB menunggu lingkungan PostgreSQL lokal/Dev yang aktif.
 - [ ] Jalankan staging smoke `draft_only`; simpan bukti run IDs/status tanpa secret.
 - [ ] Dengan approval eksplisit pengguna, jalankan staging smoke `approval_required` non-live/draft target.
 - [ ] Pastikan `auto_publish` tetap off dan tidak ada production deployment.
-- [ ] Update dokumentasi SoT dan changelog points berdasarkan implementasi aktual.
+- [x] Update dokumentasi SoT dan changelog points berdasarkan implementasi aktual.
 - [ ] Jalankan SOP release patch setelah seluruh scope dan verifikasi berhasil.
 - [ ] Verifikasi branch `main` dan tag release terunggah ke remote repository.
 
@@ -760,4 +760,3 @@ Jalankan hanya setelah implementasi dan verifikasi berhasil:
 ```bash
 npm run release-non-interactive -- --type patch --title "Hermes Agent Content Automation" --points "Tambah riset Hermes terstruktur dan orchestration run durable|Hubungkan produksi MAKNA ke publishing intent Repliz dengan approval policy|Tambah idempotency observability dan guardrail auto-publish"
 ```
-

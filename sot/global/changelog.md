@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.3 — Harden Hermes Automation Integration (01/09/2026)
+- Persist research context and produce exactly one selected video
+- Secure Hermes callbacks with scoped signed tokens and idempotency
+- Gate Repliz publishing behind exact approval and scheduled policy
+
 ## V2.29.2 — Hermes Agent Content Automation (31/08/2026)
 - Tambah riset Hermes terstruktur dan orchestration run durable
 - Hubungkan produksi MAKNA ke publishing intent Repliz dengan approval policy

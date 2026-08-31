@@ -15,7 +15,11 @@ export async function GET(request, { params }) {
       if (!run) {
         return NextResponse.json({ success: false, error: 'Automation run tidak ditemukan.' }, { status: 404 });
       }
-      return NextResponse.json({ success: true, run });
+      const { idempotency_key, research_callback_key, last_error_message, ...safeRun } = run;
+      return NextResponse.json({
+        success: true,
+        run: { ...safeRun, has_error: Boolean(last_error_message) }
+      }, { headers: { 'Cache-Control': 'no-store' } });
     });
   } catch (err) {
     return NextResponse.json({ success: false, error: err.message }, { status: err.status || 500 });

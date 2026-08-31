@@ -12,13 +12,18 @@ export async function GET(request, { params }) {
 
     return await runAsOperatorTenant(identity, async () => {
       const task = await pgQuery(
-        'SELECT * FROM agent_automation_runs WHERE research_task_id = $1 AND tenant_id = $2',
+        `SELECT r.id,r.research_task_id,r.status,r.research_policy_json,r.created_at,
+          s.operator_request_json #> '{planner}' AS planner
+         FROM agent_automation_runs r JOIN content_automation_schedules s ON s.id=r.schedule_id
+         WHERE r.research_task_id=$1 AND r.tenant_id=$2`,
         [id, identity.tenantId]
       );
       if (!task.rowCount) {
         return NextResponse.json({ success: false, error: 'Task tidak ditemukan.' }, { status: 404 });
       }
-      return NextResponse.json({ success: true, task: task.rows[0] });
+      return NextResponse.json({ success: true, task: task.rows[0] }, {
+        headers: { 'Cache-Control': 'no-store' }
+      });
     });
   } catch (err) {
     return NextResponse.json({ success: false, error: err.message }, { status: err.status || 500 });

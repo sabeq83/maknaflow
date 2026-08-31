@@ -18,25 +18,39 @@ export async function POST(request, { params }) {
     return await runAsOperatorTenant(identity, async () => {
       const body = await request.json();
       const intentRes = await pgQuery(
-        'SELECT id, payload_sha256 FROM agent_publishing_intents WHERE run_id = $1 AND tenant_id = $2 AND status = \'pending\'',
-        [id, identity.tenantId]
+        'SELECT * FROM agent_publishing_intents WHERE run_id=$1 AND id=$2 AND tenant_id=$3',
+        [id, String(body.intent_id || ''), identity.tenantId]
       );
       const intent = intentRes.rows[0];
       if (!intent) {
-        return NextResponse.json({ success: false, error: 'Intent pending tidak ditemukan.' }, { status: 404 });
+        return NextResponse.json({ success: false, error: 'Publishing intent tidak ditemukan.' }, { status: 404 });
       }
 
       if (intent.payload_sha256 !== body.review_sha256) {
         return NextResponse.json({ success: false, error: 'Revision hash mismatch.' }, { status: 400 });
       }
+      if (intent.approval_idempotency_key) {
+        if (intent.approval_idempotency_key !== idempotencyKey) {
+          return NextResponse.json({ success: false, error: 'Intent sudah disetujui dengan idempotency key berbeda.' }, { status: 409 });
+        }
+        return NextResponse.json({ success: true, reused: true, publishing_job_id: intent.publishing_job_id }, {
+          headers: { 'Cache-Control': 'no-store' }
+        });
+      }
+      if (intent.status !== 'pending') {
+        return NextResponse.json({ success: false, error: `Intent tidak dapat disetujui pada status ${intent.status}.` }, { status: 409 });
+      }
 
-      await pgQuery(
-        "UPDATE agent_publishing_intents SET status = 'approved', approved_by = $1, approved_at = CURRENT_TIMESTAMP WHERE id = $2",
-        [identity.actor, intent.id]
-      );
+      const approved = await pgQuery(`UPDATE agent_publishing_intents
+        SET status='approved',approved_by=$1,approved_at=CURRENT_TIMESTAMP,approval_idempotency_key=$2
+        WHERE id=$3 AND tenant_id=$4 AND status='pending' RETURNING id`,
+      [identity.actor, idempotencyKey, intent.id, identity.tenantId]);
+      if (!approved.rowCount) return NextResponse.json({ success: false, error: 'Intent telah berubah; muat ulang review.' }, { status: 409 });
 
       const jobs = await dispatchPublishingIntent(intent.id);
-      return NextResponse.json({ success: true, jobs_dispatched: jobs.length });
+      return NextResponse.json({ success: true, reused: false, jobs_dispatched: jobs.length }, {
+        headers: { 'Cache-Control': 'no-store' }
+      });
     });
   } catch (err) {
     return NextResponse.json({ success: false, error: err.message }, { status: err.status || 500 });
