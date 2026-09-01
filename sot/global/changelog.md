@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.29.11 — Hermes Run-Once Final Safety Remediation (01/09/2026)
+- Dual-credential atomic rotation with memory backup and rollback
+- Fail-closed agent worker bootstrap and Staging config isolation
+- DB integration natural exit and clean teardown
+- Hermes auth preflight with bounded retry and secret redaction
+
 ## V2.29.10 — Hermes Run-Once Operational Closure and Live Authentication (01/09/2026)
 - Perbaikan kredensial Hermes Dev dan persistensi token operator
 - Perbaikan lifecycle reconciliation dan penanganan ready items start frames

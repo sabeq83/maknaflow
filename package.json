@@ -1,6 +1,6 @@
 {
   "name": "maknaflow",
-  "version": "2.29.10",
+  "version": "2.29.11",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack -p 3005",
@@ -22,8 +22,11 @@
     "staging:start": "node scripts/local-staging/run.js start",
     "staging:api": "node scripts/local-staging/run.js api",
     "staging:check": "node scripts/local-staging/check.js",
-    "test:content-planner": "node scripts/test-content-planner-modes.mjs",
     "test:content-run-once:integration": "node scripts/test-content-run-once-integration.mjs",
+    "test:hermes-token-rotation": "node --test tests/hermes-token-rotation.test.js",
+    "test:agent-worker-bootstrap": "node --test tests/agent-worker-bootstrap.test.js",
+    "test:hermes-auth-preflight": "node --test tests/hermes-auth-preflight.test.js",
+    "test:env-config-isolation": "node --test tests/env-config-isolation.test.js",
     "test:operator-content": "node scripts/test-operator-content.mjs",
     "test:operator-presets": "node scripts/test-operator-presets.mjs",
     "test:opc:start-frame-reference": "node scripts/test-opc-start-frame-reference.mjs",

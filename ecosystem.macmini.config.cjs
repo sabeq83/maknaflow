@@ -32,7 +32,7 @@ module.exports = {
         TZ: 'Asia/Jakarta',
         MAKNA_SCHEDULER: '1',
         ENABLE_PUBLISHING_WORKER: 'true',
-        ENABLE_AGENT_AUTOMATION_WORKER: 'true',
+        ENABLE_AGENT_AUTOMATION_WORKER: 'false',
         ENABLE_FACEBOOK_LIVE: 'true',
         ENABLE_FACEBOOK_REELS_PUBLISHING: 'true',
         FFPROBE_PATH: '/opt/homebrew/bin/ffprobe',

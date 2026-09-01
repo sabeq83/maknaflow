@@ -92,15 +92,16 @@ assert.deepEqual(randomA, randomRetry);
 
 const oldToken = process.env.MAKNA_OPERATOR_API_TOKEN;
 const oldTenant = process.env.MAKNA_OPERATOR_TENANT_ID;
-process.env.PGHOST = process.env.PGHOST || '100.78.186.123';
-process.env.PGPORT = process.env.PGPORT || '5432';
-process.env.PGUSER = process.env.PGUSER || 'makna_user';
-process.env.PGPASSWORD = process.env.PGPASSWORD || 'maknagridpass';
-process.env.PGDATABASE = process.env.PGDATABASE || 'maknaflow_db';
-process.env.PG_SEARCH_PATH = process.env.PG_SEARCH_PATH || 'dev';
+
+process.env.DISABLE_AUTO_MIGRATIONS = 'true';
+process.env.DISABLE_STARTUP_DB_CACHES = 'true';
+process.env.ENABLE_BACKGROUND_SERVICES = 'false';
+
+import { loadAndValidateDbEnv } from '../lib/db-env-validator.js';
+const dbConfig = loadAndValidateDbEnv({ requireDevSchema: true });
 
 const { authenticateOperator } = await import('../lib/operator-auth.js');
-const { getPgPool } = await import('../lib/db-pg.js');
+const { closePgPool } = await import('../lib/db-pg.js');
 
 process.env.MAKNA_OPERATOR_API_TOKEN = 'operator-test-secret';
 process.env.MAKNA_OPERATOR_TENANT_ID = 'tenant_test';
@@ -122,12 +123,12 @@ const credentialToken = `credential-${crypto.randomUUID()}`;
 const credentialTenant = `test_operator_${Date.now().toString(36)}`;
 const credentialId = `opc_test_${Date.now().toString(36)}`;
 const client = new pg.Client({
-  host: process.env.PGHOST,
-  port: Number(process.env.PGPORT),
-  user: process.env.PGUSER,
-  password: process.env.PGPASSWORD,
-  database: process.env.PGDATABASE,
-  options: `-c search_path=${process.env.PG_SEARCH_PATH}`
+  host: dbConfig.host,
+  port: dbConfig.port,
+  user: dbConfig.user,
+  password: dbConfig.password,
+  database: dbConfig.database,
+  options: `-c search_path=${dbConfig.schema}`
 });
 await client.connect();
 try {
@@ -141,8 +142,7 @@ try {
   await client.query('DELETE FROM operator_credentials WHERE id = $1', [credentialId]);
   await client.query('DELETE FROM tenants WHERE id = $1', [credentialTenant]);
   await client.end();
-  await new Promise(r => setTimeout(r, 1500));
-  await getPgPool().end();
+  await closePgPool();
 }
 if (oldToken === undefined) delete process.env.MAKNA_OPERATOR_API_TOKEN;
 else process.env.MAKNA_OPERATOR_API_TOKEN = oldToken;

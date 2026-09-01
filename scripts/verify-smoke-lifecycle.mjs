@@ -1,19 +1,23 @@
-import { execSync } from 'node:child_process';
-import assert from 'node:assert/strict';
-import pg from 'pg';
+import { loadAndValidateDbEnv } from '../lib/db-env-validator.js';
+
+process.env.DISABLE_AUTO_MIGRATIONS = 'true';
+process.env.DISABLE_STARTUP_DB_CACHES = 'true';
+process.env.ENABLE_BACKGROUND_SERVICES = 'false';
 
 const runId = process.argv[2] || 'car_4dd16822ab764f41';
 console.log(`🔍 === VERIFYING LIFECYCLE FOR SMOKE RUN "${runId}" (DEV) === 🧪`);
 
+const dbConfig = loadAndValidateDbEnv({ requireDevSchema: true });
+
 const pool = new pg.Pool({
-  host: process.env.PGHOST || '100.78.186.123',
-  port: Number(process.env.PGPORT || 5432),
-  user: process.env.PGUSER || 'makna_user',
-  password: process.env.PGPASSWORD || 'maknagridpass',
-  database: process.env.PGDATABASE || 'maknaflow_db',
-  options: '-c search_path=dev',
-  max: 3,
-  connectionTimeoutMillis: 15000
+  host: dbConfig.host,
+  port: dbConfig.port,
+  user: dbConfig.user,
+  password: dbConfig.password,
+  database: dbConfig.database,
+  options: `-c search_path=${dbConfig.schema}`,
+  max: 2,
+  connectionTimeoutMillis: 10000
 });
 
 async function verify() {

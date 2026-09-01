@@ -1,5 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+
+process.env.DISABLE_AUTO_MIGRATIONS = 'true';
+process.env.DISABLE_STARTUP_DB_CACHES = 'true';
+process.env.ENABLE_BACKGROUND_SERVICES = 'false';
+
 import {
   PUBLISHING_PLATFORMS,
   PUBLISHING_STATUSES,
@@ -471,5 +476,8 @@ test('Instagram Workflow: Container creation and container status validation', a
   });
   assert.equal(validIg.content_id, 'VID-IG-01');
   assert.equal(validIg.media_type, 'video');
+
+  const { closePgPool } = await import('../lib/db-pg.js');
+  await closePgPool();
 });
 
