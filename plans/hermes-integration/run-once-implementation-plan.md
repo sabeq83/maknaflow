@@ -452,26 +452,26 @@ npm run build
 
 ## Execution Task List
 
-- [ ] Audit existing session `run-now`, content worker research branch, agent worker, and DB constraints.
-- [ ] Freeze run-once contract, state mapping, idempotency, latency budget, and error taxonomy.
-- [ ] Add Before/After snippets for any additional file discovered during audit before editing it.
-- [ ] Implement idempotent DB migration for `execution_mode` and run request hash.
-- [ ] Implement canonical run-once contract and product count rules.
-- [ ] Implement atomic enqueue service/repository with paused non-recurring definition.
-- [ ] Modify worker claim so queued run-once is processed exactly once.
-- [ ] Route all research-enabled run-now requests through Agent Run before Operator Job.
-- [ ] Implement filtered catalog endpoint with preset compatibility.
-- [ ] Implement Operator create/status endpoints with scopes, redaction, and no-store.
-- [ ] Refactor session run-now to shared background path without breaking compatibility.
-- [ ] Update Hermes skill and API reference with exact 5020 route and fail-fast prohibitions.
-- [ ] Add unit, concurrency, authorization, latency, and regression tests.
-- [ ] Run all listed tests and build; fix failures rather than weakening assertions.
-- [ ] Deploy Dev with run-once and workers off; verify safe disabled behavior.
-- [ ] Configure/verify Hermes Runs API and signed callbacks without exposing secrets.
-- [ ] Enable Dev pilot and run exactly one `draft_only` smoke.
-- [ ] Prove fast `run_id`, correct N items/manual review, and zero publishing jobs.
-- [ ] Confirm no Staging/Production deployment and no auto-publish change.
-- [ ] Release patch, push branch/tag, verify remote and clean worktree.
+- [x] Audit existing session `run-now`, content worker research branch, agent worker, and DB constraints.
+- [x] Freeze run-once contract, state mapping, idempotency, latency budget, and error taxonomy.
+- [x] Add Before/After snippets for any additional file discovered during audit before editing it.
+- [x] Implement idempotent DB migration for `execution_mode` and run request hash.
+- [x] Implement canonical run-once contract and product count rules.
+- [x] Implement atomic enqueue service/repository with paused non-recurring definition.
+- [x] Modify worker claim so queued run-once is processed exactly once.
+- [x] Route all research-enabled run-now requests through Agent Run before Operator Job.
+- [x] Implement filtered catalog endpoint with preset compatibility.
+- [x] Implement Operator create/status endpoints with scopes, redaction, and no-store.
+- [x] Refactor session run-now to shared background path without breaking compatibility.
+- [x] Update Hermes skill and API reference with exact 5020 route and fail-fast prohibitions.
+- [x] Add unit, concurrency, authorization, latency, and regression tests.
+- [x] Run all listed tests and build; fix failures rather than weakening assertions.
+- [x] Deploy Dev with run-once and workers off; verify safe disabled behavior.
+- [x] Configure/verify Hermes Runs API and signed callbacks without exposing secrets.
+- [x] Enable Dev pilot and run exactly one `draft_only` smoke.
+- [x] Prove fast `run_id`, correct N items/manual review, and zero publishing jobs.
+- [x] Confirm no Staging/Production deployment and no auto-publish change.
+- [x] Release patch, push branch/tag, verify remote and clean worktree.
 
 ## 14. Definition of Done
 

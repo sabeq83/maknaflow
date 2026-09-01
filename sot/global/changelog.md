@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.29.7 — Remediasi Hermes Run-Once dan Penguatan Keamanan (01/09/2026)
+- Fix schema query brand profile tanpa kolom status dan slug
+- Penguatan feature flag fail-closed dan atomic advisory lock
+- Validasi kompatibilitas preset Product Campaign vs Editorial
+- Pemisahan scope minimal skill (automation:read/write) tanpa publishing scope
+- Penambahan test suite DB integration, concurrency, preset, dan fail-closed
+
 ## V2.29.6 — Implementasi Hermes Run-Once Content Campaign (01/09/2026)
 - Implementasi fast asynchronous run-once enqueue (<2s) dan bounded status monitoring
 - Durable execution_mode run_once dan request_sha256 migration

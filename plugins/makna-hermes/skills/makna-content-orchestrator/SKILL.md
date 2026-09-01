@@ -25,8 +25,10 @@ Jadikan MAKNA Flow sebagai pemilik jadwal, produksi, approval, dan publishing. G
 ## Prerequisites & Endpoint Authority
 
 - `MAKNA_OPERATOR_BASE_URL` berasal dari environment. Di Dev, URL resmi Next.js Operator API adalah `http://127.0.0.1:5020` (bukan port 7020).
-- `MAKNA_OPERATOR_API_TOKEN` tersedia di environment dan memiliki scope minimum yang diperlukan (`automation:read`, `automation:write`, `publishing:read`, `publishing:plan`).
-- Skill dianggap belum siap jika `GET /api/operator/v2/whoami` gagal atau scope tidak mencukupi.
+- `MAKNA_OPERATOR_API_TOKEN` tersedia di environment dan memiliki scope minimum yang diperlukan untuk operasi yang dijalankan:
+  - **Untuk alur katalog, run-once, dan automasi**: Cukup `automation:read` dan `automation:write`.
+  - **Untuk alur publish approved campaign**: Memerlukan tambahan `publishing:read` dan `publishing:plan`.
+- Skill dianggap belum siap jika `GET /api/operator/v2/whoami` gagal atau scope tidak mencukupi untuk alur yang diminta.
 
 ## Strict Fail-Fast & Safety Prohibitions
 

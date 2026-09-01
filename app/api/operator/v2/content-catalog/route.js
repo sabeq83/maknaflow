@@ -19,6 +19,9 @@ export async function GET(request) {
     const limit = Math.min(50, Math.max(1, Number(query.get('limit') || 20)));
 
     const result = await runAsOperatorTenant(identity, async () => {
+      const { ensureTenantPresetsHydrated } = await import('@/lib/content-run-service');
+      await ensureTenantPresetsHydrated(identity.tenantId);
+
       const [allBrands, allCatalog] = await Promise.all([
         getAllBrandProfiles(),
         listProductCatalog({ search: productFilter, limit })
@@ -27,7 +30,7 @@ export async function GET(request) {
       let filteredBrands = allBrands.map(item => ({
         id: item.id,
         name: item.brand_name || item.name || '',
-        slug: item.brand_slug || ''
+        slug: (item.brand_name || item.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-')
       }));
 
       if (brandFilter) {
