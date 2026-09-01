@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.29.6 — Implementasi Hermes Run-Once Content Campaign (01/09/2026)
+- Implementasi fast asynchronous run-once enqueue (<2s) dan bounded status monitoring
+- Durable execution_mode run_once dan request_sha256 migration
+- Research-first routing untuk run-now dan run-once
+- Pembaruan Hermes skill dan Operator API reference dengan fail-fast rules
+- Penambahan test suite unit dan integrasi content-run-once
+
 ## V2.29.5 — Align MAKNA Skill With Hermes Metadata (01/09/2026)
 - Add Hermes-native skill metadata and prerequisites
 - Keep conversational automation triggers concise and discoverable

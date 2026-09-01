@@ -23,6 +23,19 @@ export async function POST(request,{params}){
       await updateRun(run.id,{campaign_kind:'product_campaign',product_snapshot_json:JSON.stringify(snapshot)});
       await createAutomationAuditEvent({tenantId:user.tenantId,type:'product_snapshot_captured',scheduleId:schedule.id,runId:run.id,event:{product_id:snapshot.product_id,brand_product_id:snapshot.brand_product_id,sha256:snapshot.sha256}});
     }
+    const hasResearch = Boolean(schedule.research || payload?.research);
+    if (hasResearch) {
+      const { createAgentRun } = await import('@/lib/agent-automation-repository');
+      await createAgentRun({
+        scheduleId: schedule.id,
+        runId: run.id,
+        idempotencyKey: run.idempotency_key,
+        researchPolicy: schedule.research || payload?.research || {},
+        publishingPolicy: schedule.publishing_policy || payload?.publishing_policy || { mode: 'draft_only' }
+      });
+      await updateRun(run.id, { status: 'dispatching' });
+      return NextResponse.json({ success: true, run_id: run.id, status: 'dispatching' });
+    }
     const job=await createOperatorJobFromRequest({request:payload,idempotencyKey:run.idempotency_key,actor:`automation-run-now:${user.id}`});
     await updateRun(run.id,{operator_job_id:job.id,status:'job_created'});
     return NextResponse.json({success:true,run_id:run.id,operator_job_id:job.id});

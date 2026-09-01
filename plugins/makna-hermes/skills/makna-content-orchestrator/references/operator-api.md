@@ -1,80 +1,131 @@
-# Operator API
+# Operator API Reference
 
-Base URL berasal dari `MAKNA_OPERATOR_BASE_URL`. Gunakan bearer token tanpa pernah menampilkannya.
+Base URL berasal dari `MAKNA_OPERATOR_BASE_URL`. Di Dev, gunakan `http://127.0.0.1:5020`. Gunakan bearer token tanpa pernah menampilkannya.
 
-## Resolve katalog
+---
 
-```http
-GET /api/operator/v2/content-automations/catalog?search=<product>&limit=20
-```
-
-Memerlukan scope `automation:read`. Respons menyediakan `brands`, `products`, dan `presets` dengan identifier resmi. Jangan menebak identifier.
-
-## Buat automation
+## 1. Resolve Katalog (Filtered)
 
 ```http
-POST /api/operator/v2/content-automations
+GET /api/operator/v2/content-catalog?brand=dapurbotani&product=Rolled%20Oat&preset=dapurbotani_kampanye_produk_4_klip&campaign_kind=product_campaign&limit=20
 Authorization: Bearer <token>
-Idempotency-Key: hermes:<conversation-or-request-id>
-Content-Type: application/json
 ```
 
-Memerlukan scope `automation:write`. Contoh enam video produk, riset setiap hari pukul 07.00, manual review, dan TikTok pukul 18.30:
+Memerlukan scope `automation:read`.
 
+### Response 200:
 ```json
 {
-  "name": "Daily Product XXX",
-  "campaign_kind": "product_campaign",
-  "status": "active",
-  "timezone": "Asia/Jakarta",
-  "frequency": "daily",
-  "schedule": { "hour": 7, "minute": 0 },
-  "missed_run_policy": "skip",
-  "operator_request": {
-    "planner": {
-      "planner_focus": "product_campaign",
-      "planner_count": 6,
-      "brand_id": "<brand-id>",
-      "product_id": "<product-id>",
-      "product_name": "XXX",
-      "product_description": "<verified product description>",
-      "target_audience": "<verified audience>",
-      "platform": "tiktok"
-    },
-    "selection": { "mode": "all" },
-    "research": {
-      "query": "Riset tren terbaru yang relevan untuk produk XXX dan target konsumennya",
-      "locale": "id-ID",
-      "max_research_age_hours": 24,
-      "production_count": 6,
-      "source_policy": "primary_and_reputable",
-      "prohibited_topics": []
-    },
-    "opc": {
-      "preset": "<preset-key>",
-      "basic_strategy": {
-        "brand_profile_id": "<brand-id>",
-        "product_id": "<product-id>",
-        "target_product_id": "<product-id>"
-      },
-      "workflow": {
-        "approval_mode": "start_frames",
-        "auto_sync_contentflow": true,
-        "enable_social_post": false
-      }
-    }
-  },
-  "publishing_policy": {
-    "mode": "approval_required",
-    "platform": "tiktok",
-    "account_ids": ["<repliz-account-id>"],
-    "publish_time": "18:30",
-    "timezone": "Asia/Jakarta",
-    "missed_slot_policy": "next_day"
-  }
+  "success": true,
+  "brands": [
+    { "id": "bp_xxx", "name": "dapurbotani", "slug": "dapurbotani", "exact_match": true }
+  ],
+  "products": [
+    { "id": "pe_xxx", "name": "Rolled Oat Premium Sahabat", "target_audience": "Dewasa muda", "exact_match": true }
+  ],
+  "presets": [
+    { "key": "dapurbotani_kampanye_produk_4_klip", "label": "Dapur Botani 4 Klip", "campaign_kinds": ["product_campaign"], "compatible": true, "exact_match": true }
+  ]
 }
 ```
 
-Untuk draft aman, gunakan `status: paused` dan `publishing_policy.mode: draft_only` dengan `account_ids: []`.
+---
 
-Jika server mengembalikan `HERMES_AUTO_PUBLISH_DISABLED`, jangan mencoba endpoint lain. Jelaskan bahwa approval manusia masih diwajibkan. Jika `Idempotency-Key` conflict, berhenti; jangan membuat key baru.
+## 2. Buat One-Time Campaign (Run-Once)
+
+```http
+POST /api/operator/v2/content-runs
+Authorization: Bearer <token>
+Idempotency-Key: hermes:<conversation-id>:<request-id>
+Content-Type: application/json
+```
+
+Memerlukan scope `automation:write`.
+
+### Request Body:
+```json
+{
+  "mode": "run_once",
+  "name": "Rolled Oat Premium Sahabat — One Time",
+  "brand_profile_id": "bp_xxx",
+  "product_id": "pe_xxx",
+  "preset_key": "dapurbotani_kampanye_produk_4_klip",
+  "video_count": 6,
+  "platform": "tiktok",
+  "research": {
+    "query": "Tren terbaru yang relevan untuk Rolled Oat Premium Sahabat dan target konsumennya",
+    "locale": "id-ID",
+    "max_research_age_hours": 24,
+    "source_policy": "primary_and_reputable"
+  },
+  "review_mode": "start_frames",
+  "publishing_policy": { "mode": "draft_only" }
+}
+```
+
+### Response 202 (Accepted dalam < 2 detik):
+```json
+{
+  "success": true,
+  "run_id": "car_xxx",
+  "agent_run_id": "arun_xxx",
+  "status": "research_queued",
+  "status_url": "/api/operator/v2/content-runs/car_xxx",
+  "review_url": "/content-automations?run=car_xxx",
+  "replayed": false
+}
+```
+
+---
+
+## 3. Monitor Status Run (Bounded)
+
+```http
+GET /api/operator/v2/content-runs/{id}
+Authorization: Bearer <token>
+```
+
+Memerlukan scope `automation:read`.
+
+### Response 200:
+```json
+{
+  "success": true,
+  "run_id": "car_xxx",
+  "status": "awaiting_manual_review",
+  "stage": "start_frames",
+  "items": { "total": 6, "ready": 6, "failed": 0 },
+  "action_required": "Review start frames in MAKNA",
+  "review_url": "/content-automations?run=car_xxx",
+  "publishing_mode": "draft_only"
+}
+```
+
+Public Bounded States:
+- `queued`
+- `research_queued`
+- `researching`
+- `planning`
+- `generating_start_frames`
+- `awaiting_manual_review`
+- `producing`
+- `syncing_contentflow`
+- `completed_draft`
+- `retry_wait`
+- `failed`
+- `cancelled`
+
+---
+
+## 4. Error Codes
+
+- `CATALOG_AMBIGUOUS`: Filter menghasilkan banyak kandidat; minta klarifikasi.
+- `BRAND_NOT_FOUND`: ID brand tidak ditemukan.
+- `PRODUCT_NOT_FOUND`: ID produk tidak ditemukan.
+- `PRESET_NOT_FOUND`: Preset key tidak ditemukan.
+- `PRESET_CAMPAIGN_KIND_MISMATCH`: Preset tidak kompatibel dengan jenis campaign.
+- `VIDEO_COUNT_INVALID`: Jumlah video tidak sesuai (harus 6, 12, 18, 24, atau 30).
+- `RUN_ONCE_DISABLED`: Fitur dinonaktifkan di server.
+- `IDEMPOTENCY_KEY_REQUIRED`: Header `Idempotency-Key` tidak disediakan.
+- `IDEMPOTENCY_CONFLICT`: Header `Idempotency-Key` sama telah digunakan untuk payload berbeda.
+- `RUN_NOT_FOUND`: Run ID tidak ditemukan.
