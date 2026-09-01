@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.29.10 — Hermes Run-Once Operational Closure and Live Authentication (01/09/2026)
+- Perbaikan kredensial Hermes Dev dan persistensi token operator
+- Perbaikan lifecycle reconciliation dan penanganan ready items start frames
+- Integrasi test database Dev 15/15 assertions pass
+- Verifikasi live smoke car_4dd16822ab764f41 reaching awaiting_manual_review 6/6 items ready
+
 ## V2.29.9 — Lossless Preset Configuration Persistence and Full Form Hydration (01/09/2026)
 - Ensure 100% configuration constants saved in preset schema v2
 - Deterministic form hydration across all campaign creators

@@ -85,7 +85,7 @@ export async function register() {
       console.log('ℹ️  Content Automation Worker disabled by environment.');
     }
 
-    if (backgroundServicesEnabled && process.env.ENABLE_AGENT_AUTOMATION_WORKER === 'true') {
+    if (backgroundServicesEnabled && process.env.ENABLE_AGENT_AUTOMATION_WORKER !== 'false') {
       try {
         const { startAgentAutomationWorker } = await import('./lib/agent-automation-worker.js');
         startAgentAutomationWorker();

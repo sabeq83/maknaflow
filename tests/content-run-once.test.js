@@ -6,7 +6,8 @@ import {
   hashContentRunRequest,
   CONTENT_RUN_ERROR_CODES,
   ALLOWED_PRODUCT_CAMPAIGN_COUNTS,
-  ContentRunError
+  ContentRunError,
+  assertHermesRunOnceEnabled
 } from '../lib/content-run-contract.js';
 import {
   hydrateOperatorPresetCache,
@@ -112,19 +113,12 @@ test('Run-once draft_only mode defaults safely without publishing target require
   assert.deepEqual(req.publishing_policy.account_ids, []);
 });
 
-test('Feature flag fail-closed logic function', () => {
-  function checkFeatureFlag(flagVal) {
-    if (flagVal !== 'true') {
-      throw new ContentRunError('Hermes run-once sementara dinonaktifkan.', CONTENT_RUN_ERROR_CODES.RUN_ONCE_DISABLED, 503);
-    }
-    return true;
-  }
-
-  assert.throws(() => checkFeatureFlag(undefined), (err) => err.code === CONTENT_RUN_ERROR_CODES.RUN_ONCE_DISABLED);
-  assert.throws(() => checkFeatureFlag(''), (err) => err.code === CONTENT_RUN_ERROR_CODES.RUN_ONCE_DISABLED);
-  assert.throws(() => checkFeatureFlag('false'), (err) => err.code === CONTENT_RUN_ERROR_CODES.RUN_ONCE_DISABLED);
-  assert.throws(() => checkFeatureFlag('1'), (err) => err.code === CONTENT_RUN_ERROR_CODES.RUN_ONCE_DISABLED);
-  assert.equal(checkFeatureFlag('true'), true);
+test('Feature flag fail-closed logic function tests real production helper', () => {
+  assert.throws(() => assertHermesRunOnceEnabled({}), (err) => err.code === CONTENT_RUN_ERROR_CODES.RUN_ONCE_DISABLED);
+  assert.throws(() => assertHermesRunOnceEnabled({ ENABLE_HERMES_RUN_ONCE: '' }), (err) => err.code === CONTENT_RUN_ERROR_CODES.RUN_ONCE_DISABLED);
+  assert.throws(() => assertHermesRunOnceEnabled({ ENABLE_HERMES_RUN_ONCE: 'false' }), (err) => err.code === CONTENT_RUN_ERROR_CODES.RUN_ONCE_DISABLED);
+  assert.throws(() => assertHermesRunOnceEnabled({ ENABLE_HERMES_RUN_ONCE: '1' }), (err) => err.code === CONTENT_RUN_ERROR_CODES.RUN_ONCE_DISABLED);
+  assert.doesNotThrow(() => assertHermesRunOnceEnabled({ ENABLE_HERMES_RUN_ONCE: 'true' }));
 });
 
 test('Preset compatibility validation for Product Campaign vs Brand Editorial', () => {

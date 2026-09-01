@@ -7,7 +7,6 @@ import {
   normalizeOperatorContentRequest
 } from '../lib/operator-content-contract.js';
 import { resolveWardrobe } from '../lib/visual-override-resolver.js';
-import { loadStagingEnv } from './local-staging/env.js';
 
 const nutribakeRequest = {
   planner: {
@@ -93,8 +92,16 @@ assert.deepEqual(randomA, randomRetry);
 
 const oldToken = process.env.MAKNA_OPERATOR_API_TOKEN;
 const oldTenant = process.env.MAKNA_OPERATOR_TENANT_ID;
-Object.assign(process.env, loadStagingEnv());
+process.env.PGHOST = process.env.PGHOST || '100.78.186.123';
+process.env.PGPORT = process.env.PGPORT || '5432';
+process.env.PGUSER = process.env.PGUSER || 'makna_user';
+process.env.PGPASSWORD = process.env.PGPASSWORD || 'maknagridpass';
+process.env.PGDATABASE = process.env.PGDATABASE || 'maknaflow_db';
+process.env.PG_SEARCH_PATH = process.env.PG_SEARCH_PATH || 'dev';
+
 const { authenticateOperator } = await import('../lib/operator-auth.js');
+const { getPgPool } = await import('../lib/db-pg.js');
+
 process.env.MAKNA_OPERATOR_API_TOKEN = 'operator-test-secret';
 process.env.MAKNA_OPERATOR_TENANT_ID = 'tenant_test';
 const validRequest = new Request('http://localhost/api/operator/v1/content-jobs', {
@@ -114,7 +121,14 @@ await assert.rejects(
 const credentialToken = `credential-${crypto.randomUUID()}`;
 const credentialTenant = `test_operator_${Date.now().toString(36)}`;
 const credentialId = `opc_test_${Date.now().toString(36)}`;
-const client = new pg.Client({ host: process.env.PGHOST, port: Number(process.env.PGPORT), user: process.env.PGUSER, password: process.env.PGPASSWORD, database: process.env.PGDATABASE, options: `-c search_path=${process.env.PG_SEARCH_PATH || 'public'}` });
+const client = new pg.Client({
+  host: process.env.PGHOST,
+  port: Number(process.env.PGPORT),
+  user: process.env.PGUSER,
+  password: process.env.PGPASSWORD,
+  database: process.env.PGDATABASE,
+  options: `-c search_path=${process.env.PG_SEARCH_PATH}`
+});
 await client.connect();
 try {
   await client.query("INSERT INTO tenants (id, name, slug) VALUES ($1, 'Operator Test', $1)", [credentialTenant]);
@@ -127,6 +141,8 @@ try {
   await client.query('DELETE FROM operator_credentials WHERE id = $1', [credentialId]);
   await client.query('DELETE FROM tenants WHERE id = $1', [credentialTenant]);
   await client.end();
+  await new Promise(r => setTimeout(r, 1500));
+  await getPgPool().end();
 }
 if (oldToken === undefined) delete process.env.MAKNA_OPERATOR_API_TOKEN;
 else process.env.MAKNA_OPERATOR_API_TOKEN = oldToken;
