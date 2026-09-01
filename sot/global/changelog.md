@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.9 — Lossless Preset Configuration Persistence and Full Form Hydration (01/09/2026)
+- Ensure 100% configuration constants saved in preset schema v2
+- Deterministic form hydration across all campaign creators
+- Set bridge_at_clip: 3 for 4-clip product campaign presets
+
 ## V2.29.8 — Hermes Run-Once Final Remediation to Full Operational Readiness (01/09/2026)
 - Clean unit vs integration DB test separation
 - Mac Mini Dev persistent Hermes Runs API and signed callback setup

@@ -52,6 +52,7 @@ const initialForm = {
   narrative_mode: 'Storytelling',
   target_language: 'id-ID',
   target_demographic: 'genz_casual',
+  target_demographic_custom: '',
   promotion_style: 'Softselling',
   ai_directive: '',
   mandatory_outro_line: '',
@@ -68,10 +69,12 @@ const initialForm = {
   face_visibility: 'Faceless',
   target_clips_count: 4,
   words_per_clip: '17-19 kata',
+  clip_duration: 8,
 
   // Section 3: product_bridging
   is_bridging_active: false,
-  bridge_at_clip: 2,
+  bridging_mode: 'select_existing',
+  bridge_at_clip: 3,
   bridge_duration_clips: 1,
 
   // Section 4: visual_swap
@@ -81,9 +84,9 @@ const initialForm = {
   visual_overrides_json: null,
   character_concept: 'faceless',
   subject_demographic: 'syari_classic',
-  wardrobe_style: 'random',
+  wardrobe_style: 'amber_terracotta',
   wardrobe_style_custom: '',
-  lighting_style: 'random',
+  lighting_style: 'window_daylight',
   lighting_style_custom: '',
   visual_style_preset: '3d_claymation_cozy',
 
@@ -97,9 +100,14 @@ const initialForm = {
   tts_model_quality: 'speech-2.8-turbo',
   enable_glabs: true,
   enable_ffmpeg: true,
+  ffmpeg_sync_option: 'smart_sync',
   ffmpeg_video_scale: 1.00,
   ffmpeg_bgm_volume: 0.00,
-  ffmpeg_sfx_volume: 0.00
+  ffmpeg_sfx_volume: 0.00,
+  enable_social_post: false,
+  upload_markdown: true,
+  upload_spreadsheet: false,
+  auto_sync_contentflow: true
 };
 
 function mapPresetToForm(p) {
@@ -118,10 +126,11 @@ function mapPresetToForm(p) {
     narrative_mode: bs.narrative_mode || 'Storytelling',
     target_language: bs.target_language || 'id-ID',
     target_demographic: bs.target_demographic || 'genz_casual',
+    target_demographic_custom: bs.target_demographic_custom || '',
     promotion_style: bs.promotion_style || 'Softselling',
     ai_directive: bs.ai_directive || '',
     mandatory_outro_line: bs.mandatory_outro_line || '',
-    enable_audio_segment: bs.enable_audio_segment || false,
+    enable_audio_segment: Boolean(bs.enable_audio_segment),
     sfx_setting: bs.sfx_setting || 'without_sfx',
     enable_vo_audit: bs.enable_vo_audit ?? 1,
     nextcloud_parent_folder: bs.nextcloud_parent_folder || '/MAKNA_Assets',
@@ -132,40 +141,47 @@ function mapPresetToForm(p) {
     video_model: ve.video_model || 'veo_31_lite',
     aspect_ratio: ve.aspect_ratio || '9:16',
     face_visibility: ve.face_visibility || 'Faceless',
-    target_clips_count: ve.target_clips_count || 4,
+    target_clips_count: Number(ve.target_clips_count ?? 4),
     words_per_clip: ve.words_per_clip || '17-19 kata',
+    clip_duration: Number(ve.clip_duration ?? 8),
 
     // product_bridging
-    is_bridging_active: pb.is_bridging_active || false,
-    bridge_at_clip: pb.bridge_at_clip || 2,
-    bridge_duration_clips: pb.bridge_duration_clips || 1,
+    is_bridging_active: Boolean(pb.is_bridging_active),
+    bridging_mode: pb.bridging_mode || 'select_existing',
+    bridge_at_clip: Number(pb.bridge_at_clip ?? 3),
+    bridge_duration_clips: Number(pb.bridge_duration_clips ?? 1),
 
     // visual_swap
-    is_vso_active: vs.is_vso_active || false,
+    is_vso_active: Boolean(vs.is_vso_active),
     visual_identity_preset_id: vs.visual_identity_preset_id || 'hands_only_muslimah_sage_kitchen',
     visual_identity_inline_config: vs.visual_identity_inline_config || null,
     visual_overrides_json: vs.visual_overrides_json || null,
     character_concept: vs.character_concept || 'faceless',
     subject_demographic: vs.subject_demographic || 'syari_classic',
-    wardrobe_style: vs.wardrobe_style || 'random',
+    wardrobe_style: vs.wardrobe_style || 'amber_terracotta',
     wardrobe_style_custom: vs.wardrobe_style_custom || '',
-    lighting_style: vs.lighting_style || 'random',
+    lighting_style: vs.lighting_style || 'window_daylight',
     lighting_style_custom: vs.lighting_style_custom || '',
     visual_style_preset: vs.visual_style_preset || '3d_claymation_cozy',
 
     // workflow
     approval_mode: wf.approval_mode || 'storyboard',
-    enable_tts: wf.enable_tts || false,
+    enable_tts: Boolean(wf.enable_tts),
     voice_provider: bs.voice_provider || 'minimax',
     voice_persona: bs.voice_persona || 'Indonesian_professional_anchor_vv2',
     voice_speed: Number(bs.voice_speed ?? 1.0),
     voice_volume: Number(bs.voice_volume ?? 1.0),
     tts_model_quality: bs.tts_model_quality || 'speech-2.8-turbo',
-    enable_glabs: wf.enable_glabs || false,
-    enable_ffmpeg: wf.enable_ffmpeg || false,
+    enable_glabs: Boolean(wf.enable_glabs),
+    enable_ffmpeg: Boolean(wf.enable_ffmpeg),
+    ffmpeg_sync_option: wf.ffmpeg_sync_option || 'smart_sync',
     ffmpeg_video_scale: Number(wf.ffmpeg_video_scale ?? 1.00),
     ffmpeg_bgm_volume: Number(wf.ffmpeg_bgm_volume ?? 0.00),
-    ffmpeg_sfx_volume: Number(wf.ffmpeg_sfx_volume ?? 0.00)
+    ffmpeg_sfx_volume: Number(wf.ffmpeg_sfx_volume ?? 0.00),
+    enable_social_post: Boolean(wf.enable_social_post),
+    upload_markdown: wf.upload_markdown !== undefined ? Boolean(wf.upload_markdown) : true,
+    upload_spreadsheet: Boolean(wf.upload_spreadsheet),
+    auto_sync_contentflow: wf.auto_sync_contentflow !== undefined ? Boolean(wf.auto_sync_contentflow) : true
   };
 }
 
@@ -186,13 +202,14 @@ function mapFormToPayload(f) {
         tts_model_quality: f.tts_model_quality,
         target_language: f.target_language,
         target_demographic: f.target_demographic,
-        ai_directive: f.ai_directive,
-        mandatory_outro_line: f.mandatory_outro_line,
-        enable_audio_segment: f.enable_audio_segment,
+        target_demographic_custom: f.target_demographic_custom || '',
+        ai_directive: f.ai_directive || '',
+        mandatory_outro_line: f.mandatory_outro_line || '',
+        enable_audio_segment: Boolean(f.enable_audio_segment),
         sfx_setting: f.sfx_setting,
-        enable_vo_audit: Number(f.enable_vo_audit),
-        nextcloud_parent_folder: f.nextcloud_parent_folder,
-        promotion_style: f.promotion_style
+        enable_vo_audit: Number(f.enable_vo_audit ?? 1),
+        nextcloud_parent_folder: f.nextcloud_parent_folder || '/MAKNA_Assets',
+        promotion_style: f.promotion_style || 'Softselling'
       },
       visual_engine: {
         visual_style: f.visual_style,
@@ -200,16 +217,18 @@ function mapFormToPayload(f) {
         video_model: f.video_model,
         aspect_ratio: f.aspect_ratio,
         face_visibility: f.face_visibility,
-        target_clips_count: Number(f.target_clips_count),
-        words_per_clip: f.words_per_clip
+        target_clips_count: Number(f.target_clips_count ?? 4),
+        words_per_clip: f.words_per_clip,
+        clip_duration: Number(f.clip_duration ?? 8)
       },
       product_bridging: {
-        is_bridging_active: f.is_bridging_active,
-        bridge_at_clip: Number(f.bridge_at_clip),
-        bridge_duration_clips: Number(f.bridge_duration_clips)
+        is_bridging_active: Boolean(f.is_bridging_active),
+        bridging_mode: f.bridging_mode || 'select_existing',
+        bridge_at_clip: Number(f.bridge_at_clip ?? 3),
+        bridge_duration_clips: Number(f.bridge_duration_clips ?? 1)
       },
       visual_swap: {
-        is_vso_active: f.is_vso_active,
+        is_vso_active: Boolean(f.is_vso_active),
         character_concept: f.character_concept,
         subject_demographic: f.subject_demographic,
         wardrobe_style: f.wardrobe_style,
@@ -223,15 +242,17 @@ function mapFormToPayload(f) {
       },
       workflow: {
         approval_mode: f.approval_mode,
-        enable_tts: f.enable_tts,
-        enable_glabs: f.enable_glabs,
-        enable_ffmpeg: f.enable_ffmpeg,
-        ffmpeg_video_scale: Number(f.ffmpeg_video_scale),
-        ffmpeg_bgm_volume: Number(f.ffmpeg_bgm_volume),
-        ffmpeg_sfx_volume: Number(f.ffmpeg_sfx_volume),
-        enable_social_post: false,
-        upload_markdown: true,
-        upload_spreadsheet: false
+        enable_tts: Boolean(f.enable_tts),
+        enable_glabs: Boolean(f.enable_glabs),
+        enable_ffmpeg: Boolean(f.enable_ffmpeg),
+        ffmpeg_sync_option: f.ffmpeg_sync_option || 'smart_sync',
+        ffmpeg_video_scale: Number(f.ffmpeg_video_scale ?? 1.0),
+        ffmpeg_bgm_volume: Number(f.ffmpeg_bgm_volume ?? 0.0),
+        ffmpeg_sfx_volume: Number(f.ffmpeg_sfx_volume ?? 0.0),
+        enable_social_post: Boolean(f.enable_social_post),
+        upload_markdown: f.upload_markdown !== undefined ? Boolean(f.upload_markdown) : true,
+        upload_spreadsheet: Boolean(f.upload_spreadsheet),
+        auto_sync_contentflow: f.auto_sync_contentflow !== undefined ? Boolean(f.auto_sync_contentflow) : true
       }
     }
   };
@@ -608,7 +629,14 @@ export default function PresetsPage() {
                     </label>
 
                     {form.is_bridging_active && (
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
+                        <label className="form-label">
+                          Bridging Mode
+                          <select className="form-select" value={form.bridging_mode} onChange={e => setForm({ ...form, bridging_mode: e.target.value })}>
+                            <option value="select_existing">Select Existing Product Photo</option>
+                            <option value="manual_input">Manual Prompt Only</option>
+                          </select>
+                        </label>
                         <label className="form-label">
                           Bridge at Clip (Index Klip)
                           <input type="number" className="form-input" min="1" max="12" value={form.bridge_at_clip} onChange={e => setForm({ ...form, bridge_at_clip: e.target.value })} />
@@ -676,12 +704,20 @@ export default function PresetsPage() {
                         Approval Mode
                         <select className="form-select" value={form.approval_mode} onChange={e => setForm({ ...form, approval_mode: e.target.value })}>
                           <option value="storyboard">Manual Review (Awaiting Storyboard Approval)</option>
+                          <option value="start_frames">Pause at Start Frames (Review Before TTS)</option>
                           <option value="none">Full Auto (No Approval Needed)</option>
                         </select>
                       </label>
                       <label className="form-label" style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 24 }}>
                         <input type="checkbox" checked={form.enable_tts} onChange={e => setForm({ ...form, enable_tts: e.target.checked })} />
                         Enable TTS Voice-Over
+                      </label>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 14 }}>
+                      <label className="form-label" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                        <input type="checkbox" checked={form.auto_sync_contentflow} onChange={e => setForm({ ...form, auto_sync_contentflow: e.target.checked })} />
+                        Auto Sync ke ContentFlow Pipeline
                       </label>
                     </div>
 
@@ -739,7 +775,15 @@ export default function PresetsPage() {
                     {form.enable_ffmpeg && (
                       <fieldset style={{ border: '1px solid var(--border-color)', borderRadius: 8, padding: 16, display: 'grid', gap: 12 }}>
                         <legend style={{ padding: '0 8px', fontSize: 13, fontWeight: 600 }}>🎞️ FFmpeg Render Settings</legend>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 14 }}>
+                          <label className="form-label">
+                            Sync Option
+                            <select className="form-select" value={form.ffmpeg_sync_option} onChange={e => setForm({ ...form, ffmpeg_sync_option: e.target.value })}>
+                              <option value="smart_sync">Smart Sync (Auto Fit)</option>
+                              <option value="pad_end">Pad End</option>
+                              <option value="loop">Loop</option>
+                            </select>
+                          </label>
                           <label className="form-label">
                             Video Scale (Zoom: {Math.round(form.ffmpeg_video_scale * 100)}%)
                             <input type="range" min="1.0" max="2.0" step="0.05" value={form.ffmpeg_video_scale} onChange={e => setForm({ ...form, ffmpeg_video_scale: parseFloat(e.target.value) })} style={{ width: '100%', padding: 0 }} />

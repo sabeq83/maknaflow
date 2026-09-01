@@ -184,7 +184,7 @@ export default function RECampaignsPage() {
     if (config.basic_strategy) {
       setNarrativeMode(config.basic_strategy.narrative_mode || 'Storytelling');
       setVoiceProvider(config.basic_strategy.voice_provider || 'minimax');
-      setVoicePersona(config.basic_strategy.voice_persona || 'Kore');
+      setVoicePersona(config.basic_strategy.voice_persona || (config.basic_strategy.voice_provider === 'gemini' ? 'Kore' : 'Indonesian_casual_reporter_vv2'));
       setVoiceSpeed(Number(config.basic_strategy.voice_speed ?? 1.0));
       setVoiceVolume(Number(config.basic_strategy.voice_volume ?? 1.0));
       setTtsModelQuality(config.basic_strategy.tts_model_quality || 'speech-2.8-turbo');
@@ -195,7 +195,7 @@ export default function RECampaignsPage() {
       setAiDirective(config.basic_strategy.ai_directive || '');
       setMandatoryOutroLine(config.basic_strategy.mandatory_outro_line || '');
       setSfxSetting(config.basic_strategy.sfx_setting || 'without_sfx');
-      setEnableAudioSegment(config.basic_strategy.enable_audio_segment || false);
+      setEnableAudioSegment(Boolean(config.basic_strategy.enable_audio_segment));
       setEnableVoAudit(config.basic_strategy.enable_vo_audit ?? 1);
       setNextcloudParentFolder(config.basic_strategy.nextcloud_parent_folder || '/MAKNA_Assets');
       setPromotionStyle(config.basic_strategy.promotion_style || 'Softselling');
@@ -204,10 +204,10 @@ export default function RECampaignsPage() {
     // Accordion 2: Aesthetics & Visual Settings
     if (config.visual_engine) {
       setVisualStyle(config.visual_engine.visual_style || 'Cinematic');
-      setVisualMode(executionMode === 'full_autopilot' ? 'pure_t2v' : (config.visual_engine.visual_mode || 'pure_t2v'));
+      setVisualMode(config.visual_engine.visual_mode || 'hybrid_lock');
       setVideoModel(config.visual_engine.video_model || 'veo_31_lite');
       setFaceVisibility(config.visual_engine.face_visibility || 'Faceless');
-      setTargetClipsCount(config.visual_engine.target_clips_count || 4);
+      setTargetClipsCount(Number(config.visual_engine.target_clips_count ?? 4));
       setWordsPerClip(config.visual_engine.words_per_clip || '17-19 kata');
       setAspectRatio(config.visual_engine.aspect_ratio || '9:16');
       if (typeof setAngleMultiplier === 'function') {
@@ -222,14 +222,17 @@ export default function RECampaignsPage() {
 
     // Accordion 3: Product Bridging Settings
     if (config.product_bridging) {
-      setIsBridgingActive(config.product_bridging.is_bridging_active || false);
-      setBridgeAtClip(config.product_bridging.bridge_at_clip || 2);
-      setBridgeDurationClips(config.product_bridging.bridge_duration_clips || 1);
+      setIsBridgingActive(Boolean(config.product_bridging.is_bridging_active));
+      if (typeof setBridgingMode === 'function') {
+        setBridgingMode(config.product_bridging.bridging_mode || 'select_existing');
+      }
+      setBridgeAtClip(Number(config.product_bridging.bridge_at_clip ?? (config.visual_engine?.target_clips_count === 4 ? 3 : 2)));
+      setBridgeDurationClips(Number(config.product_bridging.bridge_duration_clips ?? 1));
     }
 
     // Accordion 4: Visual Swap Overrides (VSO)
     if (config.visual_swap) {
-      setIsVsoActive(config.visual_swap.is_vso_active || false);
+      setIsVsoActive(Boolean(config.visual_swap.is_vso_active));
       setCharacterConcept(config.visual_swap.character_concept || 'faceless');
       setSubjectDemographic(config.visual_swap.subject_demographic || 'syari_classic');
       setWardrobeStyle(config.visual_swap.wardrobe_style || 'amber_terracotta');
@@ -237,16 +240,30 @@ export default function RECampaignsPage() {
       setLightingStyle(config.visual_swap.lighting_style || 'window_daylight');
       setLightingStyleCustom(config.visual_swap.lighting_style_custom || '');
       setVisualStylePreset(config.visual_swap.visual_style_preset || '3d_claymation_cozy');
+      if (config.visual_swap.visual_identity_preset_id || config.visual_swap.visual_identity_inline_config || config.visual_swap.visual_overrides_json) {
+        if (typeof setVisualIdentity === 'function') {
+          setVisualIdentity({
+            preset_id: config.visual_swap.visual_identity_preset_id || 'hands_only_muslimah_sage_kitchen',
+            inline_config: config.visual_swap.visual_identity_inline_config || null,
+            visual_overrides_json: config.visual_swap.visual_overrides_json || null
+          });
+        }
+      }
     }
 
     // Workflow Settings
     if (config.workflow) {
-      setEnableTts(config.workflow.enable_tts || false);
-      setEnableGlabs(config.workflow.enable_glabs || false);
-      setEnableFfmpeg(config.workflow.enable_ffmpeg || false);
-      setEnableSocialPost(config.workflow.enable_social_post || false);
-      setUploadMarkdown(config.workflow.upload_markdown ?? true);
-      setUploadSpreadsheet(config.workflow.upload_spreadsheet ?? true);
+      if (config.workflow.approval_mode === 'none') {
+        setExecutionMode('full_autopilot');
+      } else {
+        setExecutionMode('manual_review');
+      }
+      setEnableTts(Boolean(config.workflow.enable_tts));
+      setEnableGlabs(Boolean(config.workflow.enable_glabs));
+      setEnableFfmpeg(Boolean(config.workflow.enable_ffmpeg));
+      setEnableSocialPost(Boolean(config.workflow.enable_social_post));
+      setUploadMarkdown(config.workflow.upload_markdown !== undefined ? Boolean(config.workflow.upload_markdown) : true);
+      setUploadSpreadsheet(Boolean(config.workflow.upload_spreadsheet));
 
       setFfmpegSyncOption(config.workflow.ffmpeg_sync_option || 'smart_sync');
       setFfmpegVideoScale(Number(config.workflow.ffmpeg_video_scale ?? 1.0));
@@ -265,6 +282,9 @@ export default function RECampaignsPage() {
     }
 
     const presetConfig = {
+      schema_version: '2',
+      label: newPresetLabel.trim(),
+      campaign_kinds: isBridgingActive ? ['product_campaign'] : ['brand_editorial'],
       basic_strategy: {
         narrative_mode: narrativeMode,
         voice_provider: voiceProvider,
@@ -274,54 +294,61 @@ export default function RECampaignsPage() {
         tts_model_quality: ttsModelQuality,
         target_language: targetLanguage,
         target_demographic: targetDemographic,
-        target_demographic_custom: targetDemographicCustom,
-        custom_instruction: customInstruction,
-        ai_directive: aiDirective,
-        mandatory_outro_line: mandatoryOutroLine,
+        target_demographic_custom: targetDemographicCustom || '',
+        custom_instruction: customInstruction || '',
+        ai_directive: aiDirective || '',
+        mandatory_outro_line: mandatoryOutroLine || '',
         sfx_setting: sfxSetting,
-        enable_audio_segment: enableAudioSegment,
+        enable_audio_segment: Boolean(enableAudioSegment),
         enable_vo_audit: enableVoAudit ? 1 : 0,
-        nextcloud_parent_folder: nextcloudParentFolder,
-        promotion_style: promotionStyle
+        nextcloud_parent_folder: nextcloudParentFolder || '/MAKNA_Assets',
+        promotion_style: promotionStyle || 'Softselling'
       },
       visual_engine: {
         visual_style: visualStyle,
         visual_mode: visualMode,
         video_model: videoModel,
         face_visibility: faceVisibility,
-        target_clips_count: targetClipsCount,
+        target_clips_count: Number(targetClipsCount ?? 4),
         words_per_clip: wordsPerClip,
         aspect_ratio: aspectRatio,
-        angle_multiplier: Number(angleMultiplier)
+        angle_multiplier: Number(angleMultiplier || 0),
+        clip_duration: videoModel === 'veo_31_lite' ? 8 : 5
       },
       product_bridging: {
-        is_bridging_active: isBridgingActive,
-        bridge_at_clip: bridgeAtClip,
-        bridge_duration_clips: Number(bridgeDurationClips)
+        is_bridging_active: Boolean(isBridgingActive),
+        bridging_mode: typeof bridgingMode !== 'undefined' ? bridgingMode : 'select_existing',
+        bridge_at_clip: Number(bridgeAtClip ?? 3),
+        bridge_duration_clips: Number(bridgeDurationClips ?? 1)
       },
       visual_swap: {
-        is_vso_active: isVsoActive,
+        is_vso_active: Boolean(isVsoActive),
         character_concept: characterConcept,
         subject_demographic: subjectDemographic,
         wardrobe_style: wardrobeStyle,
-        wardrobe_style_custom: wardrobeStyleCustom,
+        wardrobe_style_custom: wardrobeStyleCustom || '',
         lighting_style: lightingStyle,
-        lighting_style_custom: lightingStyleCustom,
-        visual_style_preset: visualStylePreset
+        lighting_style_custom: lightingStyleCustom || '',
+        visual_style_preset: visualStylePreset,
+        visual_identity_preset_id: isVsoActive && typeof visualIdentity !== 'undefined' ? visualIdentity?.preset_id : null,
+        visual_identity_inline_config: isVsoActive && typeof visualIdentity !== 'undefined' && visualIdentity?.preset_id === 'inline' ? visualIdentity.inline_config : null,
+        visual_overrides_json: isVsoActive && typeof visualIdentity !== 'undefined' && visualIdentity?.preset_id === 'custom' ? visualIdentity.visual_overrides_json : null
       },
       workflow: {
-        enable_tts: enableTts,
-        enable_glabs: enableGlabs,
-        enable_ffmpeg: enableFfmpeg,
-        enable_social_post: enableSocialPost,
-        upload_markdown: uploadMarkdown,
-        upload_spreadsheet: uploadSpreadsheet,
-        ffmpeg_sync_option: ffmpegSyncOption,
-        ffmpeg_video_scale: Number(ffmpegVideoScale),
-        ffmpeg_sfx_volume: Number(ffmpegSfxVolume),
-        ffmpeg_bgm_volume: Number(ffmpegBgmVolume),
-        facebook_page_id: facebookPageId,
-        facebook_server_url: facebookServerUrl
+        approval_mode: executionMode === 'full_autopilot' ? 'none' : 'start_frames',
+        enable_tts: Boolean(enableTts),
+        enable_glabs: Boolean(enableGlabs),
+        enable_ffmpeg: Boolean(enableFfmpeg),
+        enable_social_post: Boolean(enableSocialPost),
+        upload_markdown: uploadMarkdown !== undefined ? Boolean(uploadMarkdown) : true,
+        upload_spreadsheet: Boolean(uploadSpreadsheet),
+        ffmpeg_sync_option: ffmpegSyncOption || 'smart_sync',
+        ffmpeg_video_scale: Number(ffmpegVideoScale ?? 1.0),
+        ffmpeg_sfx_volume: Number(ffmpegSfxVolume ?? 0.0),
+        ffmpeg_bgm_volume: Number(ffmpegBgmVolume ?? 0.0),
+        facebook_page_id: facebookPageId || '',
+        facebook_server_url: facebookServerUrl || '',
+        auto_sync_contentflow: true
       }
     };
 
