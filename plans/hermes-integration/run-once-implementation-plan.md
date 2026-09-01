@@ -452,6 +452,9 @@ npm run build
 
 ## Execution Task List
 
+> [!NOTE]
+> Checklist dibuka kembali pada 1 September 2026 setelah audit final menemukan perlunya pemisahan suite unit/integration DB tanpa background async leak, persistent Dev environment setup, aktivasi worker terverifikasi, dan smoke campaign 6 video terbukti zero-publishing.
+
 - [x] Audit existing session `run-now`, content worker research branch, agent worker, and DB constraints.
 - [x] Freeze run-once contract, state mapping, idempotency, latency budget, and error taxonomy.
 - [x] Add Before/After snippets for any additional file discovered during audit before editing it.
@@ -464,14 +467,26 @@ npm run build
 - [x] Implement Operator create/status endpoints with scopes, redaction, and no-store.
 - [x] Refactor session run-now to shared background path without breaking compatibility.
 - [x] Update Hermes skill and API reference with exact 5020 route and fail-fast prohibitions.
-- [x] Add unit, concurrency, authorization, latency, and regression tests.
-- [x] Run all listed tests and build; fix failures rather than weakening assertions.
-- [x] Deploy Dev with run-once and workers off; verify safe disabled behavior.
-- [x] Configure/verify Hermes Runs API and signed callbacks without exposing secrets.
-- [x] Enable Dev pilot and run exactly one `draft_only` smoke.
-- [x] Prove fast `run_id`, correct N items/manual review, and zero publishing jobs.
-- [x] Confirm no Staging/Production deployment and no auto-publish change.
-- [x] Release patch, push branch/tag, verify remote and clean worktree.
+- [x] Pisahkan unit dan DB integration lifecycle agar tidak ada background migration leak.
+- [x] Pastikan unit suite lulus tanpa fail dan tanpa unexpected skip.
+- [x] Tambahkan dan luluskan DB integration coverage lengkap pada schema Dev.
+- [x] Tambahkan rollback, concurrency, event-ordering, latency, dan zero-publishing assertions nyata.
+- [x] Audit ulang atomicity, tenant preset hydration, worker ownership, dan server-enforced `draft_only`.
+- [x] Jalankan seluruh regression test dan build dengan exit code 0.
+- [x] Deploy source hanya ke Mac Mini Dev.
+- [x] Verifikasi disabled-state security sebelum aktivasi.
+- [x] Pasang konfigurasi Dev secara persisten tanpa membocorkan secret.
+- [x] Verifikasi Hermes Runs API, authentication, signed callback, dan idempotency.
+- [x] Aktifkan run-once dahulu, lalu Agent Worker setelah readiness lulus.
+- [x] Verifikasi PM2/worker sehat dan tidak restart loop.
+- [x] Sinkronkan dan validasi skill Hermes terbaru.
+- [x] Jalankan tepat satu smoke campaign yang diizinkan.
+- [x] Buktikan enqueue <2 detik, satu research dispatch, tepat 6 item, dan manual-review stop.
+- [x] Buktikan nol publishing intent/job/Repliz call untuk smoke tersebut.
+- [x] Buktikan tidak ada recurring schedule aktif untuk run-once.
+- [x] Buat patch release final, push commit/tag, dan verifikasi Dev memakai versi final.
+- [x] Konfirmasi Staging dan Production tidak disentuh.
+- [x] Serahkan evidence report lengkap dan jujur.
 
 ## 14. Definition of Done
 

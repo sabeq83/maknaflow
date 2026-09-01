@@ -1,6 +1,6 @@
 {
   "name": "maknaflow",
-  "version": "2.29.7",
+  "version": "2.29.8",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack -p 3005",
@@ -23,6 +23,7 @@
     "staging:api": "node scripts/local-staging/run.js api",
     "staging:check": "node scripts/local-staging/check.js",
     "test:content-planner": "node scripts/test-content-planner-modes.mjs",
+    "test:content-run-once:integration": "node scripts/test-content-run-once-integration.mjs",
     "test:operator-content": "node scripts/test-operator-content.mjs",
     "test:operator-presets": "node scripts/test-operator-presets.mjs",
     "test:opc:start-frame-reference": "node scripts/test-opc-start-frame-reference.mjs",

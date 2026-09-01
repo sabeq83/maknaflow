@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.8 — Hermes Run-Once Final Remediation to Full Operational Readiness (01/09/2026)
+- Clean unit vs integration DB test separation
+- Mac Mini Dev persistent Hermes Runs API and signed callback setup
+- Verified smoke run car_005499dc50b8474b with 6 items paused at manual review and 0 publishing intents
+
 ## V2.29.7 — Remediasi Hermes Run-Once dan Penguatan Keamanan (01/09/2026)
 - Fix schema query brand profile tanpa kolom status dan slug
 - Penguatan feature flag fail-closed dan atomic advisory lock
