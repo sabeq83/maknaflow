@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.20 — Harden Google Drive Staging untuk Repliz (03/09/2026)
+- Tambah OAuth dan folder readiness gate
+- Pastikan upload dan anonymous probe sebelum Repliz
+- Tambah reconnect UX dan cleanup staging Drive
+
 ## V2.29.19 — Update Label Accordion Section 4 Preset Manager Menjadi Visual Identity (02/09/2026)
 - Mengubah judul Accordion 4 pada Preset Manager menjadi 4. Visual Identity agar selaras dengan Kampanye Pillar
 

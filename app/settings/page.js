@@ -16,7 +16,7 @@ export default function SettingsPage() {
   const [toast, setToast] = useState(null);
 
   // Google OAuth Status
-  const [googleStatus, setGoogleStatus] = useState({ credentialsSet: false, connected: false, email: null });
+  const [googleStatus, setGoogleStatus] = useState({ state: 'not_configured', credentialsSet: false, connected: false, email: null, publishingDrive: null, message: null });
   const [googleClientId, setGoogleClientId] = useState('');
   const [googleClientSecret, setGoogleClientSecret] = useState('');
   const [savingGoogle, setSavingGoogle] = useState(false);
@@ -242,15 +242,22 @@ export default function SettingsPage() {
   }
 
   async function fetchGoogleStatus() {
-    const res = await fetch('/api/google/status');
-    const data = await res.json();
-    if (data.success) {
-      setGoogleStatus({
-        credentialsSet: data.data.credentialsSet,
-        connected: data.data.connected,
-        email: data.data.userEmail || null,
-      });
-      if (data.data.clientId) setGoogleClientId(data.data.clientId);
+    try {
+      const res = await fetch('/api/google/status');
+      const data = await res.json();
+      if (data.success && data.data) {
+        setGoogleStatus({
+          state: data.data.state || (data.data.connected ? 'connected' : 'not_connected'),
+          credentialsSet: Boolean(data.data.credentialsSet),
+          connected: Boolean(data.data.connected),
+          email: data.data.email || data.data.userEmail || null,
+          publishingDrive: data.data.publishingDrive || null,
+          message: data.data.message || null
+        });
+        if (data.data.clientId) setGoogleClientId(data.data.clientId);
+      }
+    } catch (e) {
+      console.warn('Gagal memuat status Google:', e);
     }
   }
 
@@ -1542,26 +1549,58 @@ export default function SettingsPage() {
 
               <div style={{
                 padding: '14px 18px', marginBottom: '18px', borderRadius: 'var(--radius-sm)',
-                background: googleStatus.connected ? 'var(--success-glow)' : 'var(--bg-glass)',
-                border: `1px solid ${googleStatus.connected ? 'rgba(0,184,148,0.3)' : 'var(--border)'}`,
+                background: googleStatus.connected 
+                  ? 'var(--success-glow)' 
+                  : (googleStatus.state === 'reauth_required' ? 'rgba(245,158,11,0.15)' : 'var(--bg-glass)'),
+                border: `1px solid ${
+                  googleStatus.connected 
+                    ? 'rgba(0,184,148,0.3)' 
+                    : (googleStatus.state === 'reauth_required' ? 'rgba(245,158,11,0.4)' : 'var(--border)')
+                }`,
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontSize: '1.2rem' }}>{googleStatus.connected ? '✅' : '⚪'}</span>
+                  <span style={{ fontSize: '1.2rem' }}>
+                    {googleStatus.connected ? '✅' : (googleStatus.state === 'reauth_required' ? '⚠️' : '⚪')}
+                  </span>
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>
-                      {googleStatus.connected ? 'Connected' : 'Not Connected'}
+                    <div style={{ 
+                      fontWeight: 600, 
+                      fontSize: '0.88rem',
+                      color: googleStatus.state === 'reauth_required' ? 'var(--warning)' : 'inherit'
+                    }}>
+                      {googleStatus.connected 
+                        ? 'Connected' 
+                        : (googleStatus.state === 'reauth_required' ? 'Reconnect Required (Token Revoked/Expired)' : 'Not Connected')}
                     </div>
                     {googleStatus.email && (
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
                         {googleStatus.email}
                       </div>
                     )}
+                    {googleStatus.publishingDrive && (
+                      <div style={{ 
+                        fontSize: '0.72rem', 
+                        marginTop: '4px',
+                        color: googleStatus.publishingDrive.connected ? 'var(--success)' : 'var(--text-muted)' 
+                      }}>
+                        {googleStatus.publishingDrive.connected 
+                          ? `📁 Repliz Drive Folder: ${googleStatus.publishingDrive.folderName}`
+                          : (googleStatus.publishingDrive.error ? `⚠️ Repliz Drive Folder: ${googleStatus.publishingDrive.error}` : '')}
+                      </div>
+                    )}
                   </div>
                 </div>
-                {googleStatus.connected && (
-                  <button className="btn btn-sm btn-danger" onClick={disconnectGoogle}>Disconnect</button>
-                )}
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {googleStatus.credentialsSet && (
+                    <a href="/api/google/auth?returnTo=/settings" className="btn btn-sm btn-secondary" style={{ textDecoration: 'none' }}>
+                      {googleStatus.connected ? '🔄 Reconnect' : '🔗 Connect'}
+                    </a>
+                  )}
+                  {googleStatus.connected && (
+                    <button className="btn btn-sm btn-danger" onClick={disconnectGoogle}>Disconnect</button>
+                  )}
+                </div>
               </div>
 
               {!googleStatus.connected && (
@@ -1603,7 +1642,7 @@ export default function SettingsPage() {
                       {savingGoogle ? '⏳' : '💾'} Save Credentials
                     </button>
                     {googleStatus.credentialsSet && (
-                      <a href="/api/google/auth" className="btn btn-secondary" style={{ textDecoration: 'none' }}>
+                      <a href="/api/google/auth?returnTo=/settings" className="btn btn-secondary" style={{ textDecoration: 'none' }}>
                         🔗 Connect Google Account
                       </a>
                     )}
@@ -1611,11 +1650,14 @@ export default function SettingsPage() {
 
                   {googleStatus.credentialsSet && !googleStatus.connected && (
                     <p style={{ fontSize: '0.75rem', color: 'var(--warning)', marginTop: '10px' }}>
-                      ⚠ Credentials tersimpan. Klik "Connect Google Account" untuk menyelesaikan setup.
+                      ⚠ {googleStatus.state === 'reauth_required' 
+                        ? 'Token Google revoked atau kedaluwarsa. Klik "Connect Google Account" untuk memperbarui.'
+                        : 'Credentials tersimpan. Klik "Connect Google Account" untuk menyelesaikan setup.'}
                     </p>
                   )}
                 </div>
               )}
+
             </div>
           ))}
 
@@ -2194,7 +2236,29 @@ export default function SettingsPage() {
                 <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                   Folder ID Google Drive yang digunakan untuk mengunggah media agar dapat dibaca oleh Repliz.
                 </div>
+                {googleStatus.publishingDrive && (
+                  <div style={{
+                    marginTop: '8px',
+                    padding: '8px 12px',
+                    borderRadius: 'var(--radius-sm)',
+                    fontSize: '0.75rem',
+                    background: googleStatus.publishingDrive.connected ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)',
+                    border: `1px solid ${googleStatus.publishingDrive.connected ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)'}`,
+                    color: googleStatus.publishingDrive.connected ? 'var(--success)' : 'var(--warning)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}>
+                    <span>{googleStatus.publishingDrive.connected ? '✓' : '⚠️'}</span>
+                    <span>
+                      {googleStatus.publishingDrive.connected
+                        ? `Folder Google Drive Terverifikasi: "${googleStatus.publishingDrive.folderName}"`
+                        : `Status Google Drive Staging: ${googleStatus.publishingDrive.error || 'Perlu verifikasi/reconnect'}`}
+                    </span>
+                  </div>
+                )}
               </div>
+
               <div className="form-group" style={{ marginBottom: '12px' }}>
                 <label className="form-label">Access Key</label>
                 {hasReplizCredentials && !editingRepliz ? (

@@ -73,12 +73,33 @@ export const POST = withTenantContext(async (request, user) => {
       isAiGenerated: !!validated.is_ai_generated
     }));
 
+    // === SERVER-SIDE READINESS GATE ===
+    // If any target uses Repliz with media, Google Drive readiness MUST pass before creating jobs.
+    if (validated.media_type !== 'text_only') {
+      const { getPublishingAccountById } = await import('@/lib/publishing-repository');
+      const { verifyPublishingDriveReady } = await import('@/lib/publishing-drive-staging');
+
+      let requiresReplizStaging = false;
+      for (const accId of validated.account_ids) {
+        const acc = await getPublishingAccountById(tenantId, accId);
+        if (acc && acc.provider === 'repliz') {
+          requiresReplizStaging = true;
+          break;
+        }
+      }
+
+      if (requiresReplizStaging) {
+        await verifyPublishingDriveReady({ bypassCache: true });
+      }
+    }
+
     const createdJobs = await createPublishingJobs({
       tenantId,
       userId: user?.id || null,
       contentId: validated.content_id,
       targets
     });
+
 
     // === AUTO-SYNC ContentFlow: tandai 'Scheduled' segera setelah job dibuat ===
     // Langkah ini memastikan status di library berubah TANPA menunggu worker pick up job.
@@ -117,8 +138,14 @@ export const POST = withTenantContext(async (request, user) => {
   } catch (error) {
     console.error('[Publishing Jobs POST Error]:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Gagal membuat jadwal publikasi.' },
+      {
+        success: false,
+        code: error.code || 'SCHEDULE_ERROR',
+        error: error.message || 'Gagal membuat jadwal publikasi.',
+        reconnectUrl: error.reconnectUrl || null
+      },
       { status: error.status || 400 }
     );
   }
 });
+

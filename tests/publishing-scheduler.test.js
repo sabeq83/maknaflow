@@ -476,8 +476,152 @@ test('Instagram Workflow: Container creation and container status validation', a
   });
   assert.equal(validIg.content_id, 'VID-IG-01');
   assert.equal(validIg.media_type, 'video');
-
-  const { closePgPool } = await import('../lib/db-pg.js');
-  await closePgPool();
 });
+
+test('Repliz Publishing Worker: fails closed and NEVER sends raw Nextcloud URL when Drive staging fails', async () => {
+  const { processReplizJob } = await import('../lib/publishing-worker.js');
+  const replizCalls = [];
+  const previousFetch = globalThis.fetch;
+  const testTenant = `t_failclosed_${Date.now()}`;
+  const testJobId = `pub_test_failclosed_${Date.now()}`;
+
+  await pgQuery('INSERT INTO tenants (id, name) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING', [testTenant, 'Fail Closed Tenant']);
+  const accRes = await pgQuery(`
+    INSERT INTO publishing_accounts (
+      id, tenant_id, platform, display_name, provider, provider_account_id, status
+    ) VALUES ($1, $2, 'tiktok', 'Test TikTok', 'repliz', 'acc_rep_1', 'active')
+    RETURNING id
+  `, [`acc_${Date.now()}`, testTenant]);
+
+  await pgQuery(`
+    INSERT INTO publishing_jobs (
+      id, tenant_id, content_id, account_id, platform, publish_mode, media_type,
+      caption_snapshot, media_url_snapshot, scheduled_at, status, idempotency_key, provider
+    ) VALUES ($1, $2, 'VID-NC-01', $3, 'tiktok', 'live', 'video', 'Fail closed test',
+      'https://cloud.ast402.my.id/s/xyz123/download/video.mp4', CURRENT_TIMESTAMP, 'processing', $4, 'repliz')
+  `, [testJobId, testTenant, accRes.rows[0].id, `idem_${testJobId}`]);
+
+  globalThis.fetch = async (url, options = {}) => {
+    const urlStr = String(url);
+    replizCalls.push({ url: urlStr, body: options.body ? JSON.parse(options.body) : null });
+    // Mock Nextcloud fetch failure or Google API error
+    if (urlStr.includes('cloud.ast402.my.id') || urlStr.includes('100.78.186.123')) {
+      return new Response('Connection refused', { status: 502 });
+    }
+    return new Response(JSON.stringify({ success: true }), { status: 200 });
+  };
+
+  try {
+    const fakeJob = {
+      id: testJobId,
+      tenant_id: testTenant,
+      content_id: 'VID-NC-01',
+      platform: 'tiktok',
+      media_type: 'video',
+      caption_snapshot: 'Fail closed test',
+      media_url_snapshot: 'https://cloud.ast402.my.id/s/xyz123/download/video.mp4',
+      scheduled_at: new Date().toISOString(),
+      provider: 'repliz',
+      provider_account_id: 'acc_repliz_1',
+      attempt_count: 1,
+      max_attempts: 3
+    };
+
+    const credentials = { apiUrl: 'https://api.repliz.com', accessKey: 'k', secretKey: 's' };
+    await processReplizJob(fakeJob, credentials, { correlationId: 'corr_test', attemptNumber: 1, startedAt: new Date().toISOString() });
+
+    // CRITICAL: Repliz API MUST NEVER be called with the raw Nextcloud URL!
+    const createScheduleCall = replizCalls.find(c => c.url.includes('/schedules') || c.url.includes('api.repliz.com'));
+    if (createScheduleCall && createScheduleCall.body?.medias) {
+      for (const media of createScheduleCall.body.medias) {
+        assert.ok(!media.url.includes('cloud.ast402.my.id'), 'CRITICAL VIOLATION: Raw Nextcloud URL leaked to Repliz payload!');
+      }
+    }
+  } finally {
+    globalThis.fetch = previousFetch;
+    await pgQuery('DELETE FROM publishing_attempts WHERE tenant_id = $1', [testTenant]);
+    await pgQuery('DELETE FROM publishing_jobs WHERE tenant_id = $1', [testTenant]);
+    await pgQuery('DELETE FROM publishing_accounts WHERE tenant_id = $1', [testTenant]);
+    await pgQuery('DELETE FROM tenants WHERE id = $1', [testTenant]);
+  }
+});
+
+test('Repliz Publishing Worker: sends only verified Google Drive direct download URL to Repliz', async () => {
+  const { processReplizJob } = await import('../lib/publishing-worker.js');
+  const replizPayloads = [];
+  const previousFetch = globalThis.fetch;
+  const testTenant = `t_gdsuccess_${Date.now()}`;
+  const testJobId = `pub_test_gd_${Date.now()}`;
+
+  await pgQuery('INSERT INTO tenants (id, name) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING', [testTenant, 'GDrive Success Tenant']);
+  const accRes = await pgQuery(`
+    INSERT INTO publishing_accounts (
+      id, tenant_id, platform, display_name, provider, provider_account_id, status
+    ) VALUES ($1, $2, 'tiktok', 'Test TikTok', 'repliz', 'acc_rep_2', 'active')
+    RETURNING id
+  `, [`acc_${Date.now()}`, testTenant]);
+
+  await pgQuery(`
+    INSERT INTO publishing_jobs (
+      id, tenant_id, content_id, account_id, platform, publish_mode, media_type,
+      caption_snapshot, media_url_snapshot, scheduled_at, status, idempotency_key, provider
+    ) VALUES ($1, $2, 'VID-GD-01', $3, 'tiktok', 'live', 'video', 'GDrive test',
+      'https://drive.google.com/uc?export=download&id=verified_drive_id_123', CURRENT_TIMESTAMP, 'processing', $4, 'repliz')
+  `, [testJobId, testTenant, accRes.rows[0].id, `idem_${testJobId}`]);
+
+  globalThis.fetch = async (url, options = {}) => {
+    const urlStr = String(url);
+    if (urlStr.includes('api.repliz.com')) {
+      const body = options.body ? JSON.parse(options.body) : null;
+      replizPayloads.push(body);
+      return new Response(JSON.stringify({ id: 'repliz_sch_123', status: 'scheduled' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    // Mock anonymous probe for Google Drive
+    if (urlStr.includes('drive.google.com/uc?export=download')) {
+      return new Response(new Uint8Array([0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70]), {
+        status: 206,
+        headers: { 'Content-Type': 'video/mp4' }
+      });
+    }
+    return new Response(JSON.stringify({ success: true }), { status: 200 });
+  };
+
+  try {
+    const fakeJob = {
+      id: testJobId,
+      tenant_id: testTenant,
+      content_id: 'VID-GD-01',
+      platform: 'tiktok',
+      media_type: 'video',
+      caption_snapshot: 'GDrive test',
+      media_url_snapshot: 'https://drive.google.com/uc?export=download&id=verified_drive_id_123',
+      scheduled_at: new Date().toISOString(),
+      provider: 'repliz',
+      provider_account_id: 'acc_repliz_2',
+      attempt_count: 1,
+      max_attempts: 3
+    };
+
+    const credentials = { apiUrl: 'https://api.repliz.com', accessKey: 'k', secretKey: 's' };
+    await processReplizJob(fakeJob, credentials, { correlationId: 'corr_test_2', attemptNumber: 1, startedAt: new Date().toISOString() });
+
+    assert.equal(replizPayloads.length, 1);
+    const sentMedia = replizPayloads[0].medias[0];
+    assert.equal(sentMedia.url, 'https://drive.google.com/uc?export=download&id=verified_drive_id_123');
+    assert.ok(!sentMedia.url.includes('cloud.ast402.my.id'));
+  } finally {
+    globalThis.fetch = previousFetch;
+    await pgQuery('DELETE FROM publishing_attempts WHERE tenant_id = $1', [testTenant]);
+    await pgQuery('DELETE FROM publishing_jobs WHERE tenant_id = $1', [testTenant]);
+    await pgQuery('DELETE FROM publishing_accounts WHERE tenant_id = $1', [testTenant]);
+    await pgQuery('DELETE FROM tenants WHERE id = $1', [testTenant]);
+    const { closePgPool } = await import('../lib/db-pg.js');
+    await closePgPool();
+  }
+});
+
+
 

@@ -118,6 +118,27 @@ export const POST = withTenantContext(async (request) => {
       }
     }
 
+    const checks = {};
+    let driveStateError = null;
+
+    const replizSelected = validAccounts.some(account => account.provider === 'repliz');
+    if (replizSelected && mediaType !== 'text_only') {
+      const { verifyPublishingDriveReady } = await import('@/lib/publishing-drive-staging');
+      try {
+        const driveReady = await verifyPublishingDriveReady();
+        checks.googleDrive = driveReady;
+      } catch (driveErr) {
+        driveStateError = driveErr;
+        errors.push(driveErr.message);
+        checks.googleDrive = {
+          state: driveErr.code || 'drive_error',
+          connected: false,
+          error: driveErr.message,
+          reconnectUrl: driveErr.reconnectUrl || null
+        };
+      }
+    }
+
     if (mediaType === 'reels' && validAccounts.some(account => account.platform === 'facebook') && mediaUrl) {
       try {
         const probe = await probePublishingMedia(mediaUrl.trim());
@@ -134,11 +155,15 @@ export const POST = withTenantContext(async (request) => {
       isValid: errors.length === 0,
       errors,
       warnings,
+      checks,
+      code: driveStateError ? driveStateError.code : (errors.length > 0 ? 'VALIDATION_ERROR' : null),
+      reconnectUrl: driveStateError?.reconnectUrl || null,
       accounts: validAccounts.map(a => ({
         id: a.id,
         displayName: a.display_name,
         platform: a.platform,
-        status: a.status
+        status: a.status,
+        provider: a.provider
       }))
     });
   } catch (error) {
@@ -148,3 +173,4 @@ export const POST = withTenantContext(async (request) => {
     );
   }
 });
+

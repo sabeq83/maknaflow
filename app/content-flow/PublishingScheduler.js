@@ -80,6 +80,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
   const [submittingSchedule, setSubmittingSchedule] = useState(false);
   const [preflightResult, setPreflightResult] = useState(null);
   const [runningPreflight, setRunningPreflight] = useState(false);
+  const [reconnectDialog, setReconnectDialog] = useState({ open: false, reconnectUrl: '', message: '' });
 
   // Video Autocomplete & Settings State
   const [cloudBaseUrl, setCloudBaseUrl] = useState('');
@@ -109,7 +110,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
     setTimeout(() => setToastMsg(''), 3500);
   };
 
-  // Load Settings for Cloud Base Domain
+  // Load Settings for Cloud Base Domain & Check Google OAuth Return Draft
   useEffect(() => {
     fetch('/api/settings')
       .then(r => r.json())
@@ -120,6 +121,33 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
         }
       })
       .catch(() => {});
+
+    if (typeof window !== 'undefined') {
+      try {
+        const url = new URL(window.location.href);
+        const googleConnected = url.searchParams.get('google_connected');
+        const googleError = url.searchParams.get('google_error');
+
+        if (googleConnected === 'true') {
+          const savedDraft = sessionStorage.getItem('makna_publishing_draft');
+          if (savedDraft) {
+            try {
+              const parsed = JSON.parse(savedDraft);
+              setScheduleForm(parsed);
+              setShowScheduleModal(true);
+              showToast('Koneksi Google berhasil diperbarui! 🎉 Melanjutkan jadwal posting...');
+            } catch (_) {}
+          }
+          url.searchParams.delete('google_connected');
+          url.searchParams.delete('google_email');
+          window.history.replaceState({}, document.title, url.pathname + (url.search ? url.search : ''));
+        } else if (googleError) {
+          showToast(`Gagal menghubungkan Google: ${googleError} ❌`);
+          url.searchParams.delete('google_error');
+          window.history.replaceState({}, document.title, url.pathname + (url.search ? url.search : ''));
+        }
+      } catch (_) {}
+    }
   }, []);
 
   // 1. Fetch Accounts
@@ -565,8 +593,18 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
 
       if (json.success) {
         showToast(`Berhasil menjadwalkan konten! 🎉`);
+        try { sessionStorage.removeItem('makna_publishing_draft'); } catch (_) {}
         setShowScheduleModal(false);
         fetchJobs();
+      } else if (json.code === 'GOOGLE_REAUTH_REQUIRED') {
+        try { sessionStorage.setItem('makna_publishing_draft', JSON.stringify(scheduleForm)); } catch (_) {}
+        setReconnectDialog({
+          open: true,
+          reconnectUrl: json.reconnectUrl || '/api/google/auth?returnTo=%2Fcontent-flow%3Fview%3Dpublishing',
+          message: json.error || 'Koneksi Google Drive perlu dihubungkan ulang sebelum menjadwalkan konten.'
+        });
+      } else if (json.code === 'GOOGLE_DRIVE_FOLDER_MISSING') {
+        showToast(`⚠️ Folder Google Drive belum dikonfigurasi. Atur di Settings.`);
       } else {
         showToast(`Gagal menjadwalkan: ${json.error} ❌`);
       }
@@ -1679,6 +1717,60 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
           </div>
         </div>
       )}
+      {/* Modal: Google Reconnect Dialog */}
+      {reconnectDialog.open && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20
+        }}>
+          <div style={{
+            background: 'var(--surface)', border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)', maxWidth: 480, width: '100%',
+            padding: 24, boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+              <span style={{ fontSize: '1.8rem' }}>⚠️</span>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                  Koneksi Google Drive Diperlukan
+                </h3>
+                <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  Otorisasi Google OAuth Terputus atau Kedaluwarsa
+                </p>
+              </div>
+            </div>
+
+            <p style={{ fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text-secondary)', marginBottom: 20 }}>
+              {reconnectDialog.message || 'Untuk menjadwalkan postingan ke platform Repliz (TikTok, Facebook, dsb.), MAKNA perlu mengunggah video ke Google Drive staging. Sesi Google Anda perlu dihubungkan ulang.'}
+            </p>
+
+            <div style={{ background: 'var(--bg-glass)', padding: 12, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 20 }}>
+              💡 <strong>Draft form Anda tersimpan otomatis.</strong> Setelah login Google berhasil, Anda akan langsung dikembalikan ke form ini.
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => {
+                  setReconnectDialog({ open: false, reconnectUrl: '', message: '' });
+                }}
+              >
+                Batal
+              </button>
+              <a
+                href={reconnectDialog.reconnectUrl || '/api/google/auth?returnTo=%2Fcontent-flow%3Fview%3Dpublishing'}
+                className="btn btn-primary"
+                style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+              >
+                🔗 Hubungkan Ulang Google
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
