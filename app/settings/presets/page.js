@@ -438,7 +438,7 @@ export default function PresetsPage() {
                     value={form.label}
                     onChange={e => setForm({ ...form, label: e.target.value })}
                     required
-                    placeholder="Contoh: Nutribake Editorial"
+                    placeholder="Contoh: Brand Editorial Custom"
                   />
                 </label>
                 <label className="form-label">
@@ -450,7 +450,7 @@ export default function PresetsPage() {
                     onChange={e => setForm({ ...form, key: e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '') })}
                     required
                     disabled={!isNew}
-                    placeholder="Contoh: nutribake_editorial_v2"
+                    placeholder="Contoh: brand_editorial_custom_v1"
                   />
                 </label>
               </div>

@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.29.16 — Restrukturisasi 2 Master Preset dan Isolasi Multi-Tenant Preset (02/09/2026)
+- Menyederhanakan Master Preset sistem menjadi 2 generic template: Brand Editorial Campaign dan Product Campaign
+- Menambahkan dukungan alias transparan untuk kompatibilitas key preset legacy
+- Menerapkan isolasi ketat custom preset per-tenant dan membungkus API route preset dengan withTenantContext
+- Sinkronisasi default preset pada Preset Manager UI dan Content Automations
+
 ## V2.29.15 — Isolasi ReGen Exclusive Reference Lane OPC (02/09/2026)
 - Implementasi G-Labs Image Lane Leases dengan isolasi eksklusif untuk Product Bridge dan mode shared
 - Endpoint ReGen T2I diubah menjadi pure durable HTTP 202 Accepted dengan idempotency

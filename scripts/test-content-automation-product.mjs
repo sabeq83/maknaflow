@@ -17,7 +17,7 @@ assert.deepEqual(calculateStartFrameAggregate({visualMode:'pure_t2v',expectedCou
 assert.deepEqual(resolveAutomationAudience({productAudience:'Ibu muda',presetAudience:'General'}),{value:'Ibu muda',source:'product'});
 assert.deepEqual(resolveAutomationAudience({manualValue:'Manual',manualLocked:true,productAudience:'Produk'}),{value:'Manual',source:'manual'});
 const productPresets=listOperatorPresets().filter(preset=>isOperatorPresetCompatible(preset,'product_campaign'));
-assert.equal(productPresets.length>=3,true);
+assert.equal(productPresets.length>=1,true);
 assert.equal(isOperatorPresetCompatible(getOperatorPresetConfig('nutribake_editorial_v1'),'product_campaign'),false);
 const applied=applyPresetToAutomationForm({preset:'',content_goal:'',approval_mode:'creative',auto_sync_contentflow:false},productPresets[0]);
 assert.equal(applied.approval_mode,'start_frames');

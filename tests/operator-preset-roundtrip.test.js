@@ -4,18 +4,25 @@ import {
   listOperatorPresets,
   resolveOperatorPreset,
   getOperatorPresetConfig,
-  isOperatorPresetCompatible
+  isOperatorPresetCompatible,
+  isSystemOperatorPreset,
+  hydrateOperatorPresetCache
 } from '../lib/operator-presets.js';
 
-test('Preset System Integrity: All 5 sections and required constants exist across all built-in presets', () => {
-  const presets = listOperatorPresets();
-  assert.ok(presets.length >= 5, 'Must have at least 5 presets');
+test('Preset System Integrity: Exactly 2 Master Built-in Presets exist with all 5 sections', () => {
+  const presets = listOperatorPresets('clean_isolated_tenant');
+  assert.equal(presets.length, 2, 'Must have exactly 2 master built-in presets');
+
+  const keys = presets.map(p => p.key);
+  assert.ok(keys.includes('brand_editorial_campaign'), 'Must include brand_editorial_campaign');
+  assert.ok(keys.includes('product_campaign'), 'Must include product_campaign');
 
   for (const preset of presets) {
     const config = preset.config;
     assert.ok(config, `Preset ${preset.key} must have config`);
     assert.equal(config.schema_version, '2', `Preset ${preset.key} must use schema_version 2`);
     assert.ok(Array.isArray(config.campaign_kinds) && config.campaign_kinds.length > 0, `Preset ${preset.key} must declare campaign_kinds`);
+    assert.equal(preset.is_system, true, `Master preset ${preset.key} must be system`);
 
     // 1. basic_strategy
     assert.ok(config.basic_strategy, `Preset ${preset.key} missing basic_strategy`);
@@ -59,21 +66,71 @@ test('Preset System Integrity: All 5 sections and required constants exist acros
   }
 });
 
-test('Preset dapurbotani_kampanye_produk_4_klip sets bridge_at_clip to 3 and approval_mode to start_frames', () => {
-  const resolved = resolveOperatorPreset('dapurbotani_kampanye_produk_4_klip');
-  assert.equal(resolved.product_bridging.is_bridging_active, true);
-  assert.equal(resolved.product_bridging.bridging_mode, 'select_existing');
-  assert.equal(resolved.product_bridging.bridge_at_clip, 3);
-  assert.equal(resolved.product_bridging.bridge_duration_clips, 1);
-  assert.equal(resolved.workflow.approval_mode, 'start_frames');
-  assert.equal(resolved.workflow.auto_sync_contentflow, true);
-  assert.equal(resolved.visual_engine.target_clips_count, 4);
-  assert.equal(resolved.visual_engine.words_per_clip, '17-19 kata');
+test('Alias Resolution: Legacy preset keys resolve transparently to master templates', () => {
+  const resolvedProduct = resolveOperatorPreset('product_campaign');
+  assert.equal(resolvedProduct.product_bridging.is_bridging_active, true);
+  assert.equal(resolvedProduct.workflow.approval_mode, 'start_frames');
+
+  // Test aliases
+  const resolvedDapur = resolveOperatorPreset('dapurbotani_kampanye_produk_4_klip');
+  assert.equal(resolvedDapur.product_bridging.is_bridging_active, true);
+  assert.equal(resolvedDapur.workflow.approval_mode, 'start_frames');
+
+  const resolvedNutri = resolveOperatorPreset('nutribake_editorial_v1');
+  assert.equal(resolvedNutri.product_bridging.is_bridging_active, false);
+  assert.equal(resolvedNutri.workflow.approval_mode, 'storyboard');
 });
 
-test('Preset Compatibility: Product campaigns correctly match product presets and reject editorial presets', () => {
+test('Preset Compatibility: Product campaigns match product presets and reject editorial presets', () => {
+  assert.equal(isOperatorPresetCompatible('product_campaign', 'product_campaign'), true);
+  assert.equal(isOperatorPresetCompatible('product_campaign', 'brand_editorial'), false);
+  assert.equal(isOperatorPresetCompatible('brand_editorial_campaign', 'brand_editorial'), true);
+  assert.equal(isOperatorPresetCompatible('brand_editorial_campaign', 'product_campaign'), false);
   assert.equal(isOperatorPresetCompatible('dapurbotani_kampanye_produk_4_klip', 'product_campaign'), true);
-  assert.equal(isOperatorPresetCompatible('product_campaign_v1', 'product_campaign'), true);
-  assert.equal(isOperatorPresetCompatible('nutribake_editorial_v1', 'product_campaign'), false);
   assert.equal(isOperatorPresetCompatible('nutribake_editorial_v1', 'brand_editorial'), true);
+  assert.equal(isOperatorPresetCompatible('nutribake_editorial_v1', 'product_campaign'), false);
+});
+
+test('Multi-Tenant Isolation: Tenant A custom presets are strictly isolated from Tenant B', () => {
+  const tenantA = 'tenant_alpha_test';
+  const tenantB = 'tenant_beta_test';
+
+  hydrateOperatorPresetCache(tenantA, {
+    alpha_exclusive_preset: {
+      schema_version: '2',
+      label: 'Alpha Exclusive Preset',
+      campaign_kinds: ['brand_editorial'],
+      basic_strategy: { narrative_mode: 'Storytelling' },
+      visual_engine: { visual_style: 'Cinematic' },
+      product_bridging: { is_bridging_active: false },
+      visual_swap: { is_vso_active: false },
+      workflow: { approval_mode: 'storyboard' }
+    }
+  });
+
+  hydrateOperatorPresetCache(tenantB, {
+    beta_exclusive_preset: {
+      schema_version: '2',
+      label: 'Beta Exclusive Preset',
+      campaign_kinds: ['product_campaign'],
+      basic_strategy: { narrative_mode: 'auto' },
+      visual_engine: { visual_style: 'UGC' },
+      product_bridging: { is_bridging_active: true },
+      visual_swap: { is_vso_active: false },
+      workflow: { approval_mode: 'start_frames' }
+    }
+  });
+
+  const listA = listOperatorPresets(tenantA);
+  const listB = listOperatorPresets(tenantB);
+
+  // Tenant A must have 2 masters + alpha_exclusive_preset = 3
+  assert.equal(listA.length, 3);
+  assert.ok(listA.some(p => p.key === 'alpha_exclusive_preset'));
+  assert.ok(!listA.some(p => p.key === 'beta_exclusive_preset'), 'Tenant A must NOT see Tenant B preset');
+
+  // Tenant B must have 2 masters + beta_exclusive_preset = 3
+  assert.equal(listB.length, 3);
+  assert.ok(listB.some(p => p.key === 'beta_exclusive_preset'));
+  assert.ok(!listB.some(p => p.key === 'alpha_exclusive_preset'), 'Tenant B must NOT see Tenant A preset');
 });
