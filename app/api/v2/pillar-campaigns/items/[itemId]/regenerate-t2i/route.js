@@ -1,20 +1,22 @@
+import crypto from 'crypto';
 import { NextResponse } from 'next/server';
-import { getDb, updatePillarCampaignItem, getSetting } from '../../../../../../../lib/db';
-import { generateImage, getTaskStatus, getFileUrl, GLABS_IMAGE_POLL_INTERVAL_MS } from '../../../../../../../lib/webhook-client';
-import fs from 'fs';
-import path from 'path';
-import { recordCompletedStartFrameAsset } from '@/lib/pillar-start-frame-service';
-
+import { getDb, updatePillarCampaignItem } from '@/lib/db';
+import { queueSingleStartFrameRevision } from '@/lib/pillar-start-frame-service';
+import { buildOpcStartFrameRequest } from '@/lib/opc-start-frame-request';
 import { withTenantContext } from '@/lib/auth';
 
 export const POST = withTenantContext(async (req, { params }) => {
   try {
     const resolvedParams = await params;
     const itemId = resolvedParams.itemId;
-    const { clipIndex, t2i_prompt } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const { clipIndex, t2i_prompt } = body;
 
     if (!itemId || !clipIndex || !t2i_prompt) {
-      return NextResponse.json({ success: false, error: "itemId, clipIndex, and t2i_prompt are required" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "itemId, clipIndex, and t2i_prompt are required" },
+        { status: 400 }
+      );
     }
 
     const db = getDb();
@@ -52,46 +54,14 @@ export const POST = withTenantContext(async (req, { params }) => {
     });
     const updatedResultJson = JSON.stringify({ ...oldParsed, t2i_prompts });
 
-    // 3. Generate Image on G-Labs
-    const imageModel = await getSetting('webhook_image_model') || 'nano_banana_pro';
-
-    const fileToBase64 = (filePath) => {
-      // Strip leading slash from web-relative paths (e.g. /uploads/...) so they resolve under public/
-      const relativePart = filePath.startsWith('/') ? filePath.slice(1) : filePath;
-      const absolutePath = path.join(process.cwd(), 'public', relativePart);
-      if (!fs.existsSync(absolutePath)) {
-        console.warn(`[OPC Single SF Regen] File not found: ${absolutePath}`);
-        return null;
-      }
-      const buffer = fs.readFileSync(absolutePath);
-      let mimeType = 'image/png';
-      if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) {
-        mimeType = 'image/jpeg';
-      } else if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) {
-        mimeType = 'image/png';
-      } else if (buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46) {
-        mimeType = 'image/webp';
-      }
-      return `data:${mimeType};base64,${buffer.toString('base64')}`;
-    };
+    await updatePillarCampaignItem(item.id, {
+      new_video_plan_json: JSON.stringify(newVideoPlan),
+      result_json: updatedResultJson
+    });
 
     const rowPayload = item.row_creative_payload ? JSON.parse(item.row_creative_payload) : {};
 
-    // Call T2I webhook helper
-    const payload = {
-      imageModel: imageModel,
-      aspectRatio: campaign.aspect_ratio || '9:16',
-      faceVisibility: campaign.face_visibility || 'Faceless',
-      subjectDemographic: campaign.target_demographic || null,
-      subjectDemographicCustom: campaign.target_demographic_custom || null,
-      visualOverrides: campaign.visual_overrides_json ? JSON.parse(campaign.visual_overrides_json) : null
-    };
-
-    const brandProfile = campaign.brand_profile_id
-      ? await db.prepare('SELECT * FROM brand_profiles WHERE id = ?').get(campaign.brand_profile_id)
-      : null;
-
-    // Resolve characters for this clip
+    // Resolve characters for this clip if cartoon universe
     const parsed = JSON.parse(item.result_json || '{}');
     const storyboardObj = (parsed.storyboard || []).find(s => Number(s.scene) === Number(clipIndex) || Number(s.clip) === Number(clipIndex));
     let clipCharacters = [];
@@ -109,8 +79,8 @@ export const POST = withTenantContext(async (req, { params }) => {
       clipCharacters = Array.from(new Set(clipCharacters));
     }
 
-    const { normalizeCharacterId } = require('../../../../../../../lib/universe-manifests');
-    const { resolveClipReferenceImages } = require('../../../../../../../lib/cartoon-reference-resolver');
+    const { normalizeCharacterId } = await import('@/lib/universe-manifests');
+    const { resolveClipReferenceImages } = await import('@/lib/cartoon-reference-resolver');
     const normalizedClipChars = clipCharacters.map(normalizeCharacterId).filter(Boolean);
 
     const isCartoon = rowPayload.content_world === 'cartoon_universe' || campaign.content_world === 'cartoon_universe';
@@ -132,94 +102,46 @@ export const POST = withTenantContext(async (req, { params }) => {
       contextReferences = resolvedRefs.allReferences || [];
     }
 
-    const { buildOpcStartFrameRequest } = await import('../../../../../../../lib/opc-start-frame-request');
-    const { recordStartFrameRequestAudit } = await import('../../../../../../../lib/opc-start-frame-audit');
-    const builtRequest = await buildOpcStartFrameRequest({ campaign, item, clipIndex, prompt: t2i_prompt, origin: 'manual_regen', contextReferences });
-    const t2iResult = await generateImage(builtRequest.providerRequest);
+    const context = {
+      campaign,
+      item: { ...item, new_video_plan_json: JSON.stringify(newVideoPlan), result_json: updatedResultJson },
+      clipIndex: Number(clipIndex),
+      prompt: t2i_prompt,
+      origin: 'manual_regen',
+      contextReferences
+    };
 
-    if (!t2iResult?.task_id) {
-      return NextResponse.json({ success: false, error: "Failed to submit T2I task to G-Labs" }, { status: 500 });
-    }
+    // Preflight request validation
+    const builtRequest = await buildOpcStartFrameRequest(context);
+    const idempotencyKey = req.headers.get('idempotency-key') || crypto.randomUUID();
 
-    const t2iTaskId = t2iResult.task_id;
-    await recordStartFrameRequestAudit(builtRequest.audit, t2iTaskId);
-    console.log(`[OPC Single SF Regen] T2I task ${t2iTaskId} submitted. Polling...`);
+    // Enqueue durable revision
+    const queued = await queueSingleStartFrameRevision(
+      itemId,
+      {
+        clip_index: Number(clipIndex),
+        context,
+        audit: builtRequest.audit
+      },
+      { idempotencyKey }
+    );
 
-    let t2iCompleted = false;
-    let t2iImageUrl = null;
-    const maxT2iAttempts = 40; // 160s max (4s interval)
-    for (let attempt = 0; attempt < maxT2iAttempts; attempt++) {
-      await new Promise(resolve => setTimeout(resolve, GLABS_IMAGE_POLL_INTERVAL_MS || 4000));
-      const t2iStatusResult = await getTaskStatus(t2iTaskId);
-      const t2iStatus = (t2iStatusResult?.status || '').toLowerCase();
-
-      if (t2iStatus === 'completed') {
-        const files = t2iStatusResult.results || t2iStatusResult.files || [];
-        let imageFile = files.find(f => f.endsWith('.png') || f.endsWith('.jpg') || f.endsWith('.jpeg')) || files[0];
-        if (imageFile && (imageFile.startsWith('http://') || imageFile.startsWith('https://'))) {
-          imageFile = imageFile.split('/').pop();
-        }
-        if (imageFile) {
-          t2iImageUrl = getFileUrl(imageFile, t2iTaskId);
-          t2iCompleted = true;
-          break;
-        }
-      } else if (t2iStatus === 'failed') {
-        return NextResponse.json({ success: false, error: `T2I task failed on G-Labs: ${t2iStatusResult?.error || 'unknown'}` }, { status: 500 });
-      }
-    }
-
-    if (!t2iCompleted || !t2iImageUrl) {
-      return NextResponse.json({ success: false, error: "T2I generation timed out" }, { status: 504 });
-    }
-
-    console.log(`[OPC Single SF Regen] Downloading image from ${t2iImageUrl}...`);
-    const imgResponse = await fetch(t2iImageUrl);
-    if (!imgResponse.ok) {
-      return NextResponse.json({ success: false, error: "Failed to download generated image" }, { status: 500 });
-    }
-    const imgBuffer = Buffer.from(await imgResponse.arrayBuffer());
-
-    const startFrameFilename = `opc_start_frame_${item.id}_clip_${clipIndex}.png`;
-    const startFrameLocalPath = path.join(process.cwd(), 'public', 'uploads', 'start_frames', startFrameFilename);
-    const startFrameDir = path.dirname(startFrameLocalPath);
-    if (!fs.existsSync(startFrameDir)) {
-      fs.mkdirSync(startFrameDir, { recursive: true });
-    }
-    fs.writeFileSync(startFrameLocalPath, imgBuffer);
-
-    // Update database atomically
-    await db.transaction(async () => {
-      const currentItem = await db.prepare("SELECT t2i_images_json FROM pillar_campaign_items WHERE id = ?").get(itemId);
-      if (!currentItem) throw new Error("Campaign item not found in transaction");
-
-      let localT2iImages = [];
-      try {
-        localT2iImages = JSON.parse(currentItem.t2i_images_json || '[]');
-      } catch {}
-      const targetIdx = Number(clipIndex) - 1;
-      while (localT2iImages.length <= targetIdx) {
-        localT2iImages.push(null);
-      }
-      localT2iImages[targetIdx] = `/uploads/start_frames/${startFrameFilename}`;
-
-      await updatePillarCampaignItem(itemId, {
-        new_video_plan_json: JSON.stringify(newVideoPlan),
-        result_json: updatedResultJson,
-        t2i_images_json: JSON.stringify(localT2iImages),
-        t2i_start_frame_path: `/uploads/start_frames/${startFrameFilename}`
-      });
-    })();
-    await recordCompletedStartFrameAsset(itemId, { clipIndex, localPath: `/uploads/start_frames/${startFrameFilename}` });
-
-    const localUrl = `/uploads/start_frames/${startFrameFilename}?t=${Date.now()}`;
-    return NextResponse.json({
-      success: true,
-      imageUrl: localUrl,
-      message: "T2I image regenerated and updated successfully."
-    });
-
+    return NextResponse.json(
+      {
+        success: true,
+        status: 'queued',
+        assetId: queued.assetId,
+        revision: queued.revision,
+        referenceCritical: queued.referenceCritical,
+        duplicate: queued.duplicate || false
+      },
+      { status: 202 }
+    );
   } catch (error) {
-    return NextResponse.json({ success: false, code: error.code || 'OPC_REGEN_FAILED', error: error.message }, { status: error.status || 500 });
+    console.error('[OPC Single SF Regen API] Error:', error);
+    return NextResponse.json(
+      { success: false, error: error.message || 'Internal Server Error' },
+      { status: error.status || 500 }
+    );
   }
 });

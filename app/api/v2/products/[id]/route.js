@@ -164,6 +164,18 @@ export const PUT = withTenantContext(async (req, { params }) => {
       }
     }
 
+    // active_photo validation (only clean_photo_url | raw_photo_url)
+    if (updateData.active_photo !== undefined) {
+      const normalized = String(updateData.active_photo).trim().toLowerCase();
+      if (normalized !== 'clean_photo_url' && normalized !== 'raw_photo_url') {
+        return NextResponse.json({
+          success: false,
+          error: 'active_photo hanya menerima nilai "clean_photo_url" atau "raw_photo_url"'
+        }, { status: 400 });
+      }
+      updateData.active_photo = normalized;
+    }
+
     // packaging compatibility
     if (updateData.packaging_status === 'packaged') updateData.is_in_packaging = 1;
     else if (updateData.packaging_status === 'unpackaged') updateData.is_in_packaging = 0;

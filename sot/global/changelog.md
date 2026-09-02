@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.29.15 — Isolasi ReGen Exclusive Reference Lane OPC (02/09/2026)
+- Implementasi G-Labs Image Lane Leases dengan isolasi eksklusif untuk Product Bridge dan mode shared
+- Endpoint ReGen T2I diubah menjadi pure durable HTTP 202 Accepted dengan idempotency
+- Penyimpanan immutable revisioned start frames dengan pencegahan race condition
+- Audit request lifecycle dan normalisasi pointer active_photo produk
+
 ## V2.29.14 — Optimasi Delay T2I dan Progres Realtime Start Frame (02/09/2026)
 - Pemisahan delay safety media image 3-7s dan video 10-20s
 - Eliminasi delay ganda pada batch threaded T2I

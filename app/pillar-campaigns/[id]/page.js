@@ -1623,14 +1623,21 @@ export default function PillarCampaignDetailPage() {
       const taskKey = `${item.id}_${clipIdx}`;
       setRegeneratingT2I(prev => ({ ...prev, [taskKey]: true }));
       try {
+        const idempotencyKey = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : `${Date.now()}_${Math.random()}`;
         const res = await fetch(`/api/v2/pillar-campaigns/items/${item.id}/regenerate-t2i`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Idempotency-Key': idempotencyKey
+          },
           body: JSON.stringify({ clipIndex: clipIdx, t2i_prompt: t2iPrompt })
         });
         const resData = await res.json();
-        if (resData.success) {
-          showToast(`Gambar T2I klip ${clipIdx} berhasil diregenerasi!`);
+        if (res.status === 202 || resData.success) {
+          const msg = resData.referenceCritical
+            ? `ReGen Klip ${clipIdx} (Product Bridge) berhasil masuk antrean eksklusif!`
+            : `ReGen Klip ${clipIdx} berhasil masuk antrean!`;
+          showToast(msg);
           fetchDetail();
         } else {
           showToast(resData.error || 'Gagal meregenerasi gambar.', 'error');
