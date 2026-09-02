@@ -33,10 +33,10 @@ export default function ContentPlannerDashboard() {
   const [productPhotoUrl, setProductPhotoUrl] = useState('');
   const [platform, setPlatform] = useState('tiktok');
   const [objective, setObjective] = useState('soft_sell');
-  const [productPlannerCount, setProductPlannerCount] = useState(12);
+  const [productPlannerCount, setProductPlannerCount] = useState(6);
   const [editorialRowsPerPillar, setEditorialRowsPerPillar] = useState(DEFAULT_EDITORIAL_ROWS_PER_PILLAR);
   const [editorialCountNotice, setEditorialCountNotice] = useState('');
-  const [targetAudience, setTargetAudience] = useState('genz_casual');
+  const [targetAudience, setTargetAudience] = useState('ibu_rumah_tangga');
   const [customTargetAudience, setCustomTargetAudience] = useState('');
   const [promotionContext, setPromotionContext] = useState('');
   const [customInstructions, setCustomInstructions] = useState('');

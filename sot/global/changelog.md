@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.29.17 — Set Default Modal Content Planner ke IRT dan 6 Baris (02/09/2026)
+- Mengubah default target audiens modal Content Planner ke Ibu-ibu rumah tangga
+- Mengubah default jumlah baris planner ke 6 baris plan (1x CEP)
+
 ## V2.29.16 — Restrukturisasi 2 Master Preset dan Isolasi Multi-Tenant Preset (02/09/2026)
 - Menyederhanakan Master Preset sistem menjadi 2 generic template: Brand Editorial Campaign dan Product Campaign
 - Menambahkan dukungan alias transparan untuk kompatibilitas key preset legacy
