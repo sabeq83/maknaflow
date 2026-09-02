@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.29.19 — Update Label Accordion Section 4 Preset Manager Menjadi Visual Identity (02/09/2026)
+- Mengubah judul Accordion 4 pada Preset Manager menjadi 4. Visual Identity agar selaras dengan Kampanye Pillar
+
 ## V2.29.18 — Penyelarasan Dropdown Visual Style dan Face Visibility di Preset Manager (02/09/2026)
 - Menyelaraskan opsi dropdown Visual Style di Preset Manager menjadi Cinematic, UGC, dan Macrophotography
 - Menyelaraskan opsi dropdown Face Visibility di Preset Manager menjadi Faceless, POV, Silhouette, dan Cartoon Face

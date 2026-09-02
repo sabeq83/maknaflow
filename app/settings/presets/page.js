@@ -658,7 +658,7 @@ export default function PresetsPage() {
                   onClick={() => setActiveAccordion(activeAccordion === 3 ? -1 : 3)}
                   style={{ padding: '16px 20px', background: 'var(--surface-interactive)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: activeAccordion === 3 ? '1px solid var(--border-color)' : 'none' }}
                 >
-                  <strong style={{ color: activeAccordion === 3 ? 'var(--accent-color)' : 'var(--text-primary)' }}>4. Visual Swap Overrides (visual_swap)</strong>
+                  <strong style={{ color: activeAccordion === 3 ? 'var(--accent-color)' : 'var(--text-primary)' }}>4. Visual Identity</strong>
                   <span>{activeAccordion === 3 ? '▼' : '▶'}</span>
                 </div>
                 {activeAccordion === 3 && (
