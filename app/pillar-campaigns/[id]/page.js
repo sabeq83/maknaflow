@@ -567,7 +567,7 @@ export default function PillarCampaignDetailPage() {
     }
     // 3. Active processing states
     else if (item.generation_status === 'processing') {
-      text = '⚡ Fase 1 : AI Generation';
+      text = item.generation_progress ? `⚡ Fase 1 : ${item.generation_progress}` : '⚡ Fase 1 : AI Generation';
       color = 'var(--accent-light)';
       bg = 'var(--status-info-soft)';
       pulse = true;
@@ -703,7 +703,8 @@ export default function PillarCampaignDetailPage() {
               color = 'var(--text-primary)';
               bg = 'var(--status-info-soft)';
               border = '1px solid rgba(59, 130, 246, 0.5)';
-              label = `⏳ ${stage.label}`;
+              const progressText = stage.key === 'generate' && item.generation_progress ? ` (${item.generation_progress})` : '';
+              label = `⏳ ${stage.label}${progressText}`;
               anim = 'active-pulse 1.5s infinite alternate';
             }
 

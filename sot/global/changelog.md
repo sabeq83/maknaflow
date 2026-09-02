@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.14 — Optimasi Delay T2I dan Progres Realtime Start Frame (02/09/2026)
+- Pemisahan delay safety media image 3-7s dan video 10-20s
+- Eliminasi delay ganda pada batch threaded T2I
+- Pelaporan generation_progress real-time per klip di UI dan scheduler
+
 ## V2.29.13 — Perbaiki Referensi Product Bridge (02/09/2026)
 - Gunakan referensi produk Raw/Clean kanonis dan named @tag G-Labs
 - Isolasi task Product Bridge dan selaraskan polling serta model image
