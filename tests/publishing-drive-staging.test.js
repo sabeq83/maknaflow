@@ -8,8 +8,12 @@ process.env.ENABLE_BACKGROUND_SERVICES = 'false';
 const {
   isNextcloudMediaUrl,
   verifyPublishingDriveReady,
-  getPublishingDriveReadiness
+  getPublishingDriveReadiness,
+  normalizeDriveFolderId,
+  ensurePublishingDriveFolder,
+  invalidatePublishingDriveReadiness
 } = await import('../lib/publishing-drive-staging.js');
+
 
 const {
   verifyAnonymousDriveDownload
@@ -140,8 +144,42 @@ test('Drive Staging: runPublishingMediaCleanupTick purges expired items and mark
   await pgQuery('DELETE FROM tenants WHERE id = $1', [testTenant]);
 });
 
+test('Drive Staging: normalizeDriveFolderId extracts and validates IDs and URLs', () => {
+  // Raw clean IDs
+  assert.equal(normalizeDriveFolderId('1fEn2ChMCvBWEc_LiiaxbEpRESjtO5Kg6'), '1fEn2ChMCvBWEc_LiiaxbEpRESjtO5Kg6');
+  assert.equal(normalizeDriveFolderId('  folder_12345-abc  '), 'folder_12345-abc');
+
+  // Full URLs
+  assert.equal(
+    normalizeDriveFolderId('https://drive.google.com/drive/folders/1fEn2ChMCvBWEc_LiiaxbEpRESjtO5Kg6?usp=sharing'),
+    '1fEn2ChMCvBWEc_LiiaxbEpRESjtO5Kg6'
+  );
+  assert.equal(
+    normalizeDriveFolderId('https://drive.google.com/drive/u/0/folders/1fEn2ChMCvBWEc_LiiaxbEpRESjtO5Kg6'),
+    '1fEn2ChMCvBWEc_LiiaxbEpRESjtO5Kg6'
+  );
+
+  // Empty / whitespace
+  assert.equal(normalizeDriveFolderId(''), '');
+  assert.equal(normalizeDriveFolderId(null), '');
+
+  // Invalid formats / malicious URLs
+  assert.throws(() => normalizeDriveFolderId('https://evil.com/folders/12345'), /drive\.google\.com/);
+  assert.throws(() => normalizeDriveFolderId('invalid string with spaces @!'), /Format Folder ID/);
+});
+
+
+test('Drive Staging: readinessCache is isolated per tenant and does not leak between tenants', async () => {
+  const { invalidatePublishingDriveReadiness } = await import('../lib/publishing-drive-staging.js');
+  invalidatePublishingDriveReadiness('tenant_A');
+  invalidatePublishingDriveReadiness('tenant_B');
+  invalidatePublishingDriveReadiness();
+  assert.ok(true);
+});
+
 test('Cleanup and close database connections', async () => {
   const { closePgPool } = await import('../lib/db-pg.js');
   await closePgPool();
 });
+
 

@@ -94,12 +94,41 @@ test('Google Auth: normalizeAllowedReturnPath prevents open redirect attacks', (
   assert.equal(normalizeAllowedReturnPath(undefined), '/settings');
 });
 
+test('Google Auth: normalizeGoogleScopes and hasCompatibleDriveScope validate drive scopes', async () => {
+  const { normalizeGoogleScopes, hasCompatibleDriveScope } = await import('../lib/google-auth.js');
+  
+  const scopesList = normalizeGoogleScopes('https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email');
+  assert.equal(scopesList.length, 2);
+  assert.equal(hasCompatibleDriveScope(scopesList), true);
+
+  const arrayScopes = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets'];
+  assert.equal(hasCompatibleDriveScope(arrayScopes), true);
+
+  const missingDrive = ['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/spreadsheets'];
+  assert.equal(hasCompatibleDriveScope(missingDrive), false);
+
+  assert.equal(normalizeGoogleScopes('').length, 0);
+  assert.equal(hasCompatibleDriveScope([]), false);
+  assert.equal(hasCompatibleDriveScope(null), false);
+});
+
+test('Google Auth: verifyGoogleConnection does not expose sensitive tokens', async () => {
+  const { verifyGoogleConnection } = await import('../lib/google-auth.js');
+  const status = await verifyGoogleConnection();
+  assert.equal(status.accessToken, undefined);
+  assert.equal(status.refreshToken, undefined);
+  assert.equal(status.clientSecret, undefined);
+  assert.ok(Array.isArray(status.grantedScopes));
+  assert.equal(typeof status.driveFileScopeGranted, 'boolean');
+});
+
 test('Cleanup and close database connections', async () => {
   const { cachesLoaded } = await import('../lib/db.js');
   await cachesLoaded;
   const { closePgPool } = await import('../lib/db-pg.js');
   await closePgPool();
 });
+
 
 
 

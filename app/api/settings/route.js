@@ -167,15 +167,35 @@ export const POST = withTenantContext(async (request, _context, user) => {
     // Product Photo Pipeline
     if (product_photo_provider !== undefined) await setSetting('product_photo_provider', product_photo_provider);
     if (product_photo_gemini_model !== undefined) await setSetting('product_photo_gemini_model', product_photo_gemini_model);
-    if (product_photo_glabs_model !== undefined) await setSetting('product_photo_glabs_model', product_photo_glabs_model);
-    if (product_photo_auto_approve !== undefined) await setSetting('product_photo_auto_approve', String(product_photo_auto_approve ? 1 : 0));
     if (repliz_api_url !== undefined) await setSetting('repliz_api_url', repliz_api_url);
     if (isNewSecret(repliz_access_key)) await setSetting('repliz_access_key', repliz_access_key);
     if (isNewSecret(repliz_secret_key)) await setSetting('repliz_secret_key', repliz_secret_key);
-    if (repliz_drive_folder_id !== undefined) await setSetting('repliz_drive_folder_id', repliz_drive_folder_id);
+    if (repliz_drive_folder_id !== undefined) {
+      const trimmed = String(repliz_drive_folder_id || '').trim();
+      if (!trimmed) {
+        await setSetting('repliz_drive_folder_id', '');
+        const { invalidatePublishingDriveReadiness } = await import('@/lib/publishing-drive-staging');
+        const { getActiveTenantId } = await import('@/lib/tenant-context');
+        invalidatePublishingDriveReadiness(getActiveTenantId());
+      } else {
+        const { normalizeDriveFolderId, invalidatePublishingDriveReadiness } = await import('@/lib/publishing-drive-staging');
+        const { getActiveTenantId } = await import('@/lib/tenant-context');
+        try {
+          const normalized = normalizeDriveFolderId(trimmed);
+          await setSetting('repliz_drive_folder_id', normalized);
+          invalidatePublishingDriveReadiness(getActiveTenantId());
+        } catch (normErr) {
+          return NextResponse.json({
+            success: false,
+            error: normErr.message || 'Format Folder ID Google Drive tidak valid.'
+          }, { status: 400 });
+        }
+      }
+    }
 
     return NextResponse.json({ success: true, message: 'Settings saved' });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: error.status || 500 });
   }
 });
+

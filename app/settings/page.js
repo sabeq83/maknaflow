@@ -16,7 +16,17 @@ export default function SettingsPage() {
   const [toast, setToast] = useState(null);
 
   // Google OAuth Status
-  const [googleStatus, setGoogleStatus] = useState({ state: 'not_configured', credentialsSet: false, connected: false, email: null, publishingDrive: null, message: null });
+  const [googleStatus, setGoogleStatus] = useState({
+    state: 'not_configured',
+    credentialsSet: false,
+    connected: false,
+    email: null,
+    grantedScopes: [],
+    driveFileScopeGranted: false,
+    publishingDrive: null,
+    message: null
+  });
+  const [repairingFolder, setRepairingFolder] = useState(false);
   const [googleClientId, setGoogleClientId] = useState('');
   const [googleClientSecret, setGoogleClientSecret] = useState('');
   const [savingGoogle, setSavingGoogle] = useState(false);
@@ -251,6 +261,8 @@ export default function SettingsPage() {
           credentialsSet: Boolean(data.data.credentialsSet),
           connected: Boolean(data.data.connected),
           email: data.data.email || data.data.userEmail || null,
+          grantedScopes: data.data.grantedScopes || [],
+          driveFileScopeGranted: Boolean(data.data.driveFileScopeGranted),
           publishingDrive: data.data.publishingDrive || null,
           message: data.data.message || null
         });
@@ -258,6 +270,29 @@ export default function SettingsPage() {
       }
     } catch (e) {
       console.warn('Gagal memuat status Google:', e);
+    }
+  }
+
+  async function createOrRepairPublishingFolder() {
+    setRepairingFolder(true);
+    try {
+      const res = await fetch('/api/google/publishing-folder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        setReplizDriveFolderId(data.data.id);
+        showToast(`Folder "${data.data.name}" berhasil disiapkan! 🎉`);
+        await fetchGoogleStatus();
+        await fetchSettings();
+      } else {
+        alert('Gagal menyiapkan folder: ' + (data.error || 'Terjadi kesalahan.'));
+      }
+    } catch (err) {
+      alert('Error: ' + err.message);
+    } finally {
+      setRepairingFolder(false);
     }
   }
 
@@ -2225,36 +2260,87 @@ export default function SettingsPage() {
                   onChange={e => setReplizApiUrl(e.target.value)}
                 />
               </div>
-              <div className="form-group" style={{ marginBottom: '12px' }}>
-                <label className="form-label">Google Drive Folder ID (Repliz)</label>
+              <div className="form-group" style={{ marginBottom: '16px' }}>
+                <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>Google Drive Folder ID (Repliz Staging)</span>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-secondary"
+                    onClick={createOrRepairPublishingFolder}
+                    disabled={!googleStatus.connected || repairingFolder}
+                    style={{ fontSize: '0.72rem', padding: '3px 10px' }}
+                  >
+                    {repairingFolder ? '⏳ Menyiapkan Folder...' : '⚡ Buat/Perbaiki Folder REPLIZ Publishing'}
+                  </button>
+                </label>
                 <input
                   className="form-input"
-                  placeholder="Masukkan Folder ID Google Drive..."
+                  placeholder="Tempel URL atau Folder ID Google Drive..."
                   value={replizDriveFolderId}
                   onChange={e => setReplizDriveFolderId(e.target.value)}
                 />
                 <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Folder ID Google Drive yang digunakan untuk mengunggah media agar dapat dibaca oleh Repliz.
+                  Folder Google Drive tempat media di-stage sebelum Repliz mengunduhnya. Masukkan Folder ID atau URL Google Drive lengkap.
                 </div>
+
                 {googleStatus.publishingDrive && (
                   <div style={{
-                    marginTop: '8px',
-                    padding: '8px 12px',
+                    marginTop: '10px',
+                    padding: '10px 14px',
                     borderRadius: 'var(--radius-sm)',
-                    fontSize: '0.75rem',
-                    background: googleStatus.publishingDrive.connected ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)',
-                    border: `1px solid ${googleStatus.publishingDrive.connected ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)'}`,
-                    color: googleStatus.publishingDrive.connected ? 'var(--success)' : 'var(--warning)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px'
+                    fontSize: '0.78rem',
+                    lineHeight: 1.5,
+                    background: googleStatus.publishingDrive.connected
+                      ? 'rgba(16,185,129,0.1)'
+                      : (googleStatus.publishingDrive.code === 'GOOGLE_DRIVE_FOLDER_NOT_VISIBLE_TO_APP' ? 'rgba(245,158,11,0.12)' : 'rgba(239,68,68,0.1)'),
+                    border: `1px solid ${
+                      googleStatus.publishingDrive.connected
+                        ? 'rgba(16,185,129,0.3)'
+                        : (googleStatus.publishingDrive.code === 'GOOGLE_DRIVE_FOLDER_NOT_VISIBLE_TO_APP' ? 'rgba(245,158,11,0.35)' : 'rgba(239,68,68,0.3)')
+                    }`,
+                    color: googleStatus.publishingDrive.connected
+                      ? 'var(--success)'
+                      : (googleStatus.publishingDrive.code === 'GOOGLE_DRIVE_FOLDER_NOT_VISIBLE_TO_APP' ? 'var(--warning)' : 'var(--danger)')
                   }}>
-                    <span>{googleStatus.publishingDrive.connected ? '✓' : '⚠️'}</span>
-                    <span>
-                      {googleStatus.publishingDrive.connected
-                        ? `Folder Google Drive Terverifikasi: "${googleStatus.publishingDrive.folderName}"`
-                        : `Status Google Drive Staging: ${googleStatus.publishingDrive.error || 'Perlu verifikasi/reconnect'}`}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                      <span style={{ fontSize: '1rem', marginTop: '-2px' }}>
+                        {googleStatus.publishingDrive.connected ? '✅' : (googleStatus.publishingDrive.code === 'GOOGLE_DRIVE_FOLDER_NOT_VISIBLE_TO_APP' ? '⚠️' : '❌')}
+                      </span>
+                      <div style={{ flex: 1 }}>
+                        {googleStatus.publishingDrive.connected ? (
+                          <div>
+                            <strong>Folder Google Drive Terverifikasi:</strong> "{googleStatus.publishingDrive.folderName}"
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '2px', fontFamily: 'var(--font-mono)' }}>
+                              ID: {googleStatus.publishingDrive.folderId} • Hak Akses Tulis: Aktif (canAddChildren)
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <strong>Status Folder Staging:</strong> {googleStatus.publishingDrive.error || 'Perlu verifikasi/perbaikan.'}
+                            {googleStatus.publishingDrive.code === 'GOOGLE_DRIVE_FOLDER_NOT_VISIBLE_TO_APP' && (
+                              <div style={{ marginTop: '6px' }}>
+                                <button
+                                  type="button"
+                                  className="btn btn-sm btn-primary"
+                                  onClick={createOrRepairPublishingFolder}
+                                  disabled={repairingFolder}
+                                  style={{ fontSize: '0.72rem', padding: '3px 10px' }}
+                                >
+                                  {repairingFolder ? '⏳ Menyiapkan...' : '⚡ Buat/Perbaiki Folder Otomatis'}
+                                </button>
+                              </div>
+                            )}
+                            {googleStatus.publishingDrive.code === 'GOOGLE_REAUTH_REQUIRED' && (
+                              <div style={{ marginTop: '6px' }}>
+                                <a href="/api/google/auth?returnTo=/settings" className="btn btn-sm btn-warning" style={{ textDecoration: 'none', fontSize: '0.72rem', padding: '3px 10px' }}>
+                                  🔄 Reconnect Akun Google
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

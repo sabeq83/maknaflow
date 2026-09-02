@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.21 — Perbaiki akses folder Drive Repliz (03/09/2026)
+- Buat folder publishing melalui OAuth app
+- Diagnosa folder drive.file secara tepat
+- Isolasi cache dan dukung Shared Drive
+
 ## V2.29.20 — Harden Google Drive Staging untuk Repliz (03/09/2026)
 - Tambah OAuth dan folder readiness gate
 - Pastikan upload dan anonymous probe sebelum Repliz
