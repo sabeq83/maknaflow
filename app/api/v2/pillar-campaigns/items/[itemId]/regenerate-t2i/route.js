@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDb, updatePillarCampaignItem, getSetting } from '../../../../../../../lib/db';
-import { generateImage, getTaskStatus, getFileUrl } from '../../../../../../../lib/webhook-client';
+import { generateImage, getTaskStatus, getFileUrl, GLABS_IMAGE_POLL_INTERVAL_MS } from '../../../../../../../lib/webhook-client';
 import fs from 'fs';
 import path from 'path';
 import { recordCompletedStartFrameAsset } from '@/lib/pillar-start-frame-service';
@@ -147,9 +147,9 @@ export const POST = withTenantContext(async (req, { params }) => {
 
     let t2iCompleted = false;
     let t2iImageUrl = null;
-    const maxT2iAttempts = 75; // 150s max
+    const maxT2iAttempts = 40; // 160s max (4s interval)
     for (let attempt = 0; attempt < maxT2iAttempts; attempt++) {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, GLABS_IMAGE_POLL_INTERVAL_MS || 4000));
       const t2iStatusResult = await getTaskStatus(t2iTaskId);
       const t2iStatus = (t2iStatusResult?.status || '').toLowerCase();
 
@@ -160,12 +160,12 @@ export const POST = withTenantContext(async (req, { params }) => {
           imageFile = imageFile.split('/').pop();
         }
         if (imageFile) {
-          t2iImageUrl = getFileUrl(imageFile);
+          t2iImageUrl = getFileUrl(imageFile, t2iTaskId);
           t2iCompleted = true;
           break;
         }
       } else if (t2iStatus === 'failed') {
-        return NextResponse.json({ success: false, error: `T2I task failed on G-Labs` }, { status: 500 });
+        return NextResponse.json({ success: false, error: `T2I task failed on G-Labs: ${t2iStatusResult?.error || 'unknown'}` }, { status: 500 });
       }
     }
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.29.13 — Perbaiki Referensi Product Bridge (02/09/2026)
+- Gunakan referensi produk Raw/Clean kanonis dan named @tag G-Labs
+- Isolasi task Product Bridge dan selaraskan polling serta model image
+
 ## V2.29.12 — Integrasi Hermes Research ke Content Planner Tahap 1-3 (02/09/2026)
 - Lineage research revision dan row evidence di PostgreSQL
 - Locked distribution server-side dan claim risk validator

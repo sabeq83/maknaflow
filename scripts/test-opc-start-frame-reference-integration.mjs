@@ -29,9 +29,14 @@ await tenantContext.run('default_tenant', async () => {
   assert.deepEqual(initial.providerRequest.reference_images, regen.providerRequest.reference_images);
   assert.equal(initial.audit.reference_count, 1);
   assert.equal(initial.audit.product_reference_count, 1);
-  assert.equal(initial.audit.reference_source_field, 'clean_photo_url');
+  assert.ok(['clean_photo_url', 'raw_photo_url'].includes(initial.audit.reference_source_field));
   assert.ok(Array.isArray(initial.providerRequest.reference_images));
-  const payloadMetadata = inspectBase64ImageReference(initial.providerRequest.reference_images[0]);
+  const productRefObj = initial.providerRequest.reference_images[0];
+  assert.ok(typeof productRefObj === 'object' && productRefObj.name.startsWith('product_truth_'));
+  const tagStem = productRefObj.name.replace(/\.[^.]+$/, '');
+  assert.match(initial.providerRequest.prompt, new RegExp(`@${tagStem}\\b`));
+  assert.equal(initial.providerRequest.model, 'nano_banana_2');
+  const payloadMetadata = inspectBase64ImageReference(productRefObj);
   assert.equal(payloadMetadata.sha256, initial.audit.reference_sha256);
   assert.equal(initial.audit.payload_reference_sha256, initial.audit.reference_sha256);
   assert.deepEqual(initial.providerRequest.expected_reference_sha256s, [initial.audit.reference_sha256]);

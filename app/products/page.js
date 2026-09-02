@@ -310,14 +310,14 @@ export default function ProductDatabasePage() {
 
   // Set selected photo type as active
   async function handleSetActivePhoto(productId, tabType) {
-    const colName = tabType === 'raw' ? 'raw_photo_url' : (tabType === 'cleaned' ? 'cleaned_photo_url' : 'generated_photo_url');
+    const colName = tabType === 'raw' ? 'raw_photo_url' : 'clean_photo_url';
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
     let relativePath = '';
     const rawUrl = tabType === 'raw'
       ? product.raw_photo_url
-      : (tabType === 'cleaned' ? (product.cleaned_photo_url || product.clean_photo_url) : product.generated_photo_url);
+      : (product.clean_photo_url || product.cleaned_photo_url);
 
     if (rawUrl && rawUrl.includes('path=')) {
       const match = rawUrl.match(/path=([^&]+)/);
