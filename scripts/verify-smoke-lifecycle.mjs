@@ -1,3 +1,6 @@
+import { execSync } from 'node:child_process';
+import assert from 'node:assert/strict';
+import pg from 'pg';
 import { loadAndValidateDbEnv } from '../lib/db-env-validator.js';
 
 process.env.DISABLE_AUTO_MIGRATIONS = 'true';

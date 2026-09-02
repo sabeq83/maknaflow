@@ -1,6 +1,6 @@
 {
   "name": "maknaflow",
-  "version": "2.29.11",
+  "version": "2.29.12",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack -p 3005",
@@ -23,6 +23,8 @@
     "staging:api": "node scripts/local-staging/run.js api",
     "staging:check": "node scripts/local-staging/check.js",
     "test:content-run-once:integration": "node scripts/test-content-run-once-integration.mjs",
+    "test:planner-research": "node --test tests/content-planner-locked-structure.test.js tests/research-to-planner-adapter.test.js tests/research-source-verifier.test.js tests/research-claim-validator.test.js",
+    "test:planner-research:integration": "node --env-file=.env.local --test tests/content-planner-research-repository.test.js tests/content-planner-refresh-workflow.test.js tests/content-planner-research-api.test.js",
     "test:hermes-token-rotation": "node --test tests/hermes-token-rotation.test.js",
     "test:agent-worker-bootstrap": "node --test tests/agent-worker-bootstrap.test.js",
     "test:hermes-auth-preflight": "node --test tests/hermes-auth-preflight.test.js",

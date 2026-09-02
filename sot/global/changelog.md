@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.29.12 — Integrasi Hermes Research ke Content Planner Tahap 1-3 (02/09/2026)
+- Lineage research revision dan row evidence di PostgreSQL
+- Locked distribution server-side dan claim risk validator
+- SSRF-safe research source verifier
+- UI Research badge, evidence drawer, dan row risk chips
+- Live smoke Pagibaik Rolled Oat Gluten Free 6 start frames manual review
+
 ## V2.29.11 — Hermes Run-Once Final Safety Remediation (01/09/2026)
 - Dual-credential atomic rotation with memory backup and rollback
 - Fail-closed agent worker bootstrap and Staging config isolation
