@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.29.18 — Penyelarasan Dropdown Visual Style dan Face Visibility di Preset Manager (02/09/2026)
+- Menyelaraskan opsi dropdown Visual Style di Preset Manager menjadi Cinematic, UGC, dan Macrophotography
+- Menyelaraskan opsi dropdown Face Visibility di Preset Manager menjadi Faceless, POV, Silhouette, dan Cartoon Face
+
 ## V2.29.17 — Set Default Modal Content Planner ke IRT dan 6 Baris (02/09/2026)
 - Mengubah default target audiens modal Content Planner ke Ibu-ibu rumah tangga
 - Mengubah default jumlah baris planner ke 6 baris plan (1x CEP)

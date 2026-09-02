@@ -557,9 +557,8 @@ export default function PresetsPage() {
                         Visual Style
                         <select className="form-select" value={form.visual_style} onChange={e => setForm({ ...form, visual_style: e.target.value })}>
                           <option value="Cinematic">Cinematic</option>
-                          <option value="UGC">UGC (User Generated Content)</option>
-                          <option value="Food Porn">Food Porn / Aesthetic Close-Up</option>
-                          <option value="Claymation">Claymation (3D Style)</option>
+                          <option value="UGC">UGC</option>
+                          <option value="Macrophotography">Macrophotography</option>
                         </select>
                       </label>
                       <label className="form-label">
@@ -590,8 +589,10 @@ export default function PresetsPage() {
                       <label className="form-label">
                         Face Visibility
                         <select className="form-select" value={form.face_visibility} onChange={e => setForm({ ...form, face_visibility: e.target.value })}>
-                          <option value="Faceless">Faceless (No visible faces)</option>
-                          <option value="Visible">Visible Faces</option>
+                          <option value="Faceless">Faceless (Tanpa Wajah - Fokus Aksi Tangan)</option>
+                          <option value="POV">POV (Sudut Pandang Kamera Utama)</option>
+                          <option value="Silhouette">Silhouette (Estetik Siluet)</option>
+                          <option value="cartoon_face">Cartoon Face (Kartun Ekspresif)</option>
                         </select>
                       </label>
                       <label className="form-label">
