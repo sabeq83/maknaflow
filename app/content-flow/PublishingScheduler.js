@@ -63,16 +63,18 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
   const [togglingPause, setTogglingPause] = useState(false);
 
   // Schedule Modal State
+  const defaultScheduleTime = new Date(Date.now() + 3600000).toISOString().slice(0, 16);
   const [showScheduleModal, setShowScheduleModal] = useState(Boolean(initialPreloadItem));
   const [scheduleForm, setScheduleForm] = useState({
     content_id: initialPreloadItem?.video_id || '',
     account_ids: [],
     platform: 'facebook',
-    publish_mode: 'draft',
+    publish_mode: 'live',
     media_type: 'reels',
     caption: initialPreloadItem?.caption || '',
     media_url: initialPreloadItem?.url_asset || initialPreloadItem?.nextcloud_url || '',
-    scheduled_at: new Date(Date.now() + 3600000).toISOString().slice(0, 16), // default +1 hour
+    scheduled_at: defaultScheduleTime,
+    account_schedules: {},
     timezone: 'Asia/Jakarta',
     activeTabProvider: 'repliz',  // Default Repliz Cloud
     is_ai_generated: false
@@ -572,6 +574,14 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
     }
     setSubmittingSchedule(true);
     try {
+      const schedulesIso = {};
+      for (const accId of scheduleForm.account_ids) {
+        const timeVal = scheduleForm.account_schedules?.[accId] || scheduleForm.scheduled_at;
+        if (timeVal) {
+          schedulesIso[accId] = new Date(timeVal).toISOString();
+        }
+      }
+
       const payload = {
         content_id: scheduleForm.content_id,
         account_ids: scheduleForm.account_ids,
@@ -580,6 +590,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
         caption: scheduleForm.caption,
         media_url: scheduleForm.media_url,
         scheduled_at: new Date(scheduleForm.scheduled_at).toISOString(),
+        schedules: schedulesIso,
         timezone: scheduleForm.timezone,
         is_ai_generated: !!scheduleForm.is_ai_generated
       };
@@ -1413,10 +1424,21 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                             type="checkbox"
                             checked={scheduleForm.account_ids.includes(acc.id)}
                             onChange={(e) => {
-                              const next = e.target.checked
+                              const isChecked = e.target.checked;
+                              const next = isChecked
                                 ? [...scheduleForm.account_ids, acc.id]
                                 : scheduleForm.account_ids.filter(id => id !== acc.id);
-                              setScheduleForm(previous => ({ ...previous, account_ids: next }));
+                              const nextSchedules = { ...(scheduleForm.account_schedules || {}) };
+                              if (isChecked && !nextSchedules[acc.id]) {
+                                nextSchedules[acc.id] = scheduleForm.scheduled_at || defaultScheduleTime;
+                              } else if (!isChecked) {
+                                delete nextSchedules[acc.id];
+                              }
+                              setScheduleForm(previous => ({
+                                ...previous,
+                                account_ids: next,
+                                account_schedules: nextSchedules
+                              }));
                             }}
                           />
                           <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{acc.display_name}</span>
@@ -1618,27 +1640,181 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                 </div>
               )}
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>Waktu Tayang</label>
-                  <input
-                    type="datetime-local"
-                    value={scheduleForm.scheduled_at}
-                    onChange={(e) => setScheduleForm({ ...scheduleForm, scheduled_at: e.target.value })}
-                    required
-                    style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>Zona Waktu</label>
-                  <input
-                    type="text"
-                    value={scheduleForm.timezone}
-                    readOnly
-                    style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-muted)', fontSize: 12 }}
-                  />
-                </div>
-              </div>
+              {/* 6. Waktu Tayang (Dinamis Multi-Platform) */}
+              {(() => {
+                const selectedModalAccounts = accounts.filter(acc => scheduleForm.account_ids.includes(acc.id));
+                const isMulti = selectedModalAccounts.length > 1;
+
+                const handleSyncAllSchedules = (masterTime) => {
+                  const targetTime = masterTime || scheduleForm.scheduled_at;
+                  const updated = {};
+                  for (const acc of selectedModalAccounts) {
+                    updated[acc.id] = targetTime;
+                  }
+                  setScheduleForm(prev => ({
+                    ...prev,
+                    scheduled_at: targetTime,
+                    account_schedules: updated
+                  }));
+                };
+
+                if (!isMulti) {
+                  return (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>
+                          Waktu Tayang {selectedModalAccounts.length === 1 ? `(${selectedModalAccounts[0].display_name})` : ''}
+                        </label>
+                        <input
+                          type="datetime-local"
+                          value={
+                            (selectedModalAccounts.length === 1 && scheduleForm.account_schedules?.[selectedModalAccounts[0].id])
+                              ? scheduleForm.account_schedules[selectedModalAccounts[0].id]
+                              : scheduleForm.scheduled_at
+                          }
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const nextSchedules = { ...(scheduleForm.account_schedules || {}) };
+                            if (selectedModalAccounts.length === 1) {
+                              nextSchedules[selectedModalAccounts[0].id] = val;
+                            }
+                            setScheduleForm(prev => ({
+                              ...prev,
+                              scheduled_at: val,
+                              account_schedules: nextSchedules
+                            }));
+                          }}
+                          required
+                          style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>Zona Waktu</label>
+                        <input
+                          type="text"
+                          value={scheduleForm.timezone}
+                          readOnly
+                          style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-muted)', fontSize: 12 }}
+                        />
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div style={{
+                    marginBottom: 16,
+                    padding: '12px',
+                    background: 'rgba(255,255,255,0.02)',
+                    borderRadius: 8,
+                    border: '1px solid var(--surface-interactive)'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                      <label style={{ fontSize: 11, color: 'var(--text-primary)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span>⏱️ Waktu Tayang Tiap Platform ({selectedModalAccounts.length} Akun Terpilih)</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => handleSyncAllSchedules(scheduleForm.scheduled_at)}
+                        style={{
+                          background: 'var(--status-info-soft)',
+                          border: '1px solid var(--status-info)',
+                          color: 'var(--link)',
+                          fontSize: 10,
+                          fontWeight: 700,
+                          padding: '3px 8px',
+                          borderRadius: 4,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ⚡ Samakan Semua Waktu
+                      </button>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {selectedModalAccounts.map(acc => {
+                        const accTime = scheduleForm.account_schedules?.[acc.id] || scheduleForm.scheduled_at;
+                        return (
+                          <div key={acc.id} style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: 12,
+                            padding: '6px 10px',
+                            background: 'var(--surface)',
+                            border: '1px solid var(--surface-interactive)',
+                            borderRadius: 6
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+                              <span style={{
+                                fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 10, flexShrink: 0,
+                                background: acc.platform === 'instagram' ? 'rgba(236, 72, 153, 0.2)' : 
+                                            acc.platform === 'facebook' ? 'rgba(59, 130, 246, 0.2)' :
+                                            acc.platform === 'threads' ? 'rgba(255, 255, 255, 0.1)' :
+                                            acc.platform === 'tiktok' ? 'rgba(0, 242, 254, 0.2)' :
+                                            acc.platform === 'linkedin' ? 'rgba(10, 102, 194, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                                color: acc.platform === 'instagram' ? '#f472b6' : 
+                                       acc.platform === 'facebook' ? '#60a5fa' :
+                                       acc.platform === 'threads' ? '#ffffff' :
+                                       acc.platform === 'tiktok' ? '#00F2FE' :
+                                       acc.platform === 'linkedin' ? '#0a66c2' : '#f87171',
+                                border: `1px solid ${
+                                  acc.platform === 'instagram' ? '#ec4899' : 
+                                  acc.platform === 'facebook' ? '#3b82f6' :
+                                  acc.platform === 'threads' ? '#ffffff' :
+                                  acc.platform === 'tiktok' ? '#00F2FE' :
+                                  acc.platform === 'linkedin' ? '#0a66c2' : '#ef4444'
+                                }`
+                              }}>
+                                {acc.platform ? acc.platform.toUpperCase() : ''}
+                              </span>
+                              <span style={{
+                                fontSize: 12,
+                                fontWeight: 600,
+                                color: 'var(--text-primary)',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                              }}>
+                                {acc.display_name}
+                              </span>
+                            </div>
+
+                            <input
+                              type="datetime-local"
+                              value={accTime}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setScheduleForm(prev => ({
+                                  ...prev,
+                                  account_schedules: {
+                                    ...(prev.account_schedules || {}),
+                                    [acc.id]: val
+                                  }
+                                }));
+                              }}
+                              required
+                              style={{
+                                width: 175,
+                                background: 'var(--surface-interactive)',
+                                border: '1px solid var(--border)',
+                                padding: '6px 8px',
+                                borderRadius: 4,
+                                color: 'var(--text-primary)',
+                                fontSize: 11
+                              }}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div style={{ marginTop: 8, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--text-muted)' }}>
+                      <span>Zona Waktu: <strong>{scheduleForm.timezone} (WIB)</strong></span>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Preflight warning summary */}
               {preflightResult && (

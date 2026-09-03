@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.22 — Perbaikan UI Modal Publishing Scheduler (03/09/2026)
+- Waktu tayang dinamis per-platform
+- Default mode publikasi Live
+- Dukungan multi-schedule pada backend jobs API
+
 ## V2.29.21 — Perbaiki akses folder Drive Repliz (03/09/2026)
 - Buat folder publishing melalui OAuth app
 - Diagnosa folder drive.file secara tepat

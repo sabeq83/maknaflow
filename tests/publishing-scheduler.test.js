@@ -150,21 +150,38 @@ test('Publishing Contract: validateScheduleRequest validates required fields', (
     validateScheduleRequest({ content_id: 'VID-1' });
   }, /Minimal satu account_id/);
 
+  const defaultLive = validateScheduleRequest({
+    content_id: 'VID-DEFAULT',
+    account_ids: ['acc_1'],
+    media_type: 'image',
+    media_url: 'https://example.com/test.jpg',
+    scheduled_at: '2026-08-11T12:00:00Z',
+    caption: 'Default Live Test'
+  });
+  assert.equal(defaultLive.publish_mode, 'live', 'Default publish_mode should be live');
+
   const valid = validateScheduleRequest({
     content_id: 'VID-001',
-    account_ids: ['acc_1'],
+    account_ids: ['acc_1', 'acc_2'],
     publish_mode: 'draft',
     media_type: 'image',
     media_url: 'https://example.com/test.jpg',
     scheduled_at: '2026-08-11T12:00:00Z',
+    schedules: {
+      'acc_1': '2026-08-11T10:00:00Z',
+      'acc_2': '2026-08-11T15:30:00Z'
+    },
     caption: 'Hello World'
   });
 
   assert.equal(valid.content_id, 'VID-001');
-  assert.deepEqual(valid.account_ids, ['acc_1']);
+  assert.deepEqual(valid.account_ids, ['acc_1', 'acc_2']);
   assert.equal(valid.publish_mode, 'draft');
   assert.equal(valid.media_type, 'image');
+  assert.equal(valid.schedules['acc_1'], '2026-08-11T10:00:00.000Z');
+  assert.equal(valid.schedules['acc_2'], '2026-08-11T15:30:00.000Z');
 });
+
 
 test('Publishing Contract: classifies failure outcomes correctly', () => {
   // Unknown outcome

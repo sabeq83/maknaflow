@@ -68,10 +68,11 @@ export const POST = withTenantContext(async (request, user) => {
       mediaType: validated.media_type,
       caption: validated.caption,
       mediaUrl: validated.media_url,
-      scheduledAt: validated.scheduled_at,
+      scheduledAt: validated.schedules?.[accId] || validated.scheduled_at,
       approvalStatus: validated.publish_mode === 'live' ? 'pending_approval' : 'not_required',
       isAiGenerated: !!validated.is_ai_generated
     }));
+
 
     // === SERVER-SIDE READINESS GATE ===
     // If any target uses Repliz with media, Google Drive readiness MUST pass before creating jobs.
