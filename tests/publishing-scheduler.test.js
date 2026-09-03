@@ -635,10 +635,169 @@ test('Repliz Publishing Worker: sends only verified Google Drive direct download
     await pgQuery('DELETE FROM publishing_jobs WHERE tenant_id = $1', [testTenant]);
     await pgQuery('DELETE FROM publishing_accounts WHERE tenant_id = $1', [testTenant]);
     await pgQuery('DELETE FROM tenants WHERE id = $1', [testTenant]);
+  }
+});
+
+test('Repliz Failure Handling: Facebook Page permission error transitions job to needs_review and marks account disconnected', async () => {
+  const { processReplizJob } = await import('../lib/publishing-worker.js');
+  const { retryPublishingJobWithPolicy } = await import('../lib/publishing-repository.js');
+  const previousFetch = globalThis.fetch;
+  const testTenant = `t_fbperm_${Date.now()}`;
+  const testJobId = `pub_test_fbperm_${Date.now()}`;
+  const testAccId = `acc_fbperm_${Date.now()}`;
+
+  await pgQuery('INSERT INTO tenants (id, name) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING', [testTenant, 'FB Perm Tenant']);
+  await pgQuery(`
+    INSERT INTO publishing_accounts (
+      id, tenant_id, platform, display_name, provider, provider_account_id, status
+    ) VALUES ($1, $2, 'facebook', 'MAKNA Page', 'repliz', 'acc_repliz_fb_1', 'active')
+  `, [testAccId, testTenant]);
+
+  await pgQuery(`
+    INSERT INTO publishing_jobs (
+      id, tenant_id, content_id, account_id, platform, publish_mode, media_type,
+      caption_snapshot, media_url_snapshot, scheduled_at, status, idempotency_key, provider, external_schedule_id, max_attempts
+    ) VALUES ($1, $2, 'VID-FB-01', $3, 'facebook', 'live', 'video', 'FB caption',
+      'https://drive.google.com/uc?export=download&id=verified_id', CURRENT_TIMESTAMP, 'processing', $4, 'repliz', 'sch_fb_123', 3)
+  `, [testJobId, testTenant, testAccId, `idem_${testJobId}`]);
+
+  globalThis.fetch = async (url, options = {}) => {
+    const urlStr = String(url);
+    if (urlStr.includes('sch_fb_123')) {
+      return new Response(JSON.stringify({
+        data: {
+          id: 'sch_fb_123',
+          status: 'failed',
+          errorMessage: "Unsupported get request. Object with ID '2359835624786236' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please check if the object ID is correct and you have permission to read it."
+        }
+      }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    return new Response(JSON.stringify({ success: true }), { status: 200 });
+  };
+
+
+  try {
+    const fakeJob = {
+      id: testJobId,
+      tenant_id: testTenant,
+      content_id: 'VID-FB-01',
+      account_id: testAccId,
+      platform: 'facebook',
+      media_type: 'video',
+      caption_snapshot: 'FB caption',
+      media_url_snapshot: 'https://drive.google.com/uc?export=download&id=verified_id',
+      scheduled_at: new Date().toISOString(),
+      provider: 'repliz',
+      provider_account_id: 'acc_repliz_fb_1',
+      external_schedule_id: 'sch_fb_123',
+      attempt_count: 1,
+      max_attempts: 3
+    };
+
+    const credentials = { apiUrl: 'https://api.repliz.com', accessKey: 'k', secretKey: 's' };
+    await processReplizJob(fakeJob, credentials, { correlationId: 'corr_fb_1', attemptNumber: 1, startedAt: new Date().toISOString() });
+
+    const jobRes = await pgQuery('SELECT * FROM publishing_jobs WHERE id = $1', [testJobId]);
+    assert.equal(jobRes.rows[0].status, 'needs_review');
+    assert.equal(jobRes.rows[0].last_error_code, 'REPLIZ_FACEBOOK_PERMISSION_REQUIRED');
+
+    const accRes = await pgQuery('SELECT * FROM publishing_accounts WHERE id = $1', [testAccId]);
+    assert.equal(accRes.rows[0].status, 'disconnected');
+    assert.equal(accRes.rows[0].last_error_code, 'REPLIZ_FACEBOOK_PERMISSION_REQUIRED');
+
+    // Manual retry policy verification
+    await assert.rejects(
+      () => retryPublishingJobWithPolicy(testTenant, testJobId, { confirmedReconnect: false }),
+      err => err.status === 409 && err.code === 'RECONNECT_CONFIRMATION_REQUIRED'
+    );
+
+    const retriedJob = await retryPublishingJobWithPolicy(testTenant, testJobId, { confirmedReconnect: true });
+    assert.equal(retriedJob.status, 'scheduled');
+    assert.equal(retriedJob.attempt_count, 0);
+  } finally {
+    globalThis.fetch = previousFetch;
+    await pgQuery('DELETE FROM publishing_attempts WHERE tenant_id = $1', [testTenant]);
+    await pgQuery('DELETE FROM publishing_jobs WHERE tenant_id = $1', [testTenant]);
+    await pgQuery('DELETE FROM publishing_accounts WHERE tenant_id = $1', [testTenant]);
+    await pgQuery('DELETE FROM tenants WHERE id = $1', [testTenant]);
+  }
+});
+
+test('Repliz Failure Handling: TikTok transient internal error retries then transitions to needs_review when budget exhausted', async () => {
+  const { processReplizJob } = await import('../lib/publishing-worker.js');
+  const previousFetch = globalThis.fetch;
+  const testTenant = `t_tktrans_${Date.now()}`;
+  const testJobId = `pub_test_tktrans_${Date.now()}`;
+  const testAccId = `acc_tktrans_${Date.now()}`;
+
+  await pgQuery('INSERT INTO tenants (id, name) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING', [testTenant, 'TikTok Transient Tenant']);
+  await pgQuery(`
+    INSERT INTO publishing_accounts (
+      id, tenant_id, platform, display_name, provider, provider_account_id, status
+    ) VALUES ($1, $2, 'tiktok', 'MAKNA TikTok', 'repliz', 'acc_repliz_tk_1', 'active')
+  `, [testAccId, testTenant]);
+
+  await pgQuery(`
+    INSERT INTO publishing_jobs (
+      id, tenant_id, content_id, account_id, platform, publish_mode, media_type,
+      caption_snapshot, media_url_snapshot, scheduled_at, status, idempotency_key, provider, external_schedule_id, max_attempts
+    ) VALUES ($1, $2, 'VID-TK-01', $3, 'tiktok', 'live', 'video', 'TK caption',
+      'https://drive.google.com/uc?export=download&id=verified_id', CURRENT_TIMESTAMP, 'processing', $4, 'repliz', 'sch_tk_123', 3)
+  `, [testJobId, testTenant, testAccId, `idem_${testJobId}`]);
+
+  globalThis.fetch = async (url, options = {}) => {
+    return new Response(JSON.stringify({
+      data: {
+        id: 'sch_tk_123',
+        status: 'failed',
+        errorMessage: 'internal'
+      }
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  };
+
+  try {
+    const fakeJob = {
+      id: testJobId,
+      tenant_id: testTenant,
+      content_id: 'VID-TK-01',
+      account_id: testAccId,
+      platform: 'tiktok',
+      media_type: 'video',
+      caption_snapshot: 'TK caption',
+      media_url_snapshot: 'https://drive.google.com/uc?export=download&id=verified_id',
+      scheduled_at: new Date().toISOString(),
+      provider: 'repliz',
+      provider_account_id: 'acc_repliz_tk_1',
+      external_schedule_id: 'sch_tk_123',
+      attempt_count: 1,
+      max_attempts: 3
+    };
+
+    const credentials = { apiUrl: 'https://api.repliz.com', accessKey: 'k', secretKey: 's' };
+
+    // Attempt 1: Transient retryable -> retry_wait
+    await processReplizJob(fakeJob, credentials, { correlationId: 'corr_tk_1', attemptNumber: 1, startedAt: new Date().toISOString() });
+    let jobRes = await pgQuery('SELECT * FROM publishing_jobs WHERE id = $1', [testJobId]);
+    assert.equal(jobRes.rows[0].status, 'retry_wait');
+    assert.equal(jobRes.rows[0].last_error_code, 'REPLIZ_TIKTOK_INTERNAL');
+    assert.ok(jobRes.rows[0].next_attempt_at);
+
+    // Attempt 3 (exhausted): -> needs_review
+    await processReplizJob(fakeJob, credentials, { correlationId: 'corr_tk_3', attemptNumber: 3, startedAt: new Date().toISOString() });
+    jobRes = await pgQuery('SELECT * FROM publishing_jobs WHERE id = $1', [testJobId]);
+    assert.equal(jobRes.rows[0].status, 'needs_review');
+    assert.equal(jobRes.rows[0].last_error_code, 'REPLIZ_TIKTOK_INTERNAL');
+  } finally {
+    globalThis.fetch = previousFetch;
+    await pgQuery('DELETE FROM publishing_attempts WHERE tenant_id = $1', [testTenant]);
+    await pgQuery('DELETE FROM publishing_jobs WHERE tenant_id = $1', [testTenant]);
+    await pgQuery('DELETE FROM publishing_accounts WHERE tenant_id = $1', [testTenant]);
+    await pgQuery('DELETE FROM tenants WHERE id = $1', [testTenant]);
     const { closePgPool } = await import('../lib/db-pg.js');
     await closePgPool();
   }
 });
+
 
 
 

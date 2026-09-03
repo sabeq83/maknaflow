@@ -104,6 +104,8 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
   const [newScheduleTime, setNewScheduleTime] = useState('');
   const [submittingReschedule, setSubmittingReschedule] = useState(false);
   const [syncingJobId, setSyncingJobId] = useState(null);
+  const [checkingHealthId, setCheckingHealthId] = useState(null);
+  const [confirmedReconnect, setConfirmedReconnect] = useState(false);
 
   // Toast
   const [toastMsg, setToastMsg] = useState('');
@@ -460,21 +462,49 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
     }
   };
 
-  // Retry Job
-  const handleRetryJob = async (jobId) => {
+  // Manual Retry Job
+  const handleRetryJob = async (jobId, opts = {}) => {
     try {
       const res = await fetch(`/api/v2/publishing/jobs/${jobId}/retry`, {
-        method: 'POST'
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmedReconnect: opts.confirmedReconnect === true })
       });
       const json = await res.json();
       if (json.success) {
         showToast('Job berhasil dijadwalkan ulang untuk dicoba kembali 🔄');
         fetchJobs();
+        if (selectedJobId === jobId) {
+          fetch(`/api/v2/publishing/jobs/${jobId}`)
+            .then(r => r.json())
+            .then(d => { if (d.success) setSelectedJobDetail(d.data); });
+        }
+      } else if (json.code === 'RECONNECT_CONFIRMATION_REQUIRED') {
+        showToast('⚠️ Hubungkan ulang akun di Repliz terlebih dahulu dan centang konfirmasi sebelum mencoba lagi.');
       } else {
         showToast(`Gagal retry: ${json.error} ❌`);
       }
     } catch (err) {
       showToast(`Error: ${err.message} ❌`);
+    }
+  };
+
+  // Check Account Health
+  const handleCheckAccountHealth = async (accountId) => {
+    setCheckingHealthId(accountId);
+    try {
+      const res = await fetch(`/api/v2/publishing/accounts/${accountId}/health`, { method: 'POST' });
+      const json = await res.json();
+      if (json.success && json.data) {
+        showToast(json.data.isConnected ? `Koneksi akun ${json.data.displayName} aktif & valid! 🟢` : `⚠️ ${json.data.lastErrorMessage || 'Akun terdeteksi terputus'}`);
+        fetchAccounts();
+      } else {
+        showToast(`Gagal periksa akun: ${json.error} ❌`);
+      }
+    } catch (err) {
+      showToast(`Error: ${err.message} ❌`);
+    } finally {
+      setCheckingHealthId(null);
     }
   };
 
@@ -1148,10 +1178,123 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                 </div>
               )}
 
-              {selectedJobDetail.last_error_message && (
-                <div style={{ marginBottom: 12, padding: 10, background: '#27171d', border: '1px solid #5c202d', borderRadius: 8 }}>
-                  <div style={{ fontSize: 10, color: '#fb7185', fontWeight: 800, textTransform: 'uppercase' }}>Pesan Kesalahan</div>
-                  <div style={{ color: '#fca5a5', fontSize: 11, marginTop: 2 }}>{selectedJobDetail.last_error_message}</div>
+              {/* Actionable Provider Error Card */}
+              {(selectedJobDetail.last_error_message || selectedJobDetail.status === 'needs_review' || selectedJobDetail.status === 'failed' || selectedJobDetail.status === 'retry_wait') && (
+                <div style={{
+                  marginBottom: 14,
+                  padding: 12,
+                  background: selectedJobDetail.status === 'retry_wait' ? 'var(--status-info-soft)' : '#27171d',
+                  border: `1px solid ${selectedJobDetail.status === 'retry_wait' ? 'var(--status-info)' : '#5c202d'}`,
+                  borderRadius: 8
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                    <span style={{
+                      fontSize: 10,
+                      color: selectedJobDetail.status === 'retry_wait' ? '#93c5fd' : '#fb7185',
+                      fontWeight: 800,
+                      textTransform: 'uppercase'
+                    }}>
+                      {selectedJobDetail.status === 'retry_wait' ? '⏳ Menunggu Percobaan Ulang Otomatis' : '⚠️ Diagnosis Kegagalan Provider'}
+                    </span>
+                    <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+                      Percobaan: <strong>{selectedJobDetail.attempt_count || 0} / {selectedJobDetail.max_attempts || 3}</strong>
+                    </span>
+                  </div>
+
+                  <div style={{
+                    color: selectedJobDetail.status === 'retry_wait' ? 'var(--text-secondary)' : '#fca5a5',
+                    fontSize: 11,
+                    lineHeight: 1.4,
+                    marginBottom: 8
+                  }}>
+                    {selectedJobDetail.last_error_message || 'Terjadi gangguan saat eksekusi provider.'}
+                  </div>
+
+                  {selectedJobDetail.external_schedule_id && (
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span>Schedule ID Repliz:</span>
+                      <code style={{ background: 'rgba(0,0,0,0.3)', padding: '2px 6px', borderRadius: 4, color: 'var(--link)' }}>
+                        {selectedJobDetail.external_schedule_id}
+                      </code>
+                    </div>
+                  )}
+
+                  {/* Tindakan Reconnect untuk Error Permission Facebook */}
+                  {selectedJobDetail.last_error_code === 'REPLIZ_FACEBOOK_PERMISSION_REQUIRED' && (
+                    <div style={{ marginTop: 8, padding: 8, background: 'rgba(0,0,0,0.3)', borderRadius: 6, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <div style={{ fontSize: 10, color: '#fef08a' }}>
+                        💡 <strong>Langkah Perbaikan:</strong> Buka akun Anda di dashboard Repliz, perbarui izin akses / sambungkan ulang akun Facebook Page, lalu centang konfirmasi di bawah.
+                      </div>
+                      <a
+                        href="https://app.repliz.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 6,
+                          background: 'var(--status-info-soft)',
+                          border: '1px solid var(--status-info)',
+                          color: '#93c5fd',
+                          padding: '5px 10px',
+                          borderRadius: 4,
+                          fontSize: 11,
+                          fontWeight: 700,
+                          textDecoration: 'none'
+                        }}
+                      >
+                        <span>↗️ Buka Dashboard Repliz</span>
+                      </a>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={confirmedReconnect}
+                          onChange={(e) => setConfirmedReconnect(e.target.checked)}
+                        />
+                        <span>Saya sudah melakukan Reconnect akun di Repliz</span>
+                      </label>
+                    </div>
+                  )}
+
+                  {/* Tombol Aksi Manual Retry & Health Check */}
+                  <div style={{ display: 'flex', gap: 6, marginTop: 10 }}>
+                    <button
+                      type="button"
+                      disabled={checkingHealthId === selectedJobDetail.account_id}
+                      onClick={() => handleCheckAccountHealth(selectedJobDetail.account_id)}
+                      style={{
+                        flex: 1,
+                        background: 'var(--surface)',
+                        border: '1px solid var(--surface-interactive)',
+                        color: 'var(--text-secondary)',
+                        padding: '6px 10px',
+                        borderRadius: 6,
+                        fontSize: 10,
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {checkingHealthId === selectedJobDetail.account_id ? '⏳ Memeriksa...' : '🔍 Periksa Koneksi Akun'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRetryJob(selectedJobDetail.id, { confirmedReconnect })}
+                      style={{
+                        flex: 1,
+                        background: 'var(--status-info-soft)',
+                        border: '1px solid var(--status-info)',
+                        color: 'var(--link)',
+                        padding: '6px 10px',
+                        borderRadius: 6,
+                        fontSize: 10,
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      🔄 Coba Ulang (Manual Retry)
+                    </button>
+                  </div>
                 </div>
               )}
 

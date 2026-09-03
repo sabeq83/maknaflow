@@ -83,7 +83,9 @@ export const PATCH = withTenantContext(async (request, { params }, user) => {
           return NextResponse.json({ success: false, error: 'Job ini belum memiliki ID jadwal Repliz.' }, { status: 400 });
         }
 
-        const { getReplizSchedule } = await import('@/lib/repliz-client');
+        const { getReplizSchedule, extractReplizScheduleState } = await import('@/lib/repliz-client');
+        const { classifyReplizFailure } = await import('@/lib/publishing-contract');
+        const { recordReplizProviderState, recordPublishingAccountHealth } = await import('@/lib/publishing-repository');
         const { getSetting } = await import('@/lib/db');
         const url = await getSetting('repliz_api_url') || 'https://api.repliz.com';
         const accessKey = await getSetting('repliz_access_key');
@@ -93,27 +95,61 @@ export const PATCH = withTenantContext(async (request, { params }, user) => {
         }
 
         const res = await getReplizSchedule({ apiUrl: url, accessKey, secretKey }, job.external_schedule_id);
-        const schedule = res?.data || res;
-        const replizStatus = (schedule?.status || 'scheduled').toLowerCase();
+        const scheduleState = extractReplizScheduleState(res);
+        const replizStatus = scheduleState.status;
+
+        await recordReplizProviderState(tenantId, id, scheduleState);
 
         let reconciledStatus = job.status;
         let isPublished = false;
+        let failureInfo = null;
+
         if (['completed', 'success', 'published'].includes(replizStatus)) {
           reconciledStatus = 'published';
           isPublished = true;
-        } else if (replizStatus === 'failed') {
-          reconciledStatus = 'failed';
+          await recordPublishingAccountHealth(tenantId, job.account_id, {
+            isConnected: true,
+            lastErrorCode: null,
+            lastErrorMessage: null
+          });
+        } else if (['failed', 'error'].includes(replizStatus)) {
+          failureInfo = classifyReplizFailure({
+            platform: job.platform,
+            status: 'failed',
+            errorMessage: scheduleState.errorMessage,
+            errorCode: scheduleState.errorCode
+          });
+          reconciledStatus = failureInfo.targetStatus;
+          if (failureInfo.code === 'REPLIZ_FACEBOOK_PERMISSION_REQUIRED') {
+            await recordPublishingAccountHealth(tenantId, job.account_id, {
+              isConnected: false,
+              lastErrorCode: failureInfo.code,
+              lastErrorMessage: failureInfo.message
+            });
+          }
         } else if (replizStatus === 'cancelled') {
           reconciledStatus = 'cancelled';
         }
 
-        const permalink = schedule?.permalink || schedule?.publishedUrl || null;
-        const postId = schedule?.postId || schedule?.externalId || null;
+        let permalink = scheduleState.permalink;
+        let postId = scheduleState.postId;
+
+        if (isPublished && !permalink && postId) {
+          const username = scheduleState.account?.username || '';
+          const pageId = scheduleState.account?.generatedId || '';
+          if (job.platform === 'tiktok') permalink = `https://www.tiktok.com/@${username}/video/${postId}`;
+          else if (job.platform === 'instagram') permalink = `https://www.instagram.com/reel/${postId}/`;
+          else if (job.platform === 'facebook') permalink = `https://www.facebook.com/${pageId || username}/posts/${postId}`;
+          else if (job.platform === 'youtube') permalink = `https://www.youtube.com/watch?v=${postId}`;
+        }
 
         await markPublishingResult(tenantId, id, {
           status: reconciledStatus,
           external_post_id: postId,
+          externalPermalink: permalink,
           provider_stage: replizStatus,
+          last_error_code: failureInfo?.code || null,
+          last_error_message: failureInfo?.message || null,
           verified_at: isPublished ? new Date().toISOString() : null,
           published_at: isPublished ? new Date().toISOString() : null
         });
@@ -155,7 +191,8 @@ export const PATCH = withTenantContext(async (request, { params }, user) => {
           jobId: id,
           postId: postId,
           permalink: permalink,
-          status: reconciledStatus
+          status: reconciledStatus,
+          scheduleState
         };
       } else {
         if (!job.external_post_id) {

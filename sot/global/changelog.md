@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.29.23 — Hardening Penanganan Kegagalan Provider Repliz (Facebook Permission & TikTok Retry Policy) (03/09/2026)
+- Klasifikasi deterministik kegagalan provider Repliz (Facebook permission required vs TikTok transient internal)
+- Pencegahan loop retry Facebook tanpa otorisasi ulang dan isolasi status kesehatan akun
+- Policy retry otomatis dengan backoff untuk error transient TikTok dan pembatasan claim budget database
+- Endpoint account health check dan proteksi konfirmasi reconnect pada manual retry
+- UI kartu diagnosis actionable, integrasi link dashboard Repliz, dan tombol periksa koneksi akun
+
 ## V2.29.22 — Perbaikan UI Modal Publishing Scheduler (03/09/2026)
 - Waktu tayang dinamis per-platform
 - Default mode publikasi Live

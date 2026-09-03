@@ -38,6 +38,7 @@ export const GET = withTenantContext(async (request) => {
           for (const raw of replizAccs) {
             const mappedPlatform = (raw.platform || raw.type)?.toLowerCase();
             if (PUBLISHING_PLATFORMS.includes(mappedPlatform)) {
+              const isConnected = raw.isConnected !== false && raw.status !== 'disconnected';
               const saved = await savePublishingAccount({
                 tenantId,
                 provider: 'repliz',
@@ -45,7 +46,8 @@ export const GET = withTenantContext(async (request) => {
                 displayName: raw.name || raw.username || `Repliz ${mappedPlatform} #${raw.id || raw._id}`,
                 providerAccountId: String(raw.id || raw._id),
                 tokenCiphertext: null,
-                status: 'active'
+                status: isConnected ? 'active' : 'disconnected',
+                lastVerifiedAt: new Date().toISOString()
               });
               syncedIds.push(saved.id);
             }
@@ -59,10 +61,12 @@ export const GET = withTenantContext(async (request) => {
               await savePublishingAccount({
                 ...old,
                 tenantId,
-                status: 'disconnected'
+                status: 'disconnected',
+                lastVerifiedAt: new Date().toISOString()
               });
             }
           }
+
           accounts = await listPublishingAccounts(tenantId);
         }
       } catch (replizSyncErr) {
