@@ -1577,11 +1577,18 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                               } else if (!isChecked) {
                                 delete nextSchedules[acc.id];
                               }
+                              // Auto-check is_ai_generated jika ada akun TikTok yang dipilih
+                              const selectedAccs = accounts.filter(a => next.includes(a.id));
+                              const hasTikTok = selectedAccs.some(a => a.platform === 'tiktok');
+                              const nextAiGenerated = hasTikTok ? true : scheduleForm.is_ai_generated;
+
                               setScheduleForm(previous => ({
                                 ...previous,
                                 account_ids: next,
-                                account_schedules: nextSchedules
+                                account_schedules: nextSchedules,
+                                is_ai_generated: nextAiGenerated
                               }));
+
                             }}
                           />
                           <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{acc.display_name}</span>

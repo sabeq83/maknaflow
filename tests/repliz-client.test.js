@@ -220,3 +220,38 @@ test('Classifier: classifyReplizFailure accurately classifies audit failures', (
   assert.equal(mediaClassified.action, 'replace_media');
 });
 
+test('Validation Contract: validateScheduleRequest defaults is_ai_generated to true for TikTok', async () => {
+  const { validateScheduleRequest } = await import('../lib/publishing-contract.js');
+
+  // TikTok default is_ai_generated
+  const tiktokReq = validateScheduleRequest({
+    content_id: 'VID-001',
+    account_ids: ['acc_tt_1'],
+    platform: 'tiktok',
+    media_url: 'https://example.com/video.mp4',
+    scheduled_at: new Date(Date.now() + 3600000).toISOString()
+  });
+  assert.equal(tiktokReq.is_ai_generated, true);
+
+  // Facebook default is_ai_generated
+  const fbReq = validateScheduleRequest({
+    content_id: 'VID-002',
+    account_ids: ['acc_fb_1'],
+    platform: 'facebook',
+    media_url: 'https://example.com/video.mp4',
+    scheduled_at: new Date(Date.now() + 3600000).toISOString()
+  });
+  assert.equal(fbReq.is_ai_generated, false);
+
+  // Explicit false override on TikTok
+  const explicitReq = validateScheduleRequest({
+    content_id: 'VID-003',
+    account_ids: ['acc_tt_1'],
+    platform: 'tiktok',
+    media_url: 'https://example.com/video.mp4',
+    scheduled_at: new Date(Date.now() + 3600000).toISOString(),
+    is_ai_generated: false
+  });
+  assert.equal(explicitReq.is_ai_generated, false);
+});
+

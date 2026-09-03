@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.24 — Hardening TikTok Repliz OpenAPI Compliance & Default AI Generated (03/09/2026)
+- Penyelarasan 100% skema payload Repliz OpenAPI untuk TikTok
+- Default opsi AI Generated dicentang untuk TikTok
+- Perbaikan error internal Repliz pada TikTok video posting
+
 ## V2.29.23 — Hardening Penanganan Kegagalan Provider Repliz (Facebook Permission & TikTok Retry Policy) (03/09/2026)
 - Klasifikasi deterministik kegagalan provider Repliz (Facebook permission required vs TikTok transient internal)
 - Pencegahan loop retry Facebook tanpa otorisasi ulang dan isolasi status kesehatan akun
