@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.25 — Fix Google Drive Direct 200 URL for TikTok Repliz Publishing (04/09/2026)
+- Ganti format URL Google Drive staging menjadi direct usercontent streamable HTTP 200
+- Perbaikan error internal TikTok akibat redirect HTTP 303
+- Uji coba live posting TikTok Dapur Botani sukses terpublikasi
+
 ## V2.29.24 — Hardening TikTok Repliz OpenAPI Compliance & Default AI Generated (03/09/2026)
 - Penyelarasan 100% skema payload Repliz OpenAPI untuk TikTok
 - Default opsi AI Generated dicentang untuk TikTok

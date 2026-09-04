@@ -597,7 +597,7 @@ test('Repliz Publishing Worker: sends only verified Google Drive direct download
       });
     }
     // Mock anonymous probe for Google Drive
-    if (urlStr.includes('drive.google.com/uc?export=download')) {
+    if (urlStr.includes('drive.usercontent.google.com') || urlStr.includes('drive.google.com/uc?export=download')) {
       return new Response(new Uint8Array([0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70]), {
         status: 206,
         headers: { 'Content-Type': 'video/mp4' }
@@ -627,8 +627,9 @@ test('Repliz Publishing Worker: sends only verified Google Drive direct download
 
     assert.equal(replizPayloads.length, 1);
     const sentMedia = replizPayloads[0].medias[0];
-    assert.equal(sentMedia.url, 'https://drive.google.com/uc?export=download&id=verified_drive_id_123');
+    assert.equal(sentMedia.url, 'https://drive.usercontent.google.com/download?id=verified_drive_id_123&export=download');
     assert.ok(!sentMedia.url.includes('cloud.ast402.my.id'));
+
   } finally {
     globalThis.fetch = previousFetch;
     await pgQuery('DELETE FROM publishing_attempts WHERE tenant_id = $1', [testTenant]);
