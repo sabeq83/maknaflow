@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.26 — Social Media Accounts Connection & Health Hub Modal (04/09/2026)
+- Added Social Media Accounts Connection & Health Hub modal in Content Flow Scheduler
+- Added action bar button for account status overview and live health check
+- Updated Repliz account management and reconnect link to https://repliz.com/user/account
+
 ## V2.29.25 — Fix Google Drive Direct 200 URL for TikTok Repliz Publishing (04/09/2026)
 - Ganti format URL Google Drive staging menjadi direct usercontent streamable HTTP 200
 - Perbaikan error internal TikTok akibat redirect HTTP 303

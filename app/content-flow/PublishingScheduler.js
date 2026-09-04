@@ -99,12 +99,16 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
   const [selectedMediaFileName, setSelectedMediaFileName] = useState('');
   const [showVideoPreview, setShowVideoPreview] = useState(false);
 
-  // Reschedule Modal State
+  // Reschedule & Account Connection Modal State
   const [rescheduleModalJob, setRescheduleModalJob] = useState(null);
   const [newScheduleTime, setNewScheduleTime] = useState('');
   const [submittingReschedule, setSubmittingReschedule] = useState(false);
   const [syncingJobId, setSyncingJobId] = useState(null);
   const [checkingHealthId, setCheckingHealthId] = useState(null);
+  const [checkingAllHealth, setCheckingAllHealth] = useState(false);
+  const [accountHealthMap, setAccountHealthMap] = useState({});
+  const [showAccountsModal, setShowAccountsModal] = useState(false);
+  const [accountFilterPlatform, setAccountFilterPlatform] = useState('all');
   const [confirmedReconnect, setConfirmedReconnect] = useState(false);
 
   // Toast
@@ -489,13 +493,24 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
     }
   };
 
-  // Check Account Health
+  // Check Account Health (Single)
   const handleCheckAccountHealth = async (accountId) => {
     setCheckingHealthId(accountId);
     try {
       const res = await fetch(`/api/v2/publishing/accounts/${accountId}/health`, { method: 'POST' });
       const json = await res.json();
       if (json.success && json.data) {
+        setAccountHealthMap(prev => ({
+          ...prev,
+          [accountId]: {
+            checked: true,
+            isConnected: json.data.isConnected,
+            status: json.data.status,
+            lastErrorCode: json.data.lastErrorCode,
+            lastErrorMessage: json.data.lastErrorMessage,
+            lastVerifiedAt: json.data.lastVerifiedAt
+          }
+        }));
         showToast(json.data.isConnected ? `Koneksi akun ${json.data.displayName} aktif & valid! 🟢` : `⚠️ ${json.data.lastErrorMessage || 'Akun terdeteksi terputus'}`);
         fetchAccounts();
       } else {
@@ -505,6 +520,51 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
       showToast(`Error: ${err.message} ❌`);
     } finally {
       setCheckingHealthId(null);
+    }
+  };
+
+  // Check All Accounts Health Batch
+  const handleCheckAllAccountsHealth = async () => {
+    if (!accounts || accounts.length === 0) {
+      showToast('Tidak ada akun terhubung untuk diperiksa');
+      return;
+    }
+    setCheckingAllHealth(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    try {
+      for (const acc of accounts) {
+        try {
+          const res = await fetch(`/api/v2/publishing/accounts/${acc.id}/health`, { method: 'POST' });
+          const json = await res.json();
+          if (json.success && json.data) {
+            setAccountHealthMap(prev => ({
+              ...prev,
+              [acc.id]: {
+                checked: true,
+                isConnected: json.data.isConnected,
+                status: json.data.status,
+                lastErrorCode: json.data.lastErrorCode,
+                lastErrorMessage: json.data.lastErrorMessage,
+                lastVerifiedAt: json.data.lastVerifiedAt
+              }
+            }));
+            if (json.data.isConnected) successCount++;
+            else failCount++;
+          } else {
+            failCount++;
+          }
+        } catch (_) {
+          failCount++;
+        }
+      }
+      await fetchAccounts();
+      showToast(`Pemeriksaan selesai: ${successCount} aktif 🟢, ${failCount} bermasalah ⚠️`);
+    } catch (err) {
+      showToast(`Gagal memeriksa akun: ${err.message} ❌`);
+    } finally {
+      setCheckingAllHealth(false);
     }
   };
 
@@ -781,6 +841,38 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
             }}
           >
             <span>{isPaused ? '▶ Lanjutkan Worker' : '⏸️ Pause Worker'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowAccountsModal(true)}
+            style={{
+              padding: '9px 15px',
+              background: 'var(--surface)',
+              border: '1px solid var(--border-strong)',
+              borderRadius: 8,
+              color: 'var(--text-primary)',
+              fontSize: 12,
+              fontWeight: 750,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 7,
+              transition: 'all 0.15s ease'
+            }}
+            title="Kelola koneksi akun sosial media dan periksa kesehatan sesi"
+          >
+            <span>🔗 Status & Koneksi Akun</span>
+            <span style={{
+              background: accounts.length > 0 ? 'rgba(34, 197, 94, 0.15)' : 'var(--surface-interactive)',
+              color: accounts.length > 0 ? '#4ade80' : 'var(--text-muted)',
+              border: `1px solid ${accounts.length > 0 ? 'rgba(34, 197, 94, 0.3)' : 'transparent'}`,
+              fontSize: 10,
+              padding: '1px 6px',
+              borderRadius: 10,
+              fontWeight: 800
+            }}>
+              {accounts.length}
+            </span>
           </button>
           <button
             onClick={() => setShowScheduleModal(true)}
@@ -1226,7 +1318,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                         💡 <strong>Langkah Perbaikan:</strong> Buka akun Anda di dashboard Repliz, perbarui izin akses / sambungkan ulang akun Facebook Page, lalu centang konfirmasi di bawah.
                       </div>
                       <a
-                        href="https://app.repliz.com"
+                        href="https://repliz.com/user/account"
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{
@@ -1244,7 +1336,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                           textDecoration: 'none'
                         }}
                       >
-                        <span>↗️ Buka Dashboard Repliz</span>
+                        <span>↗️ Kelola & Reconnect Akun di Repliz</span>
                       </a>
                       <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--text-secondary)', cursor: 'pointer' }}>
                         <input
@@ -2092,6 +2184,349 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
               >
                 🔗 Hubungkan Ulang Google
               </a>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Modal: Accounts Connection & Health Hub */}
+      {showAccountsModal && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)',
+          backdropFilter: 'blur(8px)', display: 'grid', placeItems: 'center', zIndex: 9999, padding: 16
+        }}>
+          <div style={{
+            background: 'var(--surface)', border: '1px solid var(--border-strong)', borderRadius: 16,
+            width: '100%', maxWidth: 840, maxHeight: '90vh', display: 'flex', flexDirection: 'column',
+            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.7)', overflow: 'hidden', color: 'var(--text-primary)'
+          }}>
+            {/* Modal Header */}
+            <div style={{
+              padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: 'rgba(255,255,255,0.02)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{
+                  width: 36, height: 36, borderRadius: 10, background: 'rgba(168, 85, 247, 0.15)',
+                  border: '1px solid rgba(168, 85, 247, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 18
+                }}>
+                  🔗
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>
+                    Status & Koneksi Akun Sosial Media
+                  </h3>
+                  <p style={{ margin: 0, fontSize: 11, color: 'var(--text-muted)' }}>
+                    Kelola akun terhubung (Meta & Repliz), pantau status sesi, dan lakukan health check real-time.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAccountsModal(false)}
+                style={{
+                  background: 'transparent', border: 'none', color: 'var(--text-muted)',
+                  fontSize: 18, cursor: 'pointer', padding: '4px 8px', borderRadius: 6
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Top Hub Banner: Repliz Account Link & Global Actions */}
+            <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border-subtle)', background: 'rgba(0,0,0,0.2)' }}>
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%)',
+                border: '1px solid rgba(168, 85, 247, 0.25)', borderRadius: 12, padding: '12px 16px',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12
+              }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: '#e0e7ff', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span>⚡ Integrasi Akun Repliz</span>
+                    <span style={{ fontSize: 10, background: 'rgba(59, 130, 246, 0.25)', color: '#93c5fd', padding: '1px 6px', borderRadius: 6, fontWeight: 700 }}>
+                      TikTok · FB · IG · Threads · YouTube · LinkedIn
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>
+                    Tambah akun baru atau reconnect akun yang kedaluwarsa langsung di dashboard Repliz.
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <a
+                    href="https://repliz.com/user/account"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 6,
+                      background: 'linear-gradient(135deg, var(--status-neutral) 0%, #2563eb 100%)',
+                      border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '7px 14px',
+                      borderRadius: 8, fontSize: 11, fontWeight: 800, textDecoration: 'none',
+                      boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)'
+                    }}
+                  >
+                    <span>↗️ Kelola di Repliz</span>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => fetchAccounts(true)}
+                    disabled={syncingAccounts}
+                    style={{
+                      padding: '7px 12px', background: 'var(--surface)', border: '1px solid var(--border-strong)',
+                      color: 'var(--text-primary)', borderRadius: 8, fontSize: 11, fontWeight: 750,
+                      cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5
+                    }}
+                  >
+                    <span>{syncingAccounts ? '⏳ Menyinkronkan...' : '🔄 Sinkronkan Akun'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCheckAllAccountsHealth}
+                    disabled={checkingAllHealth || accounts.length === 0}
+                    style={{
+                      padding: '7px 12px', background: 'var(--status-info-soft)', border: '1px solid var(--status-info)',
+                      color: 'var(--link)', borderRadius: 8, fontSize: 11, fontWeight: 750,
+                      cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5
+                    }}
+                  >
+                    <span>{checkingAllHealth ? '⏳ Memeriksa Semua...' : '🔍 Periksa Semua Akun'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Platform Filter Tabs */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 6, padding: '10px 20px',
+              borderBottom: '1px solid var(--border-subtle)', overflowX: 'auto', background: 'rgba(255,255,255,0.01)'
+            }}>
+              {[
+                { key: 'all', label: 'Semua Akun', icon: '🌐', count: accounts.length },
+                { key: 'tiktok', label: 'TikTok', icon: '🎵', count: accounts.filter(a => a.platform === 'tiktok').length },
+                { key: 'instagram', label: 'Instagram', icon: '📸', count: accounts.filter(a => a.platform === 'instagram').length },
+                { key: 'facebook', label: 'Facebook', icon: '📘', count: accounts.filter(a => a.platform === 'facebook').length },
+                { key: 'youtube', label: 'YouTube', icon: '🎥', count: accounts.filter(a => a.platform === 'youtube').length },
+                { key: 'threads', label: 'Threads', icon: '🧵', count: accounts.filter(a => a.platform === 'threads').length },
+                { key: 'linkedin', label: 'LinkedIn', icon: '💼', count: accounts.filter(a => a.platform === 'linkedin').length }
+              ].filter(tab => tab.key === 'all' || tab.count > 0).map(tab => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setAccountFilterPlatform(tab.key)}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                    padding: '5px 12px', borderRadius: 20, fontSize: 11, fontWeight: 750,
+                    cursor: 'pointer', border: '1px solid',
+                    background: accountFilterPlatform === tab.key ? 'var(--status-neutral)' : 'transparent',
+                    borderColor: accountFilterPlatform === tab.key ? 'var(--status-neutral)' : 'var(--border-subtle)',
+                    color: accountFilterPlatform === tab.key ? '#fff' : 'var(--text-secondary)'
+                  }}
+                >
+                  <span>{tab.icon}</span>
+                  <span>{tab.label}</span>
+                  <span style={{
+                    fontSize: 10, padding: '1px 5px', borderRadius: 10,
+                    background: accountFilterPlatform === tab.key ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.08)'
+                  }}>
+                    {tab.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* Accounts Scrollable List */}
+            <div style={{ padding: 20, overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {(() => {
+                const filtered = accounts.filter(a => accountFilterPlatform === 'all' ? true : a.platform === accountFilterPlatform);
+                if (filtered.length === 0) {
+                  return (
+                    <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
+                      <div style={{ fontSize: 32, marginBottom: 8 }}>📭</div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>
+                        Belum ada akun sosial media yang terdaftar
+                      </div>
+                      <div style={{ fontSize: 11, marginTop: 4 }}>
+                        Hubungkan akun Anda di Repliz lalu klik "Sinkronkan Akun" di atas.
+                      </div>
+                      <a
+                        href="https://repliz.com/user/account"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 14,
+                          background: 'var(--status-info-soft)', border: '1px solid var(--status-info)',
+                          color: '#93c5fd', padding: '6px 14px', borderRadius: 6, fontSize: 11, fontWeight: 700, textDecoration: 'none'
+                        }}
+                      >
+                        ↗️ Buka repliz.com/user/account
+                      </a>
+                    </div>
+                  );
+                }
+
+                return filtered.map((acc) => {
+                  const health = accountHealthMap[acc.id];
+                  const isChecking = checkingHealthId === acc.id || checkingAllHealth;
+                  const isConnected = health ? health.isConnected : (acc.status !== 'disconnected' && acc.status !== 'inactive');
+                  const errorMsg = health?.lastErrorMessage || acc.last_error_message;
+                  const platformIcon = acc.platform === 'tiktok' ? '🎵' :
+                                       acc.platform === 'instagram' ? '📸' :
+                                       acc.platform === 'facebook' ? '📘' :
+                                       acc.platform === 'youtube' ? '🎥' :
+                                       acc.platform === 'threads' ? '🧵' :
+                                       acc.platform === 'linkedin' ? '💼' : '🌐';
+                  const platformColor = acc.platform === 'tiktok' ? '#00f2fe' :
+                                        acc.platform === 'instagram' ? '#ec4899' :
+                                        acc.platform === 'facebook' ? '#3b82f6' :
+                                        acc.platform === 'youtube' ? '#ef4444' :
+                                        acc.platform === 'threads' ? '#ffffff' :
+                                        acc.platform === 'linkedin' ? '#0a66c2' : '#a855f7';
+
+                  return (
+                    <div
+                      key={acc.id}
+                      style={{
+                        background: '#0b111d', border: `1px solid ${isConnected ? '#222d41' : 'rgba(239, 68, 68, 0.4)'}`,
+                        borderRadius: 10, padding: 14, display: 'flex', flexDirection: 'column', gap: 10
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <div style={{
+                            width: 38, height: 38, borderRadius: 8,
+                            background: `linear-gradient(135deg, ${platformColor}22, ${platformColor}11)`,
+                            border: `1px solid ${platformColor}44`,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18
+                          }}>
+                            {platformIcon}
+                          </div>
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>
+                                {acc.display_name}
+                              </span>
+                              <span style={{
+                                fontSize: 10, padding: '1px 6px', borderRadius: 4, fontWeight: 700,
+                                background: acc.provider === 'repliz' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(168, 85, 247, 0.15)',
+                                color: acc.provider === 'repliz' ? '#93c5fd' : '#d8b4fe',
+                                border: `1px solid ${acc.provider === 'repliz' ? 'rgba(59, 130, 246, 0.3)' : 'rgba(168, 85, 247, 0.3)'}`
+                              }}>
+                                {acc.provider === 'repliz' ? 'Repliz API' : 'Meta Direct API'}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <span>Platform: <strong style={{ color: 'var(--text-secondary)' }}>{acc.platform.toUpperCase()}</strong></span>
+                              <span>·</span>
+                              <span>ID: <code style={{ fontSize: 10, color: 'var(--text-muted)' }}>{acc.provider_account_id || acc.facebook_page_id || acc.id}</code></span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Status Badge & Action Buttons */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          {isChecking ? (
+                            <span style={{
+                              display: 'inline-flex', alignItems: 'center', gap: 4,
+                              background: 'rgba(234, 179, 8, 0.15)', color: '#facc15',
+                              border: '1px solid rgba(234, 179, 8, 0.3)', padding: '3px 8px',
+                              borderRadius: 6, fontSize: 11, fontWeight: 700
+                            }}>
+                              ⏳ Memeriksa...
+                            </span>
+                          ) : isConnected ? (
+                            <span style={{
+                              display: 'inline-flex', alignItems: 'center', gap: 4,
+                              background: 'rgba(34, 197, 94, 0.15)', color: '#4ade80',
+                              border: '1px solid rgba(34, 197, 94, 0.3)', padding: '3px 8px',
+                              borderRadius: 6, fontSize: 11, fontWeight: 700
+                            }}>
+                              🟢 Aktif & Valid
+                            </span>
+                          ) : (
+                            <span style={{
+                              display: 'inline-flex', alignItems: 'center', gap: 4,
+                              background: 'rgba(239, 68, 68, 0.15)', color: '#f87171',
+                              border: '1px solid rgba(239, 68, 68, 0.3)', padding: '3px 8px',
+                              borderRadius: 6, fontSize: 11, fontWeight: 700
+                            }}>
+                              🔴 Perlu Reconnect
+                            </span>
+                          )}
+
+                          <button
+                            type="button"
+                            disabled={isChecking}
+                            onClick={() => handleCheckAccountHealth(acc.id)}
+                            style={{
+                              padding: '5px 10px', background: 'var(--surface)', border: '1px solid var(--surface-interactive)',
+                              color: 'var(--text-secondary)', borderRadius: 6, fontSize: 10, fontWeight: 700, cursor: 'pointer'
+                            }}
+                          >
+                            {isChecking ? '⏳' : '🔍 Periksa Status'}
+                          </button>
+
+                          {!isConnected && acc.provider === 'repliz' && (
+                            <a
+                              href="https://repliz.com/user/account"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                padding: '5px 10px', background: 'var(--status-info-soft)', border: '1px solid var(--status-info)',
+                                color: '#93c5fd', borderRadius: 6, fontSize: 10, fontWeight: 700, textDecoration: 'none',
+                                display: 'inline-flex', alignItems: 'center', gap: 4
+                              }}
+                            >
+                              🔗 Reconnect
+                            </a>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Error Banner if Disconnected */}
+                      {!isConnected && errorMsg && (
+                        <div style={{
+                          background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)',
+                          borderRadius: 6, padding: '8px 12px', fontSize: 11, color: '#fca5a5',
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10
+                        }}>
+                          <span>⚠️ {errorMsg}</span>
+                          {acc.provider === 'repliz' && (
+                            <a
+                              href="https://repliz.com/user/account"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ color: '#93c5fd', fontWeight: 700, textDecoration: 'underline', fontSize: 11, whiteSpace: 'nowrap' }}
+                            >
+                              Buka Repliz Account ↗️
+                            </a>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{
+              padding: '12px 20px', borderTop: '1px solid var(--border-subtle)',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: 'rgba(255,255,255,0.02)'
+            }}>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                💡 Reconnect hanya diperlukan jika sesi OAuth kedaluwarsa atau password/izin diubah.
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAccountsModal(false)}
+                style={{
+                  padding: '7px 16px', background: 'var(--surface)', border: '1px solid var(--border-strong)',
+                  color: 'var(--text-primary)', borderRadius: 8, fontSize: 11, fontWeight: 800, cursor: 'pointer'
+                }}
+              >
+                Tutup
+              </button>
             </div>
           </div>
         </div>
