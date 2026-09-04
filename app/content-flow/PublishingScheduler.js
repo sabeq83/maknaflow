@@ -109,6 +109,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
   const [accountHealthMap, setAccountHealthMap] = useState({});
   const [showAccountsModal, setShowAccountsModal] = useState(false);
   const [accountFilterPlatform, setAccountFilterPlatform] = useState('all');
+  const [accountSearchQuery, setAccountSearchQuery] = useState('');
   const [confirmedReconnect, setConfirmedReconnect] = useState(false);
 
   // Toast
@@ -1489,9 +1490,9 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
           display: 'grid', placeItems: 'center', zIndex: 9999, padding: 16
         }}>
           <div style={{
-            background: 'var(--surface)', border: '1px solid var(--surface-interactive)', borderRadius: 14,
-            width: '100%', maxWidth: 540, padding: 22, color: 'var(--text-primary)', boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
-            maxHeight: '85vh', overflowY: 'auto'
+            background: 'var(--surface)', border: '1px solid var(--border-strong)', borderRadius: 16,
+            width: '100%', maxWidth: 840, padding: 24, color: 'var(--text-primary)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.7)',
+            maxHeight: '90vh', overflowY: 'auto'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Jadwalkan Publikasi Konten</h3>
@@ -1505,7 +1506,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
 
             <form onSubmit={handleScheduleSubmit}>
               {/* 1. Searchable Video ID Combobox */}
-              <div style={{ marginBottom: 12, position: 'relative', width: '100%', maxWidth: 360 }}>
+              <div style={{ marginBottom: 12, position: 'relative', width: '100%' }}>
                 <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>
                   <span>ID Konten / Video ID <span style={{ color: 'var(--status-danger)' }}>*</span></span>
                   <span style={{ color: 'var(--link)', fontWeight: 400, fontSize: 10 }}>Ketik untuk mencari di Video Library</span>
@@ -1567,7 +1568,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
 
               {/* 2. Pilih Akun Publikasi */}
               <div style={{ marginBottom: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, flexWrap: 'wrap', gap: 6 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, flexWrap: 'wrap', gap: 6 }}>
                   <label style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700 }}>
                     Pilih Akun Publikasi <span style={{ color: 'var(--status-danger)' }}>*</span>
                   </label>
@@ -1642,75 +1643,148 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                     <span>{syncingAccounts ? 'Menyinkronkan...' : 'Sinkronkan'}</span>
                   </button>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 130, overflowY: 'auto', background: 'var(--surface)', padding: 8, borderRadius: 6, border: '1px solid var(--surface-interactive)' }}>
-                  {accounts.filter(acc => (acc.provider || 'meta') === (scheduleForm.activeTabProvider || 'meta')).length === 0 ? (
-                    <div style={{ color: 'var(--text-muted)', fontSize: 11, padding: 6, textAlign: 'center' }}>
-                      Belum ada akun {(scheduleForm.activeTabProvider || 'meta') === 'meta' ? 'Meta' : 'Repliz'} terdeteksi. Silakan klik tombol <strong>"Sinkronkan"</strong> di atas.
-                    </div>
-                  ) : (
-                    accounts.filter(acc => (acc.provider || 'meta') === (scheduleForm.activeTabProvider || 'meta')).map(acc => (
-                      <label key={acc.id} style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: '4px 8px', borderRadius: 4, background: scheduleForm.account_ids.includes(acc.id) ? 'var(--status-info-soft)' : 'transparent',
-                        fontSize: 12, cursor: 'pointer'
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <input
-                            type="checkbox"
-                            checked={scheduleForm.account_ids.includes(acc.id)}
-                            onChange={(e) => {
-                              const isChecked = e.target.checked;
-                              const next = isChecked
-                                ? [...scheduleForm.account_ids, acc.id]
-                                : scheduleForm.account_ids.filter(id => id !== acc.id);
-                              const nextSchedules = { ...(scheduleForm.account_schedules || {}) };
-                              if (isChecked && !nextSchedules[acc.id]) {
-                                nextSchedules[acc.id] = scheduleForm.scheduled_at || defaultScheduleTime;
-                              } else if (!isChecked) {
-                                delete nextSchedules[acc.id];
-                              }
-                              // Auto-check is_ai_generated jika ada akun TikTok yang dipilih
-                              const selectedAccs = accounts.filter(a => next.includes(a.id));
-                              const hasTikTok = selectedAccs.some(a => a.platform === 'tiktok');
-                              const nextAiGenerated = hasTikTok ? true : scheduleForm.is_ai_generated;
 
-                              setScheduleForm(previous => ({
-                                ...previous,
-                                account_ids: next,
-                                account_schedules: nextSchedules,
-                                is_ai_generated: nextAiGenerated
-                              }));
-
-                            }}
-                          />
-                          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{acc.display_name}</span>
-                        </div>
-                        <span style={{
-                          fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 10,
-                          background: acc.platform === 'instagram' ? 'rgba(236, 72, 153, 0.2)' : 
-                                      acc.platform === 'facebook' ? 'rgba(59, 130, 246, 0.2)' :
-                                      acc.platform === 'threads' ? 'rgba(255, 255, 255, 0.1)' :
-                                      acc.platform === 'tiktok' ? 'rgba(0, 242, 254, 0.2)' :
-                                      acc.platform === 'linkedin' ? 'rgba(10, 102, 194, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                          color: acc.platform === 'instagram' ? '#f472b6' : 
-                                 acc.platform === 'facebook' ? '#60a5fa' :
-                                 acc.platform === 'threads' ? '#ffffff' :
-                                 acc.platform === 'tiktok' ? '#00F2FE' :
-                                 acc.platform === 'linkedin' ? '#0a66c2' : '#f87171',
-                          border: `1px solid ${
-                            acc.platform === 'instagram' ? '#ec4899' : 
-                            acc.platform === 'facebook' ? '#3b82f6' :
-                            acc.platform === 'threads' ? '#ffffff' :
-                            acc.platform === 'tiktok' ? '#00F2FE' :
-                            acc.platform === 'linkedin' ? '#0a66c2' : '#ef4444'
-                          }`
-                        }}>
-                          {acc.platform ? acc.platform.toUpperCase() : ''}
-                        </span>
-                      </label>
-                    ))
+                {/* Input Pencarian Akun */}
+                <div style={{ marginBottom: 6, position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <span style={{ position: 'absolute', left: 8, fontSize: 11, color: 'var(--text-muted)', pointerEvents: 'none' }}>🔍</span>
+                  <input
+                    type="text"
+                    value={accountSearchQuery}
+                    onChange={(e) => setAccountSearchQuery(e.target.value)}
+                    placeholder="Cari nama akun, platform (tiktok, ig, fb, youtube), atau ID..."
+                    style={{
+                      width: '100%',
+                      background: 'var(--surface)',
+                      border: '1px solid var(--surface-interactive)',
+                      borderRadius: 6,
+                      padding: '6px 28px 6px 26px',
+                      fontSize: 11,
+                      color: 'var(--text-primary)',
+                      outline: 'none'
+                    }}
+                  />
+                  {accountSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setAccountSearchQuery('')}
+                      style={{
+                        position: 'absolute', right: 6, background: 'transparent', border: 'none',
+                        color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer', padding: '2px 4px'
+                      }}
+                      title="Hapus pencarian"
+                    >
+                      ✕
+                    </button>
                   )}
                 </div>
+
+                {/* Counter status hasil filter */}
+                {(() => {
+                  const providerAccounts = accounts.filter(acc => (acc.provider || 'meta') === (scheduleForm.activeTabProvider || 'meta'));
+                  const displayedAccounts = providerAccounts.filter(acc => {
+                    if (!accountSearchQuery.trim()) return true;
+                    const q = accountSearchQuery.toLowerCase().trim();
+                    const nameMatch = (acc.display_name || '').toLowerCase().includes(q);
+                    const platformMatch = (acc.platform || '').toLowerCase().includes(q);
+                    const idMatch = String(acc.provider_account_id || acc.facebook_page_id || acc.instagram_user_id || acc.id || '').toLowerCase().includes(q);
+                    return nameMatch || platformMatch || idMatch;
+                  });
+
+                  return (
+                    <>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 10, color: 'var(--text-muted)', marginBottom: 6, padding: '0 2px' }}>
+                        <span>
+                          Menampilkan {displayedAccounts.length} dari {providerAccounts.length} akun
+                        </span>
+                        {scheduleForm.account_ids.length > 0 && (
+                          <span style={{ color: 'var(--link)', fontWeight: 700 }}>
+                            ✓ {scheduleForm.account_ids.length} akun dipilih
+                          </span>
+                        )}
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 150, overflowY: 'auto', background: 'var(--surface)', padding: 8, borderRadius: 6, border: '1px solid var(--surface-interactive)' }}>
+                        {providerAccounts.length === 0 ? (
+                          <div style={{ color: 'var(--text-muted)', fontSize: 11, padding: 6, textAlign: 'center' }}>
+                            Belum ada akun {(scheduleForm.activeTabProvider || 'meta') === 'meta' ? 'Meta' : 'Repliz'} terdeteksi. Silakan klik tombol <strong>"Sinkronkan"</strong> di atas.
+                          </div>
+                        ) : displayedAccounts.length === 0 ? (
+                          <div style={{ color: 'var(--text-muted)', fontSize: 11, padding: 8, textAlign: 'center' }}>
+                            Tidak ada akun yang cocok dengan <em>"{accountSearchQuery}"</em>.{' '}
+                            <button
+                              type="button"
+                              onClick={() => setAccountSearchQuery('')}
+                              style={{ background: 'transparent', border: 'none', color: 'var(--link)', cursor: 'pointer', fontSize: 11, textDecoration: 'underline' }}
+                            >
+                              Reset pencarian
+                            </button>
+                          </div>
+                        ) : (
+                          displayedAccounts.map(acc => (
+                            <label key={acc.id} style={{
+                              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                              padding: '4px 8px', borderRadius: 4, background: scheduleForm.account_ids.includes(acc.id) ? 'var(--status-info-soft)' : 'transparent',
+                              fontSize: 12, cursor: 'pointer'
+                            }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <input
+                                  type="checkbox"
+                                  checked={scheduleForm.account_ids.includes(acc.id)}
+                                  onChange={(e) => {
+                                    const isChecked = e.target.checked;
+                                    const next = isChecked
+                                      ? [...scheduleForm.account_ids, acc.id]
+                                      : scheduleForm.account_ids.filter(id => id !== acc.id);
+                                    const nextSchedules = { ...(scheduleForm.account_schedules || {}) };
+                                    if (isChecked && !nextSchedules[acc.id]) {
+                                      nextSchedules[acc.id] = scheduleForm.scheduled_at || defaultScheduleTime;
+                                    } else if (!isChecked) {
+                                      delete nextSchedules[acc.id];
+                                    }
+                                    // Auto-check is_ai_generated jika ada akun TikTok yang dipilih
+                                    const selectedAccs = accounts.filter(a => next.includes(a.id));
+                                    const hasTikTok = selectedAccs.some(a => a.platform === 'tiktok');
+                                    const nextAiGenerated = hasTikTok ? true : scheduleForm.is_ai_generated;
+
+                                    setScheduleForm(previous => ({
+                                      ...previous,
+                                      account_ids: next,
+                                      account_schedules: nextSchedules,
+                                      is_ai_generated: nextAiGenerated
+                                    }));
+                                  }}
+                                />
+                                <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{acc.display_name}</span>
+                              </div>
+                              <span style={{
+                                fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 10,
+                                background: acc.platform === 'instagram' ? 'rgba(236, 72, 153, 0.2)' : 
+                                            acc.platform === 'facebook' ? 'rgba(59, 130, 246, 0.2)' :
+                                            acc.platform === 'threads' ? 'rgba(255, 255, 255, 0.1)' :
+                                            acc.platform === 'tiktok' ? 'rgba(0, 242, 254, 0.2)' :
+                                            acc.platform === 'linkedin' ? 'rgba(10, 102, 194, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                                color: acc.platform === 'instagram' ? '#f472b6' : 
+                                       acc.platform === 'facebook' ? '#60a5fa' :
+                                       acc.platform === 'threads' ? '#ffffff' :
+                                       acc.platform === 'tiktok' ? '#00F2FE' :
+                                       acc.platform === 'linkedin' ? '#0a66c2' : '#f87171',
+                                border: `1px solid ${
+                                  acc.platform === 'instagram' ? '#ec4899' : 
+                                  acc.platform === 'facebook' ? '#3b82f6' :
+                                  acc.platform === 'threads' ? '#ffffff' :
+                                  acc.platform === 'tiktok' ? '#00F2FE' :
+                                  acc.platform === 'linkedin' ? '#0a66c2' : '#ef4444'
+                                }`
+                              }}>
+                                {acc.platform ? acc.platform.toUpperCase() : ''}
+                              </span>
+                            </label>
+                          ))
+                        )}
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
 
               {/* 3. Mode Publikasi & Tipe Media */}

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.27 — Quick Account Search & Schedule Modal Width Alignment (04/09/2026)
+- Added instant multi-attribute account search filter in Content Flow Scheduling Modal
+- Aligned scheduling modal width to 840px matching accounts hub
+- Expanded video combobox input to full width for comfortable layout
+
 ## V2.29.26 — Social Media Accounts Connection & Health Hub Modal (04/09/2026)
 - Added Social Media Accounts Connection & Health Hub modal in Content Flow Scheduler
 - Added action bar button for account status overview and live health check
