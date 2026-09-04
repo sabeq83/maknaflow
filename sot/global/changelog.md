@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.29.28 — Schedule Modal Simplification, Locked Media Type and 10m WIB Default (04/09/2026)
+- Locked media type to auto-detected vertical reels badge in schedule modal
+- Removed cloud file selector and raw URL inputs for clean intuitive layout
+- Integrated automatic large video preview player
+- Set default schedule time to precise +10 minutes in Asia/Jakarta WIB timezone
+
 ## V2.29.27 — Quick Account Search & Schedule Modal Width Alignment (04/09/2026)
 - Added instant multi-attribute account search filter in Content Flow Scheduling Modal
 - Aligned scheduling modal width to 840px matching accounts hub

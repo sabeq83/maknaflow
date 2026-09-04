@@ -62,8 +62,25 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
   const [isPaused, setIsPaused] = useState(false);
   const [togglingPause, setTogglingPause] = useState(false);
 
+  // Helper Waktu Tayang Default: +10 Menit dari Sekarang (Zona WIB / Asia/Jakarta)
+  const getWibNowPlusMinutes = (minutes = 10) => {
+    const targetDate = new Date(Date.now() + minutes * 60 * 1000);
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Jakarta',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+    const parts = formatter.formatToParts(targetDate);
+    const get = (type) => parts.find(p => p.type === type)?.value;
+    return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}`;
+  };
+
   // Schedule Modal State
-  const defaultScheduleTime = new Date(Date.now() + 3600000).toISOString().slice(0, 16);
+  const defaultScheduleTime = getWibNowPlusMinutes(10);
   const [showScheduleModal, setShowScheduleModal] = useState(Boolean(initialPreloadItem));
   const [scheduleForm, setScheduleForm] = useState({
     content_id: initialPreloadItem?.video_id || '',
@@ -1787,7 +1804,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                 })()}
               </div>
 
-              {/* 3. Mode Publikasi & Tipe Media */}
+              {/* 3. Mode Publikasi & Tipe Media (Locked) */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
                 <div>
                   <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>Mode Publikasi</label>
@@ -1802,125 +1819,52 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>
-                    Tipe Media <span style={{ color: 'var(--link)', fontWeight: 400 }}>(Autoload)</span>
+                    Tipe Media <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>🔒 (Terkunci)</span>
                   </label>
-                  <select
-                    value={scheduleForm.media_type}
-                    onChange={(e) => setScheduleForm({ ...scheduleForm, media_type: e.target.value })}
-                    style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}
-                  >
-                    <option value="reels">📱 Reel Vertikal (Facebook/Instagram)</option>
-                    <option value="video">🎬 Video Page / Feed</option>
-                    <option value="image">🖼️ Gambar / Foto (JPEG/PNG)</option>
-                    <option value="text_only">📝 Teks Saja</option>
-                  </select>
+                  <div style={{
+                    width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-interactive)',
+                    padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12, fontWeight: 700,
+                    display: 'flex', alignItems: 'center', gap: 6
+                  }}>
+                    <span>{scheduleForm.media_type === 'image' ? '🖼️ Gambar / Foto (Auto-detected)' : '📱 Reel Vertikal (TikTok / IG / FB)'}</span>
+                  </div>
                 </div>
               </div>
 
-              {/* 3.5. File Media di Folder Cloud (Auto-Scan) */}
-              {loadingMediaFiles ? (
-                <div style={{ marginBottom: 12, padding: '8px 12px', background: 'var(--status-info-soft)', borderRadius: 6, border: '1px dashed var(--status-info)', fontSize: 11, color: '#93c5fd', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span>⏳</span>
-                  <span>Memindai file media di folder Cloud...</span>
-                </div>
-              ) : folderMediaFiles.length > 0 ? (
-                <div style={{ marginBottom: 12, padding: '10px', background: 'var(--status-info-soft)', borderRadius: 6, border: '1px solid rgba(59,130,246,0.35)' }}>
+              {/* 4. Preview Media Konten (Otomatis & Lebih Besar) */}
+              {scheduleForm.media_url && (
+                <div style={{ marginBottom: 12 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                    <label style={{ fontSize: 11, color: 'var(--link)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span>📁</span>
-                      <span>Pilih File Media di Folder Cloud (Facebook Downloadable):</span>
+                    <label style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span>▶️</span>
+                      <span>Preview Media Konten</span>
+                      {selectedMediaFileName && (
+                        <span style={{ fontSize: 10, color: 'var(--link)', fontWeight: 600 }}>({selectedMediaFileName})</span>
+                      )}
                     </label>
-                    <span style={{ fontSize: 10, color: 'var(--link)', background: 'rgba(56,189,248,0.15)', padding: '2px 6px', borderRadius: 4 }}>
-                      {folderMediaFiles.length} file terdeteksi
-                    </span>
                   </div>
-                  <select
-                    value={selectedMediaFileName}
-                    onChange={(e) => handleSelectMediaFile(e.target.value)}
-                    style={{
-                      width: '100%', background: 'var(--surface)', border: '1px solid var(--status-info)', padding: '8px 10px',
-                      borderRadius: 6, color: 'var(--text-primary)', fontSize: 12, fontWeight: 500, outline: 'none'
-                    }}
-                  >
-                    {folderMediaFiles.map(file => (
-                      <option key={file.name} value={file.name}>
-                        {file.mediaType === 'video' ? '🎬 ' : (file.mediaType === 'image' ? '🖼️ ' : '📄 ')}
-                        {file.name} ({file.sizeFormatted}) {file.isRecommended ? '⭐ [Rekomendasi Utama]' : ''}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              ) : null}
-
-              {/* 4. URL Media Publik (Direct Downloadable .MP4) */}
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                  <label style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span>URL Media Publik</span>
-                    <span style={{ color: '#22c55e', fontSize: 10, fontWeight: 600 }}>⚡ Direct Downloadable .MP4</span>
-                  </label>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    {scheduleForm.media_url && (
-                      <button
-                        type="button"
-                        onClick={() => setShowVideoPreview(!showVideoPreview)}
-                        style={{
-                          background: showVideoPreview ? 'var(--status-danger-soft)' : 'var(--status-info-soft)',
-                          border: `1px solid ${showVideoPreview ? 'var(--status-danger)' : 'var(--status-info)'}`,
-                          color: showVideoPreview ? 'var(--status-danger)' : 'var(--link)',
-                          fontSize: 10, cursor: 'pointer', padding: '2px 8px', borderRadius: 4
-                        }}
-                      >
-                        {showVideoPreview ? '✕ Tutup Preview' : '▶️ Preview Media'}
-                      </button>
-                    )}
-                    {cloudBaseUrl && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (scheduleForm.media_url && !scheduleForm.media_url.startsWith('http')) {
-                            setScheduleForm(prev => ({
-                              ...prev,
-                              media_url: `${cloudBaseUrl.replace(/\/$/, '')}/${prev.media_url.replace(/^\//, '')}`
-                            }));
-                          } else if (!scheduleForm.media_url) {
-                            setScheduleForm(prev => ({ ...prev, media_url: cloudBaseUrl }));
-                          }
-                        }}
-                        style={{
-                          background: 'transparent', border: 'none', color: 'var(--link)',
-                          fontSize: 10, cursor: 'pointer', textDecoration: 'underline', padding: 0
-                        }}
-                      >
-                        ⚙️ Set Domain Cloud
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <input
-                  type="url"
-                  value={scheduleForm.media_url}
-                  onChange={(e) => setScheduleForm({ ...scheduleForm, media_url: e.target.value })}
-                  placeholder="https://cloud.ast402.my.id/index.php/s/TOKEN/download?files=video_final.mp4"
-                  style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}
-                />
-
-                {/* Mini Player Preview */}
-                {showVideoPreview && scheduleForm.media_url && (
-                  <div style={{ marginTop: 8, padding: 8, background: 'var(--surface)', borderRadius: 6, border: '1px solid #1e293b', textAlign: 'center' }}>
+                  <div style={{
+                    background: '#070b13', borderRadius: 10, border: '1px solid var(--border-subtle)',
+                    overflow: 'hidden', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center',
+                    maxHeight: 380, padding: 4
+                  }}>
                     {scheduleForm.media_type === 'image' ? (
-                      <img src={scheduleForm.media_url} alt="Preview" style={{ maxHeight: 200, maxWidth: '100%', borderRadius: 4, objectFit: 'contain' }} />
+                      <img
+                        src={scheduleForm.media_url}
+                        alt="Preview Media"
+                        style={{ maxHeight: 370, maxWidth: '100%', objectFit: 'contain', borderRadius: 6 }}
+                      />
                     ) : (
                       <video
                         src={scheduleForm.media_url}
                         controls
-                        autoPlay
-                        style={{ maxHeight: 220, maxWidth: '100%', borderRadius: 4, background: '#000' }}
+                        playsInline
+                        style={{ maxHeight: 370, maxWidth: '100%', width: 'auto', background: '#000', borderRadius: 6 }}
                       />
                     )}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
               {/* 5. Caption & Tag */}
               <div style={{ marginBottom: 12 }}>
