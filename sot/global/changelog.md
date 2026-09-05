@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.30 — Strict Phase 2 Approval Gating pada Campaign Scheduler (05/09/2026)
+- Implementasi strict whitelist approval gate pada skeduler OPC dan RE campaigns
+- Mencegah eksekusi prematur TTS/I2V/FFmpeg untuk item yang belum di-approve oleh pengguna
+- Mengunci item non-autopilot di Fase 1 hingga tombol Approve ditekan eksplisit
+
 ## V2.29.29 — Perbaikan UI Content Planner: Filter Brand, Pencarian Produk & Arsip (05/09/2026)
 - Filter by Brand Profile & Akun
 - Pencarian instan nama produk & judul planner
