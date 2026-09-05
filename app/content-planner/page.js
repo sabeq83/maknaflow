@@ -83,6 +83,13 @@ export default function ContentPlannerDashboard() {
   const [isAffiliateLinkLocked, setIsAffiliateLinkLocked] = useState(false);
   const [isNonAffiliate, setIsNonAffiliate] = useState(false);
   const [syncingIds, setSyncingIds] = useState({});
+
+  // Filter, Search & Archive View State
+  const [filterArchiveMode, setFilterArchiveMode] = useState('active'); // 'active', 'archived', 'all'
+  const [filterBrandId, setFilterBrandId] = useState('');
+  const [filterSearchQuery, setFilterSearchQuery] = useState('');
+  const [archivingIds, setArchivingIds] = useState({});
+
   const editorialCountOptions = getBrandEditorialCountOptions(pillars.length);
   const maxEditorialRowsPerPillar = editorialCountOptions.length;
   const effectiveEditorialRowsPerPillar = maxEditorialRowsPerPillar > 0
@@ -416,6 +423,33 @@ export default function ContentPlannerDashboard() {
     }
   }
 
+  async function handleToggleArchive(planner, e) {
+    if (e) e.stopPropagation();
+    const targetArchived = !planner.is_archived;
+    const actionText = targetArchived ? 'mengarsipkan' : 'memulihkan';
+    if (!confirm(`Yakin ingin ${actionText} Content Planner "${planner.title}"?`)) return;
+
+    try {
+      setArchivingIds(prev => ({ ...prev, [planner.id]: true }));
+      const res = await fetch(`/api/content-planner/${planner.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_archived: targetArchived })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message || (targetArchived ? 'Planner berhasil diarsipkan' : 'Planner berhasil dipulihkan'));
+        setPlanners(prev => prev.map(item => item.id === planner.id ? { ...item, is_archived: targetArchived } : item));
+      } else {
+        showToast('Gagal mengubah status arsip: ' + data.error, 'error');
+      }
+    } catch (err) {
+      showToast('Error: ' + err.message, 'error');
+    } finally {
+      setArchivingIds(prev => ({ ...prev, [planner.id]: false }));
+    }
+  }
+
   async function handleDeletePlanner(id, e) {
     e.stopPropagation();
     if (!confirm('Yakin ingin menghapus Content Planner ini beserta seluruh barisnya?')) return;
@@ -430,6 +464,54 @@ export default function ContentPlannerDashboard() {
       showToast('Gagal menghapus: ' + e.message, 'error');
     }
   }
+
+  // Derived filter & brand calculations
+  const activeCount = planners.filter(p => !p.is_archived).length;
+  const archivedCount = planners.filter(p => Boolean(p.is_archived)).length;
+
+  const brandOptions = (() => {
+    const map = new Map();
+    brandProfiles.forEach(b => {
+      if (b.id && b.brand_name) {
+        map.set(b.id, { id: b.id, name: b.brand_name });
+      }
+    });
+    planners.forEach(p => {
+      const name = p.brand_profile_name || p.account_name;
+      const id = p.brand_id;
+      if (id && !map.has(id)) {
+        map.set(id, { id, name: name || id });
+      } else if (!id && name && !Array.from(map.values()).some(v => v.name.toLowerCase() === name.toLowerCase())) {
+        map.set(name, { id: name, name });
+      }
+    });
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  })();
+
+  const filteredPlanners = planners.filter(p => {
+    if (filterArchiveMode === 'active' && p.is_archived) return false;
+    if (filterArchiveMode === 'archived' && !p.is_archived) return false;
+
+    if (filterBrandId) {
+      const pBrandId = p.brand_id || '';
+      const pBrandName = p.brand_profile_name || p.account_name || '';
+      const matches = pBrandId === filterBrandId || pBrandName.toLowerCase() === filterBrandId.toLowerCase();
+      if (!matches) return false;
+    }
+
+    if (filterSearchQuery.trim()) {
+      const q = filterSearchQuery.trim().toLowerCase();
+      const pName = (p.product_name || '').toLowerCase();
+      const pTitle = (p.title || '').toLowerCase();
+      const pBrandCtx = (p.brand_context || '').toLowerCase();
+      const pAcc = (p.brand_profile_name || p.account_name || '').toLowerCase();
+      if (!pName.includes(q) && !pTitle.includes(q) && !pBrandCtx.includes(q) && !pAcc.includes(q)) {
+        return false;
+      }
+    }
+
+    return true;
+  });
 
   return (
     <div className="app-layout">
@@ -473,7 +555,7 @@ export default function ContentPlannerDashboard() {
         )}
 
         {/* Header Section */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <h1 style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span>🗓️</span> Content Planner Web App
@@ -494,6 +576,138 @@ export default function ContentPlannerDashboard() {
           >
             <span>✨</span> Buat Content Planner Baru
           </button>
+        </div>
+
+        {/* Filter, Search & Archive Controls Bar */}
+        <div style={{
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--border-subtle)',
+          borderRadius: '14px',
+          padding: '16px 20px',
+          marginBottom: '24px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '16px'
+        }}>
+          {/* Status Tabs: Aktif / Arsip / Semua */}
+          <div style={{ display: 'flex', gap: '6px', background: 'var(--surface-interactive)', padding: '4px', borderRadius: '10px' }}>
+            {[
+              { id: 'active', label: '📁 Aktif', count: activeCount },
+              { id: 'archived', label: '📦 Arsip', count: archivedCount },
+              { id: 'all', label: '🌐 Semua', count: planners.length }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setFilterArchiveMode(tab.id)}
+                style={{
+                  padding: '7px 14px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  fontSize: '13px',
+                  fontWeight: filterArchiveMode === tab.id ? 700 : 500,
+                  background: filterArchiveMode === tab.id ? 'var(--action-primary)' : 'transparent',
+                  color: filterArchiveMode === tab.id ? 'var(--on-action-primary)' : 'var(--text-muted)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <span>{tab.label}</span>
+                <span style={{
+                  fontSize: '11px',
+                  padding: '1px 6px',
+                  borderRadius: '10px',
+                  background: filterArchiveMode === tab.id ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.06)',
+                  color: filterArchiveMode === tab.id ? 'inherit' : 'var(--text-secondary)',
+                  opacity: 0.9
+                }}>{tab.count}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Search & Brand Filter */}
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', flex: 1, justifyContent: 'flex-end' }}>
+            {/* Brand Filter */}
+            <div style={{ minWidth: '180px' }}>
+              <select
+                value={filterBrandId}
+                onChange={e => setFilterBrandId(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '9px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border-subtle)',
+                  background: 'var(--surface-interactive)',
+                  color: 'var(--text-primary)',
+                  fontSize: '13px',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="">🏢 Semua Brand</option>
+                {brandOptions.map(b => (
+                  <option key={b.id || b.name} value={b.id || b.name}>{b.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Product & Title Search Box */}
+            <div style={{ position: 'relative', minWidth: '220px', flex: 1, maxWidth: '340px' }}>
+              <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '13px' }}>🔍</span>
+              <input
+                type="text"
+                value={filterSearchQuery}
+                onChange={e => setFilterSearchQuery(e.target.value)}
+                placeholder="Cari produk / judul planner..."
+                style={{
+                  width: '100%',
+                  padding: '9px 30px 9px 34px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border-subtle)',
+                  background: 'var(--surface-interactive)',
+                  color: 'var(--text-primary)',
+                  fontSize: '13px',
+                  outline: 'none'
+                }}
+              />
+              {filterSearchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setFilterSearchQuery('')}
+                  style={{
+                    position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
+                    background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '13px'
+                  }}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            {/* Reset Filter Button if active */}
+            {(filterBrandId || filterSearchQuery || filterArchiveMode !== 'active') && (
+              <button
+                type="button"
+                onClick={() => { setFilterBrandId(''); setFilterSearchQuery(''); setFilterArchiveMode('active'); }}
+                style={{
+                  padding: '8px 12px',
+                  background: 'transparent',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: '8px',
+                  color: 'var(--text-muted)',
+                  fontSize: '12px',
+                  cursor: 'pointer'
+                }}
+                title="Reset semua filter"
+              >
+                ↺ Reset
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Planner List Grid */}
@@ -519,48 +733,108 @@ export default function ContentPlannerDashboard() {
               Buat Planner Pertama
             </button>
           </div>
+        ) : filteredPlanners.length === 0 ? (
+          <div style={{
+            padding: '48px 24px', textAlign: 'center', background: 'var(--bg-secondary)',
+            borderRadius: '16px', border: '1px solid var(--border-subtle)'
+          }}>
+            <div style={{ fontSize: '40px', marginBottom: '12px' }}>🔍</div>
+            <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '6px' }}>
+              Tidak ada planner yang sesuai filter
+            </h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '13px', maxWidth: '420px', margin: '0 auto 16px' }}>
+              Coba sesuaikan kata kunci pencarian, filter brand, atau beralih ke tab status lain.
+            </p>
+            <button
+              type="button"
+              onClick={() => { setFilterBrandId(''); setFilterSearchQuery(''); setFilterArchiveMode('all'); }}
+              style={{
+                padding: '8px 16px', background: 'var(--surface-interactive)', color: 'var(--text-primary)',
+                border: '1px solid var(--border-subtle)', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '13px'
+              }}
+            >
+              Tampilkan Semua Planner ({planners.length})
+            </button>
+          </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
-            {planners.map(p => {
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '20px' }}>
+            {filteredPlanners.map(p => {
               const isDraft = p.status === 'draft' || !p.row_count || p.row_count === 0;
               const isExecuting = executingIds[p.id] || p.status === 'generating';
+              const isArchived = Boolean(p.is_archived);
+              const isArchiving = archivingIds[p.id];
+              const brandLabel = p.brand_profile_name || p.account_name;
 
               return (
                 <div
                   key={p.id}
                   onClick={() => router.push(`/content-planner/${p.id}`)}
                   style={{
-                    background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '14px',
+                    background: isArchived ? 'rgba(30, 41, 59, 0.4)' : 'var(--bg-secondary)',
+                    border: isArchived ? '1px dashed var(--border-subtle)' : '1px solid var(--border-subtle)',
+                    borderRadius: '14px',
                     padding: '20px', cursor: 'pointer', transition: 'all 0.2s ease',
-                    position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'
+                    position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+                    opacity: isArchived ? 0.85 : 1
                   }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--status-neutral)'}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-subtle)'}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = isArchived ? 'var(--status-warning)' : 'var(--status-neutral)'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = isArchived ? 'var(--border-subtle)' : 'var(--border-subtle)'}
                 >
                   <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                      <h4 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{p.title}</h4>
+                    {/* Header Card: Title & Badges */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px', gap: '10px' }}>
+                      <h4 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', flex: 1, lineHeight: 1.3 }}>
+                        {p.title}
+                      </h4>
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
+                        {isArchived && (
+                          <span style={{
+                            fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px',
+                            background: 'var(--status-warning-soft)', color: 'var(--status-warning)'
+                          }}>
+                            📦 Terarsip
+                          </span>
+                        )}
+                        <span style={{
+                          fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px',
+                          background: isDraft ? 'var(--status-warning-soft)' : 'var(--status-success-soft)',
+                          color: isDraft ? 'var(--status-warning)' : 'var(--status-success)'
+                        }}>
+                          {isDraft ? 'Draft' : `${p.row_count || 0} Baris`}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Brand & Product Lineage */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px', fontSize: '12px' }}>
+                      {brandLabel && (
+                        <span style={{
+                          padding: '3px 8px', borderRadius: '6px', background: 'var(--surface-interactive)',
+                          color: 'var(--text-primary)', fontWeight: 600, border: '1px solid var(--border-subtle)',
+                          display: 'inline-flex', alignItems: 'center', gap: '4px'
+                        }}>
+                          🏢 {brandLabel}
+                        </span>
+                      )}
                       <span style={{
-                        fontSize: '11px', fontWeight: 700, padding: '4px 8px', borderRadius: '6px',
-                        background: isDraft ? 'var(--status-warning-soft)' : 'var(--status-success-soft)',
-                        color: isDraft ? 'var(--status-warning)' : 'var(--status-success)'
+                        padding: '3px 8px', borderRadius: '6px', background: 'var(--surface-interactive)',
+                        color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)',
+                        display: 'inline-flex', alignItems: 'center', gap: '4px'
                       }}>
-                        {isDraft ? 'Draft' : `${p.row_count || 0} Baris`}
+                        {p.planner_focus === 'brand_editorial' ? '🧩 Editorial' : `📦 ${p.product_name || 'Produk'}`}
                       </span>
                     </div>
-                    <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      {p.planner_focus === 'brand_editorial' ? '🧩 Brand Editorial' : `📦 ${p.product_name}`}
-                    </p>
                   </div>
 
                   <div>
+                    {/* Primary Action Button */}
                     {isDraft ? (
                       <button
                         type="button"
                         onClick={(e) => handleExecutePlanner(p.id, e)}
                         disabled={isExecuting}
                         style={{
-                          width: '100%', padding: '10px', marginBottom: '12px',
+                          width: '100%', padding: '10px', marginBottom: '10px',
                           background: isExecuting ? 'var(--status-neutral-soft)' : 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)',
                           color: 'var(--text-primary)', border: 'none', borderRadius: '8px', fontWeight: 700,
                           cursor: isExecuting ? 'not-allowed' : 'pointer', fontSize: '13px',
@@ -577,8 +851,8 @@ export default function ContentPlannerDashboard() {
                           onClick={(e) => handleSyncSheets(p.id, e)}
                           disabled={syncingIds[p.id]}
                           style={{
-                            width: '100%', padding: '8px 12px', marginBottom: '12px',
-                            background: syncingIds[p.id] ? 'var(--status-success-soft)' : 'var(--status-success-soft)',
+                            width: '100%', padding: '8px 12px', marginBottom: '10px',
+                            background: 'var(--status-success-soft)',
                             color: 'var(--status-success)', border: '1px solid var(--status-success)', borderRadius: '8px', fontWeight: 600,
                             cursor: syncingIds[p.id] ? 'not-allowed' : 'pointer', fontSize: '12px',
                             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
@@ -589,9 +863,55 @@ export default function ContentPlannerDashboard() {
                       ) : null
                     )}
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid #1f2937', fontSize: '12px', color: 'var(--text-muted)' }}>
-                      <span>📊 {p.row_count || 0} / {p.planner_count || 12} Baris Plan</span>
-                      <span>{new Date(p.created_at).toLocaleDateString('id-ID')}</span>
+                    {/* Secondary Actions & Footer Info */}
+                    <div style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      paddingTop: '10px', borderTop: '1px solid var(--border-subtle)', fontSize: '12px', color: 'var(--text-muted)'
+                    }}>
+                      <span>📊 {p.row_count || 0} / {p.planner_count || 12} Baris</span>
+                      
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                        {/* Archive / Restore Button */}
+                        <button
+                          type="button"
+                          onClick={(e) => handleToggleArchive(p, e)}
+                          disabled={isArchiving}
+                          title={isArchived ? 'Pulihkan dari arsip' : 'Arsipkan planner ini'}
+                          style={{
+                            padding: '4px 8px',
+                            background: isArchived ? 'var(--status-success-soft)' : 'var(--surface-interactive)',
+                            color: isArchived ? 'var(--status-success)' : 'var(--text-secondary)',
+                            border: `1px solid ${isArchived ? 'var(--status-success)' : 'var(--border-subtle)'}`,
+                            borderRadius: '6px',
+                            cursor: isArchiving ? 'not-allowed' : 'pointer',
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          {isArchiving ? '⏳' : (isArchived ? '🔄 Pulihkan' : '📦 Arsip')}
+                        </button>
+
+                        {/* Delete Button */}
+                        <button
+                          type="button"
+                          onClick={(e) => handleDeletePlanner(p.id, e)}
+                          title="Hapus planner permanen"
+                          style={{
+                            padding: '4px 8px',
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            color: 'var(--status-danger)',
+                            border: '1px solid rgba(239, 68, 68, 0.3)',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '11px'
+                          }}
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

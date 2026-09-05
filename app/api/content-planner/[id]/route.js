@@ -43,6 +43,7 @@ export const GET = withTenantContext(async (request, { params }, user) => {
       success: true,
       planner: {
         ...planner,
+        is_archived: Boolean(planner.is_archived),
         pillars: (() => { try { return JSON.parse(planner.pillars_json || '[]'); } catch (_) { return []; } })(),
         research: {
           revision_id: planner.research_revision_id || null,
@@ -57,6 +58,41 @@ export const GET = withTenantContext(async (request, { params }, user) => {
     });
   } catch (error) {
     console.error('[API /content-planner/[id] GET Error]', error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+});
+
+export const PATCH = withTenantContext(async (request, { params }, user) => {
+  try {
+    const { id } = await params;
+    const body = await request.json();
+    const db = getDb();
+
+    const planner = await db.prepare('SELECT id, is_archived FROM content_planners WHERE id = ?').get(id);
+    if (!planner) {
+      return NextResponse.json({ success: false, error: 'Planner tidak ditemukan.' }, { status: 404 });
+    }
+
+    if (body.is_archived !== undefined) {
+      const isArchived = Boolean(body.is_archived);
+      const archivedAt = isArchived ? new Date().toISOString() : null;
+      await db.prepare(`
+        UPDATE content_planners 
+        SET is_archived = ?, archived_at = ?, updated_at = CURRENT_TIMESTAMP 
+        WHERE id = ?
+      `).run(isArchived ? 1 : 0, archivedAt, id);
+
+      return NextResponse.json({
+        success: true,
+        message: isArchived ? 'Planner berhasil diarsipkan.' : 'Planner berhasil dipulihkan dari arsip.',
+        is_archived: isArchived,
+        archived_at: archivedAt
+      });
+    }
+
+    return NextResponse.json({ success: true, message: 'Data planner berhasil diperbarui.' });
+  } catch (error) {
+    console.error('[API /content-planner/[id] PATCH Error]', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 });

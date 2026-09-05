@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.29 — Perbaikan UI Content Planner: Filter Brand, Pencarian Produk & Arsip (05/09/2026)
+- Filter by Brand Profile & Akun
+- Pencarian instan nama produk & judul planner
+- Fitur arsip dan pemulihan content planner
+
 ## V2.29.28 — Schedule Modal Simplification, Locked Media Type and 10m WIB Default (04/09/2026)
 - Locked media type to auto-detected vertical reels badge in schedule modal
 - Removed cloud file selector and raw URL inputs for clean intuitive layout

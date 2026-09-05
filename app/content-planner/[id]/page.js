@@ -20,6 +20,7 @@ export default function ContentPlannerWorkbench() {
 
   const [executing, setExecuting] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [archiving, setArchiving] = useState(false);
   const [showOpcModal, setShowOpcModal] = useState(false);
 
   // Research UI State
@@ -141,6 +142,33 @@ export default function ContentPlannerWorkbench() {
   function showToast(msg, type = 'success') {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3500);
+  }
+
+  async function handleToggleArchive() {
+    if (!planner) return;
+    const targetArchived = !planner.is_archived;
+    const actionText = targetArchived ? 'mengarsipkan' : 'memulihkan';
+    if (!confirm(`Yakin ingin ${actionText} Content Planner ini?`)) return;
+
+    try {
+      setArchiving(true);
+      const res = await fetch(`/api/content-planner/${plannerId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_archived: targetArchived })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message || (targetArchived ? 'Planner berhasil diarsipkan' : 'Planner berhasil dipulihkan'));
+        setPlanner(prev => ({ ...prev, is_archived: targetArchived }));
+      } else {
+        showToast('Gagal mengubah status arsip: ' + data.error, 'error');
+      }
+    } catch (e) {
+      showToast('Error: ' + e.message, 'error');
+    } finally {
+      setArchiving(false);
+    }
   }
 
   async function toggleLock(row) {
@@ -273,6 +301,19 @@ export default function ContentPlannerWorkbench() {
               <h1 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
                 {planner?.title || 'Detail Content Planner'}
               </h1>
+              {planner?.is_archived && (
+                <span style={{
+                  background: 'var(--status-warning-soft)',
+                  color: 'var(--status-warning)',
+                  border: '1px solid var(--status-warning)',
+                  padding: '4px 12px',
+                  borderRadius: '20px',
+                  fontSize: '12px',
+                  fontWeight: 700
+                }}>
+                  📦 Terarsip
+                </span>
+              )}
               <span style={{
                 background: badgeStyle.bg,
                 color: badgeStyle.color,
@@ -301,6 +342,25 @@ export default function ContentPlannerWorkbench() {
 
           {/* Export & Sync Action Bar */}
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <button
+              onClick={handleToggleArchive}
+              disabled={archiving}
+              style={{
+                padding: '8px 14px',
+                background: planner?.is_archived ? 'var(--status-warning-soft)' : 'var(--surface-interactive)',
+                color: planner?.is_archived ? 'var(--status-warning)' : 'var(--text-secondary)',
+                border: `1px solid ${planner?.is_archived ? 'var(--status-warning)' : 'var(--border-subtle)'}`,
+                borderRadius: '8px',
+                fontWeight: 600,
+                cursor: archiving ? 'not-allowed' : 'pointer',
+                fontSize: '13px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              {archiving ? '⏳ Memproses...' : (planner?.is_archived ? '🔄 Pulihkan dari Arsip' : '📦 Arsipkan')}
+            </button>
             <button
               onClick={() => setShowOpcModal(true)}
               style={{ padding: '8px 14px', background: 'var(--status-neutral-soft)', color: 'var(--status-neutral)', border: '1px solid var(--status-neutral)', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', fontSize: '13px' }}
