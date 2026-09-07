@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar';
 import VisualIdentitySelector from '../components/VisualIdentitySelector';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { getWordsPerClipOptions, getDefaultWordsPerClip, VIDEO_MODELS } from '@/lib/words-per-clip-presets';
 
 const GEMINI_VOICES = [
   { id: 'Kore', name: 'Kore (Female)', avatar: '👩', desc: 'Standard Female (Skincare/Cosmetic)' },
@@ -83,6 +84,7 @@ export default function SheetsAutopilotDashboard() {
   const [aspectRatio, setAspectRatio] = useState('9:16');
   const [targetAi, setTargetAi] = useState('Google Veo (8s)');
   const [videoModel, setVideoModel] = useState('veo_31_lite');
+  const [clipDuration, setClipDuration] = useState(8);
   const [visualMode, setVisualMode] = useState('hybrid_lock');
   const [wordsPerClip, setWordsPerClip] = useState('17-19 kata');
   const [faceVisibility, setFaceVisibility] = useState('Faceless');
@@ -259,6 +261,7 @@ export default function SheetsAutopilotDashboard() {
       aspect_ratio: aspectRatio,
       target_ai: targetAi,
       video_model: videoModel,
+      clip_duration: clipDuration,
       visual_mode: visualMode,
       words_per_clip: wordsPerClip,
       face_visibility: faceVisibility,
@@ -389,6 +392,7 @@ export default function SheetsAutopilotDashboard() {
       setAspectRatio(c.aspect_ratio || '9:16');
       setTargetAi(c.target_ai || 'Google Veo (8s)');
       setVideoModel(c.video_model || 'veo_31_lite');
+      setClipDuration(c.clip_duration || 8);
       setVisualMode(c.visual_mode || 'hybrid_lock');
       setWordsPerClip(c.words_per_clip || '17-19 kata');
       setFaceVisibility(c.face_visibility || 'Faceless');
@@ -825,11 +829,44 @@ export default function SheetsAutopilotDashboard() {
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                             <div>
                               <label className="form-label">Video Model</label>
-                              <select className="form-input" value={videoModel} onChange={e => setVideoModel(e.target.value)}>
-                                <option value="veo_31_lite">Veo 3.1 Lite</option>
-                                <option value="veo_3_1">Veo 3.1 Standard</option>
+                              <select
+                                className="form-input"
+                                value={videoModel}
+                                onChange={e => {
+                                  const mod = e.target.value;
+                                  setVideoModel(mod);
+                                  if (mod !== 'omni_flash' && clipDuration === 10) {
+                                    setClipDuration(8);
+                                    setWordsPerClip(getDefaultWordsPerClip(8));
+                                  }
+                                }}
+                              >
+                                {VIDEO_MODELS.map(m => (
+                                  <option key={m.value} value={m.value}>{m.label}</option>
+                                ))}
                               </select>
                             </div>
+                            <div>
+                              <label className="form-label">Durasi per Klip</label>
+                              <select
+                                className="form-input"
+                                value={clipDuration}
+                                onChange={e => {
+                                  const dur = Number(e.target.value);
+                                  setClipDuration(dur);
+                                  setWordsPerClip(getDefaultWordsPerClip(dur));
+                                }}
+                              >
+                                <option value={4}>4s per klip</option>
+                                <option value={6}>6s per klip</option>
+                                <option value={8}>8s per klip (Default)</option>
+                                {videoModel === 'omni_flash' && (
+                                  <option value={10}>10s per klip (Khusus Omni Flash)</option>
+                                )}
+                              </select>
+                            </div>
+                          </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                             <div>
                               <label className="form-label">Visual Mode</label>
                               <select className="form-input" value={visualMode} onChange={e => setVisualMode(e.target.value)}>
@@ -837,27 +874,25 @@ export default function SheetsAutopilotDashboard() {
                                 <option value="pure_t2v">Pure Text-to-Video</option>
                               </select>
                             </div>
+                            <div>
+                              <label className="form-label">Batasan Kata per Klip</label>
+                              <select className="form-input" value={wordsPerClip} onChange={e => setWordsPerClip(e.target.value)}>
+                                {getWordsPerClipOptions(clipDuration).map(opt => (
+                                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
+                              </select>
+                            </div>
                           </div>
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                             <div>
-                              <label className="form-label">Words Per Clip</label>
-                              <select className="form-input" value={wordsPerClip} onChange={e => setWordsPerClip(e.target.value)}>
-                                <option value="17-19 kata">17-19 kata</option>
-                                <option value="12-15 kata">12-15 kata</option>
-                                <option value="10-12 kata">10-12 kata</option>
-                              </select>
-                            </div>
-                            <div>
                               <label className="form-label">Face Visibility</label>
                               <select className="form-input" value={faceVisibility} onChange={e => setFaceVisibility(e.target.value)}>
-                                <option value="Faceless">Faceless (No face shown)</option>
+                                <option value="Faceless">Faceless (Tanpa Wajah - Fokus Aksi Tangan)</option>
                                 <option value="POV">First-Person POV</option>
                                 <option value="Silhouette">Silhouette</option>
                                 <option value="cartoon_face">Cartoon Face (Kartun Ekspresif)</option>
                               </select>
                             </div>
-                          </div>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                             <div>
                               <label className="form-label">Total Clips Target</label>
                               <input
@@ -868,6 +903,8 @@ export default function SheetsAutopilotDashboard() {
                                 min="1"
                               />
                             </div>
+                          </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                             <div>
                               <label className="form-label">Visual Style</label>
                               <select className="form-input" value={visualStyle} onChange={e => setVisualStyle(e.target.value)}>
@@ -876,8 +913,6 @@ export default function SheetsAutopilotDashboard() {
                                 <option value="Macrophotography">Macrophotography</option>
                               </select>
                             </div>
-                          </div>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                             <div>
                               <label className="form-label">Narrative Mode</label>
                               <select className="form-input" value={narrativeMode} onChange={e => setNarrativeMode(e.target.value)}>
@@ -886,15 +921,15 @@ export default function SheetsAutopilotDashboard() {
                                 <option value="Educational">Educational (Tutorial / Penjelasan Ilmiah)</option>
                               </select>
                             </div>
-                            <div>
-                              <label className="form-label">Brand Profile</label>
-                              <select className="form-input" value={brandProfileId} onChange={e => setBrandProfileId(e.target.value)}>
-                                <option value="">-- Pilih Brand Profile (Opsional) --</option>
-                                {brandProfiles.map(bp => (
-                                  <option key={bp.id} value={bp.id}>{bp.brand_name}</option>
-                                ))}
-                              </select>
-                            </div>
+                          </div>
+                          <div>
+                            <label className="form-label">Brand Profile</label>
+                            <select className="form-input" value={brandProfileId} onChange={e => setBrandProfileId(e.target.value)}>
+                              <option value="">-- Pilih Brand Profile (Opsional) --</option>
+                              {brandProfiles.map(bp => (
+                                <option key={bp.id} value={bp.id}>{bp.brand_name}</option>
+                              ))}
+                            </select>
                           </div>
                           <div>
                             <label className="form-label">Custom Instruction</label>

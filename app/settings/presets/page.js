@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
 import VisualIdentitySelector from '../../components/VisualIdentitySelector';
-import { getWordsPerClipOptions, getDefaultWordsPerClip } from '@/lib/words-per-clip-presets';
+import { getWordsPerClipOptions, getDefaultWordsPerClip, VIDEO_MODELS } from '@/lib/words-per-clip-presets';
 
 const GEMINI_VOICES = [
   { id: 'Kore', name: 'Kore (Female)', avatar: '👩', desc: 'Standard Female (Skincare/Cosmetic)' },
@@ -586,8 +586,9 @@ export default function PresetsPage() {
                             });
                           }}
                         >
-                          <option value="veo_31_lite">Google Veo 3.1 Lite</option>
-                          <option value="omni_flash">⚡ Google Veo Omni Flash (Support 4s/6s/8s/10s)</option>
+                          {VIDEO_MODELS.map(m => (
+                            <option key={m.value} value={m.value}>{m.label}</option>
+                          ))}
                         </select>
                       </label>
                       <label className="form-label">

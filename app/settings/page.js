@@ -1845,6 +1845,7 @@ export default function SettingsPage() {
                   <option value="veo_31_quality">Veo 3.1 Quality (100 Credit)</option>
                   <option value="veo_31_lite_relaxed">Veo 3.1 Lite Relaxed (Ultra)</option>
                   <option value="veo_31_fast_relaxed">Veo 3.1 Fast Relaxed (Ultra)</option>
+                  <option value="omni_flash">⚡ Veo Omni Flash (Support 4s/6s/8s/10s)</option>
                 </select>
               </div>
 

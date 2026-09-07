@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.29.33 — Penyelarasan Video Model Lengkap di Seluruh Menu Kampanye (07/09/2026)
+- Penyelarasan dropdown Video Model terpusat VIDEO_MODELS
+- Dukungan Omni Flash dan Veo 3.1 di semua menu kampanye
+
 ## V2.29.32 — Fix import aliases for words-per-clip-presets (07/09/2026)
 - Gunakan alias @/lib/words-per-clip-presets untuk kompatibilitas Next.js webpack build
 

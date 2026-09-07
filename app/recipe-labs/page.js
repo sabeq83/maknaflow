@@ -2,6 +2,7 @@
 
 import Sidebar from '../components/Sidebar';
 import { useState, useEffect, useRef } from 'react';
+import { VIDEO_MODELS } from '@/lib/words-per-clip-presets';
 
 const GEMINI_VOICES = [
   { id: 'Kore', name: 'Kore (Female)', avatar: '👩', desc: 'Standard Female (Skincare/Cosmetic)' },
@@ -1507,8 +1508,9 @@ export default function RecipeLabsPage() {
                             <div className="form-group" style={{ flex: 1, minWidth: '200px' }}>
                               <label className="form-label">Model Video</label>
                               <select className="form-select" value={videoModel} onChange={e => setVideoModel(e.target.value)}>
-                                <option value="veo_31_lite">veo_31_lite</option>
-                                <option value="omni_flash">omni_flash</option>
+                                {VIDEO_MODELS.map(m => (
+                                  <option key={m.value} value={m.value}>{m.label}</option>
+                                ))}
                               </select>
                             </div>
                             <div className="form-group" style={{ flex: 1, minWidth: '200px' }}>

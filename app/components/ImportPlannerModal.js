@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { resolvePlannerInstructions } from '@/lib/prompt-instructions';
-import { getWordsPerClipOptions, getDefaultWordsPerClip } from '@/lib/words-per-clip-presets';
+import { VIDEO_MODELS, getWordsPerClipOptions, getDefaultWordsPerClip } from '@/lib/words-per-clip-presets';
 import VisualIdentitySelector from './VisualIdentitySelector';
 
 const GEMINI_VOICES = [
@@ -1242,11 +1242,9 @@ export default function ImportPlannerModal({
                         }}
                         style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                       >
-                        <option value="veo_31_lite">Google Veo 3.1 Lite (Standar Cepat)</option>
-                        <option value="veo_31_fast">Google Veo 3.1 Fast</option>
-                        <option value="veo_31_quality">Google Veo 3.1 Quality (Kualitas Tinggi)</option>
-                        <option value="veo_31_lite_relaxed">Google Veo 3.1 Relaxed</option>
-                        <option value="omni_flash">⚡ Google Veo Omni Flash (Support 10s Clip)</option>
+                        {VIDEO_MODELS.map(m => (
+                          <option key={m.value} value={m.value}>{m.label}</option>
+                        ))}
                       </select>
                     </div>
 
