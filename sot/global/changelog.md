@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.31 — Smart Dynamic Dropdown Batasan Kata Omni Flash & Veo (07/09/2026)
+- Pacing kata per klip 4s, 6s, 8s, 10s
+- Smart dynamic dropdown pada seluruh UI kampanye
+- Update ENUM contract operator-content
+
 ## V2.29.30 — Strict Phase 2 Approval Gating pada Campaign Scheduler (05/09/2026)
 - Implementasi strict whitelist approval gate pada skeduler OPC dan RE campaigns
 - Mencegah eksekusi prematur TTS/I2V/FFmpeg untuk item yang belum di-approve oleh pengguna

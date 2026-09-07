@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
 import VisualIdentitySelector from '../../components/VisualIdentitySelector';
+import { getWordsPerClipOptions, getDefaultWordsPerClip } from '../../lib/words-per-clip-presets';
 
 const GEMINI_VOICES = [
   { id: 'Kore', name: 'Kore (Female)', avatar: '👩', desc: 'Standard Female (Skincare/Cosmetic)' },
@@ -571,8 +572,44 @@ export default function PresetsPage() {
                       </label>
                       <label className="form-label">
                         Video Model
-                        <select className="form-select" value={form.video_model} onChange={e => setForm({ ...form, video_model: e.target.value })}>
+                        <select
+                          className="form-select"
+                          value={form.video_model}
+                          onChange={e => {
+                            const mod = e.target.value;
+                            const newDur = (mod !== 'omni_flash' && form.clip_duration === 10) ? 8 : (form.clip_duration || 8);
+                            setForm({
+                              ...form,
+                              video_model: mod,
+                              clip_duration: newDur,
+                              words_per_clip: (mod !== 'omni_flash' && form.clip_duration === 10) ? getDefaultWordsPerClip(8) : form.words_per_clip
+                            });
+                          }}
+                        >
                           <option value="veo_31_lite">Google Veo 3.1 Lite</option>
+                          <option value="omni_flash">⚡ Google Veo Omni Flash (Support 4s/6s/8s/10s)</option>
+                        </select>
+                      </label>
+                      <label className="form-label">
+                        Durasi per Klip
+                        <select
+                          className="form-select"
+                          value={form.clip_duration || 8}
+                          onChange={e => {
+                            const dur = Number(e.target.value);
+                            setForm({
+                              ...form,
+                              clip_duration: dur,
+                              words_per_clip: getDefaultWordsPerClip(dur)
+                            });
+                          }}
+                        >
+                          <option value={4}>4s per klip</option>
+                          <option value={6}>6s per klip</option>
+                          <option value={8}>8s per klip (Default)</option>
+                          {form.video_model === 'omni_flash' && (
+                            <option value={10}>10s per klip (Khusus Omni Flash)</option>
+                          )}
                         </select>
                       </label>
                     </div>
@@ -596,11 +633,11 @@ export default function PresetsPage() {
                         </select>
                       </label>
                       <label className="form-label">
-                        Words per Clip
+                        Words per Clip ({form.clip_duration || 8}s)
                         <select className="form-select" value={form.words_per_clip} onChange={e => setForm({ ...form, words_per_clip: e.target.value })}>
-                          <option value="15-16 kata">15-16 kata (Sangat Lambat)</option>
-                          <option value="17-19 kata">17-19 kata (Standard)</option>
-                          <option value="20-22 kata">20-22 kata (Cepat)</option>
+                          {getWordsPerClipOptions(form.clip_duration || 8).map(opt => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
                         </select>
                       </label>
                     </div>

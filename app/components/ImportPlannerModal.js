@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { resolvePlannerInstructions } from '@/lib/prompt-instructions';
+import { getWordsPerClipOptions, getDefaultWordsPerClip } from '@/lib/words-per-clip-presets';
 import VisualIdentitySelector from './VisualIdentitySelector';
 
 const GEMINI_VOICES = [
@@ -1234,7 +1235,10 @@ export default function ImportPlannerModal({
                         onChange={e => {
                           const mod = e.target.value;
                           setVideoModel(mod);
-                          if (mod !== 'omni_flash' && clipDuration === 10) setClipDuration(8);
+                          if (mod !== 'omni_flash' && clipDuration === 10) {
+                            setClipDuration(8);
+                            setWordsPerClip(getDefaultWordsPerClip(8));
+                          }
                         }}
                         style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                       >
@@ -1250,7 +1254,11 @@ export default function ImportPlannerModal({
                       <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Durasi per Klip Video:</label>
                       <select
                         value={clipDuration}
-                        onChange={e => setClipDuration(Number(e.target.value))}
+                        onChange={e => {
+                          const dur = Number(e.target.value);
+                          setClipDuration(dur);
+                          setWordsPerClip(getDefaultWordsPerClip(dur));
+                        }}
                         style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                       >
                         <option value={4}>4s per klip</option>
@@ -1288,11 +1296,11 @@ export default function ImportPlannerModal({
                     </div>
 
                     <div>
-                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Batasan Kata per Klip:</label>
+                      <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Batasan Kata ({clipDuration}s):</label>
                       <select value={wordsPerClip} onChange={e => setWordsPerClip(e.target.value)} style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}>
-                        <option value="20-22 kata">20-22 kata (Default)</option>
-                        <option value="17-19 kata">17-19 kata</option>
-                        <option value="15-16 kata">15-16 kata</option>
+                        {getWordsPerClipOptions(clipDuration).map(opt => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
                       </select>
                     </div>
 

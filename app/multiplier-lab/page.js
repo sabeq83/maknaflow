@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar';
 import VisualIdentitySelector from '../components/VisualIdentitySelector';
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { getWordsPerClipOptions, getDefaultWordsPerClip } from '../lib/words-per-clip-presets';
 
 const GEMINI_VOICES = [
   { id: 'Kore', name: 'Kore (Female)', avatar: '👩', desc: 'Standard Female (Skincare/Cosmetic)' },
@@ -103,6 +104,7 @@ function MultiplierLabPageContent() {
   const [visualStyle, setVisualStyle] = useState('Cinematic');
   const [targetAi, setTargetAi] = useState('Google Veo (8s)');
   const [videoModel, setVideoModel] = useState('veo_31_lite');
+  const [clipDuration, setClipDuration] = useState(8);
   const [aspectRatio, setAspectRatio] = useState('9:16');
   const [faceVisibility, setFaceVisibility] = useState('Faceless');
   const [wordsPerClip, setWordsPerClip] = useState('17-19 kata');
@@ -208,9 +210,11 @@ function MultiplierLabPageContent() {
       setVisualStyle(config.visual_engine.visual_style || 'Cinematic');
       setVisualMode(config.visual_engine.visual_mode || 'hybrid_lock');
       setVideoModel(config.visual_engine.video_model || 'veo_31_lite');
+      const dur = Number(config.visual_engine.clip_duration ?? 8);
+      setClipDuration(dur);
       setFaceVisibility(config.visual_engine.face_visibility || 'Faceless');
       setTargetClipsCount(Number(config.visual_engine.target_clips_count ?? 4));
-      setWordsPerClip(config.visual_engine.words_per_clip || '17-19 kata');
+      setWordsPerClip(config.visual_engine.words_per_clip || getDefaultWordsPerClip(dur));
       setAspectRatio(config.visual_engine.aspect_ratio || '9:16');
       if (config.visual_engine.video_model === 'veo_31_lite') {
         setTargetAi('Google Veo (8s)');
@@ -297,7 +301,7 @@ function MultiplierLabPageContent() {
         target_clips_count: Number(targetClipsCount ?? 4),
         words_per_clip: wordsPerClip,
         aspect_ratio: aspectRatio,
-        clip_duration: videoModel === 'veo_31_lite' ? 8 : 5
+        clip_duration: Number(clipDuration)
       },
       product_bridging: {
         is_bridging_active: Boolean(isBridgingActive),
@@ -649,7 +653,7 @@ function MultiplierLabPageContent() {
           affiliate_url: row.affiliate_url
         })),
         vso_config_json: JSON.stringify({
-          narrativeMode, visualStyle, targetAi, videoModel, aspectRatio, faceVisibility, wordsPerClip,
+          narrativeMode, visualStyle, targetAi, videoModel, clipDuration, aspectRatio, faceVisibility, wordsPerClip,
           isVsoActive, characterConcept, subjectDemographic, wardrobeStyle, wardrobeStyleCustom, lightingStyle, lightingStyleCustom
         }),
         bridging_config_json: JSON.stringify({
@@ -1465,8 +1469,40 @@ function MultiplierLabPageContent() {
 
                       <div className="form-group">
                         <label className="form-label">Video Model</label>
-                        <select className="form-input" value={videoModel} onChange={e => setVideoModel(e.target.value)}>
-                          <option value="veo_31_lite">Veo 3.1 Lite</option>
+                        <select
+                          className="form-input"
+                          value={videoModel}
+                          onChange={e => {
+                            const mod = e.target.value;
+                            setVideoModel(mod);
+                            if (mod !== 'omni_flash' && clipDuration === 10) {
+                              setClipDuration(8);
+                              setWordsPerClip(getDefaultWordsPerClip(8));
+                            }
+                          }}
+                        >
+                          <option value="veo_31_lite">Google Veo 3.1 Lite</option>
+                          <option value="omni_flash">⚡ Google Veo Omni Flash (Support 4s/6s/8s/10s)</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Durasi per Klip</label>
+                        <select
+                          className="form-input"
+                          value={clipDuration}
+                          onChange={e => {
+                            const dur = Number(e.target.value);
+                            setClipDuration(dur);
+                            setWordsPerClip(getDefaultWordsPerClip(dur));
+                          }}
+                        >
+                          <option value={4}>4s per klip</option>
+                          <option value={6}>6s per klip</option>
+                          <option value={8}>8s per klip (Default)</option>
+                          {videoModel === 'omni_flash' && (
+                            <option value={10}>10s per klip (Khusus Omni Flash)</option>
+                          )}
                         </select>
                       </div>
 
@@ -1493,11 +1529,11 @@ function MultiplierLabPageContent() {
                       </div>
 
                       <div className="form-group">
-                        <label className="form-label">Jumlah Kata Per Klip</label>
+                        <label className="form-label">Jumlah Kata Per Klip ({clipDuration}s)</label>
                         <select className="form-input" value={wordsPerClip} onChange={e => setWordsPerClip(e.target.value)}>
-                          <option value="15-16 kata">15-16 kata</option>
-                          <option value="17-19 kata">17-19 kata</option>
-                          <option value="20-24 kata">20-24 kata</option>
+                          {getWordsPerClipOptions(clipDuration).map(opt => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
                         </select>
                       </div>
 

@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar';
 import VisualIdentitySelector from '../components/VisualIdentitySelector';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
+import { getWordsPerClipOptions, getDefaultWordsPerClip } from '../lib/words-per-clip-presets';
 
 const GEMINI_VOICES = [
   { id: 'Kore', name: 'Kore (Female)', avatar: '👩', desc: 'Standard Female (Skincare/Cosmetic)' },
@@ -57,6 +58,7 @@ export default function RECampaignsPage() {
   const [aspectRatio, setAspectRatio] = useState('9:16');
   const [targetAi, setTargetAi] = useState('Google Veo (8s)');
   const [videoModel, setVideoModel] = useState('veo_31_lite');
+  const [clipDuration, setClipDuration] = useState(8);
   const [customInstruction, setCustomInstruction] = useState('akhiran skrip/voiceover : produk ori ada di keranjang ya!');
   const [aiDirective, setAiDirective] = useState('');
   const [mandatoryOutroLine, setMandatoryOutroLine] = useState('');
@@ -206,9 +208,11 @@ export default function RECampaignsPage() {
       setVisualStyle(config.visual_engine.visual_style || 'Cinematic');
       setVisualMode(config.visual_engine.visual_mode || 'hybrid_lock');
       setVideoModel(config.visual_engine.video_model || 'veo_31_lite');
+      const dur = Number(config.visual_engine.clip_duration ?? 8);
+      setClipDuration(dur);
       setFaceVisibility(config.visual_engine.face_visibility || 'Faceless');
       setTargetClipsCount(Number(config.visual_engine.target_clips_count ?? 4));
-      setWordsPerClip(config.visual_engine.words_per_clip || '17-19 kata');
+      setWordsPerClip(config.visual_engine.words_per_clip || getDefaultWordsPerClip(dur));
       setAspectRatio(config.visual_engine.aspect_ratio || '9:16');
       if (typeof setAngleMultiplier === 'function') {
         setAngleMultiplier(Number(config.visual_engine.angle_multiplier ?? 0));
@@ -313,7 +317,7 @@ export default function RECampaignsPage() {
         words_per_clip: wordsPerClip,
         aspect_ratio: aspectRatio,
         angle_multiplier: Number(angleMultiplier || 0),
-        clip_duration: videoModel === 'veo_31_lite' ? 8 : 5
+        clip_duration: Number(clipDuration)
       },
       product_bridging: {
         is_bridging_active: Boolean(isBridgingActive),
@@ -730,6 +734,7 @@ export default function RECampaignsPage() {
       formData.append('ffmpeg_sfx_volume', String(ffmpegSfxVolume));
       formData.append('ffmpeg_bgm_volume', String(ffmpegBgmVolume));
       formData.append('video_model', videoModel);
+      formData.append('clip_duration', String(clipDuration));
       formData.append('words_per_clip', wordsPerClip);
       formData.append('face_visibility', faceVisibility);
       formData.append('enable_tts', enableTts ? '1' : '0');
@@ -1550,9 +1555,36 @@ export default function RECampaignsPage() {
                       <select
                         className="form-input"
                         value={videoModel}
-                        onChange={e => setVideoModel(e.target.value)}
+                        onChange={e => {
+                          const mod = e.target.value;
+                          setVideoModel(mod);
+                          if (mod !== 'omni_flash' && clipDuration === 10) {
+                            setClipDuration(8);
+                            setWordsPerClip(getDefaultWordsPerClip(8));
+                          }
+                        }}
                       >
-                        <option value="veo_31_lite">Veo 3.1 Lite</option>
+                        <option value="veo_31_lite">Google Veo 3.1 Lite</option>
+                        <option value="omni_flash">⚡ Google Veo Omni Flash (Support 4s/6s/8s/10s)</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Durasi per Klip</label>
+                      <select
+                        className="form-input"
+                        value={clipDuration}
+                        onChange={e => {
+                          const dur = Number(e.target.value);
+                          setClipDuration(dur);
+                          setWordsPerClip(getDefaultWordsPerClip(dur));
+                        }}
+                      >
+                        <option value={4}>4s per klip</option>
+                        <option value={6}>6s per klip</option>
+                        <option value={8}>8s per klip (Default)</option>
+                        {videoModel === 'omni_flash' && (
+                          <option value={10}>10s per klip (Khusus Omni Flash)</option>
+                        )}
                       </select>
                     </div>
                     <div className="form-group">
@@ -1588,15 +1620,15 @@ export default function RECampaignsPage() {
                       <small style={{ color: 'var(--text-muted)' }}>Batas: 3 - 10</small>
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Jumlah Kata Per Klip</label>
+                      <label className="form-label">Jumlah Kata Per Klip ({clipDuration}s)</label>
                       <select
                         className="form-input"
                         value={wordsPerClip}
                         onChange={e => setWordsPerClip(e.target.value)}
                       >
-                        <option value="15-16 kata">15-16 kata</option>
-                        <option value="17-19 kata">17-19 kata</option>
-                        <option value="20-24 kata">20-24 kata</option>
+                        {getWordsPerClipOptions(clipDuration).map(opt => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
                       </select>
                     </div>
                     <div className="form-group">
