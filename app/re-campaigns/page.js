@@ -4,7 +4,7 @@ import Sidebar from '../components/Sidebar';
 import VisualIdentitySelector from '../components/VisualIdentitySelector';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
-import { getWordsPerClipOptions, getDefaultWordsPerClip } from '../lib/words-per-clip-presets';
+import { getWordsPerClipOptions, getDefaultWordsPerClip } from '@/lib/words-per-clip-presets';
 
 const GEMINI_VOICES = [
   { id: 'Kore', name: 'Kore (Female)', avatar: '👩', desc: 'Standard Female (Skincare/Cosmetic)' },

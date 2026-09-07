@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.29.32 — Fix import aliases for words-per-clip-presets (07/09/2026)
+- Gunakan alias @/lib/words-per-clip-presets untuk kompatibilitas Next.js webpack build
+
 ## V2.29.31 — Smart Dynamic Dropdown Batasan Kata Omni Flash & Veo (07/09/2026)
 - Pacing kata per klip 4s, 6s, 8s, 10s
 - Smart dynamic dropdown pada seluruh UI kampanye
