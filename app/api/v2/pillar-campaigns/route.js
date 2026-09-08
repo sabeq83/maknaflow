@@ -95,6 +95,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
         voice_provider: formData.get('voice_provider') || 'minimax',
         voice_persona: formData.get('voice_persona') || 'Indonesian_casual_reporter_vv2',
         words_per_clip: formData.get('words_per_clip') || '17-19 kata',
+        clip_duration: Number(formData.get('clip_duration') || 8),
         tts_model_quality: formData.get('tts_model_quality') || 'speech-2.8-turbo',
         voice_speed: Number(formData.get('voice_speed') || 1.0),
         voice_volume: Number(formData.get('voice_volume') || 1.0),
@@ -160,6 +161,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       parsedBody.fb_draft_mode = parsedBody.fb_draft_mode || 'auto';
       parsedBody.target_spreadsheet_id = parsedBody.target_spreadsheet_id || null;
       parsedBody.sfx_setting = parsedBody.sfx_setting || 'without_sfx';
+      parsedBody.clip_duration = parsedBody.clip_duration !== undefined ? Number(parsedBody.clip_duration) : 8;
       parsedBody.enable_vo_audit = parsedBody.enable_vo_audit !== undefined ? Number(parsedBody.enable_vo_audit) : 0;
       parsedBody.enable_audio_segment = parsedBody.enable_audio_segment !== undefined ? Number(parsedBody.enable_audio_segment) : 0;
       parsedBody.ai_directive = parsedBody.ai_directive || null;
@@ -214,6 +216,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       voice_provider,
       voice_persona,
       words_per_clip,
+      clip_duration,
       tts_model_quality,
       voice_speed,
       voice_volume,
@@ -304,6 +307,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       voice_provider: voice_provider || 'minimax',
       voice_persona: voice_persona || 'Indonesian_casual_reporter_vv2',
       words_per_clip: words_per_clip || '17-19 kata',
+      clip_duration: clip_duration || 8,
       tts_model_quality: tts_model_quality || 'speech-2.8-turbo',
       voice_speed: voice_speed !== undefined ? Number(voice_speed) : 1.0,
       voice_volume: voice_volume !== undefined ? Number(voice_volume) : 1.0,

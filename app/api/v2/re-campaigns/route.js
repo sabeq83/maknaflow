@@ -64,6 +64,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
         ffmpeg_sfx_volume: Number(formData.get('ffmpeg_sfx_volume') || 0.0),
         ffmpeg_bgm_volume: Number(formData.get('ffmpeg_bgm_volume') || 0.0),
         video_model: formData.get('video_model'),
+        clip_duration: Number(formData.get('clip_duration') || 8),
         words_per_clip: formData.get('words_per_clip'),
         face_visibility: formData.get('face_visibility'),
         enable_tts: Number(formData.get('enable_tts') || 0),
@@ -134,6 +135,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       parsedBody.angle_multiplier = parsedBody.angle_multiplier !== undefined ? Number(parsedBody.angle_multiplier) : 0;
       parsedBody.tts_model_quality = parsedBody.tts_model_quality || 'speech-2.8-turbo';
       parsedBody.target_language = parsedBody.target_language || 'id-ID';
+      parsedBody.clip_duration = parsedBody.clip_duration !== undefined ? Number(parsedBody.clip_duration) : 8;
       parsedBody.bridge_duration_clips = parsedBody.bridge_duration_clips !== undefined ? Number(parsedBody.bridge_duration_clips) : 0;
       parsedBody.visual_style = parsedBody.visual_style || 'Cinematic';
       parsedBody.nextcloud_parent_folder = parsedBody.nextcloud_parent_folder || 'MAKNA_Production_Final';
@@ -177,6 +179,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       ffmpeg_sfx_volume,
       ffmpeg_bgm_volume,
       video_model,
+      clip_duration,
       words_per_clip,
       face_visibility,
       enable_tts,
@@ -257,6 +260,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       ffmpeg_sfx_volume: ffmpeg_sfx_volume !== undefined ? Number(ffmpeg_sfx_volume) : 0.0,
       ffmpeg_bgm_volume: ffmpeg_bgm_volume !== undefined ? Number(ffmpeg_bgm_volume) : 0.0,
       video_model: video_model || 'veo_31_lite',
+      clip_duration: clip_duration || 8,
       words_per_clip: words_per_clip || '17-19 kata',
       tts_model_quality: tts_model_quality || 'speech-2.8-turbo',
       target_language: target_language || 'id-ID',

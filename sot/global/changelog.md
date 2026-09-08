@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.34 — Smart Dynamic Micro-Pacing Generator Sesuai Durasi Klip (09/09/2026)
+- Dinamisasi micro-pacing I2V dan T2V berdasarkan durasi video
+- Dukungan micro-pacing 4s (2 beat), 6s (3 beat), 8s (4 beat), 10s (5 beat)
+- Integrasi dinamis pada seluruh prompt builder kampanye
+
 ## V2.29.33 — Penyelarasan Video Model Lengkap di Seluruh Menu Kampanye (07/09/2026)
 - Penyelarasan dropdown Video Model terpusat VIDEO_MODELS
 - Dukungan Omni Flash dan Veo 3.1 di semua menu kampanye
