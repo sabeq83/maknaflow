@@ -715,10 +715,19 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
         try { sessionStorage.removeItem('makna_publishing_draft'); } catch (_) {}
         setShowScheduleModal(false);
         fetchJobs();
+      } else if (json.code === 'REPLIZ_ACCOUNT_DISCONNECTED' || json.code === 'REPLIZ_FACEBOOK_PERMISSION_REQUIRED') {
+        try { sessionStorage.setItem('makna_publishing_draft', JSON.stringify(scheduleForm)); } catch (_) {}
+        setReconnectDialog({
+          open: true,
+          isRepliz: true,
+          reconnectUrl: json.reconnectUrl || 'https://repliz.com/user/account',
+          message: json.error || 'Akun media sosial terputus di Repliz. Silakan hubungkan ulang (reconnect) akun Anda di Repliz, lalu coba kembali.'
+        });
       } else if (json.code === 'GOOGLE_REAUTH_REQUIRED') {
         try { sessionStorage.setItem('makna_publishing_draft', JSON.stringify(scheduleForm)); } catch (_) {}
         setReconnectDialog({
           open: true,
+          isRepliz: false,
           reconnectUrl: json.reconnectUrl || '/api/google/auth?returnTo=%2Fcontent-flow%3Fview%3Dpublishing',
           message: json.error || 'Koneksi Google Drive perlu dihubungkan ulang sebelum menjadwalkan konten.'
         });
@@ -1016,6 +1025,32 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
           </button>
         </div>
       </div>
+
+      {/* Disconnected Accounts Global Alert Banner */}
+      {accounts.some(a => a.status === 'disconnected') && (
+        <div style={{
+          background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)',
+          borderRadius: 10, padding: '10px 16px', marginBottom: 14,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#fca5a5', fontSize: 12 }}>
+            <span style={{ fontSize: '1.2rem' }}>⚠️</span>
+            <span>
+              <strong>Perhatian:</strong> Ditemukan akun media sosial yang terputus (disconnected). Jadwal untuk akun tersebut mungkin tertunda hingga akun terhubung kembali di Repliz.
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowAccountsModal(true)}
+            style={{
+              padding: '6px 14px', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid rgba(239, 68, 68, 0.4)',
+              color: '#fca5a5', borderRadius: 7, fontSize: 11, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap'
+            }}
+          >
+            Buka Hub Akun ↗️
+          </button>
+        </div>
+      )}
 
       {/* Tab 1: Queue & History Layout (Table + Drawer) */}
       {(activeTab === 'queue' || activeTab === 'history') && (
@@ -2153,7 +2188,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
           </div>
         </div>
       )}
-      {/* Modal: Google Reconnect Dialog */}
+      {/* Modal: Reconnect Dialog (Google or Repliz) */}
       {reconnectDialog.open && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 9999,
@@ -2162,30 +2197,36 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
         }}>
           <div style={{
             background: 'var(--surface)', border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-md)', maxWidth: 480, width: '100%',
+            borderRadius: 'var(--radius-md)', maxWidth: 500, width: '100%',
             padding: 24, boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
               <span style={{ fontSize: '1.8rem' }}>⚠️</span>
               <div>
                 <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                  Koneksi Google Drive Diperlukan
+                  {reconnectDialog.isRepliz ? 'Koneksi Akun Repliz Diperlukan' : 'Koneksi Google Drive Diperlukan'}
                 </h3>
                 <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                  Otorisasi Google OAuth Terputus atau Kedaluwarsa
+                  {reconnectDialog.isRepliz
+                    ? 'Otorisasi Akun Media Sosial di Repliz Terputus / Kedaluwarsa'
+                    : 'Otorisasi Google OAuth Terputus atau Kedaluwarsa'}
                 </p>
               </div>
             </div>
 
             <p style={{ fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text-secondary)', marginBottom: 20 }}>
-              {reconnectDialog.message || 'Untuk menjadwalkan postingan ke platform Repliz (TikTok, Facebook, dsb.), MAKNA perlu mengunggah video ke Google Drive staging. Sesi Google Anda perlu dihubungkan ulang.'}
+              {reconnectDialog.message || (reconnectDialog.isRepliz
+                ? 'Akun media sosial terputus di Repliz. Silakan hubungkan ulang (reconnect) akun Anda di web Repliz, lalu klik tombol sinkronkan.'
+                : 'Untuk menjadwalkan postingan ke platform Repliz (TikTok, Facebook, dsb.), MAKNA perlu mengunggah video ke Google Drive staging. Sesi Google Anda perlu dihubungkan ulang.')}
             </p>
 
             <div style={{ background: 'var(--bg-glass)', padding: 12, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 20 }}>
-              💡 <strong>Draft form Anda tersimpan otomatis.</strong> Setelah login Google berhasil, Anda akan langsung dikembalikan ke form ini.
+              💡 <strong>Draft form Anda tersimpan otomatis.</strong> {reconnectDialog.isRepliz
+                ? 'Setelah melakukan reconnect di Repliz, klik tombol Sinkronkan Akun di bawah untuk melanjutkan.'
+                : 'Setelah login Google berhasil, Anda akan langsung dikembalikan ke form ini.'}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, flexWrap: 'wrap' }}>
               <button
                 type="button"
                 className="btn btn-secondary"
@@ -2193,15 +2234,41 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                   setReconnectDialog({ open: false, reconnectUrl: '', message: '' });
                 }}
               >
-                Batal
+                Tutup
               </button>
-              <a
-                href={reconnectDialog.reconnectUrl || '/api/google/auth?returnTo=%2Fcontent-flow%3Fview%3Dpublishing'}
-                className="btn btn-primary"
-                style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
-              >
-                🔗 Hubungkan Ulang Google
-              </a>
+              {reconnectDialog.isRepliz ? (
+                <>
+                  <a
+                    href={reconnectDialog.reconnectUrl || 'https://repliz.com/user/account'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-secondary"
+                    style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                  >
+                    Buka Repliz Account ↗️
+                  </a>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={async () => {
+                      setReconnectDialog({ open: false, reconnectUrl: '', message: '' });
+                      await fetchAccounts(true);
+                      showToast('Sinkronisasi akun selesai! Silakan coba jadwalkan kembali.');
+                    }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                  >
+                    🔄 Sinkronkan Akun Sekarang
+                  </button>
+                </>
+              ) : (
+                <a
+                  href={reconnectDialog.reconnectUrl || '/api/google/auth?returnTo=%2Fcontent-flow%3Fview%3Dpublishing'}
+                  className="btn btn-primary"
+                  style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                >
+                  🔗 Hubungkan Ulang Google
+                </a>
+              )}
             </div>
           </div>
         </div>

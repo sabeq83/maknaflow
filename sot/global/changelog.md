@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.29.35 — Publishing Scheduler Hardening & Auto-Reconnect Gate (09/09/2026)
+- Sinkronisasi status kesehatan akun Repliz & reschedule backlog 40 postingan FB mulai 10 Sept 05:09 WIB jeda 2 jam
+- Penambahan Live Auto-Reconnect & Health Probe saat submit jadwal (pre-flight gate)
+- Penanganan non-silent error pada worker jika akun disconnected (mencegah silent stuck)
+- Background periodic health sync setiap 30 menit & visual warning banner di UI
+
 ## V2.29.34 — Smart Dynamic Micro-Pacing Generator Sesuai Durasi Klip (09/09/2026)
 - Dinamisasi micro-pacing I2V dan T2V berdasarkan durasi video
 - Dukungan micro-pacing 4s (2 beat), 6s (3 beat), 8s (4 beat), 10s (5 beat)

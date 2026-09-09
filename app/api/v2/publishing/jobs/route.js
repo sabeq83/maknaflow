@@ -74,24 +74,61 @@ export const POST = withTenantContext(async (request, user) => {
     }));
 
 
-    // === SERVER-SIDE READINESS GATE ===
-    // If any target uses Repliz with media, Google Drive readiness MUST pass before creating jobs.
-    if (validated.media_type !== 'text_only') {
-      const { getPublishingAccountById } = await import('@/lib/publishing-repository');
-      const { verifyPublishingDriveReady } = await import('@/lib/publishing-drive-staging');
+    // === SERVER-SIDE READINESS & AUTO-RECONNECT GATE ===
+    const { getPublishingAccountById, recordPublishingAccountHealth } = await import('@/lib/publishing-repository');
+    const { getReplizAccount } = await import('@/lib/repliz-client');
+    const { verifyPublishingDriveReady } = await import('@/lib/publishing-drive-staging');
 
-      let requiresReplizStaging = false;
-      for (const accId of validated.account_ids) {
-        const acc = await getPublishingAccountById(tenantId, accId);
-        if (acc && acc.provider === 'repliz') {
+    let requiresReplizStaging = false;
+    for (const accId of validated.account_ids) {
+      let acc = await getPublishingAccountById(tenantId, accId);
+      if (!acc) continue;
+
+      if (acc.provider === 'repliz') {
+        if (validated.media_type !== 'text_only') {
           requiresReplizStaging = true;
-          break;
+        }
+
+        // Live Auto-Reconnect & Health Probe jika akun lokal tercatat disconnected
+        if (acc.status === 'disconnected') {
+          try {
+            const url = await getSetting('repliz_api_url') || 'https://api.repliz.com';
+            const accessKey = await getSetting('repliz_access_key');
+            const secretKey = await getSetting('repliz_secret_key');
+            if (accessKey && secretKey) {
+              const remoteAcc = await getReplizAccount({ apiUrl: url, accessKey, secretKey }, acc.provider_account_id);
+              const isConnected = remoteAcc && remoteAcc.isConnected !== false && remoteAcc.status !== 'disconnected';
+              if (isConnected) {
+                acc = await recordPublishingAccountHealth(tenantId, acc.id, {
+                  isConnected: true,
+                  lastErrorCode: null,
+                  lastErrorMessage: null
+                });
+                console.log(`[Publishing Jobs] Auto-reconnected Repliz account ${acc.display_name} (${acc.id})`);
+              } else {
+                return NextResponse.json({
+                  success: false,
+                  error: `Akun ${acc.display_name} (${acc.platform.toUpperCase()}) terputus di Repliz. Silakan hubungkan ulang (reconnect) akun Anda di Repliz, lalu coba kembali.`,
+                  code: 'REPLIZ_ACCOUNT_DISCONNECTED',
+                  reconnectUrl: 'https://repliz.com/user/account'
+                }, { status: 409 });
+              }
+            }
+          } catch (probeErr) {
+            console.warn('[Publishing Jobs] Gagal live probe Repliz account:', probeErr.message);
+            return NextResponse.json({
+              success: false,
+              error: `Akun ${acc.display_name} (${acc.platform.toUpperCase()}) terputus di Repliz. Silakan hubungkan ulang akun Anda di Repliz.`,
+              code: 'REPLIZ_ACCOUNT_DISCONNECTED',
+              reconnectUrl: 'https://repliz.com/user/account'
+            }, { status: 409 });
+          }
         }
       }
+    }
 
-      if (requiresReplizStaging) {
-        await verifyPublishingDriveReady({ bypassCache: true });
-      }
+    if (requiresReplizStaging) {
+      await verifyPublishingDriveReady({ bypassCache: true });
     }
 
     const createdJobs = await createPublishingJobs({

@@ -104,18 +104,48 @@ export const POST = withTenantContext(async (request) => {
       warnings.push(`Panjang caption (${caption.length} karakter) mendekati batas maksimum Instagram (2.200 karakter).`);
     }
 
-    // 3. Validasi Akun Target
+    // 3. Validasi Akun Target & Live Auto-Revalidation
     const validAccounts = [];
+    const { recordPublishingAccountHealth } = await import('@/lib/publishing-repository');
+    const { getReplizAccount } = await import('@/lib/repliz-client');
+    const { getSetting } = await import('@/lib/db');
+    let accountReconnectUrl = null;
+
     for (const accId of accountIds) {
-      const acc = await getPublishingAccountById(tenantId, accId);
+      let acc = await getPublishingAccountById(tenantId, accId);
       if (!acc) {
         errors.push(`Akun publishing '${accId}' tidak ditemukan.`);
+        continue;
+      }
+
+      if (acc.provider === 'repliz' && acc.status === 'disconnected') {
+        try {
+          const url = await getSetting('repliz_api_url') || 'https://api.repliz.com';
+          const accessKey = await getSetting('repliz_access_key');
+          const secretKey = await getSetting('repliz_secret_key');
+          if (accessKey && secretKey) {
+            const remoteAcc = await getReplizAccount({ apiUrl: url, accessKey, secretKey }, acc.provider_account_id);
+            if (remoteAcc && remoteAcc.isConnected !== false && remoteAcc.status !== 'disconnected') {
+              acc = await recordPublishingAccountHealth(tenantId, acc.id, {
+                isConnected: true,
+                lastErrorCode: null,
+                lastErrorMessage: null
+              });
+              console.log(`[Publishing Preflight] Auto-reconnected Repliz account: ${acc.display_name}`);
+            } else {
+              errors.push(`Akun '${acc.display_name}' (${acc.platform.toUpperCase()}) terputus di Repliz / memerlukan otorisasi ulang.`);
+              accountReconnectUrl = 'https://repliz.com/user/account';
+            }
+          }
+        } catch (_) {
+          errors.push(`Akun '${acc.display_name}' terputus di Repliz.`);
+          accountReconnectUrl = 'https://repliz.com/user/account';
+        }
       } else if (acc.status === 'paused') {
         warnings.push(`Akun '${acc.display_name}' sedang dijeda (paused).`);
-        validAccounts.push(acc);
-      } else {
-        validAccounts.push(acc);
       }
+
+      validAccounts.push(acc);
     }
 
     const checks = {};
@@ -150,14 +180,17 @@ export const POST = withTenantContext(async (request) => {
       }
     }
 
+    const resolvedReconnectUrl = accountReconnectUrl || driveStateError?.reconnectUrl || null;
+    const resolvedCode = accountReconnectUrl ? 'REPLIZ_ACCOUNT_DISCONNECTED' : (driveStateError ? driveStateError.code : (errors.length > 0 ? 'VALIDATION_ERROR' : null));
+
     return NextResponse.json({
       success: errors.length === 0,
       isValid: errors.length === 0,
       errors,
       warnings,
       checks,
-      code: driveStateError ? driveStateError.code : (errors.length > 0 ? 'VALIDATION_ERROR' : null),
-      reconnectUrl: driveStateError?.reconnectUrl || null,
+      code: resolvedCode,
+      reconnectUrl: resolvedReconnectUrl,
       accounts: validAccounts.map(a => ({
         id: a.id,
         displayName: a.display_name,
