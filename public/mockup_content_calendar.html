@@ -3,15 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MAKNA Flow - Kalender Konten Proporsional & Detail Harian (Mockup)</title>
+  <title>MAKNA Flow - Kalender Konten Proporsional & Semantic CSS (Light/Dark Theme)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
+    /* Dark Theme (Default) */
+    :root, [data-theme="dark"] {
       color-scheme: dark;
       --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
       --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      
       --canvas: #080c14;
       --sidebar: #0c121e;
       --surface: #101827;
@@ -19,15 +21,22 @@
       --surface-interactive: #1c2a40;
       --surface-hover: #22334b;
       --input-bg: #0c1422;
+      --overlay-backdrop: rgba(2, 6, 14, 0.78);
+      
       --text-primary: #f4f7fb;
       --text-secondary: #b6c2d2;
       --text-muted: #8290a5;
       --text-disabled: #66758a;
+      
       --border-subtle: #202d40;
       --border-strong: #33445e;
-      --link: #67e8f9;
+      
       --action-primary: #a855f7;
       --action-primary-hover: #c084fc;
+      --on-action-primary: #ffffff;
+      --link: #67e8f9;
+      --link-hover: #a5f3fc;
+      
       --status-info: #60a5fa;
       --status-info-soft: rgba(96, 165, 250, 0.14);
       --status-success: #4ade80;
@@ -38,25 +47,79 @@
       --status-danger-soft: rgba(251, 113, 133, 0.14);
       --status-neutral: #a78bfa;
       --status-neutral-soft: rgba(167, 139, 250, 0.14);
+
+      /* Semantic Platform Pill Backgrounds */
+      --pill-ig-bg: rgba(236, 72, 153, 0.14);
+      --pill-ig-border: #ec4899;
+      --pill-fb-bg: rgba(59, 130, 246, 0.14);
+      --pill-fb-border: #3b82f6;
+      --pill-tk-bg: rgba(6, 182, 212, 0.14);
+      --pill-tk-border: #06b6d4;
+      --pill-th-bg: rgba(255, 255, 255, 0.08);
+      --pill-th-border: #94a3b8;
+      --pill-yt-bg: rgba(239, 68, 68, 0.14);
+      --pill-yt-border: #ef4444;
+
+      --calendar-other-month: rgba(15, 23, 42, 0.5);
+    }
+
+    /* Light Theme */
+    [data-theme="light"] {
+      color-scheme: light;
+      --canvas: #f1f5f9;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #ffffff;
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
       
-      --platform-tiktok: #00f2fe;
-      --platform-tiktok-bg: #0c2b38;
-      --platform-facebook: #3b82f6;
-      --platform-facebook-bg: #142847;
-      --platform-instagram: #ec4899;
-      --platform-instagram-bg: #2e1628;
-      --platform-youtube: #ef4444;
-      --platform-youtube-bg: #2d1618;
-      --platform-threads: #ffffff;
-      --platform-threads-bg: #222222;
-      --platform-linkedin: #0a66c2;
-      --platform-linkedin-bg: #12283e;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+      
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      
+      --action-primary: #9333ea;
+      --action-primary-hover: #7e22ce;
+      --on-action-primary: #ffffff;
+      --link: #0284c7;
+      --link-hover: #0369a1;
+      
+      --status-info: #2563eb;
+      --status-info-soft: #eff6ff;
+      --status-success: #16a34a;
+      --status-success-soft: #f0fdf4;
+      --status-warning: #d97706;
+      --status-warning-soft: #fffbeb;
+      --status-danger: #dc2626;
+      --status-danger-soft: #fef2f2;
+      --status-neutral: #7c3aed;
+      --status-neutral-soft: #f5f3ff;
+
+      /* Semantic Platform Pill Backgrounds for Light Theme */
+      --pill-ig-bg: #fdf2f8;
+      --pill-ig-border: #db2777;
+      --pill-fb-bg: #eff6ff;
+      --pill-fb-border: #2563eb;
+      --pill-tk-bg: #ecfeff;
+      --pill-tk-border: #0891b2;
+      --pill-th-bg: #f8fafc;
+      --pill-th-border: #64748b;
+      --pill-yt-bg: #fef2f2;
+      --pill-yt-border: #dc2626;
+
+      --calendar-other-month: #f8fafc;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     }
 
     body {
@@ -65,7 +128,7 @@
       font-family: var(--font-sans);
       line-height: 1.5;
       min-height: 100vh;
-      padding: 20px 28px;
+      padding: 24px 32px;
     }
 
     .container {
@@ -80,7 +143,7 @@
     .top-bar {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
       flex-wrap: wrap;
       gap: 14px;
     }
@@ -98,307 +161,232 @@
     .headline p {
       font-size: 13px;
       color: var(--text-muted);
-      margin-top: 2px;
+      margin-top: 3px;
     }
 
-    .top-actions {
-      display: flex;
-      gap: 10px;
-    }
-
-    .btn {
+    .theme-toggle-btn {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 8px 14px;
-      border-radius: 8px;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      border-radius: 999px;
       font-size: 12px;
       font-weight: 750;
       cursor: pointer;
-      transition: all 0.15s ease;
-      border: 1px solid transparent;
-      outline: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+    .theme-toggle-btn:hover {
+      background: var(--surface-interactive);
     }
 
-    .btn-secondary {
-      background: var(--surface);
-      border-color: var(--border-strong);
-      color: var(--text-secondary);
-    }
-    .btn-secondary:hover {
-      background: var(--surface-hover);
-      color: var(--text-primary);
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%);
-      border-color: #a855f7;
-      color: #fff;
-      box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35);
-    }
-    .btn-primary:hover {
-      background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
-      transform: translateY(-1px);
-    }
-
-    /* 4 Metric Cards */
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 12px;
-    }
-
-    .metric-card {
+    /* Filter Bar */
+    .filter-card {
       background: var(--surface);
       border: 1px solid var(--border-subtle);
       border-radius: 12px;
-      padding: 14px;
-    }
-    .metric-title {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-    }
-    .metric-value {
-      font-size: 24px;
-      font-weight: 850;
-      margin-top: 4px;
-    }
-    .metric-subtitle {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    /* Tabs & Toolbar Filter */
-    .nav-toolbar {
+      padding: 12px 18px;
       display: flex;
       align-items: center;
-      border-bottom: 1px solid var(--border-subtle);
+      justify-content: space-between;
+      gap: 14px;
       flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .nav-tab {
-      background: transparent;
-      border: none;
-      border-bottom: 2px solid transparent;
-      color: var(--text-muted);
-      padding: 10px 16px;
-      font-size: 13px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-    .nav-tab.active {
-      border-bottom-color: var(--status-neutral);
-      color: var(--status-neutral);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
 
     .filter-group {
-      margin-left: auto;
       display: flex;
-      gap: 8px;
       align-items: center;
+      gap: 12px;
       flex-wrap: wrap;
     }
 
-    .filter-select {
-      background: var(--input-bg);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-secondary);
-      padding: 6px 10px;
-      border-radius: 7px;
-      font-size: 12px;
-      outline: none;
-      font-weight: 600;
-    }
-    .filter-select:focus {
-      border-color: var(--link);
+    .filter-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    /* Calendar Container */
-    .calendar-card {
+    .select-input {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+    }
+    .select-input:focus {
+      border-color: var(--status-neutral);
+    }
+
+    /* Calendar Frame */
+    .calendar-container {
       background: var(--surface);
       border: 1px solid var(--border-subtle);
       border-radius: 14px;
       overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.04);
     }
 
-    .calendar-nav-header {
-      height: 54px;
-      border-bottom: 1px solid var(--border-subtle);
+    /* Calendar Top Navigation */
+    .cal-header {
+      height: 58px;
+      padding: 0 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 18px;
+      border-bottom: 1px solid var(--border-subtle);
       background: var(--surface);
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 10px;
     }
 
-    .nav-buttons {
+    .cal-nav-buttons {
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
-    .btn-nav {
+    .cal-btn {
       background: var(--surface-interactive);
       border: 1px solid var(--border-strong);
       color: var(--text-secondary);
-      padding: 5px 12px;
-      border-radius: 6px;
+      padding: 6px 12px;
+      border-radius: 7px;
       font-size: 12px;
-      font-weight: 750;
+      font-weight: 700;
       cursor: pointer;
     }
-    .btn-nav:hover {
+    .cal-btn:hover {
       background: var(--surface-hover);
       color: var(--text-primary);
     }
-
-    .calendar-title {
-      font-size: 17px;
-      font-weight: 850;
+    .cal-btn.current {
       color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      font-weight: 800;
     }
 
-    .calendar-meta {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 12px;
-      color: var(--text-muted);
+    .cal-month-title {
+      font-size: 16px;
+      font-weight: 850;
+      color: var(--text-primary);
+      margin-left: 10px;
     }
 
     /* 7 Days Header */
-    .days-header-row {
+    .cal-weekdays {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      background: var(--surface-interactive);
+      background: var(--surface-raised);
       border-bottom: 1px solid var(--border-subtle);
       text-align: center;
     }
-    .day-header-cell {
+
+    .cal-weekday-cell {
       padding: 10px 4px;
       font-size: 11px;
       font-weight: 800;
       color: var(--text-secondary);
-      letter-spacing: 0.6px;
+      letter-spacing: 0.5px;
     }
-    .day-header-cell.weekend {
+    .cal-weekday-cell.weekend {
       color: var(--status-warning);
     }
 
-    /* ========================================================
-       UNIFORM / PROPORTIONAL GRID - BOX UKURAN SERAGAM (130px)
-       ======================================================== */
-    .calendar-grid {
+    /* Calendar Grid */
+    .cal-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 1px;
       background: var(--border-subtle);
     }
 
-    .calendar-day-cell {
-      height: 132px; /* FIXED PROPORTIONAL HEIGHT UNIFORM FOR ALL DATES */
+    /* Uniform Fixed Cell */
+    .day-cell {
+      height: 132px;
+      max-height: 132px;
+      box-sizing: border-box;
       background: var(--surface);
-      padding: 8px;
+      padding: 7px 9px;
       display: flex;
       flex-direction: column;
       position: relative;
-      cursor: pointer;
-      transition: background 0.15s ease, border-color 0.15s ease;
       overflow: hidden;
+      cursor: pointer;
     }
-    .calendar-day-cell:hover {
-      background: #141f33;
+    .day-cell:hover {
+      background: var(--surface-raised);
     }
-
-    .calendar-day-cell.other-month {
-      background: rgba(10, 15, 26, 0.6);
-      opacity: 0.7;
+    .day-cell.other-month {
+      background: var(--calendar-other-month);
+      opacity: 0.75;
     }
-    .calendar-day-cell.other-month:hover {
-      background: rgba(16, 24, 40, 0.9);
-      opacity: 1;
-    }
-
-    .calendar-day-cell.is-today {
-      background: rgba(96, 165, 250, 0.08);
-      border: 1px solid var(--status-info);
+    .day-cell.today {
+      background: var(--status-info-soft);
+      outline: 1.5px solid var(--link);
+      outline-offset: -1px;
     }
 
-    /* Day Cell Top Row */
-    .cell-header {
+    .day-cell-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 6px;
-      flex-shrink: 0;
+      margin-bottom: 5px;
     }
 
-    .cell-date-wrap {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .cell-date-num {
+    .day-number {
       font-size: 13px;
       font-weight: 750;
       color: var(--text-primary);
     }
-    .is-today .cell-date-num {
-      color: var(--status-info);
+    .day-cell.other-month .day-number {
+      color: var(--text-muted);
+    }
+    .day-cell.today .day-number {
+      color: var(--link);
       font-weight: 900;
     }
-    .other-month .cell-date-num {
-      color: var(--text-disabled);
-    }
 
-    .today-tag {
-      background: var(--status-info);
-      color: #0c1422;
+    .today-badge {
+      background: var(--link);
+      color: #ffffff;
       font-size: 9px;
       font-weight: 850;
       padding: 1px 5px;
       border-radius: 4px;
-      letter-spacing: 0.3px;
+      margin-left: 5px;
     }
 
     .btn-add-schedule {
       background: var(--surface-interactive);
       border: 1px solid var(--border-strong);
-      color: var(--text-muted);
+      color: var(--text-secondary);
+      border-radius: 5px;
       width: 20px;
       height: 20px;
-      border-radius: 5px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 800;
       cursor: pointer;
       line-height: 1;
-      padding: 0;
-      transition: all 0.15s ease;
     }
     .btn-add-schedule:hover {
-      background: var(--action-primary);
-      border-color: var(--action-primary);
-      color: #fff;
-      transform: scale(1.1);
+      background: var(--status-neutral);
+      color: #ffffff;
+      border-color: var(--status-neutral);
     }
 
-    /* Scheduled Items Container in Cell */
-    .cell-events-list {
+    /* Schedule Pills */
+    .schedule-list {
       display: flex;
       flex-direction: column;
       gap: 4px;
@@ -406,122 +394,93 @@
       overflow: hidden;
     }
 
-    /* Compact 2-Line Scheduled Item Card */
     .schedule-pill {
-      border-radius: 6px;
       padding: 3px 6px;
+      border-radius: 5px;
       font-size: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-      overflow: hidden;
-      border-left: 3px solid transparent;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-      transition: transform 0.1s ease;
-      cursor: pointer;
+      line-height: 1.25;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
     }
-    .schedule-pill:hover {
-      transform: translateY(-1px);
-      filter: brightness(1.15);
+    .schedule-pill.ig {
+      background: var(--pill-ig-bg);
+      border-left: 3px solid var(--pill-ig-border);
     }
-
-    .schedule-pill.platform-tiktok {
-      background: var(--platform-tiktok-bg);
-      border-left-color: var(--platform-tiktok);
+    .schedule-pill.fb {
+      background: var(--pill-fb-bg);
+      border-left: 3px solid var(--pill-fb-border);
     }
-    .schedule-pill.platform-instagram {
-      background: var(--platform-instagram-bg);
-      border-left-color: var(--platform-instagram);
+    .schedule-pill.tk {
+      background: var(--pill-tk-bg);
+      border-left: 3px solid var(--pill-tk-border);
     }
-    .schedule-pill.platform-facebook {
-      background: var(--platform-facebook-bg);
-      border-left-color: var(--platform-facebook);
+    .schedule-pill.th {
+      background: var(--pill-th-bg);
+      border-left: 3px solid var(--pill-th-border);
     }
-    .schedule-pill.platform-youtube {
-      background: var(--platform-youtube-bg);
-      border-left-color: var(--platform-youtube);
-    }
-    .schedule-pill.platform-threads {
-      background: var(--platform-threads-bg);
-      border-left-color: var(--platform-threads);
+    .schedule-pill.yt {
+      background: var(--pill-yt-bg);
+      border-left: 3px solid var(--pill-yt-border);
     }
 
-    /* Baris 1: Platform - Jam */
-    .pill-row-top {
+    .pill-line-1 {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 4px;
+      align-items: center;
+    }
+
+    .pill-plat-time {
       font-weight: 800;
-      font-size: 10px;
+      font-size: 9.5px;
       color: var(--text-primary);
     }
-    .platform-badge-mini {
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-    }
+
     .status-dot {
-      width: 5px;
-      height: 5px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       display: inline-block;
     }
-    .status-dot.success { background: var(--status-success); }
-    .status-dot.scheduled { background: var(--status-info); }
-    .status-dot.warning { background: var(--status-warning); }
-    .status-dot.danger { background: var(--status-danger); }
+    .status-dot.published { background: var(--status-success); }
+    .status-dot.scheduled { background: var(--link); }
+    .status-dot.failed { background: var(--status-danger); }
+    .status-dot.retry { background: var(--status-warning); }
 
-    /* Baris 2: Produk - Video ID (Ellipsis 1 baris) */
-    .pill-row-bottom {
+    .pill-line-2 {
       font-size: 9.5px;
       color: var(--text-secondary);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-family: var(--font-mono);
-      opacity: 0.9;
+      margin-top: 1px;
     }
 
-    /* "+N lainnya" button indicator */
-    .pill-more-count {
-      font-size: 9.5px;
-      font-weight: 750;
+    .more-badge {
+      background: var(--status-info-soft);
+      border: 1px solid var(--status-info);
       color: var(--link);
-      background: rgba(103, 232, 249, 0.08);
-      border: 1px dashed rgba(103, 232, 249, 0.3);
-      padding: 2px 5px;
+      font-size: 9.5px;
+      font-weight: 800;
+      padding: 2px 6px;
       border-radius: 4px;
       text-align: center;
-      cursor: pointer;
-      margin-top: auto;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .pill-more-count:hover {
-      background: rgba(103, 232, 249, 0.18);
-      border-color: var(--link);
     }
 
-    /* ========================================================
-       MODAL: DETAIL SELURUH JADWAL DI TANGGAL TERSEBUT
-       ======================================================== */
+    /* Modal Styles */
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(4, 7, 13, 0.75);
-      backdrop-filter: blur(6px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: var(--overlay-backdrop);
+      display: grid;
+      place-items: center;
       z-index: 9999;
       padding: 16px;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.2s ease;
     }
-    .modal-backdrop.open {
+    .modal-backdrop.active {
       opacity: 1;
       pointer-events: auto;
     }
@@ -531,90 +490,97 @@
       border: 1px solid var(--border-strong);
       border-radius: 16px;
       width: 100%;
-      max-width: 760px;
-      max-height: 88vh;
+      max-width: 680px;
+      padding: 24px;
+      color: var(--text-primary);
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
       display: flex;
       flex-direction: column;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
-      animation: modalSlideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      overflow: hidden;
-    }
-
-    @keyframes modalSlideUp {
-      from { transform: translateY(16px) scale(0.98); opacity: 0; }
-      to { transform: translateY(0) scale(1); opacity: 1; }
+      max-height: 88vh;
     }
 
     .modal-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border-subtle);
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      background: var(--surface-raised);
+      align-items: flex-start;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-subtle);
     }
-    .modal-header h3 {
+
+    .modal-title {
       font-size: 16px;
       font-weight: 850;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .btn-close-modal {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 18px;
-      line-height: 1;
-      padding: 4px 6px;
-      border-radius: 6px;
-    }
-    .btn-close-modal:hover {
-      background: var(--surface-hover);
       color: var(--text-primary);
     }
 
-    .modal-body {
-      padding: 18px 20px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
+    .modal-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
     }
 
-    /* Day Detail List Item Card */
-    .day-detail-card {
-      background: var(--canvas);
+    .btn-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+    .btn-close:hover {
+      color: var(--text-primary);
+    }
+
+    .modal-scroller {
+      flex: 1;
+      overflow-y: auto;
+      max-height: 56vh;
+      padding-right: 6px;
+      margin: 16px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal-scroller::-webkit-scrollbar {
+      width: 6px;
+    }
+    .modal-scroller::-webkit-scrollbar-thumb {
+      background: var(--border-strong);
+      border-radius: 999px;
+    }
+
+    .job-card {
+      background: var(--surface-raised);
       border: 1px solid var(--border-subtle);
       border-radius: 10px;
       padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      transition: border-color 0.15s ease;
-    }
-    .day-detail-card:hover {
-      border-color: var(--border-strong);
+      gap: 10px;
     }
 
-    .detail-card-header {
+    .job-card-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 8px;
     }
+
     .platform-tag {
-      font-size: 10px;
-      font-weight: 800;
       padding: 3px 8px;
       border-radius: 6px;
+      font-size: 10.5px;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
+    .platform-tag.ig { background: var(--pill-ig-bg); color: var(--pill-ig-border); border: 1px solid var(--pill-ig-border); }
+    .platform-tag.fb { background: var(--pill-fb-bg); color: var(--pill-fb-border); border: 1px solid var(--pill-fb-border); }
+    .platform-tag.tk { background: var(--pill-tk-bg); color: var(--pill-tk-border); border: 1px solid var(--pill-tk-border); }
+
     .status-badge {
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 800;
       padding: 3px 8px;
       border-radius: 999px;
@@ -622,580 +588,427 @@
       align-items: center;
       gap: 5px;
     }
+    .status-badge.published { background: var(--status-success-soft); color: var(--status-success); }
+    .status-badge.scheduled { background: var(--status-info-soft); color: var(--status-info); }
+    .status-badge.failed { background: var(--status-danger-soft); color: var(--status-danger); }
 
-    .detail-card-content {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      align-items: flex-start;
-    }
-    .detail-main-info h4 {
-      font-size: 13px;
-      font-weight: 750;
-      color: var(--text-primary);
-      margin-bottom: 4px;
-    }
-    .detail-meta-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 11px;
-      color: var(--text-muted);
-      flex-wrap: wrap;
-    }
-    .caption-preview {
-      margin-top: 6px;
+    .caption-box {
       font-size: 11px;
       color: var(--text-secondary);
-      background: var(--surface);
+      background: var(--surface-interactive);
       padding: 8px 10px;
       border-radius: 6px;
       border: 1px solid var(--border-subtle);
-      max-height: 60px;
-      overflow-y: auto;
-      line-height: 1.4;
     }
 
-    .modal-footer {
-      padding: 12px 20px;
-      border-top: 1px solid var(--border-subtle);
-      background: var(--surface-raised);
+    .card-actions {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
-    /* Toast Notification */
-    .toast-box {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--surface-raised);
-      border: 1px solid var(--status-info);
-      color: #93c5fd;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 700;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-      z-index: 10000;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transform: translateY(100px);
-      opacity: 0;
-      transition: all 0.25s ease;
+    .btn-cancel {
+      background: var(--status-danger-soft);
+      border: 1px solid var(--status-danger);
+      color: var(--status-danger);
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 750;
+      cursor: pointer;
     }
-    .toast-box.show {
-      transform: translateY(0);
-      opacity: 1;
+
+    .btn-view-queue {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      color: var(--text-secondary);
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-view-queue:hover {
+      color: var(--text-primary);
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .btn-action-primary {
+      background: var(--action-primary);
+      border: none;
+      color: var(--on-action-primary);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-action-primary:hover {
+      background: var(--action-primary-hover);
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    
-    <!-- Top Headline & Action Bar -->
-    <header class="top-bar">
+    <!-- Top Bar -->
+    <div class="top-bar">
       <div class="headline">
-        <h1>🗓️ ContentFlow Publishing Scheduler</h1>
-        <p>Tampilan kalender bulanan terstruktur dengan box tanggal proporsional dan inspeksi detail harian.</p>
+        <h1>📅 Kalender Konten Semantic (Universal Light & Dark Theme)</h1>
+        <p>Demonstrasi adaptasi warna Semantic CSS agar teks selalu kontras dan jelas di mode Light maupun Dark.</p>
       </div>
-      <div class="top-actions">
-        <button class="btn btn-secondary" onclick="showToast('Memeriksa status akun terhubung...')">🔗 Status & Koneksi Akun (8)</button>
-        <button class="btn btn-primary" onclick="openScheduleModal('2026-03-15')">＋ Jadwalkan Konten</button>
+      <div>
+        <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleTheme()">
+          <span id="themeIcon">☀️</span> <span id="themeLabel">Ganti ke Light Theme</span>
+        </button>
       </div>
-    </header>
+    </div>
 
-    <!-- 4 Metric Cards -->
-    <section class="metrics-grid">
-      <div class="metric-card">
-        <div class="metric-title">Terjadwal</div>
-        <div class="metric-value" style="color: var(--link);">28</div>
-        <div class="metric-subtitle">Antrean aktif bulan ini</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-title">Published Hari Ini</div>
-        <div class="metric-value" style="color: var(--status-success);">6</div>
-        <div class="metric-subtitle">TikTok, IG, FB & YT</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-title">Menunggu Retry</div>
-        <div class="metric-value" style="color: var(--status-warning);">1</div>
-        <div class="metric-subtitle">Percobaan otomatis</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-title">Perlu Tindakan</div>
-        <div class="metric-value" style="color: var(--text-muted);">0</div>
-        <div class="metric-subtitle">Semua antrean normal</div>
-      </div>
-    </section>
-
-    <!-- Navigation Tab & Filters -->
-    <nav class="nav-toolbar">
-      <button class="nav-tab" onclick="showToast('Membuka antrean...')">Antrean (29)</button>
-      <button class="nav-tab active">Kalender</button>
-      <button class="nav-tab" onclick="showToast('Membuka riwayat...')">Riwayat Publikasi</button>
-
+    <!-- Filter Bar -->
+    <div class="filter-card">
       <div class="filter-group">
-        <!-- Filter 1: Brand Profile -->
-        <select class="filter-select" id="brandFilter" onchange="handleFilterChange()">
-          <option value="all">Semua Brand Profile</option>
-          <option value="nutribake" selected>@nutribake</option>
-          <option value="mealprepid">@mealprepid</option>
-          <option value="glowskincare">@glowskincare</option>
+        <span class="filter-label">Brand Profile</span>
+        <select class="select-input">
+          <option value="all">Semua Brand (@skinbeauty, @skinglow)</option>
+          <option value="skinbeauty">@skinbeauty</option>
+          <option value="skinglow">@skinglow</option>
         </select>
-
-        <!-- Filter 2: Platform -->
-        <select class="filter-select" id="platformFilter" onchange="handleFilterChange()">
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Platform</span>
+        <select class="select-input">
           <option value="all">Semua Platform</option>
-          <option value="tiktok">TikTok</option>
           <option value="instagram">Instagram</option>
-          <option value="facebook">Facebook Page</option>
-          <option value="youtube">YouTube</option>
-          <option value="threads">Threads</option>
+          <option value="tiktok">TikTok</option>
+          <option value="facebook">Facebook</option>
         </select>
-
-        <!-- Filter 3: Status -->
-        <select class="filter-select" id="statusFilter" onchange="handleFilterChange()">
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Status</span>
+        <select class="select-input">
           <option value="all">Semua Status</option>
           <option value="scheduled">Scheduled</option>
           <option value="published">Published</option>
-          <option value="retry_wait">Retry Wait</option>
           <option value="failed">Failed</option>
         </select>
-
-        <button class="btn btn-secondary" style="padding: 6px 10px;" onclick="showToast('Data jadwal diperbarui! 🔄')">🔄</button>
       </div>
-    </nav>
+    </div>
 
-    <!-- Main Calendar Box (Uniform Proporsional) -->
-    <main class="calendar-card">
-      
-      <!-- Calendar Nav Header -->
-      <div class="calendar-nav-header">
-        <div style="display: flex; align-items: center; gap: 14px;">
-          <div class="nav-buttons">
-            <button class="btn-nav" onclick="showToast('Navigasi ke Februari 2026')">‹ Sebelumnya</button>
-            <button class="btn-nav" style="color: var(--text-primary);" onclick="showToast('Kembali ke bulan ini')">Bulan Ini</button>
-            <button class="btn-nav" onclick="showToast('Navigasi ke April 2026')">Selanjutnya ›</button>
-          </div>
-          <div class="calendar-title">
-            <span>📅 Maret 2026</span>
-          </div>
+    <!-- Calendar Container -->
+    <div class="calendar-container">
+      <!-- Calendar Header -->
+      <div class="cal-header">
+        <div class="cal-nav-buttons">
+          <button class="cal-btn">‹ Sebelumnya</button>
+          <button class="cal-btn current">Bulan Ini</button>
+          <button class="cal-btn">Selanjutnya ›</button>
+          <span class="cal-month-title">📅 September 2026</span>
         </div>
-
-        <div class="calendar-meta">
-          <span style="background: var(--status-info-soft); color: var(--link); border: 1px solid var(--status-info); padding: 3px 8px; border-radius: 6px; font-weight: 700;">
-            🏷️ @nutribake
-          </span>
-          <span>Total <strong>28</strong> jadwal posting bulan ini</span>
+        <div style="font-size: 12px; color: var(--text-muted);">
+          Total <strong>18</strong> konten terjadwal bulan ini
         </div>
       </div>
 
-      <!-- 7 Days Header (Senin - Minggu) -->
-      <div class="days-header-row">
-        <div class="day-header-cell">SENIN</div>
-        <div class="day-header-cell">SELASA</div>
-        <div class="day-header-cell">RABU</div>
-        <div class="day-header-cell">KAMIS</div>
-        <div class="day-header-cell">JUMAT</div>
-        <div class="day-header-cell weekend">SABTU</div>
-        <div class="day-header-cell weekend">MINGGU</div>
+      <!-- 7 Weekdays -->
+      <div class="cal-weekdays">
+        <div class="cal-weekday-cell">SENIN</div>
+        <div class="cal-weekday-cell">SELASA</div>
+        <div class="cal-weekday-cell">RABU</div>
+        <div class="cal-weekday-cell">KAMIS</div>
+        <div class="cal-weekday-cell">JUMAT</div>
+        <div class="cal-weekday-cell weekend">SABTU</div>
+        <div class="cal-weekday-cell weekend">MINGGU</div>
       </div>
 
-      <!-- Calendar Month Grid (35 / 42 Cells, All 132px Fixed Height) -->
-      <div class="calendar-grid" id="calendarGrid">
-        <!-- Rendered by JS -->
-      </div>
-    </main>
+      <!-- Grid Days -->
+      <div class="cal-grid">
+        <!-- Hari 1-7 (Sample) -->
+        <div class="day-cell other-month">
+          <div class="day-cell-header"><span class="day-number">31</span></div>
+        </div>
 
+        <div class="day-cell" onclick="openDetailModal('1 September 2026', 2)">
+          <div class="day-cell-header">
+            <span class="day-number">1</span>
+            <button class="btn-add-schedule" onclick="event.stopPropagation(); alert('Buka form jadwal!');">+</button>
+          </div>
+          <div class="schedule-list">
+            <div class="schedule-pill ig">
+              <div class="pill-line-1"><span class="pill-plat-time">IG · 19:00</span><span class="status-dot published"></span></div>
+              <div class="pill-line-2">Serum Glowing - VID_001</div>
+            </div>
+            <div class="schedule-pill tk">
+              <div class="pill-line-1"><span class="pill-plat-time">TK · 20:30</span><span class="status-dot published"></span></div>
+              <div class="pill-line-2">Sunscreen UV - VID_002</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="day-cell" onclick="openDetailModal('2 September 2026', 1)">
+          <div class="day-cell-header">
+            <span class="day-number">2</span>
+            <button class="btn-add-schedule" onclick="event.stopPropagation();">+</button>
+          </div>
+          <div class="schedule-list">
+            <div class="schedule-pill fb">
+              <div class="pill-line-1"><span class="pill-plat-time">FB · 15:00</span><span class="status-dot published"></span></div>
+              <div class="pill-line-2">Moisturizer Gel - VID_003</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="day-cell" onclick="openDetailModal('3 September 2026', 0)">
+          <div class="day-cell-header">
+            <span class="day-number">3</span>
+            <button class="btn-add-schedule" onclick="event.stopPropagation();">+</button>
+          </div>
+        </div>
+
+        <div class="day-cell" onclick="openDetailModal('4 September 2026', 1)">
+          <div class="day-cell-header">
+            <span class="day-number">4</span>
+            <button class="btn-add-schedule" onclick="event.stopPropagation();">+</button>
+          </div>
+          <div class="schedule-list">
+            <div class="schedule-pill ig">
+              <div class="pill-line-1"><span class="pill-plat-time">IG · 18:00</span><span class="status-dot published"></span></div>
+              <div class="pill-line-2">Brightening Body - VID_004</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="day-cell" onclick="openDetailModal('5 September 2026', 0)">
+          <div class="day-cell-header"><span class="day-number">5</span><button class="btn-add-schedule">+</button></div>
+        </div>
+
+        <div class="day-cell" onclick="openDetailModal('6 September 2026', 0)">
+          <div class="day-cell-header"><span class="day-number">6</span><button class="btn-add-schedule">+</button></div>
+        </div>
+
+        <!-- Baris 2 -->
+        <div class="day-cell" onclick="openDetailModal('7 September 2026', 1)">
+          <div class="day-cell-header"><span class="day-number">7</span><button class="btn-add-schedule">+</button></div>
+          <div class="schedule-list">
+            <div class="schedule-pill tk">
+              <div class="pill-line-1"><span class="pill-plat-time">TK · 12:00</span><span class="status-dot published"></span></div>
+              <div class="pill-line-2">Facial Wash - VID_005</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="day-cell" onclick="openDetailModal('8 September 2026', 0)">
+          <div class="day-cell-header"><span class="day-number">8</span><button class="btn-add-schedule">+</button></div>
+        </div>
+
+        <div class="day-cell" onclick="openDetailModal('9 September 2026', 1)">
+          <div class="day-cell-header"><span class="day-number">9</span><button class="btn-add-schedule">+</button></div>
+          <div class="schedule-list">
+            <div class="schedule-pill ig">
+              <div class="pill-line-1"><span class="pill-plat-time">IG · 19:30</span><span class="status-dot published"></span></div>
+              <div class="pill-line-2">Lip Tint Velvet - VID_006</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="day-cell" onclick="openDetailModal('10 September 2026', 1)">
+          <div class="day-cell-header"><span class="day-number">10</span><button class="btn-add-schedule">+</button></div>
+          <div class="schedule-list">
+            <div class="schedule-pill fb">
+              <div class="pill-line-1"><span class="pill-plat-time">FB · 14:00</span><span class="status-dot published"></span></div>
+              <div class="pill-line-2">Eye Cream Roll - VID_007</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HARI INI (11 September 2026) -->
+        <div class="day-cell today" onclick="openDetailModal('Jumat, 11 September 2026', 4)">
+          <div class="day-cell-header">
+            <div>
+              <span class="day-number">11</span>
+              <span class="today-badge">HARI INI</span>
+            </div>
+            <button class="btn-add-schedule" onclick="event.stopPropagation();">+</button>
+          </div>
+          <div class="schedule-list">
+            <div class="schedule-pill ig">
+              <div class="pill-line-1"><span class="pill-plat-time">IG · 10:00</span><span class="status-dot published"></span></div>
+              <div class="pill-line-2">Serum Glowing - VID_008</div>
+            </div>
+            <div class="schedule-pill tk">
+              <div class="pill-line-1"><span class="pill-plat-time">TK · 14:00</span><span class="status-dot scheduled"></span></div>
+              <div class="pill-line-2">Sunscreen UV - VID_009</div>
+            </div>
+            <div class="more-badge">+2 konten lainnya</div>
+          </div>
+        </div>
+
+        <div class="day-cell" onclick="openDetailModal('12 September 2026', 1)">
+          <div class="day-cell-header"><span class="day-number">12</span><button class="btn-add-schedule">+</button></div>
+          <div class="schedule-list">
+            <div class="schedule-pill ig">
+              <div class="pill-line-1"><span class="pill-plat-time">IG · 19:00</span><span class="status-dot scheduled"></span></div>
+              <div class="pill-line-2">Acne Spot Gel - VID_010</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="day-cell" onclick="openDetailModal('13 September 2026', 0)">
+          <div class="day-cell-header"><span class="day-number">13</span><button class="btn-add-schedule">+</button></div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- ========================================================
-       MODAL 1: DETAIL SELURUH JADWAL PADA TANGGAL TERSEBUT
-       ======================================================== -->
-  <div class="modal-backdrop" id="dayDetailModal" onclick="closeDayDetailModal(event)">
+  <!-- Modal Detail Jadwal Harian (Option B) -->
+  <div id="detailModal" class="modal-backdrop" onclick="closeDetailModal()">
     <div class="modal-box" onclick="event.stopPropagation()">
       <div class="modal-header">
         <div>
-          <h3 id="modalDayTitle">📅 Detail Jadwal: Kamis, 12 Maret 2026</h3>
-          <span style="font-size: 11px; color: var(--text-muted);" id="modalDaySubtitle">3 Konten Terjadwal pada tanggal ini</span>
+          <div class="modal-title" id="modalTitle">📅 Detail Jadwal: Jumat, 11 September 2026</div>
+          <div class="modal-subtitle" id="modalSubtitle">Total 4 konten dijadwalkan pada hari ini.</div>
         </div>
-        <button class="btn-close-modal" onclick="closeDayDetailModal()">✕</button>
+        <button class="btn-close" onclick="closeDetailModal()">✕</button>
       </div>
 
-      <div class="modal-body" id="modalDayList">
-        <!-- List items rendered by JS -->
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeDayDetailModal()">Tutup</button>
-        <button class="btn btn-primary" id="btnModalAddSchedule" onclick="handleModalAddNew()">＋ Jadwalkan Konten pada Tanggal Ini</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================================
-       MODAL 2: FORM JADWALKAN PUBLIKASI KONTEN (AUTO-SYNC BRAND)
-       ======================================================== -->
-  <div class="modal-backdrop" id="scheduleFormModal" onclick="closeScheduleModal(event)">
-    <div class="modal-box" style="max-width: 680px;" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <h3>✨ Jadwalkan Publikasi Konten</h3>
-        <button class="btn-close-modal" onclick="closeScheduleModal()">✕</button>
-      </div>
-
-      <div class="modal-body">
-        <!-- Filter Brand Profile di Form Modal -->
-        <div>
-          <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">
-            <span>Brand Profile</span>
-            <span style="color: var(--link); font-weight: 700;" id="formBrandStatus">✓ Terkunci ke @nutribake</span>
-          </div>
-          <select class="filter-select" style="width: 100%; padding: 8px 10px;" id="modalBrandSelect">
-            <option value="nutribake">@nutribake (Nutribake Official)</option>
-            <option value="mealprepid">@mealprepid (Mealprep ID)</option>
-            <option value="glowskincare">@glowskincare (Glow Skincare)</option>
-          </select>
-        </div>
-
-        <!-- Video ID Input -->
-        <div>
-          <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">
-            ID Konten / Video ID <span style="color: var(--status-danger);">*</span>
-          </label>
-          <input type="text" value="VID-NUTRI-091 - Resep Brownies Kukus Rendah Kalori" class="filter-select" style="width: 100%; padding: 8px 10px; color: var(--text-primary);" readonly>
-        </div>
-
-        <!-- Platform & Waktu -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <div>
-            <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Pilih Akun Publikasi</label>
-            <div style="background: var(--input-bg); border: 1px solid var(--border-subtle); padding: 8px; border-radius: 6px; font-size: 11px; color: var(--text-primary);">
-              ☑️ Nutribake Official (Instagram @19.00)<br>
-              ☑️ Nutribake TikTok (TikTok @19.00)
+      <div class="modal-scroller">
+        <!-- Job Card 1 -->
+        <div class="job-card">
+          <div class="job-card-top">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="platform-tag ig">INSTAGRAM</span>
+              <span style="font-weight: 750; font-size: 12px; color: var(--text-primary);">⏰ 10:00 WIB</span>
+              <span style="font-size: 11px; color: var(--text-muted);">· @skinbeauty_official</span>
             </div>
+            <span class="status-badge published">✓ PUBLISHED</span>
           </div>
           <div>
-            <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Waktu Tayang</label>
-            <input type="datetime-local" id="formScheduleTime" class="filter-select" style="width: 100%; padding: 8px 10px; color: var(--text-primary);">
+            <div style="font-weight: 800; font-size: 13px; color: var(--text-primary);">🏷️ Serum Glowing - VID_008</div>
+            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Rahasia Kulit Glowing Alami dalam 7 Hari</div>
+            <div class="caption-box" style="margin-top: 6px;">Cobain serum viral ini sekarang dan rasakan perbedaannya! Link di bio ya kak ✨ #skincare #glowing</div>
+          </div>
+          <div class="card-actions">
+            <div>
+              <a href="#" style="font-size: 11px; color: var(--status-success); font-weight: 750; text-decoration: none;">↗️ Buka di Instagram</a>
+            </div>
+            <button class="btn-view-queue" onclick="alert('Beralih ke tab antrean dengan ID: VID_008'); closeDetailModal();">👁️ Lihat di Antrean</button>
           </div>
         </div>
 
-        <!-- Caption Preview -->
-        <div>
-          <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Caption & Hashtags</label>
-          <textarea class="filter-select" style="width: 100%; height: 70px; padding: 8px 10px; resize: none; font-size: 11px;" readonly>✨ RESEP BROWNIES KUKUS DIET SEHAT ✨
+        <!-- Job Card 2 -->
+        <div class="job-card">
+          <div class="job-card-top">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="platform-tag tk">TIKTOK</span>
+              <span style="font-weight: 750; font-size: 12px; color: var(--text-primary);">⏰ 14:00 WIB</span>
+              <span style="font-size: 11px; color: var(--text-muted);">· @skinbeauty_tiktok</span>
+            </div>
+            <span class="status-badge scheduled">⏳ SCHEDULED</span>
+          </div>
+          <div>
+            <div style="font-weight: 800; font-size: 13px; color: var(--text-primary);">🏷️ Sunscreen UV - VID_009</div>
+            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Review Jujur Sunscreen No Whitecast</div>
+            <div class="caption-box" style="margin-top: 6px;">Outdoor seharian gak takut gosong! Cek keranjang kuning sekarang 🔥 #sunscreen #reviewskincare</div>
+          </div>
+          <div class="card-actions">
+            <div>
+              <button class="btn-cancel" onclick="alert('Jadwal berhasil dibatalkan!');">🚫 Batalkan Jadwal</button>
+            </div>
+            <button class="btn-view-queue" onclick="closeDetailModal();">👁️ Lihat di Antrean</button>
+          </div>
+        </div>
 
-Bikin cemilan manis tanpa rasa bersalah! Menggunakan tepung almond Nutribake. 🍫🥣
+        <!-- Job Card 3 -->
+        <div class="job-card">
+          <div class="job-card-top">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="platform-tag fb">FACEBOOK</span>
+              <span style="font-weight: 750; font-size: 12px; color: var(--text-primary);">⏰ 18:30 WIB</span>
+              <span style="font-size: 11px; color: var(--text-muted);">· SkinBeauty Page</span>
+            </div>
+            <span class="status-badge scheduled">⏳ SCHEDULED</span>
+          </div>
+          <div>
+            <div style="font-weight: 800; font-size: 13px; color: var(--text-primary);">🏷️ Moisturizer Gel - VID_011</div>
+            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Tips Menjaga Skin Barrier Tetap Sehat</div>
+          </div>
+          <div class="card-actions">
+            <div>
+              <button class="btn-cancel" onclick="alert('Jadwal berhasil dibatalkan!');">🚫 Batalkan Jadwal</button>
+            </div>
+            <button class="btn-view-queue" onclick="closeDetailModal();">👁️ Lihat di Antrean</button>
+          </div>
+        </div>
 
-#nutribake #dietsehat #resepviral #brownieskukus</textarea>
+        <!-- Job Card 4 -->
+        <div class="job-card">
+          <div class="job-card-top">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="platform-tag ig">INSTAGRAM</span>
+              <span style="font-weight: 750; font-size: 12px; color: var(--text-primary);">⏰ 21:00 WIB</span>
+              <span style="font-size: 11px; color: var(--text-muted);">· @skinglow_official</span>
+            </div>
+            <span class="status-badge scheduled">⏳ SCHEDULED</span>
+          </div>
+          <div>
+            <div style="font-weight: 800; font-size: 13px; color: var(--text-primary);">🏷️ Night Cream - VID_012</div>
+            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Night Routine Skincare untuk Wajah Cerah</div>
+          </div>
+          <div class="card-actions">
+            <div>
+              <button class="btn-cancel" onclick="alert('Jadwal berhasil dibatalkan!');">🚫 Batalkan Jadwal</button>
+            </div>
+            <button class="btn-view-queue" onclick="closeDetailModal();">👁️ Lihat di Antrean</button>
+          </div>
         </div>
       </div>
 
       <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeScheduleModal()">Batal</button>
-        <button class="btn btn-primary" onclick="submitNewSchedule()">💾 Simpan & Jadwalkan Posting</button>
+        <button class="btn-action-primary" onclick="alert('Membuka dialog jadwal baru'); closeDetailModal();">
+          ＋ Jadwalkan Konten di Tanggal Ini
+        </button>
+        <button class="btn-view-queue" onclick="closeDetailModal()">Tutup</button>
       </div>
     </div>
-  </div>
-
-  <!-- Toast Element -->
-  <div class="toast-box" id="toast">
-    <span>✓</span>
-    <span id="toastText">Notifikasi</span>
   </div>
 
   <script>
-    // Mock Data Jadwal Posting Bulan Maret 2026
-    const mockJobs = {
-      "2026-03-02": [
-        { id: 1, platform: 'instagram', time: '19:00', product: 'Brownies Premix', videoId: 'V-NUTRI-101', brand: 'nutribake', status: 'published', title: 'Tutorial Baking 5 Menit' }
-      ],
-      "2026-03-05": [
-        { id: 2, platform: 'tiktok', time: '10:00', product: 'Cookies Oat', videoId: 'V-NUTRI-102', brand: 'nutribake', status: 'published', title: 'Ide Sarapan Praktis' },
-        { id: 3, platform: 'facebook', time: '15:30', product: 'Cookies Oat', videoId: 'V-NUTRI-102', brand: 'nutribake', status: 'published', title: 'Promo Bundling Akhir Pekan' }
-      ],
-      "2026-03-10": [
-        { id: 4, platform: 'instagram', time: '19:00', product: 'Pancake Mix', videoId: 'V-NUTRI-103', brand: 'nutribake', status: 'published', title: 'Resep Sarapan Sehat' }
-      ],
-      "2026-03-11": [
-        { id: 5, platform: 'tiktok', time: '10:30', product: 'Almond Flour', videoId: 'V-NUTRI-104', brand: 'nutribake', status: 'published', title: 'Kandungan Gizi Tepung Almond' },
-        { id: 6, platform: 'instagram', time: '18:00', product: 'Almond Flour', videoId: 'V-NUTRI-104', brand: 'nutribake', status: 'published', title: 'Kue Lebaran Rendah Gula' }
-      ],
-      "2026-03-12": [
-        { id: 7, platform: 'instagram', time: '19:00', product: 'Brownies Diet', videoId: 'V-NUTRI-105', brand: 'nutribake', status: 'scheduled', title: 'Brownies Fudgy Tanpa Tepung Terigu' },
-        { id: 8, platform: 'tiktok', time: '19:00', product: 'Brownies Diet', videoId: 'V-NUTRI-105', brand: 'nutribake', status: 'scheduled', title: 'Viral TikTok Baking Hack' },
-        { id: 9, platform: 'facebook', time: '20:15', product: 'Brownies Diet', videoId: 'V-NUTRI-105', brand: 'nutribake', status: 'scheduled', title: 'Tips Simpan Kue Tahan 2 Minggu' }
-      ],
-      "2026-03-15": [
-        { id: 10, platform: 'tiktok', time: '09:00', product: 'Chia Seeds', videoId: 'V-NUTRI-106', brand: 'nutribake', status: 'scheduled', title: 'Puding Chia Seeds Segar' },
-        { id: 11, platform: 'instagram', time: '12:00', product: 'Chia Seeds', videoId: 'V-NUTRI-106', brand: 'nutribake', status: 'scheduled', title: 'Meal Prep Sarapan Sehat' },
-        { id: 12, platform: 'youtube', time: '16:00', product: 'Chia Seeds', videoId: 'V-NUTRI-106', brand: 'nutribake', status: 'scheduled', title: 'Full Recipe & Macro Breakdown' },
-        { id: 13, platform: 'threads', time: '19:30', product: 'Chia Seeds', videoId: 'V-NUTRI-106', brand: 'nutribake', status: 'scheduled', title: 'Tanya Jawab Seputar Chia Seeds' }
-      ],
-      "2026-03-18": [
-        { id: 14, platform: 'instagram', time: '19:00', product: 'Matcha Powder', videoId: 'V-NUTRI-107', brand: 'nutribake', status: 'scheduled', title: 'Matcha Latte Ala Cafe' }
-      ],
-      "2026-03-22": [
-        { id: 15, platform: 'tiktok', time: '11:00', product: 'Stevia Sweetener', videoId: 'V-NUTRI-108', brand: 'nutribake', status: 'scheduled', title: 'Ganti Gula Pasirmu Sekarang!' },
-        { id: 16, platform: 'facebook', time: '14:00', product: 'Stevia Sweetener', videoId: 'V-NUTRI-108', brand: 'nutribake', status: 'scheduled', title: 'Edukasi Bebas Diabetes' }
-      ],
-      "2026-03-26": [
-        { id: 17, platform: 'instagram', time: '19:00', product: 'Granola Crunch', videoId: 'V-NUTRI-109', brand: 'nutribake', status: 'scheduled', title: 'Cemilan Renyah Anti Gemuk' },
-        { id: 18, platform: 'tiktok', time: '20:00', product: 'Granola Crunch', videoId: 'V-NUTRI-109', brand: 'nutribake', status: 'scheduled', title: 'ASMR Crunching Granola' }
-      ],
-      "2026-03-30": [
-        { id: 19, platform: 'instagram', time: '19:00', product: 'Dark Choco Melt', videoId: 'V-NUTRI-110', brand: 'nutribake', status: 'scheduled', title: 'Coklat Leleh 85% Kakao' }
-      ]
-    };
-
-    let selectedActiveDate = '2026-03-12';
-
-    // Render Kalender Maret 2026 (1 Mar = Minggu, jadi padding Feb 6 hari: 23-28 Feb)
-    function renderCalendar() {
-      const grid = document.getElementById('calendarGrid');
-      grid.innerHTML = '';
-
-      // Padding Februari 2026 (Senin 23 Feb s/d Sabtu 28 Feb)
-      const febDays = [23, 24, 25, 26, 27, 28];
-      febDays.forEach(d => {
-        const dateStr = `2026-02-${String(d).padStart(2, '0')}`;
-        grid.appendChild(createDayCell(d, dateStr, false, false));
-      });
-
-      // Hari Bulan Maret 2026 (1 s/d 31)
-      for (let d = 1; d <= 31; d++) {
-        const dateStr = `2026-03-${String(d).padStart(2, '0')}`;
-        const isToday = d === 11; // Contoh: hari ini tgl 11 Maret
-        grid.appendChild(createDayCell(d, dateStr, true, isToday));
-      }
-
-      // Padding April 2026 agar genap kelipatan 7 (April 1 s/d 5)
-      for (let a = 1; a <= 5; a++) {
-        const dateStr = `2026-04-${String(a).padStart(2, '0')}`;
-        grid.appendChild(createDayCell(a, dateStr, false, false));
-      }
-    }
-
-    function createDayCell(dayNum, dateStr, isCurrentMonth, isToday) {
-      const cell = document.createElement('div');
-      cell.className = `calendar-day-cell ${isCurrentMonth ? '' : 'other-month'} ${isToday ? 'is-today' : ''}`;
+    function toggleTheme() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', newTheme);
       
-      const jobs = mockJobs[dateStr] || [];
-
-      // Klik kotak tanggal membuka Modal Detail Harian
-      cell.onclick = (e) => {
-        openDayDetailModal(dateStr, jobs);
-      };
-
-      // Header Sel
-      const header = document.createElement('div');
-      header.className = 'cell-header';
-
-      const dateWrap = document.createElement('div');
-      dateWrap.className = 'cell-date-wrap';
-      dateWrap.innerHTML = `<span class="cell-date-num">${dayNum}</span> ${isToday ? '<span class="today-tag">HARI INI</span>' : ''}`;
-
-      const addBtn = document.createElement('button');
-      addBtn.className = 'btn-add-schedule';
-      addBtn.innerHTML = '+';
-      addBtn.title = `Jadwalkan konten pada ${dateStr}`;
-      addBtn.onclick = (e) => {
-        e.stopPropagation(); // Jangan trigger modal detail
-        openScheduleModal(dateStr);
-      };
-
-      header.appendChild(dateWrap);
-      header.appendChild(addBtn);
-      cell.appendChild(header);
-
-      // Daftar Jadwal Konten di Sel (Maksimal 2 item yang tampil, sisanya "+N lainnya")
-      const eventsList = document.createElement('div');
-      eventsList.className = 'cell-events-list';
-
-      const maxDisplay = 2;
-      const visibleJobs = jobs.slice(0, maxDisplay);
-      const remainingCount = jobs.length - maxDisplay;
-
-      visibleJobs.forEach(job => {
-        const pill = document.createElement('div');
-        pill.className = `schedule-pill platform-${job.platform}`;
-        
-        const platformCode = job.platform === 'instagram' ? 'IG' :
-                             job.platform === 'tiktok' ? 'TK' :
-                             job.platform === 'facebook' ? 'FB' :
-                             job.platform === 'youtube' ? 'YT' : 'TH';
-
-        const dotClass = job.status === 'published' ? 'success' :
-                         job.status === 'scheduled' ? 'scheduled' : 'warning';
-
-        // Format 2 Baris:
-        // Baris 1: [Platform] - [Jam]
-        // Baris 2: [Produk] - [Video ID]
-        pill.innerHTML = `
-          <div class="pill-row-top">
-            <span class="platform-badge-mini">${platformCode} · ${job.time}</span>
-            <span class="status-dot ${dotClass}"></span>
-          </div>
-          <div class="pill-row-bottom" title="${job.product} - ${job.videoId}">${job.product} - ${job.videoId}</div>
-        `;
-        eventsList.appendChild(pill);
-      });
-
-      if (remainingCount > 0) {
-        const morePill = document.createElement('div');
-        morePill.className = 'pill-more-count';
-        morePill.innerText = `+${remainingCount} konten lainnya`;
-        morePill.onclick = (e) => {
-          e.stopPropagation();
-          openDayDetailModal(dateStr, jobs);
-        };
-        eventsList.appendChild(morePill);
-      }
-
-      cell.appendChild(eventsList);
-      return cell;
-    }
-
-    // Modal Detail Jadwal Harian
-    function openDayDetailModal(dateStr, jobs) {
-      selectedActiveDate = dateStr;
-      const modal = document.getElementById('dayDetailModal');
-      const title = document.getElementById('modalDayTitle');
-      const subtitle = document.getElementById('modalDaySubtitle');
-      const listContainer = document.getElementById('modalDayList');
-
-      const dateObj = new Date(dateStr + 'T00:00:00');
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      const formattedDate = dateObj.toLocaleDateString('id-ID', options);
-
-      title.innerHTML = `📅 Jadwal Publikasi: ${formattedDate}`;
-      subtitle.innerText = `${jobs.length} Konten Terjadwal pada tanggal ini`;
-
-      listContainer.innerHTML = '';
-
-      if (jobs.length === 0) {
-        listContainer.innerHTML = `
-          <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
-            <div style="font-size: 32px; margin-bottom: 8px;">📭</div>
-            <div style="font-size: 14px; font-weight: 700; color: var(--text-primary);">Belum Ada Jadwal Posting</div>
-            <p style="font-size: 12px; margin-top: 4px;">Klik tombol "Tambah Jadwal" untuk menjadwalkan konten pada tanggal ini.</p>
-          </div>
-        `;
+      const icon = document.getElementById('themeIcon');
+      const label = document.getElementById('themeLabel');
+      if (newTheme === 'light') {
+        icon.textContent = '🌙';
+        label.textContent = 'Ganti ke Dark Theme';
       } else {
-        jobs.forEach((job, idx) => {
-          const card = document.createElement('div');
-          card.className = 'day-detail-card';
-
-          const platformBg = job.platform === 'instagram' ? 'rgba(236,72,153,0.15)' :
-                             job.platform === 'tiktok' ? 'rgba(0,242,254,0.15)' :
-                             job.platform === 'facebook' ? 'rgba(59,130,246,0.15)' : 'rgba(239,68,68,0.15)';
-          const platformColor = job.platform === 'instagram' ? '#f472b6' :
-                                job.platform === 'tiktok' ? '#00f2fe' :
-                                job.platform === 'facebook' ? '#60a5fa' : '#f87171';
-
-          card.innerHTML = `
-            <div class="detail-card-header">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span class="platform-tag" style="background: ${platformBg}; color: ${platformColor}; border: 1px solid ${platformColor};">
-                  ${job.platform.toUpperCase()} · ${job.time} WIB
-                </span>
-                <span style="font-size: 11px; font-weight: 700; color: var(--text-muted);">@${job.brand}</span>
-              </div>
-              <span class="status-badge" style="background: ${job.status === 'published' ? 'var(--status-success-soft)' : 'var(--status-info-soft)'}; color: ${job.status === 'published' ? 'var(--status-success)' : 'var(--status-info)'}; border: 1px solid ${job.status === 'published' ? 'var(--status-success)' : 'var(--status-info)'};">
-                ● ${job.status.toUpperCase()}
-              </span>
-            </div>
-
-            <div class="detail-card-content">
-              <div class="detail-main-info">
-                <h4>🎬 ${job.title}</h4>
-                <div class="detail-meta-row">
-                  <span>📦 Produk: <strong>${job.product}</strong></span>
-                  <span>🔑 ID: <code style="font-family: var(--font-mono); color: var(--link);">${job.videoId}</code></span>
-                  <span>📱 Format: Reel Vertikal</span>
-                </div>
-                <div class="caption-preview">
-                  ✨ <strong>${job.title.toUpperCase()}</strong> ✨<br>
-                  Tutorial singkat mengolah ${job.product} praktis dan sehat. #nutribake #${job.product.replace(/\\s+/g, '').toLowerCase()} #kuliner #fyp
-                </div>
-              </div>
-
-              <div style="display: flex; flex-direction: column; gap: 6px; min-width: 120px;">
-                <button class="btn btn-secondary" style="padding: 6px 10px; font-size: 11px; justify-content: center;" onclick="showToast('Membuka detail inspeksi job #${job.id}...')">
-                  🔍 Inspeksi
-                </button>
-                <button class="btn btn-secondary" style="padding: 6px 10px; font-size: 11px; justify-content: center;" onclick="showToast('Membuka dialog ubah waktu posting...')">
-                  ⏱️ Reschedule
-                </button>
-              </div>
-            </div>
-          `;
-          listContainer.appendChild(card);
-        });
+        icon.textContent = '☀️';
+        label.textContent = 'Ganti ke Light Theme';
       }
-
-      modal.classList.add('open');
     }
 
-    function closeDayDetailModal() {
-      document.getElementById('dayDetailModal').classList.remove('open');
+    function openDetailModal(dateText, count) {
+      document.getElementById('modalTitle').textContent = `📅 Detail Jadwal: ${dateText}`;
+      document.getElementById('modalSubtitle').textContent = `Total ${count} konten dijadwalkan pada hari ini.`;
+      document.getElementById('detailModal').classList.add('active');
     }
 
-    function handleModalAddNew() {
-      closeDayDetailModal();
-      openScheduleModal(selectedActiveDate);
+    function closeDetailModal() {
+      document.getElementById('detailModal').classList.remove('active');
     }
-
-    // Modal Form Jadwal Baru
-    function openScheduleModal(targetDateStr) {
-      const modal = document.getElementById('scheduleFormModal');
-      const timeInput = document.getElementById('formScheduleTime');
-      const brandFilter = document.getElementById('brandFilter').value;
-      const modalBrandSelect = document.getElementById('modalBrandSelect');
-      const formBrandStatus = document.getElementById('formBrandStatus');
-
-      // Auto-fill tanggal default jam 10:00
-      timeInput.value = `${targetDateStr}T10:00`;
-
-      // Auto-sync filter Brand Profile
-      if (brandFilter !== 'all') {
-        modalBrandSelect.value = brandFilter;
-        formBrandStatus.innerText = `✓ Terkunci ke @${brandFilter}`;
-        formBrandStatus.style.display = 'inline';
-      } else {
-        formBrandStatus.style.display = 'none';
-      }
-
-      modal.classList.add('open');
-    }
-
-    function closeScheduleModal() {
-      document.getElementById('scheduleFormModal').classList.remove('open');
-    }
-
-    function submitNewSchedule() {
-      closeScheduleModal();
-      showToast('Jadwal konten berhasil disimpan dan masuk ke antrean! 🎉');
-    }
-
-    function handleFilterChange() {
-      const b = document.getElementById('brandFilter').value;
-      showToast(`Filter diterapkan: Brand @${b}`);
-    }
-
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      document.getElementById('toastText').innerText = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 3500);
-    }
-
-    // Inisialisasi awal
-    renderCalendar();
   </script>
 </body>
 </html>

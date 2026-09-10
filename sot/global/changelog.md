@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.29.47 — Migrasi Semantic CSS Kalender Konten dan Modal Detail Harian (11/09/2026)
+- Migrasi seluruh pewarnaan kalender konten dan modal detail ke Semantic CSS tokens
+- Memastikan teks, produk ID, dan jadwal kontras dan tajam di Dark Theme dan Light Theme
+
 ## V2.29.46 — Perbaikan UI Kalender Proporsional & Modal Detail Harian Opsi B dengan Cancel Schedule (11/09/2026)
 - Menyeragamkan ukuran kotak sel kalender bulanan menjadi proporsional (fixed height 132px) dengan format ringkas 2 baris (Platform-Jam dan Produk-Video ID)
 - Menambahkan Modal Detail Jadwal Harian (Opsi B) dengan vertical scroller dan aksi Batalkan Jadwal untuk status pending/scheduled

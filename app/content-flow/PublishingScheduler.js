@@ -1663,7 +1663,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
             ))}
           </div>
 
-          {/* Monthly Day Grid (Uniform Proportional Cells) */}
+          {/* Monthly Day Grid (Semantic CSS Proportional Cells) */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1, background: 'var(--border-subtle)' }}>
             {calendarMonthData.map((day, idx) => (
               <div
@@ -1673,10 +1673,11 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                   maxHeight: 132,
                   boxSizing: 'border-box',
                   background: day.isToday
-                    ? 'rgba(59, 130, 246, 0.08)'
+                    ? 'var(--status-info-soft)'
                     : day.isCurrentMonth
                     ? 'var(--surface)'
-                    : 'rgba(15, 23, 42, 0.5)',
+                    : 'var(--canvas)',
+                  opacity: !day.isCurrentMonth && !day.isToday ? 0.7 : 1,
                   border: day.isToday ? '1px solid var(--link)' : 'none',
                   padding: '6px 8px',
                   display: 'flex',
@@ -1753,6 +1754,17 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                     const prodLabel = j.product_name || j.content_title || 'Produk';
                     const videoIdLabel = j.content_id ? ` - ${j.content_id}` : '';
 
+                    const pillBg = j.platform === 'instagram' ? 'rgba(236, 72, 153, 0.12)' :
+                                   j.platform === 'facebook' ? 'rgba(59, 130, 246, 0.12)' :
+                                   j.platform === 'tiktok' ? 'rgba(6, 182, 212, 0.12)' :
+                                   j.platform === 'youtube' ? 'rgba(239, 68, 68, 0.12)' :
+                                   'var(--surface-raised)';
+                    const pillBorderLeft = j.platform === 'instagram' ? '#ec4899' :
+                                           j.platform === 'facebook' ? '#3b82f6' :
+                                           j.platform === 'tiktok' ? '#06b6d4' :
+                                           j.platform === 'youtube' ? '#ef4444' :
+                                           'var(--status-info)';
+
                     return (
                       <div
                         key={j.id}
@@ -1760,27 +1772,22 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                         style={{
                           padding: '3px 6px',
                           borderRadius: 5,
-                          background: j.platform === 'instagram' ? '#2e1c3a' : 
-                                      j.platform === 'facebook' ? '#16253d' :
-                                      j.platform === 'threads' ? '#1e1e1e' :
-                                      j.platform === 'tiktok' ? '#1c2d3a' :
-                                      j.platform === 'linkedin' ? '#1a2936' :
-                                      j.platform === 'youtube' ? '#2d1e1e' : 'var(--surface-interactive)',
+                          background: pillBg,
+                          border: '1px solid var(--border-subtle)',
                           borderLeft: `3px solid ${
                             j.status === 'published' ? 'var(--status-success)' :
                             j.status === 'failed' ? 'var(--status-danger)' :
                             j.status === 'retry_wait' ? 'var(--status-warning)' :
-                            j.platform === 'instagram' ? '#ec4899' :
-                            j.platform === 'tiktok' ? '#00F2FE' : 'var(--status-info)'
+                            pillBorderLeft
                           }`,
                           fontSize: 10,
                           lineHeight: 1.25,
-                          boxShadow: '0 1px 2px rgba(0,0,0,0.18)'
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
                         }}
                       >
                         {/* Baris 1: [Platform] · [Jam] + Status Dot */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 800, color: 'var(--text-primary)', fontSize: 9 }}>
+                          <span style={{ fontWeight: 800, color: 'var(--text-primary)', fontSize: 9.5 }}>
                             {platLabel} · {timeStr}
                           </span>
                           <span style={{
@@ -1805,8 +1812,8 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                     <div style={{
                       padding: '2px 6px',
                       borderRadius: 4,
-                      background: 'rgba(59, 130, 246, 0.15)',
-                      border: '1px solid rgba(59, 130, 246, 0.3)',
+                      background: 'var(--status-info-soft)',
+                      border: '1px solid var(--status-info)',
                       color: 'var(--link)',
                       fontSize: 9.5,
                       fontWeight: 800,
@@ -1822,7 +1829,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
         </div>
       )}
 
-      {/* Modal: Daily Content Schedule Detail (Option B with Scroller & Cancel Feature) */}
+      {/* Modal: Daily Content Schedule Detail (Semantic CSS Option B) */}
       {showDayDetailModal && selectedDayData && (
         <div style={{
           position: 'fixed', inset: 0, background: 'var(--overlay-backdrop)',
@@ -1831,14 +1838,14 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
           <div style={{
             background: 'var(--surface)', border: '1px solid var(--border-strong)', borderRadius: 16,
             width: '100%', maxWidth: 700, padding: 22, color: 'var(--text-primary)',
-            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.7)',
+            boxShadow: 'var(--shadow-modal)',
             display: 'flex', flexDirection: 'column', maxHeight: '88vh'
           }}>
             {/* Modal Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingBottom: 14, borderBottom: '1px solid var(--border-subtle)' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>
+                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>
                     📅 Detail Jadwal: {new Date(selectedDayData.dateStr + 'T00:00:00').toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                   </h3>
                   {selectedDayData.isToday && (
@@ -1848,7 +1855,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                   )}
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
-                  Total <strong>{selectedDayData.jobs.length}</strong> konten dijadwalkan pada tanggal ini.
+                  Total <strong style={{ color: 'var(--text-primary)' }}>{selectedDayData.jobs.length}</strong> konten dijadwalkan pada tanggal ini.
                   {filterBrandProfile !== 'all' && (
                     <span style={{ marginLeft: 8, color: 'var(--link)' }}>🏷️ Filter Brand: @{filterBrandProfile}</span>
                   )}
@@ -1877,7 +1884,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
               {selectedDayData.jobs.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '36px 16px', color: 'var(--text-muted)' }}>
                   <div style={{ fontSize: 28, marginBottom: 8 }}>📭</div>
-                  <div style={{ fontWeight: 700, fontSize: 14 }}>Belum ada jadwal publikasi di tanggal ini</div>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)' }}>Belum ada jadwal publikasi di tanggal ini</div>
                   <div style={{ fontSize: 12, marginTop: 4 }}>Klik tombol "Jadwalkan Konten di Tanggal Ini" di bawah untuk menambahkan jadwal baru.</div>
                 </div>
               ) : (
@@ -1887,12 +1894,28 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                   const isFailed = job.status === 'failed' || job.status === 'needs_review';
                   const isPublished = job.status === 'published';
 
+                  const tagBg = job.platform === 'instagram' ? 'rgba(236, 72, 153, 0.15)' :
+                                job.platform === 'facebook' ? 'rgba(59, 130, 246, 0.15)' :
+                                job.platform === 'tiktok' ? 'rgba(6, 182, 212, 0.15)' :
+                                job.platform === 'youtube' ? 'rgba(239, 68, 68, 0.15)' :
+                                'var(--surface-interactive)';
+                  const tagColor = job.platform === 'instagram' ? '#ec4899' :
+                                   job.platform === 'facebook' ? '#3b82f6' :
+                                   job.platform === 'tiktok' ? '#06b6d4' :
+                                   job.platform === 'youtube' ? '#ef4444' :
+                                   'var(--text-secondary)';
+                  const tagBorder = job.platform === 'instagram' ? '#ec4899' :
+                                    job.platform === 'facebook' ? '#3b82f6' :
+                                    job.platform === 'tiktok' ? '#06b6d4' :
+                                    job.platform === 'youtube' ? '#ef4444' :
+                                    'var(--border-strong)';
+
                   return (
                     <div
                       key={job.id}
                       style={{
-                        background: 'var(--surface-interactive)',
-                        border: '1px solid var(--border-strong)',
+                        background: 'var(--surface-raised)',
+                        border: '1px solid var(--border-subtle)',
                         borderRadius: 10,
                         padding: 14,
                         display: 'flex',
@@ -1909,11 +1932,9 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                             borderRadius: 6,
                             fontSize: 11,
                             fontWeight: 800,
-                            background: job.platform === 'instagram' ? '#ec4899' :
-                                        job.platform === 'facebook' ? '#2563eb' :
-                                        job.platform === 'tiktok' ? '#00f2fe' :
-                                        job.platform === 'threads' ? '#333' : '#6366f1',
-                            color: job.platform === 'tiktok' ? '#000' : '#fff',
+                            background: tagBg,
+                            color: tagColor,
+                            border: `1px solid ${tagBorder}`,
                             textTransform: 'uppercase'
                           }}>
                             {job.platform}
@@ -1942,6 +1963,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                               fontWeight: 700,
                               color: 'var(--link)',
                               background: 'var(--status-info-soft)',
+                              border: '1px solid var(--status-info)',
                               padding: '1px 6px',
                               borderRadius: 4
                             }}>
@@ -1962,10 +1984,11 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                         {job.caption && (
                           <div style={{
                             fontSize: 11,
-                            color: 'var(--text-muted)',
-                            marginTop: 5,
-                            background: 'rgba(0,0,0,0.15)',
-                            padding: '6px 8px',
+                            color: 'var(--text-secondary)',
+                            marginTop: 6,
+                            background: 'var(--surface-interactive)',
+                            border: '1px solid var(--border-subtle)',
+                            padding: '8px 10px',
                             borderRadius: 6,
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
@@ -1982,9 +2005,9 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                       {job.last_error_message && (
                         <div style={{
                           fontSize: 11,
-                          color: '#fca5a5',
-                          background: 'rgba(239, 68, 68, 0.1)',
-                          border: '1px solid rgba(239, 68, 68, 0.3)',
+                          color: 'var(--status-danger)',
+                          background: 'var(--status-danger-soft)',
+                          border: '1px solid var(--status-danger)',
                           padding: '6px 8px',
                           borderRadius: 6
                         }}>
@@ -2009,10 +2032,10 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                               type="button"
                               onClick={() => handleCancelJob(job.id)}
                               style={{
-                                background: 'rgba(239, 68, 68, 0.12)',
-                                border: '1px solid rgba(239, 68, 68, 0.35)',
-                                color: '#f87171',
-                                padding: '4px 9px',
+                                background: 'var(--status-danger-soft)',
+                                border: '1px solid var(--status-danger)',
+                                color: 'var(--status-danger)',
+                                padding: '4px 10px',
                                 borderRadius: 6,
                                 fontSize: 11,
                                 fontWeight: 750,
@@ -2033,10 +2056,10 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                               type="button"
                               onClick={() => handleRetryJob(job.id)}
                               style={{
-                                background: 'var(--status-info-soft)',
-                                border: '1px solid var(--status-info)',
-                                color: '#93c5fd',
-                                padding: '4px 9px',
+                                background: 'var(--status-warning-soft)',
+                                border: '1px solid var(--status-warning)',
+                                color: 'var(--status-warning)',
+                                padding: '4px 10px',
                                 borderRadius: 6,
                                 fontSize: 11,
                                 fontWeight: 750,
@@ -2057,10 +2080,10 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                               target="_blank"
                               rel="noopener noreferrer"
                               style={{
-                                background: 'rgba(34, 197, 94, 0.15)',
-                                border: '1px solid rgba(34, 197, 94, 0.4)',
-                                color: '#86efac',
-                                padding: '4px 9px',
+                                background: 'var(--status-success-soft)',
+                                border: '1px solid var(--status-success)',
+                                color: 'var(--status-success)',
+                                padding: '4px 10px',
                                 borderRadius: 6,
                                 fontSize: 11,
                                 fontWeight: 750,
@@ -2096,6 +2119,8 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                             alignItems: 'center',
                             gap: 4
                           }}
+                          onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                          onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
                         >
                           👁️ Lihat di Antrean
                         </button>
@@ -2121,9 +2146,9 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                   setShowDayDetailModal(false);
                 }}
                 style={{
-                  background: 'var(--status-neutral)',
+                  background: 'var(--action-primary)',
                   border: 'none',
-                  color: '#fff',
+                  color: 'var(--on-action-primary)',
                   padding: '8px 16px',
                   borderRadius: 8,
                   fontSize: 12,
