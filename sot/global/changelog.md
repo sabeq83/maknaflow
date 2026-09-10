@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.37 — Multi-Tenant Google Workspace OAuth & Token Isolation (10/09/2026)
+- Injeksi tenantId ke dalam signed OAuth state & callback binding
+- Capture tenantContext pada client.on tokens auto-refresh
+- Isolasi google_tokens dan google_email di TENANT_PRIVATE_SETTING_KEYS
+
 ## V2.29.36 — Fix PM2 Staging Schema & Reschedule FB Backlog (10/09/2026)
 - Injeksi PG_SEARCH_PATH staging default di ecosystem.macmini.config.cjs
 - Reset akun FB ke active dan rescheduling 12 job FB needs_review

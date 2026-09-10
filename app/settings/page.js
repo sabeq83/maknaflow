@@ -1641,11 +1641,14 @@ export default function SettingsPage() {
               {!googleStatus.connected && (
                 <div>
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '14px', lineHeight: 1.7, padding: '12px', background: 'var(--bg-glass)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-                    <strong>Setup:</strong> Buka{' '}
-                    <a href="https://console.cloud.google.com" target="_blank" rel="noopener" style={{ color: 'var(--accent-light)' }}>Google Cloud Console</a>
-                    {' → '}Buat Project → Enable <strong>Google Sheets API</strong>, <strong>Google Docs API</strong>, <strong>Google Drive API</strong>
-                    {' → '}Credentials → Create OAuth Client ID (Web Application)
-                    {' → '}Authorized redirect URI: <code style={{ fontSize: '0.72rem', background: 'var(--bg-card)', padding: '2px 6px', borderRadius: '4px' }}>{appOrigin}/api/google/callback</code>
+                    <strong>Setup Google Workspace OAuth:</strong><br />
+                    1. Buka <a href="https://console.cloud.google.com" target="_blank" rel="noopener" style={{ color: 'var(--accent-light)' }}>Google Cloud Console</a> → Buat Project.<br />
+                    2. Enable API: <strong>Google Sheets API</strong>, <strong>Google Docs API</strong>, <strong>Google Drive API</strong>.<br />
+                    3. Credentials → Create OAuth Client ID (Web Application).<br />
+                    4. Authorized redirect URI: <code style={{ fontSize: '0.72rem', background: 'var(--bg-card)', padding: '2px 6px', borderRadius: '4px' }}>{appOrigin}/api/google/callback</code><br />
+                    <span style={{ color: 'var(--warning)', display: 'inline-block', marginTop: '4px' }}>
+                      💡 <em>Tips:</em> Di menu <strong>OAuth consent screen</strong>, ubah status ke <strong>&quot;In Production&quot;</strong> agar Refresh Token bersifat permanen (mode &quot;Testing&quot; otomatis kedaluwarsa setelah 7 hari oleh kebijakan Google).
+                    </span>
                   </div>
 
                   <div className="form-group" style={{ marginBottom: '12px' }}>
