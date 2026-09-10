@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.29.40 — Update Support Email to sabeq83@gmail.com (10/09/2026)
+- Update Support Email in Privacy Policy to sabeq83@gmail.com
+- Update Support Email in Terms of Service to sabeq83@gmail.com
+
 ## V2.29.39 — Rebrand to ContentFlow & Public Pages (10/09/2026)
 - Rebrand MaknaFlow to ContentFlow
 - Add Public Homepage, Privacy Policy, and Terms of Service

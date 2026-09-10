@@ -294,7 +294,7 @@ export default function TermsOfServicePage() {
               </p>
               <div style={{ background: 'var(--surface)', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '16px 20px', marginTop: '12px' }}>
                 <div><strong>Administrator Sistem &amp; IT Support ContentFlow</strong></div>
-                <div>Email Bantuan: <a href="mailto:support@ast402.my.id" style={{ color: 'var(--link)' }}>support@ast402.my.id</a></div>
+                <div>Email Bantuan: <a href="mailto:sabeq83@gmail.com" style={{ color: 'var(--link)' }}>sabeq83@gmail.com</a></div>
                 <div>Domain Resmi: <a href={siteUrl} style={{ color: 'var(--link)' }}>{siteUrl}</a></div>
               </div>
             </section>
