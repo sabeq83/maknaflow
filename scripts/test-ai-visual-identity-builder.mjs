@@ -331,9 +331,75 @@ assert.ok(customResult.resolved_preview.subject_prompt.includes('artisan barista
 assert.ok(customResult.resolved_preview.subject_prompt.includes('strictly faceless framing'));
 assert.ok(!customResult.resolved_preview.subject_prompt.includes('Muslimah'));
 assert.ok(customResult.resolved_preview.wardrobe_prompt.includes('dark indigo denim shirt'));
-assert.ok(customResult.resolved_preview.environment_prompt.includes('cozy vintage brick espresso bar'));
+// Test Non-Human Animal Mascot (Cat Barista) resolution
+const catBaristaEnvelope = {
+  label: '3D Claymation British Shorthair Cat Barista',
+  description: 'Adorable cat barista pouring latte art',
+  suggested_preset_key: 'cat_barista_3d',
+  creative_rationale: 'Cute non-human mascot for cafe campaigns',
+  config: {
+    schema_version: '1',
+    subject: {
+      kind: 'animal',
+      faceless_mode: 'not_applicable',
+      demographic_key: 'custom',
+      custom_description: 'An adorable 3D claymation British Shorthair cat with soft textured grey fur and round expressive eyes',
+      character_count: 1
+    },
+    wardrobe: {
+      mode: 'custom',
+      preset_key: 'custom',
+      custom_description: 'Miniature rich brown leather barista apron tied neatly around the waist, paired with a tiny white chef hat resting atop the head',
+      primary_color: 'Leather Brown (#8B4513)',
+      secondary_color: 'Pure White (#FFFFFF)',
+      material: 'leather',
+      sleeve_policy: 'not_applicable',
+      accessories: ['tiny white chef hat']
+    },
+    environment: {
+      preset_key: 'custom',
+      custom_description: 'inside a cozy vintage wood-paneled coffee shop with warm ambient lighting',
+      material_palette: ['wood', 'brass'],
+      props: ['espresso machine', 'mini ceramic cup'],
+      background_density: 'balanced'
+    },
+    lighting: {
+      preset_key: 'golden_hour',
+      custom_description: 'warm cozy golden light',
+      color_temperature: 'warm',
+      contrast: 'soft'
+    },
+    camera: {
+      framing: 'object_or_animal',
+      perspective: 'third_person',
+      lens_look: 'natural_50mm',
+      depth_of_field: 'shallow',
+      movement: 'still'
+    },
+    style: {
+      preset_key: '3d_claymation_cozy',
+      custom_description: '',
+      aspect_ratio: '9:16'
+    },
+    guardrails: {
+      face_visibility: 'prohibited',
+      reflection_face: 'prohibited',
+      extra_people: 'prohibited',
+      identity_drift: 'prohibited',
+      wardrobe_drift: 'prohibited',
+      required_negative_prompts: []
+    }
+  }
+};
+
+const fakeFactoryCat = makeFakeModel(JSON.stringify(catBaristaEnvelope));
+const catResult = await generateAiVisualIdentityDraft({ seed: 'Seekor kucing barista 3D claymation', subject_kind: 'animal', faceless_mode: 'not_applicable' }, { modelFactory: fakeFactoryCat });
+assert.notEqual(catResult.resolved_preview.subject_prompt, 'custom');
+assert.ok(catResult.resolved_preview.subject_prompt.includes('British Shorthair cat'));
+assert.ok(catResult.resolved_preview.wardrobe_prompt.includes('barista apron'));
+assert.ok(catResult.resolved_preview.environment_prompt.includes('wood-paneled coffee shop'));
 
 console.log('  ✅ Generator & refinement mock tests passed.');
-console.log('  ✅ Southeast Asian Male and Freeform Custom tests passed without Muslimah/Kitchen leakage.');
+console.log('  ✅ Southeast Asian Male, Freeform Custom, and Non-Human Animal tests passed without leakage.');
 console.log('🎉 ALL AI Visual Identity Builder unit tests completed successfully!');
 process.exit(0);

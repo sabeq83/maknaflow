@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.29.42 — Fix Non-Human Mascot Subject Prompt Resolution (10/09/2026)
+- Memperbaiki resolusi subject_prompt untuk kategori non-human animal dan mascot agar menggunakan custom_description secara utuh
+- Memperbaiki negative prompt khusus maskot agar tidak memblokir anatomi wajah hewan kartun
+
 ## V2.29.41 — Fix Visual Identity AI Builder and Central Resolver Freeform Synthesis (10/09/2026)
 - Menambahkan preset demografi southeast_asian_male pada prompts.js dan system presets
 - Memperbaiki Central Resolver agar mendukung custom subject, wardrobe, dan environment tanpa fallback otomatis ke Muslimah atau Nordic kitchen
