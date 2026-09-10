@@ -62,6 +62,10 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
   // Monthly Calendar Navigation State
   const [calendarDate, setCalendarDate] = useState(new Date());
 
+  // Day Detail Modal State (Opsi B)
+  const [showDayDetailModal, setShowDayDetailModal] = useState(false);
+  const [selectedDayData, setSelectedDayData] = useState(null);
+
   // Modal Brand Filter State (Auto-synced with Calendar Filter on '+')
   const [modalBrandFilter, setModalBrandFilter] = useState('all');
 
@@ -506,6 +510,13 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
       if (json.success) {
         showToast('Jadwal publikasi berhasil dibatalkan 🚫');
         fetchJobs();
+        setSelectedDayData(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            jobs: prev.jobs.map(j => j.id === jobId ? { ...j, status: 'cancelled' } : j)
+          };
+        });
       } else {
         showToast(`Gagal membatalkan: ${json.error} ❌`);
       }
@@ -1652,28 +1663,31 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
             ))}
           </div>
 
-          {/* Monthly Day Grid */}
+          {/* Monthly Day Grid (Uniform Proportional Cells) */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1, background: 'var(--border-subtle)' }}>
             {calendarMonthData.map((day, idx) => (
               <div
                 key={`${day.dateStr}_${idx}`}
                 style={{
-                  minHeight: 130,
+                  height: 132,
+                  maxHeight: 132,
+                  boxSizing: 'border-box',
                   background: day.isToday
                     ? 'rgba(59, 130, 246, 0.08)'
                     : day.isCurrentMonth
                     ? 'var(--surface)'
                     : 'rgba(15, 23, 42, 0.5)',
                   border: day.isToday ? '1px solid var(--link)' : 'none',
-                  padding: 8,
+                  padding: '6px 8px',
                   display: 'flex',
                   flexDirection: 'column',
                   transition: 'background 0.15s ease',
-                  position: 'relative'
+                  position: 'relative',
+                  overflow: 'hidden'
                 }}
               >
                 {/* Day Header: Date Num + Today Badge + Add '+' Button */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{
                       fontSize: 13,
@@ -1720,65 +1734,426 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                   </button>
                 </div>
 
-                {/* Day Scheduled Items */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, overflowY: 'auto', maxHeight: 110 }}>
-                  {day.jobs.map((j) => (
-                    <div
-                      key={j.id}
-                      onClick={() => { setSelectedJobId(j.id); setActiveTab('queue'); }}
-                      title={`${j.content_title || j.content_id} (${j.platform?.toUpperCase()}) - ${j.status}`}
-                      style={{
-                        padding: '4px 6px',
-                        borderRadius: 5,
-                        background: j.platform === 'instagram' ? '#2e1c3a' : 
-                                    j.platform === 'facebook' ? '#16253d' :
-                                    j.platform === 'threads' ? '#1e1e1e' :
-                                    j.platform === 'tiktok' ? '#1c2d3a' :
-                                    j.platform === 'linkedin' ? '#1a2936' :
-                                    j.platform === 'youtube' ? '#2d1e1e' : 'var(--surface-interactive)',
-                        borderLeft: `3px solid ${
-                          j.status === 'published' ? 'var(--status-success)' :
-                          j.status === 'failed' ? 'var(--status-danger)' :
-                          j.status === 'retry_wait' ? 'var(--status-warning)' :
-                          j.platform === 'instagram' ? '#ec4899' :
-                          j.platform === 'tiktok' ? '#00F2FE' : 'var(--status-info)'
-                        }`,
-                        fontSize: 10,
-                        color: 'var(--text-secondary)',
-                        cursor: 'pointer',
-                        transition: 'transform 0.1s ease',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 1 }}>
-                        <span style={{ fontWeight: 800, color: 'var(--text-primary)', fontSize: 9 }}>
-                          {j.platform === 'facebook' ? 'FB' : 
-                           j.platform === 'instagram' ? 'IG' :
-                           j.platform === 'threads' ? 'TH' :
-                           j.platform === 'tiktok' ? 'TK' :
-                           j.platform === 'linkedin' ? 'LN' :
-                           j.platform === 'youtube' ? 'YT' : '◎'} {j.scheduled_at ? new Date(j.scheduled_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : ''}
-                        </span>
-                        <span style={{
-                          fontSize: 8,
-                          fontWeight: 700,
-                          color: j.status === 'published' ? 'var(--status-success)' :
-                                 j.status === 'failed' ? 'var(--status-danger)' :
-                                 j.status === 'retry_wait' ? 'var(--status-warning)' : 'var(--link)'
-                        }}>
-                          {j.status === 'published' ? '✓' : j.status === 'failed' ? '✕' : '•'}
-                        </span>
+                {/* Day Scheduled Items (Fixed 2 Max Items + Click to open Detail Modal) */}
+                <div
+                  onClick={() => {
+                    setSelectedDayData(day);
+                    setShowDayDetailModal(true);
+                  }}
+                  style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, overflow: 'hidden', cursor: 'pointer' }}
+                >
+                  {day.jobs.slice(0, 2).map((j) => {
+                    const timeStr = j.scheduled_at ? new Date(j.scheduled_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '';
+                    const platLabel = j.platform === 'facebook' ? 'FB' : 
+                                       j.platform === 'instagram' ? 'IG' :
+                                       j.platform === 'threads' ? 'TH' :
+                                       j.platform === 'tiktok' ? 'TK' :
+                                       j.platform === 'linkedin' ? 'LN' :
+                                       j.platform === 'youtube' ? 'YT' : '◎';
+                    const prodLabel = j.product_name || j.content_title || 'Produk';
+                    const videoIdLabel = j.content_id ? ` - ${j.content_id}` : '';
+
+                    return (
+                      <div
+                        key={j.id}
+                        title={`${prodLabel}${videoIdLabel} (${platLabel} · ${timeStr}) - Status: ${j.status}`}
+                        style={{
+                          padding: '3px 6px',
+                          borderRadius: 5,
+                          background: j.platform === 'instagram' ? '#2e1c3a' : 
+                                      j.platform === 'facebook' ? '#16253d' :
+                                      j.platform === 'threads' ? '#1e1e1e' :
+                                      j.platform === 'tiktok' ? '#1c2d3a' :
+                                      j.platform === 'linkedin' ? '#1a2936' :
+                                      j.platform === 'youtube' ? '#2d1e1e' : 'var(--surface-interactive)',
+                          borderLeft: `3px solid ${
+                            j.status === 'published' ? 'var(--status-success)' :
+                            j.status === 'failed' ? 'var(--status-danger)' :
+                            j.status === 'retry_wait' ? 'var(--status-warning)' :
+                            j.platform === 'instagram' ? '#ec4899' :
+                            j.platform === 'tiktok' ? '#00F2FE' : 'var(--status-info)'
+                          }`,
+                          fontSize: 10,
+                          lineHeight: 1.25,
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.18)'
+                        }}
+                      >
+                        {/* Baris 1: [Platform] · [Jam] + Status Dot */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontWeight: 800, color: 'var(--text-primary)', fontSize: 9 }}>
+                            {platLabel} · {timeStr}
+                          </span>
+                          <span style={{
+                            width: 6,
+                            height: 6,
+                            borderRadius: '50%',
+                            background: j.status === 'published' ? 'var(--status-success)' :
+                                        j.status === 'failed' ? 'var(--status-danger)' :
+                                        j.status === 'retry_wait' ? 'var(--status-warning)' : 'var(--link)'
+                          }} />
+                        </div>
+                        {/* Baris 2: [Nama Produk] - [Video ID] */}
+                        <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 9.5, color: 'var(--text-secondary)', marginTop: 1 }}>
+                          {prodLabel}{videoIdLabel}
+                        </div>
                       </div>
-                      <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 10, color: 'var(--text-secondary)' }}>
-                        {j.content_title || j.content_id}
-                      </div>
+                    );
+                  })}
+
+                  {/* Badge +N konten lainnya */}
+                  {day.jobs.length > 2 && (
+                    <div style={{
+                      padding: '2px 6px',
+                      borderRadius: 4,
+                      background: 'rgba(59, 130, 246, 0.15)',
+                      border: '1px solid rgba(59, 130, 246, 0.3)',
+                      color: 'var(--link)',
+                      fontSize: 9.5,
+                      fontWeight: 800,
+                      textAlign: 'center'
+                    }}>
+                      +{day.jobs.length - 2} konten lainnya
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Daily Content Schedule Detail (Option B with Scroller & Cancel Feature) */}
+      {showDayDetailModal && selectedDayData && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'var(--overlay-backdrop)',
+          display: 'grid', placeItems: 'center', zIndex: 9998, padding: 16
+        }}>
+          <div style={{
+            background: 'var(--surface)', border: '1px solid var(--border-strong)', borderRadius: 16,
+            width: '100%', maxWidth: 700, padding: 22, color: 'var(--text-primary)',
+            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.7)',
+            display: 'flex', flexDirection: 'column', maxHeight: '88vh'
+          }}>
+            {/* Modal Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingBottom: 14, borderBottom: '1px solid var(--border-subtle)' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>
+                    📅 Detail Jadwal: {new Date(selectedDayData.dateStr + 'T00:00:00').toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                  </h3>
+                  {selectedDayData.isToday && (
+                    <span style={{ background: 'var(--link)', color: '#fff', fontSize: 10, fontWeight: 800, padding: '2px 6px', borderRadius: 4 }}>
+                      HARI INI
+                    </span>
+                  )}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+                  Total <strong>{selectedDayData.jobs.length}</strong> konten dijadwalkan pada tanggal ini.
+                  {filterBrandProfile !== 'all' && (
+                    <span style={{ marginLeft: 8, color: 'var(--link)' }}>🏷️ Filter Brand: @{filterBrandProfile}</span>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={() => setShowDayDetailModal(false)}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}
+                title="Tutup Modal"
+              >
+                <XIcon style={{ width: 18, height: 18 }} />
+              </button>
+            </div>
+
+            {/* Modal Body: Scroller Container */}
+            <div style={{
+              flex: 1,
+              overflowY: 'auto',
+              maxHeight: '58vh',
+              paddingRight: 6,
+              margin: '14px 0',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12
+            }}>
+              {selectedDayData.jobs.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '36px 16px', color: 'var(--text-muted)' }}>
+                  <div style={{ fontSize: 28, marginBottom: 8 }}>📭</div>
+                  <div style={{ fontWeight: 700, fontSize: 14 }}>Belum ada jadwal publikasi di tanggal ini</div>
+                  <div style={{ fontSize: 12, marginTop: 4 }}>Klik tombol "Jadwalkan Konten di Tanggal Ini" di bawah untuk menambahkan jadwal baru.</div>
+                </div>
+              ) : (
+                selectedDayData.jobs.map((job) => {
+                  const timeStr = job.scheduled_at ? new Date(job.scheduled_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '—';
+                  const isCancellable = ['scheduled', 'queued', 'pending_approval', 'retry_wait', 'needs_review'].includes(job.status);
+                  const isFailed = job.status === 'failed' || job.status === 'needs_review';
+                  const isPublished = job.status === 'published';
+
+                  return (
+                    <div
+                      key={job.id}
+                      style={{
+                        background: 'var(--surface-interactive)',
+                        border: '1px solid var(--border-strong)',
+                        borderRadius: 10,
+                        padding: 14,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 10,
+                        transition: 'border-color 0.15s ease'
+                      }}
+                    >
+                      {/* Top: Platform + Time + Status Badge */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{
+                            padding: '3px 8px',
+                            borderRadius: 6,
+                            fontSize: 11,
+                            fontWeight: 800,
+                            background: job.platform === 'instagram' ? '#ec4899' :
+                                        job.platform === 'facebook' ? '#2563eb' :
+                                        job.platform === 'tiktok' ? '#00f2fe' :
+                                        job.platform === 'threads' ? '#333' : '#6366f1',
+                            color: job.platform === 'tiktok' ? '#000' : '#fff',
+                            textTransform: 'uppercase'
+                          }}>
+                            {job.platform}
+                          </span>
+                          <span style={{ fontSize: 12, fontWeight: 750, color: 'var(--text-primary)' }}>
+                            ⏰ {timeStr} WIB
+                          </span>
+                          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                            · {job.account_name || 'Akun'}
+                          </span>
+                        </div>
+                        <div>
+                          {getStatusBadge(job.status, job.approval_status)}
+                        </div>
+                      </div>
+
+                      {/* Content Info: Product & Video ID & Title */}
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                          <span style={{ fontWeight: 800, fontSize: 13, color: 'var(--text-primary)' }}>
+                            🏷️ {job.product_name || job.content_title || 'Produk'}
+                          </span>
+                          {job.content_id && (
+                            <span style={{
+                              fontSize: 11,
+                              fontWeight: 700,
+                              color: 'var(--link)',
+                              background: 'var(--status-info-soft)',
+                              padding: '1px 6px',
+                              borderRadius: 4
+                            }}>
+                              ID: {job.content_id}
+                            </span>
+                          )}
+                          {job.brand_profile && (
+                            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                              (@{job.brand_profile})
+                            </span>
+                          )}
+                        </div>
+                        {job.content_title && job.content_title !== job.product_name && (
+                          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 3, fontWeight: 600 }}>
+                            {job.content_title}
+                          </div>
+                        )}
+                        {job.caption && (
+                          <div style={{
+                            fontSize: 11,
+                            color: 'var(--text-muted)',
+                            marginTop: 5,
+                            background: 'rgba(0,0,0,0.15)',
+                            padding: '6px 8px',
+                            borderRadius: 6,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical'
+                          }}>
+                            {job.caption}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Error message if failed */}
+                      {job.last_error_message && (
+                        <div style={{
+                          fontSize: 11,
+                          color: '#fca5a5',
+                          background: 'rgba(239, 68, 68, 0.1)',
+                          border: '1px solid rgba(239, 68, 68, 0.3)',
+                          padding: '6px 8px',
+                          borderRadius: 6
+                        }}>
+                          ⚠️ {job.last_error_message}
+                        </div>
+                      )}
+
+                      {/* Option B Action Buttons (Cancel Schedule, View in Queue, External Link, Retry) */}
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        paddingTop: 8,
+                        borderTop: '1px solid var(--border-subtle)',
+                        flexWrap: 'wrap',
+                        gap: 8
+                      }}>
+                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                          {/* Cancel Schedule Button */}
+                          {isCancellable && (
+                            <button
+                              type="button"
+                              onClick={() => handleCancelJob(job.id)}
+                              style={{
+                                background: 'rgba(239, 68, 68, 0.12)',
+                                border: '1px solid rgba(239, 68, 68, 0.35)',
+                                color: '#f87171',
+                                padding: '4px 9px',
+                                borderRadius: 6,
+                                fontSize: 11,
+                                fontWeight: 750,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 4
+                              }}
+                              title="Batalkan jadwal publikasi ini"
+                            >
+                              🚫 Batalkan Jadwal
+                            </button>
+                          )}
+
+                          {/* Retry Button */}
+                          {isFailed && (
+                            <button
+                              type="button"
+                              onClick={() => handleRetryJob(job.id)}
+                              style={{
+                                background: 'var(--status-info-soft)',
+                                border: '1px solid var(--status-info)',
+                                color: '#93c5fd',
+                                padding: '4px 9px',
+                                borderRadius: 6,
+                                fontSize: 11,
+                                fontWeight: 750,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 4
+                              }}
+                            >
+                              🔄 Coba Lagi (Retry)
+                            </button>
+                          )}
+
+                          {/* External Link */}
+                          {isPublished && job.external_permalink && (
+                            <a
+                              href={job.external_permalink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                background: 'rgba(34, 197, 94, 0.15)',
+                                border: '1px solid rgba(34, 197, 94, 0.4)',
+                                color: '#86efac',
+                                padding: '4px 9px',
+                                borderRadius: 6,
+                                fontSize: 11,
+                                fontWeight: 750,
+                                textDecoration: 'none',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 4
+                              }}
+                            >
+                              ↗️ Buka Postingan
+                            </a>
+                          )}
+                        </div>
+
+                        {/* View in Queue Details Button */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedJobId(job.id);
+                            setActiveTab('queue');
+                            setShowDayDetailModal(false);
+                          }}
+                          style={{
+                            background: 'var(--surface)',
+                            border: '1px solid var(--border-strong)',
+                            color: 'var(--text-secondary)',
+                            padding: '4px 10px',
+                            borderRadius: 6,
+                            fontSize: 11,
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4
+                          }}
+                        >
+                          👁️ Lihat di Antrean
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              paddingTop: 14,
+              borderTop: '1px solid var(--border-subtle)'
+            }}>
+              <button
+                type="button"
+                onClick={() => {
+                  handleOpenScheduleForDate(selectedDayData.dateStr);
+                  setShowDayDetailModal(false);
+                }}
+                style={{
+                  background: 'var(--status-neutral)',
+                  border: 'none',
+                  color: '#fff',
+                  padding: '8px 16px',
+                  borderRadius: 8,
+                  fontSize: 12,
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6
+                }}
+              >
+                ＋ Jadwalkan Konten di Tanggal Ini
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowDayDetailModal(false)}
+                style={{
+                  background: 'var(--surface-interactive)',
+                  border: '1px solid var(--border-strong)',
+                  color: 'var(--text-secondary)',
+                  padding: '8px 16px',
+                  borderRadius: 8,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                Tutup
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.46 — Perbaikan UI Kalender Proporsional & Modal Detail Harian Opsi B dengan Cancel Schedule (11/09/2026)
+- Menyeragamkan ukuran kotak sel kalender bulanan menjadi proporsional (fixed height 132px) dengan format ringkas 2 baris (Platform-Jam dan Produk-Video ID)
+- Menambahkan Modal Detail Jadwal Harian (Opsi B) dengan vertical scroller dan aksi Batalkan Jadwal untuk status pending/scheduled
+- Menambahkan c.nama_produk AS product_name pada publishing repository query
+
 ## V2.29.45 — Penyempurnaan Kalender Konten Bulanan & Filter Brand Profile Modal (11/09/2026)
 - Menambahkan tampilan kalender bulanan dengan navigasi bulan dan tombol tambah jadwal per tanggal
 - Memperbarui filter kalender ke Brand Profile, Platform, dan Status
