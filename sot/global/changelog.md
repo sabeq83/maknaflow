@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.36 — Fix PM2 Staging Schema & Reschedule FB Backlog (10/09/2026)
+- Injeksi PG_SEARCH_PATH staging default di ecosystem.macmini.config.cjs
+- Reset akun FB ke active dan rescheduling 12 job FB needs_review
+- Deploy & restart bersih PM2 di server Mac Mini Staging & Dev
+
 ## V2.29.35 — Publishing Scheduler Hardening & Auto-Reconnect Gate (09/09/2026)
 - Sinkronisasi status kesehatan akun Repliz & reschedule backlog 40 postingan FB mulai 10 Sept 05:09 WIB jeda 2 jam
 - Penambahan Live Auto-Reconnect & Health Probe saat submit jadwal (pre-flight gate)

@@ -32,7 +32,7 @@ async function deployMacMiniStaging() {
 
     echo "Reloading staging processes in PM2..."
     mkdir -p logs
-    pm2 startOrGracefulReload ecosystem.macmini.config.cjs --env staging
+    pm2 startOrGracefulReload ecosystem.macmini.config.cjs --only maknaflow-staging-ui,maknaflow-staging-api --update-env
   `;
 
   try {

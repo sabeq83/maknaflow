@@ -32,7 +32,7 @@ async function deployMacMiniDev() {
 
     echo "Reloading dev processes in PM2..."
     mkdir -p logs
-    pm2 startOrGracefulReload ecosystem.macmini.config.cjs --only maknaflow-dev-ui,maknaflow-dev-api
+    pm2 startOrGracefulReload ecosystem.macmini.config.cjs --only maknaflow-dev-ui,maknaflow-dev-api --update-env
   `;
 
   try {
