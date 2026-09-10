@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.29.43 — AI Visual Identity Animal & Mascot Prompt Builder Enhancement (10/09/2026)
+- Enhanced AI prompt builder with vivid character instructions for non-human animals and mascots
+- Ensured custom_description is always populated for custom non-human entities
+
 ## V2.29.42 — Fix Non-Human Mascot Subject Prompt Resolution (10/09/2026)
 - Memperbaiki resolusi subject_prompt untuk kategori non-human animal dan mascot agar menggunakan custom_description secara utuh
 - Memperbaiki negative prompt khusus maskot agar tidak memblokir anatomi wajah hewan kartun
