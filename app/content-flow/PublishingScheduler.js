@@ -53,10 +53,17 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
   const [loadingDetail, setLoadingDetail] = useState(false);
 
   // Filters
-  const [filterAccount, setFilterAccount] = useState('all');
+  const [filterBrandProfile, setFilterBrandProfile] = useState('all');
   const [filterPlatform, setFilterPlatform] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [availableBrands, setAvailableBrands] = useState([]);
+
+  // Monthly Calendar Navigation State
+  const [calendarDate, setCalendarDate] = useState(new Date());
+
+  // Modal Brand Filter State (Auto-synced with Calendar Filter on '+')
+  const [modalBrandFilter, setModalBrandFilter] = useState('all');
 
   // Pause Control State
   const [isPaused, setIsPaused] = useState(false);
@@ -135,6 +142,30 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
     setToastMsg(msg);
     setTimeout(() => setToastMsg(''), 3500);
   };
+
+  // Fetch available brand profiles
+  useEffect(() => {
+    fetch('/api/brand-profiles')
+      .then(r => r.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.brands)) {
+          setAvailableBrands(data.brands);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Combined Brand Options
+  const allBrandOptions = useMemo(() => {
+    const names = new Set();
+    availableBrands.forEach(b => {
+      if (b.brand_name) names.add(b.brand_name);
+    });
+    jobs.forEach(j => {
+      if (j.brand_profile) names.add(j.brand_profile);
+    });
+    return Array.from(names).sort().map(name => ({ brand_name: name }));
+  }, [availableBrands, jobs]);
 
   // Load Settings for Cloud Base Domain & Check Google OAuth Return Draft
   useEffect(() => {
@@ -225,17 +256,16 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
   }, []);
 
   // Debounced Video Search in Content Flow
-  const handleSearchVideos = (query) => {
+  const handleSearchVideos = (query, brandOverride = null) => {
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-    if (!query || !query.trim()) {
-      setVideoSearchResults([]);
-      setShowVideoDropdown(false);
-      return;
-    }
+    const activeBrand = brandOverride !== null ? brandOverride : modalBrandFilter;
     setSearchingVideos(true);
     searchTimeoutRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/content-flow?q=${encodeURIComponent(query.trim())}&limit=12`);
+        const qParam = query && query.trim() ? `q=${encodeURIComponent(query.trim())}` : '';
+        const brandParam = activeBrand && activeBrand !== 'all' ? `account=${encodeURIComponent(activeBrand)}` : '';
+        const qStr = [qParam, brandParam, 'limit=15'].filter(Boolean).join('&');
+        const res = await fetch(`/api/content-flow?${qStr}`);
         const json = await res.json();
         if (json.success && Array.isArray(json.items)) {
           setVideoSearchResults(json.items);
@@ -246,7 +276,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
       } finally {
         setSearchingVideos(false);
       }
-    }, 250);
+    }, 200);
   };
 
   // Scan Folder Media Files (Auto-Detect *_video_final.mp4)
@@ -341,7 +371,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
       else if (activeTab === 'history') params.set('view', 'history');
       else params.set('view', 'all');
 
-      if (filterAccount !== 'all') params.set('account_id', filterAccount);
+      if (filterBrandProfile !== 'all') params.set('brand', filterBrandProfile);
       if (filterPlatform !== 'all') params.set('platform', filterPlatform);
       if (filterStatus !== 'all') params.set('status', filterStatus);
       if (searchTerm.trim()) params.set('search', searchTerm.trim());
@@ -361,7 +391,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
     } finally {
       setLoading(false);
     }
-  }, [activeTab, filterAccount, filterPlatform, filterStatus, searchTerm, selectedJobId]);
+  }, [activeTab, filterBrandProfile, filterPlatform, filterStatus, searchTerm, selectedJobId]);
 
   // 3. Fetch Control Status (Global Pause)
   const fetchControl = useCallback(async () => {
@@ -787,31 +817,95 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
     }
   };
 
-  // Weekly Calendar generator
-  const calendarWeek = useMemo(() => {
-    const today = new Date();
-    const currentDay = today.getDay(); // 0 is Sunday
-    const distanceToMonday = currentDay === 0 ? -6 : 1 - currentDay;
-    const monday = new Date(today);
-    monday.setDate(today.getDate() + distanceToMonday);
+  // Monthly Calendar generator
+  const calendarMonthData = useMemo(() => {
+    const year = calendarDate.getFullYear();
+    const month = calendarDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const todayStr = new Date().toISOString().slice(0, 10);
+
+    // 0 = Senin, 6 = Minggu
+    let startDayOfWeek = firstDay.getDay() - 1;
+    if (startDayOfWeek === -1) startDayOfWeek = 6;
 
     const days = [];
-    const dayNames = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(monday);
-      d.setDate(monday.getDate() + i);
-      const dateStr = d.toISOString().slice(0, 10);
-      const dayJobs = jobs.filter(j => (j.scheduled_at || '').slice(0, 10) === dateStr);
+    // Hari padding dari bulan sebelumnya
+    const prevMonthLastDay = new Date(year, month, 0).getDate();
+    for (let i = startDayOfWeek - 1; i >= 0; i--) {
+      const dateNum = prevMonthLastDay - i;
+      const prevDate = new Date(year, month - 1, dateNum);
+      const dateStr = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}-${String(dateNum).padStart(2, '0')}`;
       days.push({
-        dayName: dayNames[i],
-        dateNum: d.getDate(),
+        dateNum,
         dateStr,
-        isToday: dateStr === today.toISOString().slice(0, 10),
-        jobs: dayJobs
+        isCurrentMonth: false,
+        isToday: dateStr === todayStr,
+        jobs: jobs.filter(j => (j.scheduled_at || '').slice(0, 10) === dateStr)
       });
     }
+
+    // Hari dalam bulan berjalan
+    for (let d = 1; d <= lastDay.getDate(); d++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      days.push({
+        dateNum: d,
+        dateStr,
+        isCurrentMonth: true,
+        isToday: dateStr === todayStr,
+        jobs: jobs.filter(j => (j.scheduled_at || '').slice(0, 10) === dateStr)
+      });
+    }
+
+    // Hari padding bulan berikutnya agar mengisi tepat 7 kolom penuh
+    const remaining = (7 - (days.length % 7)) % 7;
+    for (let t = 1; t <= remaining; t++) {
+      const nextDate = new Date(year, month + 1, t);
+      const dateStr = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}-${String(t).padStart(2, '0')}`;
+      days.push({
+        dateNum: t,
+        dateStr,
+        isCurrentMonth: false,
+        isToday: dateStr === todayStr,
+        jobs: jobs.filter(j => (j.scheduled_at || '').slice(0, 10) === dateStr)
+      });
+    }
+
     return days;
-  }, [jobs]);
+  }, [calendarDate, jobs]);
+
+  // Calendar Month Navigation
+  const handlePrevMonth = () => {
+    setCalendarDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCalendarDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
+
+  const handleCurrentMonth = () => {
+    setCalendarDate(new Date());
+  };
+
+  // Open Schedule Modal with specific date & pre-selected brand filter
+  const handleOpenScheduleForDate = (targetDateStr) => {
+    const timeVal = `${targetDateStr}T10:00`;
+    setScheduleForm(prev => ({
+      ...prev,
+      scheduled_at: timeVal
+    }));
+    const brandToSelect = filterBrandProfile !== 'all' ? filterBrandProfile : 'all';
+    setModalBrandFilter(brandToSelect);
+    handleSearchVideos('', brandToSelect);
+    setShowScheduleModal(true);
+  };
+
+  const handleOpenScheduleModal = () => {
+    const brandToSelect = filterBrandProfile !== 'all' ? filterBrandProfile : 'all';
+    setModalBrandFilter(brandToSelect);
+    handleSearchVideos(videoSearchQuery, brandToSelect);
+    setShowScheduleModal(true);
+  };
 
   return (
     <div style={{ color: 'var(--text-primary)', fontFamily: 'Inter, system-ui, sans-serif' }}>
@@ -835,7 +929,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
             Publishing Scheduler
           </h2>
           <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: 13 }}>
-            Jadwalkan dan pantau publikasi Facebook & Instagram dari Content Flow secara aman dan terpantau.
+            Jadwalkan dan pantau publikasi multi-platform (TikTok, Meta, YouTube, Threads, LinkedIn) secara aman dan terpantau.
           </p>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
@@ -902,7 +996,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
             </span>
           </button>
           <button
-            onClick={() => setShowScheduleModal(true)}
+            onClick={handleOpenScheduleModal}
             style={{
               padding: '9px 18px', background: 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)',
               border: '1px solid var(--status-neutral)', borderRadius: 8, color: 'var(--text-primary)', fontSize: 12, fontWeight: 800,
@@ -924,7 +1018,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
         <div style={{ background: 'var(--surface)', border: '1px solid var(--surface-interactive)', borderRadius: 12, padding: 14 }}>
           <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Published Hari Ini</div>
           <div style={{ fontSize: 24, fontWeight: 850, color: 'var(--status-success)', marginTop: 4 }}>{metrics.publishedToday}</div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>Facebook & Instagram</div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>Semua platform</div>
         </div>
         <div style={{ background: 'var(--surface)', border: '1px solid var(--surface-interactive)', borderRadius: 12, padding: 14 }}>
           <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Menunggu Retry</div>
@@ -977,13 +1071,14 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
         {/* Filters */}
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           <select
-            value={filterAccount}
-            onChange={(e) => setFilterAccount(e.target.value)}
+            value={filterBrandProfile}
+            onChange={(e) => setFilterBrandProfile(e.target.value)}
             style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', padding: '6px 10px', borderRadius: 7, fontSize: 12 }}
+            title="Filter berdasarkan Brand Profile"
           >
-            <option value="all">Semua Akun</option>
-            {accounts.map(acc => (
-              <option key={acc.id} value={acc.id}>{acc.display_name} ({acc.platform})</option>
+            <option value="all">Semua Brand Profile</option>
+            {allBrandOptions.map(b => (
+              <option key={b.brand_name} value={b.brand_name}>@{b.brand_name}</option>
             ))}
           </select>
 
@@ -1479,56 +1574,209 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
         </div>
       )}
 
-      {/* Tab 2: Weekly Calendar */}
+      {/* Tab 2: Monthly Calendar Grid */}
       {activeTab === 'calendar' && (
         <div style={{ background: 'var(--surface)', border: '1px solid var(--surface-interactive)', borderRadius: 12, overflow: 'hidden' }}>
-          <div style={{ height: 46, borderBottom: '1px solid var(--surface-interactive)', display: 'flex', alignItems: 'center', padding: '0 16px', color: 'var(--text-primary)', fontSize: 12, fontWeight: 800 }}>
-            <span>Kalender Jadwal Mingguan</span>
-            <span style={{ color: 'var(--text-muted)', fontWeight: 500, marginLeft: 8 }}>({calendarWeek[0].dateStr} s.d. {calendarWeek[6].dateStr})</span>
+          {/* Calendar Header / Navigation */}
+          <div style={{
+            height: 54, borderBottom: '1px solid var(--surface-interactive)', display: 'flex',
+            alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', background: 'var(--surface)',
+            flexWrap: 'wrap', gap: 10
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <button
+                  type="button"
+                  onClick={handlePrevMonth}
+                  style={{
+                    background: 'var(--surface-interactive)', border: '1px solid var(--border-strong)',
+                    color: 'var(--text-secondary)', padding: '5px 10px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer'
+                  }}
+                  title="Bulan sebelumnya"
+                >
+                  ‹ Sebelumnya
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCurrentMonth}
+                  style={{
+                    background: 'var(--surface-interactive)', border: '1px solid var(--border-strong)',
+                    color: 'var(--text-primary)', padding: '5px 12px', borderRadius: 6, fontSize: 12, fontWeight: 750, cursor: 'pointer'
+                  }}
+                  title="Kembali ke bulan saat ini"
+                >
+                  Bulan Ini
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextMonth}
+                  style={{
+                    background: 'var(--surface-interactive)', border: '1px solid var(--border-strong)',
+                    color: 'var(--text-secondary)', padding: '5px 10px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer'
+                  }}
+                  title="Bulan selanjutnya"
+                >
+                  Selanjutnya ›
+                </button>
+              </div>
+              <span style={{ fontSize: 16, fontWeight: 850, color: 'var(--text-primary)', textTransform: 'capitalize', letterSpacing: '-0.3px' }}>
+                📅 {calendarDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--text-muted)' }}>
+              {filterBrandProfile !== 'all' && (
+                <span style={{
+                  background: 'var(--status-info-soft)', color: 'var(--link)',
+                  border: '1px solid var(--status-info)', padding: '3px 8px', borderRadius: 6, fontWeight: 700
+                }}>
+                  🏷️ @{filterBrandProfile}
+                </span>
+              )}
+              <span>
+                Total <strong>{calendarMonthData.reduce((acc, d) => acc + (d.isCurrentMonth ? d.jobs.length : 0), 0)}</strong> jadwal bulan ini
+              </span>
+            </div>
           </div>
+
+          {/* 7 Days Header */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', background: 'var(--surface-interactive)', borderBottom: '1px solid var(--border-subtle)', textAlign: 'center' }}>
+            {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'].map((dName, idx) => (
+              <div key={dName} style={{
+                padding: '10px 4px', fontSize: 11, fontWeight: 800,
+                color: idx >= 5 ? 'var(--status-warning)' : 'var(--text-secondary)',
+                letterSpacing: '0.5px'
+              }}>
+                {dName.toUpperCase()}
+              </div>
+            ))}
+          </div>
+
+          {/* Monthly Day Grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1, background: 'var(--border-subtle)' }}>
-            {calendarWeek.map((day) => (
-              <div key={day.dateStr} style={{ minHeight: 280, background: day.isToday ? 'var(--surface-interactive)' : 'var(--surface)', padding: 10 }}>
-                <div style={{ fontSize: 10, color: day.isToday ? 'var(--link)' : 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800 }}>
-                  {day.dayName} {day.isToday && '· HARI INI'}
+            {calendarMonthData.map((day, idx) => (
+              <div
+                key={`${day.dateStr}_${idx}`}
+                style={{
+                  minHeight: 130,
+                  background: day.isToday
+                    ? 'rgba(59, 130, 246, 0.08)'
+                    : day.isCurrentMonth
+                    ? 'var(--surface)'
+                    : 'rgba(15, 23, 42, 0.5)',
+                  border: day.isToday ? '1px solid var(--link)' : 'none',
+                  padding: 8,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  transition: 'background 0.15s ease',
+                  position: 'relative'
+                }}
+              >
+                {/* Day Header: Date Num + Today Badge + Add '+' Button */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{
+                      fontSize: 13,
+                      fontWeight: day.isToday ? 900 : 700,
+                      color: day.isToday ? 'var(--link)' : day.isCurrentMonth ? 'var(--text-primary)' : 'var(--text-muted)'
+                    }}>
+                      {day.dateNum}
+                    </span>
+                    {day.isToday && (
+                      <span style={{ background: 'var(--link)', color: '#fff', fontSize: 9, fontWeight: 800, padding: '1px 5px', borderRadius: 4 }}>
+                        HARI INI
+                      </span>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenScheduleForDate(day.dateStr);
+                    }}
+                    title={`Jadwalkan publikasi konten pada ${day.dateStr}`}
+                    style={{
+                      background: 'var(--surface-interactive)',
+                      border: '1px solid var(--border-strong)',
+                      color: 'var(--text-secondary)',
+                      borderRadius: 5,
+                      width: 20,
+                      height: 20,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      fontSize: 13,
+                      fontWeight: 800,
+                      lineHeight: 1,
+                      padding: 0,
+                      transition: 'all 0.15s ease'
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--status-neutral)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'var(--status-neutral)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--surface-interactive)'; e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.borderColor = 'var(--border-strong)'; }}
+                  >
+                    +
+                  </button>
                 </div>
-                <div style={{ fontSize: 16, color: 'var(--text-primary)', fontWeight: 800, margin: '4px 0 10px' }}>
-                  {day.dateNum}
-                </div>
-                {day.jobs.length === 0 ? (
-                  <div style={{ color: 'var(--text-muted)', fontSize: 10, textAlign: 'center', marginTop: 30 }}>Belum ada jadwal</div>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    {day.jobs.map((j) => (
-                      <div
-                        key={j.id}
-                        onClick={() => { setSelectedJobId(j.id); setActiveTab('queue'); }}
-                        style={{
-                          padding: 7, borderRadius: 6,
-                          background: j.platform === 'instagram' ? '#2e1c3a' : 
-                                      j.platform === 'facebook' ? '#16253d' :
-                                      j.platform === 'threads' ? '#1e1e1e' :
-                                      j.platform === 'tiktok' ? '#1c2d3a' :
-                                      j.platform === 'linkedin' ? '#1a2936' : '#2d1e1e',
-                          borderLeft: `3px solid ${j.status === 'published' ? 'var(--status-success)' : (j.platform === 'instagram' ? 'rgba(236, 72, 153, 0.8)' : 'var(--status-info)')}`,
-                          fontSize: 10, color: 'var(--text-secondary)', cursor: 'pointer'
-                        }}
-                      >
-                        <div style={{ fontWeight: 800, color: 'var(--text-primary)', marginBottom: 2 }}>
+
+                {/* Day Scheduled Items */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, overflowY: 'auto', maxHeight: 110 }}>
+                  {day.jobs.map((j) => (
+                    <div
+                      key={j.id}
+                      onClick={() => { setSelectedJobId(j.id); setActiveTab('queue'); }}
+                      title={`${j.content_title || j.content_id} (${j.platform?.toUpperCase()}) - ${j.status}`}
+                      style={{
+                        padding: '4px 6px',
+                        borderRadius: 5,
+                        background: j.platform === 'instagram' ? '#2e1c3a' : 
+                                    j.platform === 'facebook' ? '#16253d' :
+                                    j.platform === 'threads' ? '#1e1e1e' :
+                                    j.platform === 'tiktok' ? '#1c2d3a' :
+                                    j.platform === 'linkedin' ? '#1a2936' :
+                                    j.platform === 'youtube' ? '#2d1e1e' : 'var(--surface-interactive)',
+                        borderLeft: `3px solid ${
+                          j.status === 'published' ? 'var(--status-success)' :
+                          j.status === 'failed' ? 'var(--status-danger)' :
+                          j.status === 'retry_wait' ? 'var(--status-warning)' :
+                          j.platform === 'instagram' ? '#ec4899' :
+                          j.platform === 'tiktok' ? '#00F2FE' : 'var(--status-info)'
+                        }`,
+                        fontSize: 10,
+                        color: 'var(--text-secondary)',
+                        cursor: 'pointer',
+                        transition: 'transform 0.1s ease',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 1 }}>
+                        <span style={{ fontWeight: 800, color: 'var(--text-primary)', fontSize: 9 }}>
                           {j.platform === 'facebook' ? 'FB' : 
                            j.platform === 'instagram' ? 'IG' :
                            j.platform === 'threads' ? 'TH' :
                            j.platform === 'tiktok' ? 'TK' :
                            j.platform === 'linkedin' ? 'LN' :
                            j.platform === 'youtube' ? 'YT' : '◎'} {j.scheduled_at ? new Date(j.scheduled_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : ''}
-                        </div>
-                        <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {j.content_title || j.content_id}
-                        </div>
+                        </span>
+                        <span style={{
+                          fontSize: 8,
+                          fontWeight: 700,
+                          color: j.status === 'published' ? 'var(--status-success)' :
+                                 j.status === 'failed' ? 'var(--status-danger)' :
+                                 j.status === 'retry_wait' ? 'var(--status-warning)' : 'var(--link)'
+                        }}>
+                          {j.status === 'published' ? '✓' : j.status === 'failed' ? '✕' : '•'}
+                        </span>
                       </div>
-                    ))}
-                  </div>
-                )}
+                      <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 10, color: 'var(--text-secondary)' }}>
+                        {j.content_title || j.content_id}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
@@ -1557,6 +1805,43 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
             </div>
 
             <form onSubmit={handleScheduleSubmit}>
+              {/* 0. Filter Brand Profile di Modal */}
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                  <label style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700 }}>
+                    Filter Brand Profile <span style={{ color: 'var(--link)', fontWeight: 400 }}>(Menyaring video & akun)</span>
+                  </label>
+                  {modalBrandFilter !== 'all' && (
+                    <span style={{ fontSize: 10, color: 'var(--link)', fontWeight: 700 }}>
+                      ✓ Terkunci ke @{modalBrandFilter}
+                    </span>
+                  )}
+                </div>
+                <select
+                  value={modalBrandFilter}
+                  onChange={(e) => {
+                    const newBrand = e.target.value;
+                    setModalBrandFilter(newBrand);
+                    handleSearchVideos(videoSearchQuery, newBrand);
+                  }}
+                  style={{
+                    width: '100%',
+                    background: 'var(--surface)',
+                    border: modalBrandFilter !== 'all' ? '1px solid var(--link)' : '1px solid var(--surface-interactive)',
+                    padding: '8px 10px',
+                    borderRadius: 6,
+                    color: 'var(--text-primary)',
+                    fontSize: 12,
+                    fontWeight: modalBrandFilter !== 'all' ? 700 : 500
+                  }}
+                >
+                  <option value="all">Semua Brand Profile</option>
+                  {allBrandOptions.map(b => (
+                    <option key={b.brand_name} value={b.brand_name}>@{b.brand_name}</option>
+                  ))}
+                </select>
+              </div>
+
               {/* 1. Searchable Video ID Combobox */}
               <div style={{ marginBottom: 12, position: 'relative', width: '100%' }}>
                 <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>
@@ -1733,7 +2018,7 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                 {/* Counter status hasil filter */}
                 {(() => {
                   const providerAccounts = accounts.filter(acc => (acc.provider || 'meta') === (scheduleForm.activeTabProvider || 'meta'));
-                  const displayedAccounts = providerAccounts.filter(acc => {
+                  let displayedAccounts = providerAccounts.filter(acc => {
                     if (!accountSearchQuery.trim()) return true;
                     const q = accountSearchQuery.toLowerCase().trim();
                     const nameMatch = (acc.display_name || '').toLowerCase().includes(q);
@@ -1741,6 +2026,18 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                     const idMatch = String(acc.provider_account_id || acc.facebook_page_id || acc.instagram_user_id || acc.id || '').toLowerCase().includes(q);
                     return nameMatch || platformMatch || idMatch;
                   });
+
+                  // Prioritaskan akun yang namanya cocok dengan modalBrandFilter
+                  if (modalBrandFilter !== 'all') {
+                    const bLower = modalBrandFilter.toLowerCase();
+                    displayedAccounts.sort((a, b) => {
+                      const aMatch = (a.display_name || '').toLowerCase().includes(bLower);
+                      const bMatch = (b.display_name || '').toLowerCase().includes(bLower);
+                      if (aMatch && !bMatch) return -1;
+                      if (!aMatch && bMatch) return 1;
+                      return 0;
+                    });
+                  }
 
                   return (
                     <>

@@ -19,6 +19,7 @@ export const GET = withTenantContext(async (request) => {
     const status = searchParams.get('status') || 'all';
     const platform = searchParams.get('platform') || 'all';
     const accountId = searchParams.get('account_id') || searchParams.get('accountId') || 'all';
+    const brand = searchParams.get('brand') || searchParams.get('brand_profile') || 'all';
     const contentId = searchParams.get('content_id') || searchParams.get('contentId') || '';
     const startDate = searchParams.get('start_date') || searchParams.get('startDate') || '';
     const endDate = searchParams.get('end_date') || searchParams.get('endDate') || '';
@@ -31,6 +32,7 @@ export const GET = withTenantContext(async (request) => {
       status,
       platform,
       accountId,
+      brand,
       contentId,
       startDate,
       endDate,

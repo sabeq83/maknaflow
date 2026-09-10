@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAKNA Flow - Kalender Konten Bulanan & Scheduler (Mockup Interaktif)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.65);
+      
+      --platform-tiktok: #00f2fe;
+      --platform-tiktok-bg: rgba(0, 242, 254, 0.12);
+      --platform-facebook: #1877f2;
+      --platform-facebook-bg: rgba(24, 119, 242, 0.14);
+      --platform-instagram: #e1306c;
+      --platform-instagram-bg: rgba(225, 48, 108, 0.14);
+      --platform-youtube: #ef4444;
+      --platform-youtube-bg: rgba(239, 68, 68, 0.14);
+      --platform-threads: #a3a3a3;
+      --platform-threads-bg: rgba(163, 163, 163, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 20px 28px;
+    }
+
+    .container {
+      max-width: 1480px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Header & Navigation Bar */
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: rgba(45, 212, 191, 0.1);
+      border: 1px solid rgba(45, 212, 191, 0.3);
+      border-radius: 8px;
+      color: var(--action-primary);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .header-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-primary);
+    }
+
+    .header-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .tab-pills {
+      display: flex;
+      gap: 6px;
+      background: var(--surface);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .tab-pill {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      background: transparent;
+    }
+
+    .tab-pill.active {
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    }
+
+    /* Filter & Controls Panel */
+    .filter-panel {
+      padding: 16px 20px;
+      border-radius: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .filter-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .filter-inputs-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      align-items: center;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .filter-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .filter-select {
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 10px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 600;
+      outline: none;
+      transition: border 0.2s ease;
+    }
+
+    .filter-select:focus {
+      border-color: var(--action-primary);
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      border: 1px solid var(--border-strong);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+
+    .btn:hover {
+      background: var(--surface-hover);
+    }
+
+    .btn-primary {
+      background: var(--action-primary);
+      border: none;
+      color: var(--on-action-primary);
+      font-weight: 800;
+    }
+
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+
+    /* Month Navigator & Calendar View Selector */
+    .calendar-controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding: 14px 20px;
+      background: var(--surface-raised);
+      border-radius: 14px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .month-navigator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .current-month-display {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: var(--text-primary);
+      min-width: 190px;
+      text-align: center;
+    }
+
+    .view-mode-toggle {
+      display: flex;
+      background: var(--input-bg);
+      padding: 3px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+      gap: 3px;
+    }
+
+    .view-btn {
+      padding: 6px 14px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .view-btn.active {
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    /* Monthly Calendar Grid Layout */
+    .calendar-container {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .calendar-weekdays-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      background: var(--surface-raised);
+      border-bottom: 1px solid var(--border-strong);
+      text-align: center;
+    }
+
+    .weekday-label {
+      padding: 12px 6px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .calendar-month-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      background: var(--border-subtle);
+    }
+
+    /* Day Cell */
+    .calendar-day-cell {
+      min-height: 145px;
+      background: var(--surface);
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      transition: background 0.15s ease;
+    }
+
+    .calendar-day-cell:hover {
+      background: rgba(45, 212, 191, 0.02);
+    }
+
+    .calendar-day-cell.other-month {
+      background: rgba(12, 20, 34, 0.6);
+      opacity: 0.5;
+    }
+
+    .calendar-day-cell.is-today {
+      background: rgba(45, 212, 191, 0.06);
+      border: 1px solid rgba(45, 212, 191, 0.4);
+    }
+
+    .day-cell-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .day-number-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .day-number {
+      font-size: 14px;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: var(--text-primary);
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .is-today .day-number {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    .today-pill {
+      font-size: 9px;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: rgba(45, 212, 191, 0.2);
+      color: var(--action-primary);
+      text-transform: uppercase;
+    }
+
+    /* Tombol Icon + Jadwalkan pada Tanggal */
+    .btn-add-schedule {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-interactive);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 800;
+      transition: all 0.2s;
+      opacity: 0.7;
+    }
+
+    .calendar-day-cell:hover .btn-add-schedule {
+      opacity: 1;
+      border-color: var(--action-primary);
+      color: var(--action-primary);
+    }
+
+    .btn-add-schedule:hover {
+      background: var(--action-primary);
+      color: var(--on-action-primary) !important;
+      transform: scale(1.1);
+    }
+
+    /* Events Container in Day Cell */
+    .day-events-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      overflow-y: auto;
+      max-height: 110px;
+    }
+
+    /* Event Card / Pill */
+    .event-card {
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: var(--surface-raised);
+      border-left: 3px solid var(--link);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      font-size: 11px;
+    }
+
+    .event-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      filter: brightness(1.1);
+    }
+
+    .event-card.plat-tiktok {
+      background: var(--platform-tiktok-bg);
+      border-left-color: var(--platform-tiktok);
+    }
+
+    .event-card.plat-facebook {
+      background: var(--platform-facebook-bg);
+      border-left-color: var(--platform-facebook);
+    }
+
+    .event-card.plat-instagram {
+      background: var(--platform-instagram-bg);
+      border-left-color: var(--platform-instagram);
+    }
+
+    .event-card.plat-youtube {
+      background: var(--platform-youtube-bg);
+      border-left-color: var(--platform-youtube);
+    }
+
+    .event-card.plat-threads {
+      background: var(--platform-threads-bg);
+      border-left-color: var(--platform-threads);
+    }
+
+    .event-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .event-platform-tag {
+      font-size: 9px;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .event-time {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .event-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .event-brand-badge {
+      font-size: 9px;
+      color: var(--text-secondary);
+      opacity: 0.85;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .st-published { background: var(--status-success); box-shadow: 0 0 6px var(--status-success); }
+    .st-scheduled { background: var(--status-warning); box-shadow: 0 0 6px var(--status-warning); }
+    .st-draft { background: var(--text-muted); }
+    .st-failed { background: var(--status-danger); }
+
+    /* Modal Jadwalkan Publikasi Konten */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      backdrop-filter: blur(5px);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-window {
+      width: 100%;
+      max-width: 780px;
+      max-height: 88vh;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 20px;
+      box-shadow: var(--shadow-modal);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalPop {
+      from { transform: scale(0.96); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      background: var(--surface-raised);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-body {
+      padding: 22px 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-field label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .form-field input, .form-field select, .form-field textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 600;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+      border-color: var(--action-primary);
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 20px;
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      font-weight: 800;
+      font-size: 13px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Top Header Navigation -->
+  <header class="header-bar">
+    <div class="header-left">
+      <div class="logo-badge">
+        <span>MAKNA FLOW</span>
+        <span style="font-size: 10px; opacity: 0.8;">• CALENDAR HUB</span>
+      </div>
+      <div>
+        <h1 class="header-title">Kalender Konten & Publishing Scheduler</h1>
+        <p class="header-desc">Kelola timeline dan jadwalkan publikasi media sosial lintas platform per brand profile</p>
+      </div>
+    </div>
+
+    <div class="tab-pills">
+      <button class="tab-pill" onclick="showToast('Beralih ke Content Library')">📁 Library</button>
+      <button class="tab-pill active">📅 Kalender Konten</button>
+      <button class="tab-pill" onclick="showToast('Beralih ke Analytics')">📊 Analytics & Reporting</button>
+    </div>
+  </header>
+
+  <!-- Filter Panel (Sesuai Permintaan: Brand Profile, Platform, Status) -->
+  <section class="filter-panel">
+    <div class="filter-top-row">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 15px; font-weight: 800; color: var(--text-primary);">
+          🔍 Filter Kalender Publikasi
+        </span>
+        <span style="font-size: 12px; color: var(--text-muted);">
+          (Kustomisasi Tampilan Jadwal)
+        </span>
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-primary" onclick="openScheduleModal()">
+          <span>+ Jadwalkan Konten Baru</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="filter-inputs-row">
+      <!-- 1. Filter Brand Profile (Utama) -->
+      <div class="filter-group">
+        <label class="filter-label" for="filterBrand">
+          <span>🏢 Brand Profile</span>
+        </label>
+        <select id="filterBrand" class="filter-select" onchange="onFilterChange()">
+          <option value="all">⭐ Semua Brand Profile (Global)</option>
+          <option value="nutribake" selected>@nutribake</option>
+          <option value="mealprepid">@mealprepid</option>
+          <option value="dapurbotani">@dapurbotani</option>
+          <option value="cookiescorner">@cookiescorner</option>
+          <option value="siasatsehat">@siasatsehat</option>
+        </select>
+      </div>
+
+      <!-- 2. Filter Platform -->
+      <div class="filter-group">
+        <label class="filter-label" for="filterPlatform">
+          <span>🌐 Platform Sosmed</span>
+        </label>
+        <select id="filterPlatform" class="filter-select" onchange="onFilterChange()">
+          <option value="all">Semua Platform</option>
+          <option value="tiktok">TikTok Video</option>
+          <option value="facebook">Facebook Page / Reel</option>
+          <option value="instagram">Instagram Reel</option>
+          <option value="youtube">YouTube Shorts</option>
+          <option value="threads">Threads</option>
+        </select>
+      </div>
+
+      <!-- 3. Filter Status -->
+      <div class="filter-group">
+        <label class="filter-label" for="filterStatus">
+          <span>⚡ Status Publikasi</span>
+        </label>
+        <select id="filterStatus" class="filter-select" onchange="onFilterChange()">
+          <option value="all">Semua Status</option>
+          <option value="scheduled">⏳ Scheduled (Terjadwal)</option>
+          <option value="published">✅ Published (Sudah Tayang)</option>
+          <option value="draft">📝 Draft / Ready</option>
+          <option value="failed">❌ Gagal / Perlu Retry</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- Month Navigator & View Mode Bar -->
+  <section class="calendar-controls-bar">
+    <div class="month-navigator">
+      <button class="btn" onclick="navigateMonth(-1)" title="Bulan Sebelumnya">
+        ‹ Sebelumnya
+      </button>
+      <div class="current-month-display" id="monthDisplayTitle">
+        September 2026
+      </div>
+      <button class="btn" onclick="navigateMonth(1)" title="Bulan Selanjutnya">
+        Selanjutnya ›
+      </button>
+      <button class="btn" onclick="resetToCurrentMonth()" style="background: var(--surface-hover); color: var(--action-primary);">
+        Hari Ini (Bulan Ini)
+      </button>
+    </div>
+
+    <!-- View Mode Switcher -->
+    <div class="view-mode-toggle">
+      <button class="view-btn active" id="btnViewMonth" onclick="switchViewMode('month')">
+        📅 Tampilan Bulan Ini
+      </button>
+      <button class="view-btn" id="btnViewWeek" onclick="switchViewMode('week')">
+        🗓️ Minggu Ini
+      </button>
+      <button class="view-btn" id="btnViewList" onclick="switchViewMode('list')">
+        📋 Antrean / List
+      </button>
+    </div>
+  </section>
+
+  <!-- Monthly Calendar Main View -->
+  <main class="calendar-container" id="calendarViewContainer">
+    <!-- Day Header -->
+    <div class="calendar-weekdays-header">
+      <div class="weekday-label">Senin</div>
+      <div class="weekday-label">Selasa</div>
+      <div class="weekday-label">Rabu</div>
+      <div class="weekday-label">Kamis</div>
+      <div class="weekday-label">Jumat</div>
+      <div class="weekday-label">Sabtu</div>
+      <div class="weekday-label" style="color: var(--status-danger);">Minggu</div>
+    </div>
+
+    <!-- Month Grid Days (Rendered by JS) -->
+    <div class="calendar-month-grid" id="calendarMonthGrid">
+      <!-- Injected by JavaScript -->
+    </div>
+  </main>
+</div>
+
+<!-- Modal Dialog: Jadwalkan Publikasi Konten (Pre-filled dengan Tanggal yang Diklik) -->
+<div class="modal-overlay" id="scheduleModal">
+  <div class="modal-window">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span>📅 Jadwalkan Publikasi Konten</span>
+      </div>
+      <button class="btn" onclick="closeScheduleModal()" style="padding: 4px 10px;">✕</button>
+    </div>
+
+    <form onsubmit="handleSaveSchedule(event)">
+      <div class="modal-body">
+        <!-- 1. Video Library Combobox -->
+        <div class="form-field">
+          <label>Pilih Video Konten (Video ID / Judul) <span style="color: var(--status-danger);">*</span></label>
+          <select id="modalSelectVideo" required>
+            <option value="VID-NUT-001">VID-NUT-001 — Rahasia Brownies Lumer Nyoklat (@nutribake • Omura Cocoa)</option>
+            <option value="VID-NUT-002">VID-NUT-002 — Sarapan Sehat Selai Kacang Rendah Gula (@nutribake • Beorganik)</option>
+            <option value="VID-NUT-003">VID-NUT-003 — 3 Tips Baking Anti Kempes (@nutribake • Umum)</option>
+            <option value="VID-MP-001">VID-MP-001 — Meal Prep 7 Hari Sayur Segar (@mealprepid • Kulkas Container)</option>
+            <option value="VID-MP-002">VID-MP-002 — Susun Kulkas Estetik Minimalis (@mealprepid • Bento Box)</option>
+            <option value="VID-BOT-001">VID-BOT-001 — Minuman Jahe Merah Penghangat Badan (@dapurbotani • Jahe Merah)</option>
+          </select>
+        </div>
+
+        <div class="form-grid-2">
+          <!-- 2. Brand Profile -->
+          <div class="form-field">
+            <label>Brand Profile Target</label>
+            <select id="modalSelectBrand" onchange="syncBrandAccountsInModal()">
+              <option value="nutribake">@nutribake</option>
+              <option value="mealprepid">@mealprepid</option>
+              <option value="dapurbotani">@dapurbotani</option>
+              <option value="cookiescorner">@cookiescorner</option>
+              <option value="siasatsehat">@siasatsehat</option>
+            </select>
+          </div>
+
+          <!-- 3. Platform Akun Sosmed -->
+          <div class="form-field">
+            <label>Platform / Akun Terhubung <span style="color: var(--status-danger);">*</span></label>
+            <select id="modalSelectPlatform" required>
+              <option value="tiktok">TikTok (@nutribake_official)</option>
+              <option value="instagram">Instagram Reel (@nutribake.id)</option>
+              <option value="facebook">Facebook Page (Nutribake Indonesia)</option>
+              <option value="youtube">YouTube Shorts (Nutribake Channel)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <!-- 4. Tanggal Publikasi (Otomatis terisi tanggal klik) -->
+          <div class="form-field">
+            <label>Tanggal Tayang <span style="color: var(--status-danger);">*</span></label>
+            <input type="date" id="modalInputDate" required />
+          </div>
+
+          <!-- 5. Jam Tayang -->
+          <div class="form-field">
+            <label>Waktu Tayang (Jam:Menit WIB) <span style="color: var(--status-danger);">*</span></label>
+            <input type="time" id="modalInputTime" value="19:00" required />
+          </div>
+        </div>
+
+        <!-- 6. Caption & Hashtags -->
+        <div class="form-field">
+          <label>Caption & Hashtags</label>
+          <textarea id="modalInputCaption" rows="3" placeholder="Tuliskan copy naskah caption dan hashtag..."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn" onclick="closeScheduleModal()">Batal</button>
+        <button type="submit" class="btn btn-primary">💾 Simpan & Aktifkan Jadwal</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Detail Event Job -->
+<div class="modal-overlay" id="eventDetailModal">
+  <div class="modal-window" style="max-width: 580px;">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span id="detailModalTitle">Detail Jadwal Publikasi</span>
+      </div>
+      <button class="btn" onclick="closeDetailModal()" style="padding: 4px 10px;">✕</button>
+    </div>
+    <div class="modal-body" id="detailModalBody">
+      <!-- Populated by JS -->
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn" onclick="closeDetailModal()">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toastMessage">
+  <span>✓</span>
+  <span id="toastText">Jadwal berhasil disimpan!</span>
+</div>
+
+<script>
+  // State Management
+  let currentYear = 2026;
+  let currentMonth = 8; // September (0-indexed: 8 = Sept)
+  let currentViewMode = 'month';
+
+  // Sample Scheduled & Published Events
+  let EVENTS_DATABASE = [
+    { id: 'ev-1', video_id: 'VID-NUT-001', brand: 'nutribake', title: 'Rahasia Brownies Lumer Nyoklat', platform: 'tiktok', status: 'published', date: '2026-09-02', time: '10:00' },
+    { id: 'ev-2', video_id: 'VID-NUT-001', brand: 'nutribake', title: 'Rahasia Brownies Lumer Nyoklat', platform: 'instagram', status: 'published', date: '2026-09-02', time: '10:30' },
+    { id: 'ev-3', video_id: 'VID-NUT-002', brand: 'nutribake', title: 'Sarapan Sehat Selai Kacang', platform: 'tiktok', status: 'published', date: '2026-09-05', time: '19:00' },
+    { id: 'ev-4', video_id: 'VID-NUT-002', brand: 'nutribake', title: 'Sarapan Sehat Selai Kacang', platform: 'facebook', status: 'published', date: '2026-09-05', time: '19:15' },
+    { id: 'ev-5', video_id: 'VID-NUT-003', brand: 'nutribake', title: '3 Tips Baking Anti Kempes', platform: 'youtube', status: 'published', date: '2026-09-08', time: '12:00' },
+    { id: 'ev-6', video_id: 'VID-NUT-003', brand: 'nutribake', title: '3 Tips Baking Anti Kempes', platform: 'tiktok', status: 'published', date: '2026-09-09', time: '19:00' },
+    { id: 'ev-7', video_id: 'VID-NUT-004', brand: 'nutribake', title: 'Cookies Cokelat Lumer Modal 30rb', platform: 'tiktok', status: 'scheduled', date: '2026-09-11', time: '19:00' },
+    { id: 'ev-8', video_id: 'VID-NUT-004', brand: 'nutribake', title: 'Cookies Cokelat Lumer Modal 30rb', platform: 'instagram', status: 'scheduled', date: '2026-09-11', time: '19:30' },
+    { id: 'ev-9', video_id: 'VID-NUT-005', brand: 'nutribake', title: 'Overnight Oat Anti Eneg', platform: 'tiktok', status: 'scheduled', date: '2026-09-14', time: '08:00' },
+    { id: 'ev-10', video_id: 'VID-NUT-005', brand: 'nutribake', title: 'Overnight Oat Anti Eneg', platform: 'facebook', status: 'scheduled', date: '2026-09-14', time: '08:15' },
+    { id: 'ev-11', video_id: 'VID-NUT-006', brand: 'nutribake', title: 'Bikin Dessert Box 3 Layer', platform: 'youtube', status: 'scheduled', date: '2026-09-18', time: '19:00' },
+    
+    // Mealprepid Events
+    { id: 'ev-12', video_id: 'VID-MP-001', brand: 'mealprepid', title: 'Meal Prep 7 Hari Sayur Segar', platform: 'tiktok', status: 'published', date: '2026-09-04', time: '18:00' },
+    { id: 'ev-13', video_id: 'VID-MP-001', brand: 'mealprepid', title: 'Meal Prep 7 Hari Sayur Segar', platform: 'instagram', status: 'published', date: '2026-09-04', time: '18:30' },
+    { id: 'ev-14', video_id: 'VID-MP-002', brand: 'mealprepid', title: 'Susun Kulkas Estetik Minimalis', platform: 'tiktok', status: 'scheduled', date: '2026-09-11', time: '20:00' },
+    { id: 'ev-15', video_id: 'VID-MP-002', brand: 'mealprepid', title: 'Susun Kulkas Estetik Minimalis', platform: 'facebook', status: 'scheduled', date: '2026-09-12', time: '10:00' },
+    
+    // Dapur Botani Events
+    { id: 'ev-16', video_id: 'VID-BOT-001', brand: 'dapurbotani', title: 'Jahe Merah Penghangat Badan', platform: 'tiktok', status: 'published', date: '2026-09-07', time: '07:30' },
+    { id: 'ev-17', video_id: 'VID-BOT-002', brand: 'dapurbotani', title: 'Chia Seed untuk Diet Glowing', platform: 'instagram', status: 'scheduled', date: '2026-09-15', time: '19:00' }
+  ];
+
+  const MONTH_NAMES = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+  ];
+
+  function getFilteredEvents() {
+    const brand = document.getElementById('filterBrand').value;
+    const platform = document.getElementById('filterPlatform').value;
+    const status = document.getElementById('filterStatus').value;
+
+    return EVENTS_DATABASE.filter(ev => {
+      const matchBrand = (brand === 'all') || (ev.brand.toLowerCase() === brand.toLowerCase());
+      const matchPlatform = (platform === 'all') || (ev.platform.toLowerCase() === platform.toLowerCase());
+      const matchStatus = (status === 'all') || (ev.status.toLowerCase() === status.toLowerCase());
+      return matchBrand && matchPlatform && matchStatus;
+    });
+  }
+
+  function renderCalendar() {
+    // 1. Update Month Header Title
+    document.getElementById('monthDisplayTitle').innerText = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
+
+    const grid = document.getElementById('calendarMonthGrid');
+    grid.innerHTML = '';
+
+    const filteredEvents = getFilteredEvents();
+
+    // First day of month (0 = Sun, 1 = Mon, ..., 6 = Sat)
+    const firstDayDate = new Date(currentYear, currentMonth, 1);
+    const startDay = firstDayDate.getDay();
+    // Convert to Monday start (0: Mon, 1: Tue, ..., 6: Sun)
+    const mondayOffset = (startDay === 0 ? 6 : startDay - 1);
+
+    // Total days in current month
+    const totalDaysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    // Total days in previous month
+    const totalDaysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+    // Today in Jakarta date string (YYYY-MM-DD)
+    const todayStr = '2026-09-11';
+
+    // 1. Render Previous Month trailing days
+    for (let i = mondayOffset - 1; i >= 0; i--) {
+      const dayNum = totalDaysInPrevMonth - i;
+      const prevM = currentMonth === 0 ? 11 : currentMonth - 1;
+      const prevY = currentMonth === 0 ? currentYear - 1 : currentYear;
+      const dateStr = `${prevY}-${String(prevM + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+      renderDayCell(grid, dayNum, dateStr, true, false, filteredEvents);
+    }
+
+    // 2. Render Current Month days
+    for (let day = 1; day <= totalDaysInMonth; day++) {
+      const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const isToday = (dateStr === todayStr);
+      renderDayCell(grid, day, dateStr, false, isToday, filteredEvents);
+    }
+
+    // 3. Render Next Month leading days to complete 35 or 42 grid cells
+    const totalRenderedSoFar = mondayOffset + totalDaysInMonth;
+    const remainingCells = (totalRenderedSoFar <= 35) ? (35 - totalRenderedSoFar) : (42 - totalRenderedSoFar);
+    
+    for (let day = 1; day <= remainingCells; day++) {
+      const nextM = currentMonth === 11 ? 0 : currentMonth + 1;
+      const nextY = currentMonth === 11 ? currentYear + 1 : currentYear;
+      const dateStr = `${nextY}-${String(nextM + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      renderDayCell(grid, day, dateStr, true, false, filteredEvents);
+    }
+  }
+
+  function renderDayCell(grid, dayNum, dateStr, isOtherMonth, isToday, eventsList) {
+    const dayEvents = eventsList.filter(ev => ev.date === dateStr);
+
+    const cell = document.createElement('div');
+    cell.className = `calendar-day-cell ${isOtherMonth ? 'other-month' : ''} ${isToday ? 'is-today' : ''}`;
+
+    cell.innerHTML = `
+      <div class="day-cell-header">
+        <div class="day-number-wrap">
+          <span class="day-number">${dayNum}</span>
+          ${isToday ? '<span class="today-pill">Hari Ini</span>' : ''}
+        </div>
+        <button class="btn-add-schedule" onclick="openScheduleModalForDate('${dateStr}')" title="Jadwalkan posting di tanggal ${dateStr}">
+          +
+        </button>
+      </div>
+
+      <div class="day-events-list">
+        ${dayEvents.map(ev => `
+          <div class="event-card plat-${ev.platform}" onclick="openEventDetail('${ev.id}')">
+            <div class="event-meta-row">
+              <span class="event-platform-tag">
+                <span class="status-dot st-${ev.status}"></span>
+                ${ev.platform.toUpperCase()}
+              </span>
+              <span class="event-time">${ev.time}</span>
+            </div>
+            <div class="event-title">${ev.title}</div>
+            <div class="event-brand-badge">@${ev.brand}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    grid.appendChild(cell);
+  }
+
+  // Navigation handlers
+  function navigateMonth(direction) {
+    currentMonth += direction;
+    if (currentMonth < 0) {
+      currentMonth = 11;
+      currentYear -= 1;
+    } else if (currentMonth > 11) {
+      currentMonth = 0;
+      currentYear += 1;
+    }
+    renderCalendar();
+  }
+
+  function resetToCurrentMonth() {
+    currentYear = 2026;
+    currentMonth = 8; // September 2026
+    renderCalendar();
+    showToast('Beralih ke Bulan Ini (September 2026)');
+  }
+
+  function onFilterChange() {
+    renderCalendar();
+    showToast('Filter kalender diperbarui!');
+  }
+
+  function switchViewMode(mode) {
+    currentViewMode = mode;
+    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+    if (mode === 'month') document.getElementById('btnViewMonth').classList.add('active');
+    if (mode === 'week') document.getElementById('btnViewWeek').classList.add('active');
+    if (mode === 'list') document.getElementById('btnViewList').classList.add('active');
+
+    showToast(`Mode tampilan: ${mode === 'month' ? 'Bulan Ini' : mode === 'week' ? 'Minggu Ini' : 'List Antrean'}`);
+  }
+
+  // Modal: Open Schedule Dialog with Date Prefill
+  function openScheduleModalForDate(dateStr) {
+    document.getElementById('modalInputDate').value = dateStr;
+    document.getElementById('modalSelectBrand').value = document.getElementById('filterBrand').value === 'all' ? 'nutribake' : document.getElementById('filterBrand').value;
+    syncBrandAccountsInModal();
+    document.getElementById('scheduleModal').classList.add('open');
+  }
+
+  function openScheduleModal() {
+    const todayStr = '2026-09-11';
+    openScheduleModalForDate(todayStr);
+  }
+
+  function closeScheduleModal() {
+    document.getElementById('scheduleModal').classList.remove('open');
+  }
+
+  function syncBrandAccountsInModal() {
+    const brand = document.getElementById('modalSelectBrand').value;
+    const platSelect = document.getElementById('modalSelectPlatform');
+    platSelect.innerHTML = `
+      <option value="tiktok">TikTok (@${brand}_official)</option>
+      <option value="instagram">Instagram Reel (@${brand}.id)</option>
+      <option value="facebook">Facebook Page (${brand.toUpperCase()} Official)</option>
+      <option value="youtube">YouTube Shorts (${brand.toUpperCase()} Studio)</option>
+    `;
+  }
+
+  function handleSaveSchedule(e) {
+    e.preventDefault();
+    const date = document.getElementById('modalInputDate').value;
+    const time = document.getElementById('modalInputTime').value;
+    const brand = document.getElementById('modalSelectBrand').value;
+    const platform = document.getElementById('modalSelectPlatform').value;
+    const videoSelect = document.getElementById('modalSelectVideo');
+    const videoText = videoSelect.options[videoSelect.selectedIndex].text;
+    const videoId = videoSelect.value;
+    const title = videoText.split('—')[1]?.split('(')[0]?.trim() || 'Konten Video Baru';
+
+    const newEvent = {
+      id: `ev-${Date.now()}`,
+      video_id: videoId,
+      brand: brand,
+      title: title,
+      platform: platform,
+      status: 'scheduled',
+      date: date,
+      time: time
+    };
+
+    EVENTS_DATABASE.push(newEvent);
+    closeScheduleModal();
+    renderCalendar();
+    showToast(`Jadwal publikasi berhasil dibuat untuk ${date} pukul ${time} WIB!`);
+  }
+
+  // Event Detail Modal
+  function openEventDetail(eventId) {
+    const ev = EVENTS_DATABASE.find(e => e.id === eventId);
+    if (!ev) return;
+
+    document.getElementById('detailModalTitle').innerHTML = `
+      <span class="status-dot st-${ev.status}"></span>
+      <span>${ev.title}</span>
+    `;
+
+    document.getElementById('detailModalBody').innerHTML = `
+      <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+        <div style="display: flex; justify-content: space-between; padding-bottom: 8px; border-bottom: 1px solid var(--border-subtle);">
+          <span style="color: var(--text-muted);">Video ID</span>
+          <strong style="font-family: var(--font-mono); color: var(--action-primary);">${ev.video_id}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding-bottom: 8px; border-bottom: 1px solid var(--border-subtle);">
+          <span style="color: var(--text-muted);">Brand Profile</span>
+          <strong>@${ev.brand}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding-bottom: 8px; border-bottom: 1px solid var(--border-subtle);">
+          <span style="color: var(--text-muted);">Platform Sosmed</span>
+          <strong style="text-transform: uppercase;">${ev.platform}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding-bottom: 8px; border-bottom: 1px solid var(--border-subtle);">
+          <span style="color: var(--text-muted);">Jadwal Tayang</span>
+          <strong>${ev.date} pukul ${ev.time} WIB</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding-bottom: 8px; border-bottom: 1px solid var(--border-subtle);">
+          <span style="color: var(--text-muted);">Status Publikasi</span>
+          <span style="padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 11px; background: ${ev.status === 'published' ? 'var(--status-success-soft)' : 'var(--status-warning-soft)'}; color: ${ev.status === 'published' ? 'var(--status-success)' : 'var(--status-warning)'};">
+            ${ev.status.toUpperCase()}
+          </span>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('eventDetailModal').classList.add('open');
+  }
+
+  function closeDetailModal() {
+    document.getElementById('eventDetailModal').classList.remove('open');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toastMessage');
+    document.getElementById('toastText').innerText = msg;
+    t.classList.add('show');
+    setTimeout(() => {
+      t.classList.remove('show');
+    }, 2800);
+  }
+
+  // Initial Load
+  document.addEventListener('DOMContentLoaded', () => {
+    renderCalendar();
+  });
+</script>
+
+</body>
+</html>

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.45 — Penyempurnaan Kalender Konten Bulanan & Filter Brand Profile Modal (11/09/2026)
+- Menambahkan tampilan kalender bulanan dengan navigasi bulan dan tombol tambah jadwal per tanggal
+- Memperbarui filter kalender ke Brand Profile, Platform, dan Status
+- Menambahkan filter Brand Profile di modal penjadwalan konten dengan sinkronisasi otomatis dari filter kalender
+
 ## V2.29.44 — Statistik Posting Berdasarkan Produk pada Content Flow Analytics (10/09/2026)
 - Penambahan filter produk dinamis dan query agregasi productsSql pada reporting engine
 - Penambahan tabel statistik posting konten per produk dan leaderboard top produk teraktif di /content-flow?view=analytics
