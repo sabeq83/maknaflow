@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.29.38 — Quick Repair Button for Repliz Drive Folder (10/09/2026)
+- Tambahkan tombol quick action Buat/Perbaiki Folder REPLIZ Publishing di Card Google Integration Settings
+
 ## V2.29.37 — Multi-Tenant Google Workspace OAuth & Token Isolation (10/09/2026)
 - Injeksi tenantId ke dalam signed OAuth state & callback binding
 - Capture tenantContext pada client.on tokens auto-refresh

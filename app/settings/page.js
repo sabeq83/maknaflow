@@ -1622,6 +1622,20 @@ export default function SettingsPage() {
                         {googleStatus.publishingDrive.connected 
                           ? `📁 Repliz Drive Folder: ${googleStatus.publishingDrive.folderName}`
                           : (googleStatus.publishingDrive.error ? `⚠️ Repliz Drive Folder: ${googleStatus.publishingDrive.error}` : '')}
+                        
+                        {!googleStatus.publishingDrive.connected && googleStatus.connected && (
+                          <div style={{ marginTop: '6px' }}>
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-primary"
+                              onClick={createOrRepairPublishingFolder}
+                              disabled={repairingFolder}
+                              style={{ fontSize: '0.72rem', padding: '3px 10px' }}
+                            >
+                              {repairingFolder ? '⏳ Menyiapkan...' : '⚡ Buat/Perbaiki Folder REPLIZ Publishing'}
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
