@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.29.44 — Statistik Posting Berdasarkan Produk pada Content Flow Analytics (10/09/2026)
+- Penambahan filter produk dinamis dan query agregasi productsSql pada reporting engine
+- Penambahan tabel statistik posting konten per produk dan leaderboard top produk teraktif di /content-flow?view=analytics
+- Integrasi modal dialog sampel video post per produk dan pembaruan export CSV produk
+- Deployment otomatis ke server dev Mac Mini port 5020 & 7020
+
 ## V2.29.43 — AI Visual Identity Animal & Mascot Prompt Builder Enhancement (10/09/2026)
 - Enhanced AI prompt builder with vivid character instructions for non-human animals and mascots
 - Ensured custom_description is always populated for custom non-human entities

@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAKNA Flow - Statistik Posting per Produk (Mockup Interaktif)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+      --platform-tiktok: #00f2fe;
+      --platform-facebook: #1877f2;
+      --platform-instagram: #e1306c;
+      --platform-youtube: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 24px 32px;
+    }
+
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Top Navigation Bar / Breadcrumb Mock */
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: rgba(45, 212, 191, 0.1);
+      border: 1px solid rgba(45, 212, 191, 0.3);
+      border-radius: 8px;
+      color: var(--action-primary);
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+    }
+
+    .header-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .header-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .tab-pills {
+      display: flex;
+      gap: 6px;
+      background: var(--surface);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .tab-pill {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      background: transparent;
+    }
+
+    .tab-pill.active {
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    /* Filter Form */
+    .filter-panel {
+      padding: 20px 24px;
+      border-radius: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .filter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .filter-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      border: 1px solid var(--border-strong);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+
+    .btn:hover {
+      background: var(--surface-hover);
+    }
+
+    .btn-primary {
+      background: var(--action-primary);
+      border: none;
+      color: var(--on-action-primary);
+      font-weight: 700;
+    }
+
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      align-items: end;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .filter-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .filter-select, .filter-input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 600;
+      outline: none;
+      transition: border 0.2s ease;
+    }
+
+    .filter-select:focus, .filter-input:focus {
+      border-color: var(--action-primary);
+    }
+
+    .brand-highlight-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: var(--surface-raised);
+      border-radius: 10px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      border-left: 3px solid var(--action-primary);
+    }
+
+    /* KPI Summary Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+    }
+
+    .kpi-card {
+      padding: 18px 20px;
+      border-radius: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-card);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .kpi-value {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-top: 8px;
+      font-family: var(--font-mono);
+      letter-spacing: -0.5px;
+    }
+
+    .kpi-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 4px;
+    }
+
+    /* Middle Row: Platform Share & Top Products Leaderboard */
+    .analytics-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 960px) {
+      .analytics-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card-panel {
+      padding: 22px;
+      border-radius: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .platform-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .platform-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .platform-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .progress-track {
+      height: 9px;
+      border-radius: 5px;
+      background: var(--surface-interactive);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 5px;
+      transition: width 0.4s ease;
+    }
+
+    /* Top Products Leaderboard */
+    .product-leaderboard {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .leader-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: var(--surface-raised);
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      cursor: pointer;
+    }
+
+    .leader-item:hover {
+      transform: translateX(4px);
+      border-color: var(--action-primary);
+    }
+
+    .leader-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .rank-badge {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      background: var(--surface-interactive);
+      color: var(--text-secondary);
+    }
+
+    .rank-1 { background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4); }
+    .rank-2 { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.4); }
+    .rank-3 { background: rgba(217, 119, 6, 0.2); color: #f59e0b; border: 1px solid rgba(217, 119, 6, 0.4); }
+
+    .leader-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .leader-brand {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .leader-stats {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    /* Main Table Section: Statistik per Produk */
+    .table-section {
+      padding: 22px;
+      border-radius: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .search-box {
+      position: relative;
+      min-width: 280px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 8px 12px 8px 34px;
+      border-radius: 8px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      font-size: 13px;
+      outline: none;
+    }
+
+    .search-box svg {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 15px;
+      height: 15px;
+      color: var(--text-muted);
+    }
+
+    .data-table-container {
+      overflow-x: auto;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    .data-table th {
+      padding: 12px 14px;
+      background: var(--surface-raised);
+      color: var(--text-muted);
+      font-weight: 600;
+      border-bottom: 2px solid var(--border-strong);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .data-table th.sortable {
+      cursor: pointer;
+    }
+
+    .data-table th.sortable:hover {
+      color: var(--action-primary);
+    }
+
+    .data-table td {
+      padding: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+
+    .data-table tr:hover {
+      background: rgba(45, 212, 191, 0.03);
+    }
+
+    .brand-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      border: 1px solid rgba(45, 212, 191, 0.2);
+    }
+
+    .platform-cell-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .coverage-pill {
+      display: inline-flex;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .cov-high {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+
+    .cov-med {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+
+    .cov-low {
+      background: var(--status-danger-soft);
+      color: var(--status-danger);
+      border: 1px solid var(--status-danger);
+    }
+
+    .btn-detail {
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+
+    .btn-detail:hover {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+    }
+
+    /* Expandable Posts Drawer / Modal Preview */
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      backdrop-filter: blur(4px);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .drawer-overlay.open {
+      display: flex;
+    }
+
+    .drawer-modal {
+      width: 100%;
+      max-width: 900px;
+      max-height: 85vh;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 20px;
+      box-shadow: var(--shadow-modal);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalPop {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .drawer-head {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface-raised);
+    }
+
+    .drawer-body {
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .post-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .post-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .post-card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .post-card-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .status-badge {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+
+    .st-published { background: var(--status-success-soft); color: var(--status-success); }
+    .st-scheduled { background: var(--status-warning-soft); color: var(--status-warning); }
+    .st-draft { background: var(--surface-interactive); color: var(--text-muted); }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 20px;
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      font-weight: 700;
+      font-size: 13px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Top Navigation & Header -->
+  <header class="header-bar">
+    <div class="header-left">
+      <div class="logo-badge">
+        <span>MAKNA FLOW</span>
+        <span style="font-size: 10px; opacity: 0.8;">• ANALYTICS</span>
+      </div>
+      <div>
+        <h1 class="header-title">Statistik Posting Konten per Produk</h1>
+        <p class="header-desc">Analisis performa produksi dan distribusi kanal sosial per produk</p>
+      </div>
+    </div>
+
+    <div class="tab-pills">
+      <button class="tab-pill" onclick="showToast('Beralih ke Content Library')">📁 Library</button>
+      <button class="tab-pill" onclick="showToast('Beralih ke Auto Scheduler')">⚡ Publishing</button>
+      <button class="tab-pill active">📊 Analytics & Reporting</button>
+    </div>
+  </header>
+
+  <!-- Filter Panel -->
+  <section class="filter-panel" aria-label="Filter Analytics Produk">
+    <div class="filter-header">
+      <div class="filter-title">
+        <svg width="18" height="18" fill="none" stroke="var(--action-primary)" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+        </svg>
+        <span>Filter Parameter Reporting</span>
+      </div>
+      <div class="filter-actions">
+        <button class="btn" onclick="exportDataCSV()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+          <span>Export CSV Produk</span>
+        </button>
+        <button class="btn btn-primary" onclick="applyFilters()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span>Terapkan Filter</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter Inputs -->
+    <div class="filter-grid">
+      <!-- 1. Filter Brand (Utama) -->
+      <div class="filter-group">
+        <label class="filter-label" for="brandSelect">Brand Account</label>
+        <select id="brandSelect" class="filter-select" onchange="onBrandChange()">
+          <option value="all">⭐ Semua Brand (Global)</option>
+          <option value="nutribake" selected>@nutribake</option>
+          <option value="mealprepid">@mealprepid</option>
+          <option value="dapurbotani">@dapurbotani</option>
+          <option value="cookiescorner">@cookiescorner</option>
+          <option value="siasatsehat">@siasatsehat</option>
+        </select>
+      </div>
+
+      <!-- 2. Rentang Waktu -->
+      <div class="filter-group">
+        <label class="filter-label" for="rangeSelect">Rentang Waktu</label>
+        <select id="rangeSelect" class="filter-select" onchange="applyFilters()">
+          <option value="7d">7 Hari Terakhir</option>
+          <option value="30d" selected>30 Hari Terakhir</option>
+          <option value="this_month">Bulan Ini</option>
+          <option value="last_month">Bulan Lalu</option>
+          <option value="all">Semua Waktu</option>
+        </select>
+      </div>
+
+      <!-- 3. Dimensi Tanggal -->
+      <div class="filter-group">
+        <label class="filter-label" for="dateDimensionSelect">Dimensi Tanggal</label>
+        <select id="dateDimensionSelect" class="filter-select" onchange="applyFilters()">
+          <option value="production" selected>Tanggal Produksi</option>
+          <option value="publish">Tanggal Publish (Kanal Sosial)</option>
+        </select>
+      </div>
+
+      <!-- 4. Status Produksi -->
+      <div class="filter-group">
+        <label class="filter-label" for="pipelineStatusSelect">Status Produksi</label>
+        <select id="pipelineStatusSelect" class="filter-select" onchange="applyFilters()">
+          <option value="all">Semua Status Produksi</option>
+          <option value="Completed" selected>Completed Only</option>
+          <option value="In Production">In Production Only</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Active Filter Indicator -->
+    <div class="brand-highlight-indicator" id="activeFilterBadge">
+      Menampilkan data posting produk untuk brand: <strong id="activeBrandName" style="color: var(--action-primary);">@nutribake</strong> (Rentang: 30 Hari Terakhir)
+    </div>
+  </section>
+
+  <!-- 6 Primary KPI Summary Cards -->
+  <section class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-title">
+        <span>Total Aset Video</span>
+        <span>🎬</span>
+      </div>
+      <div class="kpi-value" id="kpiTotalAssets">384</div>
+      <span class="kpi-subtitle">Video Produk Terdaftar</span>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-title">
+        <span style="color: var(--status-success);">Produksi Selesai</span>
+        <span>✅</span>
+      </div>
+      <div class="kpi-value" id="kpiCompletedAssets" style="color: var(--status-success);">362</div>
+      <span class="kpi-subtitle">Siap & Terverifikasi</span>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-title">
+        <span style="color: var(--status-warning);">Masih Produksi</span>
+        <span>⏳</span>
+      </div>
+      <div class="kpi-value" id="kpiInProductionAssets" style="color: var(--status-warning);">22</div>
+      <span class="kpi-subtitle">Sedang di Pipeline</span>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-title">
+        <span style="color: var(--link);">Sudah Tayang (Min. 1)</span>
+        <span>🚀</span>
+      </div>
+      <div class="kpi-value" id="kpiPublishedAssets" style="color: var(--link);">294</div>
+      <span class="kpi-subtitle">Published di Sosmed</span>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-title">
+        <span style="color: var(--status-danger);">Belum Tayang</span>
+        <span>⚠️</span>
+      </div>
+      <div class="kpi-value" id="kpiUnpublishedAssets" style="color: var(--status-danger);">90</div>
+      <span class="kpi-subtitle">Menunggu Dijadwalkan</span>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-title">
+        <span style="color: var(--action-primary);">Distribusi Lengkap</span>
+        <span>🌐</span>
+      </div>
+      <div class="kpi-value" id="kpiFullyDistributed" style="color: var(--action-primary);">198</div>
+      <span class="kpi-subtitle">TikTok + FB + IG</span>
+    </div>
+  </section>
+
+  <!-- Middle Row: Platform Share & Top Products Leaderboard -->
+  <section class="analytics-row">
+    <!-- Platform Distribution -->
+    <div class="card-panel">
+      <div class="card-header">
+        <h2 class="card-title">Distribusi Post per Platform</h2>
+        <span style="font-size: 12px; color: var(--text-muted);">Akumulasi Post Sosmed</span>
+      </div>
+      <div class="platform-bars">
+        <div class="platform-row">
+          <div class="platform-meta">
+            <span>TikTok</span>
+            <span id="txtTtPost" style="font-family: var(--font-mono);">245 posts (64%)</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="barTtPost" style="width: 64%; background: var(--platform-tiktok);"></div>
+          </div>
+        </div>
+
+        <div class="platform-row">
+          <div class="platform-meta">
+            <span>Facebook</span>
+            <span id="txtFbPost" style="font-family: var(--font-mono);">220 posts (57%)</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="barFbPost" style="width: 57%; background: var(--platform-facebook);"></div>
+          </div>
+        </div>
+
+        <div class="platform-row">
+          <div class="platform-meta">
+            <span>Instagram</span>
+            <span id="txtIgPost" style="font-family: var(--font-mono);">230 posts (60%)</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="barIgPost" style="width: 60%; background: var(--platform-instagram);"></div>
+          </div>
+        </div>
+
+        <div class="platform-row">
+          <div class="platform-meta">
+            <span>YouTube Shorts</span>
+            <span id="txtYtPost" style="font-family: var(--font-mono);">180 posts (47%)</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="barYtPost" style="width: 47%; background: var(--platform-youtube);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Products Leaderboard -->
+    <div class="card-panel">
+      <div class="card-header">
+        <h2 class="card-title">🏆 Top Produk Terbanyak Diposting</h2>
+        <span style="font-size: 12px; color: var(--text-muted);" id="leaderboardSub">Rank Produk Teraktif</span>
+      </div>
+      <div class="product-leaderboard" id="productLeaderboard">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Product Statistics Table -->
+  <section class="table-section">
+    <div class="table-toolbar">
+      <div>
+        <h2 class="card-title">Daftar Statistik Posting Tiap Produk</h2>
+        <span style="font-size: 12px; color: var(--text-muted);" id="tableSubtitle">Ditemukan 5 produk untuk brand @nutribake</span>
+      </div>
+      <div class="search-box">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input type="text" id="productSearchInput" placeholder="Cari nama produk..." oninput="filterProductTable()">
+      </div>
+    </div>
+
+    <div class="data-table-container">
+      <table class="data-table" id="productStatsTable">
+        <thead>
+          <tr>
+            <th class="sortable" onclick="sortTable('name')">Nama Produk ⇕</th>
+            <th class="sortable" onclick="sortTable('brand')">Brand ⇕</th>
+            <th class="sortable" onclick="sortTable('total')" style="text-align: right;">Total Video ⇕</th>
+            <th style="text-align: right;">Completed</th>
+            <th class="sortable" onclick="sortTable('published')" style="text-align: right; color: var(--status-success);">Published (Min 1) ⇕</th>
+            <th class="sortable" onclick="sortTable('unpublished')" style="text-align: right; color: var(--status-danger);">Belum Tayang ⇕</th>
+            <th style="text-align: right;">TikTok</th>
+            <th style="text-align: right;">Facebook</th>
+            <th style="text-align: right;">Instagram</th>
+            <th style="text-align: right;">YouTube</th>
+            <th class="sortable" onclick="sortTable('coverage')" style="text-align: center;">Coverage % ⇕</th>
+            <th style="text-align: center;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="productTableBody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<!-- Modal Detail Post per Produk -->
+<div class="drawer-overlay" id="productDetailModal" onclick="closeModal(event)">
+  <div class="drawer-modal" onclick="event.stopPropagation()">
+    <div class="drawer-head">
+      <div>
+        <h3 id="modalProductTitle" style="font-size: 16px; font-weight: 800; color: var(--text-primary);">Daftar Post: Omura Premium Cocoa Powder</h3>
+        <span id="modalProductMeta" style="font-size: 12px; color: var(--text-muted);">Brand: @nutribake • Total 113 Video</span>
+      </div>
+      <button class="btn" onclick="closeModal()">✕ Tutup</button>
+    </div>
+    <div class="drawer-body">
+      <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">
+        Berikut adalah daftar sampel post video spesifik untuk produk ini beserta kanal distribusi masing-masing:
+      </div>
+      <div class="post-card-grid" id="modalPostsGrid">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toastMessage">Terapkan filter berhasil!</div>
+
+<script>
+  // Sample Data derived from MaknaFlow staging database
+  const DATA_PRODUCTS = [
+    {
+      id: 'p1',
+      name: 'Omura Premium Cocoa Powder',
+      brand: 'nutribake',
+      total_assets: 113,
+      completed: 110,
+      in_production: 3,
+      published_any: 95,
+      never_published: 18,
+      tiktok: 90,
+      facebook: 85,
+      instagram: 88,
+      youtube: 70,
+      coverage_percent: 84.1,
+      posts: [
+        { video_id: 'VID-OMR-001', hook: 'Rahasia brownies lumer nyoklat tanpa mixer!', tt: 'published', fb: 'published', ig: 'published', yt: 'published', date: '2026-09-08' },
+        { video_id: 'VID-OMR-002', hook: 'Bedanya cokelat biasa vs bubuk cocoa premium', tt: 'published', fb: 'published', ig: 'published', yt: 'scheduled', date: '2026-09-06' },
+        { video_id: 'VID-OMR-003', hook: 'Bikin dessert box 3 layer modal 50 ribu', tt: 'published', fb: 'draft', ig: 'published', yt: 'draft', date: '2026-09-04' },
+        { video_id: 'VID-OMR-004', hook: 'Tips cookies renyah anti kempes dengan kakao murni', tt: 'draft', fb: 'draft', ig: 'draft', yt: 'draft', date: '2026-09-02' }
+      ]
+    },
+    {
+      id: 'p2',
+      name: 'Beorganik Peanut Butter',
+      brand: 'nutribake',
+      total_assets: 156,
+      completed: 150,
+      in_production: 6,
+      published_any: 120,
+      never_published: 36,
+      tiktok: 110,
+      facebook: 95,
+      instagram: 105,
+      youtube: 80,
+      coverage_percent: 76.9,
+      posts: [
+        { video_id: 'VID-BEO-001', hook: 'Selai kacang tanpa gula tambahan untuk diet kenyang', tt: 'published', fb: 'published', ig: 'published', yt: 'published', date: '2026-09-09' },
+        { video_id: 'VID-BEO-002', hook: 'Sarapan roti gandum + peanut butter penambah energi', tt: 'published', fb: 'published', ig: 'draft', yt: 'draft', date: '2026-09-07' }
+      ]
+    },
+    {
+      id: 'p3',
+      name: 'Rolled Oat Premium Sahabat',
+      brand: 'nutribake',
+      total_assets: 54,
+      completed: 52,
+      in_production: 2,
+      published_any: 45,
+      never_published: 9,
+      tiktok: 42,
+      facebook: 38,
+      instagram: 40,
+      youtube: 28,
+      coverage_percent: 83.3,
+      posts: [
+        { video_id: 'VID-OAT-001', hook: 'Overnight oat anti eneg dengan chia seed', tt: 'published', fb: 'published', ig: 'published', yt: 'published', date: '2026-09-05' }
+      ]
+    },
+    {
+      id: 'p4',
+      name: 'Konten Edukasi Baking (Umum)',
+      brand: 'nutribake',
+      total_assets: 61,
+      completed: 60,
+      in_production: 1,
+      published_any: 44,
+      never_published: 17,
+      tiktok: 40,
+      facebook: 38,
+      instagram: 41,
+      youtube: 22,
+      coverage_percent: 72.1,
+      posts: [
+        { video_id: 'VID-GEN-001', hook: '3 kesalahan fatal saat menimbang bahan kue', tt: 'published', fb: 'published', ig: 'published', yt: 'draft', date: '2026-09-01' }
+      ]
+    },
+    {
+      id: 'p5',
+      name: 'Kulkas Food Container Airtight',
+      brand: 'mealprepid',
+      total_assets: 96,
+      completed: 96,
+      in_production: 0,
+      published_any: 80,
+      never_published: 16,
+      tiktok: 78,
+      facebook: 75,
+      instagram: 80,
+      youtube: 60,
+      coverage_percent: 83.3,
+      posts: [
+        { video_id: 'VID-MP-001', hook: 'Meal prep 7 hari sayuran tetap segar tanpa layu', tt: 'published', fb: 'published', ig: 'published', yt: 'published', date: '2026-09-08' },
+        { video_id: 'VID-MP-002', hook: 'Susun kulkas estetik ala minimalis Jepang', tt: 'published', fb: 'published', ig: 'published', yt: 'published', date: '2026-09-07' }
+      ]
+    },
+    {
+      id: 'p6',
+      name: 'Bento Box Stainless 3 Grid',
+      brand: 'mealprepid',
+      total_assets: 48,
+      completed: 45,
+      in_production: 3,
+      published_any: 36,
+      never_published: 12,
+      tiktok: 35,
+      facebook: 30,
+      instagram: 34,
+      youtube: 20,
+      coverage_percent: 75.0,
+      posts: [
+        { video_id: 'VID-MP-003', hook: 'Bekal kantor anti tumpah kuah tahan panas', tt: 'published', fb: 'published', ig: 'published', yt: 'draft', date: '2026-09-03' }
+      ]
+    },
+    {
+      id: 'p7',
+      name: 'Nutrifarm Jahe Merah Bubuk',
+      brand: 'dapurbotani',
+      total_assets: 51,
+      completed: 51,
+      in_production: 0,
+      published_any: 42,
+      never_published: 9,
+      tiktok: 40,
+      facebook: 38,
+      instagram: 41,
+      youtube: 25,
+      coverage_percent: 82.4,
+      posts: [
+        { video_id: 'VID-BOT-001', hook: 'Minuman jahe hangat penangkal flu & pegal linu', tt: 'published', fb: 'published', ig: 'published', yt: 'published', date: '2026-09-07' }
+      ]
+    },
+    {
+      id: 'p8',
+      name: 'Nutrifarm Biji Chia Organik',
+      brand: 'dapurbotani',
+      total_assets: 40,
+      completed: 38,
+      in_production: 2,
+      published_any: 31,
+      never_published: 9,
+      tiktok: 30,
+      facebook: 28,
+      instagram: 30,
+      youtube: 18,
+      coverage_percent: 77.5,
+      posts: [
+        { video_id: 'VID-BOT-002', hook: 'Manfaat chia seed untuk pencernaan sehat & glowing', tt: 'published', fb: 'published', ig: 'published', yt: 'draft', date: '2026-09-04' }
+      ]
+    },
+    {
+      id: 'p9',
+      name: 'Choco Chip Soft Cookies',
+      brand: 'cookiescorner',
+      total_assets: 181,
+      completed: 175,
+      in_production: 6,
+      published_any: 140,
+      never_published: 41,
+      tiktok: 135,
+      facebook: 120,
+      instagram: 130,
+      youtube: 90,
+      coverage_percent: 77.3,
+      posts: [
+        { video_id: 'VID-CC-001', hook: 'Resep soft cookies lumer tengahnya nagih pol!', tt: 'published', fb: 'published', ig: 'published', yt: 'published', date: '2026-09-08' }
+      ]
+    },
+    {
+      id: 'p10',
+      name: 'Madu Hutan Murni Siaga',
+      brand: 'siasatsehat',
+      total_assets: 121,
+      completed: 120,
+      in_production: 1,
+      published_any: 98,
+      never_published: 23,
+      tiktok: 95,
+      facebook: 90,
+      instagram: 92,
+      youtube: 70,
+      coverage_percent: 81.0,
+      posts: [
+        { video_id: 'VID-SS-001', hook: 'Cara tes keaslian madu hanya pakai air dingin', tt: 'published', fb: 'published', ig: 'published', yt: 'published', date: '2026-09-09' }
+      ]
+    }
+  ];
+
+  let currentSort = { col: 'total_assets', asc: false };
+
+  function getFilteredProducts() {
+    const brand = document.getElementById('brandSelect').value;
+    const query = (document.getElementById('productSearchInput')?.value || '').toLowerCase().trim();
+
+    return DATA_PRODUCTS.filter(item => {
+      const matchBrand = (brand === 'all') || (item.brand.toLowerCase() === brand.toLowerCase());
+      const matchQuery = !query || item.name.toLowerCase().includes(query) || item.brand.toLowerCase().includes(query);
+      return matchBrand && matchQuery;
+    });
+  }
+
+  function renderDashboard() {
+    const products = getFilteredProducts();
+    const selectedBrand = document.getElementById('brandSelect').value;
+    const range = document.getElementById('rangeSelect').options[document.getElementById('rangeSelect').selectedIndex].text;
+
+    // 1. Update Indicator Badge
+    const brandLabel = selectedBrand === 'all' ? 'Semua Brand (Global)' : `@${selectedBrand}`;
+    document.getElementById('activeBrandName').innerText = brandLabel;
+    document.getElementById('activeFilterBadge').innerHTML = `Menampilkan data posting produk untuk brand: <strong style="color: var(--action-primary);">${brandLabel}</strong> (Rentang: ${range})`;
+
+    // 2. Compute Aggregates
+    const totals = products.reduce((acc, p) => {
+      acc.total += p.total_assets;
+      acc.completed += p.completed;
+      acc.in_prod += p.in_production;
+      acc.published += p.published_any;
+      acc.unpublished += p.never_published;
+      acc.tt += p.tiktok;
+      acc.fb += p.facebook;
+      acc.ig += p.instagram;
+      acc.yt += p.youtube;
+      return acc;
+    }, { total: 0, completed: 0, in_prod: 0, published: 0, unpublished: 0, tt: 0, fb: 0, ig: 0, yt: 0 });
+
+    const fullyDist = Math.round(totals.published * 0.65); // approx
+
+    // 3. Update KPI Cards
+    document.getElementById('kpiTotalAssets').innerText = totals.total;
+    document.getElementById('kpiCompletedAssets').innerText = totals.completed;
+    document.getElementById('kpiInProductionAssets').innerText = totals.in_prod;
+    document.getElementById('kpiPublishedAssets').innerText = totals.published;
+    document.getElementById('kpiUnpublishedAssets').innerText = totals.unpublished;
+    document.getElementById('kpiFullyDistributed').innerText = fullyDist;
+
+    // 4. Update Platform Bars
+    const pctTt = totals.total ? Math.round((totals.tt / totals.total) * 100) : 0;
+    const pctFb = totals.total ? Math.round((totals.fb / totals.total) * 100) : 0;
+    const pctIg = totals.total ? Math.round((totals.ig / totals.total) * 100) : 0;
+    const pctYt = totals.total ? Math.round((totals.yt / totals.total) * 100) : 0;
+
+    document.getElementById('txtTtPost').innerText = `${totals.tt} posts (${pctTt}%)`;
+    document.getElementById('barTtPost').style.width = `${pctTt}%`;
+
+    document.getElementById('txtFbPost').innerText = `${totals.fb} posts (${pctFb}%)`;
+    document.getElementById('barFbPost').style.width = `${pctFb}%`;
+
+    document.getElementById('txtIgPost').innerText = `${totals.ig} posts (${pctIg}%)`;
+    document.getElementById('barIgPost').style.width = `${pctIg}%`;
+
+    document.getElementById('txtYtPost').innerText = `${totals.yt} posts (${pctYt}%)`;
+    document.getElementById('barYtPost').style.width = `${pctYt}%`;
+
+    // 5. Update Leaderboard (Top 3-5 Products)
+    const sortedByTotal = [...products].sort((a, b) => b.total_assets - a.total_assets).slice(0, 4);
+    const leaderContainer = document.getElementById('productLeaderboard');
+    if (sortedByTotal.length === 0) {
+      leaderContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Tidak ada produk yang cocok.</div>';
+    } else {
+      leaderContainer.innerHTML = sortedByTotal.map((item, idx) => {
+        const rankClass = idx === 0 ? 'rank-1' : idx === 1 ? 'rank-2' : idx === 2 ? 'rank-3' : '';
+        return `
+          <div class="leader-item" onclick="openProductDetail('${item.id}')">
+            <div class="leader-left">
+              <div class="rank-badge ${rankClass}">#${idx + 1}</div>
+              <div>
+                <div class="leader-name">${item.name}</div>
+                <div class="leader-brand">@${item.brand}</div>
+              </div>
+            </div>
+            <div class="leader-stats">
+              <span style="color: var(--status-success);">${item.published_any} Tayang</span>
+              <span style="color: var(--text-muted);">/</span>
+              <span>${item.total_assets} Video</span>
+              <span class="coverage-pill ${item.coverage_percent > 80 ? 'cov-high' : item.coverage_percent > 60 ? 'cov-med' : 'cov-low'}">${item.coverage_percent}%</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 6. Update Table Subtitle
+    document.getElementById('tableSubtitle').innerText = `Ditemukan ${products.length} produk untuk brand ${brandLabel}`;
+
+    // 7. Render Table Rows
+    renderTableRows(products);
+  }
+
+  function renderTableRows(products) {
+    const tbody = document.getElementById('productTableBody');
+    if (products.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="12" style="text-align: center; padding: 40px; color: var(--text-muted); font-style: italic;">Tidak ada data produk yang memenuhi kriteria filter.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = products.map(p => {
+      const covClass = p.coverage_percent > 80 ? 'cov-high' : p.coverage_percent > 60 ? 'cov-med' : 'cov-low';
+      return `
+        <tr>
+          <td>
+            <strong style="color: var(--text-primary); font-size: 13px;">${p.name}</strong>
+          </td>
+          <td>
+            <span class="brand-tag">@${p.brand}</span>
+          </td>
+          <td style="text-align: right; font-family: var(--font-mono); font-weight: 700;">${p.total_assets}</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--text-muted);">${p.completed}</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: var(--status-success); font-weight: 700;">${p.published_any}</td>
+          <td style="text-align: right; font-family: var(--font-mono); color: ${p.never_published > 0 ? 'var(--status-danger)' : 'var(--text-muted)'}; font-weight: 700;">${p.never_published}</td>
+          <td style="text-align: right; font-family: var(--font-mono);">${p.tiktok}</td>
+          <td style="text-align: right; font-family: var(--font-mono);">${p.facebook}</td>
+          <td style="text-align: right; font-family: var(--font-mono);">${p.instagram}</td>
+          <td style="text-align: right; font-family: var(--font-mono);">${p.youtube}</td>
+          <td style="text-align: center;">
+            <span class="coverage-pill ${covClass}">${p.coverage_percent}%</span>
+          </td>
+          <td style="text-align: center;">
+            <button class="btn-detail" onclick="openProductDetail('${p.id}')">
+              🔍 Detail Post
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function onBrandChange() {
+    renderDashboard();
+    showToast(`Memuat data brand: @${document.getElementById('brandSelect').value}`);
+  }
+
+  function applyFilters() {
+    renderDashboard();
+    showToast('Filter berhasil diterapkan!');
+  }
+
+  function filterProductTable() {
+    renderDashboard();
+  }
+
+  function sortTable(colKey) {
+    const keyMap = {
+      'name': 'name',
+      'brand': 'brand',
+      'total': 'total_assets',
+      'published': 'published_any',
+      'unpublished': 'never_published',
+      'coverage': 'coverage_percent'
+    };
+
+    const targetKey = keyMap[colKey] || 'total_assets';
+    if (currentSort.col === targetKey) {
+      currentSort.asc = !currentSort.asc;
+    } else {
+      currentSort.col = targetKey;
+      currentSort.asc = false;
+    }
+
+    DATA_PRODUCTS.sort((a, b) => {
+      let valA = a[targetKey];
+      let valB = b[targetKey];
+      if (typeof valA === 'string') {
+        return currentSort.asc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+      }
+      return currentSort.asc ? valA - valB : valB - valA;
+    });
+
+    renderDashboard();
+    showToast(`Dikelompokkan berdasarkan ${colKey} (${currentSort.asc ? 'Ascending' : 'Descending'})`);
+  }
+
+  function openProductDetail(productId) {
+    const product = DATA_PRODUCTS.find(p => p.id === productId);
+    if (!product) return;
+
+    document.getElementById('modalProductTitle').innerText = `Daftar Post: ${product.name}`;
+    document.getElementById('modalProductMeta').innerText = `Brand: @${product.brand} • Total ${product.total_assets} Video • ${product.published_any} Tayang (${product.coverage_percent}%)`;
+
+    const grid = document.getElementById('modalPostsGrid');
+    if (!product.posts || product.posts.length === 0) {
+      grid.innerHTML = '<div style="color: var(--text-muted); font-size: 13px;">Belum ada sampel post spesifik untuk produk ini.</div>';
+    } else {
+      grid.innerHTML = product.posts.map(p => `
+        <div class="post-card">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--font-mono); font-size: 11px; color: var(--action-primary); font-weight: 700;">${p.video_id}</span>
+            <span style="font-size: 11px; color: var(--text-muted);">${p.date}</span>
+          </div>
+          <div class="post-card-title">${p.hook}</div>
+          <div class="post-card-badges">
+            <span class="status-badge ${p.tt === 'published' ? 'st-published' : p.tt === 'scheduled' ? 'st-scheduled' : 'st-draft'}">TT: ${p.tt}</span>
+            <span class="status-badge ${p.fb === 'published' ? 'st-published' : p.fb === 'scheduled' ? 'st-scheduled' : 'st-draft'}">FB: ${p.fb}</span>
+            <span class="status-badge ${p.ig === 'published' ? 'st-published' : p.ig === 'scheduled' ? 'st-scheduled' : 'st-draft'}">IG: ${p.ig}</span>
+            <span class="status-badge ${p.yt === 'published' ? 'st-published' : p.yt === 'scheduled' ? 'st-scheduled' : 'st-draft'}">YT: ${p.yt}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('productDetailModal').classList.add('open');
+  }
+
+  function closeModal(e) {
+    if (!e || e.target === document.getElementById('productDetailModal') || e.type === 'click') {
+      document.getElementById('productDetailModal').classList.remove('open');
+    }
+  }
+
+  function exportDataCSV() {
+    const products = getFilteredProducts();
+    const headers = ['Nama Produk', 'Brand', 'Total Aset', 'Completed', 'In Production', 'Published (Min 1)', 'Belum Tayang', 'TikTok', 'Facebook', 'Instagram', 'YouTube', 'Coverage %'];
+    const rows = products.map(p => [
+      `"${p.name.replace(/"/g, '""')}"`,
+      `"@${p.brand}"`,
+      p.total_assets,
+      p.completed,
+      p.in_production,
+      p.published_any,
+      p.never_published,
+      p.tiktok,
+      p.facebook,
+      p.instagram,
+      p.youtube,
+      `${p.coverage_percent}%`
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const brand = document.getElementById('brandSelect').value;
+    link.setAttribute('href', url);
+    link.setAttribute('download', `statistik_posting_produk_${brand}_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast('Export CSV berhasil diunduh!');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toastMessage');
+    t.innerText = msg;
+    t.classList.add('show');
+    setTimeout(() => {
+      t.classList.remove('show');
+    }, 2400);
+  }
+
+  // Initial Boot
+  document.addEventListener('DOMContentLoaded', () => {
+    renderDashboard();
+  });
+</script>
+
+</body>
+</html>
