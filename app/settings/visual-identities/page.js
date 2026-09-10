@@ -453,12 +453,22 @@ export default function VisualIdentityStudioPage() {
                 </label>
                 <label className="form-label">
                   Demographic Key
-                  <input
-                    type="text"
+                  <select
                     value={config.subject.demographic_key}
                     onChange={(e) => updateConfigField('subject', 'demographic_key', e.target.value)}
-                    className="form-input"
-                  />
+                    className="form-select"
+                  >
+                    <option value="syari_classic">syari_classic (Muslimah Syar'i)</option>
+                    <option value="southeast_asian_male">southeast_asian_male (Pria Asia Tenggara / Indo)</option>
+                    <option value="caucasian_male">caucasian_male (Pria Kaukasia)</option>
+                    <option value="stylized_3d_muslimah">stylized_3d_muslimah (3D Muslimah)</option>
+                    <option value="stylized_3d_male">stylized_3d_male (3D Pria)</option>
+                    <option value="stylized_3d_duo">stylized_3d_duo (3D Duo)</option>
+                    <option value="custom">custom (Custom / Bebas)</option>
+                    {config.subject.demographic_key && !['syari_classic', 'southeast_asian_male', 'caucasian_male', 'stylized_3d_muslimah', 'stylized_3d_male', 'stylized_3d_duo', 'custom'].includes(config.subject.demographic_key) && (
+                      <option value={config.subject.demographic_key}>{config.subject.demographic_key}</option>
+                    )}
+                  </select>
                 </label>
               </div>
               <label className="form-label" style={{ marginTop: 12 }}>

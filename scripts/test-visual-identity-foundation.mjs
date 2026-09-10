@@ -112,6 +112,9 @@ assert.ok(systemList.length > 0);
 const sagePreset = getSystemVisualIdentity('hands_only_muslimah_sage_kitchen');
 assert.ok(sagePreset);
 assert.equal(sagePreset.label, 'Muslimah Sage Kitchen');
+const indoMaleSystemPreset = getSystemVisualIdentity('hands_only_southeast_asian_male');
+assert.ok(indoMaleSystemPreset);
+assert.equal(indoMaleSystemPreset.label, 'Southeast Asian Male Casual');
 console.log('  ✅ System presets tests passed.');
 
 // 4. Repository & Database Integration Tests
@@ -275,6 +278,39 @@ async function runRegressionTests() {
   assert.equal(legacyMap.schema_version, 'visual_identity_snapshot_v1');
   assert.ok(legacyMap.resolved.subject_prompt.includes('man') || legacyMap.resolved.subject_prompt.includes('male'));
   assert.ok(legacyMap.resolved.wardrobe_prompt.toLowerCase().includes('terracotta'));
+
+  // Southeast Asian Male resolution check
+  const indoMaleResolved = resolveVisualOverrides({
+    visualOverrides: {
+      subject_demographic: 'southeast_asian_male',
+      wardrobe_style: 'male_caramel',
+      lighting_style: 'window_daylight'
+    },
+    itemIndex: 0
+  });
+  assert.ok(indoMaleResolved.resolved.subject_prompt.includes('Southeast Asian man'));
+  assert.ok(!indoMaleResolved.resolved.subject_prompt.includes('Muslimah'));
+
+  // Custom demographic with custom description check
+  const customResolved = resolveVisualOverrides({
+    visualOverrides: {
+      schema_version: 'visual_identity_snapshot_v1',
+      identity_ref: { id: 'custom_doctor', key: 'custom_doctor', version: 1, source: 'user' },
+      structured: {
+        subject: { kind: 'human', faceless_mode: 'hands_only', demographic_key: 'custom', custom_description: 'a dedicated surgeon wearing sterile surgical gloves' },
+        wardrobe: { mode: 'custom', preset_key: 'custom', custom_description: 'wearing surgical scrub sleeves' },
+        environment: { preset_key: 'custom', custom_description: 'in a modern sterile surgical operating theater' },
+        lighting: { preset_key: 'lab_cold' },
+        camera: { framing: 'hands_closeup', perspective: 'first_person' },
+        style: { preset_key: 'cinematic_realistic' },
+        guardrails: { face_visibility: 'prohibited' }
+      }
+    }
+  });
+  assert.ok(customResolved.resolved.subject_prompt.includes('dedicated surgeon'));
+  assert.ok(customResolved.resolved.subject_prompt.includes('strictly faceless framing'));
+  assert.ok(!customResolved.resolved.subject_prompt.includes('Muslimah'));
+  assert.ok(customResolved.resolved.environment_prompt.includes('surgical operating theater'));
 
   console.log('  ✅ Regression, immutability & fallback tests passed.');
 }

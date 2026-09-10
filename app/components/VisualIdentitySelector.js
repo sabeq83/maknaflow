@@ -42,6 +42,10 @@ const DEMOGRAPHIC_WARDROBES = {
     'amber_terracotta', 'mocca_caramel', 'warm_grey', 'sage_muted', 'lavender_lilac',
     'butter_yellow', 'teal_navy', 'olive_modern', 'mahogany_maroon', 'cloud_dancer'
   ],
+  southeast_asian_male: [
+    'male_terracotta', 'male_caramel', 'male_khaki_tan', 'male_navy_blue', 'male_forest_green',
+    'male_charcoal', 'male_burgundy', 'male_sage_muted', 'male_steel_blue', 'male_cloud_dancer'
+  ],
   caucasian_male: [
     'male_terracotta', 'male_caramel', 'male_khaki_tan', 'male_navy_blue', 'male_forest_green',
     'male_charcoal', 'male_burgundy', 'male_sage_muted', 'male_steel_blue', 'male_cloud_dancer'
@@ -292,6 +296,7 @@ export default function VisualIdentitySelector({ value, onChange, allowLegacyCus
               style={{ textTransform: 'capitalize' }}
             >
               <option value="syari_classic">Southeast Asian Muslimah (Syar'i)</option>
+              <option value="southeast_asian_male">Southeast Asian Male (Pria Indonesia / Asia Tenggara)</option>
               <option value="caucasian_male">Caucasian Male</option>
               <option value="stylized_3d_muslimah">3D Muslimah (Blank Head)</option>
               <option value="stylized_3d_male">3D Male (Blank Head)</option>

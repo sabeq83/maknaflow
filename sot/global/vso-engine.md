@@ -78,11 +78,12 @@ Sistem MAKNA menyediakan 7 opsi pramuat (*preloaded*) siap pakai untuk setiap ka
 ### **C. Preset Demografi Subjek (Subject Demographic)**
 
 1. `syari_classic`          : Wanita Muslimah anggun, pembawaan tenang, dengan fokus framing strictly faceless (potong siku ke bawah, fokus 100% pada gerakan tangan).
-2. `caucasian_male`          : Pria Kaukasia dengan fokus framing strictly faceless (potong siku ke bawah, fokus 100% pada gerakan tangan).
-3. `stylized_3d_muslimah`   : Karakter kartun 3D Muslimah berwajah polos tanpa mata/hidung/mulut, memakai abaya & khimar longgar, gaya render clay halus.
-4. `stylized_3d_male`       : Karakter kartun 3D Pria berwajah polos tanpa mata/hidung/mulut, dengan rambut pendek rapi, memakai pakaian kasual umum, gaya render clay halus.
-5. `stylized_3d_duo`        : Dua karakter kartun 3D (Muslimah & Pria) berwajah polos dalam satu scene untuk mendukung cerita terintegrasi.
-6. `custom`                 : *Input Teks Manual Kustom*
+2. `southeast_asian_male`   : Pria Asia Tenggara / Indonesia dengan kulit sawo matang / kuning langsat, tangan rapi, jam tangan, pembingkaian strictly faceless (potong siku ke bawah).
+3. `caucasian_male`          : Pria Kaukasia dengan fokus framing strictly faceless (potong siku ke bawah, fokus 100% pada gerakan tangan).
+4. `stylized_3d_muslimah`   : Karakter kartun 3D Muslimah berwajah polos tanpa mata/hidung/mulut, memakai abaya & khimar longgar, gaya render clay halus.
+5. `stylized_3d_male`       : Karakter kartun 3D Pria berwajah polos tanpa mata/hidung/mulut, dengan rambut pendek rapi, memakai pakaian kasual umum, gaya render clay halus.
+6. `stylized_3d_duo`        : Dua karakter kartun 3D (Muslimah & Pria) berwajah polos dalam satu scene untuk mendukung cerita terintegrasi.
+7. `custom`                 : *Input Teks Manual Kustom / Freeform AI Synthesis*
 
 ### **D. Preset Pencahayaan & Atmosfer (Lighting Style)**
 
@@ -156,6 +157,7 @@ const ENVIRONMENT_PRESETS = {
 
 const DEMOGRAPHIC_PRESETS = {
   syari_classic: "a graceful Southeast Asian Muslimah wearing a modest loose-fitting gamis dress with long flowing sleeves covering the arms completely down to the wrists (strictly no t-shirts, strictly no rolled-up sleeves, strictly no casual knitwear), featuring delicate female hands with smooth light skin, slender fingers, and natural neat fingernails, strictly faceless framing, camera focused entirely on the hands and arms, cropped from the elbow down to show only the forearms and hands, strictly omitting the face, head, neck, chest, and shoulders, showcasing precise hand actions and movements",
+  southeast_asian_male: "a Southeast Asian man wearing clean casual attire, featuring clean male hands with warm light-tan smooth skin, natural neat fingernails, and a stylish wristwatch, strictly faceless framing, camera focused on the forearms and hands, cropped from the elbow down to show only the forearms and hands interacting naturally with the scene, strictly omitting the face, head, neck, chest, and shoulders, showcasing precise hand actions",
   caucasian_male: "a Caucasian man wearing clean casual male attire, featuring clean male hands with smooth skin, natural neat fingernails, and a subtle wristwatch, strictly faceless framing, camera focused on the forearms, hands, and product workspace, cropped from the elbow down to show only the forearms and hands interacting naturally with the product, strictly omitting the face, head, neck, chest, and shoulders, showcasing precise hand actions",
   stylized_3d_muslimah: "a 3D stylized Muslim woman with a completely blank faceless smooth head (no eyes, nose, or mouth), dressed in an elegant loose-fitting modest abaya and a wide khimar covering her chest, smooth clay-like 3D render style, bare hands visible",
   stylized_3d_male: "a 3D stylized young male with a completely blank faceless smooth head (no eyes, nose, or mouth) and detailed short hair, dressed in clean casual attire, smooth clay-like 3D render style, bare hands visible",

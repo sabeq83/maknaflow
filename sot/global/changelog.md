@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.29.41 — Fix Visual Identity AI Builder and Central Resolver Freeform Synthesis (10/09/2026)
+- Menambahkan preset demografi southeast_asian_male pada prompts.js dan system presets
+- Memperbaiki Central Resolver agar mendukung custom subject, wardrobe, dan environment tanpa fallback otomatis ke Muslimah atau Nordic kitchen
+- Meredesain prompt AI Visual Identity Builder dengan panduan sintesis kustom dan opsi enum lengkap
+
 ## V2.29.40 — Update Support Email to sabeq83@gmail.com (10/09/2026)
 - Update Support Email in Privacy Policy to sabeq83@gmail.com
 - Update Support Email in Terms of Service to sabeq83@gmail.com

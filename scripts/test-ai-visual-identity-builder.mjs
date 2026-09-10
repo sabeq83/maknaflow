@@ -191,5 +191,149 @@ const refineResult = await refineAiVisualIdentityDraft({
 assert.equal(refineResult.label, 'Sage Morning Skincare Refined');
 assert.equal(refineResult.config.lighting.preset_key, 'golden_hour');
 
+// Test Indonesian Male generation & resolution without Muslimah/Kitchen leakage
+const indonesianMaleBrief = {
+  seed: 'pria indonesia hanya nampak tangan, mulai siku hingga tangan, warna kulit kuning langsat, memakai jam tangan premium.',
+  subject_kind: 'human',
+  faceless_mode: 'hands_only',
+  aspect_ratio: '9:16',
+  variation_level: 'balanced'
+};
+
+const indonesianMaleEnvelope = {
+  label: 'Indonesian Male Premium Watch',
+  description: 'Clean Indonesian male hands with luxury watch',
+  suggested_preset_key: 'indonesian_male_premium_watch',
+  creative_rationale: 'Southeast Asian male demographic with warm skin tones and watchmaker workspace',
+  config: {
+    schema_version: '1',
+    subject: {
+      kind: 'human',
+      faceless_mode: 'hands_only',
+      demographic_key: 'southeast_asian_male',
+      custom_description: 'featuring warm light-tan smooth skin, wearing a luxury silver chronograph wristwatch',
+      character_count: 1
+    },
+    wardrobe: {
+      mode: 'fixed',
+      preset_key: 'male_caramel',
+      custom_description: '',
+      primary_color: 'Caramel',
+      secondary_color: '',
+      material: 'cotton',
+      sleeve_policy: 'forearms_exposed',
+      accessories: ['luxury silver wristwatch']
+    },
+    environment: {
+      preset_key: 'general_workspace',
+      custom_description: 'minimalist dark wood desk with precision tools',
+      material_palette: ['dark wood', 'leather'],
+      props: ['watchmaker tools'],
+      background_density: 'minimal'
+    },
+    lighting: {
+      preset_key: 'window_daylight',
+      custom_description: '',
+      color_temperature: 'warm_neutral',
+      contrast: 'soft'
+    },
+    camera: {
+      framing: 'forearms_and_hands',
+      perspective: 'third_person',
+      lens_look: 'natural_50mm',
+      depth_of_field: 'shallow',
+      movement: 'subtle_handheld'
+    },
+    style: {
+      preset_key: 'cinematic_realistic',
+      custom_description: '',
+      aspect_ratio: '9:16'
+    },
+    guardrails: {
+      face_visibility: 'prohibited',
+      reflection_face: 'prohibited',
+      extra_people: 'prohibited',
+      identity_drift: 'prohibited',
+      wardrobe_drift: 'prohibited',
+      required_negative_prompts: []
+    }
+  }
+};
+
+const fakeFactoryIndoMale = makeFakeModel(JSON.stringify(indonesianMaleEnvelope));
+const indoMaleResult = await generateAiVisualIdentityDraft(indonesianMaleBrief, { modelFactory: fakeFactoryIndoMale });
+assert.equal(indoMaleResult.label, 'Indonesian Male Premium Watch');
+assert.ok(indoMaleResult.resolved_preview.subject_prompt.includes('Southeast Asian man'));
+assert.ok(!indoMaleResult.resolved_preview.subject_prompt.includes('Muslimah'));
+assert.ok(!indoMaleResult.resolved_preview.environment_prompt.includes('Nordic'));
+
+// Test 100% Custom Freeform Demographic & Environment Synthesis
+const customEnvelope = {
+  label: 'Urban Coffee Barista',
+  description: 'Specialty coffee barista hands pouring latte art',
+  suggested_preset_key: 'urban_coffee_barista',
+  creative_rationale: 'Rustic vintage coffee shop vibe',
+  config: {
+    schema_version: '1',
+    subject: {
+      kind: 'human',
+      faceless_mode: 'hands_only',
+      demographic_key: 'custom',
+      custom_description: 'a young artisan barista with tanned hands and neat rolled-up leather apron cuffs',
+      character_count: 1
+    },
+    wardrobe: {
+      mode: 'custom',
+      preset_key: 'custom',
+      custom_description: 'wearing a dark indigo denim shirt and rugged brown leather apron',
+      sleeve_policy: 'forearms_exposed',
+      accessories: ['barista ring']
+    },
+    environment: {
+      preset_key: 'custom',
+      custom_description: 'inside a cozy vintage brick espresso bar with warm rustic wooden countertops',
+      material_palette: ['brick', 'reclaimed wood'],
+      props: ['espresso machine', 'ceramic cups'],
+      background_density: 'balanced'
+    },
+    lighting: {
+      preset_key: 'golden_hour',
+      custom_description: 'warm Edison bulb glow mixed with afternoon golden light',
+      color_temperature: 'warm',
+      contrast: 'medium'
+    },
+    camera: {
+      framing: 'hands_closeup',
+      perspective: 'first_person',
+      lens_look: 'macro_closeup',
+      depth_of_field: 'shallow',
+      movement: 'still'
+    },
+    style: {
+      preset_key: 'cinematic_realistic',
+      custom_description: '',
+      aspect_ratio: '9:16'
+    },
+    guardrails: {
+      face_visibility: 'prohibited',
+      reflection_face: 'prohibited',
+      extra_people: 'prohibited',
+      identity_drift: 'prohibited',
+      wardrobe_drift: 'prohibited',
+      required_negative_prompts: []
+    }
+  }
+};
+
+const fakeFactoryCustom = makeFakeModel(JSON.stringify(customEnvelope));
+const customResult = await generateAiVisualIdentityDraft({ seed: 'Barista kopi di kafe vintage', subject_kind: 'human', faceless_mode: 'hands_only' }, { modelFactory: fakeFactoryCustom });
+assert.ok(customResult.resolved_preview.subject_prompt.includes('artisan barista with tanned hands'));
+assert.ok(customResult.resolved_preview.subject_prompt.includes('strictly faceless framing'));
+assert.ok(!customResult.resolved_preview.subject_prompt.includes('Muslimah'));
+assert.ok(customResult.resolved_preview.wardrobe_prompt.includes('dark indigo denim shirt'));
+assert.ok(customResult.resolved_preview.environment_prompt.includes('cozy vintage brick espresso bar'));
+
 console.log('  ✅ Generator & refinement mock tests passed.');
+console.log('  ✅ Southeast Asian Male and Freeform Custom tests passed without Muslimah/Kitchen leakage.');
 console.log('🎉 ALL AI Visual Identity Builder unit tests completed successfully!');
+process.exit(0);
