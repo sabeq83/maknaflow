@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.29.39 — Rebrand to ContentFlow & Public Pages (10/09/2026)
+- Rebrand MaknaFlow to ContentFlow
+- Add Public Homepage, Privacy Policy, and Terms of Service
+- Update Domain to contentflow-stg.ast402.my.id
+- Add Internal Enterprise Scope Notices
+
 ## V2.29.38 — Quick Repair Button for Repliz Drive Folder (10/09/2026)
 - Tambahkan tombol quick action Buat/Perbaiki Folder REPLIZ Publishing di Card Google Integration Settings
 

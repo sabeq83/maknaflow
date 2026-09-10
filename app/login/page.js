@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import ThemeToggle from '../components/ThemeToggle';
+import ContentFlowLogo from '../components/ContentFlowLogo';
 
 const EyeIcon = ({ style }) => (
   <svg style={style} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,7 +41,7 @@ export default function LoginPage() {
 
       const data = await res.json();
       if (data.success) {
-        window.location.href = '/';
+        window.location.href = '/dashboard';
       } else {
         setError(data.error || 'Login gagal. Periksa username & password.');
       }
@@ -59,66 +61,67 @@ export default function LoginPage() {
       background: 'radial-gradient(circle at top left, var(--surface-raised) 0%, var(--canvas) 100%)',
       fontFamily: 'Inter, system-ui, sans-serif',
       color: 'var(--text-primary)',
-      position: 'relative'
+      position: 'relative',
+      padding: '20px'
     }}>
       <div style={{ position: 'absolute', top: '20px', right: '20px', width: '148px' }}>
         <ThemeToggle />
       </div>
+
+      <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
+        <Link
+          href="/"
+          style={{
+            color: 'var(--text-secondary)',
+            textDecoration: 'none',
+            fontSize: '0.85rem',
+            fontWeight: 500,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '6px 12px',
+            borderRadius: '8px',
+            background: 'var(--surface-raised)',
+            border: '1px solid var(--border-subtle)'
+          }}
+        >
+          ← Beranda Publik
+        </Link>
+      </div>
+
       <div style={{
         width: '100%',
-        maxWidth: '360px',
-        padding: '32px',
+        maxWidth: '380px',
+        padding: '36px 32px',
         boxSizing: 'border-box',
         background: 'color-mix(in srgb, var(--surface) 88%, transparent)',
         backdropFilter: 'blur(16px)',
         border: '1px solid var(--border-subtle)',
-        borderRadius: '16px',
+        borderRadius: '20px',
         boxShadow: 'var(--shadow-modal)'
       }}>
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <div style={{
-            width: '64px',
-            height: '64px',
-            margin: '0 auto 16px auto',
-            borderRadius: '16px',
-            background: 'linear-gradient(135deg, rgba(0,242,254,0.15), var(--status-success-soft))',
-            border: '1px solid rgba(0,242,254,0.3)',
-            boxShadow: '0 0 24px rgba(0,242,254,0.25)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <svg viewBox="0 0 64 64" fill="none" style={{ width: '42px', height: '42px' }}>
-              <defs>
-                <linearGradient id="gridGradM_lg" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#00F2FE" />
-                  <stop offset="50%" stopColor="var(--status-info)" />
-                  <stop offset="100%" stopColor="var(--status-success)" />
-                </linearGradient>
-              </defs>
-              <circle cx="32" cy="32" r="22" fill="rgba(0,242,254,0.12)"/>
-              <path d="M16 48 L16 16 L32 34 L48 16 L48 48" stroke="url(#gridGradM_lg)" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M16 28 L24 28 L32 37 L40 28 L48 28" stroke="#00F2FE" strokeWidth="1.5" opacity="0.6" strokeDasharray="2 2"/>
-              <path d="M16 38 L48 38" stroke="var(--status-success)" strokeWidth="1.5" opacity="0.5" strokeDasharray="2 2"/>
-              <circle cx="16" cy="16" r="3.5" fill="#00F2FE"/>
-              <circle cx="48" cy="16" r="3.5" fill="#00F2FE"/>
-              <circle cx="32" cy="34" r="4" fill="var(--status-success)"/>
-              <circle cx="16" cy="48" r="3.5" fill="#00F2FE"/>
-              <circle cx="48" cy="48" r="3.5" fill="#00F2FE"/>
-            </svg>
+        {/* LOGO & TITLE */}
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+            <ContentFlowLogo variant="stacked" size="lg" showTagline={true} />
           </div>
+
           <div style={{
-            fontSize: '2rem',
-            fontWeight: 800,
-            background: 'linear-gradient(135deg, var(--link) 0%, var(--status-success) 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            letterSpacing: '-0.5px'
+            display: 'inline-block',
+            padding: '4px 10px',
+            borderRadius: '6px',
+            background: 'rgba(59, 130, 246, 0.12)',
+            border: '1px solid rgba(59, 130, 246, 0.3)',
+            color: '#93c5fd',
+            fontSize: '0.72rem',
+            fontWeight: 700,
+            marginTop: '8px'
           }}>
-            MAKNA FLOW
+            🔒 Internal Enterprise Portal
           </div>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '6px' }}>
-            Isolated SaaS Content Flow Platform
+
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '8px', lineHeight: 1.4 }}>
+            Akses khusus staf &amp; operator internal terotorisasi.
           </p>
         </div>
 
@@ -129,8 +132,8 @@ export default function LoginPage() {
             color: 'var(--status-danger)',
             padding: '10px 14px',
             borderRadius: '8px',
-            fontSize: '0.85rem',
-            marginBottom: '20px'
+            fontSize: '0.82rem',
+            marginBottom: '18px'
           }}>
             ⚠️ {error}
           </div>
@@ -155,7 +158,8 @@ export default function LoginPage() {
                 borderRadius: '8px',
                 color: 'var(--text-primary)',
                 fontSize: '0.9rem',
-                outline: 'none'
+                outline: 'none',
+                boxSizing: 'border-box'
               }}
             />
           </div>
@@ -179,7 +183,8 @@ export default function LoginPage() {
                   borderRadius: '8px',
                   color: 'var(--text-primary)',
                   fontSize: '0.9rem',
-                  outline: 'none'
+                  outline: 'none',
+                  boxSizing: 'border-box'
                 }}
               />
               <button
@@ -212,15 +217,29 @@ export default function LoginPage() {
               borderRadius: '8px',
               color: 'var(--on-action-primary)',
               fontSize: '0.95rem',
-              fontWeight: 600,
+              fontWeight: 700,
               cursor: loading ? 'not-allowed' : 'pointer',
               boxShadow: '0 4px 15px var(--accent-glow)',
               transition: 'all 0.2s ease'
             }}
           >
-            {loading ? 'Processing...' : 'Masuk ke Portal'}
+            {loading ? 'Memverifikasi...' : 'Masuk ke Portal Internal'}
           </button>
         </form>
+
+        {/* FOOTER LINKS */}
+        <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid var(--border-subtle)', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', marginBottom: '6px' }}>
+            <Link href="/terms" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>
+              Terms of Service
+            </Link>
+            <span>•</span>
+            <Link href="/privacy" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>
+              Privacy Policy
+            </Link>
+          </div>
+          <div>Target: <span style={{ color: 'var(--link)' }}>contentflow-stg.ast402.my.id</span></div>
+        </div>
       </div>
     </div>
   );

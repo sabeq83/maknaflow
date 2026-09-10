@@ -2,10 +2,23 @@ import './globals.css';
 import './theme.css';
 
 export const metadata = {
-  title: 'MAKNA FLOW — Isolated SaaS Content Flow Platform',
-  description: 'Industrial-grade AI content engine for strategic video production & multi-node orchestration',
+  metadataBase: new URL('https://contentflow-stg.ast402.my.id'),
+  title: {
+    default: 'ContentFlow — Create More. Do Less. | Internal AI Content Engine',
+    template: '%s | ContentFlow'
+  },
+  description: 'Internal enterprise AI content orchestration engine for strategic multi-channel video production, automated voice cloning, and distributed rendering.',
   icons: {
     icon: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
+  openGraph: {
+    title: 'ContentFlow — Create More. Do Less.',
+    description: 'Internal enterprise AI content orchestration engine for strategic video production.',
+    url: 'https://contentflow-stg.ast402.my.id',
+    siteName: 'ContentFlow',
+    locale: 'id_ID',
+    type: 'website',
   },
 };
 

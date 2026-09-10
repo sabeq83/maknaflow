@@ -2,7 +2,8 @@
 
 /* Theme values and cross-component light/dark rules live in theme.css. */
 
-body { height: 100%; overflow: hidden; }
+html { scroll-behavior: smooth; }
+body { min-height: 100%; overflow-x: hidden; }
 
 body {
   font-family: var(--font-sans);
