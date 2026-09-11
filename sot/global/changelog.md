@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.29.48 — Penambahan Multi-Platform Publish Badges pada Searchbox ID Konten (11/09/2026)
+- Menampilkan badge status publikasi per platform (IG, TikTok, FB, YouTube) atau Belum Terpublikasi pada dropdown searchbox Video ID
+- Memudahkan identifikasi video fresh vs cross-posting dengan Semantic CSS
+
 ## V2.29.47 — Migrasi Semantic CSS Kalender Konten dan Modal Detail Harian (11/09/2026)
 - Migrasi seluruh pewarnaan kalender konten dan modal detail ke Semantic CSS tokens
 - Memastikan teks, produk ID, dan jadwal kontras dan tajam di Dark Theme dan Light Theme

@@ -2267,38 +2267,85 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
                   )}
                 </div>
 
-                {/* Dropdown Hasil Pencarian Video */}
+                {/* Dropdown Hasil Pencarian Video dengan Multi-Platform Publish Badges (Opsi B) */}
                 {showVideoDropdown && videoSearchResults.length > 0 && (
                   <div style={{
                     position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 100,
                     background: 'var(--surface)', border: '1px solid var(--status-info)', borderRadius: 8,
-                    marginTop: 4, maxHeight: 220, overflowY: 'auto', boxShadow: '0 10px 25px var(--overlay-backdrop)'
+                    marginTop: 4, maxHeight: 260, overflowY: 'auto', boxShadow: 'var(--shadow-modal)'
                   }}>
-                    {videoSearchResults.map(item => (
-                      <div
-                        key={item.id || item.video_id}
-                        onClick={() => selectVideoItem(item)}
-                        style={{
-                          padding: '8px 12px', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer',
-                          display: 'flex', flexDirection: 'column', gap: 2, transition: 'background 0.15s'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface-hover)'}
-                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 700, fontSize: 12, color: 'var(--link)' }}>🎬 {item.video_id}</span>
-                          <span style={{ fontSize: 10, color: 'var(--text-muted)', background: 'var(--surface)', padding: '1px 6px', borderRadius: 4 }}>
-                            {item.account_name || 'Umum'}
-                          </span>
+                    {videoSearchResults.map(item => {
+                      const isIgPub = String(item.instagram_status || '').toLowerCase() === 'published';
+                      const isFbPub = String(item.facebook_status || '').toLowerCase() === 'published';
+                      const isTkPub = String(item.tiktok_status || '').toLowerCase() === 'published';
+                      const isYtPub = String(item.youtube_status || '').toLowerCase() === 'published';
+                      const hasAnyPublished = isIgPub || isFbPub || isTkPub || isYtPub;
+
+                      return (
+                        <div
+                          key={item.id || item.video_id}
+                          onClick={() => selectVideoItem(item)}
+                          style={{
+                            padding: '10px 12px', borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer',
+                            display: 'flex', flexDirection: 'column', gap: 4, transition: 'background 0.15s'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface-hover)'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                              <span style={{ fontWeight: 800, fontSize: 12, color: 'var(--link)' }}>🎬 {item.video_id}</span>
+                              <span style={{ fontSize: 10, color: 'var(--text-muted)', background: 'var(--surface-interactive)', padding: '1px 6px', borderRadius: 4 }}>
+                                @{item.account_name || 'umum'}
+                              </span>
+                            </div>
+
+                            {/* Multi-Platform Publish Badges (Opsi B) */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+                              {!hasAnyPublished ? (
+                                <span style={{
+                                  fontSize: 9.5, fontWeight: 750,
+                                  background: 'var(--status-warning-soft)', color: 'var(--status-warning)',
+                                  border: '1px solid var(--status-warning)', padding: '1px 6px', borderRadius: 4
+                                }}>
+                                  ⏳ Belum Terpublikasi
+                                </span>
+                              ) : (
+                                <>
+                                  {isIgPub && (
+                                    <span style={{ fontSize: 9.5, fontWeight: 800, background: 'rgba(236,72,153,0.15)', color: '#ec4899', border: '1px solid #ec4899', padding: '1px 5px', borderRadius: 4 }} title="Sudah terpublikasi di Instagram">
+                                      ✓ IG
+                                    </span>
+                                  )}
+                                  {isTkPub && (
+                                    <span style={{ fontSize: 9.5, fontWeight: 800, background: 'rgba(6,182,212,0.15)', color: '#06b6d4', border: '1px solid #06b6d4', padding: '1px 5px', borderRadius: 4 }} title="Sudah terpublikasi di TikTok">
+                                      ✓ TK
+                                    </span>
+                                  )}
+                                  {isFbPub && (
+                                    <span style={{ fontSize: 9.5, fontWeight: 800, background: 'rgba(59,130,246,0.15)', color: '#3b82f6', border: '1px solid #3b82f6', padding: '1px 5px', borderRadius: 4 }} title="Sudah terpublikasi di Facebook">
+                                      ✓ FB
+                                    </span>
+                                  )}
+                                  {isYtPub && (
+                                    <span style={{ fontSize: 9.5, fontWeight: 800, background: 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid #ef4444', padding: '1px 5px', borderRadius: 4 }} title="Sudah terpublikasi di YouTube">
+                                      ✓ YT
+                                    </span>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          </div>
+
+                          <div style={{ fontSize: 11.5, color: 'var(--text-primary)', fontWeight: 650 }}>
+                            {item.campaign_title || item.hook || item.nama_produk || 'Konten Video'}
+                          </div>
+                          {item.nama_produk && (
+                            <div style={{ fontSize: 10.5, color: 'var(--text-secondary)' }}>🏷️ Produk: {item.nama_produk}</div>
+                          )}
                         </div>
-                        <div style={{ fontSize: 11, color: 'var(--text-primary)', fontWeight: 600 }}>
-                          {item.campaign_title || item.hook || item.nama_produk || 'Konten Video'}
-                        </div>
-                        {item.nama_produk && (
-                          <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>Produk: {item.nama_produk}</div>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
