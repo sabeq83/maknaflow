@@ -2,9 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import ProductEditModal from './ProductEditModal';
 import styles from './AffiliateStudio.module.css';
 
 export function BrandProductPortfolio({
+  brandId,
+  brandName,
   data,
   filters,
   loading,
@@ -13,7 +16,8 @@ export function BrandProductPortfolio({
   onLoadMore,
   onRefresh
 }) {
-  const [searchTerm, setSearchTerm] = useState(filters.q || '');
+  const [searchTerm, setSearchTerm] = useState(filters?.q || '');
+  const [editingProduct, setEditingProduct] = useState(null);
 
   // Keep local search term in sync with filter prop
   useEffect(() => {
@@ -244,78 +248,92 @@ export function BrandProductPortfolio({
                       )}
                     </div>
 
-                    {/* Affiliate Link Resolution */}
-                    <div className={styles.affiliateResolutionSection}>
-                      <span className={styles.sectionLabel}>Affiliate Route:</span>
-                      {item.affiliate.link ? (
-                        <div className={styles.linkInfoBox}>
-                          <a
-                            href={item.affiliate.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={styles.resolvedLink}
-                            title={item.affiliate.link}
-                          >
-                            {item.affiliate.link} ↗
-                          </a>
-                          <div className={styles.linkMetaRow}>
-                            <span className={`${styles.linkSourceBadge} ${styles[`source_${item.affiliate.source}`]}`}>
-                              {item.affiliate.source === 'brand_product' ? 'BRAND OVERRIDE' : 'LEGACY FALLBACK'}
-                            </span>
-                            {item.affiliate.trackingCode && (
-                              <span className={styles.trackingCodeSpan}>
-                                Track: <code>{item.affiliate.trackingCode}</code>
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className={styles.missingLinkBox}>
-                          <span>No Affiliate Link Found</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Readiness Checker */}
-                    <div className={styles.readinessSection}>
-                      <div className={styles.readinessOverallRow}>
-                        <span className={styles.sectionLabel}>Readiness Status:</span>
-                        <span className={`${styles.overallReadinessBadge} ${styles[`readinessOverall_${readinessOverall}`]}`}>
-                          {readinessOverall.toUpperCase().replace('_', ' ')}
-                        </span>
-                      </div>
-                      <div className={styles.readinessGrid}>
-                        <div className={styles.readinessSubcell}>
-                          <span>Truth:</span>
-                          <span className={styles[`readinessVal_${item.readiness.productTruth}`]}>
-                            {item.readiness.productTruth.toUpperCase()}
-                          </span>
-                        </div>
-                        <div className={styles.readinessSubcell}>
-                          <span>Image:</span>
-                          <span className={styles[`readinessVal_${item.readiness.image}`]}>
-                            {item.readiness.image.toUpperCase()}
-                          </span>
-                        </div>
-                        <div className={styles.readinessSubcell}>
-                          <span>Link:</span>
-                          <span className={styles[`readinessVal_${item.readiness.affiliateLink}`]}>
-                            {item.readiness.affiliateLink.toUpperCase().replace('_', ' ')}
-                          </span>
-                        </div>
-                        <div className={styles.readinessSubcell}>
-                          <span>Assoc:</span>
-                          <span className={styles[`readinessVal_${item.readiness.association}`]}>
-                            {item.readiness.association.toUpperCase().replace('_', ' ')}
-                          </span>
-                        </div>
-                      </div>
+                    {/* Status Asosiasi */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '10px 12px',
+                      background: 'var(--surface-bg, rgba(15, 23, 42, 0.6))',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                      border: '1px solid var(--border-color, #1e293b)',
+                      margin: '12px 0 10px 0'
+                    }}>
+                      <span style={{ color: 'var(--text-muted, #94a3b8)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
+                        Status Asosiasi
+                      </span>
+                      <span style={{
+                        fontWeight: 700,
+                        fontSize: '11px',
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        background: (associationState === 'active' || item.assoc_status === 'ACTIVE_ASSOC') ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                        color: (associationState === 'active' || item.assoc_status === 'ACTIVE_ASSOC') ? '#10b981' : '#f59e0b',
+                        border: (associationState === 'active' || item.assoc_status === 'ACTIVE_ASSOC') ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(245, 158, 11, 0.3)'
+                      }}>
+                        {associationState ? associationState.toUpperCase() : 'CANDIDATE'}
+                      </span>
                     </div>
 
                     {/* Footer Actions */}
-                    <div className={styles.cardActions}>
-                      <Link href="/products" className={styles.cardActionDbLink}>
-                        Open Product Database ↗
+                    <div style={{ display: 'flex', gap: '8px', marginTop: 'auto' }}>
+                      <button
+                        type="button"
+                        onClick={() => setEditingProduct({
+                          id: item.productId,
+                          product_name: item.displayName || item.name,
+                          sku: item.sku || item.productId,
+                          category: item.category,
+                          product_description: item.description,
+                          affiliate_link: item.affiliate?.link || '',
+                          price: item.price,
+                          commission_rate: item.commissionRate,
+                          target_audience: item.targetAudience,
+                          unique_selling_point: item.uniqueSellingPoint,
+                          pain_point_solved: item.painPointSolved,
+                          key_visuals_extracted: item.keyVisuals,
+                          tags: item.tags,
+                          assoc_status: associationState ? (associationState === 'active' ? 'ACTIVE_ASSOC' : associationState.toUpperCase()) : 'CANDIDATE'
+                        })}
+                        style={{
+                          flex: 1,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px',
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid var(--border-color, #1e293b)',
+                          background: 'var(--surface-subtle, #0f172a)',
+                          color: 'var(--text-main, #f8fafc)',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ✏️ Edit Produk
+                      </button>
+                      <Link
+                        href="/products"
+                        style={{
+                          flex: 1,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '4px',
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          border: 'none',
+                          background: 'var(--primary, #3b82f6)',
+                          color: '#ffffff',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          textDecoration: 'none',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Detail DB ↗
                       </Link>
                     </div>
                   </div>
@@ -337,6 +355,20 @@ export function BrandProductPortfolio({
             </div>
           )}
         </>
+      )}
+
+      {/* Product Edit Modal */}
+      {editingProduct && (
+        <ProductEditModal
+          product={editingProduct}
+          brandId={brandId}
+          brandName={brandName}
+          isOpen={Boolean(editingProduct)}
+          onClose={() => setEditingProduct(null)}
+          onSuccess={() => {
+            onRefresh?.();
+          }}
+        />
       )}
     </div>
   );

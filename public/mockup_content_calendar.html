@@ -3,123 +3,120 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MAKNA Flow - Kalender Konten Proporsional & Semantic CSS (Light/Dark Theme)</title>
+  <title>MAKNA Flow — Affiliate Studio Interactive Mockup (Content Calendar & Product Tab)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* Dark Theme (Default) */
+    /* =========================================================
+       1. SEMANTIC CSS DESIGN TOKENS (UNIVERSAL LIGHT & DARK)
+       ========================================================= */
     :root, [data-theme="dark"] {
       color-scheme: dark;
-      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
       --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-      
-      --canvas: #080c14;
-      --sidebar: #0c121e;
-      --surface: #101827;
-      --surface-raised: #162235;
-      --surface-interactive: #1c2a40;
-      --surface-hover: #22334b;
-      --input-bg: #0c1422;
-      --overlay-backdrop: rgba(2, 6, 14, 0.78);
-      
-      --text-primary: #f4f7fb;
-      --text-secondary: #b6c2d2;
-      --text-muted: #8290a5;
-      --text-disabled: #66758a;
-      
-      --border-subtle: #202d40;
-      --border-strong: #33445e;
-      
-      --action-primary: #a855f7;
-      --action-primary-hover: #c084fc;
-      --on-action-primary: #ffffff;
-      --link: #67e8f9;
-      --link-hover: #a5f3fc;
-      
-      --status-info: #60a5fa;
-      --status-info-soft: rgba(96, 165, 250, 0.14);
+
+      --canvas: #090d16;
+      --sidebar: #0d1320;
+      --surface: #121a2b;
+      --surface-raised: #18233a;
+      --surface-interactive: #1e2c48;
+      --surface-hover: #26385a;
+      --input-bg: #0d1524;
+      --overlay-backdrop: rgba(4, 8, 16, 0.82);
+
+      --text-primary: #f3f6fc;
+      --text-secondary: #b3c0d4;
+      --text-muted: #7989a3;
+      --text-disabled: #55647c;
+
+      --border-subtle: #1f2d45;
+      --border-strong: #2e4162;
+
+      --accent: #8b5cf6;
+      --accent-hover: #a78bfa;
+      --accent-soft: rgba(139, 92, 246, 0.16);
+      --on-accent: #ffffff;
+
+      --link: #38bdf8;
+      --link-hover: #7dd3fc;
+
+      --status-info: #38bdf8;
+      --status-info-soft: rgba(56, 189, 248, 0.14);
       --status-success: #4ade80;
       --status-success-soft: rgba(74, 222, 128, 0.14);
       --status-warning: #fbbf24;
       --status-warning-soft: rgba(251, 191, 36, 0.14);
-      --status-danger: #fb7185;
-      --status-danger-soft: rgba(251, 113, 133, 0.14);
-      --status-neutral: #a78bfa;
-      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --status-danger: #f87171;
+      --status-danger-soft: rgba(248, 113, 113, 0.14);
+      --status-neutral: #c084fc;
+      --status-neutral-soft: rgba(192, 132, 252, 0.14);
 
-      /* Semantic Platform Pill Backgrounds */
       --pill-ig-bg: rgba(236, 72, 153, 0.14);
       --pill-ig-border: #ec4899;
       --pill-fb-bg: rgba(59, 130, 246, 0.14);
       --pill-fb-border: #3b82f6;
       --pill-tk-bg: rgba(6, 182, 212, 0.14);
       --pill-tk-border: #06b6d4;
-      --pill-th-bg: rgba(255, 255, 255, 0.08);
-      --pill-th-border: #94a3b8;
-      --pill-yt-bg: rgba(239, 68, 68, 0.14);
-      --pill-yt-border: #ef4444;
 
-      --calendar-other-month: rgba(15, 23, 42, 0.5);
+      --calendar-other-month: rgba(13, 19, 32, 0.6);
+      --shadow-elevation: 0 10px 30px -8px rgba(0,0,0,0.5);
     }
 
-    /* Light Theme */
     [data-theme="light"] {
       color-scheme: light;
-      --canvas: #f1f5f9;
+      --canvas: #f8fafc;
       --sidebar: #ffffff;
       --surface: #ffffff;
-      --surface-raised: #f8fafc;
+      --surface-raised: #f1f5f9;
       --surface-interactive: #e2e8f0;
       --surface-hover: #cbd5e1;
       --input-bg: #ffffff;
-      --overlay-backdrop: rgba(15, 23, 42, 0.54);
-      
+      --overlay-backdrop: rgba(15, 23, 42, 0.56);
+
       --text-primary: #0f172a;
       --text-secondary: #334155;
       --text-muted: #64748b;
       --text-disabled: #94a3b8;
-      
+
       --border-subtle: #e2e8f0;
       --border-strong: #cbd5e1;
-      
-      --action-primary: #9333ea;
-      --action-primary-hover: #7e22ce;
-      --on-action-primary: #ffffff;
+
+      --accent: #7c3aed;
+      --accent-hover: #6d28d9;
+      --accent-soft: rgba(124, 58, 237, 0.1);
+      --on-accent: #ffffff;
+
       --link: #0284c7;
       --link-hover: #0369a1;
-      
-      --status-info: #2563eb;
-      --status-info-soft: #eff6ff;
-      --status-success: #16a34a;
-      --status-success-soft: #f0fdf4;
-      --status-warning: #d97706;
-      --status-warning-soft: #fffbeb;
-      --status-danger: #dc2626;
-      --status-danger-soft: #fef2f2;
-      --status-neutral: #7c3aed;
-      --status-neutral-soft: #f5f3ff;
 
-      /* Semantic Platform Pill Backgrounds for Light Theme */
+      --status-info: #0284c7;
+      --status-info-soft: #e0f2fe;
+      --status-success: #16a34a;
+      --status-success-soft: #dcfce7;
+      --status-warning: #d97706;
+      --status-warning-soft: #fef3c7;
+      --status-danger: #dc2626;
+      --status-danger-soft: #fee2e2;
+      --status-neutral: #9333ea;
+      --status-neutral-soft: #f3e8ff;
+
       --pill-ig-bg: #fdf2f8;
       --pill-ig-border: #db2777;
       --pill-fb-bg: #eff6ff;
       --pill-fb-border: #2563eb;
       --pill-tk-bg: #ecfeff;
       --pill-tk-border: #0891b2;
-      --pill-th-bg: #f8fafc;
-      --pill-th-border: #64748b;
-      --pill-yt-bg: #fef2f2;
-      --pill-yt-border: #dc2626;
 
       --calendar-other-month: #f8fafc;
+      --shadow-elevation: 0 10px 30px -8px rgba(15,23,42,0.12);
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+      transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
     }
 
     body {
@@ -128,106 +125,362 @@
       font-family: var(--font-sans);
       line-height: 1.5;
       min-height: 100vh;
-      padding: 24px 32px;
+      padding: 24px;
     }
 
-    .container {
-      max-width: 1480px;
+    .app-container {
+      max-width: 1440px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 20px;
     }
 
-    /* Top Headline & Actions */
-    .top-bar {
+    /* =========================================================
+       2. AFFILIATE STUDIO SHELL & HEADER
+       ========================================================= */
+    .studio-shell {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      box-shadow: var(--shadow-elevation);
+      overflow: hidden;
+    }
+
+    .studio-header {
+      padding: 16px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
       flex-wrap: wrap;
       gap: 14px;
     }
 
-    .headline h1 {
-      font-size: 22px;
-      font-weight: 850;
-      color: var(--text-primary);
-      letter-spacing: -0.5px;
+    .breadcrumb-row {
       display: flex;
       align-items: center;
       gap: 10px;
+      font-size: 14px;
+      font-weight: 700;
     }
 
-    .headline p {
-      font-size: 13px;
+    .studio-badge {
+      background: var(--accent-soft);
+      color: var(--accent);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+
+    .breadcrumb-divider {
       color: var(--text-muted);
-      margin-top: 3px;
+    }
+
+    .brand-select-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .brand-select {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .theme-toggle-btn {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 16px;
-      background: var(--surface);
+      padding: 7px 14px;
+      background: var(--surface-raised);
       border: 1px solid var(--border-strong);
       color: var(--text-primary);
       border-radius: 999px;
       font-size: 12px;
-      font-weight: 750;
+      font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
     }
     .theme-toggle-btn:hover {
       background: var(--surface-interactive);
     }
 
-    /* Filter Bar */
-    .filter-card {
-      background: var(--surface);
+    /* Local Navigation Tabs */
+    .studio-nav {
+      display: flex;
+      background: var(--surface-raised);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 0 16px;
+      gap: 4px;
+      overflow-x: auto;
+    }
+
+    .nav-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 14px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      position: relative;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .nav-tab:hover {
+      color: var(--text-primary);
+    }
+    .nav-tab.active {
+      color: var(--accent);
+    }
+    .nav-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 3px 3px 0 0;
+    }
+
+    /* Tab Content Panels */
+    .tab-panel {
+      padding: 24px;
+      display: none;
+    }
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* =========================================================
+       3. TAB 1: PRODUCT PORTFOLIO VIEW (MODIFIED)
+       ========================================================= */
+    .products-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .product-card {
+      background: var(--surface-raised);
       border: 1px solid var(--border-subtle);
       border-radius: 12px;
-      padding: 12px 18px;
+      overflow: hidden;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      flex-wrap: wrap;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      flex-direction: column;
+    }
+    .product-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
     }
 
-    .filter-group {
+    .product-card-thumb {
+      height: 140px;
+      background: var(--surface-interactive);
       display: flex;
       align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .product-card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
-    .filter-label {
+    .assoc-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .assoc-badge.active {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+    .assoc-badge.candidate {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+
+    .product-card-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: 10px;
+    }
+
+    .product-category {
       font-size: 11px;
       font-weight: 800;
-      color: var(--text-muted);
+      color: var(--accent);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
-    .select-input {
-      background: var(--surface-raised);
-      border: 1px solid var(--border-subtle);
+    .product-title {
+      font-size: 15px;
+      font-weight: 800;
       color: var(--text-primary);
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      outline: none;
-      cursor: pointer;
-    }
-    .select-input:focus {
-      border-color: var(--status-neutral);
     }
 
-    /* Calendar Frame */
-    .calendar-container {
+    .product-usp {
+      font-size: 12px;
+      color: var(--text-secondary);
+      background: var(--surface);
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Readiness: Assoc Status Only */
+    .product-readiness-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: var(--surface-interactive);
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .product-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .btn-edit-product {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 750;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-edit-product:hover {
+      background: var(--accent);
+      color: var(--on-accent);
+    }
+
+    /* =========================================================
+       4. TAB 2: CONTENT CALENDAR VIEW & ACTION BAR
+       ========================================================= */
+    .calendar-action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .calendar-title-wrap h2 {
+      font-size: 18px;
+      font-weight: 850;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .calendar-title-wrap p {
+      font-size: 12.5px;
+      color: var(--text-muted);
+    }
+
+    .action-button-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-add-plan {
+      background: var(--accent);
+      color: var(--on-accent);
+      border: none;
+      padding: 9px 18px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+    }
+    .btn-add-plan:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-send-planner {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+      padding: 9px 18px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-send-planner:hover {
+      background: var(--status-success);
+      color: #000000;
+    }
+
+    /* Calendar Grid Container */
+    .calendar-frame {
       background: var(--surface);
       border: 1px solid var(--border-subtle);
       border-radius: 14px;
@@ -235,98 +488,57 @@
       box-shadow: 0 4px 14px rgba(0,0,0,0.04);
     }
 
-    /* Calendar Top Navigation */
-    .cal-header {
-      height: 58px;
-      padding: 0 18px;
+    .cal-nav-bar {
+      padding: 12px 18px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid var(--border-subtle);
-      background: var(--surface);
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .cal-nav-buttons {
-      display: flex;
       align-items: center;
-      gap: 6px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
     }
 
-    .cal-btn {
-      background: var(--surface-interactive);
-      border: 1px solid var(--border-strong);
-      color: var(--text-secondary);
-      padding: 6px 12px;
-      border-radius: 7px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .cal-btn:hover {
-      background: var(--surface-hover);
-      color: var(--text-primary);
-    }
-    .cal-btn.current {
-      color: var(--text-primary);
-      font-weight: 800;
-    }
-
-    .cal-month-title {
-      font-size: 16px;
+    .cal-month-headline {
+      font-size: 15px;
       font-weight: 850;
       color: var(--text-primary);
-      margin-left: 10px;
     }
 
-    /* 7 Days Header */
-    .cal-weekdays {
+    .cal-weekdays-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      background: var(--surface-raised);
+      background: var(--surface-interactive);
       border-bottom: 1px solid var(--border-subtle);
       text-align: center;
     }
-
-    .cal-weekday-cell {
+    .weekday-header {
       padding: 10px 4px;
       font-size: 11px;
       font-weight: 800;
       color: var(--text-secondary);
       letter-spacing: 0.5px;
     }
-    .cal-weekday-cell.weekend {
+    .weekday-header.weekend {
       color: var(--status-warning);
     }
 
-    /* Calendar Grid */
-    .cal-grid {
+    .cal-month-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 1px;
       background: var(--border-subtle);
     }
 
-    /* Uniform Fixed Cell */
     .day-cell {
-      height: 132px;
-      max-height: 132px;
-      box-sizing: border-box;
+      min-height: 124px;
       background: var(--surface);
-      padding: 7px 9px;
+      padding: 8px;
       display: flex;
       flex-direction: column;
       position: relative;
-      overflow: hidden;
-      cursor: pointer;
-    }
-    .day-cell:hover {
-      background: var(--surface-raised);
     }
     .day-cell.other-month {
       background: var(--calendar-other-month);
-      opacity: 0.75;
+      opacity: 0.6;
     }
     .day-cell.today {
       background: var(--status-info-soft);
@@ -334,147 +546,82 @@
       outline-offset: -1px;
     }
 
-    .day-cell-header {
+    .day-cell-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 5px;
+      margin-bottom: 6px;
     }
 
-    .day-number {
-      font-size: 13px;
-      font-weight: 750;
+    .day-num {
+      font-size: 12.5px;
+      font-weight: 800;
       color: var(--text-primary);
     }
-    .day-cell.other-month .day-number {
-      color: var(--text-muted);
-    }
-    .day-cell.today .day-number {
+    .day-cell.today .day-num {
       color: var(--link);
-      font-weight: 900;
     }
 
-    .today-badge {
-      background: var(--link);
-      color: #ffffff;
-      font-size: 9px;
-      font-weight: 850;
-      padding: 1px 5px;
-      border-radius: 4px;
-      margin-left: 5px;
-    }
-
-    .btn-add-schedule {
-      background: var(--surface-interactive);
-      border: 1px solid var(--border-strong);
-      color: var(--text-secondary);
-      border-radius: 5px;
-      width: 20px;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 800;
-      cursor: pointer;
-      line-height: 1;
-    }
-    .btn-add-schedule:hover {
-      background: var(--status-neutral);
-      color: #ffffff;
-      border-color: var(--status-neutral);
-    }
-
-    /* Schedule Pills */
-    .schedule-list {
+    .pill-container {
       display: flex;
       flex-direction: column;
       gap: 4px;
       flex: 1;
-      overflow: hidden;
+      overflow-y: auto;
+      max-height: 90px;
     }
 
-    .schedule-pill {
-      padding: 3px 6px;
-      border-radius: 5px;
+    .cal-event-pill {
+      padding: 4px 6px;
+      border-radius: 6px;
       font-size: 10px;
-      line-height: 1.25;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      line-height: 1.3;
       border: 1px solid var(--border-subtle);
       background: var(--surface-raised);
+      cursor: pointer;
     }
-    .schedule-pill.ig {
-      background: var(--pill-ig-bg);
-      border-left: 3px solid var(--pill-ig-border);
-    }
-    .schedule-pill.fb {
-      background: var(--pill-fb-bg);
-      border-left: 3px solid var(--pill-fb-border);
-    }
-    .schedule-pill.tk {
-      background: var(--pill-tk-bg);
-      border-left: 3px solid var(--pill-tk-border);
-    }
-    .schedule-pill.th {
-      background: var(--pill-th-bg);
-      border-left: 3px solid var(--pill-th-border);
-    }
-    .schedule-pill.yt {
-      background: var(--pill-yt-bg);
-      border-left: 3px solid var(--pill-yt-border);
+    .cal-event-pill:hover {
+      border-color: var(--accent);
     }
 
-    .pill-line-1 {
+    .cal-event-pill.product-pill {
+      border-left: 3px solid var(--accent);
+      background: var(--accent-soft);
+    }
+    .cal-event-pill.editorial-pill {
+      border-left: 3px solid var(--status-info);
+      background: var(--status-info-soft);
+    }
+
+    .pill-time-platform {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-    }
-
-    .pill-plat-time {
       font-weight: 800;
-      font-size: 9.5px;
+      font-size: 9px;
       color: var(--text-primary);
     }
-
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-    .status-dot.published { background: var(--status-success); }
-    .status-dot.scheduled { background: var(--link); }
-    .status-dot.failed { background: var(--status-danger); }
-    .status-dot.retry { background: var(--status-warning); }
-
-    .pill-line-2 {
-      font-size: 9.5px;
-      color: var(--text-secondary);
+    .pill-title {
+      font-weight: 700;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-top: 1px;
+      color: var(--text-primary);
+    }
+    .pill-badge-sub {
+      font-size: 8.5px;
+      color: var(--text-secondary);
     }
 
-    .more-badge {
-      background: var(--status-info-soft);
-      border: 1px solid var(--status-info);
-      color: var(--link);
-      font-size: 9.5px;
-      font-weight: 800;
-      padding: 2px 6px;
-      border-radius: 4px;
-      text-align: center;
-    }
-
-    /* Modal Styles */
+    /* =========================================================
+       5. MODAL: TAMBAHKAN PLAN (2-MODE SELECTION & GENERATOR)
+       ========================================================= */
     .modal-backdrop {
       position: fixed;
       inset: 0;
       background: var(--overlay-backdrop);
       display: grid;
       place-items: center;
-      z-index: 9999;
+      z-index: 10000;
       padding: 16px;
       opacity: 0;
       pointer-events: none;
@@ -485,529 +632,1053 @@
       pointer-events: auto;
     }
 
-    .modal-box {
+    .modal-card {
       background: var(--surface);
       border: 1px solid var(--border-strong);
-      border-radius: 16px;
+      border-radius: 18px;
       width: 100%;
-      max-width: 680px;
-      padding: 24px;
-      color: var(--text-primary);
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
+      max-width: 780px;
+      max-height: 90vh;
       display: flex;
       flex-direction: column;
-      max-height: 88vh;
+      box-shadow: 0 25px 60px -15px rgba(0,0,0,0.5);
+      overflow: hidden;
     }
 
-    .modal-header {
+    .modal-head {
+      padding: 18px 24px;
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      padding-bottom: 14px;
+      align-items: center;
       border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
     }
-
-    .modal-title {
+    .modal-head h3 {
       font-size: 16px;
       font-weight: 850;
-      color: var(--text-primary);
     }
-
-    .modal-subtitle {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    .btn-close {
+    .btn-close-modal {
       background: transparent;
       border: none;
       color: var(--text-muted);
-      font-size: 18px;
+      font-size: 20px;
       cursor: pointer;
-      padding: 4px 8px;
-    }
-    .btn-close:hover {
-      color: var(--text-primary);
     }
 
-    .modal-scroller {
-      flex: 1;
+    .modal-body {
+      padding: 24px;
       overflow-y: auto;
-      max-height: 56vh;
-      padding-right: 6px;
-      margin: 16px 0;
+      flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 18px;
     }
 
-    .modal-scroller::-webkit-scrollbar {
-      width: 6px;
+    /* Mode Selection Cards */
+    .mode-selector-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
     }
-    .modal-scroller::-webkit-scrollbar-thumb {
-      background: var(--border-strong);
-      border-radius: 999px;
+    .mode-option-card {
+      background: var(--surface-raised);
+      border: 2px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .mode-option-card:hover {
+      border-color: var(--accent-hover);
+    }
+    .mode-option-card.selected {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .mode-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .mode-desc {
+      font-size: 11.5px;
+      color: var(--text-secondary);
     }
 
-    .job-card {
+    /* Snapshot Box */
+    .snapshot-box {
       background: var(--surface-raised);
       border: 1px solid var(--border-subtle);
       border-radius: 10px;
       padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
+      font-size: 12px;
     }
-
-    .job-card-top {
+    .snapshot-row {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
       gap: 8px;
     }
-
-    .platform-tag {
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 10.5px;
-      font-weight: 800;
-      text-transform: uppercase;
-    }
-    .platform-tag.ig { background: var(--pill-ig-bg); color: var(--pill-ig-border); border: 1px solid var(--pill-ig-border); }
-    .platform-tag.fb { background: var(--pill-fb-bg); color: var(--pill-fb-border); border: 1px solid var(--pill-fb-border); }
-    .platform-tag.tk { background: var(--pill-tk-bg); color: var(--pill-tk-border); border: 1px solid var(--pill-tk-border); }
-
-    .status-badge {
-      font-size: 11px;
-      font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .status-badge.published { background: var(--status-success-soft); color: var(--status-success); }
-    .status-badge.scheduled { background: var(--status-info-soft); color: var(--status-info); }
-    .status-badge.failed { background: var(--status-danger-soft); color: var(--status-danger); }
-
-    .caption-box {
-      font-size: 11px;
-      color: var(--text-secondary);
-      background: var(--surface-interactive);
-      padding: 8px 10px;
-      border-radius: 6px;
-      border: 1px solid var(--border-subtle);
-    }
-
-    .card-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-top: 8px;
-      border-top: 1px solid var(--border-subtle);
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .btn-cancel {
-      background: var(--status-danger-soft);
-      border: 1px solid var(--status-danger);
-      color: var(--status-danger);
-      padding: 5px 10px;
-      border-radius: 6px;
-      font-size: 11px;
+    .snapshot-label {
       font-weight: 750;
-      cursor: pointer;
+      color: var(--text-muted);
+      width: 120px;
+      flex-shrink: 0;
     }
-
-    .btn-view-queue {
-      background: var(--surface);
-      border: 1px solid var(--border-strong);
-      color: var(--text-secondary);
-      padding: 5px 10px;
+    .snapshot-val {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    .pillar-pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .pillar-pill {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+      padding: 2px 8px;
       border-radius: 6px;
       font-size: 11px;
       font-weight: 700;
+    }
+
+    /* Form Fields */
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-label {
+      font-size: 11.5px;
+      font-weight: 800;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .form-control {
+      background: var(--input-bg);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+      font-family: inherit;
+    }
+    .form-control:focus {
+      border-color: var(--accent);
+    }
+
+    /* Generated Rows Table */
+    .generated-table-wrapper {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .generated-table-head {
+      display: grid;
+      grid-template-columns: 50px 1.4fr 1.2fr 1fr;
+      padding: 10px 14px;
+      background: var(--surface-interactive);
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .generated-row-item {
+      display: grid;
+      grid-template-columns: 50px 1.4fr 1.2fr 1fr;
+      padding: 8px 14px;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .generated-row-item:last-child {
+      border-bottom: none;
+    }
+
+    .modal-foot {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .btn-secondary {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-strong);
+      color: var(--text-secondary);
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 750;
       cursor: pointer;
     }
-    .btn-view-queue:hover {
-      color: var(--text-primary);
-    }
-
-    .modal-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-top: 14px;
-      border-top: 1px solid var(--border-subtle);
-    }
-
-    .btn-action-primary {
-      background: var(--action-primary);
+    .btn-primary {
+      background: var(--accent);
+      color: var(--on-accent);
       border: none;
-      color: var(--on-action-primary);
-      padding: 8px 16px;
+      padding: 9px 20px;
       border-radius: 8px;
-      font-size: 12px;
+      font-size: 12.5px;
       font-weight: 800;
       cursor: pointer;
     }
-    .btn-action-primary:hover {
-      background: var(--action-primary-hover);
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    /* Toast Notification */
+    .toast-box {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface-raised);
+      border: 1px solid var(--accent);
+      border-left: 5px solid var(--accent);
+      padding: 14px 20px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      z-index: 100000;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toast-box.show {
+      transform: translateY(0);
+      opacity: 1;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <!-- Top Bar -->
-    <div class="top-bar">
-      <div class="headline">
-        <h1>📅 Kalender Konten Semantic (Universal Light & Dark Theme)</h1>
-        <p>Demonstrasi adaptasi warna Semantic CSS agar teks selalu kontras dan jelas di mode Light maupun Dark.</p>
+  <div class="app-container">
+
+    <!-- =========================================================
+         MAIN APPLICATION SHELL (AFFILIATE STUDIO)
+         ========================================================= -->
+    <div class="studio-shell">
+      <!-- Header -->
+      <header class="studio-header">
+        <div class="breadcrumb-row">
+          <span class="studio-badge">AFFILIATE STUDIO</span>
+          <span class="breadcrumb-divider">/</span>
+          <span style="color: var(--text-primary);" id="activeBrandLabel">@skinbeauty (Skin Glow Official)</span>
+        </div>
+
+        <div class="header-actions">
+          <div class="brand-select-wrap">
+            <span>Brand:</span>
+            <select class="brand-select" id="brandSwitcher" onchange="switchBrand(this.value)">
+              <option value="skinbeauty">@skinbeauty</option>
+              <option value="skinglow">@skinglow</option>
+            </select>
+          </div>
+
+          <button class="theme-toggle-btn" onclick="toggleTheme()">
+            <span id="themeIcon">☀️</span> <span id="themeLabel">Light Mode</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Local Navigation -->
+      <nav class="studio-nav">
+        <button class="nav-tab" onclick="switchTab('products', this)">📦 Products</button>
+        <button class="nav-tab active" onclick="switchTab('calendar', this)">📅 Content Calendar</button>
+        <button class="nav-tab" onclick="switchTab('planner', this)">📝 Planner</button>
+        <button class="nav-tab" onclick="switchTab('production', this)">🎬 Production</button>
+        <button class="nav-tab" onclick="switchTab('publishing', this)">🚀 Publishing</button>
+        <button class="nav-tab" onclick="switchTab('performance', this)">📊 Performance</button>
+      </nav>
+
+      <!-- =========================================================
+           TAB 1: PRODUCTS (MODIFIED ACCORDING TO USER SPEC)
+           ========================================================= -->
+      <div id="tab-products" class="tab-panel">
+        <div class="products-toolbar">
+          <div>
+            <h2 style="font-size: 18px; font-weight: 850;">📦 Brand Product Portfolio</h2>
+            <p style="font-size: 12.5px; color: var(--text-muted);">Hanya menampilkan status asosiasi, bebas tampilan route, dan tombol edit terintegrasi.</p>
+          </div>
+        </div>
+
+        <div class="products-grid">
+          <!-- Card 1 -->
+          <div class="product-card">
+            <div class="product-card-thumb">
+              <span class="assoc-badge active">ACTIVE ASSOC</span>
+              <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=500&auto=format&fit=crop&q=60" alt="Serum">
+            </div>
+            <div class="product-card-body">
+              <span class="product-category">Skincare / Serum</span>
+              <h3 class="product-title">Serum Retinol 0.5% Anti-Aging</h3>
+              <p class="product-usp"><strong>USP:</strong> Micro-encapsulated retinol tanpa iritasi & mencerahkan dalam 14 hari.</p>
+              
+              <!-- Readiness: Assoc Status Only -->
+              <div class="product-readiness-row">
+                <span style="color: var(--text-muted);">Assoc Status:</span>
+                <span style="color: var(--status-success);">ACTIVE</span>
+              </div>
+
+              <div class="product-card-footer">
+                <button class="btn-edit-product" onclick="openEditProductModal('Serum Retinol 0.5% Anti-Aging', 'Skincare', 'Micro-encapsulated retinol tanpa iritasi...')">
+                  ✏️ Edit Product
+                </button>
+                <span style="font-size: 11px; color: var(--text-muted);">ID: PROD_001</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="product-card">
+            <div class="product-card-thumb">
+              <span class="assoc-badge active">ACTIVE ASSOC</span>
+              <img src="https://images.unsplash.com/photo-1556228720-195a672e8a03?w=500&auto=format&fit=crop&q=60" alt="Sunscreen">
+            </div>
+            <div class="product-card-body">
+              <span class="product-category">Skincare / UV Filter</span>
+              <h3 class="product-title">Sunscreen Gel UV SPF50+ PA++++</h3>
+              <p class="product-usp"><strong>USP:</strong> Water-burst texture, 0% whitecast, matte look seharian.</p>
+              
+              <div class="product-readiness-row">
+                <span style="color: var(--text-muted);">Assoc Status:</span>
+                <span style="color: var(--status-success);">ACTIVE</span>
+              </div>
+
+              <div class="product-card-footer">
+                <button class="btn-edit-product" onclick="openEditProductModal('Sunscreen Gel UV SPF50+ PA++++', 'Skincare', 'Water-burst texture, 0% whitecast...')">
+                  ✏️ Edit Product
+                </button>
+                <span style="font-size: 11px; color: var(--text-muted);">ID: PROD_002</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="product-card">
+            <div class="product-card-thumb">
+              <span class="assoc-badge candidate">CANDIDATE</span>
+              <img src="https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=500&auto=format&fit=crop&q=60" alt="Facial Wash">
+            </div>
+            <div class="product-card-body">
+              <span class="product-category">Skincare / Cleanser</span>
+              <h3 class="product-title">Gentle Facial Wash Oat & Ceramide</h3>
+              <p class="product-usp"><strong>USP:</strong> Low pH 5.5, menjaga skin barrier tanpa rasa ketarik.</p>
+              
+              <div class="product-readiness-row">
+                <span style="color: var(--text-muted);">Assoc Status:</span>
+                <span style="color: var(--status-warning);">CANDIDATE</span>
+              </div>
+
+              <div class="product-card-footer">
+                <button class="btn-edit-product" onclick="openEditProductModal('Gentle Facial Wash Oat & Ceramide', 'Skincare', 'Low pH 5.5...')">
+                  ✏️ Edit Product
+                </button>
+                <span style="font-size: 11px; color: var(--text-muted);">ID: PROD_003</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div>
-        <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleTheme()">
-          <span id="themeIcon">☀️</span> <span id="themeLabel">Ganti ke Light Theme</span>
-        </button>
-      </div>
-    </div>
 
-    <!-- Filter Bar -->
-    <div class="filter-card">
-      <div class="filter-group">
-        <span class="filter-label">Brand Profile</span>
-        <select class="select-input">
-          <option value="all">Semua Brand (@skinbeauty, @skinglow)</option>
-          <option value="skinbeauty">@skinbeauty</option>
-          <option value="skinglow">@skinglow</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <span class="filter-label">Platform</span>
-        <select class="select-input">
-          <option value="all">Semua Platform</option>
-          <option value="instagram">Instagram</option>
-          <option value="tiktok">TikTok</option>
-          <option value="facebook">Facebook</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <span class="filter-label">Status</span>
-        <select class="select-input">
-          <option value="all">Semua Status</option>
-          <option value="scheduled">Scheduled</option>
-          <option value="published">Published</option>
-          <option value="failed">Failed</option>
-        </select>
-      </div>
-    </div>
+      <!-- =========================================================
+           TAB 2: CONTENT CALENDAR VIEW (USER'S NEW WORKFLOW)
+           ========================================================= -->
+      <div id="tab-calendar" class="tab-panel active">
+        <!-- Action Bar -->
+        <div class="calendar-action-bar">
+          <div class="calendar-title-wrap">
+            <h2>📅 Content Calendar Bulan Ini</h2>
+            <p>Jadwalkan rencana kampanye editorial maupun pengetesan 6 CEP produk terpadu.</p>
+          </div>
 
-    <!-- Calendar Container -->
-    <div class="calendar-container">
-      <!-- Calendar Header -->
-      <div class="cal-header">
-        <div class="cal-nav-buttons">
-          <button class="cal-btn">‹ Sebelumnya</button>
-          <button class="cal-btn current">Bulan Ini</button>
-          <button class="cal-btn">Selanjutnya ›</button>
-          <span class="cal-month-title">📅 September 2026</span>
+          <div class="action-button-group">
+            <button class="btn-add-plan" onclick="openAddPlanModal()">
+              <span>+</span> Tambahkan Plan
+            </button>
+            <button class="btn-send-planner" onclick="handleSendToPlanner()">
+              <span>⚡</span> Kirim ke Content Planner
+            </button>
+          </div>
         </div>
-        <div style="font-size: 12px; color: var(--text-muted);">
-          Total <strong>18</strong> konten terjadwal bulan ini
-        </div>
-      </div>
 
-      <!-- 7 Weekdays -->
-      <div class="cal-weekdays">
-        <div class="cal-weekday-cell">SENIN</div>
-        <div class="cal-weekday-cell">SELASA</div>
-        <div class="cal-weekday-cell">RABU</div>
-        <div class="cal-weekday-cell">KAMIS</div>
-        <div class="cal-weekday-cell">JUMAT</div>
-        <div class="cal-weekday-cell weekend">SABTU</div>
-        <div class="cal-weekday-cell weekend">MINGGU</div>
+        <!-- Calendar Frame -->
+        <div class="calendar-frame">
+          <div class="cal-nav-bar">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <button class="btn-secondary" style="padding: 4px 10px; font-size: 11px;">‹ Prev</button>
+              <span class="cal-month-headline">📅 September 2026</span>
+              <button class="btn-secondary" style="padding: 4px 10px; font-size: 11px;">Next ›</button>
+            </div>
+            <div style="font-size: 12px; color: var(--text-muted);">
+              Total <strong id="totalScheduledCount" style="color: var(--accent);">8</strong> Jadwal Terdaftar
+            </div>
+          </div>
+
+          <!-- 7 Weekdays -->
+          <div class="cal-weekdays-grid">
+            <div class="weekday-header">SENIN</div>
+            <div class="weekday-header">SELASA</div>
+            <div class="weekday-header">RABU</div>
+            <div class="weekday-header">KAMIS</div>
+            <div class="weekday-header">JUMAT</div>
+            <div class="weekday-header weekend">SABTU</div>
+            <div class="weekday-header weekend">MINGGU</div>
+          </div>
+
+          <!-- Calendar Days Grid -->
+          <div class="cal-month-grid" id="calendarGrid">
+            <!-- Dynamically Rendered via JS -->
+          </div>
+        </div>
       </div>
 
-      <!-- Grid Days -->
-      <div class="cal-grid">
-        <!-- Hari 1-7 (Sample) -->
-        <div class="day-cell other-month">
-          <div class="day-cell-header"><span class="day-number">31</span></div>
-        </div>
-
-        <div class="day-cell" onclick="openDetailModal('1 September 2026', 2)">
-          <div class="day-cell-header">
-            <span class="day-number">1</span>
-            <button class="btn-add-schedule" onclick="event.stopPropagation(); alert('Buka form jadwal!');">+</button>
-          </div>
-          <div class="schedule-list">
-            <div class="schedule-pill ig">
-              <div class="pill-line-1"><span class="pill-plat-time">IG · 19:00</span><span class="status-dot published"></span></div>
-              <div class="pill-line-2">Serum Glowing - VID_001</div>
-            </div>
-            <div class="schedule-pill tk">
-              <div class="pill-line-1"><span class="pill-plat-time">TK · 20:30</span><span class="status-dot published"></span></div>
-              <div class="pill-line-2">Sunscreen UV - VID_002</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="day-cell" onclick="openDetailModal('2 September 2026', 1)">
-          <div class="day-cell-header">
-            <span class="day-number">2</span>
-            <button class="btn-add-schedule" onclick="event.stopPropagation();">+</button>
-          </div>
-          <div class="schedule-list">
-            <div class="schedule-pill fb">
-              <div class="pill-line-1"><span class="pill-plat-time">FB · 15:00</span><span class="status-dot published"></span></div>
-              <div class="pill-line-2">Moisturizer Gel - VID_003</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="day-cell" onclick="openDetailModal('3 September 2026', 0)">
-          <div class="day-cell-header">
-            <span class="day-number">3</span>
-            <button class="btn-add-schedule" onclick="event.stopPropagation();">+</button>
-          </div>
-        </div>
-
-        <div class="day-cell" onclick="openDetailModal('4 September 2026', 1)">
-          <div class="day-cell-header">
-            <span class="day-number">4</span>
-            <button class="btn-add-schedule" onclick="event.stopPropagation();">+</button>
-          </div>
-          <div class="schedule-list">
-            <div class="schedule-pill ig">
-              <div class="pill-line-1"><span class="pill-plat-time">IG · 18:00</span><span class="status-dot published"></span></div>
-              <div class="pill-line-2">Brightening Body - VID_004</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="day-cell" onclick="openDetailModal('5 September 2026', 0)">
-          <div class="day-cell-header"><span class="day-number">5</span><button class="btn-add-schedule">+</button></div>
-        </div>
-
-        <div class="day-cell" onclick="openDetailModal('6 September 2026', 0)">
-          <div class="day-cell-header"><span class="day-number">6</span><button class="btn-add-schedule">+</button></div>
-        </div>
-
-        <!-- Baris 2 -->
-        <div class="day-cell" onclick="openDetailModal('7 September 2026', 1)">
-          <div class="day-cell-header"><span class="day-number">7</span><button class="btn-add-schedule">+</button></div>
-          <div class="schedule-list">
-            <div class="schedule-pill tk">
-              <div class="pill-line-1"><span class="pill-plat-time">TK · 12:00</span><span class="status-dot published"></span></div>
-              <div class="pill-line-2">Facial Wash - VID_005</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="day-cell" onclick="openDetailModal('8 September 2026', 0)">
-          <div class="day-cell-header"><span class="day-number">8</span><button class="btn-add-schedule">+</button></div>
-        </div>
-
-        <div class="day-cell" onclick="openDetailModal('9 September 2026', 1)">
-          <div class="day-cell-header"><span class="day-number">9</span><button class="btn-add-schedule">+</button></div>
-          <div class="schedule-list">
-            <div class="schedule-pill ig">
-              <div class="pill-line-1"><span class="pill-plat-time">IG · 19:30</span><span class="status-dot published"></span></div>
-              <div class="pill-line-2">Lip Tint Velvet - VID_006</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="day-cell" onclick="openDetailModal('10 September 2026', 1)">
-          <div class="day-cell-header"><span class="day-number">10</span><button class="btn-add-schedule">+</button></div>
-          <div class="schedule-list">
-            <div class="schedule-pill fb">
-              <div class="pill-line-1"><span class="pill-plat-time">FB · 14:00</span><span class="status-dot published"></span></div>
-              <div class="pill-line-2">Eye Cream Roll - VID_007</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- HARI INI (11 September 2026) -->
-        <div class="day-cell today" onclick="openDetailModal('Jumat, 11 September 2026', 4)">
-          <div class="day-cell-header">
-            <div>
-              <span class="day-number">11</span>
-              <span class="today-badge">HARI INI</span>
-            </div>
-            <button class="btn-add-schedule" onclick="event.stopPropagation();">+</button>
-          </div>
-          <div class="schedule-list">
-            <div class="schedule-pill ig">
-              <div class="pill-line-1"><span class="pill-plat-time">IG · 10:00</span><span class="status-dot published"></span></div>
-              <div class="pill-line-2">Serum Glowing - VID_008</div>
-            </div>
-            <div class="schedule-pill tk">
-              <div class="pill-line-1"><span class="pill-plat-time">TK · 14:00</span><span class="status-dot scheduled"></span></div>
-              <div class="pill-line-2">Sunscreen UV - VID_009</div>
-            </div>
-            <div class="more-badge">+2 konten lainnya</div>
-          </div>
-        </div>
-
-        <div class="day-cell" onclick="openDetailModal('12 September 2026', 1)">
-          <div class="day-cell-header"><span class="day-number">12</span><button class="btn-add-schedule">+</button></div>
-          <div class="schedule-list">
-            <div class="schedule-pill ig">
-              <div class="pill-line-1"><span class="pill-plat-time">IG · 19:00</span><span class="status-dot scheduled"></span></div>
-              <div class="pill-line-2">Acne Spot Gel - VID_010</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="day-cell" onclick="openDetailModal('13 September 2026', 0)">
-          <div class="day-cell-header"><span class="day-number">13</span><button class="btn-add-schedule">+</button></div>
-        </div>
+      <!-- Other Tabs Placeholder -->
+      <div id="tab-planner" class="tab-panel">
+        <h3>📝 Content Planner Workbench</h3>
+        <p style="color: var(--text-muted); margin-top: 8px;">Area integrasi Single-Pass AI Engine. Jadwal dari kalender akan diterjemahkan ke baris planner ini.</p>
+      </div>
+      <div id="tab-production" class="tab-panel">
+        <h3>🎬 Production Runs</h3>
+        <p style="color: var(--text-muted); margin-top: 8px;">Daftar eksekusi pembuatan video MP4 dan TTS Voice-Over.</p>
+      </div>
+      <div id="tab-publishing" class="tab-panel">
+        <h3>🚀 Publishing Queue</h3>
+        <p style="color: var(--text-muted); margin-top: 8px;">Antrean auto-posting ContentFlow ke IG/TikTok/FB sesuai jam kalender.</p>
+      </div>
+      <div id="tab-performance" class="tab-panel">
+        <h3>📊 Performance Analytics</h3>
+        <p style="color: var(--text-muted); margin-top: 8px;">Evaluasi konversi affiliate dan performa video per produk & CEP.</p>
       </div>
     </div>
   </div>
 
-  <!-- Modal Detail Jadwal Harian (Option B) -->
-  <div id="detailModal" class="modal-backdrop" onclick="closeDetailModal()">
-    <div class="modal-box" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div>
-          <div class="modal-title" id="modalTitle">📅 Detail Jadwal: Jumat, 11 September 2026</div>
-          <div class="modal-subtitle" id="modalSubtitle">Total 4 konten dijadwalkan pada hari ini.</div>
-        </div>
-        <button class="btn-close" onclick="closeDetailModal()">✕</button>
+  <!-- =========================================================
+       6. MODAL 1: TAMBAHKAN PLAN (2-MODE WORKFLOW)
+       ========================================================= -->
+  <div class="modal-backdrop" id="addPlanModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>📅 Tambahkan Plan Jadwal Konten</h3>
+        <button class="btn-close-modal" onclick="closeModal('addPlanModal')">✕</button>
       </div>
 
-      <div class="modal-scroller">
-        <!-- Job Card 1 -->
-        <div class="job-card">
-          <div class="job-card-top">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span class="platform-tag ig">INSTAGRAM</span>
-              <span style="font-weight: 750; font-size: 12px; color: var(--text-primary);">⏰ 10:00 WIB</span>
-              <span style="font-size: 11px; color: var(--text-muted);">· @skinbeauty_official</span>
+      <div class="modal-body">
+        <!-- 1. Pilih Tipe Plan -->
+        <div class="form-group">
+          <label class="form-label">1. Pilih Tipe Plan</label>
+          <div class="mode-selector-grid">
+            <div class="mode-option-card selected" id="modeCardEditorial" onclick="selectPlanMode('editorial')">
+              <div class="mode-title">🏛️ Brand Editorial</div>
+              <div class="mode-desc">Konten pilar otoritas brand, edukasi umum, lifestyle, dan interaksi audiens.</div>
             </div>
-            <span class="status-badge published">✓ PUBLISHED</span>
-          </div>
-          <div>
-            <div style="font-weight: 800; font-size: 13px; color: var(--text-primary);">🏷️ Serum Glowing - VID_008</div>
-            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Rahasia Kulit Glowing Alami dalam 7 Hari</div>
-            <div class="caption-box" style="margin-top: 6px;">Cobain serum viral ini sekarang dan rasakan perbedaannya! Link di bio ya kak ✨ #skincare #glowing</div>
-          </div>
-          <div class="card-actions">
-            <div>
-              <a href="#" style="font-size: 11px; color: var(--status-success); font-weight: 750; text-decoration: none;">↗️ Buka di Instagram</a>
+            <div class="mode-option-card" id="modeCardProduct" onclick="selectPlanMode('product')">
+              <div class="mode-title">📦 Product Campaign</div>
+              <div class="mode-desc">Pengetesan siklus 6 CEP spesifik untuk 1 produk dengan konteks promosi.</div>
             </div>
-            <button class="btn-view-queue" onclick="alert('Beralih ke tab antrean dengan ID: VID_008'); closeDetailModal();">👁️ Lihat di Antrean</button>
           </div>
         </div>
 
-        <!-- Job Card 2 -->
-        <div class="job-card">
-          <div class="job-card-top">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span class="platform-tag tk">TIKTOK</span>
-              <span style="font-weight: 750; font-size: 12px; color: var(--text-primary);">⏰ 14:00 WIB</span>
-              <span style="font-size: 11px; color: var(--text-muted);">· @skinbeauty_tiktok</span>
+        <!-- 2.A Sub-Form: Brand Editorial -->
+        <div id="subformEditorial">
+          <div class="snapshot-box">
+            <div class="snapshot-row">
+              <span class="snapshot-label">📌 Konteks Brand:</span>
+              <span class="snapshot-val">Brand skincare lokal berfokus pada kesehatan skin barrier & bahan vegan alami.</span>
             </div>
-            <span class="status-badge scheduled">⏳ SCHEDULED</span>
-          </div>
-          <div>
-            <div style="font-weight: 800; font-size: 13px; color: var(--text-primary);">🏷️ Sunscreen UV - VID_009</div>
-            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Review Jujur Sunscreen No Whitecast</div>
-            <div class="caption-box" style="margin-top: 6px;">Outdoor seharian gak takut gosong! Cek keranjang kuning sekarang 🔥 #sunscreen #reviewskincare</div>
-          </div>
-          <div class="card-actions">
-            <div>
-              <button class="btn-cancel" onclick="alert('Jadwal berhasil dibatalkan!');">🚫 Batalkan Jadwal</button>
+            <div class="snapshot-row">
+              <span class="snapshot-label">🎯 Tujuan Konten:</span>
+              <span class="snapshot-val">Membangun authority, edukasi merawat kulit sensitif, dan brand awareness.</span>
             </div>
-            <button class="btn-view-queue" onclick="closeDetailModal();">👁️ Lihat di Antrean</button>
+            <div class="snapshot-row">
+              <span class="snapshot-label">🏛️ Pilar Konten:</span>
+              <div class="pillar-pill-list">
+                <span class="pillar-pill">Edukasi & Problem Solving</span>
+                <span class="pillar-pill">Routine & Habit</span>
+                <span class="pillar-pill">Review & Comparison</span>
+                <span class="pillar-pill">Behind the Scene</span>
+              </div>
+            </div>
           </div>
+
+          <div class="form-grid-2" style="margin-top: 14px;">
+            <div class="form-group">
+              <label class="form-label">Jumlah Konten</label>
+              <select class="form-control" id="editorialCountInput">
+                <option value="4">4 Konten (1 Ide per Pilar)</option>
+                <option value="8" selected>8 Konten (2 Ide per Pilar)</option>
+                <option value="12">12 Konten (3 Ide per Pilar)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Jadwalkan Mulai</label>
+              <input type="date" class="form-control" id="editorialStartDate" value="2026-09-12">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 12px;">
+            <label class="form-label">Frekuensi Posting (Berapa Kali Sehari / Interval)</label>
+            <select class="form-control" id="editorialFrequencyInput">
+              <option value="1_per_day">1x Posting per Hari (10:00)</option>
+              <option value="2_per_day" selected>2x Posting per Hari (10:00 & 19:00)</option>
+              <option value="3_per_day">3x Posting per Hari (09:00, 14:00, 19:00)</option>
+              <option value="4_per_day">4x Posting per Hari (08:00, 12:00, 16:00, 20:00)</option>
+              <option value="1_per_2_days">1x Posting tiap 2 Hari (2 Hari Sekali)</option>
+              <option value="1_per_3_days">1x Posting tiap 3 Hari (3 Hari Sekali)</option>
+            </select>
+          </div>
+
+          <!-- Multi-Platform Broadcast Selector -->
+          <div class="form-group" style="margin-top: 12px;">
+            <label class="form-label">🎯 Target Kanal Distribusi (Multi-Platform Broadcast)</label>
+            <div style="display: flex; gap: 14px; flex-wrap: wrap; background: var(--surface); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                <input type="checkbox" id="edPlatIG" checked style="accent-color: var(--accent);"> 📸 Instagram Reels
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                <input type="checkbox" id="edPlatTK" checked style="accent-color: var(--accent);"> 🎵 TikTok
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                <input type="checkbox" id="edPlatFB" checked style="accent-color: var(--accent);"> 📘 Facebook Reels
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                <input type="checkbox" id="edPlatYT" style="accent-color: var(--accent);"> ▶️ YouTube Shorts
+              </label>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">1 video hasil produksi akan otomatis disiarkan ke semua platform yang dicentang.</span>
+          </div>
+
+          <button type="button" class="btn-primary" style="margin-top: 12px; width: 100%;" onclick="generateDraftRows('editorial')">
+            ⚡ Buat Rencana Baris Jadwal
+          </button>
         </div>
 
-        <!-- Job Card 3 -->
-        <div class="job-card">
-          <div class="job-card-top">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span class="platform-tag fb">FACEBOOK</span>
-              <span style="font-weight: 750; font-size: 12px; color: var(--text-primary);">⏰ 18:30 WIB</span>
-              <span style="font-size: 11px; color: var(--text-muted);">· SkinBeauty Page</span>
+        <!-- 2.B Sub-Form: Product Campaign -->
+        <div id="subformProduct" style="display: none;">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Pilih 1 Produk Target</label>
+              <select class="form-control" id="productSelectInput">
+                <option value="Serum Retinol 0.5%">Serum Retinol 0.5% Anti-Aging (Skincare)</option>
+                <option value="Sunscreen Gel UV">Sunscreen Gel UV SPF50+ (UV Filter)</option>
+                <option value="Gentle Facial Wash">Gentle Facial Wash Oat & Ceramide (Cleanser)</option>
+              </select>
             </div>
-            <span class="status-badge scheduled">⏳ SCHEDULED</span>
-          </div>
-          <div>
-            <div style="font-weight: 800; font-size: 13px; color: var(--text-primary);">🏷️ Moisturizer Gel - VID_011</div>
-            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Tips Menjaga Skin Barrier Tetap Sehat</div>
-          </div>
-          <div class="card-actions">
-            <div>
-              <button class="btn-cancel" onclick="alert('Jadwal berhasil dibatalkan!');">🚫 Batalkan Jadwal</button>
+            <div class="form-group">
+              <label class="form-label">Jumlah Konten (Siklus 6 CEP)</label>
+              <select class="form-control" id="productCountInput">
+                <option value="6" selected>6 Konten (1 Siklus 6 CEP Penuh)</option>
+                <option value="12">12 Konten (2 Siklus 6 CEP)</option>
+                <option value="18">18 Konten (3 Siklus 6 CEP)</option>
+              </select>
             </div>
-            <button class="btn-view-queue" onclick="closeDetailModal();">👁️ Lihat di Antrean</button>
           </div>
+
+          <div class="form-group" style="margin-top: 12px;">
+            <label class="form-label">Konteks Promosi Khusus (Optional)</label>
+            <input type="text" class="form-control" id="productPromoInput" placeholder="Contoh: Promo Gajian 25 Sept / Launching Formula Baru / Solusi Anti-Purging">
+          </div>
+
+          <div class="form-grid-2" style="margin-top: 12px;">
+            <div class="form-group">
+              <label class="form-label">Jadwalkan Mulai</label>
+              <input type="date" class="form-control" id="productStartDate" value="2026-09-12">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Frekuensi Posting (Berapa Kali Sehari / Interval)</label>
+              <select class="form-control" id="productFrequencyInput">
+                <option value="1_per_day">1x Posting per Hari (10:00)</option>
+                <option value="2_per_day" selected>2x Posting per Hari (10:00 & 19:00)</option>
+                <option value="3_per_day">3x Posting per Hari (09:00, 14:00, 19:00)</option>
+                <option value="4_per_day">4x Posting per Hari (08:00, 12:00, 16:00, 20:00)</option>
+                <option value="1_per_2_days">1x Posting tiap 2 Hari (2 Hari Sekali)</option>
+                <option value="1_per_3_days">1x Posting tiap 3 Hari (3 Hari Sekali)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Multi-Platform Broadcast Selector -->
+          <div class="form-group" style="margin-top: 12px;">
+            <label class="form-label">🎯 Target Kanal Distribusi (Multi-Platform Broadcast)</label>
+            <div style="display: flex; gap: 14px; flex-wrap: wrap; background: var(--surface); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                <input type="checkbox" id="prodPlatIG" checked style="accent-color: var(--accent);"> 📸 Instagram Reels
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                <input type="checkbox" id="prodPlatTK" checked style="accent-color: var(--accent);"> 🎵 TikTok
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                <input type="checkbox" id="prodPlatFB" checked style="accent-color: var(--accent);"> 📘 Facebook Reels
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                <input type="checkbox" id="prodPlatYT" style="accent-color: var(--accent);"> ▶️ YouTube Shorts
+              </label>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">1 video hasil produksi akan otomatis disiarkan ke semua platform yang dicentang.</span>
+          </div>
+
+          <button type="button" class="btn-primary" style="margin-top: 12px; width: 100%;" onclick="generateDraftRows('product')">
+            ⚡ Buat Rencana Baris Jadwal (6 CEP)
+          </button>
         </div>
 
-        <!-- Job Card 4 -->
-        <div class="job-card">
-          <div class="job-card-top">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span class="platform-tag ig">INSTAGRAM</span>
-              <span style="font-weight: 750; font-size: 12px; color: var(--text-primary);">⏰ 21:00 WIB</span>
-              <span style="font-size: 11px; color: var(--text-muted);">· @skinglow_official</span>
-            </div>
-            <span class="status-badge scheduled">⏳ SCHEDULED</span>
+        <!-- 3. Generated Rows Table Area -->
+        <div id="generatedTableContainer" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+            <h4 style="font-size: 13px; font-weight: 800; color: var(--accent);">📋 Daftar Baris Jadwal Ter-Generate</h4>
+            <span style="font-size: 11px; color: var(--text-muted);">Bisa ubah pilar/CEP, tanggal, dan jam sesuai kebutuhan</span>
           </div>
-          <div>
-            <div style="font-weight: 800; font-size: 13px; color: var(--text-primary);">🏷️ Night Cream - VID_012</div>
-            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Night Routine Skincare untuk Wajah Cerah</div>
-          </div>
-          <div class="card-actions">
-            <div>
-              <button class="btn-cancel" onclick="alert('Jadwal berhasil dibatalkan!');">🚫 Batalkan Jadwal</button>
+
+          <div class="generated-table-wrapper">
+            <div class="generated-table-head">
+              <div>#</div>
+              <div id="colPillarOrCep">Pilar / CEP</div>
+              <div>Tanggal</div>
+              <div>Jam Tayang</div>
             </div>
-            <button class="btn-view-queue" onclick="closeDetailModal();">👁️ Lihat di Antrean</button>
+            <div id="generatedRowsList">
+              <!-- Dynamically Populated -->
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="modal-footer">
-        <button class="btn-action-primary" onclick="alert('Membuka dialog jadwal baru'); closeDetailModal();">
-          ＋ Jadwalkan Konten di Tanggal Ini
+      <div class="modal-foot">
+        <button type="button" class="btn-secondary" onclick="closeModal('addPlanModal')">Batal</button>
+        <button type="button" class="btn-primary" id="btnSaveSchedule" style="display: none;" onclick="saveGeneratedSchedule()">
+          💾 Simpan Jadwal ke Kalender
         </button>
-        <button class="btn-view-queue" onclick="closeDetailModal()">Tutup</button>
       </div>
     </div>
   </div>
 
+  <!-- =========================================================
+       7. MODAL 2: EDIT DATA PRODUK (REUSABLE COMPONENT)
+       ========================================================= -->
+  <div class="modal-backdrop" id="editProductModal">
+    <div class="modal-card" style="max-width: 640px;">
+      <div class="modal-head">
+        <h3>✏️ Edit Data Produk</h3>
+        <button class="btn-close-modal" onclick="closeModal('editProductModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Nama Produk *</label>
+          <input type="text" class="form-control" id="editProdName" value="">
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Kategori</label>
+            <input type="text" class="form-control" id="editProdCategory" value="">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Packaging Status</label>
+            <select class="form-control" id="editProdPackaging">
+              <option value="packaged">📦 Dikemas (Packaged)</option>
+              <option value="unpackaged">🔓 Tidak Dikemas</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Unique Selling Proposition (USP)</label>
+          <textarea class="form-control" id="editProdUSP" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="color: var(--status-success);">🛡️ Product Truth (Physics & Packaging Lock)</label>
+          <textarea class="form-control" id="editProdTruth" rows="2" placeholder="Deskripsi fisik kemasan resmi untuk physics lock AI..."></textarea>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn-secondary" onclick="closeModal('editProductModal')">Batal</button>
+        <button type="button" class="btn-primary" onclick="saveEditedProduct()">💾 Simpan Perubahan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Box -->
+  <div class="toast-box" id="toastBox">
+    <span id="toastIcon" style="font-size: 20px;">✅</span>
+    <span id="toastMsg" style="font-size: 13px; font-weight: 700;">Jadwal berhasil disimpan!</span>
+  </div>
+
+  <!-- =========================================================
+       8. JAVASCRIPT LOGIC & STATE SIMULATION
+       ========================================================= -->
   <script>
+    // State Data
+    let activePlanMode = 'editorial';
+    let currentDraftRows = [];
+    
+    // Initial Calendar Schedule Items
+    let scheduleEvents = [
+      { id: 1, type: 'product', title: 'Serum Retinol 0.5%', sub: 'CEP: Problem-Solution', time: '10:00', platform: 'IG', date: '2026-09-11' },
+      { id: 2, type: 'product', title: 'Sunscreen Gel UV', sub: 'CEP: Routine Based', time: '14:00', platform: 'TK', date: '2026-09-11' },
+      { id: 3, type: 'editorial', title: 'Brand Editorial', sub: 'Pilar: Edukasi & Problem', time: '19:00', platform: 'IG', date: '2026-09-12' },
+      { id: 4, type: 'product', title: 'Serum Retinol 0.5%', sub: 'CEP: Emotional Based', time: '10:00', platform: 'FB', date: '2026-09-13' },
+      { id: 5, type: 'editorial', title: 'Brand Editorial', sub: 'Pilar: Review & Comparison', time: '15:00', platform: 'TK', date: '2026-09-14' },
+      { id: 6, type: 'product', title: 'Gentle Facial Wash', sub: 'CEP: Problem-Solution', time: '11:00', platform: 'IG', date: '2026-09-15' },
+      { id: 7, type: 'product', title: 'Sunscreen Gel UV', sub: 'CEP: Opportunistic Based', time: '14:30', platform: 'IG', date: '2026-09-16' },
+      { id: 8, type: 'editorial', title: 'Brand Editorial', sub: 'Pilar: Routine & Habit', time: '18:00', platform: 'FB', date: '2026-09-17' },
+    ];
+
+    const cepList = [
+      'Problem-Solution Based',
+      'Routine Based',
+      'Emotional Based',
+      'Aspirational Based',
+      'Commitment Based',
+      'Opportunistic Based'
+    ];
+
+    const pillarList = [
+      'Edukasi & Problem Solving',
+      'Routine & Habit Building',
+      'Review & Honest Comparison',
+      'Behind the Scene & Lifestyle'
+    ];
+
+    // Initialize Calendar on Load
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCalendar();
+    });
+
+    function renderCalendar() {
+      const grid = document.getElementById('calendarGrid');
+      grid.innerHTML = '';
+      
+      // Total 35 cells for September 2026 (Starts on Tuesday = Day 1 index)
+      // August 31 (Prev month)
+      const prevMonthCell = createDayCell(31, true, false, '2026-08-31');
+      grid.appendChild(prevMonthCell);
+
+      // Sept 1 to 30
+      for (let day = 1; day <= 30; day++) {
+        const dateStr = `2026-09-${String(day).padStart(2, '0')}`;
+        const isToday = (day === 11);
+        const dayCell = createDayCell(day, false, isToday, dateStr);
+        grid.appendChild(dayCell);
+      }
+
+      // Oct 1 to 4 (Next month)
+      for (let nextDay = 1; nextDay <= 4; nextDay++) {
+        const dateStr = `2026-10-${String(nextDay).padStart(2, '0')}`;
+        const nextMonthCell = createDayCell(nextDay, true, false, dateStr);
+        grid.appendChild(nextMonthCell);
+      }
+
+      document.getElementById('totalScheduledCount').innerText = scheduleEvents.length;
+    }
+
+    function createDayCell(dayNum, isOtherMonth, isToday, dateStr) {
+      const cell = document.createElement('div');
+      cell.className = `day-cell ${isOtherMonth ? 'other-month' : ''} ${isToday ? 'today' : ''}`;
+
+      const topRow = document.createElement('div');
+      topRow.className = 'day-cell-top';
+      topRow.innerHTML = `
+        <span class="day-num">${dayNum}</span>
+        ${isToday ? '<span style="background:var(--link); color:#fff; font-size:9px; font-weight:800; padding:1px 5px; border-radius:4px;">HARI INI</span>' : ''}
+      `;
+      cell.appendChild(topRow);
+
+      const pillContainer = document.createElement('div');
+      pillContainer.className = 'pill-container';
+
+      // Find events matching this date
+      const matchingEvents = scheduleEvents.filter(ev => ev.date === dateStr);
+      matchingEvents.forEach(ev => {
+        const pill = document.createElement('div');
+        pill.className = `cal-event-pill ${ev.type === 'product' ? 'product-pill' : 'editorial-pill'}`;
+        pill.innerHTML = `
+          <div class="pill-time-platform">
+            <span>${ev.platform} · ${ev.time}</span>
+            <span>●</span>
+          </div>
+          <div class="pill-title">${ev.title}</div>
+          <div class="pill-badge-sub">${ev.sub}</div>
+        `;
+        pill.onclick = () => showToast(`🔍 Detail: ${ev.title} (${ev.sub}) - Jam ${ev.time}`);
+        pillContainer.appendChild(pill);
+      });
+
+      cell.appendChild(pillContainer);
+      return cell;
+    }
+
+    // Modal Plan Mode Selection
+    function selectPlanMode(mode) {
+      activePlanMode = mode;
+      document.getElementById('modeCardEditorial').classList.toggle('selected', mode === 'editorial');
+      document.getElementById('modeCardProduct').classList.toggle('selected', mode === 'product');
+
+      document.getElementById('subformEditorial').style.display = mode === 'editorial' ? 'block' : 'none';
+      document.getElementById('subformProduct').style.display = mode === 'product' ? 'block' : 'none';
+
+      // Reset generated table
+      document.getElementById('generatedTableContainer').style.display = 'none';
+      document.getElementById('btnSaveSchedule').style.display = 'none';
+    }
+
+    // Helper to calculate date & time slots based on posting frequency
+    function calculateScheduleSlots(count, startDateStr, frequencyPattern) {
+      const startDate = new Date(startDateStr);
+      const slots = [];
+
+      let times = ['10:00'];
+      let postsPerDay = 1;
+      let dayStep = 1;
+
+      if (frequencyPattern === '1_per_day') {
+        times = ['10:00'];
+        postsPerDay = 1;
+        dayStep = 1;
+      } else if (frequencyPattern === '2_per_day') {
+        times = ['10:00', '19:00'];
+        postsPerDay = 2;
+        dayStep = 1;
+      } else if (frequencyPattern === '3_per_day') {
+        times = ['09:00', '14:00', '19:00'];
+        postsPerDay = 3;
+        dayStep = 1;
+      } else if (frequencyPattern === '4_per_day') {
+        times = ['08:00', '12:00', '16:00', '20:00'];
+        postsPerDay = 4;
+        dayStep = 1;
+      } else if (frequencyPattern === '1_per_2_days') {
+        times = ['10:00'];
+        postsPerDay = 1;
+        dayStep = 2;
+      } else if (frequencyPattern === '1_per_3_days') {
+        times = ['10:00'];
+        postsPerDay = 1;
+        dayStep = 3;
+      }
+
+      for (let i = 0; i < count; i++) {
+        const dayIndex = Math.floor(i / postsPerDay);
+        const timeIndex = i % postsPerDay;
+
+        const rowDate = new Date(startDate);
+        rowDate.setDate(rowDate.getDate() + (dayIndex * dayStep));
+        const formattedDate = rowDate.toISOString().split('T')[0];
+        const time = times[timeIndex] || '10:00';
+
+        slots.push({ date: formattedDate, time });
+      }
+
+      return slots;
+    }
+
+    // Generate Draft Rows
+    function generateDraftRows(mode) {
+      const count = mode === 'editorial'
+        ? parseInt(document.getElementById('editorialCountInput').value)
+        : parseInt(document.getElementById('productCountInput').value);
+
+      const startDateStr = mode === 'editorial'
+        ? document.getElementById('editorialStartDate').value
+        : document.getElementById('productStartDate').value;
+
+      const frequency = mode === 'editorial'
+        ? document.getElementById('editorialFrequencyInput').value
+        : document.getElementById('productFrequencyInput').value;
+
+      const prodName = document.getElementById('productSelectInput').value;
+
+      // Extract checked broadcast platforms
+      const selectedPlatforms = [];
+      if (mode === 'editorial') {
+        if (document.getElementById('edPlatIG').checked) selectedPlatforms.push('IG');
+        if (document.getElementById('edPlatTK').checked) selectedPlatforms.push('TK');
+        if (document.getElementById('edPlatFB').checked) selectedPlatforms.push('FB');
+        if (document.getElementById('edPlatYT').checked) selectedPlatforms.push('YT');
+      } else {
+        if (document.getElementById('prodPlatIG').checked) selectedPlatforms.push('IG');
+        if (document.getElementById('prodPlatTK').checked) selectedPlatforms.push('TK');
+        if (document.getElementById('prodPlatFB').checked) selectedPlatforms.push('FB');
+        if (document.getElementById('prodPlatYT').checked) selectedPlatforms.push('YT');
+      }
+      const platformDisplay = selectedPlatforms.length > 0 ? selectedPlatforms.join(' · ') : 'IG';
+
+      const calculatedSlots = calculateScheduleSlots(count, startDateStr, frequency);
+      currentDraftRows = [];
+
+      for (let i = 0; i < count; i++) {
+        const slot = calculatedSlots[i];
+
+        if (mode === 'editorial') {
+          const pillar = pillarList[i % pillarList.length];
+          currentDraftRows.push({
+            index: i + 1,
+            type: 'editorial',
+            title: 'Brand Editorial',
+            tag: pillar,
+            date: slot.date,
+            time: slot.time,
+            platform: platformDisplay
+          });
+        } else {
+          const cep = cepList[i % cepList.length];
+          currentDraftRows.push({
+            index: i + 1,
+            type: 'product',
+            title: prodName,
+            tag: cep,
+            date: slot.date,
+            time: slot.time,
+            platform: platformDisplay
+          });
+        }
+      }
+
+      renderGeneratedRowsTable(mode);
+    }
+
+    function renderGeneratedRowsTable(mode) {
+      const list = document.getElementById('generatedRowsList');
+      list.innerHTML = '';
+
+      document.getElementById('colPillarOrCep').innerText = mode === 'editorial' ? 'Pilar Konten' : 'Category Entry Point (CEP)';
+
+      currentDraftRows.forEach((row, idx) => {
+        const item = document.createElement('div');
+        item.className = 'generated-row-item';
+
+        const dropdownOptions = (mode === 'editorial' ? pillarList : cepList)
+          .map(opt => `<option value="${opt}" ${opt === row.tag ? 'selected' : ''}>${opt}</option>`)
+          .join('');
+
+        item.innerHTML = `
+          <div style="font-weight:800; font-size:12px; color:var(--text-muted);">${row.index}</div>
+          <div>
+            <select class="form-control" style="padding:4px 8px; font-size:12px;" onchange="currentDraftRows[${idx}].tag = this.value">
+              ${dropdownOptions}
+            </select>
+          </div>
+          <div>
+            <input type="date" class="form-control" style="padding:4px 8px; font-size:12px;" value="${row.date}" onchange="currentDraftRows[${idx}].date = this.value">
+          </div>
+          <div>
+            <input type="time" class="form-control" style="padding:4px 8px; font-size:12px;" value="${row.time}" onchange="currentDraftRows[${idx}].time = this.value">
+          </div>
+        `;
+        list.appendChild(item);
+      });
+
+      document.getElementById('generatedTableContainer').style.display = 'block';
+      document.getElementById('btnSaveSchedule').style.display = 'inline-block';
+    }
+
+    // Save Generated Schedule to Calendar
+    function saveGeneratedSchedule() {
+      currentDraftRows.forEach(row => {
+        scheduleEvents.push({
+          id: Date.now() + Math.random(),
+          type: row.type,
+          title: row.title,
+          sub: (row.type === 'editorial' ? `Pilar: ${row.tag}` : `CEP: ${row.tag}`),
+          time: row.time,
+          platform: row.platform,
+          date: row.date
+        });
+      });
+
+      renderCalendar();
+      closeModal('addPlanModal');
+      showToast(`🎉 Sukses menambahkan ${currentDraftRows.length} baris jadwal ke Content Calendar!`);
+    }
+
+    // Send to Content Planner Action
+    function handleSendToPlanner() {
+      showToast('⚡ Menghubungkan jadwal ke AI Content Planner Engine...');
+      setTimeout(() => {
+        showToast('🚀 Berhasil membuat sesi Planner resmi dengan naskah & locked structure!');
+      }, 1200);
+    }
+
+    // Navigation & Tabs
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
+      const target = document.getElementById(`tab-${tabId}`);
+      if (target) target.classList.add('active');
+      if (btn) btn.classList.add('active');
+    }
+
+    function switchBrand(brand) {
+      const label = brand === 'skinbeauty' ? '@skinbeauty (Skin Glow Official)' : '@skinglow (Daily Protection)';
+      document.getElementById('activeBrandLabel').innerText = label;
+      showToast(`Switched active brand to ${label}`);
+    }
+
+    // Edit Product Modal
+    function openEditProductModal(name, cat, usp) {
+      document.getElementById('editProdName').value = name;
+      document.getElementById('editProdCategory').value = cat;
+      document.getElementById('editProdUSP').value = usp;
+      document.getElementById('editProdTruth').value = `Official authentic ${name} packaging, high quality render physics.`;
+      openModal('editProductModal');
+    }
+
+    function saveEditedProduct() {
+      closeModal('editProductModal');
+      showToast('✅ Data produk & physics truth berhasil diperbarui!');
+    }
+
+    // Modal Helpers
+    function openAddPlanModal() {
+      selectPlanMode('editorial');
+      openModal('addPlanModal');
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.add('active');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    // Toast Helper
+    function showToast(msg) {
+      const box = document.getElementById('toastBox');
+      document.getElementById('toastMsg').innerText = msg;
+      box.classList.add('show');
+      setTimeout(() => box.classList.remove('show'), 3200);
+    }
+
+    // Theme Toggle
     function toggleTheme() {
       const html = document.documentElement;
-      const currentTheme = html.getAttribute('data-theme');
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      html.setAttribute('data-theme', newTheme);
-      
-      const icon = document.getElementById('themeIcon');
-      const label = document.getElementById('themeLabel');
-      if (newTheme === 'light') {
-        icon.textContent = '🌙';
-        label.textContent = 'Ganti ke Dark Theme';
-      } else {
-        icon.textContent = '☀️';
-        label.textContent = 'Ganti ke Light Theme';
-      }
-    }
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
 
-    function openDetailModal(dateText, count) {
-      document.getElementById('modalTitle').textContent = `📅 Detail Jadwal: ${dateText}`;
-      document.getElementById('modalSubtitle').textContent = `Total ${count} konten dijadwalkan pada hari ini.`;
-      document.getElementById('detailModal').classList.add('active');
-    }
-
-    function closeDetailModal() {
-      document.getElementById('detailModal').classList.remove('active');
+      document.getElementById('themeIcon').innerText = next === 'dark' ? '☀️' : '🌙';
+      document.getElementById('themeLabel').innerText = next === 'dark' ? 'Light Mode' : 'Dark Mode';
     }
   </script>
 </body>

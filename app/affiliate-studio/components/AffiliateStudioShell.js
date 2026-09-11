@@ -4,7 +4,7 @@ export function AffiliateStudioShell({ brands = [], activeBrand, activeView = 'o
   const tabs = [
     { key: 'overview', label: 'Overview', enabled: true },
     { key: 'products', label: 'Products', enabled: true },
-    { key: 'campaigns', label: 'Campaigns', enabled: true },
+    { key: 'calendar', label: 'Content Calendar', enabled: true },
     { key: 'planner', label: 'Planner', enabled: true },
     { key: 'production', label: 'Production', enabled: true },
     { key: 'publishing', label: 'Publishing', enabled: true },

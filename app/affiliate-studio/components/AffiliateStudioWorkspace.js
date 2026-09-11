@@ -11,6 +11,7 @@ import {
 import { AffiliateStudioShell } from './AffiliateStudioShell';
 import { BrandOverview } from './BrandOverview';
 import { BrandProductPortfolio } from './BrandProductPortfolio';
+import AffiliateContentCalendar from './AffiliateContentCalendar';
 import { BrandCampaignPrograms } from './BrandCampaignPrograms';
 import { CampaignProgramDetail } from './CampaignProgramDetail';
 import { BrandCalendarView } from './BrandCalendarView';
@@ -417,6 +418,8 @@ export function AffiliateStudioWorkspace() {
       )}
       {activeView === 'products' && (
         <BrandProductPortfolio
+          brandId={activeBrand?.id}
+          brandName={activeBrand?.name || activeBrand?.brand_name}
           data={portfolio}
           filters={productFilters}
           loading={loadingPortfolio}
@@ -440,36 +443,13 @@ export function AffiliateStudioWorkspace() {
           onRefresh={() => activeBrand && loadProducts(activeBrand.id, productFilters)}
         />
       )}
-      {activeView === 'campaigns' && !requestedProgramId && (
-        <BrandCampaignPrograms
+      {(activeView === 'calendar' || activeView === 'campaigns') && (
+        <AffiliateContentCalendar
           brandId={activeBrand?.id}
-          programs={programs}
-          loading={loadingPrograms}
-          error={programsError}
-          onCreate={handleCreateProgram}
-          onSelect={(programId) => {
-            router.push(buildAffiliateStudioUrl(activeBrand?.id, {
-              view: 'campaigns',
-              program: programId
-            }));
+          brandName={activeBrand?.name || activeBrand?.brand_name}
+          onNavigateToPlanner={(sched) => {
+            router.push(buildAffiliateStudioUrl(activeBrand?.id, { view: 'planner' }));
           }}
-          onRefresh={() => activeBrand && loadPrograms(activeBrand.id)}
-        />
-      )}
-      {activeView === 'campaigns' && requestedProgramId && (
-        <CampaignProgramDetail
-          brandId={activeBrand?.id}
-          program={programDetail}
-          loading={loadingProgramDetail}
-          error={programDetailError}
-          onBack={() => {
-            router.push(buildAffiliateStudioUrl(activeBrand?.id, { view: 'campaigns' }));
-          }}
-          onUpdate={handleUpdateProgram}
-          onArchive={handleArchiveProgram}
-          onAddProducts={handleAddProductsToProgram}
-          onRemoveProducts={handleRemoveProductsFromProgram}
-          onRefresh={() => activeBrand && loadProgramDetail(activeBrand.id, requestedProgramId)}
         />
       )}
       {activeView === 'planner' && (

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.30.0 — Affiliate Studio Content Calendar & Product Edit Modal (Repliz Aligned) (11/09/2026)
+- Penyederhanaan Tab Products & Modal Edit Produk
+- Penambahan Tab Content Calendar interaktif dengan multi-platform broadcast
+- Penyelarasan arsitektur jadwal dengan Repliz Publishing API
+
 ## V2.29.48 — Penambahan Multi-Platform Publish Badges pada Searchbox ID Konten (11/09/2026)
 - Menampilkan badge status publikasi per platform (IG, TikTok, FB, YouTube) atau Belum Terpublikasi pada dropdown searchbox Video ID
 - Memudahkan identifikasi video fresh vs cross-posting dengan Semantic CSS
