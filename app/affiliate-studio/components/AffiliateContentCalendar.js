@@ -1056,7 +1056,7 @@ export default function AffiliateContentCalendar({
                       >
                         {brandProducts.map(p => (
                           <option key={p.productId} value={p.productId}>
-                            {p.displayName || p.name} (Rp {p.price?.toLocaleString('id-ID') || 0})
+                            {p.displayName || p.productName || p.name}
                           </option>
                         ))}
                       </select>

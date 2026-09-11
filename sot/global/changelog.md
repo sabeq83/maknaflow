@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.30.4 — Clean up product option label in Content Calendar (12/09/2026)
+- Menampilkan hanya nama produk pada dropdown pilihan produk Product Campaign
+- Menghapus tampilan teks harga kosong Rp 0
+
 ## V2.30.3 — Dynamic Proportional Pillar Multiplier for Brand Editorial Calendar (11/09/2026)
 - Penyesuaian dropdown Jumlah Konten Brand Editorial berdasarkan total pilar brand aktif
 - Dukungan opsi kelipatan 1x hingga 4x ide per pilar hingga 28 konten sebulan
