@@ -46,15 +46,20 @@ export default function AffiliateContentCalendar({
 
   // Modal State
   const [showPlanModal, setShowPlanModal] = useState(false);
-  const [planType, setPlanType] = useState('product_campaign'); // 'brand_editorial' | 'product_campaign'
+  const [planType, setPlanType] = useState('brand_editorial'); // 'brand_editorial' (LEFT) | 'product_campaign' (RIGHT)
   const [selectedProductId, setSelectedProductId] = useState('');
   const [promotionContext, setPromotionContext] = useState('');
-  const [contentCount, setContentCount] = useState(6);
+  const [contentCount, setContentCount] = useState(8);
   const [startDate, setStartDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [postingFrequency, setPostingFrequency] = useState('2'); // '1', '2', '3', '4', 'every2', 'every3'
   const [selectedPlatforms, setSelectedPlatforms] = useState(['instagram', 'tiktok', 'facebook']);
   const [draftRows, setDraftRows] = useState([]);
   const [savingPlan, setSavingPlan] = useState(false);
+  const [brandProfileData, setBrandProfileData] = useState({
+    context: '',
+    goal: '',
+    pillars: DEFAULT_BRAND_PILLARS
+  });
 
   // Selected schedule detail modal / drawer
   const [selectedSchedule, setSelectedSchedule] = useState(null);
@@ -112,6 +117,32 @@ export default function AffiliateContentCalendar({
       })
       .catch(() => {});
   }, [brandId]);
+
+  // 3. Fetch active brand profile for editorial context, goals & pillars
+  useEffect(() => {
+    fetch('/api/brand-profiles')
+      .then(r => r.json())
+      .then(json => {
+        if (json.success && Array.isArray(json.brands)) {
+          const match = json.brands.find(b => b.id === brandId || b.brand_name === brandName);
+          if (match) {
+            let parsedPillars = [];
+            try {
+              parsedPillars = typeof match.editorial_content_pillars_json === 'string'
+                ? JSON.parse(match.editorial_content_pillars_json)
+                : (match.editorial_content_pillars_json || []);
+            } catch (_) {}
+
+            setBrandProfileData({
+              context: match.editorial_brand_context || match.tone_of_voice || 'Brand berfokus pada konten berkualitas dan engagement audiens.',
+              goal: match.editorial_content_goal || 'Membangun authority dan engagement audiens.',
+              pillars: (Array.isArray(parsedPillars) && parsedPillars.length > 0) ? parsedPillars : DEFAULT_BRAND_PILLARS
+            });
+          }
+        }
+      })
+      .catch(() => {});
+  }, [brandId, brandName]);
 
   // Calendar Days Computation
   const calendarGrid = useMemo(() => {
@@ -200,9 +231,16 @@ export default function AffiliateContentCalendar({
     });
   };
 
+  // Active brand pillars (dynamic with fallback)
+  const activeBrandPillars = useMemo(() => {
+    return (brandProfileData.pillars && brandProfileData.pillars.length > 0)
+      ? brandProfileData.pillars
+      : DEFAULT_BRAND_PILLARS;
+  }, [brandProfileData.pillars]);
+
   // Generate Draft Rows
   const handleGeneratePlanDraft = () => {
-    const count = parseInt(contentCount, 10) || 6;
+    const count = parseInt(contentCount, 10) || (planType === 'brand_editorial' ? 8 : 6);
     const baseDate = new Date(startDate);
     const rows = [];
 
@@ -244,13 +282,13 @@ export default function AffiliateContentCalendar({
       }
 
       const cepIdx = i % CEP_OPTIONS.length;
-      const pillarIdx = i % DEFAULT_BRAND_PILLARS.length;
+      const pillarIdx = i % activeBrandPillars.length;
 
       rows.push({
         id: `draft_${i}_${Date.now()}`,
-        cep_code: CEP_OPTIONS[cepIdx].code,
-        pillar_name: DEFAULT_BRAND_PILLARS[pillarIdx],
-        product_name: resolvedProdName,
+        cep_code: planType === 'product_campaign' ? CEP_OPTIONS[cepIdx].code : null,
+        pillar_name: planType === 'brand_editorial' ? activeBrandPillars[pillarIdx] : null,
+        product_name: planType === 'product_campaign' ? resolvedProdName : null,
         date: dateStr,
         time: timeStr
       });
@@ -348,155 +386,193 @@ export default function AffiliateContentCalendar({
   // Open modal prefilled with specific date
   const handleOpenAddOnDate = (dateStr) => {
     setStartDate(dateStr);
+    setDraftRows([]);
     setShowPlanModal(true);
   };
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '16px',
-      color: 'var(--text-main, #f8fafc)',
-      minHeight: '600px'
-    }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Toast Notification */}
       {toastMsg && (
         <div style={{
           position: 'fixed',
-          top: '24px',
+          bottom: '24px',
           right: '24px',
-          padding: '12px 20px',
-          background: 'rgba(15, 23, 42, 0.95)',
+          background: 'var(--surface-bg, #0f172a)',
           color: 'var(--text-main, #f8fafc)',
-          border: '1px solid var(--primary, #38bdf8)',
+          padding: '12px 20px',
           borderRadius: '10px',
+          border: '1px solid var(--primary, #38bdf8)',
           boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
           zIndex: 99999,
-          fontSize: '13px',
-          fontWeight: 600
+          fontWeight: 600,
+          fontSize: '13px'
         }}>
           {toastMsg}
         </div>
       )}
 
-      {/* Top Header & Calendar Controls */}
+      {/* Action Bar */}
       <div style={{
         display: 'flex',
-        alignItems: 'center',
         justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '16px',
         padding: '16px 20px',
         background: 'var(--surface-bg, #0f172a)',
         borderRadius: '12px',
-        border: '1px solid var(--border-color, #1e293b)',
-        flexWrap: 'wrap',
-        gap: '12px'
+        border: '1px solid var(--border-color, #1e293b)'
       }}>
-        {/* Month Navigation */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button
-            type="button"
-            onClick={handlePrevMonth}
-            style={{
-              padding: '6px 12px',
-              borderRadius: '8px',
-              border: '1px solid var(--border-color, #1e293b)',
-              background: 'var(--surface-subtle, #090e1a)',
-              color: 'var(--text-main, #f8fafc)',
-              cursor: 'pointer',
-              fontWeight: 600
-            }}
-          >
-            ◀
-          </button>
-          <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 700, minWidth: '180px', textAlign: 'center' }}>
-            {MONTH_NAMES[currentMonth - 1]} {currentYear}
+        <div>
+          <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 4px 0', color: 'var(--text-main, #f8fafc)' }}>
+            📅 Content Calendar & Repliz Scheduling
           </h2>
-          <button
-            type="button"
-            onClick={handleNextMonth}
-            style={{
-              padding: '6px 12px',
-              borderRadius: '8px',
-              border: '1px solid var(--border-color, #1e293b)',
-              background: 'var(--surface-subtle, #090e1a)',
-              color: 'var(--text-main, #f8fafc)',
-              cursor: 'pointer',
-              fontWeight: 600
-            }}
-          >
-            ▶
-          </button>
-          <button
-            type="button"
-            onClick={handleToday}
-            style={{
-              padding: '6px 12px',
-              borderRadius: '8px',
-              border: '1px solid var(--border-color, #1e293b)',
-              background: 'transparent',
-              color: 'var(--text-muted, #94a3b8)',
-              fontSize: '12px',
-              cursor: 'pointer'
-            }}
-          >
-            Bulan Ini
-          </button>
+          <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted, #94a3b8)' }}>
+            Jadwalkan konten editorial brand dan kampanye produk dengan integrasi multi-channel broadcast.
+          </p>
         </div>
 
-        {/* Stats & Add Plan Button */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ display: 'flex', gap: '8px', fontSize: '12px', color: 'var(--text-muted, #94a3b8)' }}>
-            <span style={{ padding: '4px 8px', borderRadius: '6px', background: 'var(--surface-subtle, #090e1a)', border: '1px solid var(--border-color, #1e293b)' }}>
-              📦 Total: <strong>{schedules.length}</strong>
-            </span>
-          </div>
-
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <button
             type="button"
-            onClick={() => setShowPlanModal(true)}
+            onClick={() => {
+              setDraftRows([]);
+              setShowPlanModal(true);
+            }}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '9px 16px',
+              padding: '9px 18px',
               borderRadius: '8px',
-              border: 'none',
               background: 'var(--primary, #38bdf8)',
               color: '#0f172a',
+              border: 'none',
+              fontWeight: 750,
               fontSize: '13px',
-              fontWeight: 700,
               cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(56, 189, 248, 0.25)'
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
             }}
           >
             <span>+</span> Tambahkan Plan
           </button>
+
+          <button
+            type="button"
+            onClick={() => onNavigateToPlanner?.()}
+            style={{
+              padding: '9px 16px',
+              borderRadius: '8px',
+              background: 'rgba(56, 189, 248, 0.1)',
+              color: 'var(--primary, #38bdf8)',
+              border: '1px solid var(--primary, #38bdf8)',
+              fontWeight: 650,
+              fontSize: '13px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <span>⚡</span> Buka Content Planner
+          </button>
         </div>
       </div>
 
-      {/* 7-Days Calendar Grid */}
+      {/* Calendar Shell */}
       <div style={{
         background: 'var(--surface-bg, #0f172a)',
         borderRadius: '12px',
         border: '1px solid var(--border-color, #1e293b)',
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column'
+        overflow: 'hidden'
       }}>
-        {/* Days Header */}
+        {/* Calendar Nav Bar */}
+        <div style={{
+          padding: '14px 20px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderBottom: '1px solid var(--border-color, #1e293b)',
+          background: 'var(--surface-header, rgba(15, 23, 42, 0.6))'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button
+              type="button"
+              onClick={handlePrevMonth}
+              style={{
+                padding: '6px 12px',
+                borderRadius: '6px',
+                background: 'var(--surface-subtle, #1e293b)',
+                border: '1px solid var(--border-color, #334155)',
+                color: 'var(--text-main, #f8fafc)',
+                fontSize: '12px',
+                cursor: 'pointer'
+              }}
+            >
+              ‹ Prev
+            </button>
+            <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-main, #f8fafc)' }}>
+              📅 {MONTH_NAMES[currentMonth - 1]} {currentYear}
+            </span>
+            <button
+              type="button"
+              onClick={handleNextMonth}
+              style={{
+                padding: '6px 12px',
+                borderRadius: '6px',
+                background: 'var(--surface-subtle, #1e293b)',
+                border: '1px solid var(--border-color, #334155)',
+                color: 'var(--text-main, #f8fafc)',
+                fontSize: '12px',
+                cursor: 'pointer'
+              }}
+            >
+              Next ›
+            </button>
+            <button
+              type="button"
+              onClick={handleToday}
+              style={{
+                padding: '4px 10px',
+                borderRadius: '6px',
+                background: 'transparent',
+                border: '1px solid var(--border-color, #334155)',
+                color: 'var(--text-muted, #94a3b8)',
+                fontSize: '11px',
+                cursor: 'pointer'
+              }}
+            >
+              Bulan Ini
+            </button>
+          </div>
+
+          <div style={{ fontSize: '13px', color: 'var(--text-muted, #94a3b8)' }}>
+            Total <strong style={{ color: 'var(--primary, #38bdf8)' }}>{schedules.length}</strong> Konten Terjadwal
+            {loading && <span style={{ marginLeft: '8px', fontSize: '11px' }}>⏳ Memuat...</span>}
+          </div>
+        </div>
+
+        {/* Weekday Headers (Mon-Sun) */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(7, 1fr)',
-          borderBottom: '1px solid var(--border-color, #1e293b)',
           background: 'var(--surface-subtle, #090e1a)',
-          textAlign: 'center',
-          fontWeight: 700,
-          fontSize: '11px',
-          letterSpacing: '0.05em',
-          color: 'var(--text-muted, #94a3b8)'
+          borderBottom: '1px solid var(--border-color, #1e293b)'
         }}>
-          {['SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU', 'MINGGU'].map(day => (
-            <div key={day} style={{ padding: '10px 0' }}>{day}</div>
+          {['SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU', 'MINGGU'].map((day, idx) => (
+            <div
+              key={day}
+              style={{
+                padding: '10px',
+                textAlign: 'center',
+                fontSize: '11px',
+                fontWeight: 700,
+                color: idx >= 5 ? '#f43f5e' : 'var(--text-muted, #94a3b8)',
+                letterSpacing: '0.5px'
+              }}
+            >
+              {day}
+            </div>
           ))}
         </div>
 
@@ -594,7 +670,7 @@ export default function AffiliateContentCalendar({
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
-                          <span style={{ fontWeight: 700, color: isCampaign ? '#38bdf8' : '#c084fc' }}>
+                          <span style={{ fontWeight: 750, color: isCampaign ? '#38bdf8' : '#c084fc' }}>
                             {timeStr}
                           </span>
                           <span style={{ fontSize: '9px', opacity: 0.75 }}>
@@ -687,84 +763,310 @@ export default function AffiliateContentCalendar({
 
             {/* Modal Scrollable Body */}
             <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {/* 1. Plan Type Switcher */}
+              {/* 1. Plan Type Switcher (Brand Editorial KIRI, Product Campaign KANAN) */}
               <div>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '8px', color: 'var(--text-muted, #94a3b8)' }}>
-                  Tipe Rencana
+                  1. Pilih Tipe Plan
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  {/* Brand Editorial di KIRI */}
                   <button
                     type="button"
-                    onClick={() => { setPlanType('product_campaign'); setDraftRows([]); }}
+                    onClick={() => {
+                      setPlanType('brand_editorial');
+                      setContentCount(8);
+                      setDraftRows([]);
+                    }}
                     style={{
                       padding: '12px',
                       borderRadius: '10px',
-                      border: planType === 'product_campaign' ? '2px solid var(--primary, #38bdf8)' : '1px solid var(--border-color, #1e293b)',
-                      background: planType === 'product_campaign' ? 'rgba(56, 189, 248, 0.12)' : 'var(--surface-subtle, #090e1a)',
+                      border: planType === 'brand_editorial' ? '2px solid var(--primary, #38bdf8)' : '1px solid var(--border-color, #1e293b)',
+                      background: planType === 'brand_editorial' ? 'rgba(56, 189, 248, 0.12)' : 'var(--surface-subtle, #090e1a)',
                       color: 'var(--text-main, #f8fafc)',
                       textAlign: 'left',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
                     }}
                   >
-                    <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '4px' }}>🎯 Product Campaign</div>
+                    <div style={{ fontWeight: 750, fontSize: '14px', marginBottom: '4px', color: planType === 'brand_editorial' ? 'var(--primary, #38bdf8)' : 'inherit' }}>
+                      🏛️ Brand Editorial
+                    </div>
                     <div style={{ fontSize: '12px', color: 'var(--text-muted, #94a3b8)' }}>
-                      Fokus 1 produk dengan rotasi 6 Category Entry Point (CEP).
+                      Konten pilar otoritas brand, edukasi umum, lifestyle, dan interaksi audiens.
                     </div>
                   </button>
 
+                  {/* Product Campaign di KANAN */}
                   <button
                     type="button"
-                    onClick={() => { setPlanType('brand_editorial'); setDraftRows([]); }}
+                    onClick={() => {
+                      setPlanType('product_campaign');
+                      setContentCount(6);
+                      setDraftRows([]);
+                    }}
                     style={{
                       padding: '12px',
                       borderRadius: '10px',
-                      border: planType === 'brand_editorial' ? '2px solid #a855f7' : '1px solid var(--border-color, #1e293b)',
-                      background: planType === 'brand_editorial' ? 'rgba(168, 85, 247, 0.12)' : 'var(--surface-subtle, #090e1a)',
+                      border: planType === 'product_campaign' ? '2px solid #a855f7' : '1px solid var(--border-color, #1e293b)',
+                      background: planType === 'product_campaign' ? 'rgba(168, 85, 247, 0.12)' : 'var(--surface-subtle, #090e1a)',
                       color: 'var(--text-main, #f8fafc)',
                       textAlign: 'left',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
                     }}
                   >
-                    <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '4px' }}>🏛️ Brand Editorial</div>
+                    <div style={{ fontWeight: 750, fontSize: '14px', marginBottom: '4px', color: planType === 'product_campaign' ? '#c084fc' : 'inherit' }}>
+                      📦 Product Campaign
+                    </div>
                     <div style={{ fontSize: '12px', color: 'var(--text-muted, #94a3b8)' }}>
-                      Konten organik pilar brand (Edukasi, Cerita, Tips, UGC).
+                      Pengetesan siklus 6 CEP spesifik untuk 1 produk dengan konteks promosi.
                     </div>
                   </button>
                 </div>
               </div>
 
-              {/* 2. Product Campaign Config */}
-              {planType === 'product_campaign' && (
-                <div style={{ padding: '14px', borderRadius: '10px', background: 'var(--surface-subtle, #090e1a)', border: '1px solid var(--border-color, #1e293b)' }}>
-                  <div style={{ marginBottom: '12px' }}>
+              {/* 2.A Subform: Brand Editorial */}
+              {planType === 'brand_editorial' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {/* Snapshot Konteks & Pilar dari Brand Profile Aktif */}
+                  <div style={{
+                    padding: '14px 16px',
+                    borderRadius: '10px',
+                    background: 'var(--surface-subtle, #090e1a)',
+                    border: '1px solid var(--border-color, #1e293b)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px'
+                  }}>
+                    <div style={{ fontSize: '12px', display: 'flex', gap: '6px' }}>
+                      <span style={{ fontWeight: 700, color: 'var(--primary, #38bdf8)', minWidth: '110px' }}>📌 Konteks Brand:</span>
+                      <span style={{ color: 'var(--text-main, #f8fafc)' }}>
+                        {brandProfileData.context || 'Brand berfokus pada konten berkualitas tinggi.'}
+                      </span>
+                    </div>
+
+                    <div style={{ fontSize: '12px', display: 'flex', gap: '6px' }}>
+                      <span style={{ fontWeight: 700, color: '#c084fc', minWidth: '110px' }}>🎯 Tujuan Konten:</span>
+                      <span style={{ color: 'var(--text-main, #f8fafc)' }}>
+                        {brandProfileData.goal || 'Membangun authority dan engagement audiens.'}
+                      </span>
+                    </div>
+
+                    <div style={{ fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '4px' }}>
+                      <span style={{ fontWeight: 700, color: 'var(--text-muted, #94a3b8)' }}>🏛️ Pilar Konten Brand:</span>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                        {activeBrandPillars.map(p => (
+                          <span
+                            key={p}
+                            style={{
+                              padding: '4px 10px',
+                              borderRadius: '6px',
+                              background: 'rgba(56, 189, 248, 0.12)',
+                              color: 'var(--primary, #38bdf8)',
+                              fontSize: '11.5px',
+                              fontWeight: 600,
+                              border: '1px solid rgba(56, 189, 248, 0.25)'
+                            }}
+                          >
+                            {p}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Form Parameters Editorial */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
+                        Jumlah Konten
+                      </label>
+                      <select
+                        value={contentCount}
+                        onChange={(e) => setContentCount(Number(e.target.value))}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid var(--border-color, #1e293b)',
+                          background: 'var(--surface-subtle, #090e1a)',
+                          color: 'var(--text-main, #f8fafc)',
+                          fontSize: '13px',
+                          outline: 'none'
+                        }}
+                      >
+                        <option value="4">4 Konten (1 Ide per Pilar)</option>
+                        <option value="8">8 Konten (2 Ide per Pilar)</option>
+                        <option value="12">12 Konten (3 Ide per Pilar)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
+                        Jadwalkan Mulai
+                      </label>
+                      <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid var(--border-color, #1e293b)',
+                          background: 'var(--surface-subtle, #090e1a)',
+                          color: 'var(--text-main, #f8fafc)',
+                          fontSize: '13px',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Frequency Selector */}
+                  <div>
                     <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
-                      Pilih Produk Unggulan
+                      Frekuensi Posting (Berapa Kali Sehari / Interval)
                     </label>
                     <select
-                      value={selectedProductId}
-                      onChange={(e) => setSelectedProductId(e.target.value)}
+                      value={postingFrequency}
+                      onChange={(e) => setPostingFrequency(e.target.value)}
                       style={{
                         width: '100%',
                         padding: '10px 12px',
                         borderRadius: '8px',
                         border: '1px solid var(--border-color, #1e293b)',
-                        background: 'var(--surface-bg, #0f172a)',
+                        background: 'var(--surface-subtle, #090e1a)',
                         color: 'var(--text-main, #f8fafc)',
                         fontSize: '13px',
                         outline: 'none'
                       }}
                     >
-                      {brandProducts.map(p => (
-                        <option key={p.productId} value={p.productId}>
-                          {p.displayName || p.name} (Rp {p.price?.toLocaleString('id-ID') || 0})
-                        </option>
-                      ))}
+                      <option value="1">1x Posting per Hari (10:00 WIB)</option>
+                      <option value="2">2x Posting per Hari (10:00 & 16:00 WIB)</option>
+                      <option value="3">3x Posting per Hari (09:00, 13:00, 19:00 WIB)</option>
+                      <option value="4">4x Posting per Hari (08:00, 12:00, 16:00, 20:00 WIB)</option>
+                      <option value="every2">1x Posting tiap 2 Hari (2 Hari Sekali)</option>
+                      <option value="every3">1x Posting tiap 3 Hari (3 Hari Sekali)</option>
                     </select>
+                  </div>
+
+                  {/* Multi-Platform Broadcast Selector */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
+                      🎯 Target Kanal Distribusi (Multi-Platform Broadcast)
+                    </label>
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                      {PLATFORMS_CONFIG.map(p => (
+                        <label
+                          key={p.id}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '8px 14px',
+                            borderRadius: '8px',
+                            background: selectedPlatforms.includes(p.id) ? 'rgba(56, 189, 248, 0.12)' : 'var(--surface-subtle, #090e1a)',
+                            border: selectedPlatforms.includes(p.id) ? '1px solid var(--primary, #38bdf8)' : '1px solid var(--border-color, #1e293b)',
+                            cursor: 'pointer',
+                            fontSize: '13px',
+                            fontWeight: 600
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedPlatforms.includes(p.id)}
+                            onChange={() => handleTogglePlatform(p.id)}
+                            style={{ cursor: 'pointer' }}
+                          />
+                          <span>{p.icon}</span>
+                          <span>{p.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Trigger Generate Draft Button */}
+                  <div>
+                    <button
+                      type="button"
+                      onClick={handleGeneratePlanDraft}
+                      style={{
+                        width: '100%',
+                        padding: '11px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: 'var(--primary, #38bdf8)',
+                        color: '#0f172a',
+                        fontWeight: 750,
+                        fontSize: '13px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ⚡ Buat Rencana Baris Jadwal ({contentCount} Konten)
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* 2.B Subform: Product Campaign */}
+              {planType === 'product_campaign' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
+                        Pilih 1 Produk Target
+                      </label>
+                      <select
+                        value={selectedProductId}
+                        onChange={(e) => setSelectedProductId(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid var(--border-color, #1e293b)',
+                          background: 'var(--surface-subtle, #090e1a)',
+                          color: 'var(--text-main, #f8fafc)',
+                          fontSize: '13px',
+                          outline: 'none'
+                        }}
+                      >
+                        {brandProducts.map(p => (
+                          <option key={p.productId} value={p.productId}>
+                            {p.displayName || p.name} (Rp {p.price?.toLocaleString('id-ID') || 0})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
+                        Jumlah Konten (Siklus 6 CEP)
+                      </label>
+                      <select
+                        value={contentCount}
+                        onChange={(e) => setContentCount(Number(e.target.value))}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid var(--border-color, #1e293b)',
+                          background: 'var(--surface-subtle, #090e1a)',
+                          color: 'var(--text-main, #f8fafc)',
+                          fontSize: '13px',
+                          outline: 'none'
+                        }}
+                      >
+                        <option value="6">6 Konten (1 Siklus 6 CEP Penuh)</option>
+                        <option value="12">12 Konten (2 Siklus 6 CEP)</option>
+                        <option value="18">18 Konten (3 Siklus 6 CEP)</option>
+                      </select>
+                    </div>
                   </div>
 
                   <div>
                     <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
-                      Konteks Promosi / Penawaran Khusus
+                      Konteks Promosi Khusus (Optional)
                     </label>
                     <textarea
                       rows={2}
@@ -776,166 +1078,125 @@ export default function AffiliateContentCalendar({
                         padding: '10px 12px',
                         borderRadius: '8px',
                         border: '1px solid var(--border-color, #1e293b)',
-                        background: 'var(--surface-bg, #0f172a)',
+                        background: 'var(--surface-subtle, #090e1a)',
                         color: 'var(--text-main, #f8fafc)',
                         fontSize: '13px',
                         outline: 'none'
                       }}
                     />
                   </div>
-                </div>
-              )}
 
-              {/* 3. Brand Editorial Snapshot */}
-              {planType === 'brand_editorial' && (
-                <div style={{ padding: '14px', borderRadius: '10px', background: 'var(--surface-subtle, #090e1a)', border: '1px solid var(--border-color, #1e293b)' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: '8px', color: 'var(--text-muted, #94a3b8)' }}>
-                    Pilar Konten Brand
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
+                        Jadwalkan Mulai
+                      </label>
+                      <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid var(--border-color, #1e293b)',
+                          background: 'var(--surface-subtle, #090e1a)',
+                          color: 'var(--text-main, #f8fafc)',
+                          fontSize: '13px',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
+                        Frekuensi Posting
+                      </label>
+                      <select
+                        value={postingFrequency}
+                        onChange={(e) => setPostingFrequency(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid var(--border-color, #1e293b)',
+                          background: 'var(--surface-subtle, #090e1a)',
+                          color: 'var(--text-main, #f8fafc)',
+                          fontSize: '13px',
+                          outline: 'none'
+                        }}
+                      >
+                        <option value="1">1x Posting per Hari (10:00 WIB)</option>
+                        <option value="2">2x Posting per Hari (10:00 & 16:00 WIB)</option>
+                        <option value="3">3x Posting per Hari (09:00, 13:00, 19:00 WIB)</option>
+                        <option value="4">4x Posting per Hari (08:00, 12:00, 16:00, 20:00 WIB)</option>
+                        <option value="every2">1x Posting tiap 2 Hari</option>
+                        <option value="every3">1x Posting tiap 3 Hari</option>
+                      </select>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                    {DEFAULT_BRAND_PILLARS.map(p => (
-                      <span key={p} style={{ padding: '4px 10px', borderRadius: '6px', background: 'rgba(168, 85, 247, 0.15)', color: '#c084fc', fontSize: '12px', fontWeight: 500 }}>
-                        {p}
-                      </span>
-                    ))}
+
+                  {/* Multi-Platform Broadcast Selector */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
+                      🎯 Target Kanal Distribusi (Multi-Platform Broadcast)
+                    </label>
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                      {PLATFORMS_CONFIG.map(p => (
+                        <label
+                          key={p.id}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '8px 14px',
+                            borderRadius: '8px',
+                            background: selectedPlatforms.includes(p.id) ? 'rgba(168, 85, 247, 0.12)' : 'var(--surface-subtle, #090e1a)',
+                            border: selectedPlatforms.includes(p.id) ? '1px solid #a855f7' : '1px solid var(--border-color, #1e293b)',
+                            cursor: 'pointer',
+                            fontSize: '13px',
+                            fontWeight: 600
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedPlatforms.includes(p.id)}
+                            onChange={() => handleTogglePlatform(p.id)}
+                            style={{ cursor: 'pointer' }}
+                          />
+                          <span>{p.icon}</span>
+                          <span>{p.label}</span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
 
-              {/* 4. Scheduling Parameters (Date, Count, Frequency, Platforms) */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
-                    Tanggal Mulai
-                  </label>
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid var(--border-color, #1e293b)',
-                      background: 'var(--surface-subtle, #090e1a)',
-                      color: 'var(--text-main, #f8fafc)',
-                      fontSize: '13px',
-                      outline: 'none'
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
-                    Jumlah Konten
-                  </label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={30}
-                    value={contentCount}
-                    onChange={(e) => setContentCount(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid var(--border-color, #1e293b)',
-                      background: 'var(--surface-subtle, #090e1a)',
-                      color: 'var(--text-main, #f8fafc)',
-                      fontSize: '13px',
-                      outline: 'none'
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Frequency Selector */}
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
-                  Frekuensi Tayang
-                </label>
-                <select
-                  value={postingFrequency}
-                  onChange={(e) => setPostingFrequency(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border-color, #1e293b)',
-                    background: 'var(--surface-subtle, #090e1a)',
-                    color: 'var(--text-main, #f8fafc)',
-                    fontSize: '13px',
-                    outline: 'none'
-                  }}
-                >
-                  <option value="1">1x sehari (10:00 WIB)</option>
-                  <option value="2">2x sehari (10:00 & 16:00 WIB)</option>
-                  <option value="3">3x sehari (09:00, 13:00, 19:00 WIB)</option>
-                  <option value="4">4x sehari (08:00, 12:00, 16:00, 20:00 WIB)</option>
-                  <option value="every2">1x setiap 2 hari</option>
-                  <option value="every3">1x setiap 3 hari</option>
-                </select>
-              </div>
-
-              {/* Multi-Platform Broadcast Selector */}
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
-                  Broadcast ke Platform (Repliz Multi-Publishing)
-                </label>
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                  {PLATFORMS_CONFIG.map(p => (
-                    <label
-                      key={p.id}
+                  {/* Trigger Generate Draft Button */}
+                  <div>
+                    <button
+                      type="button"
+                      onClick={handleGeneratePlanDraft}
                       style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        padding: '8px 14px',
+                        width: '100%',
+                        padding: '11px',
                         borderRadius: '8px',
-                        background: selectedPlatforms.includes(p.id) ? 'rgba(56, 189, 248, 0.12)' : 'var(--surface-subtle, #090e1a)',
-                        border: selectedPlatforms.includes(p.id) ? '1px solid var(--primary, #38bdf8)' : '1px solid var(--border-color, #1e293b)',
-                        cursor: 'pointer',
+                        border: 'none',
+                        background: '#a855f7',
+                        color: '#ffffff',
+                        fontWeight: 750,
                         fontSize: '13px',
-                        fontWeight: 600
+                        cursor: 'pointer'
                       }}
                     >
-                      <input
-                        type="checkbox"
-                        checked={selectedPlatforms.includes(p.id)}
-                        onChange={() => handleTogglePlatform(p.id)}
-                        style={{ cursor: 'pointer' }}
-                      />
-                      <span>{p.icon}</span>
-                      <span>{p.label}</span>
-                    </label>
-                  ))}
+                      ⚡ Buat Rencana Baris Jadwal (6 CEP - {contentCount} Konten)
+                    </button>
+                  </div>
                 </div>
-              </div>
-
-              {/* Trigger Generate Draft Button */}
-              <div>
-                <button
-                  type="button"
-                  onClick={handleGeneratePlanDraft}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    borderRadius: '8px',
-                    border: '1px dashed var(--primary, #38bdf8)',
-                    background: 'rgba(56, 189, 248, 0.08)',
-                    color: 'var(--primary, #38bdf8)',
-                    fontWeight: 700,
-                    fontSize: '13px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  ⚡ Buat Rencana Konten ({contentCount} Jadwal)
-                </button>
-              </div>
+              )}
 
               {/* Draft Rows Table */}
               {draftRows.length > 0 && (
-                <div>
+                <div style={{ marginTop: '8px' }}>
                   <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', color: 'var(--text-muted, #94a3b8)' }}>
                     Preview Baris Jadwal ({draftRows.length} Konten)
                   </div>
@@ -996,7 +1257,7 @@ export default function AffiliateContentCalendar({
                                     fontSize: '11px'
                                   }}
                                 >
-                                  {DEFAULT_BRAND_PILLARS.map(pil => (
+                                  {activeBrandPillars.map(pil => (
                                     <option key={pil} value={pil}>{pil}</option>
                                   ))}
                                 </select>

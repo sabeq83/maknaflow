@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import ProductEditModal from './ProductEditModal';
+import ProductDatabaseModal from '@/app/products/ProductDatabaseModal';
 import styles from './AffiliateStudio.module.css';
 
 export function BrandProductPortfolio({
@@ -357,10 +357,10 @@ export function BrandProductPortfolio({
         </>
       )}
 
-      {/* Product Edit Modal */}
+      {/* Product Database Modal (Identik dengan Menu Product Database) */}
       {editingProduct && (
-        <ProductEditModal
-          product={editingProduct}
+        <ProductDatabaseModal
+          productId={editingProduct.id || editingProduct.productId}
           brandId={brandId}
           brandName={brandName}
           isOpen={Boolean(editingProduct)}

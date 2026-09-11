@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.30.1 — Align Content Calendar Plan Modal with Brand Profile Pillars & Product Database Modal (11/09/2026)
+- Integrasi ProductDatabaseModal lengkap pada tab products
+- Penyelarasan layout modal kalender Brand Editorial di kiri dan Product Campaign di kanan
+- Pilar konten dinamis dari brand profile aktif
+
 ## V2.30.0 — Affiliate Studio Content Calendar & Product Edit Modal (Repliz Aligned) (11/09/2026)
 - Penyederhanaan Tab Products & Modal Edit Produk
 - Penambahan Tab Content Calendar interaktif dengan multi-platform broadcast
