@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.30.2 — Streamline Product Edit Modal with 3-Tab Semantic UI (11/09/2026)
+- Perombakan ProductDatabaseModal menjadi 3 tab ergonomis
+- Penerapan 100 persen Semantic CSS tokens untuk Light dan Dark mode
+- Penyatuan komponen modal pada menu Product Database dan Affiliate Studio
+
 ## V2.30.1 — Align Content Calendar Plan Modal with Brand Profile Pillars & Product Database Modal (11/09/2026)
 - Integrasi ProductDatabaseModal lengkap pada tab products
 - Penyelarasan layout modal kalender Brand Editorial di kiri dan Product Campaign di kanan

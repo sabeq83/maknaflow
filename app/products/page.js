@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
+import ProductDatabaseModal from './ProductDatabaseModal';
 
 export default function ProductDatabasePage() {
   const [products, setProducts] = useState([]);
@@ -24,32 +25,6 @@ export default function ProductDatabasePage() {
   const [inlineAffiliateLinks, setInlineAffiliateLinks] = useState({});
   const [savingAffiliateId, setSavingAffiliateId] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
-  const [productBrandLinks, setProductBrandLinks] = useState([]);
-  const [brandProfiles, setBrandProfiles] = useState([]);
-
-  // Form fields for Add/Edit full product
-  const [formData, setFormData] = useState({
-    product_name: '',
-    category: '',
-    tags: '',
-    product_description: '',
-    unique_selling_point: '',
-    affiliate_link: '',
-    source_url: '',
-    packaging_status: '',  // 'packaged' | 'unpackaged'
-    packaging_type: '',
-    packaging_notes: '',
-    clean_photo_t2i_prompt: '',
-    product_truth: '',
-    geometric_truth: '',
-    photo_provider: 'system_default',
-  });
-
-  // State untuk upload raw photo baru (file dipilih, belum dikirim)
-  const [rawPhotoFile, setRawPhotoFile] = useState(null);
-  const [rawPhotoPreview, setRawPhotoPreview] = useState(null);
-  const [formErrors, setFormErrors] = useState({});
-  const [regenerateOnSave, setRegenerateOnSave] = useState(false);
   const [regeneratingPhotoId, setRegeneratingPhotoId] = useState(null);
 
   // Scraper fields
@@ -114,33 +89,6 @@ export default function ProductDatabasePage() {
     fetchProducts();
   }, [selectedCategory]);
 
-  useEffect(() => {
-    fetchBrandProfiles();
-  }, []);
-
-  async function fetchBrandProfiles() {
-    try {
-      const res = await fetch('/api/v2/brand-profiles');
-      const data = await res.json();
-      if (data.success) {
-        setBrandProfiles(data.data || []);
-      }
-    } catch (e) {
-      console.error('Failed to fetch brand profiles:', e);
-    }
-  }
-
-  async function fetchProductBrandLinks(productId) {
-    try {
-      const res = await fetch(`/api/v2/products/${productId}/brands`);
-      const data = await res.json();
-      if (data.success) {
-        setProductBrandLinks(data.data || []);
-      }
-    } catch (e) {
-      console.error('Failed to fetch product brand links:', e);
-    }
-  }
 
   // Run search on Enter key
   const handleSearchKeyPress = (e) => {
@@ -193,85 +141,6 @@ export default function ProductDatabasePage() {
   // Extract unique categories for filter dropdown
   const categories = Array.from(new Set(products.map(p => p.category).filter(Boolean)));
 
-  // Validasi client-side sebelum submit
-  function validateProductForm() {
-    const errors = {};
-    if (!formData.product_name.trim() || formData.product_name.trim().length < 2) {
-      errors.product_name = 'Nama produk wajib diisi (min 2 karakter)';
-    }
-    if (!formData.product_description.trim() || formData.product_description.trim().length < 10) {
-      errors.product_description = 'Deskripsi produk wajib diisi (min 10 karakter)';
-    }
-    if (!editingProduct && !rawPhotoFile) {
-      errors.raw_photo = 'Foto produk wajib diunggah saat membuat produk baru';
-    }
-    if (!formData.packaging_status) {
-      errors.packaging_status = 'Status kemasan wajib dipilih';
-    }
-    if (formData.packaging_status === 'packaged' && !formData.packaging_type.trim()) {
-      errors.packaging_type = 'Jenis kemasan wajib diisi jika produk dikemas';
-    }
-    return errors;
-  }
-
-  // Manual save for full add/edit product — multipart
-  async function handleSaveProduct(e) {
-    e.preventDefault();
-
-    const errors = validateProductForm();
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      return;
-    }
-    setFormErrors({});
-
-    try {
-      const payload = new FormData();
-      const productPayload = {
-        product_name: formData.product_name.trim(),
-        product_description: formData.product_description.trim(),
-        raw_description: formData.product_description.trim(),
-        category: formData.category.trim() || null,
-        tags: formData.tags.trim() || null,
-        affiliate_link: formData.affiliate_link.trim() || null,
-        source_url: formData.source_url.trim() || null,
-        packaging_status: formData.packaging_status,
-        packaging_type: formData.packaging_status === 'packaged' ? formData.packaging_type.trim() : null,
-        packaging_notes: formData.packaging_notes?.trim() || null,
-        unique_selling_point: formData.unique_selling_point.trim() || null,
-        clean_photo_t2i_prompt: formData.clean_photo_t2i_prompt.trim() || null,
-        product_truth: formData.product_truth.trim() || null,
-        geometric_truth: formData.geometric_truth.trim() || null,
-        photo_provider: formData.photo_provider !== 'system_default' ? formData.photo_provider : null,
-      };
-      payload.set('product', JSON.stringify(productPayload));
-      if (rawPhotoFile) payload.set('raw_photo', rawPhotoFile);
-      if (editingProduct && regenerateOnSave) payload.set('regenerate', 'true');
-
-      const url = editingProduct
-        ? `/api/v2/products/${editingProduct.id}`
-        : '/api/v2/products';
-      const method = editingProduct ? 'PUT' : 'POST';
-
-      const res = await fetch(url, { method, body: payload });
-      const data = await res.json();
-
-      if (data.success) {
-        showToast(editingProduct ? '✅ Produk berhasil diperbarui!' : '✅ Produk berhasil ditambahkan! AI enrichment berjalan otomatis.');
-        setShowAddEditModal(false);
-        setEditingProduct(null);
-        resetForm();
-        fetchProducts();
-      } else {
-        if (data.errors) {
-          setFormErrors(data.errors);
-        }
-        showToast(data.error || Object.values(data.errors || {})[0] || 'Gagal menyimpan produk', 'error');
-      }
-    } catch (err) {
-      showToast(err.message, 'error');
-    }
-  }
 
   // Quick save for affiliate link inline
   async function handleQuickSaveAffiliate(productId) {
@@ -700,40 +569,9 @@ export default function ProductDatabasePage() {
     }
   }
 
-  // Pilih raw photo file (disimpan di state, tidak langsung upload)
-  function handleRawPhotoSelect(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setRawPhotoFile(file);
-    const url = URL.createObjectURL(file);
-    setRawPhotoPreview(url);
-    setFormErrors(prev => ({ ...prev, raw_photo: undefined }));
-  }
-
   // Edit action
   function handleEditProduct(product) {
     setEditingProduct(product);
-    setFormData({
-      product_name: product.product_name || '',
-      category: product.category || '',
-      tags: product.tags || '',
-      product_description: product.product_description || '',
-      unique_selling_point: product.unique_selling_point || '',
-      affiliate_link: product.affiliate_link || '',
-      source_url: product.source_url || '',
-      packaging_status: product.packaging_status || (product.is_in_packaging ? 'packaged' : 'unpackaged'),
-      packaging_type: product.packaging_type || '',
-      packaging_notes: product.packaging_notes || '',
-      clean_photo_t2i_prompt: product.clean_photo_t2i_prompt || '',
-      product_truth: product.product_truth || '',
-      geometric_truth: product.geometric_truth || '',
-      photo_provider: product.photo_provider || 'system_default',
-    });
-    setRawPhotoFile(null);
-    setRawPhotoPreview(null);
-    setFormErrors({});
-    setRegenerateOnSave(false);
-    fetchProductBrandLinks(product.id);
     setShowAddEditModal(true);
   }
 
@@ -753,29 +591,6 @@ export default function ProductDatabasePage() {
     } catch (err) {
       showToast(err.message, 'error');
     }
-  }
-
-  function resetForm() {
-    setFormData({
-      product_name: '',
-      category: '',
-      tags: '',
-      product_description: '',
-      unique_selling_point: '',
-      affiliate_link: '',
-      source_url: '',
-      packaging_status: '',
-      packaging_type: '',
-      packaging_notes: '',
-      clean_photo_t2i_prompt: '',
-      product_truth: '',
-      geometric_truth: '',
-      photo_provider: 'system_default',
-    });
-    setRawPhotoFile(null);
-    setRawPhotoPreview(null);
-    setFormErrors({});
-    setRegenerateOnSave(false);
   }
 
   return (
@@ -870,7 +685,7 @@ export default function ProductDatabasePage() {
                   boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
                   transition: 'all 0.2s ease'
                 }}
-                onClick={() => { resetForm(); setEditingProduct(null); setShowAddEditModal(true); }}
+                onClick={() => { setEditingProduct(null); setShowAddEditModal(true); }}
               >
                 ➕ Add Product
               </button>
@@ -2009,388 +1824,20 @@ export default function ProductDatabasePage() {
         </div>
       )}
 
-      {/* MODAL 2: ADD / EDIT FULL PRODUCT */}
+      {/* MODAL 2: ADD / EDIT FULL PRODUCT (SHARED 3-TAB SEMANTIC COMPONENT) */}
       {showAddEditModal && (
-        <div className="modal-backdrop" style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          background: 'var(--overlay-backdrop)', zIndex: 1000,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          backdropFilter: 'blur(6px)',
-        }} onClick={() => { setShowAddEditModal(false); setEditingProduct(null); }}>
-          <div className="card" style={{
-            width: '90%', maxWidth: '640px',
-            maxHeight: '90vh',
-            overflowY: 'auto',
-            background: 'var(--bg-panel)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius)',
-            padding: '24px'
-          }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ margin: 0 }}>
-                {editingProduct ? '✏️ Edit Data Produk' : '📦 Tambah Produk Manual'}
-              </h3>
-              <button onClick={() => { setShowAddEditModal(false); setEditingProduct(null); }} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
-            </div>
-
-            <form onSubmit={handleSaveProduct}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label" style={{ color: formErrors.product_name ? 'var(--status-danger)' : undefined }}>Nama Produk *</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={formData.product_name}
-                    onChange={e => setFormData({ ...formData, product_name: e.target.value })}
-                    placeholder="Nama produk..."
-                    required
-                  />
-                  {formErrors.product_name && <span style={{ fontSize: '0.75rem', color: 'var(--status-danger)', marginTop: '4px', display: 'block' }}>{formErrors.product_name}</span>}
-                </div>
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">Kategori</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={formData.category}
-                    onChange={e => setFormData({ ...formData, category: e.target.value })}
-                    placeholder="Contoh: Skincare"
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">Tags (Pisah koma)</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={formData.tags}
-                    onChange={e => setFormData({ ...formData, tags: e.target.value })}
-                    placeholder="serum, glowing, lokal"
-                  />
-                </div>
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label" style={{ color: 'var(--text-muted)' }}>Default Affiliate Link (Legacy/Fallback)</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={formData.affiliate_link}
-                    onChange={e => setFormData({ ...formData, affiliate_link: e.target.value })}
-                    placeholder="https://shope.ee/..."
-                  />
-                </div>
-              </div>
-
-              <div className="form-group" style={{ marginBottom: '12px' }}>
-                <label className="form-label" style={{ color: formErrors.product_description ? 'var(--status-danger)' : undefined }}>Deskripsi Produk *</label>
-                <textarea
-                  className="form-textarea"
-                  value={formData.product_description}
-                  onChange={e => setFormData({ ...formData, product_description: e.target.value })}
-                  placeholder="Deskripsi singkat mengenai produk (min 10 karakter)..."
-                  style={{ minHeight: '60px' }}
-                />
-                {formErrors.product_description && <span style={{ fontSize: '0.75rem', color: 'var(--status-danger)', marginTop: '4px', display: 'block' }}>{formErrors.product_description}</span>}
-              </div>
-
-              <div className="form-group" style={{ marginBottom: '12px' }}>
-                <label className="form-label">Unique Selling Proposition (USP) - Satu Poin per Baris</label>
-                <textarea
-                  className="form-textarea"
-                  value={formData.unique_selling_point}
-                  onChange={e => setFormData({ ...formData, unique_selling_point: e.target.value })}
-                  placeholder="- Poin ke-1&#10;- Poin ke-2&#10;- Poin ke-3"
-                  style={{ minHeight: '80px', fontFamily: 'monospace' }}
-                />
-              </div>
-
-              {/* Seksi Pengaturan Kemasan & Prompts AI */}
-              <div style={{
-                background: 'var(--surface-interactive)',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-sm)',
-                padding: '16px',
-                marginBottom: '16px'
-              }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-light)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  📦 Kemasan & Prompt AI
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px', alignItems: 'start' }}>
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label" style={{ color: formErrors.packaging_status ? 'var(--status-danger)' : undefined }}>
-                      Status Kemasan *
-                    </label>
-                    <div style={{ display: 'flex', gap: '16px', marginTop: '6px' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-                        <input
-                          id="pkg-packaged"
-                          type="radio"
-                          name="packaging_status"
-                          value="packaged"
-                          checked={formData.packaging_status === 'packaged'}
-                          onChange={e => setFormData({ ...formData, packaging_status: e.target.value })}
-                          style={{ accentColor: 'var(--accent)', cursor: 'pointer' }}
-                        />
-                        📦 Dikemas
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-                        <input
-                          id="pkg-unpackaged"
-                          type="radio"
-                          name="packaging_status"
-                          value="unpackaged"
-                          checked={formData.packaging_status === 'unpackaged'}
-                          onChange={e => setFormData({ ...formData, packaging_status: e.target.value })}
-                          style={{ accentColor: 'var(--accent)', cursor: 'pointer' }}
-                        />
-                        🔓 Tidak Dikemas
-                      </label>
-                    </div>
-                    {formErrors.packaging_status && <span style={{ fontSize: '0.75rem', color: 'var(--status-danger)', marginTop: '4px', display: 'block' }}>{formErrors.packaging_status}</span>}
-                  </div>
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label" style={{ color: formErrors.packaging_type ? 'var(--status-danger)' : undefined }}>
-                      Jenis Kemasan {formData.packaging_status === 'packaged' ? '*' : ''}
-                    </label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={formData.packaging_type}
-                      onChange={e => setFormData({ ...formData, packaging_type: e.target.value })}
-                      placeholder="Botol Kaca, Kotak Kardus, Pouch..."
-                      disabled={formData.packaging_status !== 'packaged'}
-                      style={{ opacity: formData.packaging_status === 'packaged' ? 1 : 0.4 }}
-                    />
-                    {formErrors.packaging_type && <span style={{ fontSize: '0.75rem', color: 'var(--status-danger)', marginTop: '4px', display: 'block' }}>{formErrors.packaging_type}</span>}
-                  </div>
-                </div>
-
-                <div className="form-group" style={{ marginBottom: '12px' }}>
-                  <label className="form-label" style={{ color: 'var(--status-success)', fontWeight: 600 }}>🛡️ Product Truth (T2I Physics & Packaging Lock)</label>
-                  <textarea
-                    className="form-textarea"
-                    value={formData.product_truth}
-                    onChange={e => setFormData({ ...formData, product_truth: e.target.value })}
-                    placeholder="Deskripsi fisik kemasan resmi (misal: Official Omura Premium Cocoa Powder in an authentic standing aluminium foil sachet packaging...)"
-                    style={{ minHeight: '60px', fontSize: '0.82rem', borderColor: 'var(--status-success-soft)' }}
-                  />
-                </div>
-
-                <div className="form-group" style={{ marginBottom: '12px' }}>
-                  <label className="form-label" style={{ color: 'var(--status-neutral)', fontWeight: 600 }}>📐 Geometric Truth (I2V Geometry & Material Lock)</label>
-                  <textarea
-                    className="form-textarea"
-                    value={formData.geometric_truth}
-                    onChange={e => setFormData({ ...formData, geometric_truth: e.target.value })}
-                    placeholder="Deskripsi geometri wadah & fisika permukaan (misal: Flexible standing sachet pouch, rectangular front face, metallic matte foil...)"
-                    style={{ minHeight: '60px', fontSize: '0.82rem', borderColor: 'rgba(168, 85, 247, 0.3)' }}
-                  />
-                </div>
-
-                <div className="form-group" style={{ marginBottom: '12px' }}>
-                  <label className="form-label" style={{ fontWeight: 600, color: 'var(--link)' }}>✨ Prompt Foto Clean (Clean Photo T2I Prompt)</label>
-                  <textarea
-                    className="form-textarea"
-                    value={formData.clean_photo_t2i_prompt}
-                    onChange={e => setFormData({ ...formData, clean_photo_t2i_prompt: e.target.value })}
-                    placeholder="Deskripsi visual untuk menghasilkan foto clean berlatar putih..."
-                    style={{ minHeight: '80px', fontSize: '0.82rem', borderColor: 'rgba(96, 165, 250, 0.3)' }}
-                  />
-                </div>
-
-                {/* Upload Foto Produk Raw */}
-                <div className="form-group" style={{ marginTop: '12px' }}>
-                  <label className="form-label" style={{ fontWeight: 600, color: formErrors.raw_photo ? 'var(--status-danger)' : 'var(--link)' }}>
-                    📷 Foto Produk Raw {!editingProduct ? '*' : '(Ganti Foto)'}
-                  </label>
-                  <input
-                    id="raw-photo-input"
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    onChange={handleRawPhotoSelect}
-                    style={{
-                      width: '100%',
-                      padding: '8px',
-                      background: '#0d1527',
-                      border: `1px dashed ${formErrors.raw_photo ? 'var(--status-danger)' : 'var(--status-info)'}`,
-                      borderRadius: '8px',
-                      color: 'var(--text-secondary)',
-                      cursor: 'pointer',
-                      fontSize: '0.82rem'
-                    }}
-                  />
-                  {rawPhotoPreview && (
-                    <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <img src={rawPhotoPreview} alt="Preview" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--status-info)' }} />
-                      <span style={{ fontSize: '0.75rem', color: 'var(--link)' }}>✅ {rawPhotoFile?.name}</span>
-                    </div>
-                  )}
-                  {formErrors.raw_photo && <span style={{ fontSize: '0.75rem', color: 'var(--status-danger)', marginTop: '4px', display: 'block' }}>{formErrors.raw_photo}</span>}
-                  {editingProduct && !rawPhotoPreview && editingProduct.raw_photo_url && (
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>Foto raw saat ini sudah ada. Biarkan kosong untuk mempertahankan.</p>
-                  )}
-                </div>
-
-                {/* Provider Selection */}
-                <div className="form-group" style={{ marginTop: '12px', marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontWeight: 600 }}>🤖 Provider Foto Clean</label>
-                  <select
-                    id="photo-provider-select"
-                    className="form-input"
-                    value={formData.photo_provider}
-                    onChange={e => setFormData({ ...formData, photo_provider: e.target.value })}
-                    style={{ fontSize: '0.85rem' }}
-                  >
-                    <option value="system_default">🔧 Default Sistem</option>
-                    <option value="glabs">🏭 G-Labs</option>
-                    <option value="gemini">✨ Gemini AI</option>
-                  </select>
-                  <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px' }}>AI Enrichment dan Clean Photo dibuat secara otomatis setelah produk disimpan.</p>
-                </div>
-              </div>
-
-              {/* Brand Profile Affiliate Links Section (Hanya untuk Edit) */}
-              {editingProduct && (
-                <div style={{ marginTop: '20px', padding: '16px', border: '1px solid var(--border)', borderRadius: '6px', background: 'var(--surface-interactive)', marginBottom: '16px' }}>
-                  <h4 style={{ margin: '0 0 12px 0', color: 'var(--accent-light)' }}>🔗 Affiliate Links per Brand Profile</h4>
-
-                  {/* Daftar link aktif per brand */}
-                  {productBrandLinks.length === 0 ? (
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                      Belum ada brand profile yang terhubung ke produk ini.
-                    </div>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
-                      {productBrandLinks.map(link => (
-                        <div key={link.brand_product_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)', padding: '8px 12px', borderRadius: '4px', border: '1px solid var(--surface-interactive)' }}>
-                          <div>
-                            <div style={{ fontSize: '0.82rem', fontWeight: 600 }}>{link.brand_name}</div>
-                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', wordBreak: 'break-all' }}>{link.affiliate_link}</div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={async () => {
-                              if (!confirm(`Hapus link affiliate untuk brand ${link.brand_name}?`)) return;
-                              try {
-                                const res = await fetch(`/api/v2/brand-profiles/${link.brand_profile_id}/products?productId=${editingProduct.id}`, {
-                                  method: 'DELETE'
-                                });
-                                const data = await res.json();
-                                if (data.success) {
-                                  showToast(`🗑 Link brand ${link.brand_name} berhasil dihapus.`);
-                                  fetchProductBrandLinks(editingProduct.id);
-                                }
-                              } catch (err) {
-                                showToast(err.message, 'error');
-                              }
-                            }}
-                            style={{ background: 'transparent', border: 'none', color: '#ff7675', fontSize: '0.8rem', cursor: 'pointer', padding: '4px' }}
-                          >
-                            Hapus
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Form tambah/update link brand */}
-                  <div style={{ background: 'var(--overlay-subtle)', padding: '12px', borderRadius: '6px', border: '1px solid var(--surface-interactive)' }}>
-                    <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '8px' }}>Tambah / Update Link Brand</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
-                      <select
-                        id="new-link-brand-id"
-                        className="form-input"
-                        style={{ height: '34px', padding: '0 8px', fontSize: '0.8rem' }}
-                      >
-                        <option value="">-- Pilih Brand --</option>
-                        {brandProfiles.map(bp => (
-                          <option key={bp.id} value={bp.id}>{bp.brand_name}</option>
-                        ))}
-                      </select>
-                      <input
-                        id="new-link-tracking-code"
-                        type="text"
-                        placeholder="Tracking Code (Opsional)"
-                        className="form-input"
-                        style={{ height: '34px', fontSize: '0.8rem' }}
-                      />
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <input
-                        id="new-link-url"
-                        type="text"
-                        placeholder="Affiliate Link (https://...)"
-                        className="form-input"
-                        style={{ flex: 1, height: '34px', fontSize: '0.8rem' }}
-                      />
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          const brandId = document.getElementById('new-link-brand-id').value;
-                          const affLink = document.getElementById('new-link-url').value;
-                          const trackCode = document.getElementById('new-link-tracking-code').value;
-                          if (!brandId || !affLink.trim()) {
-                            showToast('Brand dan Affiliate Link wajib diisi.', 'error');
-                            return;
-                          }
-                          try {
-                            const res = await fetch(`/api/v2/brand-profiles/${brandId}/products`, {
-                              method: 'PUT',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({
-                                productId: editingProduct.id,
-                                affiliateLink: affLink.trim(),
-                                trackingCode: trackCode.trim() || null
-                              })
-                            });
-                            const data = await res.json();
-                            if (data.success) {
-                              showToast('✅ Link brand berhasil disimpan!');
-                              document.getElementById('new-link-url').value = '';
-                              document.getElementById('new-link-tracking-code').value = '';
-                              fetchProductBrandLinks(editingProduct.id);
-                            } else {
-                              showToast(data.error || 'Gagal menyimpan link', 'error');
-                            }
-                          } catch (err) {
-                            showToast(err.message, 'error');
-                          }
-                        }}
-                        className="btn btn-primary"
-                        style={{ height: '34px', padding: '0 12px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
-                      >
-                        Simpan Link
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid var(--border)' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => { setShowAddEditModal(false); setEditingProduct(null); }}>
-                  Batal
-                </button>
-                {editingProduct && (
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.8rem', color: 'var(--text-muted)', userSelect: 'none' }}>
-                    <input
-                      id="regenerate-on-save"
-                      type="checkbox"
-                      checked={regenerateOnSave}
-                      onChange={e => setRegenerateOnSave(e.target.checked)}
-                      style={{ accentColor: 'var(--accent)' }}
-                    />
-                    Generate Ulang Foto
-                  </label>
-                )}
-                <button type="submit" className="btn btn-primary" id="save-product-btn">
-                  💾 {editingProduct ? 'Simpan Perubahan' : 'Simpan Produk'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <ProductDatabaseModal
+          isOpen={showAddEditModal}
+          productId={editingProduct?.id || null}
+          product={editingProduct}
+          onClose={() => {
+            setShowAddEditModal(false);
+            setEditingProduct(null);
+          }}
+          onSuccess={() => {
+            fetchProducts();
+          }}
+        />
       )}
 
       {/* MODAL 3: IMPORT PRODUCTS ZIP */}

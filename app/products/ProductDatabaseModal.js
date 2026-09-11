@@ -13,6 +13,7 @@ export default function ProductDatabaseModal({
 }) {
   if (!isOpen) return null;
 
+  const [activeTab, setActiveTab] = useState('basic'); // 'basic' | 'visual_ai' | 'brand_links'
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [brandProfiles, setBrandProfiles] = useState([]);
@@ -167,6 +168,11 @@ export default function ProductDatabaseModal({
     const errors = validateProductForm();
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
+      if (errors.product_name || errors.product_description) {
+        setActiveTab('basic');
+      } else if (errors.raw_photo || errors.packaging_status || errors.packaging_type) {
+        setActiveTab('visual_ai');
+      }
       return;
     }
     setFormErrors({});
@@ -276,37 +282,36 @@ export default function ProductDatabaseModal({
 
   return (
     <div
-      className="modal-backdrop"
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
         width: '100vw',
         height: '100vh',
-        background: 'rgba(0, 0, 0, 0.75)',
+        background: 'var(--overlay-backdrop, rgba(2, 6, 14, 0.76))',
         zIndex: 9999,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backdropFilter: 'blur(6px)',
+        backdropFilter: 'blur(8px)',
         padding: '20px'
       }}
       onClick={onClose}
     >
       <div
-        className="card"
         style={{
           width: '100%',
-          maxWidth: '680px',
-          maxHeight: '90vh',
-          overflowY: 'auto',
-          background: 'var(--bg-panel, #0f172a)',
-          color: 'var(--text-primary, #f8fafc)',
-          border: '1px solid var(--border, #1e293b)',
-          borderRadius: 'var(--radius, 16px)',
-          padding: '24px',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-          position: 'relative'
+          maxWidth: '720px',
+          maxHeight: '92vh',
+          display: 'flex',
+          flexDirection: 'column',
+          background: 'var(--surface, #101827)',
+          color: 'var(--text-primary, #f4f7fb)',
+          border: '1px solid var(--border-subtle, #26354a)',
+          borderRadius: 'var(--radius-lg, 16px)',
+          boxShadow: 'var(--shadow-modal, 0 26px 80px rgba(0, 0, 0, 0.52))',
+          position: 'relative',
+          overflow: 'hidden'
         }}
         onClick={e => e.stopPropagation()}
       >
@@ -316,360 +321,716 @@ export default function ProductDatabaseModal({
             position: 'absolute',
             top: '16px',
             right: '24px',
-            padding: '8px 14px',
-            borderRadius: '8px',
-            background: toastMsg.type === 'error' ? 'rgba(239, 68, 68, 0.95)' : 'rgba(16, 185, 129, 0.95)',
-            color: '#ffffff',
+            padding: '8px 16px',
+            borderRadius: 'var(--radius-sm, 8px)',
+            background: toastMsg.type === 'error' ? 'var(--status-danger, #fb7185)' : 'var(--action-primary, #2dd4bf)',
+            color: toastMsg.type === 'error' ? '#ffffff' : 'var(--on-action-primary, #042f2e)',
             fontSize: '12px',
             fontWeight: 700,
-            zIndex: 10,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+            zIndex: 20,
+            boxShadow: 'var(--shadow-card, 0 4px 12px rgba(0,0,0,0.3))'
           }}>
             {toastMsg.text}
           </div>
         )}
 
         {/* Modal Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid var(--border, #1e293b)', paddingBottom: '14px' }}>
+        <div style={{
+          padding: '16px 24px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderBottom: '1px solid var(--border-subtle, #26354a)',
+          background: 'var(--surface-raised, #162235)'
+        }}>
           <div>
-            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>✏️</span> Edit Data Produk (Product Database)
+            <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 750, color: 'var(--text-primary, #f4f7fb)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>✏️</span> {activeProductId ? 'Edit Data Produk' : 'Tambah Produk Baru'}
             </h3>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted, #94a3b8)' }}>
-              {brandName ? `Brand Aktif: ${brandName} · ` : ''}ID: <code>{activeProductId}</code>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted, #8290a5)' }}>
+              {brandName ? `Brand: ${brandName} · ` : ''}ID: <code>{activeProductId || 'Baru'}</code>
             </span>
           </div>
           <button
             type="button"
             onClick={onClose}
-            style={{ background: 'transparent', border: 'none', color: 'var(--text-muted, #94a3b8)', fontSize: '1.4rem', cursor: 'pointer', padding: '4px 8px' }}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-muted, #8290a5)',
+              fontSize: '1.4rem',
+              cursor: 'pointer',
+              padding: '4px 8px',
+              lineHeight: 1
+            }}
           >
             ✕
           </button>
         </div>
 
+        {/* Semantic 3-Tab Navigation Bar */}
+        <div style={{
+          display: 'flex',
+          borderBottom: '1px solid var(--border-subtle, #26354a)',
+          background: 'var(--surface-raised, #162235)',
+          padding: '0 16px',
+          gap: '4px',
+          overflowX: 'auto'
+        }}>
+          <button
+            type="button"
+            onClick={() => setActiveTab('basic')}
+            style={{
+              padding: '12px 16px',
+              border: 'none',
+              background: activeTab === 'basic' ? 'var(--surface-interactive, #1c2a40)' : 'transparent',
+              borderBottom: activeTab === 'basic' ? '2px solid var(--action-primary, #2dd4bf)' : '2px solid transparent',
+              color: activeTab === 'basic' ? 'var(--action-primary, #2dd4bf)' : 'var(--text-muted, #8290a5)',
+              fontWeight: 700,
+              fontSize: '13px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              borderTopLeftRadius: '6px',
+              borderTopRightRadius: '6px',
+              transition: 'all 0.15s ease',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <span>📝</span> Info Dasar & USP
+            {(formErrors.product_name || formErrors.product_description) && (
+              <span style={{ color: 'var(--status-danger, #fb7185)', fontSize: '11px' }}>●</span>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('visual_ai')}
+            style={{
+              padding: '12px 16px',
+              border: 'none',
+              background: activeTab === 'visual_ai' ? 'var(--surface-interactive, #1c2a40)' : 'transparent',
+              borderBottom: activeTab === 'visual_ai' ? '2px solid var(--action-primary, #2dd4bf)' : '2px solid transparent',
+              color: activeTab === 'visual_ai' ? 'var(--action-primary, #2dd4bf)' : 'var(--text-muted, #8290a5)',
+              fontWeight: 700,
+              fontSize: '13px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              borderTopLeftRadius: '6px',
+              borderTopRightRadius: '6px',
+              transition: 'all 0.15s ease',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <span>🎨</span> Foto & AI Truth Engine
+            {(formErrors.raw_photo || formErrors.packaging_status || formErrors.packaging_type) && (
+              <span style={{ color: 'var(--status-danger, #fb7185)', fontSize: '11px' }}>●</span>
+            )}
+          </button>
+
+          {activeProductId && (
+            <button
+              type="button"
+              onClick={() => setActiveTab('brand_links')}
+              style={{
+                padding: '12px 16px',
+                border: 'none',
+                background: activeTab === 'brand_links' ? 'var(--surface-interactive, #1c2a40)' : 'transparent',
+                borderBottom: activeTab === 'brand_links' ? '2px solid var(--action-primary, #2dd4bf)' : '2px solid transparent',
+                color: activeTab === 'brand_links' ? 'var(--action-primary, #2dd4bf)' : 'var(--text-muted, #8290a5)',
+                fontWeight: 700,
+                fontSize: '13px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                borderTopLeftRadius: '6px',
+                borderTopRightRadius: '6px',
+                transition: 'all 0.15s ease',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <span>🔗</span> Brand Affiliate Links
+              <span style={{
+                fontSize: '11px',
+                padding: '1px 6px',
+                borderRadius: '10px',
+                background: 'var(--status-info-soft, rgba(96, 165, 250, 0.14))',
+                color: 'var(--status-info, #60a5fa)',
+                fontWeight: 700
+              }}>
+                {productBrandLinks.length}
+              </span>
+            </button>
+          )}
+        </div>
+
+        {/* Scrollable Modal Form Body */}
         {loading ? (
-          <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted, #94a3b8)', fontSize: '14px' }}>
-            Memuat data produk...
+          <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted, #8290a5)', fontSize: '14px' }}>
+            ⏳ Memuat data produk...
           </div>
         ) : (
-          <form onSubmit={handleSaveProduct}>
-            {/* 1. Nama & Kategori */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-              <div className="form-group" style={{ margin: 0 }}>
-                <label className="form-label" style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: formErrors.product_name ? 'var(--status-danger, #f87171)' : 'var(--text-muted, #94a3b8)' }}>
-                  Nama Produk *
-                </label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.product_name}
-                  onChange={e => setFormData({ ...formData, product_name: e.target.value })}
-                  placeholder="Nama produk..."
-                  required
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border, #1e293b)', background: 'var(--surface-interactive, #090e1a)', color: 'var(--text-primary, #f8fafc)', fontSize: '13px', outline: 'none' }}
-                />
-                {formErrors.product_name && <span style={{ fontSize: '0.75rem', color: 'var(--status-danger, #f87171)', marginTop: '4px', display: 'block' }}>{formErrors.product_name}</span>}
-              </div>
-              <div className="form-group" style={{ margin: 0 }}>
-                <label className="form-label" style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
-                  Kategori
-                </label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.category}
-                  onChange={e => setFormData({ ...formData, category: e.target.value })}
-                  placeholder="Contoh: Kitchen & Dining"
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border, #1e293b)', background: 'var(--surface-interactive, #090e1a)', color: 'var(--text-primary, #f8fafc)', fontSize: '13px', outline: 'none' }}
-                />
-              </div>
-            </div>
+          <form onSubmit={handleSaveProduct} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+            <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-            {/* 2. Tags & Fallback Link */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-              <div className="form-group" style={{ margin: 0 }}>
-                <label className="form-label" style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
-                  Tags (Pisah koma)
-                </label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.tags}
-                  onChange={e => setFormData({ ...formData, tags: e.target.value })}
-                  placeholder="pisau, dapur, praktis"
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border, #1e293b)', background: 'var(--surface-interactive, #090e1a)', color: 'var(--text-primary, #f8fafc)', fontSize: '13px', outline: 'none' }}
-                />
-              </div>
-              <div className="form-group" style={{ margin: 0 }}>
-                <label className="form-label" style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
-                  Default Affiliate Link (Legacy/Fallback)
-                </label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.affiliate_link}
-                  onChange={e => setFormData({ ...formData, affiliate_link: e.target.value })}
-                  placeholder="https://shope.ee/..."
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border, #1e293b)', background: 'var(--surface-interactive, #090e1a)', color: 'var(--text-primary, #f8fafc)', fontSize: '13px', outline: 'none' }}
-                />
-              </div>
-            </div>
-
-            {/* 3. Deskripsi Produk */}
-            <div className="form-group" style={{ marginBottom: '12px' }}>
-              <label className="form-label" style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: formErrors.product_description ? 'var(--status-danger, #f87171)' : 'var(--text-muted, #94a3b8)' }}>
-                Deskripsi Produk *
-              </label>
-              <textarea
-                className="form-textarea"
-                rows={3}
-                value={formData.product_description}
-                onChange={e => setFormData({ ...formData, product_description: e.target.value })}
-                placeholder="Deskripsi singkat mengenai produk (min 10 karakter)..."
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border, #1e293b)', background: 'var(--surface-interactive, #090e1a)', color: 'var(--text-primary, #f8fafc)', fontSize: '13px', outline: 'none', resize: 'vertical' }}
-              />
-              {formErrors.product_description && <span style={{ fontSize: '0.75rem', color: 'var(--status-danger, #f87171)', marginTop: '4px', display: 'block' }}>{formErrors.product_description}</span>}
-            </div>
-
-            {/* 4. USP */}
-            <div className="form-group" style={{ marginBottom: '14px' }}>
-              <label className="form-label" style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
-                Unique Selling Proposition (USP) - Satu Poin per Baris
-              </label>
-              <textarea
-                className="form-textarea"
-                rows={3}
-                value={formData.unique_selling_point}
-                onChange={e => setFormData({ ...formData, unique_selling_point: e.target.value })}
-                placeholder="- Bilah baja Jerman tahan karat&#10;- Gagang ergonomis kayu rosewood&#10;- Sangat presisi dan tajam"
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border, #1e293b)', background: 'var(--surface-interactive, #090e1a)', color: 'var(--text-primary, #f8fafc)', fontSize: '13px', fontFamily: 'monospace', outline: 'none', resize: 'vertical' }}
-              />
-            </div>
-
-            {/* 5. Seksi Pengaturan Kemasan & Prompts AI */}
-            <div style={{
-              background: 'var(--surface-interactive, rgba(15, 23, 42, 0.8))',
-              border: '1px solid var(--border, #1e293b)',
-              borderRadius: 'var(--radius-sm, 10px)',
-              padding: '16px',
-              marginBottom: '16px'
-            }}>
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#38bdf8', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                📦 Kemasan & Prompt AI
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px', alignItems: 'start' }}>
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label" style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: formErrors.packaging_status ? 'var(--status-danger, #f87171)' : 'var(--text-muted, #94a3b8)' }}>
-                    Status Kemasan *
-                  </label>
-                  <div style={{ display: 'flex', gap: '16px', marginTop: '6px' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-primary, #f8fafc)' }}>
+              {/* ========================================================
+                  TAB 1: INFO DASAR & USP
+                  ======================================================== */}
+              {activeTab === 'basic' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {/* Nama Produk & Kategori */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: formErrors.product_name ? 'var(--status-danger, #fb7185)' : 'var(--text-secondary, #b6c2d2)' }}>
+                        Nama Produk *
+                      </label>
                       <input
-                        type="radio"
-                        name="packaging_status"
-                        value="packaged"
-                        checked={formData.packaging_status === 'packaged'}
-                        onChange={e => setFormData({ ...formData, packaging_status: e.target.value })}
-                        style={{ accentColor: '#38bdf8', cursor: 'pointer' }}
+                        type="text"
+                        value={formData.product_name}
+                        onChange={e => setFormData({ ...formData, product_name: e.target.value })}
+                        placeholder="Contoh: Pisau Dapur Chef Stainless Steel"
+                        required
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          borderRadius: 'var(--radius-sm, 8px)',
+                          border: formErrors.product_name ? '1px solid var(--status-danger, #fb7185)' : '1px solid var(--border-subtle, #26354a)',
+                          background: 'var(--input-bg, #0c1422)',
+                          color: 'var(--text-primary, #f4f7fb)',
+                          fontSize: '13px',
+                          outline: 'none'
+                        }}
                       />
-                      📦 Dikemas
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-primary, #f8fafc)' }}>
+                      {formErrors.product_name && (
+                        <span style={{ fontSize: '11px', color: 'var(--status-danger, #fb7185)', marginTop: '4px', display: 'block' }}>
+                          {formErrors.product_name}
+                        </span>
+                      )}
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-secondary, #b6c2d2)' }}>
+                        Kategori
+                      </label>
                       <input
-                        type="radio"
-                        name="packaging_status"
-                        value="unpackaged"
-                        checked={formData.packaging_status === 'unpackaged'}
-                        onChange={e => setFormData({ ...formData, packaging_status: e.target.value })}
-                        style={{ accentColor: '#38bdf8', cursor: 'pointer' }}
+                        type="text"
+                        value={formData.category}
+                        onChange={e => setFormData({ ...formData, category: e.target.value })}
+                        placeholder="Contoh: Kitchen & Dining / Peralatan Masak"
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          borderRadius: 'var(--radius-sm, 8px)',
+                          border: '1px solid var(--border-subtle, #26354a)',
+                          background: 'var(--input-bg, #0c1422)',
+                          color: 'var(--text-primary, #f4f7fb)',
+                          fontSize: '13px',
+                          outline: 'none'
+                        }}
                       />
-                      🔓 Tidak Dikemas
+                    </div>
+                  </div>
+
+                  {/* Tags & Default Fallback Link */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-secondary, #b6c2d2)' }}>
+                        Tags (Pisah Koma)
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.tags}
+                        onChange={e => setFormData({ ...formData, tags: e.target.value })}
+                        placeholder="pisau, dapur, tajam, anti-karat"
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          borderRadius: 'var(--radius-sm, 8px)',
+                          border: '1px solid var(--border-subtle, #26354a)',
+                          background: 'var(--input-bg, #0c1422)',
+                          color: 'var(--text-primary, #f4f7fb)',
+                          fontSize: '13px',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-secondary, #b6c2d2)' }}>
+                        Default Affiliate Link (Fallback)
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.affiliate_link}
+                        onChange={e => setFormData({ ...formData, affiliate_link: e.target.value })}
+                        placeholder="https://shope.ee/..."
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          borderRadius: 'var(--radius-sm, 8px)',
+                          border: '1px solid var(--border-subtle, #26354a)',
+                          background: 'var(--input-bg, #0c1422)',
+                          color: 'var(--text-primary, #f4f7fb)',
+                          fontSize: '13px',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Deskripsi Produk */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: formErrors.product_description ? 'var(--status-danger, #fb7185)' : 'var(--text-secondary, #b6c2d2)' }}>
+                      Deskripsi Produk *
                     </label>
+                    <textarea
+                      rows={3}
+                      value={formData.product_description}
+                      onChange={e => setFormData({ ...formData, product_description: e.target.value })}
+                      placeholder="Deskripsi detail mengenai fungsi, keunggulan, dan spesifikasi produk (min 10 karakter)..."
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: 'var(--radius-sm, 8px)',
+                        border: formErrors.product_description ? '1px solid var(--status-danger, #fb7185)' : '1px solid var(--border-subtle, #26354a)',
+                        background: 'var(--input-bg, #0c1422)',
+                        color: 'var(--text-primary, #f4f7fb)',
+                        fontSize: '13px',
+                        outline: 'none',
+                        resize: 'vertical'
+                      }}
+                    />
+                    {formErrors.product_description && (
+                      <span style={{ fontSize: '11px', color: 'var(--status-danger, #fb7185)', marginTop: '4px', display: 'block' }}>
+                        {formErrors.product_description}
+                      </span>
+                    )}
                   </div>
-                  {formErrors.packaging_status && <span style={{ fontSize: '0.75rem', color: 'var(--status-danger, #f87171)', marginTop: '4px', display: 'block' }}>{formErrors.packaging_status}</span>}
+
+                  {/* Unique Selling Proposition (USP) */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-secondary, #b6c2d2)' }}>
+                      Unique Selling Proposition (USP) — Satu Poin per Baris
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={formData.unique_selling_point}
+                      onChange={e => setFormData({ ...formData, unique_selling_point: e.target.value })}
+                      placeholder="- Bilah baja Jerman tahan karat&#10;- Gagang ergonomis kayu rosewood&#10;- Sangat tajam & presisi untuk memotong daging tebal"
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: 'var(--radius-sm, 8px)',
+                        border: '1px solid var(--border-subtle, #26354a)',
+                        background: 'var(--input-bg, #0c1422)',
+                        color: 'var(--text-primary, #f4f7fb)',
+                        fontSize: '13px',
+                        fontFamily: 'var(--font-mono, monospace)',
+                        outline: 'none',
+                        resize: 'vertical'
+                      }}
+                    />
+                  </div>
                 </div>
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label" style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: formErrors.packaging_type ? 'var(--status-danger, #f87171)' : 'var(--text-muted, #94a3b8)' }}>
-                    Jenis Kemasan {formData.packaging_status === 'packaged' ? '*' : ''}
-                  </label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={formData.packaging_type}
-                    onChange={e => setFormData({ ...formData, packaging_type: e.target.value })}
-                    placeholder="Botol Kaca, Kotak Kardus, Pouch..."
-                    disabled={formData.packaging_status !== 'packaged'}
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border, #1e293b)', background: 'var(--surface-interactive, #090e1a)', color: 'var(--text-primary, #f8fafc)', fontSize: '13px', opacity: formData.packaging_status === 'packaged' ? 1 : 0.4 }}
-                  />
-                  {formErrors.packaging_type && <span style={{ fontSize: '0.75rem', color: 'var(--status-danger, #f87171)', marginTop: '4px', display: 'block' }}>{formErrors.packaging_type}</span>}
+              )}
+
+              {/* ========================================================
+                  TAB 2: FOTO & AI TRUTH ENGINE
+                  ======================================================== */}
+              {activeTab === 'visual_ai' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {/* Upload Foto Raw Produk & Provider */}
+                  <div style={{
+                    padding: '14px',
+                    borderRadius: 'var(--radius-md, 12px)',
+                    background: 'var(--surface-interactive, #1c2a40)',
+                    border: '1px solid var(--border-subtle, #26354a)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px'
+                  }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px', alignItems: 'start' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: formErrors.raw_photo ? 'var(--status-danger, #fb7185)' : 'var(--action-primary, #2dd4bf)' }}>
+                          📷 Foto Produk Raw {!activeProductId ? '*' : '(Ganti Foto)'}
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          onChange={handleRawPhotoSelect}
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            background: 'var(--input-bg, #0c1422)',
+                            border: `1px dashed ${formErrors.raw_photo ? 'var(--status-danger, #fb7185)' : 'var(--action-primary, #2dd4bf)'}`,
+                            borderRadius: 'var(--radius-sm, 8px)',
+                            color: 'var(--text-muted, #8290a5)',
+                            cursor: 'pointer',
+                            fontSize: '12px'
+                          }}
+                        />
+                        {rawPhotoPreview && (
+                          <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <img
+                              src={rawPhotoPreview}
+                              alt="Preview"
+                              style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--action-primary, #2dd4bf)' }}
+                            />
+                            <span style={{ fontSize: '12px', color: 'var(--action-primary, #2dd4bf)', fontWeight: 600 }}>
+                              ✅ {rawPhotoFile?.name}
+                            </span>
+                          </div>
+                        )}
+                        {formErrors.raw_photo && (
+                          <span style={{ fontSize: '11px', color: 'var(--status-danger, #fb7185)', marginTop: '4px', display: 'block' }}>
+                            {formErrors.raw_photo}
+                          </span>
+                        )}
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-secondary, #b6c2d2)' }}>
+                          🤖 Provider Foto Clean
+                        </label>
+                        <select
+                          value={formData.photo_provider}
+                          onChange={e => setFormData({ ...formData, photo_provider: e.target.value })}
+                          style={{
+                            width: '100%',
+                            padding: '9px 12px',
+                            borderRadius: 'var(--radius-sm, 8px)',
+                            border: '1px solid var(--border-subtle, #26354a)',
+                            background: 'var(--input-bg, #0c1422)',
+                            color: 'var(--text-primary, #f4f7fb)',
+                            fontSize: '13px',
+                            outline: 'none'
+                          }}
+                        >
+                          <option value="system_default">🔧 Default Sistem</option>
+                          <option value="glabs">🏭 G-Labs (Local Worker)</option>
+                          <option value="gemini">✨ Gemini AI Image</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Status & Jenis Kemasan */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', alignItems: 'start' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: formErrors.packaging_status ? 'var(--status-danger, #fb7185)' : 'var(--text-secondary, #b6c2d2)' }}>
+                        Status Kemasan *
+                      </label>
+                      <div style={{ display: 'flex', gap: '16px', marginTop: '6px' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '13px', color: 'var(--text-primary, #f4f7fb)' }}>
+                          <input
+                            type="radio"
+                            name="packaging_status"
+                            value="packaged"
+                            checked={formData.packaging_status === 'packaged'}
+                            onChange={e => setFormData({ ...formData, packaging_status: e.target.value })}
+                            style={{ accentColor: 'var(--action-primary, #2dd4bf)', cursor: 'pointer' }}
+                          />
+                          📦 Dikemas
+                        </label>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '13px', color: 'var(--text-primary, #f4f7fb)' }}>
+                          <input
+                            type="radio"
+                            name="packaging_status"
+                            value="unpackaged"
+                            checked={formData.packaging_status === 'unpackaged'}
+                            onChange={e => setFormData({ ...formData, packaging_status: e.target.value })}
+                            style={{ accentColor: 'var(--action-primary, #2dd4bf)', cursor: 'pointer' }}
+                          />
+                          🔓 Tidak Dikemas
+                        </label>
+                      </div>
+                      {formErrors.packaging_status && (
+                        <span style={{ fontSize: '11px', color: 'var(--status-danger, #fb7185)', marginTop: '4px', display: 'block' }}>
+                          {formErrors.packaging_status}
+                        </span>
+                      )}
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: formErrors.packaging_type ? 'var(--status-danger, #fb7185)' : 'var(--text-secondary, #b6c2d2)' }}>
+                        Jenis Kemasan {formData.packaging_status === 'packaged' ? '*' : ''}
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.packaging_type}
+                        onChange={e => setFormData({ ...formData, packaging_type: e.target.value })}
+                        placeholder="Botol Kaca, Kotak Kardus, Pouch..."
+                        disabled={formData.packaging_status !== 'packaged'}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          borderRadius: 'var(--radius-sm, 8px)',
+                          border: formErrors.packaging_type ? '1px solid var(--status-danger, #fb7185)' : '1px solid var(--border-subtle, #26354a)',
+                          background: 'var(--input-bg, #0c1422)',
+                          color: 'var(--text-primary, #f4f7fb)',
+                          fontSize: '13px',
+                          opacity: formData.packaging_status === 'packaged' ? 1 : 0.45,
+                          outline: 'none'
+                        }}
+                      />
+                      {formErrors.packaging_type && (
+                        <span style={{ fontSize: '11px', color: 'var(--status-danger, #fb7185)', marginTop: '4px', display: 'block' }}>
+                          {formErrors.packaging_type}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* AI Prompts (Product Truth, Geometric Truth, Clean Photo Prompt) */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--status-success, #4ade80)' }}>
+                        🛡️ Product Truth (T2I Physics & Packaging Lock)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={formData.product_truth}
+                        onChange={e => setFormData({ ...formData, product_truth: e.target.value })}
+                        placeholder="Deskripsi fisik kemasan resmi produk untuk acuan render AI..."
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          borderRadius: 'var(--radius-sm, 8px)',
+                          border: '1px solid var(--status-success-soft, rgba(74, 222, 128, 0.3))',
+                          background: 'var(--input-bg, #0c1422)',
+                          color: 'var(--text-primary, #f4f7fb)',
+                          fontSize: '12px',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--status-neutral, #a78bfa)' }}>
+                        📐 Geometric Truth (I2V Geometry & Material Lock)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={formData.geometric_truth}
+                        onChange={e => setFormData({ ...formData, geometric_truth: e.target.value })}
+                        placeholder="Deskripsi geometri wadah & fisika permukaan..."
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          borderRadius: 'var(--radius-sm, 8px)',
+                          border: '1px solid var(--status-neutral-soft, rgba(167, 139, 250, 0.3))',
+                          background: 'var(--input-bg, #0c1422)',
+                          color: 'var(--text-primary, #f4f7fb)',
+                          fontSize: '12px',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--status-info, #60a5fa)' }}>
+                        ✨ Prompt Foto Clean (Clean Photo T2I Prompt)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={formData.clean_photo_t2i_prompt}
+                        onChange={e => setFormData({ ...formData, clean_photo_t2i_prompt: e.target.value })}
+                        placeholder="Deskripsi visual untuk menghasilkan foto clean latar putih..."
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          borderRadius: 'var(--radius-sm, 8px)',
+                          border: '1px solid var(--status-info-soft, rgba(96, 165, 250, 0.3))',
+                          background: 'var(--input-bg, #0c1422)',
+                          color: 'var(--text-primary, #f4f7fb)',
+                          fontSize: '12px',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="form-group" style={{ marginBottom: '12px' }}>
-                <label className="form-label" style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: '#10b981' }}>
-                  🛡️ Product Truth (T2I Physics & Packaging Lock)
-                </label>
-                <textarea
-                  className="form-textarea"
-                  rows={2}
-                  value={formData.product_truth}
-                  onChange={e => setFormData({ ...formData, product_truth: e.target.value })}
-                  placeholder="Deskripsi fisik kemasan resmi produk untuk acuan render AI..."
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.3)', background: 'var(--surface-interactive, #090e1a)', color: 'var(--text-primary, #f8fafc)', fontSize: '12px' }}
-                />
-              </div>
+              {/* ========================================================
+                  TAB 3: BRAND AFFILIATE LINKS
+                  ======================================================== */}
+              {activeTab === 'brand_links' && activeProductId && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  <div style={{
+                    padding: '14px',
+                    borderRadius: 'var(--radius-md, 12px)',
+                    background: 'var(--surface-interactive, #1c2a40)',
+                    border: '1px solid var(--border-subtle, #26354a)'
+                  }}>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--action-primary, #2dd4bf)', marginBottom: '10px' }}>
+                      🔗 Daftar Affiliate Links per Brand Profile
+                    </div>
 
-              <div className="form-group" style={{ marginBottom: '12px' }}>
-                <label className="form-label" style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: '#c084fc' }}>
-                  📐 Geometric Truth (I2V Geometry & Material Lock)
-                </label>
-                <textarea
-                  className="form-textarea"
-                  rows={2}
-                  value={formData.geometric_truth}
-                  onChange={e => setFormData({ ...formData, geometric_truth: e.target.value })}
-                  placeholder="Deskripsi geometri wadah & fisika permukaan..."
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(168, 85, 247, 0.3)', background: 'var(--surface-interactive, #090e1a)', color: 'var(--text-primary, #f8fafc)', fontSize: '12px' }}
-                />
-              </div>
+                    {/* List of active brand links */}
+                    {productBrandLinks.length === 0 ? (
+                      <div style={{ fontSize: '12px', color: 'var(--text-muted, #8290a5)', marginBottom: '12px' }}>
+                        Belum ada brand profile yang terhubung ke produk ini.
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '14px' }}>
+                        {productBrandLinks.map(link => (
+                          <div
+                            key={link.brand_product_id}
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              background: 'var(--input-bg, #0c1422)',
+                              padding: '8px 12px',
+                              borderRadius: 'var(--radius-sm, 8px)',
+                              border: '1px solid var(--border-subtle, #26354a)'
+                            }}
+                          >
+                            <div>
+                              <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary, #f4f7fb)' }}>
+                                {link.brand_name}
+                              </div>
+                              <div style={{ fontSize: '11px', color: 'var(--text-muted, #8290a5)', wordBreak: 'break-all' }}>
+                                {link.affiliate_link}
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteBrandLink(link)}
+                              style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: 'var(--status-danger, #fb7185)',
+                                fontSize: '12px',
+                                cursor: 'pointer',
+                                padding: '4px 8px'
+                              }}
+                            >
+                              Hapus
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
-              <div className="form-group" style={{ marginBottom: '12px' }}>
-                <label className="form-label" style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: '#60a5fa' }}>
-                  ✨ Prompt Foto Clean (Clean Photo T2I Prompt)
-                </label>
-                <textarea
-                  className="form-textarea"
-                  rows={2}
-                  value={formData.clean_photo_t2i_prompt}
-                  onChange={e => setFormData({ ...formData, clean_photo_t2i_prompt: e.target.value })}
-                  placeholder="Deskripsi visual untuk menghasilkan foto clean latar putih..."
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(96, 165, 250, 0.3)', background: 'var(--surface-interactive, #090e1a)', color: 'var(--text-primary, #f8fafc)', fontSize: '12px' }}
-                />
-              </div>
-
-              {/* Upload Foto Raw */}
-              <div className="form-group" style={{ marginTop: '12px' }}>
-                <label className="form-label" style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: formErrors.raw_photo ? 'var(--status-danger, #f87171)' : '#38bdf8' }}>
-                  📷 Foto Produk Raw {!activeProductId ? '*' : '(Ganti Foto)'}
-                </label>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={handleRawPhotoSelect}
-                  style={{ width: '100%', padding: '8px', background: '#090e1a', border: `1px dashed ${formErrors.raw_photo ? '#f87171' : '#38bdf8'}`, borderRadius: '8px', color: 'var(--text-muted, #94a3b8)', cursor: 'pointer', fontSize: '12px' }}
-                />
-                {rawPhotoPreview && (
-                  <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <img src={rawPhotoPreview} alt="Preview" style={{ width: '70px', height: '70px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #38bdf8' }} />
-                    <span style={{ fontSize: '12px', color: '#38bdf8' }}>✅ {rawPhotoFile?.name}</span>
-                  </div>
-                )}
-                {formErrors.raw_photo && <span style={{ fontSize: '0.75rem', color: '#f87171', marginTop: '4px', display: 'block' }}>{formErrors.raw_photo}</span>}
-              </div>
-
-              {/* Provider Selection */}
-              <div className="form-group" style={{ marginTop: '12px', marginBottom: 0 }}>
-                <label className="form-label" style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
-                  🤖 Provider Foto Clean
-                </label>
-                <select
-                  value={formData.photo_provider}
-                  onChange={e => setFormData({ ...formData, photo_provider: e.target.value })}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border, #1e293b)', background: '#090e1a', color: 'var(--text-primary, #f8fafc)', fontSize: '13px' }}
-                >
-                  <option value="system_default">🔧 Default Sistem</option>
-                  <option value="glabs">🏭 G-Labs</option>
-                  <option value="gemini">✨ Gemini AI</option>
-                </select>
-              </div>
-            </div>
-
-            {/* 6. Brand Profile Affiliate Links Section */}
-            {activeProductId && (
-              <div style={{ marginTop: '16px', padding: '16px', border: '1px solid var(--border, #1e293b)', borderRadius: '10px', background: 'var(--surface-interactive, rgba(15, 23, 42, 0.8))', marginBottom: '16px' }}>
-                <h4 style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: 700, color: '#38bdf8' }}>
-                  🔗 Affiliate Links per Brand Profile
-                </h4>
-
-                {/* List of active brand links */}
-                {productBrandLinks.length === 0 ? (
-                  <div style={{ fontSize: '12px', color: 'var(--text-muted, #94a3b8)', marginBottom: '12px' }}>
-                    Belum ada brand profile yang terhubung ke produk ini.
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
-                    {productBrandLinks.map(link => (
-                      <div key={link.brand_product_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#090e1a', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border, #1e293b)' }}>
-                        <div>
-                          <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary, #f8fafc)' }}>{link.brand_name}</div>
-                          <div style={{ fontSize: '11px', color: 'var(--text-muted, #94a3b8)', wordBreak: 'break-all' }}>{link.affiliate_link}</div>
-                        </div>
+                    {/* Add / Update Brand Link Form */}
+                    <div style={{
+                      background: 'var(--input-bg, #0c1422)',
+                      padding: '12px',
+                      borderRadius: 'var(--radius-sm, 8px)',
+                      border: '1px solid var(--border-subtle, #26354a)'
+                    }}>
+                      <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px', color: 'var(--text-secondary, #b6c2d2)' }}>
+                        Tambah / Update Link Brand
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
+                        <select
+                          value={newLinkBrandId}
+                          onChange={e => setNewLinkBrandId(e.target.value)}
+                          style={{
+                            padding: '8px 10px',
+                            borderRadius: '6px',
+                            border: '1px solid var(--border-subtle, #26354a)',
+                            background: 'var(--surface, #101827)',
+                            color: 'var(--text-primary, #f4f7fb)',
+                            fontSize: '12px',
+                            outline: 'none'
+                          }}
+                        >
+                          <option value="">-- Pilih Brand --</option>
+                          {brandProfiles.map(bp => (
+                            <option key={bp.id} value={bp.id}>{bp.brand_name}</option>
+                          ))}
+                        </select>
+                        <input
+                          type="text"
+                          placeholder="Tracking Code (Opsional)"
+                          value={newLinkTrackingCode}
+                          onChange={e => setNewLinkTrackingCode(e.target.value)}
+                          style={{
+                            padding: '8px 10px',
+                            borderRadius: '6px',
+                            border: '1px solid var(--border-subtle, #26354a)',
+                            background: 'var(--surface, #101827)',
+                            color: 'var(--text-primary, #f4f7fb)',
+                            fontSize: '12px',
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <input
+                          type="text"
+                          placeholder="Affiliate Link (https://...)"
+                          value={newLinkUrl}
+                          onChange={e => setNewLinkUrl(e.target.value)}
+                          style={{
+                            flex: 1,
+                            padding: '8px 10px',
+                            borderRadius: '6px',
+                            border: '1px solid var(--border-subtle, #26354a)',
+                            background: 'var(--surface, #101827)',
+                            color: 'var(--text-primary, #f4f7fb)',
+                            fontSize: '12px',
+                            outline: 'none'
+                          }}
+                        />
                         <button
                           type="button"
-                          onClick={() => handleDeleteBrandLink(link)}
-                          style={{ background: 'transparent', border: 'none', color: '#f87171', fontSize: '12px', cursor: 'pointer', padding: '4px 8px' }}
+                          disabled={savingLink}
+                          onClick={handleSaveBrandLink}
+                          style={{
+                            padding: '8px 14px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            background: 'var(--action-primary, #2dd4bf)',
+                            color: 'var(--on-action-primary, #042f2e)',
+                            fontWeight: 700,
+                            fontSize: '12px',
+                            cursor: savingLink ? 'not-allowed' : 'pointer',
+                            whiteSpace: 'nowrap'
+                          }}
                         >
-                          Hapus
+                          {savingLink ? 'Menyimpan...' : 'Simpan Link'}
                         </button>
                       </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Add / Update Brand Link Form */}
-                <div style={{ background: '#090e1a', padding: '12px', borderRadius: '8px', border: '1px solid var(--border, #1e293b)' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>Tambah / Update Link Brand</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
-                    <select
-                      value={newLinkBrandId}
-                      onChange={e => setNewLinkBrandId(e.target.value)}
-                      style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--border, #1e293b)', background: 'var(--bg-panel, #0f172a)', color: 'var(--text-primary, #f8fafc)', fontSize: '12px' }}
-                    >
-                      <option value="">-- Pilih Brand --</option>
-                      {brandProfiles.map(bp => (
-                        <option key={bp.id} value={bp.id}>{bp.brand_name}</option>
-                      ))}
-                    </select>
-                    <input
-                      type="text"
-                      placeholder="Tracking Code (Opsional)"
-                      value={newLinkTrackingCode}
-                      onChange={e => setNewLinkTrackingCode(e.target.value)}
-                      style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--border, #1e293b)', background: 'var(--bg-panel, #0f172a)', color: 'var(--text-primary, #f8fafc)', fontSize: '12px' }}
-                    />
-                  </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <input
-                      type="text"
-                      placeholder="Affiliate Link (https://...)"
-                      value={newLinkUrl}
-                      onChange={e => setNewLinkUrl(e.target.value)}
-                      style={{ flex: 1, padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--border, #1e293b)', background: 'var(--bg-panel, #0f172a)', color: 'var(--text-primary, #f8fafc)', fontSize: '12px' }}
-                    />
-                    <button
-                      type="button"
-                      disabled={savingLink}
-                      onClick={handleSaveBrandLink}
-                      style={{ padding: '8px 14px', borderRadius: '6px', border: 'none', background: '#38bdf8', color: '#0f172a', fontWeight: 700, fontSize: '12px', cursor: savingLink ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap' }}
-                    >
-                      {savingLink ? 'Menyimpan...' : 'Simpan Link'}
-                    </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
-            {/* Modal Footer Actions */}
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', alignItems: 'center', paddingTop: '14px', borderTop: '1px solid var(--border, #1e293b)' }}>
+            {/* Persistent Sticky Footer */}
+            <div style={{
+              padding: '14px 24px',
+              borderTop: '1px solid var(--border-subtle, #26354a)',
+              background: 'var(--surface-raised, #162235)',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              gap: '12px'
+            }}>
               {activeProductId && (
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '12px', color: 'var(--text-muted, #94a3b8)', marginRight: 'auto', userSelect: 'none' }}>
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  color: 'var(--text-muted, #8290a5)',
+                  marginRight: 'auto',
+                  userSelect: 'none'
+                }}>
                   <input
                     type="checkbox"
                     checked={regenerateOnSave}
                     onChange={e => setRegenerateOnSave(e.target.checked)}
-                    style={{ accentColor: '#38bdf8', cursor: 'pointer' }}
+                    style={{ accentColor: 'var(--action-primary, #2dd4bf)', cursor: 'pointer' }}
                   />
                   Regenerate Foto & AI Enrichment saat disimpan
                 </label>
@@ -679,14 +1040,36 @@ export default function ProductDatabaseModal({
                 type="button"
                 onClick={onClose}
                 disabled={saving}
-                style={{ padding: '9px 16px', borderRadius: '8px', border: '1px solid var(--border, #1e293b)', background: 'transparent', color: 'var(--text-primary, #f8fafc)', fontSize: '13px', fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer' }}
+                style={{
+                  padding: '9px 16px',
+                  borderRadius: 'var(--radius-sm, 8px)',
+                  border: '1px solid var(--border-strong, #3c506b)',
+                  background: 'var(--surface-interactive, #1c2a40)',
+                  color: 'var(--text-secondary, #b6c2d2)',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: saving ? 'not-allowed' : 'pointer'
+                }}
               >
                 Batal
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                style={{ padding: '9px 20px', borderRadius: '8px', border: 'none', background: '#38bdf8', color: '#0f172a', fontSize: '13px', fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '6px', opacity: saving ? 0.7 : 1 }}
+                style={{
+                  padding: '9px 20px',
+                  borderRadius: 'var(--radius-sm, 8px)',
+                  border: 'none',
+                  background: 'var(--action-primary, #2dd4bf)',
+                  color: 'var(--on-action-primary, #042f2e)',
+                  fontSize: '13px',
+                  fontWeight: 750,
+                  cursor: saving ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  opacity: saving ? 0.7 : 1
+                }}
               >
                 {saving ? 'Menyimpan...' : (activeProductId ? '💾 Simpan Perubahan Produk' : '📦 Tambah Produk')}
               </button>
