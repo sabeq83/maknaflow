@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.30.5 — 1-Column Product Campaign with Search Box and 6 Category CEPs (12/09/2026)
+- Penataan 1 kolom vertikal ergonomis pada form Product Campaign kalender konten
+- Penambahan fitur live search box produk dengan lebar 100% selaras
+- Standardisasi 6 Category CEP resmi MAKNA Flow pada kalender dan preview jadwal
+- Penerapan 100% semantic CSS design tokens pada seluruh modal dan form
+
 ## V2.30.4 — Clean up product option label in Content Calendar (12/09/2026)
 - Menampilkan hanya nama produk pada dropdown pilihan produk Product Campaign
 - Menghapus tampilan teks harga kosong Rp 0

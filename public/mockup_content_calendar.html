@@ -769,6 +769,8 @@
       letter-spacing: 0.4px;
     }
     .form-control {
+      width: 100%;
+      box-sizing: border-box;
       background: var(--input-bg);
       border: 1px solid var(--border-strong);
       color: var(--text-primary);
@@ -1181,26 +1183,56 @@
 
         <!-- 2.B Sub-Form: Product Campaign -->
         <div id="subformProduct" style="display: none;">
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label class="form-label">Pilih 1 Produk Target</label>
-              <select class="form-control" id="productSelectInput">
-                <option value="Serum Retinol 0.5% Anti-Aging">Serum Retinol 0.5% Anti-Aging</option>
-                <option value="Sunscreen Gel UV SPF50+">Sunscreen Gel UV SPF50+</option>
-                <option value="Gentle Facial Wash Oat & Ceramide">Gentle Facial Wash Oat & Ceramide</option>
-              </select>
+          <!-- 1. Pilih 1 Produk Target (1 Kolom Penuh) -->
+          <div class="form-group" style="margin-top: 12px;">
+            <label class="form-label" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span>Pilih 1 Produk Target</span>
+              <span id="productCountBadge" style="font-size: 11px; color: var(--text-muted); font-weight: 600;">8 Produk</span>
+            </label>
+            <!-- Search Box Produk -->
+            <div style="position: relative; margin-bottom: 6px;">
+              <input
+                type="text"
+                id="productSearchInput"
+                class="form-control"
+                placeholder="🔍 Cari nama produk / kategori..."
+                style="padding-right: 28px; font-size: 12px; height: 34px;"
+                oninput="filterMockupProducts()"
+              >
+              <button
+                type="button"
+                id="clearProductSearchBtn"
+                onclick="clearProductSearch()"
+                style="display: none; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 12px;"
+              >✕</button>
             </div>
-            <div class="form-group">
-              <label class="form-label">Jumlah Konten (Siklus 6 CEP)</label>
-              <select class="form-control" id="productCountInput">
-                <option value="6" selected>6 Konten (1 Siklus 6 CEP Penuh)</option>
-                <option value="12">12 Konten (2 Siklus 6 CEP)</option>
-                <option value="18">18 Konten (3 Siklus 6 CEP)</option>
-                <option value="24">24 Konten (4 Siklus 6 CEP / 1 Bulan)</option>
-              </select>
+            <select class="form-control" id="productSelectInput">
+              <option value="Serum Retinol 0.5% Anti-Aging">Serum Retinol 0.5% Anti-Aging</option>
+              <option value="Sunscreen Gel UV SPF50+">Sunscreen Gel UV SPF50+</option>
+              <option value="Gentle Facial Wash Oat & Ceramide">Gentle Facial Wash Oat & Ceramide</option>
+              <option value="Brightening Vitamin C 10% Booster">Brightening Vitamin C 10% Booster</option>
+              <option value="Centella Asiatica Calming Toner">Centella Asiatica Calming Toner</option>
+              <option value="Deep Cleansing Micellar Water">Deep Cleansing Micellar Water</option>
+              <option value="Pisau Dapur Chef Stainless Steel">Pisau Dapur Chef Stainless Steel</option>
+              <option value="Wajan Anti Lengket Granit 28cm">Wajan Anti Lengket Granit 28cm</option>
+            </select>
+            <div id="noProductFoundMsg" style="display: none; font-size: 11px; color: var(--status-danger); margin-top: 4px;">
+              ⚠️ Tidak ada produk yang cocok dengan pencarian.
             </div>
           </div>
 
+          <!-- 2. Jumlah Konten (1 Kolom Penuh) -->
+          <div class="form-group" style="margin-top: 12px;">
+            <label class="form-label">Jumlah Konten (Siklus 6 CEP)</label>
+            <select class="form-control" id="productCountInput">
+              <option value="6" selected>6 Konten (1 Siklus 6 CEP Penuh)</option>
+              <option value="12">12 Konten (2 Siklus 6 CEP)</option>
+              <option value="18">18 Konten (3 Siklus 6 CEP)</option>
+              <option value="24">24 Konten (4 Siklus 6 CEP / 1 Bulan)</option>
+            </select>
+          </div>
+
+          <!-- 3. Konteks Promosi Khusus (1 Kolom Penuh) -->
           <div class="form-group" style="margin-top: 12px;">
             <label class="form-label">Konteks Promosi Khusus (Optional)</label>
             <input type="text" class="form-control" id="productPromoInput" placeholder="Contoh: Promo Gajian 25 Sept / Launching Formula Baru / Solusi Anti-Purging">
@@ -1347,6 +1379,51 @@
       { id: 7, type: 'product', title: 'Sunscreen Gel UV', sub: 'CEP: Opportunistic Based', time: '14:30', platform: 'IG', date: '2026-09-16' },
       { id: 8, type: 'editorial', title: 'Brand Editorial', sub: 'Pilar: Routine & Habit', time: '18:00', platform: 'FB', date: '2026-09-17' },
     ];
+
+    const sampleProductList = [
+      { id: 'prod_1', name: 'Serum Retinol 0.5% Anti-Aging', category: 'Skincare' },
+      { id: 'prod_2', name: 'Sunscreen Gel UV SPF50+', category: 'UV Filter' },
+      { id: 'prod_3', name: 'Gentle Facial Wash Oat & Ceramide', category: 'Cleanser' },
+      { id: 'prod_4', name: 'Brightening Vitamin C 10% Booster', category: 'Serum' },
+      { id: 'prod_5', name: 'Centella Asiatica Calming Toner', category: 'Toner' },
+      { id: 'prod_6', name: 'Deep Cleansing Micellar Water', category: 'Cleanser' },
+      { id: 'prod_7', name: 'Pisau Dapur Chef Stainless Steel', category: 'Kitchen & Dining' },
+      { id: 'prod_8', name: 'Wajan Anti Lengket Granit 28cm', category: 'Cookware' }
+    ];
+
+    function filterMockupProducts() {
+      const q = document.getElementById('productSearchInput').value.toLowerCase().trim();
+      const clearBtn = document.getElementById('clearProductSearchBtn');
+      clearBtn.style.display = q ? 'block' : 'none';
+
+      const select = document.getElementById('productSelectInput');
+      const noFound = document.getElementById('noProductFoundMsg');
+      const badge = document.getElementById('productCountBadge');
+
+      const filtered = sampleProductList.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
+      select.innerHTML = '';
+
+      if (filtered.length === 0) {
+        noFound.style.display = 'block';
+        select.style.display = 'none';
+        badge.innerText = '0 Produk';
+      } else {
+        noFound.style.display = 'none';
+        select.style.display = 'block';
+        badge.innerText = `${filtered.length} Produk`;
+        filtered.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.name;
+          opt.innerText = p.name;
+          select.appendChild(opt);
+        });
+      }
+    }
+
+    function clearProductSearch() {
+      document.getElementById('productSearchInput').value = '';
+      filterMockupProducts();
+    }
 
     const cepList = [
       'Problem-Solution Based',

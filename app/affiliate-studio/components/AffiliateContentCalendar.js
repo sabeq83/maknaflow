@@ -3,12 +3,12 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 
 const CEP_OPTIONS = [
-  { code: 'CEP 1', label: 'CEP 1: Situasi Masak Cepat & Sibuk' },
-  { code: 'CEP 2', label: 'CEP 2: Masak Bersama Keluarga / Akhir Pekan' },
-  { code: 'CEP 3', label: 'CEP 3: Menu Sehat & Diet Rendah Minyak' },
-  { code: 'CEP 4', label: 'CEP 4: Pemula Belajar Masak Anti-Gagal' },
-  { code: 'CEP 5', label: 'CEP 5: Jamuan Acara & Hari Spesial' },
-  { code: 'CEP 6', label: 'CEP 6: Hemat Biaya & Food Prep Awet' }
+  { code: 'Problem-Solution Based', label: 'Problem-Solution Based' },
+  { code: 'Routine Based', label: 'Routine Based' },
+  { code: 'Emotional Based', label: 'Emotional Based' },
+  { code: 'Aspirational Based', label: 'Aspirational Based' },
+  { code: 'Commitment Based', label: 'Commitment Based' },
+  { code: 'Opportunistic Based', label: 'Opportunistic Based' }
 ];
 
 const DEFAULT_BRAND_PILLARS = [
@@ -48,6 +48,7 @@ export default function AffiliateContentCalendar({
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [planType, setPlanType] = useState('brand_editorial'); // 'brand_editorial' (LEFT) | 'product_campaign' (RIGHT)
   const [selectedProductId, setSelectedProductId] = useState('');
+  const [productSearch, setProductSearch] = useState('');
   const [promotionContext, setPromotionContext] = useState('');
   const [contentCount, setContentCount] = useState(8);
   const [startDate, setStartDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -117,6 +118,27 @@ export default function AffiliateContentCalendar({
       })
       .catch(() => {});
   }, [brandId]);
+
+  // Filtered products based on real-time search input
+  const filteredBrandProducts = useMemo(() => {
+    if (!productSearch.trim()) return brandProducts;
+    const q = productSearch.toLowerCase().trim();
+    return brandProducts.filter(p => {
+      const name = (p.displayName || p.productName || p.name || '').toLowerCase();
+      const cat = (p.category || '').toLowerCase();
+      return name.includes(q) || cat.includes(q);
+    });
+  }, [brandProducts, productSearch]);
+
+  // Auto-sync selectedProductId if current selection is not in filtered list
+  useEffect(() => {
+    if (filteredBrandProducts.length > 0) {
+      const exists = filteredBrandProducts.some(p => p.productId === selectedProductId);
+      if (!exists) {
+        setSelectedProductId(filteredBrandProducts[0].productId);
+      }
+    }
+  }, [filteredBrandProducts, selectedProductId]);
 
   // 3. Fetch active brand profile for editorial context, goals & pillars
   useEffect(() => {
@@ -738,33 +760,33 @@ export default function AffiliateContentCalendar({
           padding: '20px'
         }}>
           <div style={{
-            background: 'var(--surface-bg, #0f172a)',
-            color: 'var(--text-main, #f8fafc)',
-            border: '1px solid var(--border-color, #1e293b)',
+            background: 'var(--surface-raised, #0f172a)',
+            color: 'var(--text-primary, #f8fafc)',
+            border: '1px solid var(--border-subtle, #1e293b)',
             borderRadius: '16px',
             width: '100%',
             maxWidth: '780px',
             maxHeight: '92vh',
             display: 'flex',
             flexDirection: 'column',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+            boxShadow: 'var(--shadow-modal, 0 25px 50px -12px rgba(0, 0, 0, 0.5))',
             overflow: 'hidden'
           }}>
             {/* Modal Header */}
             <div style={{
               padding: '16px 24px',
-              borderBottom: '1px solid var(--border-color, #1e293b)',
+              borderBottom: '1px solid var(--border-subtle, #1e293b)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               background: 'var(--surface-header, rgba(15, 23, 42, 0.6))'
             }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)' }}>
                   📅 Buat Rencana Jadwal Konten
                 </h3>
                 <span style={{ fontSize: '12px', color: 'var(--text-muted, #94a3b8)' }}>
-                  Brand: <strong>{brandName || 'MAKNA Brand'}</strong> · Terintegrasi dengan Repliz Multi-Platform
+                  Brand: <strong style={{ color: 'var(--text-primary)' }}>{brandName || 'MAKNA Brand'}</strong> · Terintegrasi dengan Repliz Multi-Platform
                 </span>
               </div>
               <button
@@ -786,7 +808,7 @@ export default function AffiliateContentCalendar({
             <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {/* 1. Plan Type Switcher (Brand Editorial KIRI, Product Campaign KANAN) */}
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '8px', color: 'var(--text-muted, #94a3b8)' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '8px', color: 'var(--text-secondary, #94a3b8)' }}>
                   1. Pilih Tipe Plan
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -800,16 +822,16 @@ export default function AffiliateContentCalendar({
                     }}
                     style={{
                       padding: '12px',
-                      borderRadius: '10px',
-                      border: planType === 'brand_editorial' ? '2px solid var(--primary, #38bdf8)' : '1px solid var(--border-color, #1e293b)',
-                      background: planType === 'brand_editorial' ? 'rgba(56, 189, 248, 0.12)' : 'var(--surface-subtle, #090e1a)',
-                      color: 'var(--text-main, #f8fafc)',
+                      borderRadius: 'var(--radius-md, 10px)',
+                      border: planType === 'brand_editorial' ? '2px solid var(--action-primary, #38bdf8)' : '1px solid var(--border-subtle, #1e293b)',
+                      background: planType === 'brand_editorial' ? 'var(--action-primary-soft, rgba(56, 189, 248, 0.12))' : 'var(--input-bg, #090e1a)',
+                      color: 'var(--text-primary, #f8fafc)',
                       textAlign: 'left',
                       cursor: 'pointer',
                       transition: 'all 0.15s ease'
                     }}
                   >
-                    <div style={{ fontWeight: 750, fontSize: '14px', marginBottom: '4px', color: planType === 'brand_editorial' ? 'var(--primary, #38bdf8)' : 'inherit' }}>
+                    <div style={{ fontWeight: 750, fontSize: '14px', marginBottom: '4px', color: planType === 'brand_editorial' ? 'var(--action-primary, #38bdf8)' : 'inherit' }}>
                       🏛️ Brand Editorial
                     </div>
                     <div style={{ fontSize: '12px', color: 'var(--text-muted, #94a3b8)' }}>
@@ -827,16 +849,16 @@ export default function AffiliateContentCalendar({
                     }}
                     style={{
                       padding: '12px',
-                      borderRadius: '10px',
-                      border: planType === 'product_campaign' ? '2px solid #a855f7' : '1px solid var(--border-color, #1e293b)',
-                      background: planType === 'product_campaign' ? 'rgba(168, 85, 247, 0.12)' : 'var(--surface-subtle, #090e1a)',
-                      color: 'var(--text-main, #f8fafc)',
+                      borderRadius: 'var(--radius-md, 10px)',
+                      border: planType === 'product_campaign' ? '2px solid var(--accent, #a855f7)' : '1px solid var(--border-subtle, #1e293b)',
+                      background: planType === 'product_campaign' ? 'rgba(168, 85, 247, 0.12)' : 'var(--input-bg, #090e1a)',
+                      color: 'var(--text-primary, #f8fafc)',
                       textAlign: 'left',
                       cursor: 'pointer',
                       transition: 'all 0.15s ease'
                     }}
                   >
-                    <div style={{ fontWeight: 750, fontSize: '14px', marginBottom: '4px', color: planType === 'product_campaign' ? '#c084fc' : 'inherit' }}>
+                    <div style={{ fontWeight: 750, fontSize: '14px', marginBottom: '4px', color: planType === 'product_campaign' ? 'var(--accent, #a855f7)' : 'inherit' }}>
                       📦 Product Campaign
                     </div>
                     <div style={{ fontSize: '12px', color: 'var(--text-muted, #94a3b8)' }}>
@@ -852,23 +874,23 @@ export default function AffiliateContentCalendar({
                   {/* Snapshot Konteks & Pilar dari Brand Profile Aktif */}
                   <div style={{
                     padding: '14px 16px',
-                    borderRadius: '10px',
+                    borderRadius: 'var(--radius-md, 10px)',
                     background: 'var(--surface-subtle, #090e1a)',
-                    border: '1px solid var(--border-color, #1e293b)',
+                    border: '1px solid var(--border-subtle, #1e293b)',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '8px'
                   }}>
                     <div style={{ fontSize: '12px', display: 'flex', gap: '6px' }}>
-                      <span style={{ fontWeight: 700, color: 'var(--primary, #38bdf8)', minWidth: '110px' }}>📌 Konteks Brand:</span>
-                      <span style={{ color: 'var(--text-main, #f8fafc)' }}>
+                      <span style={{ fontWeight: 700, color: 'var(--action-primary, #38bdf8)', minWidth: '110px' }}>📌 Konteks Brand:</span>
+                      <span style={{ color: 'var(--text-primary, #f8fafc)' }}>
                         {brandProfileData.context || 'Brand berfokus pada konten berkualitas tinggi.'}
                       </span>
                     </div>
 
                     <div style={{ fontSize: '12px', display: 'flex', gap: '6px' }}>
-                      <span style={{ fontWeight: 700, color: '#c084fc', minWidth: '110px' }}>🎯 Tujuan Konten:</span>
-                      <span style={{ color: 'var(--text-main, #f8fafc)' }}>
+                      <span style={{ fontWeight: 700, color: 'var(--accent, #c084fc)', minWidth: '110px' }}>🎯 Tujuan Konten:</span>
+                      <span style={{ color: 'var(--text-primary, #f8fafc)' }}>
                         {brandProfileData.goal || 'Membangun authority dan engagement audiens.'}
                       </span>
                     </div>
@@ -881,12 +903,12 @@ export default function AffiliateContentCalendar({
                             key={p}
                             style={{
                               padding: '4px 10px',
-                              borderRadius: '6px',
-                              background: 'rgba(56, 189, 248, 0.12)',
-                              color: 'var(--primary, #38bdf8)',
+                              borderRadius: 'var(--radius-sm, 6px)',
+                              background: 'var(--action-primary-soft, rgba(56, 189, 248, 0.12))',
+                              color: 'var(--action-primary, #38bdf8)',
                               fontSize: '11.5px',
                               fontWeight: 600,
-                              border: '1px solid rgba(56, 189, 248, 0.25)'
+                              border: '1px solid var(--border-subtle, rgba(56, 189, 248, 0.25))'
                             }}
                           >
                             {p}
@@ -899,7 +921,7 @@ export default function AffiliateContentCalendar({
                   {/* Form Parameters Editorial */}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-secondary, #94a3b8)' }}>
                         Jumlah Konten
                       </label>
                       <select
@@ -907,11 +929,12 @@ export default function AffiliateContentCalendar({
                         onChange={(e) => setContentCount(Number(e.target.value))}
                         style={{
                           width: '100%',
+                          boxSizing: 'border-box',
                           padding: '10px 12px',
-                          borderRadius: '8px',
-                          border: '1px solid var(--border-color, #1e293b)',
-                          background: 'var(--surface-subtle, #090e1a)',
-                          color: 'var(--text-main, #f8fafc)',
+                          borderRadius: 'var(--radius-sm, 8px)',
+                          border: '1px solid var(--border-subtle, #1e293b)',
+                          background: 'var(--input-bg, #090e1a)',
+                          color: 'var(--text-primary, #f8fafc)',
                           fontSize: '13px',
                           outline: 'none'
                         }}
@@ -925,7 +948,7 @@ export default function AffiliateContentCalendar({
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-secondary, #94a3b8)' }}>
                         Jadwalkan Mulai
                       </label>
                       <input
@@ -934,11 +957,12 @@ export default function AffiliateContentCalendar({
                         onChange={(e) => setStartDate(e.target.value)}
                         style={{
                           width: '100%',
+                          boxSizing: 'border-box',
                           padding: '10px 12px',
-                          borderRadius: '8px',
-                          border: '1px solid var(--border-color, #1e293b)',
-                          background: 'var(--surface-subtle, #090e1a)',
-                          color: 'var(--text-main, #f8fafc)',
+                          borderRadius: 'var(--radius-sm, 8px)',
+                          border: '1px solid var(--border-subtle, #1e293b)',
+                          background: 'var(--input-bg, #090e1a)',
+                          color: 'var(--text-primary, #f8fafc)',
                           fontSize: '13px',
                           outline: 'none'
                         }}
@@ -948,7 +972,7 @@ export default function AffiliateContentCalendar({
 
                   {/* Frequency Selector */}
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-secondary, #94a3b8)' }}>
                       Frekuensi Posting (Berapa Kali Sehari / Interval)
                     </label>
                     <select
@@ -956,11 +980,12 @@ export default function AffiliateContentCalendar({
                       onChange={(e) => setPostingFrequency(e.target.value)}
                       style={{
                         width: '100%',
+                        boxSizing: 'border-box',
                         padding: '10px 12px',
-                        borderRadius: '8px',
-                        border: '1px solid var(--border-color, #1e293b)',
-                        background: 'var(--surface-subtle, #090e1a)',
-                        color: 'var(--text-main, #f8fafc)',
+                        borderRadius: 'var(--radius-sm, 8px)',
+                        border: '1px solid var(--border-subtle, #1e293b)',
+                        background: 'var(--input-bg, #090e1a)',
+                        color: 'var(--text-primary, #f8fafc)',
                         fontSize: '13px',
                         outline: 'none'
                       }}
@@ -976,7 +1001,7 @@ export default function AffiliateContentCalendar({
 
                   {/* Multi-Platform Broadcast Selector */}
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-secondary, #94a3b8)' }}>
                       🎯 Target Kanal Distribusi (Multi-Platform Broadcast)
                     </label>
                     <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
@@ -988,9 +1013,9 @@ export default function AffiliateContentCalendar({
                             alignItems: 'center',
                             gap: '6px',
                             padding: '8px 14px',
-                            borderRadius: '8px',
-                            background: selectedPlatforms.includes(p.id) ? 'rgba(56, 189, 248, 0.12)' : 'var(--surface-subtle, #090e1a)',
-                            border: selectedPlatforms.includes(p.id) ? '1px solid var(--primary, #38bdf8)' : '1px solid var(--border-color, #1e293b)',
+                            borderRadius: 'var(--radius-sm, 8px)',
+                            background: selectedPlatforms.includes(p.id) ? 'var(--action-primary-soft, rgba(56, 189, 248, 0.12))' : 'var(--input-bg, #090e1a)',
+                            border: selectedPlatforms.includes(p.id) ? '1px solid var(--action-primary, #38bdf8)' : '1px solid var(--border-subtle, #1e293b)',
                             cursor: 'pointer',
                             fontSize: '13px',
                             fontWeight: 600
@@ -1017,10 +1042,10 @@ export default function AffiliateContentCalendar({
                       style={{
                         width: '100%',
                         padding: '11px',
-                        borderRadius: '8px',
+                        borderRadius: 'var(--radius-sm, 8px)',
                         border: 'none',
-                        background: 'var(--primary, #38bdf8)',
-                        color: '#0f172a',
+                        background: 'var(--action-primary, #38bdf8)',
+                        color: 'var(--on-action-primary, #0f172a)',
                         fontWeight: 750,
                         fontSize: '13px',
                         cursor: 'pointer'
@@ -1032,64 +1057,128 @@ export default function AffiliateContentCalendar({
                 </div>
               )}
 
-              {/* 2.B Subform: Product Campaign */}
+              {/* 2.B Subform: Product Campaign (1 Kolom Vertikal - Lebar Selaras 100%) */}
               {planType === 'product_campaign' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px' }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
+                  {/* 1. Pilih 1 Produk Target (1 Kolom Penuh) */}
+                  <div style={{ width: '100%' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary, #94a3b8)' }}>
                         Pilih 1 Produk Target
                       </label>
+                      <span style={{ fontSize: '11px', color: 'var(--text-muted, #64748b)', fontWeight: 600 }}>
+                        {filteredBrandProducts.length} Produk
+                      </span>
+                    </div>
+
+                    {/* Search Box Produk (100% Lebar Selaras) */}
+                    <div style={{ position: 'relative', width: '100%', marginBottom: '6px' }}>
+                      <input
+                        type="text"
+                        value={productSearch}
+                        onChange={(e) => setProductSearch(e.target.value)}
+                        placeholder="🔍 Cari nama produk / kategori..."
+                        style={{
+                          width: '100%',
+                          boxSizing: 'border-box',
+                          padding: '9px 32px 9px 12px',
+                          borderRadius: 'var(--radius-sm, 8px)',
+                          border: '1px solid var(--border-subtle, #1e293b)',
+                          background: 'var(--input-bg, #090e1a)',
+                          color: 'var(--text-primary, #f8fafc)',
+                          fontSize: '12.5px',
+                          outline: 'none'
+                        }}
+                      />
+                      {productSearch && (
+                        <button
+                          type="button"
+                          onClick={() => setProductSearch('')}
+                          style={{
+                            position: 'absolute',
+                            right: '8px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'transparent',
+                            border: 'none',
+                            color: 'var(--text-muted, #94a3b8)',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            padding: '4px 6px'
+                          }}
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Dropdown Produk Terfilter (100% Lebar Selaras) */}
+                    {filteredBrandProducts.length === 0 ? (
+                      <div style={{
+                        padding: '10px 12px',
+                        background: 'var(--status-danger-soft, rgba(239, 68, 68, 0.12))',
+                        color: 'var(--status-danger, #ef4444)',
+                        fontSize: '12px',
+                        borderRadius: 'var(--radius-sm, 8px)',
+                        border: '1px solid var(--status-danger-soft, rgba(239, 68, 68, 0.25))'
+                      }}>
+                        ⚠️ Tidak ada produk yang cocok dengan pencarian &quot;{productSearch}&quot;.
+                      </div>
+                    ) : (
                       <select
                         value={selectedProductId}
                         onChange={(e) => setSelectedProductId(e.target.value)}
                         style={{
                           width: '100%',
+                          boxSizing: 'border-box',
                           padding: '10px 12px',
-                          borderRadius: '8px',
-                          border: '1px solid var(--border-color, #1e293b)',
-                          background: 'var(--surface-subtle, #090e1a)',
-                          color: 'var(--text-main, #f8fafc)',
+                          borderRadius: 'var(--radius-sm, 8px)',
+                          border: '1px solid var(--border-subtle, #1e293b)',
+                          background: 'var(--input-bg, #090e1a)',
+                          color: 'var(--text-primary, #f8fafc)',
                           fontSize: '13px',
                           outline: 'none'
                         }}
                       >
-                        {brandProducts.map(p => (
+                        {filteredBrandProducts.map(p => (
                           <option key={p.productId} value={p.productId}>
                             {p.displayName || p.productName || p.name}
                           </option>
                         ))}
                       </select>
-                    </div>
-
-                    <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
-                        Jumlah Konten (Siklus 6 CEP)
-                      </label>
-                      <select
-                        value={contentCount}
-                        onChange={(e) => setContentCount(Number(e.target.value))}
-                        style={{
-                          width: '100%',
-                          padding: '10px 12px',
-                          borderRadius: '8px',
-                          border: '1px solid var(--border-color, #1e293b)',
-                          background: 'var(--surface-subtle, #090e1a)',
-                          color: 'var(--text-main, #f8fafc)',
-                          fontSize: '13px',
-                          outline: 'none'
-                        }}
-                      >
-                        <option value="6">6 Konten (1 Siklus 6 CEP Penuh)</option>
-                        <option value="12">12 Konten (2 Siklus 6 CEP)</option>
-                        <option value="18">18 Konten (3 Siklus 6 CEP)</option>
-                        <option value="24">24 Konten (4 Siklus 6 CEP / 1 Bulan)</option>
-                      </select>
-                    </div>
+                    )}
                   </div>
 
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
+                  {/* 2. Jumlah Konten (Siklus 6 CEP) (1 Kolom Penuh - Lebar Selaras) */}
+                  <div style={{ width: '100%' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-secondary, #94a3b8)' }}>
+                      Jumlah Konten (Siklus 6 CEP)
+                    </label>
+                    <select
+                      value={contentCount}
+                      onChange={(e) => setContentCount(Number(e.target.value))}
+                      style={{
+                        width: '100%',
+                        boxSizing: 'border-box',
+                        padding: '10px 12px',
+                        borderRadius: 'var(--radius-sm, 8px)',
+                        border: '1px solid var(--border-subtle, #1e293b)',
+                        background: 'var(--input-bg, #090e1a)',
+                        color: 'var(--text-primary, #f8fafc)',
+                        fontSize: '13px',
+                        outline: 'none'
+                      }}
+                    >
+                      <option value="6">6 Konten (1 Siklus 6 CEP Penuh)</option>
+                      <option value="12">12 Konten (2 Siklus 6 CEP)</option>
+                      <option value="18">18 Konten (3 Siklus 6 CEP)</option>
+                      <option value="24">24 Konten (4 Siklus 6 CEP / 1 Bulan)</option>
+                    </select>
+                  </div>
+
+                  {/* 3. Konteks Promosi Khusus (Optional) (1 Kolom Penuh - Lebar Selaras) */}
+                  <div style={{ width: '100%' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-secondary, #94a3b8)' }}>
                       Konteks Promosi Khusus (Optional)
                     </label>
                     <textarea
@@ -1099,20 +1188,22 @@ export default function AffiliateContentCalendar({
                       placeholder="Contoh: Promo Flash Sale Gajian Diskon 25% + Free Ongkir se-Indonesia..."
                       style={{
                         width: '100%',
+                        boxSizing: 'border-box',
                         padding: '10px 12px',
-                        borderRadius: '8px',
-                        border: '1px solid var(--border-color, #1e293b)',
-                        background: 'var(--surface-subtle, #090e1a)',
-                        color: 'var(--text-main, #f8fafc)',
+                        borderRadius: 'var(--radius-sm, 8px)',
+                        border: '1px solid var(--border-subtle, #1e293b)',
+                        background: 'var(--input-bg, #090e1a)',
+                        color: 'var(--text-primary, #f8fafc)',
                         fontSize: '13px',
-                        outline: 'none'
+                        outline: 'none',
+                        resize: 'vertical'
                       }}
                     />
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-secondary, #94a3b8)' }}>
                         Jadwalkan Mulai
                       </label>
                       <input
@@ -1121,11 +1212,12 @@ export default function AffiliateContentCalendar({
                         onChange={(e) => setStartDate(e.target.value)}
                         style={{
                           width: '100%',
+                          boxSizing: 'border-box',
                           padding: '10px 12px',
-                          borderRadius: '8px',
-                          border: '1px solid var(--border-color, #1e293b)',
-                          background: 'var(--surface-subtle, #090e1a)',
-                          color: 'var(--text-main, #f8fafc)',
+                          borderRadius: 'var(--radius-sm, 8px)',
+                          border: '1px solid var(--border-subtle, #1e293b)',
+                          background: 'var(--input-bg, #090e1a)',
+                          color: 'var(--text-primary, #f8fafc)',
                           fontSize: '13px',
                           outline: 'none'
                         }}
@@ -1133,7 +1225,7 @@ export default function AffiliateContentCalendar({
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-secondary, #94a3b8)' }}>
                         Frekuensi Posting
                       </label>
                       <select
@@ -1141,11 +1233,12 @@ export default function AffiliateContentCalendar({
                         onChange={(e) => setPostingFrequency(e.target.value)}
                         style={{
                           width: '100%',
+                          boxSizing: 'border-box',
                           padding: '10px 12px',
-                          borderRadius: '8px',
-                          border: '1px solid var(--border-color, #1e293b)',
-                          background: 'var(--surface-subtle, #090e1a)',
-                          color: 'var(--text-main, #f8fafc)',
+                          borderRadius: 'var(--radius-sm, 8px)',
+                          border: '1px solid var(--border-subtle, #1e293b)',
+                          background: 'var(--input-bg, #090e1a)',
+                          color: 'var(--text-primary, #f8fafc)',
                           fontSize: '13px',
                           outline: 'none'
                         }}
@@ -1162,7 +1255,7 @@ export default function AffiliateContentCalendar({
 
                   {/* Multi-Platform Broadcast Selector */}
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-muted, #94a3b8)' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-secondary, #94a3b8)' }}>
                       🎯 Target Kanal Distribusi (Multi-Platform Broadcast)
                     </label>
                     <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
@@ -1174,9 +1267,9 @@ export default function AffiliateContentCalendar({
                             alignItems: 'center',
                             gap: '6px',
                             padding: '8px 14px',
-                            borderRadius: '8px',
-                            background: selectedPlatforms.includes(p.id) ? 'rgba(168, 85, 247, 0.12)' : 'var(--surface-subtle, #090e1a)',
-                            border: selectedPlatforms.includes(p.id) ? '1px solid #a855f7' : '1px solid var(--border-color, #1e293b)',
+                            borderRadius: 'var(--radius-sm, 8px)',
+                            background: selectedPlatforms.includes(p.id) ? 'var(--action-primary-soft, rgba(56, 189, 248, 0.12))' : 'var(--input-bg, #090e1a)',
+                            border: selectedPlatforms.includes(p.id) ? '1px solid var(--action-primary, #38bdf8)' : '1px solid var(--border-subtle, #1e293b)',
                             cursor: 'pointer',
                             fontSize: '13px',
                             fontWeight: 600
@@ -1203,9 +1296,9 @@ export default function AffiliateContentCalendar({
                       style={{
                         width: '100%',
                         padding: '11px',
-                        borderRadius: '8px',
+                        borderRadius: 'var(--radius-sm, 8px)',
                         border: 'none',
-                        background: '#a855f7',
+                        background: 'var(--accent, #a855f7)',
                         color: '#ffffff',
                         fontWeight: 750,
                         fontSize: '13px',
@@ -1242,8 +1335,8 @@ export default function AffiliateContentCalendar({
                       </thead>
                       <tbody>
                         {draftRows.map((row, idx) => (
-                          <tr key={row.id} style={{ borderTop: '1px solid var(--border-color, #1e293b)' }}>
-                            <td style={{ padding: '8px 10px', fontWeight: 700 }}>{idx + 1}</td>
+                          <tr key={row.id} style={{ borderTop: '1px solid var(--border-subtle, #1e293b)' }}>
+                            <td style={{ padding: '8px 10px', fontWeight: 700, color: 'var(--text-primary)' }}>{idx + 1}</td>
                             <td style={{ padding: '8px 10px' }}>
                               {planType === 'product_campaign' ? (
                                 <select
@@ -1253,12 +1346,13 @@ export default function AffiliateContentCalendar({
                                     setDraftRows(prev => prev.map((r, i) => i === idx ? { ...r, cep_code: val } : r));
                                   }}
                                   style={{
-                                    padding: '4px 8px',
-                                    borderRadius: '6px',
-                                    border: '1px solid var(--border-color, #1e293b)',
-                                    background: 'var(--surface-bg, #0f172a)',
-                                    color: 'var(--text-main, #f8fafc)',
-                                    fontSize: '11px'
+                                    padding: '5px 8px',
+                                    borderRadius: 'var(--radius-sm, 6px)',
+                                    border: '1px solid var(--border-subtle, #1e293b)',
+                                    background: 'var(--input-bg, #090e1a)',
+                                    color: 'var(--text-primary, #f8fafc)',
+                                    fontSize: '11.5px',
+                                    outline: 'none'
                                   }}
                                 >
                                   {CEP_OPTIONS.map(c => (
@@ -1273,12 +1367,13 @@ export default function AffiliateContentCalendar({
                                     setDraftRows(prev => prev.map((r, i) => i === idx ? { ...r, pillar_name: val } : r));
                                   }}
                                   style={{
-                                    padding: '4px 8px',
-                                    borderRadius: '6px',
-                                    border: '1px solid var(--border-color, #1e293b)',
-                                    background: 'var(--surface-bg, #0f172a)',
-                                    color: 'var(--text-main, #f8fafc)',
-                                    fontSize: '11px'
+                                    padding: '5px 8px',
+                                    borderRadius: 'var(--radius-sm, 6px)',
+                                    border: '1px solid var(--border-subtle, #1e293b)',
+                                    background: 'var(--input-bg, #090e1a)',
+                                    color: 'var(--text-primary, #f8fafc)',
+                                    fontSize: '11.5px',
+                                    outline: 'none'
                                   }}
                                 >
                                   {activeBrandPillars.map(pil => (
@@ -1296,12 +1391,13 @@ export default function AffiliateContentCalendar({
                                   setDraftRows(prev => prev.map((r, i) => i === idx ? { ...r, date: val } : r));
                                 }}
                                 style={{
-                                  padding: '4px 6px',
-                                  borderRadius: '6px',
-                                  border: '1px solid var(--border-color, #1e293b)',
-                                  background: 'var(--surface-bg, #0f172a)',
-                                  color: 'var(--text-main, #f8fafc)',
-                                  fontSize: '11px'
+                                  padding: '5px 7px',
+                                  borderRadius: 'var(--radius-sm, 6px)',
+                                  border: '1px solid var(--border-subtle, #1e293b)',
+                                  background: 'var(--input-bg, #090e1a)',
+                                  color: 'var(--text-primary, #f8fafc)',
+                                  fontSize: '11.5px',
+                                  outline: 'none'
                                 }}
                               />
                             </td>
@@ -1314,12 +1410,13 @@ export default function AffiliateContentCalendar({
                                   setDraftRows(prev => prev.map((r, i) => i === idx ? { ...r, time: val } : r));
                                 }}
                                 style={{
-                                  padding: '4px 6px',
-                                  borderRadius: '6px',
-                                  border: '1px solid var(--border-color, #1e293b)',
-                                  background: 'var(--surface-bg, #0f172a)',
-                                  color: 'var(--text-main, #f8fafc)',
-                                  fontSize: '11px'
+                                  padding: '5px 7px',
+                                  borderRadius: 'var(--radius-sm, 6px)',
+                                  border: '1px solid var(--border-subtle, #1e293b)',
+                                  background: 'var(--input-bg, #090e1a)',
+                                  color: 'var(--text-primary, #f8fafc)',
+                                  fontSize: '11.5px',
+                                  outline: 'none'
                                 }}
                               />
                             </td>
@@ -1350,7 +1447,7 @@ export default function AffiliateContentCalendar({
             {/* Modal Footer Actions */}
             <div style={{
               padding: '14px 24px',
-              borderTop: '1px solid var(--border-color, #1e293b)',
+              borderTop: '1px solid var(--border-subtle, #1e293b)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'flex-end',
@@ -1363,10 +1460,10 @@ export default function AffiliateContentCalendar({
                 disabled={savingPlan}
                 style={{
                   padding: '9px 16px',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border-color, #1e293b)',
+                  borderRadius: 'var(--radius-sm, 8px)',
+                  border: '1px solid var(--border-subtle, #1e293b)',
                   background: 'transparent',
-                  color: 'var(--text-main, #f8fafc)',
+                  color: 'var(--text-primary, #f8fafc)',
                   fontSize: '13px',
                   fontWeight: 600,
                   cursor: 'pointer'
@@ -1380,10 +1477,10 @@ export default function AffiliateContentCalendar({
                 disabled={savingPlan || draftRows.length === 0}
                 style={{
                   padding: '9px 20px',
-                  borderRadius: '8px',
+                  borderRadius: 'var(--radius-sm, 8px)',
                   border: 'none',
-                  background: 'var(--primary, #38bdf8)',
-                  color: '#0f172a',
+                  background: 'var(--action-primary, #38bdf8)',
+                  color: 'var(--on-action-primary, #0f172a)',
                   fontSize: '13px',
                   fontWeight: 700,
                   cursor: (savingPlan || draftRows.length === 0) ? 'not-allowed' : 'pointer',
@@ -1402,7 +1499,7 @@ export default function AffiliateContentCalendar({
         <div style={{
           position: 'fixed',
           inset: 0,
-          background: 'rgba(0, 0, 0, 0.75)',
+          background: 'var(--overlay-backdrop, rgba(0, 0, 0, 0.75))',
           backdropFilter: 'blur(4px)',
           display: 'flex',
           alignItems: 'center',
@@ -1411,20 +1508,20 @@ export default function AffiliateContentCalendar({
           padding: '20px'
         }}>
           <div style={{
-            background: 'var(--surface-bg, #0f172a)',
-            color: 'var(--text-main, #f8fafc)',
-            border: '1px solid var(--border-color, #1e293b)',
+            background: 'var(--surface-raised, #0f172a)',
+            color: 'var(--text-primary, #f8fafc)',
+            border: '1px solid var(--border-subtle, #1e293b)',
             borderRadius: '16px',
             width: '100%',
             maxWidth: '520px',
             padding: '20px 24px',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+            boxShadow: 'var(--shadow-modal, 0 25px 50px -12px rgba(0, 0, 0, 0.5))',
             display: 'flex',
             flexDirection: 'column',
             gap: '14px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)' }}>
                 📌 Detail Jadwal Konten
               </h3>
               <button
@@ -1439,28 +1536,28 @@ export default function AffiliateContentCalendar({
             <div style={{ fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div>
                 <span style={{ color: 'var(--text-muted, #94a3b8)' }}>Waktu Tayang: </span>
-                <strong>{new Date(selectedSchedule.scheduled_at).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })} WIB</strong>
+                <strong style={{ color: 'var(--text-primary)' }}>{new Date(selectedSchedule.scheduled_at).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })} WIB</strong>
               </div>
               <div>
                 <span style={{ color: 'var(--text-muted, #94a3b8)' }}>Tipe: </span>
-                <strong>{selectedSchedule.plan_type === 'product_campaign' ? '🎯 Product Campaign' : '🏛️ Brand Editorial'}</strong>
+                <strong style={{ color: 'var(--text-primary)' }}>{selectedSchedule.plan_type === 'product_campaign' ? '🎯 Product Campaign' : '🏛️ Brand Editorial'}</strong>
               </div>
               {selectedSchedule.product_name && (
                 <div>
                   <span style={{ color: 'var(--text-muted, #94a3b8)' }}>Produk: </span>
-                  <strong>{selectedSchedule.product_name}</strong>
+                  <strong style={{ color: 'var(--text-primary)' }}>{selectedSchedule.product_name}</strong>
                 </div>
               )}
               {selectedSchedule.cep_code && (
                 <div>
                   <span style={{ color: 'var(--text-muted, #94a3b8)' }}>CEP: </span>
-                  <strong>{selectedSchedule.cep_code}</strong>
+                  <strong style={{ color: 'var(--text-primary)' }}>{selectedSchedule.cep_code}</strong>
                 </div>
               )}
               {selectedSchedule.pillar_name && (
                 <div>
                   <span style={{ color: 'var(--text-muted, #94a3b8)' }}>Pilar: </span>
-                  <strong>{selectedSchedule.pillar_name}</strong>
+                  <strong style={{ color: 'var(--text-primary)' }}>{selectedSchedule.pillar_name}</strong>
                 </div>
               )}
               <div>
@@ -1470,8 +1567,8 @@ export default function AffiliateContentCalendar({
                   borderRadius: '4px',
                   fontSize: '11px',
                   fontWeight: 700,
-                  background: selectedSchedule.status === 'scheduled' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                  color: selectedSchedule.status === 'scheduled' ? '#38bdf8' : '#f59e0b'
+                  background: selectedSchedule.status === 'scheduled' ? 'var(--status-info-soft, rgba(56, 189, 248, 0.15))' : 'var(--status-warning-soft, rgba(245, 158, 11, 0.15))',
+                  color: selectedSchedule.status === 'scheduled' ? 'var(--status-info, #38bdf8)' : 'var(--status-warning, #f59e0b)'
                 }}>
                   {selectedSchedule.status.toUpperCase()}
                 </span>
@@ -1488,10 +1585,10 @@ export default function AffiliateContentCalendar({
                 style={{
                   flex: 1,
                   padding: '10px',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border-color, #1e293b)',
-                  background: 'var(--surface-subtle, #090e1a)',
-                  color: 'var(--text-main, #f8fafc)',
+                  borderRadius: 'var(--radius-sm, 8px)',
+                  border: '1px solid var(--border-subtle, #1e293b)',
+                  background: 'var(--input-bg, #090e1a)',
+                  color: 'var(--text-primary, #f8fafc)',
                   fontSize: '13px',
                   fontWeight: 600,
                   cursor: 'pointer'
@@ -1506,10 +1603,10 @@ export default function AffiliateContentCalendar({
                 style={{
                   flex: 1,
                   padding: '10px',
-                  borderRadius: '8px',
+                  borderRadius: 'var(--radius-sm, 8px)',
                   border: 'none',
-                  background: 'var(--primary, #38bdf8)',
-                  color: '#0f172a',
+                  background: 'var(--action-primary, #38bdf8)',
+                  color: 'var(--on-action-primary, #0f172a)',
                   fontSize: '13px',
                   fontWeight: 700,
                   cursor: (dispatchingRepliz || selectedSchedule.status === 'scheduled') ? 'not-allowed' : 'pointer',
