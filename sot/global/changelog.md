@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.30.3 — Dynamic Proportional Pillar Multiplier for Brand Editorial Calendar (11/09/2026)
+- Penyesuaian dropdown Jumlah Konten Brand Editorial berdasarkan total pilar brand aktif
+- Dukungan opsi kelipatan 1x hingga 4x ide per pilar hingga 28 konten sebulan
+- Penyelarasan opsi 4 siklus 6 CEP pada Product Campaign dan mockup standalone
+
 ## V2.30.2 — Streamline Product Edit Modal with 3-Tab Semantic UI (11/09/2026)
 - Perombakan ProductDatabaseModal menjadi 3 tab ergonomis
 - Penerapan 100 persen Semantic CSS tokens untuk Light dan Dark mode

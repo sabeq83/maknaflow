@@ -238,9 +238,30 @@ export default function AffiliateContentCalendar({
       : DEFAULT_BRAND_PILLARS;
   }, [brandProfileData.pillars]);
 
+  // Dynamic Editorial Content Count Options based on active pillars count (1x - 4x)
+  const editorialCountOptions = useMemo(() => {
+    const n = (activeBrandPillars && activeBrandPillars.length > 0) ? activeBrandPillars.length : 7;
+    return [
+      { value: n * 1, label: `${n * 1} Konten (1 Ide per Pilar)`, multiplier: 1 },
+      { value: n * 2, label: `${n * 2} Konten (2 Ide per Pilar)`, multiplier: 2 },
+      { value: n * 3, label: `${n * 3} Konten (3 Ide per Pilar)`, multiplier: 3 },
+      { value: n * 4, label: `${n * 4} Konten (4 Ide per Pilar / 1 Bulan)`, multiplier: 4 },
+    ];
+  }, [activeBrandPillars]);
+
+  // Auto-sync contentCount for brand_editorial to stay aligned with active pillars
+  useEffect(() => {
+    if (planType === 'brand_editorial' && editorialCountOptions.length > 0) {
+      const exists = editorialCountOptions.some(opt => opt.value === contentCount);
+      if (!exists) {
+        setContentCount(editorialCountOptions[0].value);
+      }
+    }
+  }, [planType, editorialCountOptions, contentCount]);
+
   // Generate Draft Rows
   const handleGeneratePlanDraft = () => {
-    const count = parseInt(contentCount, 10) || (planType === 'brand_editorial' ? 8 : 6);
+    const count = parseInt(contentCount, 10) || (planType === 'brand_editorial' ? (editorialCountOptions[0]?.value || 7) : 6);
     const baseDate = new Date(startDate);
     const rows = [];
 
@@ -774,7 +795,7 @@ export default function AffiliateContentCalendar({
                     type="button"
                     onClick={() => {
                       setPlanType('brand_editorial');
-                      setContentCount(8);
+                      setContentCount(editorialCountOptions[0]?.value || (activeBrandPillars.length || 7));
                       setDraftRows([]);
                     }}
                     style={{
@@ -895,9 +916,11 @@ export default function AffiliateContentCalendar({
                           outline: 'none'
                         }}
                       >
-                        <option value="4">4 Konten (1 Ide per Pilar)</option>
-                        <option value="8">8 Konten (2 Ide per Pilar)</option>
-                        <option value="12">12 Konten (3 Ide per Pilar)</option>
+                        {editorialCountOptions.map(opt => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
                       </select>
                     </div>
 
@@ -1060,6 +1083,7 @@ export default function AffiliateContentCalendar({
                         <option value="6">6 Konten (1 Siklus 6 CEP Penuh)</option>
                         <option value="12">12 Konten (2 Siklus 6 CEP)</option>
                         <option value="18">18 Konten (3 Siklus 6 CEP)</option>
+                        <option value="24">24 Konten (4 Siklus 6 CEP / 1 Bulan)</option>
                       </select>
                     </div>
                   </div>
