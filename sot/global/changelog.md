@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.30.9 — Harden API Tenant Wrapper with Async Cluster Session Fallback (12/09/2026)
+- Enable getCurrentUserAsync fallback in withTenantContext for PM2 cluster workers
+- Ensure session validity across multi-worker deployments
+
 ## V2.30.8 — Fix PostgreSQL Schema Search Path for Multi-Environment Shared Tables (12/09/2026)
 - Add public fallback to PG_SEARCH_PATH in lib/db-pg.js
 - Ensure staging and dev schemas resolve shared products catalog without 500 errors
