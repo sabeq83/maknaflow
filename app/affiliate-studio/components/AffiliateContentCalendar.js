@@ -85,6 +85,7 @@ export default function AffiliateContentCalendar({
     setLoading(true);
     try {
       const q = new URLSearchParams({
+        brand_profile_id: brandId || '',
         brand_name: brandName || '',
         month: String(currentMonth),
         year: String(currentYear)
@@ -103,7 +104,7 @@ export default function AffiliateContentCalendar({
     } finally {
       setLoading(false);
     }
-  }, [brandName, currentMonth, currentYear]);
+  }, [brandId, brandName, currentMonth, currentYear]);
 
   useEffect(() => {
     fetchSchedules();
@@ -447,6 +448,7 @@ export default function AffiliateContentCalendar({
 
       const payload = {
         plan_type: planType,
+        brand_profile_id: brandId || null,
         brand_name: brandName || 'MAKNA Brand',
         product_id: planType === 'product_campaign' ? selectedProductId : null,
         product_name: productName,

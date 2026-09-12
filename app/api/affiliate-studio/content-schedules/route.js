@@ -16,6 +16,7 @@ export const GET = withTenantContext(async (request) => {
     const tenantId = getActiveTenantId();
     const { searchParams } = new URL(request.url);
 
+    const brandProfileId = searchParams.get('brand_profile_id') || searchParams.get('brand_id') || '';
     const brandName = searchParams.get('brand_name') || searchParams.get('brand') || '';
     const month = searchParams.get('month') ? parseInt(searchParams.get('month'), 10) : undefined;
     const year = searchParams.get('year') ? parseInt(searchParams.get('year'), 10) : undefined;
@@ -26,6 +27,7 @@ export const GET = withTenantContext(async (request) => {
     const [schedules, accounts] = await Promise.all([
       listAffiliateSchedules({
         tenantId,
+        brandProfileId,
         brandName,
         month,
         year,
@@ -50,13 +52,15 @@ export const GET = withTenantContext(async (request) => {
   }
 });
 
-export const POST = withTenantContext(async (request, user) => {
+export const POST = withTenantContext(async (request, context, user) => {
   try {
     const tenantId = getActiveTenantId();
     const body = await request.json();
 
     const {
       plan_type,
+      brand_profile_id,
+      brand_id,
       brand_name,
       product_id,
       product_name,
@@ -68,6 +72,7 @@ export const POST = withTenantContext(async (request, user) => {
 
     const created = await createAffiliatePlanSchedules({
       tenantId,
+      brandProfileId: brand_profile_id || brand_id || null,
       planType: plan_type || 'product_campaign',
       brandName: brand_name,
       productId: product_id || null,

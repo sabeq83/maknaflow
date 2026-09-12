@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.30.7 — Fix Content Calendar DB Query & Brand Profile Persistence (12/09/2026)
+- Fix column p.price does not exist error in schedule listing
+- Add brand_profile_id column and migration to affiliate_content_schedules
+- Ensure robust calendar CRUD persistence and case-insensitive brand lookup
+
 ## V2.30.6 — Affiliate Studio Workflow V2 Continuous Pipeline (12/09/2026)
 - Dual-View Content Calendar (30-day grid & row mode) with inline toolbar dispatch
 - 6 CEP AI Planner with Bulk Approval and Ingest to Production
