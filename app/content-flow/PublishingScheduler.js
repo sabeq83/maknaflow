@@ -42,7 +42,15 @@ const XIcon = ({ style }) => (
   </svg>
 );
 
-export default function PublishingScheduler({ initialPreloadItem = null, onBackToLibrary = null, modalOnly = false }) {
+export default function PublishingScheduler({
+  initialPreloadItem = null,
+  onBackToLibrary = null,
+  modalOnly = false,
+  controlledBrandProfileId = null,
+  controlledAccountName = null,
+  controlledContentRunIds = null,
+  controlledProgramId = null
+}) {
   const [activeTab, setActiveTab] = useState('queue'); // 'queue', 'calendar', 'history'
   const [jobs, setJobs] = useState([]);
   const [metrics, setMetrics] = useState({ scheduled: 0, publishedToday: 0, retryWait: 0, needsAction: 0 });
@@ -53,11 +61,17 @@ export default function PublishingScheduler({ initialPreloadItem = null, onBackT
   const [loadingDetail, setLoadingDetail] = useState(false);
 
   // Filters
-  const [filterBrandProfile, setFilterBrandProfile] = useState('all');
+  const [filterBrandProfile, setFilterBrandProfile] = useState(controlledBrandProfileId || 'all');
   const [filterPlatform, setFilterPlatform] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [availableBrands, setAvailableBrands] = useState([]);
+
+  useEffect(() => {
+    if (controlledBrandProfileId) {
+      setFilterBrandProfile(controlledBrandProfileId);
+    }
+  }, [controlledBrandProfileId]);
 
   // Monthly Calendar Navigation State
   const [calendarDate, setCalendarDate] = useState(new Date());

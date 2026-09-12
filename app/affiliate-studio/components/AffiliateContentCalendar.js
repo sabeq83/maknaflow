@@ -44,6 +44,12 @@ export default function AffiliateContentCalendar({
   const [brandProducts, setBrandProducts] = useState([]);
   const [toastMsg, setToastMsg] = useState('');
 
+  // Dual-View and Selection State
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+  const [platformFilter, setPlatformFilter] = useState('all'); // 'all' | 'instagram' | 'tiktok' | 'facebook' | 'youtube'
+  const [selectedRowIds, setSelectedRowIds] = useState([]);
+  const [dispatchingPlanner, setDispatchingPlanner] = useState(false);
+
   // Modal State
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [planType, setPlanType] = useState('brand_editorial'); // 'brand_editorial' (LEFT) | 'product_campaign' (RIGHT)
@@ -219,17 +225,28 @@ export default function AffiliateContentCalendar({
     return cells;
   }, [currentYear, currentMonth]);
 
+  // Filter schedules by selected platform filter
+  const filteredSchedules = useMemo(() => {
+    if (platformFilter === 'all') return schedules;
+    return schedules.filter(item => {
+      const platforms = Array.isArray(item.target_platforms)
+        ? item.target_platforms
+        : (typeof item.target_platforms === 'string' ? JSON.parse(item.target_platforms || '[]') : []);
+      return platforms.includes(platformFilter);
+    });
+  }, [schedules, platformFilter]);
+
   // Group schedules by YYYY-MM-DD
   const schedulesByDate = useMemo(() => {
     const map = {};
-    schedules.forEach(item => {
+    filteredSchedules.forEach(item => {
       const d = new Date(item.scheduled_at);
       const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       if (!map[dateStr]) map[dateStr] = [];
       map[dateStr].push(item);
     });
     return map;
-  }, [schedules]);
+  }, [filteredSchedules]);
 
   // Month Navigation Handlers
   const handlePrevMonth = () => {
@@ -242,7 +259,53 @@ export default function AffiliateContentCalendar({
     setCurrentDate(new Date());
   };
 
-  // Toggle platform checkbox
+  // Toggle selection for all rows
+  const handleToggleSelectAll = () => {
+    if (selectedRowIds.length === filteredSchedules.length && filteredSchedules.length > 0) {
+      setSelectedRowIds([]);
+    } else {
+      setSelectedRowIds(filteredSchedules.map(s => s.id));
+    }
+  };
+
+  // Toggle selection for individual row
+  const handleToggleSelectRow = (id) => {
+    setSelectedRowIds(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
+
+  // Dispatch selected content schedules to AI Content Planner
+  const handleDispatchToPlanner = async () => {
+    if (selectedRowIds.length === 0) return;
+    setDispatchingPlanner(true);
+    try {
+      const res = await fetch(`/api/v2/affiliate-studio/brands/${brandId}/calendar/dispatch`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          scheduleIds: selectedRowIds
+        })
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || 'Gagal mengirim jadwal ke Content Planner.');
+      }
+      showToast(`⚡ ${json.data.rowsCreated} konten berhasil dikirim ke AI Content Planner! 🚀`);
+      setSelectedRowIds([]);
+      fetchSchedules();
+      if (onNavigateToPlanner) {
+        setTimeout(() => onNavigateToPlanner(), 1200);
+      }
+    } catch (err) {
+      console.error('Error dispatching to planner:', err);
+      showToast(err.message || 'Gagal mengirim ke Content Planner ❌');
+    } finally {
+      setDispatchingPlanner(false);
+    }
+  };
+
+  // Toggle platform checkbox in modal
   const handleTogglePlatform = (pId) => {
     setSelectedPlatforms(prev => {
       if (prev.includes(pId)) {
@@ -251,6 +314,24 @@ export default function AffiliateContentCalendar({
       }
       return [...prev, pId];
     });
+  };
+
+  // Toggle individual row platform in list view
+  const handleToggleRowPlatform = async (item, platformKey) => {
+    const currentPlatforms = Array.isArray(item.target_platforms)
+      ? item.target_platforms
+      : (typeof item.target_platforms === 'string' ? JSON.parse(item.target_platforms || '[]') : ['instagram', 'tiktok']);
+
+    let updatedPlatforms;
+    if (currentPlatforms.includes(platformKey)) {
+      if (currentPlatforms.length === 1) return; // Keep at least 1
+      updatedPlatforms = currentPlatforms.filter(p => p !== platformKey);
+    } else {
+      updatedPlatforms = [...currentPlatforms, platformKey];
+    }
+
+    // Optimistically update local schedules state
+    setSchedules(prev => prev.map(s => s.id === item.id ? { ...s, target_platforms: updatedPlatforms } : s));
   };
 
   // Active brand pillars (dynamic with fallback)
@@ -455,7 +536,7 @@ export default function AffiliateContentCalendar({
         </div>
       )}
 
-      {/* Action Bar */}
+      {/* Stage 1 Header & Toolbar */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -463,20 +544,83 @@ export default function AffiliateContentCalendar({
         flexWrap: 'wrap',
         gap: '16px',
         padding: '16px 20px',
-        background: 'var(--surface-bg, #0f172a)',
-        borderRadius: '12px',
-        border: '1px solid var(--border-color, #1e293b)'
+        background: 'var(--surface)',
+        borderRadius: 'var(--radius-lg, 12px)',
+        border: '1px solid var(--border-subtle)'
       }}>
         <div>
-          <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 4px 0', color: 'var(--text-main, #f8fafc)' }}>
-            📅 Content Calendar & Repliz Scheduling
+          <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
+            📅 Tahap 1: Content Calendar & Brief Sourcing
           </h2>
-          <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted, #94a3b8)' }}>
-            Jadwalkan konten editorial brand dan kampanye produk dengan integrasi multi-channel broadcast.
+          <p style={{ margin: 0, fontSize: '12.5px', color: 'var(--text-muted)' }}>
+            Jadwalkan brief konten editorial brand dan produk dengan integrasi multi-platform broadcast.
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* Dual-View Mode Switcher */}
+          <div style={{
+            display: 'inline-flex',
+            background: 'var(--input-bg, #0c1422)',
+            padding: '3px',
+            borderRadius: '8px',
+            border: '1px solid var(--border-subtle)'
+          }}>
+            <button
+              type="button"
+              id="btnViewCalendar"
+              onClick={() => setViewMode('grid')}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '6px',
+                border: 'none',
+                background: viewMode === 'grid' ? 'var(--action-primary, #2dd4bf)' : 'transparent',
+                color: viewMode === 'grid' ? 'var(--on-action-primary, #042f2e)' : 'var(--text-secondary)',
+                fontWeight: viewMode === 'grid' ? 700 : 500,
+                fontSize: '12px',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              📅 Kalender 30 Hari
+            </button>
+            <button
+              type="button"
+              id="btnViewList"
+              onClick={() => setViewMode('list')}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '6px',
+                border: 'none',
+                background: viewMode === 'list' ? 'var(--action-primary, #2dd4bf)' : 'transparent',
+                color: viewMode === 'list' ? 'var(--on-action-primary, #042f2e)' : 'var(--text-secondary)',
+                fontWeight: viewMode === 'list' ? 700 : 500,
+                fontSize: '12px',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              📋 Mode Baris
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleToggleSelectAll}
+            style={{
+              padding: '7px 14px',
+              borderRadius: '8px',
+              background: 'var(--surface-raised)',
+              border: '1px solid var(--border-subtle)',
+              color: 'var(--text-primary)',
+              fontWeight: 600,
+              fontSize: '12px',
+              cursor: 'pointer'
+            }}
+          >
+            ✓ {selectedRowIds.length === filteredSchedules.length && filteredSchedules.length > 0 ? 'Batal Pilih' : 'Pilih Semua'}
+          </button>
+
           <button
             type="button"
             onClick={() => {
@@ -484,267 +628,478 @@ export default function AffiliateContentCalendar({
               setShowPlanModal(true);
             }}
             style={{
-              padding: '9px 18px',
+              padding: '7px 16px',
               borderRadius: '8px',
-              background: 'var(--primary, #38bdf8)',
-              color: '#0f172a',
-              border: 'none',
-              fontWeight: 750,
-              fontSize: '13px',
+              background: 'var(--surface-interactive)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-strong)',
+              fontWeight: 700,
+              fontSize: '12px',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '6px'
             }}
           >
-            <span>+</span> Tambahkan Plan
+            <span>+</span> Buat Rencana Baru
           </button>
 
+          {/* Inline Dispatch Action Button */}
           <button
             type="button"
-            onClick={() => onNavigateToPlanner?.()}
+            id="btnDispatchPlanner"
+            onClick={handleDispatchToPlanner}
+            disabled={selectedRowIds.length === 0 || dispatchingPlanner}
             style={{
-              padding: '9px 16px',
+              padding: '7px 16px',
               borderRadius: '8px',
-              background: 'rgba(56, 189, 248, 0.1)',
-              color: 'var(--primary, #38bdf8)',
-              border: '1px solid var(--primary, #38bdf8)',
-              fontWeight: 650,
-              fontSize: '13px',
-              cursor: 'pointer',
+              background: selectedRowIds.length > 0 ? 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)' : 'var(--surface-raised)',
+              color: selectedRowIds.length > 0 ? '#ffffff' : 'var(--text-muted)',
+              border: 'none',
+              fontWeight: 750,
+              fontSize: '12px',
+              cursor: selectedRowIds.length > 0 ? 'pointer' : 'not-allowed',
+              opacity: selectedRowIds.length > 0 ? 1 : 0.5,
               display: 'flex',
               alignItems: 'center',
-              gap: '6px'
+              gap: '6px',
+              boxShadow: selectedRowIds.length > 0 ? '0 4px 14px rgba(168, 85, 247, 0.35)' : 'none',
+              transition: 'all 0.15s ease'
             }}
           >
-            <span>⚡</span> Buka Content Planner
+            <span>⚡</span> Kirim ke AI Content Planner ({selectedRowIds.length}) →
           </button>
         </div>
       </div>
 
-      {/* Calendar Shell */}
-      <div style={{
-        background: 'var(--surface-bg, #0f172a)',
-        borderRadius: '12px',
-        border: '1px solid var(--border-color, #1e293b)',
-        overflow: 'hidden'
-      }}>
-        {/* Calendar Nav Bar */}
+      {/* VIEW A: 30-DAY CALENDAR GRID */}
+      {viewMode === 'grid' && (
         <div style={{
-          padding: '14px 20px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          borderBottom: '1px solid var(--border-color, #1e293b)',
-          background: 'var(--surface-header, rgba(15, 23, 42, 0.6))'
+          background: 'var(--surface)',
+          borderRadius: 'var(--radius-lg, 12px)',
+          border: '1px solid var(--border-subtle)',
+          overflow: 'hidden'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button
-              type="button"
-              onClick={handlePrevMonth}
-              style={{
-                padding: '6px 12px',
-                borderRadius: '6px',
-                background: 'var(--surface-subtle, #1e293b)',
-                border: '1px solid var(--border-color, #334155)',
-                color: 'var(--text-main, #f8fafc)',
-                fontSize: '12px',
-                cursor: 'pointer'
-              }}
-            >
-              ‹ Prev
-            </button>
-            <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-main, #f8fafc)' }}>
-              📅 {MONTH_NAMES[currentMonth - 1]} {currentYear}
-            </span>
-            <button
-              type="button"
-              onClick={handleNextMonth}
-              style={{
-                padding: '6px 12px',
-                borderRadius: '6px',
-                background: 'var(--surface-subtle, #1e293b)',
-                border: '1px solid var(--border-color, #334155)',
-                color: 'var(--text-main, #f8fafc)',
-                fontSize: '12px',
-                cursor: 'pointer'
-              }}
-            >
-              Next ›
-            </button>
-            <button
-              type="button"
-              onClick={handleToday}
-              style={{
-                padding: '4px 10px',
-                borderRadius: '6px',
-                background: 'transparent',
-                border: '1px solid var(--border-color, #334155)',
-                color: 'var(--text-muted, #94a3b8)',
-                fontSize: '11px',
-                cursor: 'pointer'
-              }}
-            >
-              Bulan Ini
-            </button>
-          </div>
-
-          <div style={{ fontSize: '13px', color: 'var(--text-muted, #94a3b8)' }}>
-            Total <strong style={{ color: 'var(--primary, #38bdf8)' }}>{schedules.length}</strong> Konten Terjadwal
-            {loading && <span style={{ marginLeft: '8px', fontSize: '11px' }}>⏳ Memuat...</span>}
-          </div>
-        </div>
-
-        {/* Weekday Headers (Mon-Sun) */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(7, 1fr)',
-          background: 'var(--surface-subtle, #090e1a)',
-          borderBottom: '1px solid var(--border-color, #1e293b)'
-        }}>
-          {['SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU', 'MINGGU'].map((day, idx) => (
-            <div
-              key={day}
-              style={{
-                padding: '10px',
-                textAlign: 'center',
-                fontSize: '11px',
-                fontWeight: 700,
-                color: idx >= 5 ? '#f43f5e' : 'var(--text-muted, #94a3b8)',
-                letterSpacing: '0.5px'
-              }}
-            >
-              {day}
-            </div>
-          ))}
-        </div>
-
-        {/* Date Cells Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(7, 1fr)',
-          background: 'var(--border-color, #1e293b)',
-          gap: '1px'
-        }}>
-          {calendarGrid.map((cell, idx) => {
-            const daySchedules = schedulesByDate[cell.dateStr] || [];
-            return (
-              <div
-                key={`${cell.dateStr}_${idx}`}
+          {/* Calendar Toolbar with Platform Filter */}
+          <div style={{
+            padding: '12px 20px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '12px',
+            borderBottom: '1px solid var(--border-subtle)',
+            background: 'var(--surface-raised)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <button
+                type="button"
+                onClick={handlePrevMonth}
                 style={{
-                  background: cell.isCurrentMonth ? 'var(--surface-bg, #0f172a)' : 'rgba(15, 23, 42, 0.4)',
-                  minHeight: '120px',
-                  maxHeight: '160px',
-                  padding: '8px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  position: 'relative',
-                  opacity: cell.isCurrentMonth ? 1 : 0.45,
-                  overflow: 'hidden'
+                  padding: '5px 10px',
+                  borderRadius: '6px',
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border-subtle)',
+                  color: 'var(--text-primary)',
+                  fontSize: '12px',
+                  cursor: 'pointer'
                 }}
               >
-                {/* Cell Header: Date Number & Add Button */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  marginBottom: '6px'
-                }}>
-                  <span style={{
-                    fontSize: '12px',
-                    fontWeight: cell.isToday ? 800 : 600,
-                    color: cell.isToday ? 'var(--primary, #38bdf8)' : 'var(--text-main, #f8fafc)',
-                    background: cell.isToday ? 'rgba(56, 189, 248, 0.15)' : 'transparent',
-                    padding: cell.isToday ? '2px 6px' : '0',
-                    borderRadius: '4px'
+                ◀
+              </button>
+              <span style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)' }}>
+                {MONTH_NAMES[currentMonth - 1]} {currentYear}
+              </span>
+              <button
+                type="button"
+                onClick={handleNextMonth}
+                style={{
+                  padding: '5px 10px',
+                  borderRadius: '6px',
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border-subtle)',
+                  color: 'var(--text-primary)',
+                  fontSize: '12px',
+                  cursor: 'pointer'
+                }}
+              >
+                ▶
+              </button>
+              <button
+                type="button"
+                onClick={handleToday}
+                style={{
+                  padding: '3px 8px',
+                  borderRadius: '4px',
+                  background: 'transparent',
+                  border: '1px solid var(--border-subtle)',
+                  color: 'var(--text-muted)',
+                  fontSize: '11px',
+                  cursor: 'pointer'
+                }}
+              >
+                Bulan Ini
+              </button>
+            </div>
+
+            {/* Platform Filters */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700 }}>Filter Platform:</span>
+              {[
+                { id: 'all', label: 'Semua' },
+                { id: 'instagram', label: '📸 IG' },
+                { id: 'tiktok', label: '🎵 TikTok' },
+                { id: 'facebook', label: '📘 FB' },
+                { id: 'youtube', label: '▶️ YT' }
+              ].map(f => (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => setPlatformFilter(f.id)}
+                  style={{
+                    padding: '3px 9px',
+                    borderRadius: '6px',
+                    fontSize: '11px',
+                    fontWeight: platformFilter === f.id ? 700 : 500,
+                    border: '1px solid',
+                    borderColor: platformFilter === f.id ? 'var(--action-primary)' : 'var(--border-subtle)',
+                    background: platformFilter === f.id ? 'var(--surface-interactive)' : 'transparent',
+                    color: platformFilter === f.id ? 'var(--action-primary)' : 'var(--text-muted)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+              Total <strong style={{ color: 'var(--action-primary)' }}>{filteredSchedules.length}</strong> Konten Terjadwal
+              {loading && <span style={{ marginLeft: '8px', fontSize: '11px' }}>⏳ Memuat...</span>}
+            </div>
+          </div>
+
+          {/* Weekday Headers */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            background: 'var(--surface-raised)',
+            borderBottom: '1px solid var(--border-subtle)'
+          }}>
+            {['SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU', 'MINGGU'].map((day, idx) => (
+              <div
+                key={day}
+                style={{
+                  padding: '9px',
+                  textAlign: 'center',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  color: idx >= 5 ? 'var(--status-danger)' : 'var(--text-muted)',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                {day}
+              </div>
+            ))}
+          </div>
+
+          {/* Date Cells Grid */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            background: 'var(--border-subtle)',
+            gap: '1px'
+          }}>
+            {calendarGrid.map((cell, idx) => {
+              const daySchedules = schedulesByDate[cell.dateStr] || [];
+              return (
+                <div
+                  key={`${cell.dateStr}_${idx}`}
+                  style={{
+                    background: cell.isCurrentMonth ? 'var(--surface)' : 'var(--canvas)',
+                    minHeight: '120px',
+                    maxHeight: '160px',
+                    padding: '8px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    position: 'relative',
+                    opacity: cell.isCurrentMonth ? 1 : 0.45,
+                    overflow: 'hidden'
+                  }}
+                >
+                  {/* Cell Header: Date Number & Add Button */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '6px'
                   }}>
-                    {cell.dayNum}
-                  </span>
+                    <span style={{
+                      fontSize: '12px',
+                      fontWeight: cell.isToday ? 800 : 600,
+                      color: cell.isToday ? 'var(--action-primary)' : 'var(--text-primary)',
+                      background: cell.isToday ? 'var(--surface-interactive)' : 'transparent',
+                      padding: cell.isToday ? '2px 6px' : '0',
+                      borderRadius: '4px'
+                    }}>
+                      {cell.dayNum} {cell.isToday && <span style={{ fontSize: '9px', color: 'var(--action-primary)' }}>• HARI INI</span>}
+                    </span>
 
-                  {cell.isCurrentMonth && (
-                    <button
-                      type="button"
-                      onClick={() => handleOpenAddOnDate(cell.dateStr)}
-                      title="Tambah jadwal di tanggal ini"
-                      style={{
-                        background: 'transparent',
-                        border: 'none',
-                        color: 'var(--text-muted, #94a3b8)',
-                        fontSize: '14px',
-                        cursor: 'pointer',
-                        padding: '0 4px',
-                        lineHeight: 1
-                      }}
-                    >
-                      +
-                    </button>
-                  )}
-                </div>
-
-                {/* List of Schedules in this date */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '4px',
-                  overflowY: 'auto',
-                  flex: 1,
-                  paddingRight: '2px'
-                }}>
-                  {daySchedules.map(sched => {
-                    const timeStr = new Date(sched.scheduled_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                    const isCampaign = sched.plan_type === 'product_campaign';
-                    const platforms = Array.isArray(sched.target_platforms) ? sched.target_platforms : ['instagram', 'tiktok'];
-
-                    return (
-                      <div
-                        key={sched.id}
-                        onClick={() => setSelectedSchedule(sched)}
+                    {cell.isCurrentMonth && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenAddOnDate(cell.dateStr)}
+                        title="Tambah jadwal di tanggal ini"
                         style={{
-                          padding: '6px 8px',
-                          borderRadius: '6px',
-                          background: isCampaign ? 'rgba(56, 189, 248, 0.1)' : 'rgba(168, 85, 247, 0.1)',
-                          borderLeft: isCampaign ? '3px solid #38bdf8' : '3px solid #a855f7',
-                          borderTop: '1px solid var(--border-color, #1e293b)',
-                          borderRight: '1px solid var(--border-color, #1e293b)',
-                          borderBottom: '1px solid var(--border-color, #1e293b)',
-                          fontSize: '11px',
+                          background: 'transparent',
+                          border: 'none',
+                          color: 'var(--text-muted)',
+                          fontSize: '14px',
                           cursor: 'pointer',
-                          transition: 'all 0.15s ease'
+                          padding: '0 4px',
+                          lineHeight: 1
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
-                          <span style={{ fontWeight: 750, color: isCampaign ? '#38bdf8' : '#c084fc' }}>
-                            {timeStr}
-                          </span>
-                          <span style={{ fontSize: '9px', opacity: 0.75 }}>
-                            {sched.cep_code || sched.pillar_name || 'Konten'}
-                          </span>
+                        +
+                      </button>
+                    )}
+                  </div>
+
+                  {/* List of Schedules in this date */}
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px',
+                    overflowY: 'auto',
+                    flex: 1,
+                    paddingRight: '2px'
+                  }}>
+                    {daySchedules.map(sched => {
+                      const timeStr = new Date(sched.scheduled_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                      const isCampaign = sched.plan_type === 'product_campaign';
+                      const platforms = Array.isArray(sched.target_platforms)
+                        ? sched.target_platforms
+                        : (typeof sched.target_platforms === 'string' ? JSON.parse(sched.target_platforms || '[]') : ['instagram', 'tiktok']);
+                      const isSelected = selectedRowIds.includes(sched.id);
+
+                      return (
+                        <div
+                          key={sched.id}
+                          onClick={() => setSelectedSchedule(sched)}
+                          style={{
+                            padding: '6px 8px',
+                            borderRadius: '6px',
+                            background: isSelected ? 'var(--surface-interactive)' : (isCampaign ? 'rgba(56, 189, 248, 0.08)' : 'rgba(168, 85, 247, 0.08)'),
+                            borderLeft: isCampaign ? '3px solid var(--action-primary)' : '3px solid #a855f7',
+                            borderTop: '1px solid var(--border-subtle)',
+                            borderRight: '1px solid var(--border-subtle)',
+                            borderBottom: '1px solid var(--border-subtle)',
+                            fontSize: '11px',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+                            <span style={{ fontWeight: 750, color: isCampaign ? 'var(--action-primary)' : '#c084fc' }}>
+                              {timeStr}
+                            </span>
+                            <span style={{ fontSize: '9px', opacity: 0.8, color: 'var(--text-muted)' }}>
+                              {sched.cep_code || sched.pillar_name || 'Konten'}
+                            </span>
+                          </div>
+                          <div style={{
+                            fontWeight: 600,
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            color: 'var(--text-primary)'
+                          }}>
+                            {sched.product_name || sched.pillar_name || 'Brand Post'}
+                          </div>
+                          {/* Multi-Platform Badges */}
+                          <div style={{ display: 'flex', gap: '3px', marginTop: '3px', fontSize: '10px' }}>
+                            {platforms.includes('instagram') && <span title="Instagram Reels">📸</span>}
+                            {platforms.includes('tiktok') && <span title="TikTok">🎵</span>}
+                            {platforms.includes('facebook') && <span title="Facebook">📘</span>}
+                            {platforms.includes('youtube') && <span title="YouTube Shorts">▶️</span>}
+                          </div>
                         </div>
-                        <div style={{
-                          fontWeight: 600,
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          color: 'var(--text-main, #f8fafc)'
-                        }}>
-                          {sched.product_name || sched.pillar_name || 'Brand Post'}
-                        </div>
-                        {/* Multi-Platform Badges */}
-                        <div style={{ display: 'flex', gap: '3px', marginTop: '3px', fontSize: '9px' }}>
-                          {platforms.includes('instagram') && <span title="Instagram">📸</span>}
-                          {platforms.includes('tiktok') && <span title="TikTok">🎵</span>}
-                          {platforms.includes('facebook') && <span title="Facebook">📘</span>}
-                          {platforms.includes('youtube') && <span title="YouTube">▶️</span>}
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* VIEW B: MODE BARIS (1 ROW = 1 KONTEN UNIK) */}
+      {viewMode === 'list' && (
+        <div style={{
+          background: 'var(--surface)',
+          borderRadius: 'var(--radius-lg, 12px)',
+          border: '1px solid var(--border-subtle)',
+          overflow: 'hidden'
+        }}>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '12.5px' }}>
+              <thead>
+                <tr style={{ background: 'var(--surface-raised)', borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-muted)', fontSize: '11.5px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  <th style={{ padding: '12px 16px', width: '40px' }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedRowIds.length === filteredSchedules.length && filteredSchedules.length > 0}
+                      onChange={handleToggleSelectAll}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  </th>
+                  <th style={{ padding: '12px 16px', width: '140px' }}>Waktu Siar</th>
+                  <th style={{ padding: '12px 16px', width: '220px' }}>Target Produk</th>
+                  <th style={{ padding: '12px 16px', width: '180px' }}>Sudut Pandang (6 CEP)</th>
+                  <th style={{ padding: '12px 16px', width: '150px' }}>Kanal Distribusi</th>
+                  <th style={{ padding: '12px 16px' }}>Konteks Promosi (Optional)</th>
+                  <th style={{ padding: '12px 16px', width: '130px' }}>Status</th>
+                  <th style={{ padding: '12px 16px', width: '90px', textAlign: 'center' }}>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredSchedules.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} style={{ padding: '36px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                      Belum ada rencana jadwal konten untuk filter ini. Klik <strong>+ Buat Rencana Baru</strong> untuk memulai.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredSchedules.map((item) => {
+                    const isSelected = selectedRowIds.includes(item.id);
+                    const d = new Date(item.scheduled_at);
+                    const dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+                    const timeStr = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+                    const platforms = Array.isArray(item.target_platforms)
+                      ? item.target_platforms
+                      : (typeof item.target_platforms === 'string' ? JSON.parse(item.target_platforms || '[]') : ['instagram', 'tiktok']);
+
+                    return (
+                      <tr
+                        key={item.id}
+                        style={{
+                          borderBottom: '1px solid var(--border-subtle)',
+                          background: isSelected ? 'var(--surface-interactive)' : 'transparent',
+                          transition: 'background-color 0.15s ease'
+                        }}
+                      >
+                        <td style={{ padding: '14px 16px' }}>
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handleToggleSelectRow(item.id)}
+                            style={{ cursor: 'pointer' }}
+                          />
+                        </td>
+                        <td style={{ padding: '14px 16px' }}>
+                          <strong style={{ color: 'var(--text-primary)' }}>{dateStr}</strong>
+                          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{timeStr}</div>
+                        </td>
+                        <td style={{ padding: '14px 16px' }}>
+                          <strong style={{ color: 'var(--text-primary)' }}>{item.product_name || item.brand_name || 'Brand Editorial'}</strong>
+                          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{item.plan_type === 'product_campaign' ? 'Kampanye Produk' : 'Editorial Brand'}</div>
+                        </td>
+                        <td style={{ padding: '14px 16px' }}>
+                          <span style={{
+                            display: 'inline-block',
+                            background: 'rgba(168, 85, 247, 0.15)',
+                            color: '#c084fc',
+                            border: '1px solid rgba(168, 85, 247, 0.25)',
+                            padding: '3px 8px',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: 700
+                          }}>
+                            {item.cep_code || item.pillar_name || 'Problem-Solution'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '14px 16px' }}>
+                          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                            {[
+                              { id: 'instagram', icon: '📸', title: 'Instagram Reels' },
+                              { id: 'tiktok', icon: '🎵', title: 'TikTok' },
+                              { id: 'facebook', icon: '📘', title: 'Facebook' },
+                              { id: 'youtube', icon: '▶️', title: 'YouTube Shorts' }
+                            ].map(p => {
+                              const active = platforms.includes(p.id);
+                              return (
+                                <button
+                                  key={p.id}
+                                  type="button"
+                                  title={p.title}
+                                  onClick={() => handleToggleRowPlatform(item, p.id)}
+                                  style={{
+                                    width: '28px',
+                                    height: '28px',
+                                    borderRadius: '6px',
+                                    border: '1px solid',
+                                    borderColor: active ? 'var(--border-strong)' : 'var(--border-subtle)',
+                                    background: active ? 'var(--surface-raised)' : 'var(--input-bg)',
+                                    opacity: active ? 1 : 0.35,
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '13px',
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                >
+                                  {p.icon}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </td>
+                        <td style={{ padding: '14px 16px', color: item.promotion_context ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                          {item.promotion_context ? `🏷️ ${item.promotion_context}` : '-'}
+                        </td>
+                        <td style={{ padding: '14px 16px' }}>
+                          <span style={{
+                            display: 'inline-block',
+                            padding: '3px 8px',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            textTransform: 'capitalize',
+                            background: item.status === 'in_production' ? 'rgba(56, 189, 248, 0.15)' : 'var(--surface-raised)',
+                            color: item.status === 'in_production' ? 'var(--action-primary)' : 'var(--text-muted)',
+                            border: '1px solid var(--border-subtle)'
+                          }}>
+                            {item.status || 'planned'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '14px 16px', textAlign: 'center' }}>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedSchedule(item)}
+                            style={{
+                              padding: '5px 10px',
+                              borderRadius: '6px',
+                              background: 'var(--surface-raised)',
+                              border: '1px solid var(--border-subtle)',
+                              color: 'var(--text-primary)',
+                              fontSize: '11.5px',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            👁️ Detail
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* MODAL TAMBAHKAN PLAN */}
       {showPlanModal && (

@@ -14,8 +14,10 @@ import { BrandProductPortfolio } from './BrandProductPortfolio';
 import AffiliateContentCalendar from './AffiliateContentCalendar';
 import { BrandCampaignPrograms } from './BrandCampaignPrograms';
 import { CampaignProgramDetail } from './CampaignProgramDetail';
+import { CampaignProgramPlanners } from './CampaignProgramPlanners';
 import { BrandCalendarView } from './BrandCalendarView';
 import { BrandProductionRuns } from './BrandProductionRuns';
+import { AffiliateProductionWorkspace } from './AffiliateProductionWorkspace';
 import { BrandPublishingDashboard } from './BrandPublishingDashboard';
 import { BrandPerformanceOverview } from './BrandPerformanceOverview';
 import styles from './AffiliateStudio.module.css';
@@ -379,6 +381,17 @@ export function AffiliateStudioWorkspace() {
     }
   }, [activeBrand, activeView, searchParams]);
 
+  const navCounts = useMemo(() => {
+    return {
+      productsCount: portfolio?.items?.length || overview?.productCount || 0,
+      draftSchedulesCount: undefined,
+      plannerRowsCount: brandCalendar?.length || undefined,
+      productionRunsCount: brandRuns?.length || undefined,
+      publishingScheduledCount: undefined,
+      performanceGmvFormatted: brandPerf?.summary?.totalSalesCommission ? `Rp ${(brandPerf.summary.totalSalesCommission / 1000000).toFixed(1)}M` : undefined
+    };
+  }, [portfolio, overview, brandCalendar, brandRuns, brandPerf]);
+
   if (brandsError) {
     return <div className={styles.errorState}>{brandsError}</div>;
   }
@@ -401,6 +414,7 @@ export function AffiliateStudioWorkspace() {
       brands={brands}
       activeBrand={activeBrand}
       activeView={activeView}
+      counts={navCounts}
       onBrandChange={(brandId) => {
         router.push(buildAffiliateStudioUrl(brandId, { view: activeView }));
       }}
@@ -447,23 +461,25 @@ export function AffiliateStudioWorkspace() {
         <AffiliateContentCalendar
           brandId={activeBrand?.id}
           brandName={activeBrand?.name || activeBrand?.brand_name}
-          onNavigateToPlanner={(sched) => {
+          onNavigateToPlanner={() => {
             router.push(buildAffiliateStudioUrl(activeBrand?.id, { view: 'planner' }));
           }}
         />
       )}
       {activeView === 'planner' && (
-        <BrandCalendarView 
-          events={brandCalendar} 
-          loading={loadingBrandData} 
+        <CampaignProgramPlanners
+          brandId={activeBrand?.id}
+          program={programDetail}
+          onRefreshProgram={() => activeBrand && loadBrandCalendar(activeBrand.id)}
         />
       )}
       {activeView === 'production' && (
-        <BrandProductionRuns 
-          brandId={activeBrand?.id} 
-          runs={brandRuns} 
-          loading={loadingBrandData} 
-          onRefresh={() => activeBrand && loadBrandRuns(activeBrand.id)} 
+        <AffiliateProductionWorkspace
+          brandId={activeBrand?.id}
+          brandName={activeBrand?.name || activeBrand?.brand_name}
+          onNavigateToPublishing={() => {
+            router.push(buildAffiliateStudioUrl(activeBrand?.id, { view: 'publishing' }));
+          }}
         />
       )}
       {activeView === 'publishing' && (
@@ -477,6 +493,9 @@ export function AffiliateStudioWorkspace() {
         <BrandPerformanceOverview 
           data={brandPerf} 
           loading={loadingBrandData} 
+          onScheduleRecommendation={() => {
+            router.push(buildAffiliateStudioUrl(activeBrand?.id, { view: 'calendar' }));
+          }}
         />
       )}
     </AffiliateStudioShell>

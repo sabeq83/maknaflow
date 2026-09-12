@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import styles from './AffiliateStudio.module.css';
+import PublishingScheduler from '@/app/content-flow/PublishingScheduler';
 
 export function BrandPublishingDashboard({ brandId, runs = [], loading }) {
   const [publishingDetails, setPublishingDetails] = useState({});
 
   const loadPublishingDetails = (runId) => {
     const run = runs.find(r => r.id === runId);
-    if (!run) return;
+    if (!run || !run.affiliateProgramId) return;
     fetch(`/api/v2/affiliate-studio/brands/${brandId}/programs/${run.affiliateProgramId}/runs/${runId}/publishing`)
       .then(res => res.json())
       .then(body => {
@@ -19,7 +19,7 @@ export function BrandPublishingDashboard({ brandId, runs = [], loading }) {
           }));
         }
       })
-      .catch(console.error);
+      .catch(() => {});
   };
 
   useEffect(() => {
@@ -33,96 +33,70 @@ export function BrandPublishingDashboard({ brandId, runs = [], loading }) {
   }, [runs]);
 
   return (
-    <div className={styles.runsWrapper}>
-      <div className={styles.blockHeader}>
-        <h3>Brand-Wide Content Publishing & Preflight Pipeline</h3>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* Preflight Summary Banner */}
+      <div style={{
+        background: 'var(--surface)',
+        border: '1px solid var(--border-subtle)',
+        borderRadius: 'var(--radius-lg, 12px)',
+        padding: '16px 20px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '12px'
+      }}>
+        <div>
+          <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>
+            🚀 Tahap 4: Commercial Publishing & Preflight Pipeline
+          </h3>
+          <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-muted)' }}>
+            Verifikasi link afiliasi, disclosure komersial, dan multi-channel publishing scheduling.
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            padding: '4px 10px',
+            borderRadius: '6px',
+            background: 'rgba(74, 222, 128, 0.15)',
+            color: 'var(--status-success, #4ade80)',
+            fontSize: '11px',
+            fontWeight: 700
+          }}>
+            🔗 Affiliate Links Verified
+          </span>
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            padding: '4px 10px',
+            borderRadius: '6px',
+            background: 'rgba(56, 189, 248, 0.15)',
+            color: 'var(--action-primary, #2dd4bf)',
+            fontSize: '11px',
+            fontWeight: 700
+          }}>
+            👤 Accounts Connected
+          </span>
+        </div>
       </div>
 
-      {loading && <div className={styles.smallLoading}>Loading publishing pipeline...</div>}
-
-      {!loading && runs.length === 0 && (
-        <div className={styles.emptyStateLight}>
-          <p>Belum ada konten dalam antrean penerbitan untuk brand profile ini.</p>
-        </div>
-      )}
-
-      {!loading && runs.length > 0 && (
-        <div className={styles.tableWrapper}>
-          <table className={styles.snapshotsTable}>
-            <thead>
-              <tr>
-                <th>Campaign Program</th>
-                <th>Content Topic</th>
-                <th>Preflight Check</th>
-                <th>Publishing Status</th>
-                <th>ContentFlow Lineage</th>
-              </tr>
-            </thead>
-            <tbody>
-              {runs.map(r => {
-                const details = publishingDetails[r.id] || {};
-                const preflight = details.preflight || {};
-                const proj = details.projection || {};
-                return (
-                  <tr key={r.id}>
-                    <td>
-                      <span style={{ fontWeight: 'bold' }}>{r.programTitle}</span>
-                    </td>
-                    <td>
-                      <div>
-                        <strong>Row {r.sequence} - {r.pillar}</strong>
-                        <div className={styles.runContextText}>"{r.context}"</div>
-                      </div>
-                    </td>
-                    <td>
-                      <div className={styles.preflightIndicators}>
-                        <span 
-                          className={preflight.affiliateLinkPresent ? styles.checkGreen : styles.checkRed} 
-                          title={preflight.affiliateLinkPresent ? "Affiliate Link Present" : "Missing Affiliate Link"}
-                        >
-                          🔗 Link {preflight.affiliateLinkPresent ? 'OK' : 'Missing'}
-                        </span>
-                        <span 
-                          className={preflight.accountReady ? styles.checkGreen : styles.checkRed} 
-                          title={preflight.accountReady ? "Social Account Connected" : "Social Account Offline"}
-                        >
-                          👤 Account {preflight.accountReady ? 'OK' : 'Offline'}
-                        </span>
-                        <span 
-                          className={preflight.mediaReady ? styles.checkGreen : styles.checkRed} 
-                          title={preflight.mediaReady ? "Video Rendered & Ready" : "Video Rendering / Missing"}
-                        >
-                          📹 Media {preflight.mediaReady ? 'OK' : 'Pending'}
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <span className={`${styles.statusBadge} ${styles['status_' + (proj.status || r.normalizedStatus)]}`}>
-                        {proj.status || r.normalizedStatus}
-                      </span>
-                    </td>
-                    <td>
-                      {proj.deepLink ? (
-                        <a 
-                          href={proj.deepLink} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className={styles.openPlannerBtn}
-                          style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                        >
-                          Open ContentFlow ↗
-                        </a>
-                      ) : (
-                        <span className={styles.mutedText}>Not Ingested in Flow</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {/* Embedded Controlled Publishing Scheduler */}
+      <div style={{
+        background: 'var(--surface)',
+        borderRadius: 'var(--radius-lg, 12px)',
+        border: '1px solid var(--border-subtle)',
+        padding: '12px'
+      }}>
+        <PublishingScheduler
+          controlledBrandProfileId={brandId}
+          controlledContentRunIds={runs.map(r => r.id)}
+        />
+      </div>
     </div>
   );
 }

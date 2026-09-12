@@ -1,0 +1,2244 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAKNA Flow — Affiliate Studio Workflow V2 Interactive Mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================================
+       1. SEMANTIC CSS DESIGN TOKENS (UNIVERSAL LIGHT & DARK)
+       ========================================================= */
+    :root, [data-theme="dark"] {
+      color-scheme: dark;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+      --canvas: #090d16;
+      --sidebar: #0d1320;
+      --surface: #121a2b;
+      --surface-raised: #18233a;
+      --surface-subtle: #0d1524;
+      --surface-interactive: #1e2c48;
+      --surface-hover: #26385a;
+      --surface-header: rgba(15, 23, 42, 0.75);
+      --input-bg: #0d1524;
+      --overlay-backdrop: rgba(4, 8, 16, 0.84);
+
+      --text-primary: #f3f6fc;
+      --text-secondary: #b3c0d4;
+      --text-muted: #7989a3;
+      --text-disabled: #55647c;
+
+      --border-subtle: #1f2d45;
+      --border-strong: #2e4162;
+
+      --accent: #a855f7;
+      --accent-hover: #c084fc;
+      --accent-soft: rgba(168, 85, 247, 0.16);
+      --on-accent: #ffffff;
+
+      --action-primary: #38bdf8;
+      --action-primary-hover: #7dd3fc;
+      --action-primary-soft: rgba(56, 189, 248, 0.14);
+      --on-action-primary: #090d16;
+
+      --status-info: #38bdf8;
+      --status-info-soft: rgba(56, 189, 248, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #f87171;
+      --status-danger-soft: rgba(248, 113, 113, 0.14);
+      --status-neutral: #c084fc;
+      --status-neutral-soft: rgba(192, 132, 252, 0.14);
+
+      --pill-ig-bg: rgba(236, 72, 153, 0.16);
+      --pill-ig-border: #ec4899;
+      --pill-ig-text: #f472b6;
+      --pill-fb-bg: rgba(59, 130, 246, 0.16);
+      --pill-fb-border: #3b82f6;
+      --pill-fb-text: #60a5fa;
+      --pill-tk-bg: rgba(6, 182, 212, 0.16);
+      --pill-tk-border: #06b6d4;
+      --pill-tk-text: #22d3ee;
+      --pill-yt-bg: rgba(239, 68, 68, 0.16);
+      --pill-yt-border: #ef4444;
+      --pill-yt-text: #f87171;
+
+      --calendar-other-month: rgba(13, 19, 32, 0.6);
+      --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      --shadow-card: 0 4px 20px -4px rgba(0, 0, 0, 0.35);
+      --shadow-elevation: 0 10px 30px -8px rgba(0,0,0,0.5);
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+    }
+
+    [data-theme="light"] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-subtle: #f8fafc;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --surface-header: rgba(248, 250, 252, 0.85);
+      --input-bg: #ffffff;
+      --overlay-backdrop: rgba(15, 23, 42, 0.6);
+
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+
+      --accent: #9333ea;
+      --accent-hover: #7e22ce;
+      --accent-soft: rgba(147, 51, 234, 0.1);
+      --on-accent: #ffffff;
+
+      --action-primary: #0284c7;
+      --action-primary-hover: #0369a1;
+      --action-primary-soft: rgba(2, 132, 199, 0.1);
+      --on-action-primary: #ffffff;
+
+      --status-info: #0284c7;
+      --status-info-soft: #e0f2fe;
+      --status-success: #16a34a;
+      --status-success-soft: #dcfce7;
+      --status-warning: #d97706;
+      --status-warning-soft: #fef3c7;
+      --status-danger: #dc2626;
+      --status-danger-soft: #fee2e2;
+      --status-neutral: #9333ea;
+      --status-neutral-soft: #f3e8ff;
+
+      --pill-ig-bg: #fdf2f8;
+      --pill-ig-border: #db2777;
+      --pill-ig-text: #be185d;
+      --pill-fb-bg: #eff6ff;
+      --pill-fb-border: #2563eb;
+      --pill-fb-text: #1d4ed8;
+      --pill-tk-bg: #ecfeff;
+      --pill-tk-border: #0891b2;
+      --pill-tk-text: #0e7490;
+      --pill-yt-bg: #fef2f2;
+      --pill-yt-border: #dc2626;
+      --pill-yt-text: #b91c1c;
+
+      --calendar-other-month: #f1f5f9;
+      --shadow-modal: 0 25px 50px -12px rgba(15, 23, 42, 0.18);
+      --shadow-card: 0 4px 20px -4px rgba(15, 23, 42, 0.08);
+      --shadow-elevation: 0 10px 30px -8px rgba(15,23,42,0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+
+    body {
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .app-container {
+      max-width: 1460px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Top Global Header */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      padding: 12px 20px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+    }
+    .brand-id-block {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--action-primary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #fff;
+      font-weight: 800;
+    }
+    .brand-info h2 {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+    }
+    .brand-info span {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    .top-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-select {
+      background: var(--input-bg);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 7px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12.5px;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+    }
+    .theme-toggle-btn {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 7px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 12.5px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* =========================================================
+       2. WORKFLOW V2 NUMBERED PIPELINE NAVIGATION
+       ========================================================= */
+    .pipeline-nav-container {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow-card);
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .nav-group-setup, .nav-group-pipeline {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .nav-btn:hover {
+      background: var(--surface-raised);
+      color: var(--text-primary);
+    }
+    .nav-btn.active {
+      background: var(--action-primary-soft);
+      border-color: var(--action-primary);
+      color: var(--action-primary);
+    }
+    .nav-step-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      background: var(--surface-interactive);
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .nav-btn.active .nav-step-badge {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .nav-count-badge {
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+      background: var(--surface-interactive);
+      color: var(--text-muted);
+    }
+    .nav-divider {
+      width: 1px;
+      height: 24px;
+      background: var(--border-subtle);
+      margin: 0 4px;
+    }
+
+    /* Main Content Container */
+    .workflow-panel {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+      min-height: 620px;
+    }
+    .workflow-panel.active {
+      display: block;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(3px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Common Components */
+    .section-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 12.5px;
+      font-weight: 750;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+    .btn-accent {
+      background: var(--accent);
+      color: var(--on-accent);
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 12.5px;
+      font-weight: 750;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-accent:hover {
+      background: var(--accent-hover);
+    }
+    .btn-secondary {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-secondary:hover {
+      background: var(--surface-interactive);
+    }
+
+    /* View Switcher Toggle */
+    .view-mode-toggle {
+      display: inline-flex;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      gap: 3px;
+    }
+    .view-mode-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .view-mode-btn:hover {
+      color: var(--text-primary);
+    }
+    .view-mode-btn.active {
+      background: var(--surface-raised);
+      border-color: var(--action-primary);
+      color: var(--action-primary);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    /* Tables */
+    .data-table-wrapper {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+    .data-table th {
+      background: var(--surface-raised);
+      color: var(--text-muted);
+      text-align: left;
+      padding: 11px 14px;
+      font-weight: 700;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .data-table td {
+      padding: 12px 14px;
+      border-top: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+    .data-table tr:hover td {
+      background: var(--surface-interactive);
+    }
+
+    /* Platform Multi-Toggle Selector (Icon-Only Chips in Table Row) */
+    .platform-chip-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .platform-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      user-select: none;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+    }
+    .platform-chip.ig.active {
+      background: var(--pill-ig-bg);
+      border-color: var(--pill-ig-border);
+    }
+    .platform-chip.tiktok.active {
+      background: var(--pill-tk-bg);
+      border-color: var(--pill-tk-border);
+    }
+    .platform-chip.fb.active {
+      background: var(--pill-fb-bg);
+      border-color: var(--pill-fb-border);
+    }
+    .platform-chip.yt.active {
+      background: var(--pill-yt-bg);
+      border-color: var(--pill-yt-border);
+    }
+    .platform-chip.inactive {
+      background: var(--surface);
+      border-color: var(--border-subtle);
+      opacity: 0.3;
+      filter: grayscale(1);
+    }
+    .platform-chip:hover {
+      transform: scale(1.15);
+      opacity: 1;
+      filter: none;
+    }
+
+    /* Badges */
+    .badge-cep {
+      display: inline-block;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid rgba(168, 85, 247, 0.25);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .badge-funnel {
+      display: inline-block;
+      background: var(--action-primary-soft);
+      color: var(--action-primary);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .badge-status {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .badge-status.approved {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+    }
+    .badge-status.review {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+    }
+    .badge-status.in-progress {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+    }
+
+    /* =========================================================
+       CALENDAR 30-DAY GRID STYLES
+       ========================================================= */
+    .cal-grid-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+    }
+    .cal-grid-toolbar {
+      padding: 12px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .cal-month-title {
+      font-size: 15px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .cal-month-nav-btn {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .cal-month-nav-btn:hover {
+      background: var(--surface-hover);
+    }
+    .cal-platform-filters {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cal-filter-btn {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .cal-filter-btn.active {
+      background: var(--action-primary-soft);
+      border-color: var(--action-primary);
+      color: var(--action-primary);
+    }
+
+    .cal-weekdays-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      background: var(--surface-interactive);
+      border-bottom: 1px solid var(--border-subtle);
+      text-align: center;
+    }
+    .weekday-col {
+      padding: 9px 4px;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-secondary);
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+    .weekday-col.weekend {
+      color: var(--status-warning);
+    }
+
+    .cal-days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      background: var(--border-subtle);
+    }
+    .day-cell {
+      min-height: 124px;
+      background: var(--surface);
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: background 0.15s ease;
+    }
+    .day-cell:hover {
+      background: var(--surface-subtle);
+    }
+    .day-cell.other-month {
+      background: var(--calendar-other-month);
+      opacity: 0.55;
+    }
+    .day-cell.today {
+      background: var(--status-info-soft);
+      outline: 2px solid var(--action-primary);
+      outline-offset: -2px;
+    }
+
+    .day-cell-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .day-number {
+      font-size: 12.5px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+    .day-cell.today .day-number {
+      color: var(--action-primary);
+    }
+    .today-tag {
+      font-size: 9px;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      text-transform: uppercase;
+    }
+    .add-event-day-btn {
+      opacity: 0;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+    .day-cell:hover .add-event-day-btn {
+      opacity: 1;
+    }
+
+    .day-events-container {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 95px;
+    }
+    .cal-event-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-left: 3px solid var(--accent);
+      border-radius: 6px;
+      padding: 5px 6px;
+      font-size: 10.5px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      transition: all 0.15s ease;
+    }
+    .cal-event-card:hover {
+      border-color: var(--action-primary);
+      border-left-color: var(--action-primary);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .cal-event-card.editorial {
+      border-left-color: var(--status-info);
+    }
+    .cal-event-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 9.5px;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
+    .cal-event-title {
+      font-weight: 750;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 10.5px;
+    }
+    .cal-event-platforms {
+      display: flex;
+      gap: 2px;
+      font-size: 9px;
+    }
+
+    /* Production Layout (Pillar Model) */
+    .prod-workspace-grid {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 20px;
+    }
+    .prod-sidebar-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .prod-card-item {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.15s ease;
+    }
+    .prod-card-item:hover, .prod-card-item.selected {
+      border-color: var(--action-primary);
+      background: var(--surface-raised);
+    }
+    .stage-rail {
+      display: flex;
+      gap: 4px;
+      margin-top: 4px;
+    }
+    .stage-step {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--surface-interactive);
+    }
+    .stage-step.done {
+      background: var(--status-success);
+    }
+    .stage-step.active {
+      background: var(--action-primary);
+    }
+
+    /* Scene Inspector */
+    .scene-inspector {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .scene-timeline {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+    .scene-thumb {
+      flex: 0 0 110px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 8px;
+      font-size: 11px;
+      cursor: pointer;
+      text-align: center;
+    }
+    .scene-thumb.active {
+      border-color: var(--action-primary);
+      background: var(--action-primary-soft);
+    }
+    .inspector-tabs {
+      display: flex;
+      gap: 6px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 8px;
+    }
+    .insp-tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .insp-tab-btn.active {
+      background: var(--surface-raised);
+      color: var(--text-primary);
+    }
+
+    /* Performance Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .kpi-card {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .kpi-card-title {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .kpi-card-val {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+    .kpi-card-growth {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--status-success);
+    }
+
+    /* Learning Loop Card */
+    .learning-loop-card {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(56, 189, 248, 0.12));
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      border-radius: var(--radius-lg);
+      padding: 18px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    /* Modal Component */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      display: grid;
+      place-items: center;
+      z-index: 10000;
+      padding: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-modal);
+      overflow: hidden;
+    }
+    .modal-head {
+      padding: 16px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+    }
+    .modal-head h3 {
+      font-size: 15px;
+      font-weight: 800;
+    }
+    .btn-close-modal {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .modal-body {
+      padding: 20px 22px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .modal-foot {
+      padding: 14px 22px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+    .form-input, .form-select, .form-textarea {
+      background: var(--input-bg);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12.5px;
+      font-family: var(--font-sans);
+      outline: none;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--action-primary);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: var(--shadow-modal);
+      transform: translateY(-50px);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- 1. TOP GLOBAL BAR -->
+  <header class="top-bar">
+    <div class="brand-id-block">
+      <div class="brand-logo-badge">M</div>
+      <div class="brand-info">
+        <h2>Affiliate Studio — Workflow V2</h2>
+        <span>Continuous Pipeline Orchestration & Multi-Platform Distribution</span>
+      </div>
+    </div>
+    <div class="top-controls">
+      <label style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Active Brand:</label>
+      <select class="brand-select" id="activeBrandSelect" onchange="handleBrandSwitch(this.value)">
+        <option value="skinbeauty">@skinbeauty (Skin Glow Official)</option>
+        <option value="culinarypro">@culinarypro (Dapur & Kitchenware)</option>
+      </select>
+      <button class="theme-toggle-btn" onclick="toggleTheme()">
+        <span id="themeIcon">☀️</span>
+        <span id="themeText">Theme</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. NUMBERED PIPELINE STAGE NAVIGATION -->
+  <nav class="pipeline-nav-container" aria-label="Affiliate Studio Workflow Stages">
+    <div class="nav-group-setup">
+      <button class="nav-btn" onclick="switchStage('overview', this)">
+        <span>🏢 Overview</span>
+      </button>
+      <button class="nav-btn" onclick="switchStage('products', this)">
+        <span>📦 Products</span>
+        <span class="nav-count-badge">8</span>
+      </button>
+    </div>
+
+    <div class="nav-divider"></div>
+
+    <div class="nav-group-pipeline">
+      <button class="nav-btn active" id="btnStageCalendar" onclick="switchStage('calendar', this)">
+        <span class="nav-step-badge">1</span>
+        <span>📅 Calendar</span>
+        <span class="nav-count-badge" id="calCountBadge">8 Draft</span>
+      </button>
+
+      <span style="color: var(--border-strong); font-size: 12px;">→</span>
+
+      <button class="nav-btn" id="btnStagePlanner" onclick="switchStage('planner', this)">
+        <span class="nav-step-badge">2</span>
+        <span>📋 Planner</span>
+        <span class="nav-count-badge" id="planCountBadge">3 Rows</span>
+      </button>
+
+      <span style="color: var(--border-strong); font-size: 12px;">→</span>
+
+      <button class="nav-btn" id="btnStageProduction" onclick="switchStage('production', this)">
+        <span class="nav-step-badge">3</span>
+        <span>🎬 Production</span>
+        <span class="nav-count-badge" id="prodCountBadge">3 Runs</span>
+      </button>
+
+      <span style="color: var(--border-strong); font-size: 12px;">→</span>
+
+      <button class="nav-btn" id="btnStagePublishing" onclick="switchStage('publishing', this)">
+        <span class="nav-step-badge">4</span>
+        <span>🚀 Publishing</span>
+        <span class="nav-count-badge">3 Scheduled</span>
+      </button>
+
+      <span style="color: var(--border-strong); font-size: 12px;">→</span>
+
+      <button class="nav-btn" id="btnStagePerformance" onclick="switchStage('performance', this)">
+        <span class="nav-step-badge">5</span>
+        <span>📈 Performance</span>
+        <span class="nav-count-badge" style="background: var(--status-success-soft); color: var(--status-success);">Rp 48.5M</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- =========================================================
+       STAGE 1: CONTENT CALENDAR (DUAL VIEW: 30-DAY GRID & ROW LIST)
+       ========================================================= -->
+  <section class="workflow-panel active" id="panel-calendar">
+    <div class="section-header-row">
+      <div>
+        <h3 class="section-title">📅 Tahap 1: Content Calendar & Slot Dispatch</h3>
+        <p class="section-subtitle">Pilih jadwal konten & atur target platform broadcast (FB, IG, TikTok, YT) sebelum dikirim ke AI Content Planner.</p>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <!-- Dual View Mode Switcher -->
+        <div class="view-mode-toggle" role="group" aria-label="Tampilan Kalender">
+          <button class="view-mode-btn active" id="btnViewCalendar" onclick="switchCalendarView('grid')">
+            <span>📅 Kalender 30 Hari</span>
+          </button>
+          <button class="view-mode-btn" id="btnViewList" onclick="switchCalendarView('list')">
+            <span>📋 Mode Baris</span>
+          </button>
+        </div>
+
+        <button class="btn-secondary" onclick="selectAllCalendarRows()">✓ Pilih Semua</button>
+        <button class="btn-primary" onclick="openCreatePlanModal()">+ Buat Rencana Baru</button>
+        <button class="btn-accent" id="btnDispatchPlanner" onclick="dispatchCalendarToPlanner()">
+          ⚡ Kirim ke AI Content Planner (<span id="dispatchCountBadge">3</span>) →
+        </button>
+      </div>
+    </div>
+
+    <!-- VIEW A: 30-DAY CALENDAR GRID -->
+    <div id="calendarGridView" class="cal-grid-wrapper">
+      <div class="cal-grid-toolbar">
+        <div class="cal-month-title">
+          <button class="cal-month-nav-btn" onclick="showToast('◀ Bulan Sebelumnya')">◀</button>
+          <span>September 2026</span>
+          <button class="cal-month-nav-btn" onclick="showToast('Bulan Berikutnya ▶')">▶</button>
+          <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 600;">(30 Hari Siklus Penuh)</span>
+        </div>
+
+        <div class="cal-platform-filters">
+          <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">Filter Platform:</span>
+          <button class="cal-filter-btn active" onclick="filterCalendarGrid('all', this)">Semua</button>
+          <button class="cal-filter-btn" onclick="filterCalendarGrid('ig', this)">📸 IG</button>
+          <button class="cal-filter-btn" onclick="filterCalendarGrid('tiktok', this)">🎵 TikTok</button>
+          <button class="cal-filter-btn" onclick="filterCalendarGrid('fb', this)">📘 FB</button>
+          <button class="cal-filter-btn" onclick="filterCalendarGrid('yt', this)">▶️ YT</button>
+        </div>
+      </div>
+
+      <!-- Weekday Headers -->
+      <div class="cal-weekdays-grid">
+        <div class="weekday-col">Sen</div>
+        <div class="weekday-col">Sel</div>
+        <div class="weekday-col">Rab</div>
+        <div class="weekday-col">Kam</div>
+        <div class="weekday-col">Jum</div>
+        <div class="weekday-col weekend">Sab</div>
+        <div class="weekday-col weekend">Min</div>
+      </div>
+
+      <!-- Days Grid (Rendered Dynamically via JS) -->
+      <div class="cal-days-grid" id="calendarDaysGrid">
+        <!-- Rendered by renderCalendarMonthGrid() -->
+      </div>
+    </div>
+
+    <!-- VIEW B: MODE BARIS (1 ROW = 1 KONTEN MULTI-PLATFORM) -->
+    <div id="calendarListView" class="data-table-wrapper" style="display: none;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width: 36px;"><input type="checkbox" id="checkAllCalendar" onchange="toggleAllCalendarCheck(this)"></th>
+            <th style="width: 140px;">Waktu Siar</th>
+            <th style="width: 220px;">Target Produk</th>
+            <th style="width: 180px;">Sudut Pandang (6 CEP)</th>
+            <th style="width: 140px;">Kanal Distribusi</th>
+            <th>Konteks Promosi (Optional)</th>
+            <th style="width: 130px;">Status</th>
+            <th style="width: 90px; text-align: center;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="calendarTableBody">
+          <!-- Rendered by renderCalendarListView() -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       STAGE 2: CONTENT PLANNER
+       ========================================================= -->
+  <section class="workflow-panel" id="panel-planner">
+    <div class="section-header-row">
+      <div>
+        <h3 class="section-title">📋 Tahap 2: AI Content Planner Workspace & Coverage Review</h3>
+        <p class="section-subtitle">Sesi Planner resmi: <strong>PLN-202609-SKINBEAUTY-01</strong> · Human Approval Gate</p>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-secondary" onclick="bulkApprovePlannerRows()">✓ Bulk Approve All Rows</button>
+        <button class="btn-accent" onclick="ingestPlannerToProduction()">🚀 Ingest Approved Rows ke Production</button>
+      </div>
+    </div>
+
+    <!-- Coverage Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <span class="kpi-card-title">Siklus 6 CEP Coverage</span>
+        <span class="kpi-card-val" style="color: var(--accent);">3 / 6 CEP Terjadwal</span>
+        <span class="kpi-card-growth">✓ 1 Siklus Sedang Berjalan</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-card-title">Kesiapan Produk</span>
+        <span class="kpi-card-val" style="color: var(--action-primary);">Serum Retinol 0.5%</span>
+        <span class="kpi-card-growth">✓ Physical Truth & Formula Siap</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-card-title">Approved Rows</span>
+        <span class="kpi-card-val" id="approvedRowCount" style="color: var(--status-success);">3 / 3 Approved</span>
+        <span class="kpi-card-growth">Siap Ingest ke Produksi</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-card-title">Total Kanal Siar</span>
+        <span class="kpi-card-val">7 Distribusi Multi-Platform</span>
+        <span class="kpi-card-growth">📸 IG · 🎵 TikTok · 📘 FB</span>
+      </div>
+    </div>
+
+    <!-- Planner Table -->
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width: 40px;">#</th>
+            <th style="width: 170px;">Sudut Pandang (6 CEP)</th>
+            <th style="width: 180px;">Produk Target</th>
+            <th style="width: 140px;">Kanal Distribusi</th>
+            <th>Hook Visual & Naskah Voice-Over (Output AI Generator)</th>
+            <th style="width: 130px;">Human Approval</th>
+            <th style="width: 80px; text-align: center;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="plannerTableBody">
+          <tr>
+            <td><strong>#1</strong></td>
+            <td><span class="badge-cep">Problem-Solution</span></td>
+            <td><strong>Serum Retinol 0.5%</strong></td>
+            <td>
+              <div class="platform-chip-group">
+                <span class="platform-chip ig active" title="Instagram Reels">📸</span>
+                <span class="platform-chip tiktok active" title="TikTok">🎵</span>
+              </div>
+            </td>
+            <td>
+              <div style="font-weight: 700;">"Garis halus di bawah mata bikin kamu kelihatan capek terus?"</div>
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">Naskah VO: Membongkar mitos penuaan dini dan bagaimana formula Retinol 0.5% bekerja gentle tanpa iritasi...</div>
+            </td>
+            <td><span class="badge-status approved" id="appStatus1">Approved ✅</span></td>
+            <td style="text-align: center;"><button class="btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="toggleRowApproval(1)">Toggle</button></td>
+          </tr>
+          <tr>
+            <td><strong>#2</strong></td>
+            <td><span class="badge-cep">Routine Based</span></td>
+            <td><strong>Serum Retinol 0.5%</strong></td>
+            <td>
+              <div class="platform-chip-group">
+                <span class="platform-chip ig active" title="Instagram Reels">📸</span>
+                <span class="platform-chip tiktok active" title="TikTok">🎵</span>
+              </div>
+            </td>
+            <td>
+              <div style="font-weight: 700;">"3 Langkah Night Routine Wajib untuk Pejuang Skin Barrier"</div>
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">Naskah VO: Step-by-step layering toner, serum retinol, dan moisturizer tanpa rasa cekit-cekit...</div>
+            </td>
+            <td><span class="badge-status approved" id="appStatus2">Approved ✅</span></td>
+            <td style="text-align: center;"><button class="btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="toggleRowApproval(2)">Toggle</button></td>
+          </tr>
+          <tr>
+            <td><strong>#3</strong></td>
+            <td><span class="badge-cep">Emotional Based</span></td>
+            <td><strong>Serum Retinol 0.5%</strong></td>
+            <td>
+              <div class="platform-chip-group">
+                <span class="platform-chip ig active" title="Instagram Reels">📸</span>
+                <span class="platform-chip tiktok active" title="TikTok">🎵</span>
+                <span class="platform-chip fb active" title="Facebook">📘</span>
+              </div>
+            </td>
+            <td>
+              <div style="font-weight: 700;">"Momen saat kamu berani selfie tanpa filter lagi!"</div>
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">Naskah VO: Transformasi percaya diri setelah 21 hari pemakaian rutin. Flash Sale 25% hari ini!</div>
+            </td>
+            <td><span class="badge-status approved" id="appStatus3">Approved ✅</span></td>
+            <td style="text-align: center;"><button class="btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="toggleRowApproval(3)">Toggle</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       STAGE 3: PRODUCTION WORKSPACE (PILLAR CAMPAIGN MODEL)
+       ========================================================= -->
+  <section class="workflow-panel" id="panel-production">
+    <div class="section-header-row">
+      <div>
+        <h3 class="section-title">🎬 Tahap 3: Production Workspace (Pillar Campaign Interaction Model)</h3>
+        <p class="section-subtitle">Campaign Run: <strong>RUN-SKINBEAUTY-RETINOL-001</strong> · Scene-Level Generation & Visual Inspector</p>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-secondary" onclick="showToast('⚡ Sinkronisasi state engine Pillar...')">🔄 Reconcile Engine</button>
+        <button class="btn-primary" onclick="switchStage('publishing', document.getElementById('btnStagePublishing'))">Lanjut ke Publishing →</button>
+      </div>
+    </div>
+
+    <div class="prod-workspace-grid">
+      <!-- Left Column: Content Items Rail -->
+      <div class="prod-sidebar-list">
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Content Runs (3 Items)</div>
+
+        <div class="prod-card-item selected" onclick="selectProdCard(this, 1)">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 800; font-size: 13px;">Item #1 — Problem-Solution</span>
+            <span class="badge-status in-progress">Rendering</span>
+          </div>
+          <div style="font-size: 11.5px; color: var(--text-muted);">Serum Retinol · 5 Scenes · IG / TikTok</div>
+          <div class="stage-rail">
+            <div class="stage-step done" title="Storyboard"></div>
+            <div class="stage-step done" title="VO Audio"></div>
+            <div class="stage-step done" title="Visual Prompts"></div>
+            <div class="stage-step active" title="Rendering"></div>
+            <div class="stage-step" title="Ready"></div>
+          </div>
+        </div>
+
+        <div class="prod-card-item" onclick="selectProdCard(this, 2)">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 800; font-size: 13px;">Item #2 — Routine Based</span>
+            <span class="badge-status approved">Ready</span>
+          </div>
+          <div style="font-size: 11.5px; color: var(--text-muted);">Serum Retinol · 5 Scenes · IG / TikTok</div>
+          <div class="stage-rail">
+            <div class="stage-step done"></div>
+            <div class="stage-step done"></div>
+            <div class="stage-step done"></div>
+            <div class="stage-step done"></div>
+            <div class="stage-step done"></div>
+          </div>
+        </div>
+
+        <div class="prod-card-item" onclick="selectProdCard(this, 3)">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 800; font-size: 13px;">Item #3 — Emotional Based</span>
+            <span class="badge-status review">Generating</span>
+          </div>
+          <div style="font-size: 11.5px; color: var(--text-muted);">Serum Retinol · 5 Scenes · FB / TikTok</div>
+          <div class="stage-rail">
+            <div class="stage-step done"></div>
+            <div class="stage-step done"></div>
+            <div class="stage-step active"></div>
+            <div class="stage-step"></div>
+            <div class="stage-step"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Scene Inspector -->
+      <div class="scene-inspector">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h4 style="font-size: 14px; font-weight: 800;">Scene Inspector — Item #1 (Problem-Solution Based)</h4>
+            <span style="font-size: 11.5px; color: var(--text-muted);">10 Video DNA Parameter Locked · Single-Pass Engine Output</span>
+          </div>
+          <span class="badge-cep">Pacing: Dynamic Fast · Hook: Agitative</span>
+        </div>
+
+        <!-- Scene Thumbnails -->
+        <div class="scene-timeline">
+          <div class="scene-thumb active" onclick="selectSceneTab(this, 1)">
+            <strong>Scene 1 (3s)</strong>
+            <div>🔍 Hook Masalah</div>
+          </div>
+          <div class="scene-thumb" onclick="selectSceneTab(this, 2)">
+            <strong>Scene 2 (4s)</strong>
+            <div>💡 Agitasi Kulit</div>
+          </div>
+          <div class="scene-thumb" onclick="selectSceneTab(this, 3)">
+            <strong>Scene 3 (5s)</strong>
+            <div>✨ Hero Solution</div>
+          </div>
+          <div class="scene-thumb" onclick="selectSceneTab(this, 4)">
+            <strong>Scene 4 (4s)</strong>
+            <div>🔬 Physics Truth</div>
+          </div>
+          <div class="scene-thumb" onclick="selectSceneTab(this, 5)">
+            <strong>Scene 5 (4s)</strong>
+            <div>🛒 Promo CTA</div>
+          </div>
+        </div>
+
+        <!-- Inspector Subtabs -->
+        <div class="inspector-tabs">
+          <button class="insp-tab-btn active" onclick="switchInspectorTab('storyboard', this)">🎬 Storyboard</button>
+          <button class="insp-tab-btn" onclick="switchInspectorTab('visual', this)">🖼️ Visual Plan</button>
+          <button class="insp-tab-btn" onclick="switchInspectorTab('vo', this)">🎙️ Voice-Over</button>
+          <button class="insp-tab-btn" onclick="switchInspectorTab('t2i', this)">🎨 T2I Prompt</button>
+          <button class="insp-tab-btn" onclick="switchInspectorTab('i2v', this)">🎥 I2V Motion</button>
+        </div>
+
+        <!-- Inspector Content Box -->
+        <div id="inspectorContentBox" style="background: var(--surface); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); font-size: 12.5px; line-height: 1.6;">
+          <div style="font-weight: 700; color: var(--action-primary); margin-bottom: 4px;">🎬 Storyboard Scene 1 — Close-up Hook</div>
+          <p>Kamera macro zoom-in memperlihatkan ekspresi keresahan wanita usia 28 tahun yang melihat pantulan wajah di cermin dengan pencahayaan natural pagi hari. Suasana sinematik dengan shallow depth-of-field.</p>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 6px;">
+          <button class="btn-secondary" style="font-size: 12px;" onclick="showToast('⚡ Meregenerasi frame scene...')">🔄 Regenerate Scene</button>
+          <button class="btn-primary" style="font-size: 12px;" onclick="showToast('🚀 Render final dispatch...')">⚡ Render Video Final</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       STAGE 4: EMBEDDED PUBLISHING
+       ========================================================= -->
+  <section class="workflow-panel" id="panel-publishing">
+    <div class="section-header-row">
+      <div>
+        <h3 class="section-title">🚀 Tahap 4: Embedded ContentFlow Publishing Scheduler</h3>
+        <p class="section-subtitle">Scope Terkunci: <strong>@skinbeauty</strong> · Multi-Platform Broadcast Sync (Repliz Engine)</p>
+      </div>
+      <div>
+        <button class="btn-primary" onclick="switchStage('performance', document.getElementById('btnStagePerformance'))">Lihat Laporan Performance →</button>
+      </div>
+    </div>
+
+    <!-- Preflight Commercial Checklist -->
+    <div style="background: var(--surface-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 18px; display: flex; gap: 24px; flex-wrap: wrap;">
+      <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; color: var(--status-success);">
+        <span>✓</span> Product Affiliate Link Valid
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; color: var(--status-success);">
+        <span>✓</span> Commercial Disclosure Tag (#ad) Ready
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; color: var(--status-success);">
+        <span>✓</span> IG, TikTok & FB Account Tokens Active
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; color: var(--status-success);">
+        <span>✓</span> Video 1080x1920 60fps Preflight Passed
+      </div>
+    </div>
+
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Jadwal Siar</th>
+            <th>Kanal Distribusi</th>
+            <th>Video Asset</th>
+            <th>Caption & Affiliate Link</th>
+            <th>Repliz Job Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>15 Sept 2026</strong> · 10:00 WIB</td>
+            <td><span class="platform-chip ig active" title="Instagram Reels">📸</span></td>
+            <td><code>RETINOL-01-PROB.mp4</code></td>
+            <td>"Garis halus bikin gak pede? Solusinya retinol formula lembut ini! Cek link bio diskon 25% #ad"</td>
+            <td><span class="badge-status in-progress">Scheduled</span></td>
+            <td><button class="btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="showToast('🚀 Publish di-trigger sekarang!')">Publish Now</button></td>
+          </tr>
+          <tr>
+            <td><strong>15 Sept 2026</strong> · 10:00 WIB</td>
+            <td><span class="platform-chip tiktok active" title="TikTok">🎵</span></td>
+            <td><code>RETINOL-01-PROB.mp4</code></td>
+            <td>"Rahasia kulit kenyal anti penuaan dini! Keranjang kuning diskon gajian 🛍️ #skincare #retinol"</td>
+            <td><span class="badge-status in-progress">Scheduled</span></td>
+            <td><button class="btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="showToast('🚀 Publish di-trigger sekarang!')">Publish Now</button></td>
+          </tr>
+          <tr>
+            <td><strong>16 Sept 2026</strong> · 16:00 WIB</td>
+            <td><span class="platform-chip ig active" title="Instagram Reels">📸</span></td>
+            <td><code>RETINOL-02-ROUT.mp4</code></td>
+            <td>"Layering night routine yang bener itu gini lho! Simak step-nya yuk #ad #skincareroutine"</td>
+            <td><span class="badge-status in-progress">Scheduled</span></td>
+            <td><button class="btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="showToast('🚀 Publish di-trigger sekarang!')">Publish Now</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       STAGE 5: EMBEDDED PERFORMANCE & LEARNING LOOP
+       ========================================================= -->
+  <section class="workflow-panel" id="panel-performance">
+    <div class="section-header-row">
+      <div>
+        <h3 class="section-title">📈 Tahap 5: ContentFlow Analytics + Affiliate Performance Funnel</h3>
+        <p class="section-subtitle">Real-Time Commercial Metrics & Closed Learning Loop Recommendation</p>
+      </div>
+      <div>
+        <button class="btn-primary" onclick="showToast('📥 Mengunduh laporan performa affiliate (CSV)...')">📥 Export Report</button>
+      </div>
+    </div>
+
+    <!-- Performance KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <span class="kpi-card-title">💰 Total GMV Revenue</span>
+        <span class="kpi-card-val" style="color: var(--status-success);">Rp 48.500.000</span>
+        <span class="kpi-card-growth">▲ +24.8% vs Bulan Lalu</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-card-title">🛒 Total Orders & CVR</span>
+        <span class="kpi-card-val">342 Orders <span style="font-size: 13px; color: var(--action-primary);">(4.2% CVR)</span></span>
+        <span class="kpi-card-growth">▲ +0.8% Conversion Rate</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-card-title">👆 Clicks & EPC</span>
+        <span class="kpi-card-val">8.140 <span style="font-size: 13px; color: var(--accent);">(EPC Rp 5.958)</span></span>
+        <span class="kpi-card-growth">▲ +12.4% Traffic</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-card-title">👁️ Total Views & RPM</span>
+        <span class="kpi-card-val">184.200 <span style="font-size: 13px; color: var(--text-muted);">(RPM Rp 263rb)</span></span>
+        <span class="kpi-card-growth">▲ High Organic Reach</span>
+      </div>
+    </div>
+
+    <!-- Breakdown Table by CEP -->
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Kategori CEP</th>
+            <th>Jumlah Video</th>
+            <th>Total Views</th>
+            <th>Affiliate Clicks</th>
+            <th>Orders</th>
+            <th>CVR (%)</th>
+            <th>Total GMV</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background: rgba(74, 222, 128, 0.06);">
+            <td><span class="badge-cep">Problem-Solution Based</span> 🏆 <em>Top Performer</em></td>
+            <td>4 Video</td>
+            <td>82.400</td>
+            <td>4.200</td>
+            <td>184 Orders</td>
+            <td><strong style="color: var(--status-success);">8.4%</strong></td>
+            <td><strong>Rp 27.600.000</strong></td>
+          </tr>
+          <tr>
+            <td><span class="badge-cep">Routine Based</span></td>
+            <td>3 Video</td>
+            <td>54.100</td>
+            <td>2.100</td>
+            <td>88 Orders</td>
+            <td>4.2%</td>
+            <td>Rp 12.400.000</td>
+          </tr>
+          <tr>
+            <td><span class="badge-cep">Emotional Based</span></td>
+            <td>3 Video</td>
+            <td>47.700</td>
+            <td>1.840</td>
+            <td>70 Orders</td>
+            <td>3.8%</td>
+            <td>Rp 8.500.000</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 💡 CLOSED LEARNING LOOP CARD -->
+    <div class="learning-loop-card">
+      <div>
+        <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 14px; color: var(--accent);">
+          <span>💡</span> AI Closed Learning Loop Recommendation
+        </div>
+        <p style="font-size: 12.5px; margin-top: 4px; color: var(--text-primary); max-width: 850px;">
+          Berdasarkan 30 hari data performa, sudut pandang <strong>Problem-Solution Based</strong> pada produk <strong>Serum Retinol 0.5%</strong> menghasilkan Conversion Rate tertinggi <strong>(8.4% CVR vs 4.2% rata-rata)</strong>. Sistem menyarankan untuk menambahkan <strong>4 slot jadwal baru</strong> dengan sudut pandang ini di Kalender Konten bulan depan.
+        </p>
+      </div>
+      <button class="btn-accent" onclick="applyLearningLoopRecommendation()">
+        ➕ Terapkan ke Content Calendar
+      </button>
+    </div>
+  </section>
+
+  <!-- SETUP TABS PLACEHOLDER -->
+  <section class="workflow-panel" id="panel-overview">
+    <div class="section-header-row">
+      <h3 class="section-title">🏢 Brand Overview</h3>
+    </div>
+    <p style="color: var(--text-muted); font-size: 13px;">Overview profil brand, tone of voice, dan target KPI komersial brand @skinbeauty.</p>
+  </section>
+
+  <section class="workflow-panel" id="panel-products">
+    <div class="section-header-row">
+      <h3 class="section-title">📦 Brand Product Portfolio</h3>
+    </div>
+    <p style="color: var(--text-muted); font-size: 13px;">Daftar 8 produk aktif dan physical truth physics untuk @skinbeauty.</p>
+  </section>
+
+</div>
+
+<!-- =========================================================
+     MODAL: BUAT RENCANA KONTEN BARU
+     ========================================================= -->
+<div class="modal-backdrop" id="createPlanModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3>➕ Tambah Rencana Konten Baru</h3>
+      <button class="btn-close-modal" onclick="closeCreatePlanModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Tipe Rencana:</label>
+        <select class="form-select" id="newPlanType" onchange="handlePlanTypeChange(this.value)">
+          <option value="product">🎯 Product Campaign (Berorientasi Penjualan & Review Produk)</option>
+          <option value="editorial">🏛️ Brand Editorial (Authority & Lab Science)</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="productSelectGroup">
+        <label class="form-label">Pilih Produk Target:</label>
+        <select class="form-select" id="newTargetProduct">
+          <option value="Serum Retinol 0.5% Anti-Aging">Serum Retinol 0.5% Anti-Aging</option>
+          <option value="Sunscreen Gel UV SPF50+">Sunscreen Gel UV SPF50+</option>
+          <option value="Barrier Moisture Gel Ceramide">Barrier Moisture Gel Ceramide</option>
+          <option value="Brightening Niacinamide 10%">Brightening Niacinamide 10%</option>
+          <option value="Deep Cleansing Cica Foam">Deep Cleansing Cica Foam</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Sudut Pandang (Pilih 1 dari 6 Kategori CEP):</label>
+        <select class="form-select" id="newCepAngle">
+          <option value="Problem-Solution Based">1. Problem-Solution Based (Solusi Keluhan Spesifik)</option>
+          <option value="Routine Based">2. Routine Based (Urutan & Cara Pakai Harian)</option>
+          <option value="Emotional Based">3. Emotional Based (Empati & Transformasi Diri)</option>
+          <option value="Aspirational Based">4. Aspirational Based (Standar Estetika & Impian)</option>
+          <option value="Commitment Based">5. Commitment Based (Tantangan Disiplin & Habit)</option>
+          <option value="Opportunistic Based">6. Opportunistic Based (Momentum Tren & Flash Sale)</option>
+        </select>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+        <div class="form-group">
+          <label class="form-label">Tanggal Siar:</label>
+          <input type="number" class="form-input" id="newScheduleDay" min="1" max="30" value="21" placeholder="Tanggal (1-30)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Jam Tayang:</label>
+          <select class="form-select" id="newScheduleTime">
+            <option value="10:00 WIB">10:00 WIB (Pagi Prime)</option>
+            <option value="12:00 WIB">12:00 WIB (Siang Istirahat)</option>
+            <option value="16:00 WIB">16:00 WIB (Sore Pulang Kantor)</option>
+            <option value="19:00 WIB">19:00 WIB (Malam Prime Time)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Kanal Distribusi (Pilih Platform Posting):</label>
+        <div style="display: flex; gap: 14px; flex-wrap: wrap; background: var(--surface-subtle); padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; cursor: pointer;">
+            <input type="checkbox" id="platIG" checked> 📸 Instagram Reels
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; cursor: pointer;">
+            <input type="checkbox" id="platTK" checked> 🎵 TikTok
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; cursor: pointer;">
+            <input type="checkbox" id="platFB"> 📘 Facebook
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; cursor: pointer;">
+            <input type="checkbox" id="platYT"> ▶️ YouTube Shorts
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Konteks Promosi Khusus (Optional):</label>
+        <input type="text" class="form-input" id="newPromoContext" placeholder="Misal: Flash Sale 25%, Voucher Bundling Toko, Promo Beli 1 Gratis 1...">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeCreatePlanModal()">Batal</button>
+      <button class="btn-primary" onclick="saveNewPlan()">💾 Simpan & Jadwalkan Konten</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toastBox">
+  <span id="toastIcon">✅</span>
+  <span id="toastMsg">Notifikasi</span>
+</div>
+
+<!-- =========================================================
+     JAVASCRIPT LOGIC & STATE SIMULATION
+     ========================================================= -->
+<script>
+  // Global Data State: 1 Item = 1 Konten Unik Multi-Platform
+  let scheduleEvents = [
+    {
+      id: 1,
+      day: 15,
+      dateStr: '15 Sept 2026',
+      timeStr: '10:00 WIB',
+      planType: 'product',
+      product: 'Serum Retinol 0.5% Anti-Aging',
+      cep: 'Problem-Solution Based',
+      platforms: ['ig', 'tiktok'],
+      promoContext: 'Flash Sale Diskon 25%',
+      status: 'Ready to Dispatch',
+      checked: true
+    },
+    {
+      id: 2,
+      day: 16,
+      dateStr: '16 Sept 2026',
+      timeStr: '16:00 WIB',
+      planType: 'product',
+      product: 'Serum Retinol 0.5% Anti-Aging',
+      cep: 'Routine Based',
+      platforms: ['ig', 'tiktok'],
+      promoContext: 'Promo Bundling 3 Langkah',
+      status: 'Ready to Dispatch',
+      checked: true
+    },
+    {
+      id: 3,
+      day: 17,
+      dateStr: '17 Sept 2026',
+      timeStr: '10:00 WIB',
+      planType: 'product',
+      product: 'Serum Retinol 0.5% Anti-Aging',
+      cep: 'Emotional Based',
+      platforms: ['ig', 'tiktok', 'fb'],
+      promoContext: 'Voucher Toko 20%',
+      status: 'Ready to Dispatch',
+      checked: true
+    },
+    {
+      id: 4,
+      day: 18,
+      dateStr: '18 Sept 2026',
+      timeStr: '16:00 WIB',
+      planType: 'product',
+      product: 'Sunscreen Gel UV SPF50+',
+      cep: 'Aspirational Based',
+      platforms: ['ig', 'tiktok'],
+      promoContext: 'Promo Beli 1 Gratis 1',
+      status: 'Draft',
+      checked: false
+    },
+    {
+      id: 5,
+      day: 19,
+      dateStr: '19 Sept 2026',
+      timeStr: '10:00 WIB',
+      planType: 'product',
+      product: 'Sunscreen Gel UV SPF50+',
+      cep: 'Commitment Based',
+      platforms: ['ig', 'tiktok'],
+      promoContext: 'Challenge 30 Hari Kulit Sehat',
+      status: 'Draft',
+      checked: false
+    },
+    {
+      id: 6,
+      day: 20,
+      dateStr: '20 Sept 2026',
+      timeStr: '19:00 WIB',
+      planType: 'editorial',
+      product: 'Brand Authority & Lab Science',
+      cep: 'Opportunistic Based',
+      platforms: ['ig', 'tiktok', 'yt'],
+      promoContext: 'Edisi Khusus Lab Science',
+      status: 'Draft',
+      checked: false
+    },
+    {
+      id: 7,
+      day: 22,
+      dateStr: '22 Sept 2026',
+      timeStr: '12:00 WIB',
+      planType: 'product',
+      product: 'Barrier Moisture Gel Ceramide',
+      cep: 'Problem-Solution Based',
+      platforms: ['ig', 'tiktok', 'fb'],
+      promoContext: 'Diskon Skin Barrier Rescue',
+      status: 'Draft',
+      checked: false
+    },
+    {
+      id: 8,
+      day: 25,
+      dateStr: '25 Sept 2026',
+      timeStr: '15:00 WIB',
+      planType: 'product',
+      product: 'Brightening Niacinamide 10%',
+      cep: 'Routine Based',
+      platforms: ['ig', 'tiktok'],
+      promoContext: 'Voucher Gajian Akhir Bulan',
+      status: 'Draft',
+      checked: false
+    }
+  ];
+
+  let currentCalView = 'grid'; // 'grid' | 'list'
+  let currentPlatformFilter = 'all';
+
+  // Initialize Views on Load
+  window.addEventListener('DOMContentLoaded', () => {
+    renderCalendarMonthGrid();
+    renderCalendarListView();
+    updateBatchBar();
+  });
+
+  // Switch between 30-Day Grid and Row List Mode
+  function switchCalendarView(mode) {
+    currentCalView = mode;
+    const gridEl = document.getElementById('calendarGridView');
+    const listEl = document.getElementById('calendarListView');
+    const btnCal = document.getElementById('btnViewCalendar');
+    const btnList = document.getElementById('btnViewList');
+
+    if (mode === 'grid') {
+      gridEl.style.display = 'block';
+      listEl.style.display = 'none';
+      btnCal.classList.add('active');
+      btnList.classList.remove('active');
+      renderCalendarMonthGrid();
+      showToast('📅 Beralih ke Mode Kalender 30 Hari');
+    } else {
+      gridEl.style.display = 'none';
+      listEl.style.display = 'block';
+      btnCal.classList.remove('active');
+      btnList.classList.add('active');
+      renderCalendarListView();
+      showToast('📋 Beralih ke Mode Baris Konten (Multi-Platform)');
+    }
+  }
+
+  // Filter Grid by Platform
+  function filterCalendarGrid(platform, btn) {
+    currentPlatformFilter = platform;
+    document.querySelectorAll('.cal-filter-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderCalendarMonthGrid();
+    showToast(`🔍 Filter Platform: ${platform.toUpperCase()}`);
+  }
+
+  // Render 30-Day Calendar Grid (September 2026: 1 Sept is Tuesday, 30 days)
+  function renderCalendarMonthGrid() {
+    const grid = document.getElementById('calendarDaysGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    // Day 1 of Sept 2026 is Tuesday -> 1 padding cell for Monday (Aug 31)
+    const prevMonthCell = document.createElement('div');
+    prevMonthCell.className = 'day-cell other-month';
+    prevMonthCell.innerHTML = `
+      <div class="day-cell-top"><span class="day-number">31</span></div>
+    `;
+    grid.appendChild(prevMonthCell);
+
+    // Days 1 to 30
+    for (let day = 1; day <= 30; day++) {
+      const cell = document.createElement('div');
+      const isToday = (day === 12);
+      cell.className = `day-cell ${isToday ? 'today' : ''}`;
+
+      let dayEvents = scheduleEvents.filter(e => e.day === day);
+      if (currentPlatformFilter !== 'all') {
+        dayEvents = dayEvents.filter(e => e.platforms.includes(currentPlatformFilter));
+      }
+
+      let eventsHtml = '';
+      dayEvents.forEach(ev => {
+        const platIcons = ev.platforms.map(p => {
+          if (p === 'ig') return '📸';
+          if (p === 'tiktok') return '🎵';
+          if (p === 'fb') return '📘';
+          if (p === 'yt') return '▶️';
+          return '';
+        }).join(' ');
+
+        eventsHtml += `
+          <div class="cal-event-card ${ev.planType === 'editorial' ? 'editorial' : ''}" onclick="openEventDetail(${ev.id})">
+            <div class="cal-event-meta">
+              <span>${ev.timeStr.split(' ')[0]}</span>
+              <span class="cal-event-platforms">${platIcons}</span>
+            </div>
+            <div class="cal-event-title" title="${ev.product}">${ev.product}</div>
+            <div style="font-size: 9px; color: var(--accent); font-weight: 700;">${ev.cep.replace(' Based', '')}</div>
+          </div>
+        `;
+      });
+
+      cell.innerHTML = `
+        <div class="day-cell-top">
+          <span class="day-number">${day}</span>
+          ${isToday ? '<span class="today-tag">HARI INI</span>' : ''}
+          <button class="add-event-day-btn" title="Tambah Konten Tanggal ${day}" onclick="openCreatePlanModal(${day})">+</button>
+        </div>
+        <div class="day-events-container">
+          ${eventsHtml}
+        </div>
+      `;
+
+      grid.appendChild(cell);
+    }
+
+    // Trailing padding cells to complete the 35-cell grid (5 rows x 7 days = 35; 1 + 30 = 31 -> 4 next month cells)
+    for (let nextDay = 1; nextDay <= 4; nextDay++) {
+      const nextCell = document.createElement('div');
+      nextCell.className = 'day-cell other-month';
+      nextCell.innerHTML = `
+        <div class="day-cell-top"><span class="day-number">${nextDay}</span></div>
+      `;
+      grid.appendChild(nextCell);
+    }
+  }
+
+  // Render Mode Baris (1 Row = 1 Content Item with Multi-Platform Toggles)
+  function renderCalendarListView() {
+    const tbody = document.getElementById('calendarTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    scheduleEvents.forEach((ev, idx) => {
+      const isIg = ev.platforms.includes('ig');
+      const isTk = ev.platforms.includes('tiktok');
+      const isFb = ev.platforms.includes('fb');
+      const isYt = ev.platforms.includes('yt');
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <input type="checkbox" class="cal-checkbox" data-id="${ev.id}" ${ev.checked ? 'checked' : ''} onchange="handleRowCheck(${ev.id}, this.checked)">
+        </td>
+        <td>
+          <strong>${ev.dateStr}</strong>
+          <div style="font-size: 11px; color: var(--text-muted);">${ev.timeStr}</div>
+        </td>
+        <td>
+          <div style="font-weight: 700; color: var(--text-primary);">${ev.product}</div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+            ${ev.planType === 'product' ? '🎯 Product Campaign' : '🏛️ Brand Editorial'}
+          </div>
+        </td>
+        <td>
+          <span class="badge-cep">${ev.cep}</span>
+        </td>
+        <td>
+          <div class="platform-chip-group">
+            <span class="platform-chip ig ${isIg ? 'active' : 'inactive'}" onclick="toggleRowPlatform(${ev.id}, 'ig')" title="Instagram Reels">📸</span>
+            <span class="platform-chip tiktok ${isTk ? 'active' : 'inactive'}" onclick="toggleRowPlatform(${ev.id}, 'tiktok')" title="TikTok">🎵</span>
+            <span class="platform-chip fb ${isFb ? 'active' : 'inactive'}" onclick="toggleRowPlatform(${ev.id}, 'fb')" title="Facebook">📘</span>
+            <span class="platform-chip yt ${isYt ? 'active' : 'inactive'}" onclick="toggleRowPlatform(${ev.id}, 'yt')" title="YouTube Shorts">▶️</span>
+          </div>
+        </td>
+        <td>
+          <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.4;">
+            ${ev.promoContext ? `🏷️ <strong style="color: var(--text-primary);">${ev.promoContext}</strong>` : '<span style="color: var(--text-disabled);">-</span>'}
+          </div>
+        </td>
+        <td>
+          <span class="badge-status ${ev.status === 'Ready to Dispatch' ? 'review' : 'in-progress'}">${ev.status}</span>
+        </td>
+        <td style="text-align: center;">
+          <button class="btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="openEventDetail(${ev.id})">👁️ Detail</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    updateBatchBar();
+  }
+
+  // Toggle Platform on a Single Content Row
+  function toggleRowPlatform(id, platCode) {
+    const item = scheduleEvents.find(e => e.id === id);
+    if (!item) return;
+
+    if (item.platforms.includes(platCode)) {
+      if (item.platforms.length === 1) {
+        showToast('⚠️ Minimal 1 platform posting harus aktif untuk konten ini!');
+        return;
+      }
+      item.platforms = item.platforms.filter(p => p !== platCode);
+      showToast(`➖ Nonaktifkan ${platCode.toUpperCase()} untuk baris #${id}`);
+    } else {
+      item.platforms.push(platCode);
+      showToast(`➕ Aktifkan ${platCode.toUpperCase()} untuk baris #${id}`);
+    }
+
+    renderCalendarListView();
+    renderCalendarMonthGrid();
+  }
+
+  // Row Checkbox Handling
+  function handleRowCheck(id, isChecked) {
+    const item = scheduleEvents.find(e => e.id === id);
+    if (item) item.checked = isChecked;
+    updateBatchBar();
+  }
+
+  function toggleAllCalendarCheck(master) {
+    scheduleEvents.forEach(e => e.checked = master.checked);
+    renderCalendarListView();
+    updateBatchBar();
+  }
+
+  function selectAllCalendarRows() {
+    scheduleEvents.forEach(e => e.checked = true);
+    const master = document.getElementById('checkAllCalendar');
+    if (master) master.checked = true;
+    renderCalendarListView();
+    updateBatchBar();
+    showToast('✓ Semua baris konten berhasil dipilih!');
+  }
+
+  function updateBatchBar() {
+    const checked = scheduleEvents.filter(e => e.checked);
+    const badge = document.getElementById('calCountBadge');
+    if (badge) badge.innerText = `${scheduleEvents.length} Draft`;
+
+    const dispatchBtn = document.getElementById('btnDispatchPlanner');
+    const dispatchCountBadge = document.getElementById('dispatchCountBadge');
+    if (dispatchCountBadge) dispatchCountBadge.innerText = checked.length;
+    if (dispatchBtn) {
+      if (checked.length > 0) {
+        dispatchBtn.style.opacity = '1';
+        dispatchBtn.style.pointerEvents = 'auto';
+      } else {
+        dispatchBtn.style.opacity = '0.45';
+        dispatchBtn.style.pointerEvents = 'none';
+      }
+    }
+  }
+
+  // Modal Open / Close
+  function openCreatePlanModal(prefillDay) {
+    const m = document.getElementById('createPlanModal');
+    if (prefillDay) {
+      document.getElementById('newScheduleDay').value = prefillDay;
+    }
+    m.classList.add('active');
+  }
+
+  function closeCreatePlanModal() {
+    document.getElementById('createPlanModal').classList.remove('active');
+  }
+
+  function handlePlanTypeChange(type) {
+    const grp = document.getElementById('productSelectGroup');
+    if (type === 'editorial') {
+      grp.style.display = 'none';
+    } else {
+      grp.style.display = 'flex';
+    }
+  }
+
+  function saveNewPlan() {
+    const planType = document.getElementById('newPlanType').value;
+    const product = planType === 'editorial' ? 'Brand Authority & Lab Science' : document.getElementById('newTargetProduct').value;
+    const cep = document.getElementById('newCepAngle').value;
+    const day = parseInt(document.getElementById('newScheduleDay').value) || 21;
+    const timeStr = document.getElementById('newScheduleTime').value;
+    const promoContext = document.getElementById('newPromoContext').value.trim();
+
+    const platforms = [];
+    if (document.getElementById('platIG').checked) platforms.push('ig');
+    if (document.getElementById('platTK').checked) platforms.push('tiktok');
+    if (document.getElementById('platFB').checked) platforms.push('fb');
+    if (document.getElementById('platYT').checked) platforms.push('yt');
+
+    if (platforms.length === 0) {
+      showToast('⚠️ Pilih minimal 1 kanal distribusi platform!');
+      return;
+    }
+
+    const newId = scheduleEvents.length ? Math.max(...scheduleEvents.map(e => e.id)) + 1 : 1;
+    const newEntry = {
+      id: newId,
+      day: day,
+      dateStr: `${day} Sept 2026`,
+      timeStr: timeStr,
+      planType: planType,
+      product: product,
+      cep: cep,
+      platforms: platforms,
+      promoContext: promoContext,
+      status: 'Ready to Dispatch',
+      checked: true
+    };
+
+    scheduleEvents.push(newEntry);
+    closeCreatePlanModal();
+
+    renderCalendarMonthGrid();
+    renderCalendarListView();
+    updateBatchBar();
+
+    showToast(`🎉 Konten baru berhasil dijadwalkan untuk ${day} Sept 2026!`);
+  }
+
+  function openEventDetail(id) {
+    const item = scheduleEvents.find(e => e.id === id);
+    if (!item) return;
+    showToast(`🔍 Konten #${item.id}: ${item.product} (${item.cep}) — Promo: ${item.promoContext || 'None'} [${item.platforms.join(', ').toUpperCase()}]`);
+  }
+
+  // Pipeline Navigation
+  function switchStage(stageKey, btn) {
+    document.querySelectorAll('.workflow-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+    const target = document.getElementById(`panel-${stageKey}`);
+    if (target) target.classList.add('active');
+    if (btn) btn.classList.add('active');
+
+    updateBatchBar();
+  }
+
+  function handleBrandSwitch(val) {
+    showToast(`🔄 Beralih ke brand profil: ${val}`);
+  }
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const cur = html.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    document.getElementById('themeIcon').innerText = next === 'dark' ? '☀️' : '🌙';
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toastBox');
+    document.getElementById('toastMsg').innerText = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3200);
+  }
+
+  // Dispatch Action: Calendar -> Planner
+  function dispatchCalendarToPlanner() {
+    const checked = scheduleEvents.filter(e => e.checked);
+    showToast(`⚡ Mengirim ${checked.length} brief konten ke AI Content Planner Engine...`);
+    setTimeout(() => {
+      showToast(`🎉 Sukses membuat Sesi Planner dengan ${checked.length} naskah AI terstruktur!`);
+      const plannerBtn = document.getElementById('btnStagePlanner');
+      switchStage('planner', plannerBtn);
+    }, 1000);
+  }
+
+  // Planner Approval & Ingest -> Production
+  function toggleRowApproval(rowNum) {
+    const st = document.getElementById(`appStatus${rowNum}`);
+    if (st.innerText.includes('Approved')) {
+      st.className = 'badge-status review';
+      st.innerText = 'Review ⏳';
+    } else {
+      st.className = 'badge-status approved';
+      st.innerText = 'Approved ✅';
+    }
+  }
+
+  function bulkApprovePlannerRows() {
+    for (let i = 1; i <= 3; i++) {
+      const st = document.getElementById(`appStatus${i}`);
+      if (st) {
+        st.className = 'badge-status approved';
+        st.innerText = 'Approved ✅';
+      }
+    }
+    document.getElementById('approvedRowCount').innerText = '3 / 3 Approved';
+    showToast('✓ Semua baris planner berhasil di-approve!');
+  }
+
+  function ingestPlannerToProduction() {
+    showToast('🚀 Meng-ingest 3 approved rows ke Production Workspace...');
+    setTimeout(() => {
+      showToast('🎬 Run & Scene projection berhasil dibuat di Production Workspace!');
+      const prodBtn = document.getElementById('btnStageProduction');
+      switchStage('production', prodBtn);
+    }, 1000);
+  }
+
+  // Production Workspace Interactions
+  function selectProdCard(card, itemNum) {
+    document.querySelectorAll('.prod-card-item').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    showToast(`🔍 Membuka Scene Inspector untuk Item #${itemNum}`);
+  }
+
+  function selectSceneTab(tab, sceneNum) {
+    document.querySelectorAll('.scene-thumb').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const content = document.getElementById('inspectorContentBox');
+    content.innerHTML = `
+      <div style="font-weight: 700; color: var(--action-primary); margin-bottom: 4px;">🎬 Storyboard Scene ${sceneNum}</div>
+      <p>Visual plan dan komposisi kamera untuk Scene ${sceneNum}. Dynamic pacing disesuaikan dengan DNA Video MAKNA Flow.</p>
+    `;
+  }
+
+  function switchInspectorTab(tabType, btn) {
+    document.querySelectorAll('.insp-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const content = document.getElementById('inspectorContentBox');
+
+    if (tabType === 'storyboard') {
+      content.innerHTML = `<div style="font-weight:700; color:var(--action-primary); margin-bottom:4px;">🎬 Storyboard Visual Direction</div><p>Close-up macro shot wanita 28 tahun mengamati pantulan di cermin dengan ekspresi lelah dan gelisah.</p>`;
+    } else if (tabType === 'visual') {
+      content.innerHTML = `<div style="font-weight:700; color:var(--action-primary); margin-bottom:4px;">🖼️ Visual Plan & Lighting</div><p>Warm morning sunlight, 50mm lens f/1.8, soft contrast bokeh, high physics realism packaging.</p>`;
+    } else if (tabType === 'vo') {
+      content.innerHTML = `<div style="font-weight:700; color:var(--action-primary); margin-bottom:4px;">🎙️ Voice-Over Script (Durasi: 3.2 detik)</div><p style="font-style:italic; font-family:var(--font-mono);">"Garis halus di bawah mata bikin kamu kelihatan capek terus?"</p>`;
+    } else if (tabType === 't2i') {
+      content.innerHTML = `<div style="font-weight:700; color:var(--action-primary); margin-bottom:4px;">🎨 Text-to-Image Prompt (Gemini Imagen 3)</div><p style="font-family:var(--font-mono); font-size:11px;">cinematic portrait of an Indonesian woman looking into a bathroom mirror, soft morning rim light, authentic skin texture --ar 9:16 --v 6.0</p>`;
+    } else if (tabType === 'i2v') {
+      content.innerHTML = `<div style="font-weight:700; color:var(--action-primary); margin-bottom:4px;">🎥 Image-to-Video Motion Prompt (Kling / Wan)</div><p style="font-family:var(--font-mono); font-size:11px;">gentle camera zoom in, subject blinks softly and touches under eye area, natural movement, cinematic physics</p>`;
+    }
+  }
+
+  // Learning Loop
+  function applyLearningLoopRecommendation() {
+    showToast('➕ Menerapkan rekomendasi 4 slot CEP Problem-Solution ke Content Calendar...');
+    setTimeout(() => {
+      const calBtn = document.getElementById('btnStageCalendar');
+      switchStage('calendar', calBtn);
+      showToast('🎉 4 Slot cerdas baru berhasil ditambahkan ke Kalender Konten!');
+    }, 1200);
+  }
+</script>
+
+</body>
+</html>

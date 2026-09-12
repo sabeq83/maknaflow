@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import styles from './AffiliateStudio.module.css';
+import { useState, useEffect, useMemo } from 'react';
 
 export function CampaignProgramPlanners({
   brandId,
@@ -22,22 +21,43 @@ export function CampaignProgramPlanners({
   const [activePlannerId, setActivePlannerId] = useState(null);
   const [loadingRows, setLoadingRows] = useState(false);
   const [rowsError, setRowsError] = useState(null);
-  const [savingRowId, setSavingRowId] = useState(null);
-  const [recommendation, setRecommendation] = useState(null);
-  const [loadingRec, setLoadingRec] = useState(false);
+  const [toastMsg, setToastMsg] = useState('');
+  const [isApproving, setIsApproving] = useState(false);
+  const [isIngesting, setIsIngesting] = useState(false);
+
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(''), 3500);
+  };
 
   useEffect(() => {
     loadPlanners();
-  }, [program.id]);
+  }, [program?.id, brandId]);
 
   const loadPlanners = () => {
+    if (!brandId) return;
     setLoadingPlanners(true);
     setPlannersError(null);
-    fetch(`/api/v2/affiliate-studio/brands/${brandId}/programs/${program.id}/planners`)
+    const url = program?.id
+      ? `/api/v2/affiliate-studio/brands/${brandId}/programs/${program.id}/planners`
+      : `/api/v2/affiliate-studio/brands/${brandId}/planners`;
+
+    fetch(url)
       .then(res => res.json())
       .then(body => {
         if (body.success) {
-          setPlannersData(body.data || { linked: [], available: [] });
+          let linked = [];
+          let available = [];
+          if (Array.isArray(body.data)) {
+            linked = body.data;
+          } else if (body.data?.linked) {
+            linked = body.data.linked;
+            available = body.data.available || [];
+          }
+          setPlannersData({ linked, available });
+          if (linked.length > 0 && !activePlannerId) {
+            handleOpenRowConfig(linked[0].id);
+          }
         } else {
           throw new Error(body.error || 'Failed to fetch planners connection');
         }
@@ -50,67 +70,16 @@ export function CampaignProgramPlanners({
       });
   };
 
-  const handleLinkPlanner = (e) => {
-    e.preventDefault();
-    if (!selectedPlannerId) return;
-
-    setLinking(true);
-    fetch(`/api/v2/affiliate-studio/brands/${brandId}/programs/${program.id}/planners`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plannerId: selectedPlannerId })
-    })
-      .then(res => res.json())
-      .then(body => {
-        if (body.success) {
-          setShowLinkModal(false);
-          setSelectedPlannerId('');
-          loadPlanners();
-          onRefreshProgram();
-        } else {
-          throw new Error(body.error || 'Failed to link planner');
-        }
-      })
-      .catch(err => {
-        alert(err.message);
-      })
-      .finally(() => {
-        setLinking(false);
-      });
-  };
-
-  const handleUnlinkPlanner = (plannerId) => {
-    if (!confirm('Are you sure you want to unlink this planner? Row mappings will be cleared, but the original planner remains untouched.')) {
-      return;
-    }
-
-    fetch(`/api/v2/affiliate-studio/brands/${brandId}/programs/${program.id}/planners/${plannerId}`, {
-      method: 'DELETE'
-    })
-      .then(res => res.json())
-      .then(body => {
-        if (body.success) {
-          if (activePlannerId === plannerId) {
-            setActivePlannerRows(null);
-            setActivePlannerId(null);
-          }
-          loadPlanners();
-          onRefreshProgram();
-        } else {
-          throw new Error(body.error || 'Failed to unlink planner');
-        }
-      })
-      .catch(err => {
-        alert(err.message);
-      });
-  };
-
   const handleOpenRowConfig = (plannerId) => {
     setActivePlannerId(plannerId);
     setLoadingRows(true);
     setRowsError(null);
 
-    fetch(`/api/v2/affiliate-studio/brands/${brandId}/programs/${program.id}/planners/${plannerId}/rows`)
+    const url = program?.id
+      ? `/api/v2/affiliate-studio/brands/${brandId}/programs/${program.id}/planners/${plannerId}/rows`
+      : `/api/v2/affiliate-studio/brands/${brandId}/planners/${plannerId}/rows`;
+
+    fetch(url)
       .then(res => res.json())
       .then(body => {
         if (body.success) {
@@ -127,432 +96,356 @@ export function CampaignProgramPlanners({
       });
   };
 
-  const handleSaveRowConfig = (rowId, programProductId, funnelStage, scheduledDate) => {
-    setSavingRowId(rowId);
-    
-    const payload = {
-      rowId,
-      programProductId: programProductId || null,
-      funnelStage: funnelStage || null,
-      metadata: { scheduled_date: scheduledDate || null }
-    };
-
-    fetch(`/api/v2/affiliate-studio/brands/${brandId}/programs/${program.id}/planners/${activePlannerId}/rows`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-      .then(res => res.json())
-      .then(body => {
-        if (body.success) {
-          // Update local rows state
-          setActivePlannerRows(prev =>
-            prev.map(r => r.id === rowId ? { ...r, programProductId, funnelStage, metadata: { scheduled_date: scheduledDate } } : r)
-          );
-          onRefreshProgram();
-        } else {
-          throw new Error(body.error || 'Failed to save row linkage');
-        }
-      })
-      .catch(err => {
-        alert(err.message);
-      })
-      .finally(() => {
-        setSavingRowId(null);
+  const handleToggleRowApproval = async (rowId, currentStatus) => {
+    const nextStatus = currentStatus === 'approved' ? 'review' : 'approved';
+    try {
+      const res = await fetch(`/api/v2/affiliate-studio/brands/${brandId}/planners/${activePlannerId}/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          rowIds: [rowId],
+          allApproved: false
+        })
       });
-  };
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Gagal mengubah status approval');
 
-  const handleLaunchCampaign = (rowId, engineType) => {
-    if (!confirm(`Are you sure you want to launch the ${engineType.toUpperCase()} campaign engine for this planner row?`)) {
-      return;
+      setActivePlannerRows(prev =>
+        prev.map(r => r.id === rowId ? { ...r, status: nextStatus, metadata: { ...r.metadata, approval_status: nextStatus } } : r)
+      );
+      showToast(nextStatus === 'approved' ? 'Row disetujui ✅' : 'Row dikembalikan ke review ⏳');
+    } catch (err) {
+      showToast(err.message || 'Gagal mengubah status');
     }
-
-    fetch(`/api/v2/affiliate-studio/brands/${brandId}/programs/${program.id}/runs/launch`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        plannerId: activePlannerId,
-        rowId,
-        engineType
-      })
-    })
-      .then(res => res.json())
-      .then(body => {
-        if (body.success) {
-          alert('Campaign launched successfully and registered in production runs.');
-          onRefreshProgram();
-        } else {
-          throw new Error(body.error || 'Failed to launch campaign');
-        }
-      })
-      .catch(err => alert(err.message));
   };
 
-  const handleGetRecommendation = (rowId) => {
-    setLoadingRec(true);
-    setRecommendation(null);
-    fetch(`/api/v2/affiliate-studio/brands/${brandId}/programs/${program.id}/runs/recommend?plannerId=${activePlannerId}&rowId=${rowId}`)
-      .then(res => res.json())
-      .then(body => {
-        if (body.success) {
-          setRecommendation(body.data);
-          const sel = document.getElementById(`engine-select-${rowId}`);
-          if (sel) sel.value = body.data.recommendedEngine;
-        } else {
-          throw new Error(body.error || 'Failed to get recommendation');
-        }
-      })
-      .catch(err => alert(err.message))
-      .finally(() => setLoadingRec(false));
+  const handleBulkApproveAll = async () => {
+    if (!activePlannerId) return;
+    setIsApproving(true);
+    try {
+      const res = await fetch(`/api/v2/affiliate-studio/brands/${brandId}/planners/${activePlannerId}/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ allApproved: true })
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Gagal bulk approve');
+
+      showToast(`✓ Semua ${json.data.updatedCount} baris berhasil diapprove!`);
+      handleOpenRowConfig(activePlannerId);
+    } catch (err) {
+      showToast(err.message || 'Gagal bulk approve');
+    } finally {
+      setIsApproving(false);
+    }
   };
 
-  const coverage = program.coverage || {
-    production: { target: 0, actual: 0, progressPercent: 0 },
-    funnel: { target: { tofu: 40, mofu: 40, bofu: 20 }, actual: { tofu: 0, mofu: 0, bofu: 0 } },
-    products: { total: 0, linked: 0, progressPercent: 0 },
-    platforms: { targets: [], actuals: {} }
+  const handleIngestToProduction = async () => {
+    if (!activePlannerId) return;
+    setIsIngesting(true);
+    try {
+      const res = await fetch(`/api/v2/affiliate-studio/brands/${brandId}/planners/${activePlannerId}/ingest-production`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ programId: program?.id || null })
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Gagal ingest ke production');
+
+      showToast(`🚀 ${json.data.runsCreated} content runs berhasil dibuat di Production Workspace!`);
+      onRefreshProgram?.();
+    } catch (err) {
+      showToast(err.message || 'Gagal ingest ke production');
+    } finally {
+      setIsIngesting(false);
+    }
   };
 
-  const calendarEvents = program.calendar || [];
+  // Compute 6 CEP Coverage & Readiness
+  const rows = activePlannerRows || [];
+  const approvedCount = rows.filter(r => r.status === 'approved' || r.metadata?.approval_status === 'approved').length;
+  const uniqueCeps = useMemo(() => {
+    const ceps = new Set();
+    rows.forEach(r => {
+      const cep = r.categoryCep || r.category || r.metadata?.cep_code;
+      if (cep) ceps.add(cep);
+    });
+    return ceps.size;
+  }, [rows]);
 
   return (
-    <div className={styles.plannerConnectionWrapper}>
-      {/* Coverage summary widgets */}
-      <div className={styles.coverageGrid}>
-        <div className={styles.coverageCard}>
-          <h4>Production Progress</h4>
-          <div className={styles.progressContainer}>
-            <div className={styles.progressLabel}>
-              <span>{coverage.production.actual} / {coverage.production.target} Videos</span>
-              <span>{coverage.production.progressPercent}%</span>
-            </div>
-            <div className={styles.progressBarBg}>
-              <div 
-                className={styles.progressBarFill} 
-                style={{ width: `${coverage.production.progressPercent}%` }} 
-              />
-            </div>
-          </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {toastMsg && (
+        <div style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          background: 'var(--surface)',
+          color: 'var(--text-primary)',
+          padding: '12px 20px',
+          borderRadius: '10px',
+          border: '1px solid var(--action-primary)',
+          boxShadow: 'var(--shadow-card)',
+          zIndex: 99999,
+          fontWeight: 600,
+          fontSize: '13px'
+        }}>
+          {toastMsg}
+        </div>
+      )}
+
+      {/* Stage 2 Header */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '16px',
+        padding: '16px 20px',
+        background: 'var(--surface)',
+        borderRadius: 'var(--radius-lg, 12px)',
+        border: '1px solid var(--border-subtle)'
+      }}>
+        <div>
+          <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
+            📋 Tahap 2: AI Content Planner Workspace & Coverage Review
+          </h2>
+          <p style={{ margin: 0, fontSize: '12.5px', color: 'var(--text-muted)' }}>
+            Review sudut pandang 6 CEP, Hook visual, naskah Voice-Over, dan gerbang approval produksi.
+          </p>
         </div>
 
-        <div className={styles.coverageCard}>
-          <h4>Associated Products Coverage</h4>
-          <div className={styles.progressContainer}>
-            <div className={styles.progressLabel}>
-              <span>{coverage.products.linked} / {coverage.products.total} Products Linked</span>
-              <span>{coverage.products.progressPercent}%</span>
-            </div>
-            <div className={styles.progressBarBg}>
-              <div 
-                className={styles.progressBarFill} 
-                style={{ width: `${coverage.products.progressPercent}%` }} 
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.coverageCard}>
-          <h4>Funnel Mix Coverage</h4>
-          <div className={styles.funnelMixBars}>
-            <div className={styles.funnelBarRow}>
-              <span>TOFU</span>
-              <div className={styles.funnelSplitBar}>
-                <span className={styles.splitTarget}>Target: {coverage.funnel.target.tofu}%</span>
-                <span className={styles.splitActual}>Actual: {coverage.funnel.actual.tofu}%</span>
-              </div>
-            </div>
-            <div className={styles.funnelBarRow}>
-              <span>MOFU</span>
-              <div className={styles.funnelSplitBar}>
-                <span className={styles.splitTarget}>Target: {coverage.funnel.target.mofu}%</span>
-                <span className={styles.splitActual}>Actual: {coverage.funnel.actual.mofu}%</span>
-              </div>
-            </div>
-            <div className={styles.funnelBarRow}>
-              <span>BOFU</span>
-              <div className={styles.funnelSplitBar}>
-                <span className={styles.splitTarget}>Target: {coverage.funnel.target.bofu}%</span>
-                <span className={styles.splitActual}>Actual: {coverage.funnel.actual.bofu}%</span>
-              </div>
-            </div>
-          </div>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <button
+            type="button"
+            onClick={handleBulkApproveAll}
+            disabled={isApproving || rows.length === 0}
+            style={{
+              padding: '7px 16px',
+              borderRadius: '8px',
+              background: 'var(--surface-raised)',
+              border: '1px solid var(--border-subtle)',
+              color: 'var(--text-primary)',
+              fontWeight: 650,
+              fontSize: '12px',
+              cursor: 'pointer'
+            }}
+          >
+            ✓ Bulk Approve All Rows
+          </button>
+          <button
+            type="button"
+            onClick={handleIngestToProduction}
+            disabled={isIngesting || approvedCount === 0}
+            style={{
+              padding: '7px 16px',
+              borderRadius: '8px',
+              background: approvedCount > 0 ? 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)' : 'var(--surface-raised)',
+              color: approvedCount > 0 ? '#ffffff' : 'var(--text-muted)',
+              border: 'none',
+              fontWeight: 750,
+              fontSize: '12px',
+              cursor: approvedCount > 0 ? 'pointer' : 'not-allowed',
+              opacity: approvedCount > 0 ? 1 : 0.5,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🚀 Ingest Approved Rows ke Production
+          </button>
         </div>
       </div>
 
-      <div className={styles.plannerMainLayout}>
-        <div className={styles.plannerListBlock}>
-          <div className={styles.blockHeader}>
-            <h3>Connected Editorial Planners</h3>
-            <button 
-              type="button" 
-              className={styles.addPlannerBtn}
-              onClick={() => setShowLinkModal(true)}
+      {/* KPI Coverage Cards (6 CEP & Readiness) */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+        gap: '14px'
+      }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border-subtle)', padding: '16px', borderRadius: '12px' }}>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Siklus 6 CEP Coverage</span>
+          <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--accent, #a855f7)', marginTop: '4px' }}>
+            {uniqueCeps} / 6 CEP Terjadwal
+          </div>
+          <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>✓ Siklus Multi-Sudut Pandang</span>
+        </div>
+
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border-subtle)', padding: '16px', borderRadius: '12px' }}>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Kesiapan Produk</span>
+          <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--action-primary, #2dd4bf)', marginTop: '4px' }}>
+            {rows[0]?.product || rows[0]?.metadata?.product_name || 'Serum Retinol 0.5%'}
+          </div>
+          <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>✓ Physical Truth & Formula Siap</span>
+        </div>
+
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border-subtle)', padding: '16px', borderRadius: '12px' }}>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Approved Rows</span>
+          <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--status-success, #4ade80)', marginTop: '4px' }}>
+            {approvedCount} / {rows.length} Approved
+          </div>
+          <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Siap Ingest ke Produksi</span>
+        </div>
+
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border-subtle)', padding: '16px', borderRadius: '12px' }}>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Total Kanal Siar</span>
+          <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', marginTop: '4px' }}>
+            Multi-Platform Broadcast
+          </div>
+          <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>📸 IG · 🎵 TikTok · 📘 FB · ▶️ YT</span>
+        </div>
+      </div>
+
+      {/* Connected Planner Sesi List */}
+      {plannersData.linked.length > 1 && (
+        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
+          {plannersData.linked.map(p => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => handleOpenRowConfig(p.id)}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '8px',
+                fontSize: '12px',
+                fontWeight: activePlannerId === p.id ? 700 : 500,
+                border: '1px solid',
+                borderColor: activePlannerId === p.id ? 'var(--action-primary)' : 'var(--border-subtle)',
+                background: activePlannerId === p.id ? 'var(--surface-interactive)' : 'var(--surface)',
+                color: activePlannerId === p.id ? 'var(--action-primary)' : 'var(--text-muted)',
+                cursor: 'pointer'
+              }}
             >
-              Link Content Planner
+              {p.title}
             </button>
-          </div>
-
-          {loadingPlanners && <div className={styles.smallLoading}>Loading planners...</div>}
-          {plannersError && <div className={styles.errorState}>{plannersError}</div>}
-          
-          {!loadingPlanners && plannersData.linked.length === 0 && (
-            <div className={styles.emptyStateLight}>
-              <p>Belum ada Content Planner yang dihubungkan ke program ini.</p>
-            </div>
-          )}
-
-          {!loadingPlanners && plannersData.linked.length > 0 && (
-            <div className={styles.linkedPlannersList}>
-              {plannersData.linked.map(p => (
-                <div 
-                  key={p.id} 
-                  className={`${styles.plannerLinkCard} ${activePlannerId === p.id ? styles.activePlannerCard : ''}`}
-                >
-                  <div className={styles.plannerLinkCardHeader}>
-                    <h4>{p.title}</h4>
-                    <span className={styles.plannerStatus}>{p.status}</span>
-                  </div>
-                  <div className={styles.plannerMetrics}>
-                    <span>Rows Linked: <strong>{p.linkedRows} / {p.totalRows}</strong></span>
-                    <span>Created: {new Date(p.createdAt).toLocaleDateString()}</span>
-                  </div>
-                  <div className={styles.plannerCardActions}>
-                    <a 
-                      href={`/content-planner/${p.id}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className={styles.openPlannerBtn}
-                    >
-                      Open Editor ↗
-                    </a>
-                    <button 
-                      type="button" 
-                      className={styles.unlinkBtn}
-                      onClick={() => handleUnlinkPlanner(p.id)}
-                    >
-                      Unlink
-                    </button>
-                    <button 
-                      type="button" 
-                      className={styles.manageRowsBtn}
-                      onClick={() => handleOpenRowConfig(p.id)}
-                    >
-                      Map Rows & Funnel →
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Calendar Display */}
-          <div className={styles.calendarSection}>
-            <h3>Brand Coverage Calendar Events</h3>
-            {calendarEvents.length === 0 ? (
-              <div className={styles.emptyStateLight}>No scheduled posts mapped. Map rows with post dates.</div>
-            ) : (
-              <div className={styles.calendarGridList}>
-                {calendarEvents.map(ev => (
-                  <div key={ev.id} className={styles.calendarEventCard}>
-                    <div className={styles.eventCardHeader}>
-                      <span className={styles.eventDate}>{new Date(ev.date).toLocaleDateString()}</span>
-                      <span className={`${styles.eventFunnelBadge} ${styles['funnel_' + ev.funnelStage]}`}>{ev.funnelStage}</span>
-                    </div>
-                    <div className={styles.eventTitle}>{ev.title}</div>
-                    <div className={styles.eventCategory}>Pillar: <strong>{ev.pillar}</strong> | Category: {ev.category}</div>
-                    <div className={styles.eventProduct}>Product Focus: <strong>{ev.product}</strong></div>
-                    <div className={styles.eventPlatformBadge}>Plat: {ev.platform}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          ))}
         </div>
+      )}
 
-        {/* Row mapping sidebar/panel */}
-        <div className={styles.plannerRowMappingBlock}>
-          <h3>Row Mappings Configuration</h3>
-          {!activePlannerId ? (
-            <div className={styles.selectPlannerPrompt}>
-              <p>Pilih "Map Rows & Funnel" pada salah satu planner di samping untuk mulai memetakan baris editorial ke program kampanye.</p>
-            </div>
-          ) : loadingRows ? (
-            <div className={styles.smallLoading}>Loading planner rows...</div>
-          ) : rowsError ? (
-            <div className={styles.errorState}>{rowsError}</div>
-          ) : activePlannerRows.length === 0 ? (
-            <div className={styles.emptyStateLight}>No rows in this content planner.</div>
-          ) : (
-            <div className={styles.plannerRowsList}>
-              {activePlannerRows.map(r => (
-                <div key={r.id} className={styles.rowMappingCard}>
-                  <div className={styles.rowInfoTop}>
-                    <strong>Row {r.sequence} - {r.pillar}</strong>
-                    <span>{r.categoryCep}</span>
-                  </div>
-                  <p className={styles.rowContext}>"{r.context}"</p>
-                  
-                  <div className={styles.mappingFields}>
-                    <div className={styles.mapField}>
-                      <label htmlFor={`prod-select-${r.id}`}>Target Product:</label>
-                      <select
-                        id={`prod-select-${r.id}`}
-                        value={r.programProductId || ''}
-                        onChange={(e) => handleSaveRowConfig(r.id, e.target.value, r.funnelStage, r.metadata?.scheduled_date)}
-                        disabled={savingRowId === r.id}
-                      >
-                        <option value="">-- No Product Associated --</option>
-                        {program.products?.map(p => (
-                          <option key={p.id} value={p.id}>{p.productSnapshot.displayName}</option>
-                        ))}
-                      </select>
-                    </div>
+      {/* Planner Rows Table */}
+      <div style={{
+        background: 'var(--surface)',
+        borderRadius: 'var(--radius-lg, 12px)',
+        border: '1px solid var(--border-subtle)',
+        overflow: 'hidden'
+      }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '12.5px' }}>
+            <thead>
+              <tr style={{ background: 'var(--surface-raised)', borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-muted)', fontSize: '11.5px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                <th style={{ padding: '12px 16px', width: '40px' }}>#</th>
+                <th style={{ padding: '12px 16px', width: '180px' }}>Sudut Pandang (6 CEP)</th>
+                <th style={{ padding: '12px 16px', width: '180px' }}>Target Produk</th>
+                <th style={{ padding: '12px 16px', width: '140px' }}>Kanal Distribusi</th>
+                <th style={{ padding: '12px 16px' }}>Hook Visual & Naskah Voice-Over (Output AI Generator)</th>
+                <th style={{ padding: '12px 16px', width: '140px' }}>Human Approval</th>
+                <th style={{ padding: '12px 16px', width: '90px', textAlign: 'center' }}>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loadingRows ? (
+                <tr>
+                  <td colSpan={7} style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                    ⏳ Memuat data planner rows...
+                  </td>
+                </tr>
+              ) : rows.length === 0 ? (
+                <tr>
+                  <td colSpan={7} style={{ padding: '36px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                    Belum ada baris konten di planner ini. Kirim brief dari <strong>Tahap 1: Content Calendar</strong> untuk memulai.
+                  </td>
+                </tr>
+              ) : (
+                rows.map((row, idx) => {
+                  const meta = row.metadata || {};
+                  const isApproved = row.status === 'approved' || meta.approval_status === 'approved';
+                  const platforms = meta.target_platforms || ['instagram', 'tiktok'];
 
-                    <div className={styles.mapField}>
-                      <label htmlFor={`funnel-select-${r.id}`}>Funnel Stage:</label>
-                      <select
-                        id={`funnel-select-${r.id}`}
-                        value={r.funnelStage || ''}
-                        onChange={(e) => handleSaveRowConfig(r.id, r.programProductId, e.target.value, r.metadata?.scheduled_date)}
-                        disabled={savingRowId === r.id}
-                      >
-                        <option value="">-- No Stage --</option>
-                        <option value="TOFU">TOFU (Awareness)</option>
-                        <option value="MOFU">MOFU (Consideration)</option>
-                        <option value="BOFU">BOFU (Conversion)</option>
-                      </select>
-                    </div>
-
-                    <div className={styles.mapField}>
-                      <label htmlFor={`date-input-${r.id}`}>Post Date:</label>
-                      <input
-                        id={`date-input-${r.id}`}
-                        type="date"
-                        value={r.metadata?.scheduled_date || ''}
-                        onChange={(e) => handleSaveRowConfig(r.id, r.programProductId, r.funnelStage, e.target.value)}
-                        disabled={savingRowId === r.id}
-                      />
-                    </div>
-                  </div>
-
-                  <div className={styles.launchAreaRow}>
-                    <button
-                      type="button"
-                      className={styles.recommendBtn}
-                      onClick={() => handleGetRecommendation(r.id)}
-                      disabled={!r.programProductId || loadingRec}
-                    >
-                      {loadingRec ? 'Analyzing...' : '💡 Recommend'}
-                    </button>
-                    <select
-                      id={`engine-select-${r.id}`}
-                      defaultValue="re"
-                      className={styles.engineSelectInline}
-                    >
-                      <option value="re">RE Campaign</option>
-                      <option value="pillar">Pillar Campaign</option>
-                      <option value="recipe">Recipe Labs</option>
-                      <option value="multiplier">Multiplier Lab</option>
-                      <option value="instant">Instant Factory</option>
-                      <option value="bridge">Product Bridging</option>
-                    </select>
-                    <button
-                      type="button"
-                      className={styles.launchRowBtn}
-                      onClick={() => {
-                        const sel = document.getElementById(`engine-select-${r.id}`);
-                        handleLaunchCampaign(r.id, sel.value);
+                  return (
+                    <tr
+                      key={row.id}
+                      style={{
+                        borderBottom: '1px solid var(--border-subtle)',
+                        background: 'transparent',
+                        transition: 'background-color 0.15s ease'
                       }}
-                      disabled={!r.programProductId}
                     >
-                      🚀 Launch Engine
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                      <td style={{ padding: '14px 16px', fontWeight: 800, color: 'var(--text-muted)' }}>
+                        #{idx + 1}
+                      </td>
+                      <td style={{ padding: '14px 16px' }}>
+                        <span style={{
+                          display: 'inline-block',
+                          background: 'rgba(168, 85, 247, 0.15)',
+                          color: '#c084fc',
+                          border: '1px solid rgba(168, 85, 247, 0.25)',
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          fontSize: '11px',
+                          fontWeight: 700
+                        }}>
+                          {row.categoryCep || row.category || meta.cep_code || 'Problem-Solution'}
+                        </span>
+                      </td>
+                      <td style={{ padding: '14px 16px' }}>
+                        <strong style={{ color: 'var(--text-primary)' }}>{row.product || meta.product_name || 'Produk Brand'}</strong>
+                      </td>
+                      <td style={{ padding: '14px 16px' }}>
+                        <div style={{ display: 'flex', gap: '4px', fontSize: '13px' }}>
+                          {platforms.includes('instagram') && <span title="Instagram Reels">📸</span>}
+                          {platforms.includes('tiktok') && <span title="TikTok">🎵</span>}
+                          {platforms.includes('facebook') && <span title="Facebook">📘</span>}
+                          {platforms.includes('youtube') && <span title="YouTube Shorts">▶️</span>}
+                        </div>
+                      </td>
+                      <td style={{ padding: '14px 16px' }}>
+                        <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '3px' }}>
+                          "{row.hook || 'Hook visual konten'}"
+                        </div>
+                        <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
+                          {row.body || row.visualAction || 'Naskah Voice-Over dan visual storyboard terintegrasi.'}
+                        </div>
+                      </td>
+                      <td style={{ padding: '14px 16px' }}>
+                        <span style={{
+                          display: 'inline-block',
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          background: isApproved ? 'rgba(74, 222, 128, 0.15)' : 'rgba(251, 191, 36, 0.15)',
+                          color: isApproved ? 'var(--status-success, #4ade80)' : 'var(--status-warning, #fbbf24)',
+                          border: '1px solid',
+                          borderColor: isApproved ? 'rgba(74, 222, 128, 0.3)' : 'rgba(251, 191, 36, 0.3)'
+                        }}>
+                          {isApproved ? 'Approved ✅' : 'Review ⏳'}
+                        </span>
+                      </td>
+                      <td style={{ padding: '14px 16px', textAlign: 'center' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleRowApproval(row.id, isApproved ? 'approved' : 'review')}
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            background: 'var(--surface-raised)',
+                            border: '1px solid var(--border-subtle)',
+                            color: 'var(--text-primary)',
+                            fontSize: '11px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Toggle
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
-
-      {showLinkModal && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
-            <form onSubmit={handleLinkPlanner}>
-              <div className={styles.modalHeader}>
-                <h3>Link Editorial Content Planner</h3>
-                <button 
-                  type="button" 
-                  className={styles.closeModalBtn}
-                  onClick={() => setShowLinkModal(false)}
-                >
-                  ×
-                </button>
-              </div>
-
-              <div className={styles.modalBody}>
-                {plannersData.available.length === 0 ? (
-                  <p>Semua Content Planner brand profile ini sudah ditautkan ke program ini atau tidak ada planner tersedia.</p>
-                ) : (
-                  <div className={styles.formField}>
-                    <label htmlFor="avail-planner-select">Select Planner:</label>
-                    <select
-                      id="avail-planner-select"
-                      value={selectedPlannerId}
-                      onChange={(e) => setSelectedPlannerId(e.target.value)}
-                      required
-                    >
-                      <option value="">-- Select Available Planner --</option>
-                      {plannersData.available.map(avail => (
-                        <option key={avail.id} value={avail.id}>
-                          {avail.title} ({avail.status} | Created: {new Date(avail.createdAt).toLocaleDateString()})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-              </div>
-
-              <div className={styles.modalFooter}>
-                <button 
-                  type="button" 
-                  className={styles.cancelBtn}
-                  onClick={() => setShowLinkModal(false)}
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  className={styles.linkBtnSubmit}
-                  disabled={linking || plannersData.available.length === 0 || !selectedPlannerId}
-                >
-                  {linking ? 'Linking...' : 'Link Planner'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-      {recommendation && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
-            <div className={styles.modalHeader}>
-              <h3>Smart Route Recommendation Result</h3>
-              <button type="button" className={styles.closeModalBtn} onClick={() => setRecommendation(null)}>×</button>
-            </div>
-            <div className={styles.recommendationBody}>
-              <div className={styles.recScoreRow}>
-                <span className={styles.recEngineBadge}>{recommendation.recommendedEngine.toUpperCase()}</span>
-                <span className={styles.recConfidence}>Confidence: {(recommendation.confidence * 100).toFixed(0)}%</span>
-              </div>
-              <p className={styles.recReasoningText}>{recommendation.reasoning}</p>
-              <div className={styles.modalActions}>
-                <button type="button" className={styles.submitBtn} onClick={() => setRecommendation(null)}>Apply & Close</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

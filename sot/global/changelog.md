@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.30.6 — Affiliate Studio Workflow V2 Continuous Pipeline (12/09/2026)
+- Dual-View Content Calendar (30-day grid & row mode) with inline toolbar dispatch
+- 6 CEP AI Planner with Bulk Approval and Ingest to Production
+- Pillar Production Workspace with Scene Inspector (Storyboard, VO, T2I, I2V)
+- Embedded Publishing with preflight checks and Controlled Scheduler
+- Commercial Performance dashboard with Closed Advisory Learning Loop
+
 ## V2.30.5 — 1-Column Product Campaign with Search Box and 6 Category CEPs (12/09/2026)
 - Penataan 1 kolom vertikal ergonomis pada form Product Campaign kalender konten
 - Penambahan fitur live search box produk dengan lebar 100% selaras
