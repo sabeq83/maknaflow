@@ -54,3 +54,67 @@ test('Workflow V2 Calendar Component: AffiliateContentCalendar.js contains Dual-
   assert.ok(content.includes('showPlanModal'), 'Existing showPlanModal state must be preserved');
   assert.ok(content.includes('planType'), 'Plan type selection must be preserved');
 });
+
+test('Workflow V2 Calendar Dispatch: Live database dispatch execution', async () => {
+  const { createAffiliatePlanSchedules, deleteAffiliateSchedule } = await import('../lib/affiliate-content-schedules-repository.js');
+  const { dispatchCalendarSchedulesToPlanner } = await import('../lib/affiliate-studio-calendar-dispatch-service.js');
+  const { pgQuery } = await import('../lib/db-pg.js');
+
+  const testTenantId = 'default_tenant';
+  const testBrandId = 'brand_disp_' + Date.now();
+  const testBrandName = 'Test Brand Dispatch';
+
+  // Seed brand profile in pg
+  await pgQuery(
+    `INSERT INTO brand_profiles (id, tenant_id, brand_name) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING`,
+    [testBrandId, testTenantId, testBrandName]
+  );
+
+  const schedules = await createAffiliatePlanSchedules({
+    tenantId: testTenantId,
+    brandProfileId: testBrandId,
+    planType: 'product_campaign',
+    brandName: testBrandName,
+    productId: 'prod_123',
+    productName: 'Nutty Spread',
+    promotionContext: 'Flash Sale 30%',
+    targetPlatforms: ['instagram', 'tiktok', 'facebook'],
+    items: [
+      { cep_code: 'Problem-Solution Based', scheduled_at: new Date(Date.now() + 86400000).toISOString() },
+      { cep_code: 'Routine Based', scheduled_at: new Date(Date.now() + 172800000).toISOString() }
+    ]
+  });
+
+  const result = await dispatchCalendarSchedulesToPlanner({
+    user: { id: 'usr_test', role: 'admin', tenantId: testTenantId },
+    brandId: testBrandId,
+    scheduleIds: schedules.map(s => s.id)
+  });
+
+  assert.ok(result.plannerId, 'Must create plannerId');
+  assert.equal(result.rowsCreated, 2, 'Must create 2 planner rows');
+
+  // Verify content_planners in database
+  const plannerRes = await pgQuery(
+    `SELECT * FROM content_planners WHERE id = $1 AND tenant_id = $2`,
+    [result.plannerId, testTenantId]
+  );
+  assert.equal(plannerRes.rows.length, 1, 'Planner must exist in database');
+
+  // Verify content_planner_rows in database
+  const rowsRes = await pgQuery(
+    `SELECT * FROM content_planner_rows WHERE planner_id = $1`,
+    [result.plannerId]
+  );
+  assert.equal(rowsRes.rows.length, 2, 'Planner rows must exist in database');
+
+  // Cleanup
+  for (const s of schedules) {
+    await deleteAffiliateSchedule(testTenantId, s.id);
+  }
+  await pgQuery(`DELETE FROM affiliate_content_lineage WHERE brand_profile_id = $1`, [testBrandId]);
+  await pgQuery(`DELETE FROM content_planner_rows WHERE planner_id = $1`, [result.plannerId]);
+  await pgQuery(`DELETE FROM content_planners WHERE id = $1`, [result.plannerId]);
+  await pgQuery(`DELETE FROM brand_profiles WHERE id = $1`, [testBrandId]);
+  process.exit(0);
+});

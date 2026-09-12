@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.30.10 — Fix Content Planner Metadata Column & Dispatch Fields (12/09/2026)
+- Add metadata_json and supporting columns to content_planners & rows migrations
+- Ensure calendar dispatch populates complete column set without database column errors
+
 ## V2.30.9 — Harden API Tenant Wrapper with Async Cluster Session Fallback (12/09/2026)
 - Enable getCurrentUserAsync fallback in withTenantContext for PM2 cluster workers
 - Ensure session validity across multi-worker deployments
