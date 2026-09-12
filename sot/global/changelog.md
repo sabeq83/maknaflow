@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.30.11 — Filter Active Content Planners di Affiliate Studio (12/09/2026)
+- Filter out archived planners in Affiliate Studio planner adapter
+- Update projectPlannerSummary to count active planners only
+
 ## V2.30.10 — Fix Content Planner Metadata Column & Dispatch Fields (12/09/2026)
 - Add metadata_json and supporting columns to content_planners & rows migrations
 - Ensure calendar dispatch populates complete column set without database column errors
