@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.30.8 — Fix PostgreSQL Schema Search Path for Multi-Environment Shared Tables (12/09/2026)
+- Add public fallback to PG_SEARCH_PATH in lib/db-pg.js
+- Ensure staging and dev schemas resolve shared products catalog without 500 errors
+- Restore full visibility of 24 content schedules in Staging environment
+
 ## V2.30.7 — Fix Content Calendar DB Query & Brand Profile Persistence (12/09/2026)
 - Fix column p.price does not exist error in schedule listing
 - Add brand_profile_id column and migration to affiliate_content_schedules
