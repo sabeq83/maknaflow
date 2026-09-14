@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.30.12 — Fix OPC Campaign Stale Processing & PM2 Memory Limit (14/09/2026)
+- Naikkan max_memory_restart PM2 Staging ke 8G dan Dev ke 4G
+- Implementasi auto-recovery stale processing items pada campaign scheduler
+- Rekonsiliasi status idempotent stage untuk cegah looping
+- Perbaiki async error handler pada processPillarGenerator
+
 ## V2.30.11 — Filter Active Content Planners di Affiliate Studio (12/09/2026)
 - Filter out archived planners in Affiliate Studio planner adapter
 - Update projectPlannerSummary to count active planners only
