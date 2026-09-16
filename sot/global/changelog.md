@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.30.14 — Fix OPC Scheduler Premature Visual Status and FFmpeg Guard (16/09/2026)
+- Fix premature idempotent completion for asynchronous video stage in campaign scheduler
+- Add preflight validation for visual_clip_paths in processPillarFfmpeg
+- Harden videoPaths parsing and validation in processTtsStudioMuxing
+- Add automated unit tests and reset stuck OPC campaign items
+
 ## V2.30.13 — Fix Ambiguous Tenant ID in Content Planner AI Engine (16/09/2026)
 - Fix ambiguous tenant_id column in getProductHistoryDigest and getEditorialHistoryDigest
 - Harden interceptQuery with table alias detection for JOIN queries
