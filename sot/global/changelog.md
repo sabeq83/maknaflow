@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.30.13 — Fix Ambiguous Tenant ID in Content Planner AI Engine (16/09/2026)
+- Fix ambiguous tenant_id column in getProductHistoryDigest and getEditorialHistoryDigest
+- Harden interceptQuery with table alias detection for JOIN queries
+- Add multi-tenant content planner digest test suite
+
 ## V2.30.12 — Fix OPC Campaign Stale Processing & PM2 Memory Limit (14/09/2026)
 - Naikkan max_memory_restart PM2 Staging ke 8G dan Dev ke 4G
 - Implementasi auto-recovery stale processing items pada campaign scheduler
