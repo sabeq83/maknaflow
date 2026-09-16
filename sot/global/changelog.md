@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.31.1 — Fix Recipe Planner execution and key resolution (16/09/2026)
+- Fix content_planner_rows column insertion for recipe campaign
+- Fallback Gemini API key resolution to environment and key pool
+
 ## V2.31.0 — Recipe Campaign Content Planner (16/09/2026)
 - Integrasi Recipe Campaign pada menu Content Planner
 - Single-pass culinary engine & teks resep lengkap
