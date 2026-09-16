@@ -16,6 +16,9 @@ export default function ContentPlannerDashboard() {
 
   // Form State
   const [plannerFocus, setPlannerFocus] = useState('product_campaign');
+  const [recipeCategory, setRecipeCategory] = useState('minuman');
+  const [recipeProductIds, setRecipeProductIds] = useState([]);
+  const [recipeCount, setRecipeCount] = useState(5);
   const [brandContext, setBrandContext] = useState('');
   const [contentGoal, setContentGoal] = useState('');
   const [pillars, setPillars] = useState([]);
@@ -97,7 +100,7 @@ export default function ContentPlannerDashboard() {
     : 0;
   const effectivePlannerCount = plannerFocus === 'brand_editorial'
     ? pillars.length * effectiveEditorialRowsPerPillar
-    : Number(productPlannerCount);
+    : (plannerFocus === 'recipe_campaign' ? Number(recipeCount) : Number(productPlannerCount));
 
   useEffect(() => {
     fetchPlanners();
@@ -105,14 +108,18 @@ export default function ContentPlannerDashboard() {
   }, []);
 
   useEffect(() => {
-    if (plannerFocus !== 'product_campaign' || inputMode !== 'existing') return;
-    const controller = new AbortController();
-    const timer = setTimeout(() => {
-      const query = new URLSearchParams({ limit: '100' });
-      if (productSearchQuery.trim()) query.set('search', productSearchQuery.trim());
-      fetch(`/api/v2/products?${query}`, { signal: controller.signal }).then(r => r.json()).then(d => { if (d.success) setExistingProducts(d.data || []); }).catch(error => { if (error.name !== 'AbortError') setExistingProducts([]); });
-    }, 250);
-    return () => { clearTimeout(timer); controller.abort(); };
+    if ((plannerFocus === 'product_campaign' && inputMode === 'existing') || plannerFocus === 'recipe_campaign') {
+      const controller = new AbortController();
+      const timer = setTimeout(() => {
+        const query = new URLSearchParams({ limit: '100' });
+        if (productSearchQuery.trim()) query.set('search', productSearchQuery.trim());
+        fetch(`/api/v2/products?${query}`, { signal: controller.signal })
+          .then(r => r.json())
+          .then(d => { if (d.success) setExistingProducts(d.data || []); })
+          .catch(error => { if (error.name !== 'AbortError') setExistingProducts([]); });
+      }, 250);
+      return () => { clearTimeout(timer); controller.abort(); };
+    }
   }, [plannerFocus, inputMode, productSearchQuery]);
 
   // Auto-resolve affiliate link reaktif saat produk atau brand dipilih
@@ -308,12 +315,16 @@ export default function ContentPlannerDashboard() {
       showToast('Konteks Brand dan minimal satu Pilar Konten wajib diisi', 'error');
       return;
     }
+    if (plannerFocus === 'recipe_campaign' && recipeProductIds.length === 0) {
+      showToast('Minimal satu produk katalog wajib dipilih untuk Recipe Campaign', 'error');
+      return;
+    }
 
     const selectedBrand = brandProfiles.find(b => b.id === selectedBrandId);
     const effectiveAccountName = (
       selectedBrand?.brand_name ||
       accountName ||
-      (plannerFocus === 'brand_editorial' ? 'Editorial' : productName)
+      (plannerFocus === 'brand_editorial' ? 'Editorial' : (plannerFocus === 'recipe_campaign' ? 'Resep Kuliner' : productName))
     ).trim();
 
     const effectiveTargetAudience = targetAudience === 'custom'
@@ -349,6 +360,18 @@ export default function ContentPlannerDashboard() {
           target_audience: effectiveTargetAudience,
           promotion_context: promotionContext.trim() || null,
           custom_instructions: customInstructions.trim() || null,
+          // Recipe Campaign payload
+          recipe_config: plannerFocus === 'recipe_campaign' ? {
+            category: recipeCategory,
+            product_ids: recipeProductIds
+          } : null,
+          products_snapshot: plannerFocus === 'recipe_campaign' ? existingProducts.filter(p => recipeProductIds.includes(p.id)).map(p => ({
+            product_id: p.id,
+            name: p.product_name,
+            description: p.product_description,
+            usp: p.unique_selling_point,
+            reference_image: p.product_photo_url || p.photo_url || null
+          })) : [],
           // World-Aware fields (Tahap 1)
           content_world: contentWorld,
           knowledge_domain: knowledgeDomain,
@@ -821,7 +844,7 @@ export default function ContentPlannerDashboard() {
                         color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)',
                         display: 'inline-flex', alignItems: 'center', gap: '4px'
                       }}>
-                        {p.planner_focus === 'brand_editorial' ? '🧩 Editorial' : `📦 ${p.product_name || 'Produk'}`}
+                        {p.planner_focus === 'brand_editorial' ? '🧩 Editorial' : (p.planner_focus === 'recipe_campaign' ? '🍳 Recipe Campaign' : `📦 ${p.product_name || 'Produk'}`)}
                       </span>
                     </div>
                   </div>
@@ -942,18 +965,19 @@ export default function ContentPlannerDashboard() {
                   <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 600 }}>
                     🧭 Fokus Planner:
                   </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
                     {[
-                      ['brand_editorial', '🧩 Brand Editorial', 'Berbasis brand, audiens, dan pilar. Produk tidak wajib.'],
-                      ['product_campaign', '📦 Product Campaign', 'Berpusat pada satu produk tertentu.']
+                      ['brand_editorial', '🧩 Brand Editorial', 'Berbasis brand, audiens, dan pilar.'],
+                      ['product_campaign', '📦 Product Campaign', 'Berpusat pada satu produk tunggal.'],
+                      ['recipe_campaign', '🍳 Recipe Campaign', 'Resep kuliner dengan integrasi produk natural.']
                     ].map(([value, label, desc]) => (
                       <button key={value} type="button" onClick={() => setPlannerFocus(value)} style={{
                         padding: '12px', textAlign: 'left', borderRadius: '10px', cursor: 'pointer',
                         border: plannerFocus === value ? '1px solid var(--status-neutral)' : '1px solid var(--border-subtle)',
                         background: plannerFocus === value ? 'var(--status-neutral-soft)' : 'var(--bg-secondary)', color: 'var(--text-primary)'
                       }}>
-                        <div style={{ fontWeight: 700, marginBottom: '4px' }}>{label}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.4 }}>{desc}</div>
+                        <div style={{ fontWeight: 700, marginBottom: '4px', fontSize: '13px' }}>{label}</div>
+                        <div style={{ fontSize: '10px', color: 'var(--text-muted)', lineHeight: 1.3 }}>{desc}</div>
                       </button>
                     ))}
                   </div>
@@ -1270,7 +1294,7 @@ export default function ContentPlannerDashboard() {
                   </div>
                 </>}
 
-                {plannerFocus === 'product_campaign' && <div style={{ marginBottom: '16px' }}>
+                {(plannerFocus === 'product_campaign' || plannerFocus === 'recipe_campaign') && <div style={{ marginBottom: '16px' }}>
                   <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>
                     🧬 Brand Profile (Akun Brand):
                   </label>
@@ -1287,6 +1311,141 @@ export default function ContentPlannerDashboard() {
                     ))}
                   </select>
                 </div>}
+
+                {/* Recipe Campaign Specific Inputs */}
+                {plannerFocus === 'recipe_campaign' && (
+                  <div style={{ marginBottom: '20px', background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '16px' }}>
+                    
+                    {/* Multi-Product Catalog Selector */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <label style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: 700 }}>
+                          📦 Pilih Produk Katalog Terkait (Rotasi 1 Produk per Resep):
+                        </label>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--status-info)' }}>
+                          {recipeProductIds.length} Produk Dipilih
+                        </span>
+                      </div>
+                      
+                      <div style={{ position: 'relative', marginBottom: '8px' }}>
+                        <input
+                          type="text"
+                          placeholder="Cari produk dari katalog tenant..."
+                          value={productSearchQuery}
+                          onChange={(e) => setProductSearchQuery(e.target.value)}
+                          style={{
+                            width: '100%', padding: '8px 12px', background: 'var(--input-bg)',
+                            border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '13px'
+                          }}
+                        />
+                      </div>
+
+                      <div style={{ maxHeight: '180px', overflowY: 'auto', borderRadius: '8px', border: '1px solid var(--border-subtle)', background: 'var(--input-bg)', padding: '6px' }}>
+                        {existingProducts.length === 0 ? (
+                          <div style={{ padding: '12px', fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center' }}>
+                            Tidak ada produk ditemukan di database.
+                          </div>
+                        ) : (
+                          existingProducts.map(p => {
+                            const isChecked = recipeProductIds.includes(p.id);
+                            return (
+                              <label
+                                key={p.id}
+                                style={{
+                                  display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px',
+                                  borderRadius: '6px', cursor: 'pointer', marginBottom: '4px',
+                                  background: isChecked ? 'var(--status-info-soft)' : 'transparent',
+                                  border: isChecked ? '1px solid var(--status-info)' : '1px solid transparent',
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => {
+                                    if (isChecked) {
+                                      setRecipeProductIds(recipeProductIds.filter(id => id !== p.id));
+                                    } else {
+                                      setRecipeProductIds([...recipeProductIds, p.id]);
+                                    }
+                                  }}
+                                  style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                                />
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div style={{ fontSize: '13px', fontWeight: isChecked ? 700 : 500, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {p.product_name}
+                                  </div>
+                                  {p.unique_selling_point && (
+                                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                      {p.unique_selling_point}
+                                    </div>
+                                  )}
+                                </div>
+                              </label>
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Culinary Category Chips */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-primary)', marginBottom: '8px', fontWeight: 700 }}>
+                        🍲 Kategori Kuliner:
+                      </label>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+                        {[
+                          ['masakan', '🍲 Masakan'],
+                          ['minuman', '🍹 Minuman'],
+                          ['dessert', '🍮 Dessert'],
+                          ['kue', '🧁 Kue']
+                        ].map(([catKey, catLabel]) => (
+                          <button
+                            key={catKey}
+                            type="button"
+                            onClick={() => setRecipeCategory(catKey)}
+                            style={{
+                              padding: '8px 10px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 650,
+                              border: recipeCategory === catKey ? '1px solid var(--status-warning)' : '1px solid var(--border-subtle)',
+                              background: recipeCategory === catKey ? 'var(--status-warning-soft)' : 'var(--surface-interactive)',
+                              color: 'var(--text-primary)', textAlign: 'center'
+                            }}
+                          >
+                            {catLabel}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Promotion Context & Custom Instructions */}
+                    <div style={{ marginBottom: '12px' }}>
+                      <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>
+                        Sudut Pandang / Konteks Promosi (Opsional):
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Contoh: Menu Sarapan Sehat, Cafe at Home, Minuman Segar Rendah Kalori"
+                        value={promotionContext}
+                        onChange={e => setPromotionContext(e.target.value)}
+                        style={{ width: '100%', padding: '8px 10px', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '13px' }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>
+                        Instruksi Khusus Tambahan (Opsional):
+                      </label>
+                      <textarea
+                        rows={2}
+                        placeholder="Contoh: Gunakan takaran sendok teh/makan agar mudah diikuti pemula..."
+                        value={customInstructions}
+                        onChange={e => setCustomInstructions(e.target.value)}
+                        style={{ width: '100%', padding: '8px 10px', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '13px' }}
+                      />
+                    </div>
+
+                  </div>
+                )}
 
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
@@ -1513,11 +1672,13 @@ export default function ContentPlannerDashboard() {
                     <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>Jumlah Baris Planner:</label>
                     <select
                       disabled={plannerFocus === 'brand_editorial' && pillars.length === 0}
-                      value={plannerFocus === 'brand_editorial' ? effectiveEditorialRowsPerPillar : productPlannerCount}
+                      value={plannerFocus === 'brand_editorial' ? effectiveEditorialRowsPerPillar : (plannerFocus === 'recipe_campaign' ? recipeCount : productPlannerCount)}
                       onChange={e => {
                         if (plannerFocus === 'brand_editorial') {
                           setEditorialRowsPerPillar(Number(e.target.value));
                           setEditorialCountNotice('');
+                        } else if (plannerFocus === 'recipe_campaign') {
+                          setRecipeCount(Number(e.target.value));
                         } else {
                           setProductPlannerCount(Number(e.target.value));
                         }
@@ -1532,13 +1693,20 @@ export default function ContentPlannerDashboard() {
                               {option.label}{option.rowsPerPillar === DEFAULT_EDITORIAL_ROWS_PER_PILLAR ? ' (Direkomendasikan)' : ''}
                             </option>
                           ))
-                      ) : <>
+                      ) : (plannerFocus === 'recipe_campaign' ? <>
+                        <option value="1">1 Resep (Quick Test)</option>
+                        <option value="3">3 Resep (Mini Pack)</option>
+                        <option value="5">5 Resep (Standar Direkomendasikan)</option>
+                        <option value="10">10 Resep (Batch 2 Minggu)</option>
+                        <option value="15">15 Resep (Batch 3 Minggu)</option>
+                        <option value="20">20 Resep (Batch 1 Bulan Maksimal)</option>
+                      </> : <>
                         <option value="6">6 Baris Plan (1x CEP)</option>
                         <option value="12">12 Baris Plan (2x CEP - Standar)</option>
                         <option value="18">18 Baris Plan (3x CEP)</option>
                         <option value="24">24 Baris Plan (4x CEP - Massal)</option>
                         <option value="30">30 Baris Plan (5x CEP - Maksimal)</option>
-                      </>}
+                      </>)}
                     </select>
                     {plannerFocus === 'brand_editorial' && editorialCountNotice && (
                       <div style={{ marginTop: '6px', color: 'var(--status-warning)', fontSize: '11px', lineHeight: 1.4 }}>

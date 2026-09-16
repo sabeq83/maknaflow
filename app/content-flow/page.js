@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import PublishingScheduler from './PublishingScheduler';
 import ContentFlowAnalytics from './ContentFlowAnalytics';
+import RecipeSocialPreview from '../components/RecipeSocialPreview';
 
 const SearchIcon = ({ style }) => (
   <svg style={style} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2034,7 +2035,7 @@ function ContentFlowHubPageContent() {
                               </div>
                             </div>
 
-                            {/* Caption Panel */}
+                              {/* Caption Panel */}
                             <div style={{ marginTop: '4px' }}>
                               <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Caption:</span>
                               <div style={{
@@ -2045,6 +2046,18 @@ function ContentFlowHubPageContent() {
                                 {activeItem.caption || '(Tidak ada caption)'}
                               </div>
                             </div>
+
+                            {/* Recipe Social Package & Plain Text Preview */}
+                            {(activeItem.content_kind === 'recipe' || activeItem.recipe_text_markdown || activeItem.recipe_payload_json) && (
+                              <RecipeSocialPreview
+                                recipeTextMarkdown={activeItem.recipe_text_markdown}
+                                recipeTextPlain={activeItem.recipe_text_plain}
+                                recipePayload={activeItem.recipe_payload_json}
+                                socialMediaPackage={activeItem.social_media_package_json}
+                                caption={activeItem.caption}
+                                onCopy={(text, key) => showToast(`Berhasil disalin ke clipboard!`)}
+                              />
+                            )}
                           </div>
                         )}
                       </div>

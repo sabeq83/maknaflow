@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.0 — Recipe Campaign Content Planner (16/09/2026)
+- Integrasi Recipe Campaign pada menu Content Planner
+- Single-pass culinary engine & teks resep lengkap
+- Start frame checkpoint & ContentFlow publishing
+
 ## V2.30.15 — Fix OPC Start Frame Product Reference on Bridge Duration Zero (16/09/2026)
 - Support bridge_duration_clips = 0 to cover product references up to target_clips_count
 - Fix T2I bridge lane isolation and start frame expected count in hybrid_lock mode
