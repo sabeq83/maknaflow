@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.30.15 — Fix OPC Start Frame Product Reference on Bridge Duration Zero (16/09/2026)
+- Support bridge_duration_clips = 0 to cover product references up to target_clips_count
+- Fix T2I bridge lane isolation and start frame expected count in hybrid_lock mode
+- Add automated tests for bridge_duration_zero contract and parity
+
 ## V2.30.14 — Fix OPC Scheduler Premature Visual Status and FFmpeg Guard (16/09/2026)
 - Fix premature idempotent completion for asynchronous video stage in campaign scheduler
 - Add preflight validation for visual_clip_paths in processPillarFfmpeg

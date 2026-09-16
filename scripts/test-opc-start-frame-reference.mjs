@@ -139,8 +139,15 @@ assert.doesNotMatch(scheduler.slice(scheduler.indexOf('const submitStartFrame'),
 
 const regenSource = fs.readFileSync(new URL('../app/api/v2/pillar-campaigns/items/[itemId]/regenerate-t2i/route.js', import.meta.url), 'utf8');
 assert.match(regenSource, /buildOpcStartFrameRequest/);
-assert.match(regenSource, /GLABS_IMAGE_POLL_INTERVAL_MS/);
+assert.match(regenSource, /queueSingleStartFrameRevision/);
 assert.doesNotMatch(regenSource, /resolveProductBase64/);
+
+// 12. bridge_duration_clips = 0 test
+const campZero = { id: 'camp-zero', target_product_id: 'prod_1', target_clips_count: 7, bridge_at_clip: 5, bridge_duration_clips: 0 };
+assert.equal(resolveProductReferenceRequirement({ campaign: campZero, item: {}, clipIndex: 4 }).required, false);
+assert.equal(resolveProductReferenceRequirement({ campaign: campZero, item: {}, clipIndex: 5 }).required, true);
+assert.equal(resolveProductReferenceRequirement({ campaign: campZero, item: {}, clipIndex: 6 }).required, true);
+assert.equal(resolveProductReferenceRequirement({ campaign: campZero, item: {}, clipIndex: 7 }).required, true);
 
 const youtubeAdapter = fs.readFileSync(new URL('../lib/youtube-studio-start-frame-adapter.js', import.meta.url), 'utf8');
 assert.doesNotMatch(youtubeAdapter, /imagen_3/);
