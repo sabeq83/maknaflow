@@ -80,3 +80,41 @@ test('glabs image lane concurrency: serialization and FIFO isolation', async () 
   // Clean up
   await releaseImageLane(req3.lease.id, 'completed');
 });
+
+test('glabs image lane: auto-recovers and expires stale orphaned waiting leases without blocking', async () => {
+  const { getPgPool } = await import('../lib/db-pg.js');
+  const pool = getPgPool();
+  const laneKey = `test_stale_lane_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  const tenantId = 'default_tenant';
+
+  // 1. Insert a stale exclusive waiting lease (simulating a dead process from 10 minutes ago)
+  const staleLeaseId = `glease_stale_${Date.now()}`;
+  await pool.query(
+    `INSERT INTO glabs_image_lane_leases (
+       id, tenant_id, lane_key, mode, owner_kind, owner_id, status, requested_at
+     ) VALUES ($1, $2, $3, 'exclusive', 'test_asset', 'dead_process_1', 'waiting', CURRENT_TIMESTAMP - INTERVAL '10 minutes')`,
+    [staleLeaseId, tenantId, laneKey]
+  );
+
+  // 2. A new lease requests the lane
+  const newReq = await requestImageLane({
+    tenantId,
+    laneKey,
+    mode: 'exclusive',
+    ownerKind: 'test_asset',
+    ownerId: 'new_active_process_2',
+    leaseSeconds: 30
+  });
+
+  // 3. The stale waiter should have been auto-expired and new lease should acquire immediately
+  assert.equal(newReq.acquired, true, 'New lease should acquire immediately because stale waiter is auto-expired');
+
+  // Verify the stale lease was updated to status = 'expired' and release_reason = 'wait_abandoned'
+  const checkStale = await pool.query(`SELECT status, release_reason FROM glabs_image_lane_leases WHERE id = $1`, [staleLeaseId]);
+  assert.equal(checkStale.rows[0]?.status, 'expired', 'Stale waiting lease must be marked as expired');
+  assert.equal(checkStale.rows[0]?.release_reason, 'wait_abandoned', 'Release reason must be wait_abandoned');
+
+  // Clean up
+  await releaseImageLane(newReq.lease.id, 'completed');
+});
+

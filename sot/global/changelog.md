@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.4 — Fix G-Labs image lane stale waiting lease auto-recovery (17/09/2026)
+- Auto-expire stale waiting leases in glabs-image-lane-service
+- Add startup cleanup in db-pg for orphaned waiting leases
+- Unblock start frame generation on OPC campaigns
+
 ## V2.31.3 — Implement Multi-Product Synergy Strategy for Recipe Campaign (17/09/2026)
 - Add Multi-Product Synergy Strategy mode
 - Co-integrate ingredients and appliances into single recipe
