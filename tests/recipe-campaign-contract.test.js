@@ -20,18 +20,20 @@ test('PLANNER_FOCI includes recipe_campaign and normalizePlannerFocus works', ()
   }, /Fokus planner tidak valid/);
 });
 
-test('validateRecipePlannerDraft validates valid recipe planner configuration', () => {
+test('validateRecipePlannerDraft validates valid recipe planner configuration with strategyMode', () => {
   const validDraft = {
     category: 'minuman',
     count: 5,
-    productIds: ['prod_1', 'prod_2'],
+    productIds: ['prod_1', 'prod_2', 'prod_3'],
+    strategy_mode: 'synergy',
     targetAudience: 'genz_casual'
   };
 
   const result = validateRecipePlannerDraft(validDraft);
   assert.equal(result.category, 'minuman');
   assert.equal(result.count, 5);
-  assert.deepEqual(result.productIds, ['prod_1', 'prod_2']);
+  assert.equal(result.strategyMode, 'synergy');
+  assert.deepEqual(result.productIds, ['prod_1', 'prod_2', 'prod_3']);
 });
 
 test('validateRecipePlannerDraft rejects invalid category and count outside 1-20', () => {

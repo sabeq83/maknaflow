@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.3 — Implement Multi-Product Synergy Strategy for Recipe Campaign (17/09/2026)
+- Add Multi-Product Synergy Strategy mode
+- Co-integrate ingredients and appliances into single recipe
+- Register multi-product bindings per recipe item in OPC
+
 ## V2.31.2 — Fix OPC Ingest and Multi-Product Snapshot for Recipe Campaign (17/09/2026)
 - Fix createPillarCampaignBundle signature in recipe campaign ingest
 - Add persistent multi-product snapshot and auto-hydration from product_extractions

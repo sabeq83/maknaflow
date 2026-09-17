@@ -458,6 +458,7 @@ export default function ContentPlannerWorkbench() {
                 <>
                   <span>🍲 Kategori: <strong>{recipeConfig?.category?.toUpperCase() || 'KULINER'}</strong></span>
                   <span>📦 Produk Terkait: <strong>{productsSnapshot?.length || 1} Produk</strong></span>
+                  <span>🔀 Strategi: <strong style={{ color: recipeConfig?.strategy_mode === 'rotation' ? 'var(--status-warning)' : 'var(--status-success)' }}>{recipeConfig?.strategy_mode === 'rotation' ? '🔄 Rotasi 1 Produk' : '🌟 Sinergi Kombo'}</strong></span>
                   <span>🎯 Audiens: <strong>{planner?.target_audience || 'Semua Kalangan'}</strong></span>
                 </>
               ) : (
@@ -663,9 +664,38 @@ export default function ContentPlannerWorkbench() {
 
                         {/* Product */}
                         <td style={{ padding: '12px' }}>
-                          <span style={{ background: 'var(--status-info-soft)', color: 'var(--status-info)', padding: '4px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: 600 }}>
-                            🥛 {rProduct}
-                          </span>
+                          {Array.isArray(idea.featured_products) && idea.featured_products.length > 0 ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                              {idea.featured_products.map((fp, fIdx) => {
+                                const isApp = fp.role?.includes('appliance') || fp.role?.includes('equipment') || /blender|mixer|oven|chopper/i.test(fp.name || fp.product_name || '');
+                                return (
+                                  <span
+                                    key={fIdx}
+                                    style={{
+                                      background: isApp ? 'var(--status-success-soft)' : 'var(--status-info-soft)',
+                                      color: isApp ? 'var(--status-success)' : 'var(--status-info)',
+                                      border: `1px solid ${isApp ? 'var(--status-success)' : 'var(--status-info)'}`,
+                                      padding: '2px 8px',
+                                      borderRadius: '4px',
+                                      fontSize: '11px',
+                                      fontWeight: 600,
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '4px'
+                                    }}
+                                  >
+                                    <span>{isApp ? '⚡' : '🍫'}</span>
+                                    <span>{fp.product_name || fp.name}</span>
+                                    <span style={{ fontSize: '9px', opacity: 0.8 }}>({isApp ? 'Alat' : 'Bahan'})</span>
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <span style={{ background: 'var(--status-info-soft)', color: 'var(--status-info)', padding: '4px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: 600 }}>
+                              🥛 {rProduct}
+                            </span>
+                          )}
                         </td>
 
                         {/* Time & Servings */}

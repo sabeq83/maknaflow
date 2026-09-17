@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MAKNA Flow — Content Planner Dashboard (Recipe Campaign Integrated)</title>
+  <title>MAKNA Flow — Content Planner Dashboard (Recipe Campaign & Multi-Product Synergy)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -40,6 +40,8 @@
       --status-neutral-soft: rgba(167, 139, 250, 0.14);
       --recipe-accent: #f59e0b;
       --recipe-accent-soft: rgba(245, 158, 11, 0.16);
+      --recipe-synergy: #10b981;
+      --recipe-synergy-soft: rgba(16, 185, 129, 0.16);
       --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.28);
       --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.6);
       --radius: 12px;
@@ -77,6 +79,8 @@
       --status-neutral-soft: #f0ecfb;
       --recipe-accent: #d97706;
       --recipe-accent-soft: #fef3c7;
+      --recipe-synergy: #059669;
+      --recipe-synergy-soft: #d1fae5;
       --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
       --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
     }
@@ -98,83 +102,75 @@
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
-      position: sticky;
-      top: 0;
-      height: 100vh;
     }
-
     .sidebar-brand {
-      padding: 20px 18px;
+      padding: 20px;
       font-weight: 800;
-      font-size: 1.15rem;
+      font-size: 1.1rem;
+      letter-spacing: -0.5px;
       border-bottom: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
       gap: 10px;
     }
-
+    .sidebar-brand-badge {
+      background: linear-gradient(135deg, var(--recipe-accent) 0%, #b45309 100%);
+      color: var(--on-action-primary);
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
     .sidebar-nav {
       padding: 16px 12px;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
       flex: 1;
     }
-
     .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
       padding: 10px 14px;
       border-radius: var(--radius-sm);
       color: var(--text-secondary);
-      text-decoration: none;
       font-size: 0.88rem;
       font-weight: 600;
-      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
       transition: all 0.15s ease;
+      cursor: pointer;
     }
-
     .nav-item:hover {
-      background: var(--surface-interactive);
+      background: var(--surface-hover);
       color: var(--text-primary);
     }
-
     .nav-item.active {
-      background: var(--status-info-soft);
-      color: var(--status-info);
-      font-weight: 700;
-      border: 1px solid color-mix(in srgb, var(--status-info) 30%, transparent);
+      background: var(--surface-interactive);
+      color: var(--recipe-accent);
+      border-left: 3px solid var(--recipe-accent);
     }
 
-    /* Main Content Wrapper */
+    /* Main Container */
     .app-main {
       flex: 1;
       display: flex;
       flex-direction: column;
-      min-width: 0;
-      height: 100vh;
       overflow-y: auto;
     }
-
     .top-navbar {
+      height: 64px;
       background: var(--surface);
       border-bottom: 1px solid var(--border-subtle);
-      padding: 14px 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 30;
+      padding: 0 24px;
     }
-
     .page-body {
-      padding: 24px 28px 60px;
-      max-width: 1400px;
-      width: 100%;
-      margin: 0 auto;
-      box-sizing: border-box;
+      padding: 24px;
+      flex: 1;
     }
 
     /* Buttons */
@@ -183,51 +179,52 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 10px 18px;
+      padding: 8px 16px;
       border-radius: var(--radius-sm);
-      font-family: inherit;
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       font-weight: 700;
       cursor: pointer;
       border: 1px solid transparent;
-      transition: all 0.18s ease;
+      transition: all 0.15s ease;
     }
-
     .btn-primary {
-      background: var(--status-neutral);
-      color: var(--text-primary);
-      border-color: var(--status-neutral);
-    }
-    .btn-primary:hover {
-      background: color-mix(in srgb, var(--status-neutral) 85%, #fff);
-      transform: translateY(-1px);
-    }
-
-    .btn-recipe {
-      background: var(--recipe-accent);
-      color: var(--on-action-primary);
-      border-color: var(--recipe-accent);
-    }
-    .btn-recipe:hover {
-      background: color-mix(in srgb, var(--recipe-accent) 85%, #fff);
-      transform: translateY(-1px);
-    }
-
-    .btn-teal {
       background: var(--action-primary);
       color: var(--on-action-primary);
-      border-color: var(--action-primary);
     }
-    .btn-teal:hover { background: var(--action-primary-hover); }
-
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
     .btn-secondary {
       background: var(--surface-interactive);
-      border-color: var(--border-subtle);
       color: var(--text-primary);
+      border-color: var(--border-subtle);
     }
-    .btn-secondary:hover { background: var(--surface-hover); border-color: var(--border-strong); }
-
-    .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
+    .btn-secondary:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+    .btn-recipe {
+      background: linear-gradient(135deg, var(--recipe-accent) 0%, #b45309 100%);
+      color: var(--on-action-primary);
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
+    }
+    .btn-recipe:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+    .btn-synergy {
+      background: linear-gradient(135deg, var(--recipe-synergy) 0%, #065f46 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+    }
+    .btn-synergy:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.78rem;
+    }
 
     /* Badges */
     .badge-pill {
@@ -235,225 +232,280 @@
       align-items: center;
       gap: 4px;
       padding: 3px 8px;
-      border-radius: 6px;
+      border-radius: 999px;
       font-size: 0.72rem;
       font-weight: 700;
-      border: 1px solid transparent;
     }
-    .badge-pill.cat { background: var(--recipe-accent-soft); border-color: var(--recipe-accent); color: var(--recipe-accent); }
-    .badge-pill.prod { background: var(--status-info-soft); border-color: var(--status-info); color: var(--status-info); }
-    .badge-pill.status-draft { background: var(--status-warning-soft); border-color: var(--status-warning); color: var(--status-warning); }
-    .badge-pill.status-ready { background: var(--status-success-soft); border-color: var(--status-success); color: var(--status-success); }
+    .badge-pill.cat {
+      background: var(--recipe-accent-soft);
+      color: var(--recipe-accent);
+      border: 1px solid color-mix(in srgb, var(--recipe-accent) 30%, transparent);
+    }
+    .badge-pill.synergy {
+      background: var(--recipe-synergy-soft);
+      color: var(--recipe-synergy);
+      border: 1px solid color-mix(in srgb, var(--recipe-synergy) 40%, transparent);
+    }
+    .badge-pill.prod {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid color-mix(in srgb, var(--status-info) 30%, transparent);
+    }
+    .badge-pill.status-draft {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+    }
+    .badge-pill.status-ready {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+    }
 
     /* Card Grid */
     .planner-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
     }
-
     .planner-card {
       background: var(--surface);
       border: 1px solid var(--border-subtle);
-      border-radius: 14px;
-      padding: 20px;
-      cursor: pointer;
+      border-radius: var(--radius);
+      padding: 18px;
       transition: all 0.2s ease;
+      cursor: pointer;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      min-height: 190px;
     }
-
     .planner-card:hover {
-      border-color: var(--status-neutral);
+      border-color: var(--border-strong);
       transform: translateY(-2px);
       box-shadow: var(--shadow-card);
     }
-
-    .planner-card.recipe-type:hover {
-      border-color: var(--recipe-accent);
+    .planner-card.recipe-type {
+      border-color: color-mix(in srgb, var(--recipe-accent) 40%, var(--border-subtle));
+      background: linear-gradient(180deg, var(--surface) 0%, color-mix(in srgb, var(--recipe-accent-soft) 25%, var(--surface)) 100%);
     }
 
-    /* Modal Overlay */
+    /* Modal Styling */
     .modal-overlay {
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
+      inset: 0;
       background: var(--overlay-backdrop);
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
-      z-index: 100;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s ease;
+      z-index: 1000;
+      padding: 20px;
+      backdrop-filter: blur(4px);
     }
-
     .modal-overlay.open {
-      opacity: 1;
-      pointer-events: auto;
+      display: flex;
     }
-
     .modal-dialog {
       background: var(--surface);
       border: 1px solid var(--border-subtle);
       border-radius: 16px;
       width: 100%;
-      max-width: 680px;
+      max-width: 650px;
       max-height: 90vh;
       overflow-y: auto;
-      padding: 28px;
+      padding: 24px;
       box-shadow: var(--shadow-modal);
     }
 
-    /* Form Fields */
-    .form-group { margin-bottom: 18px; }
-    .form-label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; }
-    .form-input, .form-select, .form-textarea {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 10px;
-      background: var(--input-bg);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-primary);
-      font-family: inherit;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-    .form-input:focus, .form-select:focus, .form-textarea:focus {
-      outline: none;
-      border-color: var(--recipe-accent);
-    }
-
-    /* Focus 3-Option Grid */
+    /* Focus 3-Grid */
     .focus-3-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
+      margin-bottom: 16px;
     }
-
     .focus-btn {
-      padding: 12px;
-      text-align: left;
-      border-radius: 10px;
-      cursor: pointer;
-      background: var(--surface);
+      background: var(--surface-interactive);
       border: 1px solid var(--border-subtle);
-      color: var(--text-primary);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      cursor: pointer;
+      text-align: center;
       transition: all 0.15s ease;
     }
-
+    .focus-btn:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-hover);
+    }
     .focus-btn.selected {
+      background: var(--surface-hover);
       border-color: var(--recipe-accent);
-      background: var(--recipe-accent-soft);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--recipe-accent) 30%, transparent);
     }
 
-    /* Detail Workbench Table */
+    /* Strategy Radio Cards */
+    .strategy-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .strategy-card {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+    .strategy-card:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-hover);
+    }
+    .strategy-card.selected {
+      background: var(--surface-hover);
+      border-color: var(--recipe-synergy);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--recipe-synergy) 35%, transparent);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border 0.15s ease;
+      font-family: inherit;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--action-primary);
+    }
+
+    /* Workbench Table */
     .workbench-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 14px;
-      background: var(--surface);
-      border-radius: var(--radius);
-      border: 1px solid var(--border-subtle);
-      overflow: hidden;
+      font-size: 0.82rem;
     }
-
     .workbench-table th, .workbench-table td {
       padding: 12px 14px;
       border-bottom: 1px solid var(--border-subtle);
-      font-size: 0.88rem;
       text-align: left;
     }
-
     .workbench-table th {
       background: var(--surface-raised);
-      color: var(--text-secondary);
-      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      font-size: 0.75rem;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.5px;
+    }
+    .workbench-table tr:hover td {
+      background: var(--surface-hover);
     }
 
-    /* Recipe Production Drawer / Panel */
+    /* Production Drawer / Detail */
     .drawer-panel {
-      background: var(--surface);
+      background: var(--surface-raised);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius);
-      padding: 24px;
+      padding: 20px;
       margin-top: 24px;
-      box-shadow: var(--shadow-card);
     }
-
     .prod-tabs {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       border-bottom: 1px solid var(--border-subtle);
-      margin-bottom: 20px;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
     }
-
     .prod-tab-btn {
-      padding: 10px 16px;
-      background: transparent;
-      border: 1px solid transparent;
-      border-bottom: 2px solid transparent;
-      color: var(--text-secondary);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.82rem;
       font-weight: 700;
-      font-size: 0.88rem;
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
+      transition: all 0.15s ease;
     }
-
+    .prod-tab-btn:hover {
+      color: var(--text-primary);
+      background: var(--surface-interactive);
+    }
     .prod-tab-btn.active {
-      color: var(--recipe-accent);
-      border-bottom-color: var(--recipe-accent);
-      background: var(--surface-raised);
-      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+      color: var(--on-action-primary);
+      background: var(--action-primary);
     }
 
     .recipe-canonical-card {
-      background: var(--surface-raised);
+      background: var(--surface-interactive);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
-      padding: 20px;
+      padding: 16px;
+      margin-bottom: 16px;
     }
 
     /* Toast */
     .toast {
       position: fixed;
-      bottom: 24px; right: 24px;
+      bottom: 24px;
+      right: 24px;
       background: var(--surface-raised);
-      border: 1px solid var(--recipe-accent);
-      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
       padding: 12px 20px;
-      border-radius: var(--radius-sm);
-      font-weight: 700;
-      display: flex; align-items: center; gap: 8px;
+      border-radius: var(--radius);
       box-shadow: var(--shadow-modal);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
       transform: translateY(100px);
       opacity: 0;
-      transition: all 0.2s ease;
-      z-index: 200;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 2000;
     }
-    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
 
-  <!-- MAKNA Flow Left Sidebar -->
+  <!-- Sidebar -->
   <aside class="app-sidebar">
     <div class="sidebar-brand">
-      <span>🚀 MAKNA Flow</span>
+      <span>MAKNA Flow</span>
+      <span class="sidebar-brand-badge">Culinary v2</span>
     </div>
     <nav class="sidebar-nav">
-      <a class="nav-item">📊 Dashboard</a>
-      <a class="nav-item active" id="menuPlannerNav" onclick="showView('dashboard')">🗓️ Content Planner</a>
-      <a class="nav-item">🎬 Pillar & OPC Studio</a>
+      <a class="nav-item active">📋 Content Planner</a>
+      <a class="nav-item" onclick="showToast('Beralih ke Pillar Campaigns...')">🏛️ Pillar Campaigns</a>
       <a class="nav-item" onclick="showToast('Beralih ke ContentFlow Studio...')">🚀 ContentFlow</a>
       <a class="nav-item">📦 Katalog Produk</a>
       <a class="nav-item">⚙️ Pengaturan Tenant</a>
     </nav>
     <div style="padding: 16px; border-top: 1px solid var(--border-subtle); font-size: 0.75rem; color: var(--text-muted);">
       <div>Tenant: <strong>sy-dodot</strong></div>
-      <div style="margin-top: 4px;">v2.30.15 (Staging)</div>
+      <div style="margin-top: 4px;">v2.31.2 (Dev / Staging)</div>
     </div>
   </aside>
 
@@ -470,7 +522,7 @@
         <button class="btn btn-secondary btn-sm" onclick="toggleTheme()">
           <span id="themeIcon">☀️</span> <span id="themeLabel">Light Mode</span>
         </button>
-        <button class="btn btn-primary" onclick="openCreatePlannerModal()">
+        <button class="btn btn-recipe" onclick="openCreatePlannerModal()">
           <span>+ Buat Planner Baru</span>
         </button>
       </div>
@@ -480,10 +532,9 @@
     <div class="page-body" id="dashboardView">
       
       <!-- Callout Explanation -->
-      <div style="background: var(--status-info-soft); border: 1px solid var(--status-info); border-radius: 12px; padding: 14px 18px; margin-bottom: 24px; font-size: 0.88rem; color: var(--status-info);">
-        <strong>ℹ️ Alur Lifecycle Content Planner MAKNA Flow (Save as Draft → Eksekusi AI Pipeline):</strong><br>
-        1. Form generator menyediakan tombol <strong>💾 Simpan Draft Planner</strong> untuk menyimpan konfigurasi (produk, kategori, target audiens, pilar/jumlah) ke database.<br>
-        2. Planner yang berstatus <strong>Draft</strong> dapat dieksekusi kapan saja menggunakan tombol <strong>🚀 Eksekusi AI Pipeline</strong> langsung dari kartu dashboard atau workbench.
+      <div style="background: var(--recipe-synergy-soft); border: 1px solid var(--recipe-synergy); border-radius: 12px; padding: 14px 18px; margin-bottom: 24px; font-size: 0.88rem; color: var(--recipe-synergy);">
+        <strong>✨ Fitur Baru: Multi-Product Synergy (Kombo Produk dalam 1 Resep):</strong><br>
+        Kini Recipe Campaign dapat mengintegrasikan <strong>Bahan Baku (Omura Cocoa) + Peralatan (Blender Philips)</strong> secara bersamaan dalam 1 alur video resep dan menghubungkan keranjang ganda di OPC Studio!
       </div>
 
       <!-- Filters Bar -->
@@ -494,7 +545,7 @@
             <option>Semua Fokus</option>
             <option>🧩 Brand Editorial</option>
             <option>📦 Product Campaign</option>
-            <option>🍳 Recipe Campaign</option>
+            <option selected>🍳 Recipe Campaign</option>
           </select>
         </div>
         <div style="font-size: 0.85rem; color: var(--text-muted);">Menampilkan 3 Planner</div>
@@ -528,7 +579,7 @@
         <div class="planner-card">
           <div>
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
-              <h4 style="font-size:15px; font-weight:700;">Soft Sell - Mini Blender Wireless</h4>
+              <h4 style="font-size:15px; font-weight:700;">Soft Sell - Single Product</h4>
               <span class="badge-pill status-ready">6 Baris</span>
             </div>
             <div style="display:flex; gap:6px; margin-bottom:14px;">
@@ -545,20 +596,20 @@
           </div>
         </div>
 
-        <!-- Planner 3: Recipe Campaign (Simulasi Kartu State Interaktif) -->
-        <div class="planner-card recipe-type" id="recipeCardItem" style="border-color: var(--recipe-accent); background: var(--recipe-accent-soft);">
+        <!-- Planner 3: Recipe Campaign Multi-Product Combo -->
+        <div class="planner-card recipe-type" id="recipeCardItem" style="border-color: var(--recipe-synergy); background: var(--recipe-synergy-soft);">
           <div>
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
-              <h4 style="font-size:15px; font-weight:800; color: var(--text-primary);" id="cardTitleDisplay">🍳 Resep Kafe Minuman Sehat Sehari-hari</h4>
+              <h4 style="font-size:15px; font-weight:800; color: var(--text-primary);" id="cardTitleDisplay">🍳 nutribake - 20260916 (Resep Minuman Kafe)</h4>
               <span class="badge-pill status-draft" id="cardStatusBadge">Draft</span>
             </div>
             <div style="display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;">
               <span class="badge-pill cat">🍳 Recipe Campaign</span>
-              <span class="badge-pill prod">🍹 Minuman</span>
-              <span class="badge-pill prod">🥛 3 Produk Terkait</span>
+              <span class="badge-pill synergy">🌟 Sinergi Kombo (2 Produk)</span>
+              <span class="badge-pill prod">🍫 Omura Cocoa + ⚡ Blender Philips</span>
             </div>
             <div style="font-size:12px; color:var(--text-secondary); margin-bottom:14px;">
-              🎯 Audiens: <strong>Gen-Z &amp; Milenial Muda</strong>
+              🎯 Audiens: <strong>Gen-Z &amp; Milenial Muda</strong> • Kategori: <strong>Minuman</strong>
             </div>
           </div>
 
@@ -570,16 +621,16 @@
               onclick="executePlannerFromCard(event)"
               style="
                 width: 100%; padding: 10px; margin-bottom: 10px;
-                background: linear-gradient(135deg, var(--recipe-accent) 0%, #b45309 100%);
-                color: var(--on-action-primary); border: none; borderRadius: 8px; font-weight: 700;
+                background: linear-gradient(135deg, var(--recipe-synergy) 0%, #065f46 100%);
+                color: #ffffff; border: none; border-radius: 8px; font-weight: 700;
                 cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px;
-                box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
               "
             >
-              <span>🚀 Eksekusi AI Pipeline (Generate 5 Resep)</span>
+              <span>🚀 Eksekusi AI Pipeline (Generate 5 Resep Kombo)</span>
             </button>
-            <div style="border-top:1px solid color-mix(in srgb, var(--recipe-accent) 30%, transparent); padding-top:8px; display:flex; justify-content:space-between; font-size:12px; color:var(--recipe-accent); font-weight:700;" onclick="openRecipeWorkbench()">
-              <span>Konfigurasi: 5 Resep</span>
+            <div style="border-top:1px solid color-mix(in srgb, var(--recipe-synergy) 30%, transparent); padding-top:8px; display:flex; justify-content:space-between; font-size:12px; color:var(--recipe-synergy); font-weight:700;" onclick="openRecipeWorkbench()">
+              <span>Konfigurasi: 5 Resep Kombo</span>
               <span style="cursor:pointer;">Buka Detail Planner →</span>
             </div>
           </div>
@@ -596,15 +647,27 @@
         <div>
           <button class="btn btn-secondary btn-sm" onclick="showView('dashboard')" style="margin-bottom:8px;">← Kembali ke Daftar Planner</button>
           <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-            <h2 style="font-size: 1.35rem; font-weight: 800;" id="workbenchHeadingTitle">🍳 Resep Kafe Minuman Sehat Sehari-hari</h2>
+            <h2 style="font-size: 1.35rem; font-weight: 800;" id="workbenchHeadingTitle">🍳 nutribake - 20260916 (Resep Minuman Kafe)</h2>
             <span class="badge-pill cat">Recipe Campaign</span>
-            <span class="badge-pill prod">🎯 Audiens: Gen-Z &amp; Milenial</span>
+            <span class="badge-pill synergy" id="workbenchStrategyBadge">🌟 Sinergi Kombo (2 Produk per Resep)</span>
             <span class="badge-pill status-ready" id="workbenchCountBadge">5 Resep Terencana</span>
           </div>
         </div>
         <div style="display:flex; gap:8px;">
           <button class="btn btn-secondary btn-sm" onclick="showToast('💾 Ekspor Markdown/CSV berhasil!')">📊 Ekspor Data</button>
-          <button class="btn btn-recipe btn-sm" id="workbenchIngestBtn" onclick="showToast('🚀 Meng-ingest baris recipe terpilih ke Pipeline OPC...')">🚀 Ingest ke OPC Studio</button>
+          <button class="btn btn-synergy btn-sm" id="workbenchIngestBtn" onclick="simulateOpcIngest()">🚀 Ingest ke OPC Studio</button>
+        </div>
+      </div>
+
+      <!-- Strategy Simulation Switcher Toolbar -->
+      <div style="background:var(--surface); border:1px solid var(--border-subtle); border-radius:10px; padding:10px 16px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem;">
+          <span style="font-weight:700; color:var(--text-secondary);">🔀 Simulasi Mode Strategi:</span>
+          <button type="button" class="btn btn-sm" id="simSynergyBtn" style="background:var(--recipe-synergy); color:#fff;" onclick="setWorkbenchMode('synergy')">🌟 Sinergi Kombo (2 Produk di Tiap Resep)</button>
+          <button type="button" class="btn btn-secondary btn-sm" id="simRotationBtn" onclick="setWorkbenchMode('rotation')">🔄 Rotasi Bergantian (1 Produk / Resep)</button>
+        </div>
+        <div style="font-size:0.8rem; color:var(--text-muted);" id="simStrategyHint">
+          Semua 5 resep mengombinasikan <strong>Omura Cocoa + Blender Philips</strong>
         </div>
       </div>
 
@@ -615,60 +678,16 @@
             <tr>
               <th style="width: 30px;"><input type="checkbox" checked></th>
               <th>#</th>
-              <th>Judul Resep & Hook (Disesuaikan Target Audiens)</th>
+              <th>Judul Resep &amp; Hook</th>
               <th>Kategori</th>
-              <th>Produk Terkait</th>
+              <th>Produk Terlibat</th>
               <th>Waktu / Porsi</th>
               <th>Status</th>
               <th>Aksi</th>
             </tr>
           </thead>
           <tbody id="workbenchTbody">
-            <tr style="background: var(--status-info-soft);">
-              <td><input type="checkbox" checked></td>
-              <td style="font-weight:800;">1</td>
-              <td>
-                <div style="font-weight:700;">Iced Matcha Oat Latte Creamy Kafe</div>
-                <div style="font-size:0.75rem; color:var(--text-secondary);">"Stop beli matcha 50rb di kafe, ini rahasia creamy 3 bahan!"</div>
-              </td>
-              <td><span class="badge-pill cat">Minuman</span></td>
-              <td><span class="badge-pill prod">🥛 Susu Oat Barista</span></td>
-              <td><span class="badge-pill" style="background:var(--surface-interactive);">5 mnt • 1 Porsi</span></td>
-              <td><span class="badge-pill status-ready">Fase 1 Siap</span></td>
-              <td>
-                <button class="btn btn-recipe btn-sm" onclick="showToast('Membuka detail resep & start frame di bawah...')">Buka Resep ↓</button>
-              </td>
-            </tr>
-            <tr>
-              <td><input type="checkbox" checked></td>
-              <td style="font-weight:800;">2</td>
-              <td>
-                <div style="font-weight:700;">Matcha Chia Seed Pudding Gula Aren</div>
-                <div style="font-size:0.75rem; color:var(--text-secondary);">"Sarapan sehat anti ribet, siap dalam 5 menit sebelum ngantor!"</div>
-              </td>
-              <td><span class="badge-pill cat">Dessert</span></td>
-              <td><span class="badge-pill prod">🍯 Sirup Gula Aren</span></td>
-              <td><span class="badge-pill" style="background:var(--surface-interactive);">10 mnt • 2 Porsi</span></td>
-              <td><span class="badge-pill status-ready">Fase 1 Siap</span></td>
-              <td>
-                <button class="btn btn-secondary btn-sm" onclick="showToast('Pilih baris #2')">Pilih Baris</button>
-              </td>
-            </tr>
-            <tr>
-              <td><input type="checkbox" checked></td>
-              <td style="font-weight:800;">3</td>
-              <td>
-                <div style="font-weight:700;">Matcha Cloud Cake No-Bake Lembut</div>
-                <div style="font-size:0.75rem; color:var(--text-secondary);">"Bikin kue matcha tanpa oven cuma 4 bahan anti gagal!"</div>
-              </td>
-              <td><span class="badge-pill cat">Kue</span></td>
-              <td><span class="badge-pill prod">🍵 Bubuk Matcha</span></td>
-              <td><span class="badge-pill" style="background:var(--surface-interactive);">20 mnt • 4 Porsi</span></td>
-              <td><span class="badge-pill status-ready">Fase 1 Siap</span></td>
-              <td>
-                <button class="btn btn-secondary btn-sm" onclick="showToast('Pilih baris #3')">Pilih Baris</button>
-              </td>
-            </tr>
+            <!-- Rendered by JavaScript -->
           </tbody>
         </table>
       </div>
@@ -677,21 +696,21 @@
       <div class="drawer-panel" id="workbenchDrawerPanel">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
           <div>
-            <h3 style="font-size: 1.15rem; font-weight: 800;">📜 Detail Produksi Resep: Iced Matcha Oat Latte</h3>
-            <p style="font-size: 0.8rem; color: var(--text-muted);">Lineage: Row #1 → OPC Item #REC-001 • Target Audiens: Gen-Z &amp; Pekerja Muda</p>
+            <h3 style="font-size: 1.15rem; font-weight: 800;" id="drawerRecipeTitle">📜 Detail Resep: Es Dark Chocolate Sea Salt Silk Frappe</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted);" id="drawerLineageInfo">Lineage: Row #1 → OPC Item #REC-001 • Target Audiens: Gen-Z &amp; Pekerja Muda • Multi-Binding: 2 Produk Terikat</p>
           </div>
           <div style="display:flex; gap:8px;">
             <button class="btn btn-secondary btn-sm" onclick="copyFullRecipePlainText()">📋 Salin Teks Resep Lengkap</button>
-            <button class="btn btn-teal btn-sm" onclick="showToast('✅ Fase 2 Disetujui! Render Video & Audio dimulai.')">✅ Approve Fase 2 (Render Video)</button>
+            <button class="btn btn-teal btn-sm" onclick="showToast('✅ Fase 2 Disetujui! Ingest ke OPC Studio.')">✅ Approve ke OPC</button>
           </div>
         </div>
 
         <!-- 4 Tabs -->
         <div class="prod-tabs">
-          <button class="prod-tab-btn active" id="tabBtn1" onclick="switchTab(1)">📜 Resep Lengkap (Canonical & Text)</button>
-          <button class="prod-tab-btn" id="tabBtn2" onclick="switchTab(2)">🎬 Storyboard & VO</button>
+          <button class="prod-tab-btn active" id="tabBtn1" onclick="switchTab(1)">📜 Resep Lengkap (Canonical &amp; Text)</button>
+          <button class="prod-tab-btn" id="tabBtn2" onclick="switchTab(2)">🎬 Storyboard &amp; VO (Integrasi Sinergi)</button>
           <button class="prod-tab-btn" id="tabBtn3" onclick="switchTab(3)">🖼️ Start Frames Review (4/4)</button>
-          <button class="prod-tab-btn" id="tabBtn4" onclick="switchTab(4)">📱 Paket Sosial & Validasi Caption</button>
+          <button class="prod-tab-btn" id="tabBtn4" onclick="switchTab(4)">📱 Paket Sosial &amp; Dual Keranjang</button>
         </div>
 
         <!-- Tab 1: Resep Lengkap -->
@@ -699,115 +718,88 @@
           <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:16px;">
             <div style="background:var(--surface); padding:10px; border-radius:8px; text-align:center;">
               <div style="font-size:0.72rem; color:var(--text-muted);">Porsi</div>
-              <div style="font-weight:800;">1 Gelas (350ml)</div>
+              <div style="font-weight:800;">1 Gelas Besar (400ml)</div>
             </div>
             <div style="background:var(--surface); padding:10px; border-radius:8px; text-align:center;">
               <div style="font-size:0.72rem; color:var(--text-muted);">Waktu Pembuatan</div>
-              <div style="font-weight:800;">5 Menit</div>
+              <div style="font-weight:800;">5 Menit (Blend 20s)</div>
             </div>
             <div style="background:var(--surface); padding:10px; border-radius:8px; text-align:center;">
               <div style="font-size:0.72rem; color:var(--text-muted);">Tingkat Kesulitan</div>
-              <div style="font-weight:800; color:var(--status-success);">Sangat Mudah</div>
+              <div style="font-weight:800; color:var(--status-success);">Sangat Praktis</div>
             </div>
           </div>
 
-          <div style="font-weight:800; font-size:0.9rem; margin-bottom:8px;">🛒 Bahan-Bahan Takaran Pas:</div>
-          <ul style="list-style:none; display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px;">
-            <li style="background:var(--surface); padding:8px 12px; border-radius:6px; font-size:0.85rem; display:flex; justify-content:space-between;">
-              <span>• Susu Oat Barista Blend</span> <span class="badge-pill prod">150 ml (Produk Utama)</span>
-            </li>
-            <li style="background:var(--surface); padding:8px 12px; border-radius:6px; font-size:0.85rem; display:flex; justify-content:space-between;">
-              <span>• Bubuk Pure Matcha Ceremonial</span> <span class="badge-pill cat">1.5 sdt (3g)</span>
-            </li>
-            <li style="background:var(--surface); padding:8px 12px; border-radius:6px; font-size:0.85rem; display:flex; justify-content:space-between;">
-              <span>• Sirup Gula Aren Organik</span> <span class="badge-pill prod">15 ml</span>
-            </li>
-            <li style="background:var(--surface); padding:8px 12px; border-radius:6px; font-size:0.85rem; display:flex; justify-content:space-between;">
-              <span>• Air Hangat &amp; Es Batu</span> <span class="badge-pill" style="background:var(--surface-interactive);">Secukupnya</span>
-            </li>
+          <div style="font-weight:800; font-size:0.9rem; margin-bottom:8px;">🛒 Bahan-Bahan &amp; Peralatan Terpadu:</div>
+          <ul style="list-style:none; display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px;" id="drawerIngredientsList">
+            <!-- Dynamic via JS -->
           </ul>
 
-          <div style="font-weight:800; font-size:0.9rem; margin-bottom:8px;">🍳 Cara Membuat:</div>
-          <ol style="margin-left: 20px; font-size:0.85rem; line-height:1.6;">
-            <li>Larutkan 1.5 sdt matcha dengan 50 ml air hangat menggunakan frother sampai berbusa lembut.</li>
-            <li>Siapkan gelas saji, tuang sirup aren di dasar gelas, lalu masukkan es batu kristal.</li>
-            <li>Tuang 150 ml Susu Oat Barista secara perlahan hingga 3/4 tinggi gelas.</li>
-            <li>Tuang larutan matcha di bagian paling atas untuk menciptakan layer 3 warna yang estetik!</li>
+          <div style="font-weight:800; font-size:0.9rem; margin-bottom:8px;">🍳 Cara Membuat (Alur Kombo Terpadu):</div>
+          <ol style="margin-left: 20px; font-size:0.85rem; line-height:1.6;" id="drawerStepsList">
+            <!-- Dynamic via JS -->
           </ol>
         </div>
 
         <!-- Tab 2: Storyboard & VO -->
         <div id="tabContent2" style="display:none;" class="recipe-canonical-card">
-          <div style="font-size:0.85rem; line-height:1.6;">
-            <div style="padding:10px; background:var(--surface); border-radius:8px; margin-bottom:8px;">
-              <strong>Scene 1 (Hook 4s):</strong> Beauty shot es batu &amp; matcha waterfall.<br>
-              <span style="color:var(--status-info);">VO: "Stop beli matcha 50rb di kafe, ini rahasia creamy 3 bahan!"</span>
-            </div>
-            <div style="padding:10px; background:var(--surface); border-radius:8px; margin-bottom:8px;">
-              <strong>Scene 2 (Prep 6s):</strong> Whisking matcha &amp; drizzle gula aren di dasar gelas.<br>
-              <span style="color:var(--status-info);">VO: "Larutkan 1.5 sdt matcha dengan air hangat, lalu tuang gula aren dan es batu."</span>
-            </div>
-            <div style="padding:10px; background:var(--surface); border-radius:8px;">
-              <strong>Scene 3 (Action 6s):</strong> Menuang Susu Oat Barista Blend membentuk swirl lembut.<br>
-              <span style="color:var(--status-info);">VO: "Kuncinya wajib pakai Susu Oat Barista Blend biar rasanya nutty dan super silky!"</span>
-            </div>
+          <div style="font-size:0.85rem; line-height:1.6;" id="drawerStoryboardList">
+            <!-- Dynamic via JS -->
           </div>
         </div>
 
         <!-- Tab 3: Start Frames -->
         <div id="tabContent3" style="display:none;">
           <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin-top:10px;">
-            <div style="background:linear-gradient(135deg, #064e3b, #0f766e); height:140px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:2.5rem; position:relative;">
-              <span>🍵</span>
-              <span style="position:absolute; bottom:6px; right:6px; font-size:0.7rem; background:rgba(0,0,0,0.7); padding:2px 6px; border-radius:4px;">Frame 1 (Ready)</span>
+            <div style="background:linear-gradient(135deg, #78350f, #3e1b04); height:140px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:2.5rem; position:relative;">
+              <span>🍫</span>
+              <span style="position:absolute; bottom:6px; right:6px; font-size:0.7rem; background:rgba(0,0,0,0.7); color:#fff; padding:2px 6px; border-radius:4px;">Frame 1: Cocoa Hook</span>
             </div>
-            <div style="background:linear-gradient(135deg, #78350f, #b45309); height:140px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:2.5rem; position:relative;">
-              <span>🍯</span>
-              <span style="position:absolute; bottom:6px; right:6px; font-size:0.7rem; background:rgba(0,0,0,0.7); padding:2px 6px; border-radius:4px;">Frame 2 (Ready)</span>
+            <div style="background:linear-gradient(135deg, #0f766e, #134e4a); height:140px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:2.5rem; position:relative;">
+              <span>⚡</span>
+              <span style="position:absolute; bottom:6px; right:6px; font-size:0.7rem; background:rgba(0,0,0,0.7); color:#fff; padding:2px 6px; border-radius:4px;">Frame 2: Philips Blender</span>
             </div>
-            <div style="background:linear-gradient(135deg, #1e3a8a, #0369a1); height:140px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:2.5rem; position:relative;">
-              <span>🥛</span>
-              <span style="position:absolute; bottom:6px; right:6px; font-size:0.7rem; background:rgba(0,0,0,0.7); padding:2px 6px; border-radius:4px;">Frame 3 (Ready)</span>
+            <div style="background:linear-gradient(135deg, #1e3a8a, #1e293b); height:140px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:2.5rem; position:relative;">
+              <span>🌪️</span>
+              <span style="position:absolute; bottom:6px; right:6px; font-size:0.7rem; background:rgba(0,0,0,0.7); color:#fff; padding:2px 6px; border-radius:4px;">Frame 3: Velvet Blend</span>
             </div>
             <div style="background:linear-gradient(135deg, #065f46, #047857); height:140px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:2.5rem; position:relative;">
               <span>✨</span>
-              <span style="position:absolute; bottom:6px; right:6px; font-size:0.7rem; background:rgba(0,0,0,0.7); padding:2px 6px; border-radius:4px;">Frame 4 (Ready)</span>
+              <span style="position:absolute; bottom:6px; right:6px; font-size:0.7rem; background:rgba(0,0,0,0.7); color:#fff; padding:2px 6px; border-radius:4px;">Frame 4: Dual Product CTA</span>
             </div>
           </div>
         </div>
 
         <!-- Tab 4: Social Package -->
         <div id="tabContent4" style="display:none;" class="recipe-canonical-card">
-          <div style="font-weight:700; margin-bottom:6px; font-size:0.85rem;">Caption Siap Publikasi (Membawa Resep Lengkap Utuh):</div>
-          <div style="background:var(--surface); padding:12px; border-radius:8px; font-family:var(--font-mono); font-size:0.78rem; line-height:1.5; white-space:pre-wrap;">
-Stop beli matcha 50rb di kafe! Bikin sendiri cuma 3 menit super creamy pakai Susu Oat Barista Blend! 🍵✨
+          <div style="font-weight:700; margin-bottom:6px; font-size:0.85rem;">Caption Siap Publikasi (Membawa Dual Keranjang Kuning):</div>
+          <div style="background:var(--surface); padding:12px; border-radius:8px; font-family:var(--font-mono); font-size:0.78rem; line-height:1.5; white-space:pre-wrap;" id="drawerCaptionBox">
+Stop beli ice choco mahal di kafe! Bikin sendiri cuma 20 detik super smooth & velvety! 🍫⚡✨
 
-ICED MATCHA OAT LATTE
-Porsi: 1 Gelas | Waktu: 5 Menit
+ES DARK CHOCOLATE SEA SALT SILK FRAPPE
+Porsi: 1 Gelas Besar | Waktu: 5 Menit (Blend 20s)
 
-BAHAN:
-• 150 ml Susu Oat Barista Blend
-• 1.5 sdt Matcha
-• 15 ml Gula Aren & Es Batu
+BAHAN & ALAT:
+• 2 sdm Omura Premium Cocoa Powder
+• 150 ml Susu Full Cream & 1 cup Es Batu
+• Blender Philips 3000 Series (Pulse Mode)
 
 CARA MEMBUAT:
-1. Larutkan matcha dengan air hangat.
-2. Siapkan gelas isi es batu dan gula aren.
-3. Tuang Susu Oat Barista secara perlahan.
-4. Tuang matcha di atasnya!
+1. Masukkan semua bahan ke tabung Blender Philips.
+2. Blend 20 detik sampai es batu halus selembut sutra.
+3. Tuang ke gelas saji, beri taburan sea salt!
 
-Cek produk di link bio! 👇
-#ResepMatcha #IcedMatchaLatte #SusuOat #KulinerViral
+🛒 Cek keranjang kuning di bawah untuk Omura Cocoa Powder & Blender Philips 3000 Series! 👇
+#OmuraCocoa #PhilipsBlender3000 #ResepFrappe #MinumanKafe #ResepViral
           </div>
         </div>
 
       </div>
-
     </div>
 
   </main>
 
-  <!-- Generator Content Planner Baru Modal (100% Identik dengan Modal Asli MAKNA Flow) -->
+  <!-- Generator Content Planner Baru Modal (Dengan Strategi Integrasi Multi-Produk) -->
   <div class="modal-overlay" id="createPlannerModal">
     <div class="modal-dialog">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
@@ -821,15 +813,15 @@ Cek produk di link bio! 👇
         <div class="focus-3-grid">
           <div class="focus-btn" id="fBtnEditorial" onclick="selectModalFocus('brand_editorial')">
             <div style="font-weight:700; font-size:13px; margin-bottom:3px;">🧩 Brand Editorial</div>
-            <div style="font-size:10px; color:var(--text-muted); line-height:1.3;">Berbasis brand, audiens &amp; pilar.</div>
+            <div style="font-size:10px; color:var(--text-muted); line-height:1.3;">Berbasis brand &amp; pilar.</div>
           </div>
           <div class="focus-btn" id="fBtnProduct" onclick="selectModalFocus('product_campaign')">
             <div style="font-weight:700; font-size:13px; margin-bottom:3px;">📦 Product Campaign</div>
-            <div style="font-size:10px; color:var(--text-muted); line-height:1.3;">Berpusat pada satu produk tunggal.</div>
+            <div style="font-size:10px; color:var(--text-muted); line-height:1.3;">Satu produk tunggal.</div>
           </div>
           <div class="focus-btn selected" id="fBtnRecipe" onclick="selectModalFocus('recipe_campaign')">
             <div style="font-weight:700; font-size:13px; margin-bottom:3px; color:var(--recipe-accent);">🍳 Recipe Campaign</div>
-            <div style="font-size:10px; color:var(--text-muted); line-height:1.3;">Resep kuliner dengan integrasi produk natural.</div>
+            <div style="font-size:10px; color:var(--text-muted); line-height:1.3;">Resep kuliner multi-produk.</div>
           </div>
         </div>
       </div>
@@ -838,8 +830,8 @@ Cek produk di link bio! 👇
       <div class="form-group">
         <label class="form-label">🧬 Brand Profile (Akun Brand):</label>
         <select class="form-select" id="brandProfileSelect">
-          <option value="brand_1">@makna_culinary (Food &amp; Beverage Kitchen)</option>
-          <option value="brand_2">@dodot_daily (Healthy Lifestyle &amp; Home Cafe)</option>
+          <option value="brand_1">@nutribake.id (Culinary &amp; Home Cafe)</option>
+          <option value="brand_2">@makna_culinary (Food &amp; Beverage Kitchen)</option>
           <option value="brand_3">-- Buat tanpa binding akun --</option>
         </select>
       </div>
@@ -850,7 +842,7 @@ Cek produk di link bio! 👇
           <label class="form-label" style="margin:0;">Judul Planner (Opsional):</label>
           <span style="color:var(--status-neutral); font-size:12px; font-weight:600; cursor:pointer;" onclick="autoFillTitle()">✨ Auto-fill</span>
         </div>
-        <input type="text" class="form-input" id="plannerTitleInput" value="maknaculinary - 20260917 - Resep Minuman Kafe">
+        <input type="text" class="form-input" id="plannerTitleInput" value="nutribake - 20260916 - Resep Kafe Kombo">
       </div>
 
       <!-- 4. Recipe-Specific Dynamic Fields -->
@@ -858,17 +850,59 @@ Cek produk di link bio! 👇
         
         <!-- Multi-select Product Catalog -->
         <div class="form-group">
-          <label class="form-label">📦 Pilih Produk Katalog Terkait (Rotasi 1 Produk Utama per Resep):</label>
+          <label class="form-label">📦 Pilih Produk Katalog Terkait (Pilih 1 atau Lebih):</label>
           <div style="display:grid; grid-template-columns:1fr; gap:8px;">
             <label style="background:var(--surface-interactive); padding:10px 12px; border-radius:8px; display:flex; align-items:center; gap:10px; font-size:13px; cursor:pointer;">
-              <input type="checkbox" checked> <span>🥛 Susu Oat Barista Blend 1L (Bahan Cair • Creamy)</span>
+              <input type="checkbox" id="chkProd1" checked onchange="updateModalProductCount()">
+              <div>
+                <strong>🍫 Omura Premium Cocoa Powder</strong> 
+                <span class="badge-pill cat" style="font-size:10px; margin-left:6px;">Bahan Baku Utama</span>
+                <div style="font-size:11px; color:var(--text-muted);">Bubuk cokelat murni pekat, aroma kafe premium.</div>
+              </div>
             </label>
             <label style="background:var(--surface-interactive); padding:10px 12px; border-radius:8px; display:flex; align-items:center; gap:10px; font-size:13px; cursor:pointer;">
-              <input type="checkbox" checked> <span>🍵 Bubuk Matcha Ceremonial Grade 100g (Bahan Bubuk • Kyoto)</span>
+              <input type="checkbox" id="chkProd2" checked onchange="updateModalProductCount()">
+              <div>
+                <strong>⚡ Blender Philips 3000 Series HR2042/13</strong>
+                <span class="badge-pill synergy" style="font-size:10px; margin-left:6px;">Peralatan / Appliance</span>
+                <div style="font-size:11px; color:var(--text-muted);">ProBlend system, menghaluskan es batu dalam 45 detik.</div>
+              </div>
             </label>
             <label style="background:var(--surface-interactive); padding:10px 12px; border-radius:8px; display:flex; align-items:center; gap:10px; font-size:13px; cursor:pointer;">
-              <input type="checkbox" checked> <span>🍯 Sirup Gula Aren Organik 500ml (Pemanis Alami)</span>
+              <input type="checkbox" id="chkProd3" onchange="updateModalProductCount()">
+              <div>
+                <strong>🥛 Susu UHT Full Cream 1L</strong>
+                <span class="badge-pill prod" style="font-size:10px; margin-left:6px;">Bahan Pelengkap</span>
+                <div style="font-size:11px; color:var(--text-muted);">Susu sapi segar gurih alami.</div>
+              </div>
             </label>
+          </div>
+        </div>
+
+        <!-- NEW: Strategi Integrasi Multi-Produk (Multi-Product Strategy Mode) -->
+        <div class="form-group" id="strategyModeSection">
+          <label class="form-label">🔀 Strategi Integrasi Produk:</label>
+          <div class="strategy-grid">
+            
+            <!-- Option A: Sinergi Kombo -->
+            <div class="strategy-card selected" id="stratComboCard" onclick="selectStrategy('synergy')">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
+                <span style="font-weight:700; font-size:13px; color:var(--recipe-synergy);">🌟 Sinergi Kombo</span>
+                <span class="badge-pill synergy" style="font-size:9px;">Direkomendasikan</span>
+              </div>
+              <div style="font-size:11px; color:var(--text-secondary); line-height:1.35;">
+                Tampilkan <strong>SEMUA produk terpilih</strong> (Bahan + Alat) dalam setiap resep, VO, dan keranjang ganda.
+              </div>
+            </div>
+
+            <!-- Option B: Rotasi Bergantian -->
+            <div class="strategy-card" id="stratRotationCard" onclick="selectStrategy('rotation')">
+              <div style="font-weight:700; font-size:13px; margin-bottom:4px;">🔄 Rotasi Bergantian</div>
+              <div style="font-size:11px; color:var(--text-muted); line-height:1.35;">
+                Membagi produk <strong>secara terpisah</strong> (Resep 1 = Produk A, Resep 2 = Produk B).
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -897,7 +931,7 @@ Cek produk di link bio! 👇
 
       </div>
 
-      <!-- 5. TARGET DEMOGRAFI AUDIENS (PRESET PROMPT BUILDER) -->
+      <!-- 5. TARGET DEMOGRAFI AUDIENS -->
       <div class="form-group">
         <label class="form-label">🎯 Target Demografi Audiens (Personalitas Hook):</label>
         <select class="form-select" id="targetAudienceSelect" onchange="handleTargetAudienceChange(this.value)">
@@ -909,7 +943,7 @@ Cek produk di link bio! 👇
           <option value="custom">✏️ Custom / Bebas (Tentukan Sendiri...)</option>
         </select>
         
-        <input type="text" id="customAudienceInput" class="form-input" style="display:none; margin-top:8px;" placeholder="Ketik deskripsi target audiens kustom (misal: Mahasiswa kosan yang cari resep hemat)...">
+        <input type="text" id="customAudienceInput" class="form-input" style="display:none; margin-top:8px;" placeholder="Ketik deskripsi target audiens kustom...">
       </div>
 
       <!-- 6. Platform & Jumlah Baris Planner -->
@@ -935,16 +969,16 @@ Cek produk di link bio! 👇
         </div>
       </div>
 
-      <!-- Action Button: SAVE AS DRAFT (Persis dengan UI MAKNA Flow Asli) -->
+      <!-- Action Button: SAVE AS DRAFT -->
       <button
         type="button"
         id="saveDraftModalBtn"
         onclick="savePlannerAsDraft()"
         style="
-          width: 100%; padding: 14px; background: linear-gradient(135deg, var(--recipe-accent) 0%, #b45309 100%);
-          color: var(--on-action-primary); border: none; border-radius: 10px; font-weight: 700; cursor: pointer;
+          width: 100%; padding: 14px; background: linear-gradient(135deg, var(--recipe-synergy) 0%, #065f46 100%);
+          color: #ffffff; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;
           font-size: 15px; display: flex; justify-content: center; align-items: center; gap: 8px;
-          box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
+          box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
         "
       >
         <span>💾 Simpan Draft Planner</span>
@@ -959,7 +993,311 @@ Cek produk di link bio! 👇
   </div>
 
   <script>
-    let isPlannerExecuted = false;
+    let currentStrategy = 'synergy'; // 'synergy' or 'rotation'
+    let selectedRowIndex = 0;
+
+    const synergyRowsData = [
+      {
+        title: "Es Dark Chocolate Sea Salt Silk Frappe",
+        hook: "\"Stop beli choco frappe 50rb di kafe, blender ini bikin cokelat pekat sehalus sutra dalam 20 detik!\"",
+        category: "Minuman",
+        products: [
+          { name: "Omura Cocoa Powder", role: "Bahan Utama", icon: "🍫" },
+          { name: "Philips Blender 3000", role: "Alat Pengolah", icon: "⚡" }
+        ],
+        time: "5 mnt • 1 Porsi",
+        ingredients: [
+          { text: "• 2 sdm Omura Premium Cocoa Powder", tag: "🍫 Bahan Utama", type: "cat" },
+          { text: "• 1 Unit Blender Philips 3000 Series", tag: "⚡ Alat Pengolah", type: "synergy" },
+          { text: "• 150 ml Susu Full Cream UHT", tag: "Bahan Pelengkap", type: "prod" },
+          { text: "• 1 cup Es Batu Kristal & Sejumput Sea Salt", tag: "Topping", type: "default" }
+        ],
+        steps: [
+          "Masukkan 2 sdm Omura Premium Cocoa Powder, susu, gula aren, dan es batu ke tabung Blender Philips.",
+          "Nyalakan Blender Philips dengan mode pulse selama 20 detik hingga es batu hancur lembut menjadi frappe sutra.",
+          "Tuang frappe ke gelas saji, beri taburan sea salt dan dusting sedikit bubuk cocoa di atasnya.",
+          "Es Dark Chocolate Frappe siap dinikmati—super creamy tanpa ampas berkat ProBlend Philips & Omura Cocoa!"
+        ],
+        storyboard: [
+          { scene: "Scene 1 (Hook 4s)", action: "Host memegang bungkus Omura Cocoa di samping Blender Philips menyala.", vo: "\"Stop beli choco frappe 50rb di kafe, rahasia selembut sutra ada di kombinasi ini!\"" },
+          { scene: "Scene 2 (Prep 5s)", action: "Menakar 2 sdm Omura Cocoa Powder dan es batu ke dalam tabung Blender Philips.", vo: "\"Tuang 2 scoop Omura Cocoa pekat dan es batu langsung ke Blender Philips 3000 Series.\"" },
+          { scene: "Scene 3 (Blend Action 6s)", action: "Close-up pusaran es dan cokelat berputar velvet tanpa hambatan di dalam blender.", vo: "\"Teknologi ProBlend Philips bikin es batu dan cokelat menyatu sehalus es krim cuma 20 detik!\"" },
+          { scene: "Scene 4 (CTA 5s)", action: "Host menyedot frappe, menunjuk keranjang kuning berisi 2 produk.", vo: "\"Hasilnya super mewah! Dapatkan Omura Cocoa & Blender Philips di keranjang kuning sekarang!\"" }
+        ]
+      },
+      {
+        title: "Mango Chocolate Layered Ice Smoothie",
+        hook: "\"Smoothie mangga cokelat lapis dua yang viral, bikinnya cuma 3 menit anti ribet!\"",
+        category: "Minuman",
+        products: [
+          { name: "Omura Cocoa Powder", role: "Bahan Layer", icon: "🍫" },
+          { name: "Philips Blender 3000", role: "Alat Pengolah", icon: "⚡" }
+        ],
+        time: "5 mnt • 2 Porsi",
+        ingredients: [
+          { text: "• 2 buah Mangga Matang Beku", tag: "Buah Segar", type: "cat" },
+          { text: "• 2 sdm Omura Premium Cocoa Powder", tag: "🍫 Bahan Cokelat", type: "cat" },
+          { text: "• 1 Unit Blender Philips 3000", tag: "⚡ Alat Pengolah", type: "synergy" },
+          { text: "• 100 ml Susu & Es Batu", tag: "Pelengkap", type: "prod" }
+        ],
+        steps: [
+          "Blend potongan mangga beku dan susu di Blender Philips sampai halus kental, tuang separuh ke gelas.",
+          "Tambahkan 2 sdm Omura Cocoa Powder ke sisa mangga di blender, blend 10 detik lagi untuk layer cokelat.",
+          "Tuang layer cokelat di atas mangga untuk gradasi warna kafe estetik."
+        ],
+        storyboard: [
+          { scene: "Scene 1 (Hook 4s)", action: "Visual layer kuning mangga dan cokelat gelap dalam gelas kaca.", vo: "\"Smoothie mangga cokelat kafe viral ini ternyata segampang ini bikinnya di rumah!\"" },
+          { scene: "Scene 2 (Action 6s)", action: "Blender Philips menghaluskan mangga beku tanpa air tambahan.", vo: "\"Blender Philips beneran kuat halusin buah beku tanpa macet, langsung super creamy!\"" },
+          { scene: "Scene 3 (Action 5s)", action: "Menambahkan Omura Cocoa Powder ke tabung blender.", vo: "\"Campur Omura Cocoa pekat buat layer cokelatnya yang rich dan wangi.\"" },
+          { scene: "Scene 4 (CTA 5s)", action: "Presentation shot dan dual CTA keranjang.", vo: "\"Cobain resep ini weekend ini ya, link produk ada di bio!\"" }
+        ]
+      },
+      {
+        title: "Avocado Choco Coffee Silk Frappe",
+        hook: "\"Pecinta alpukat kocok wajib coba versi frappe kafe ini, creamy cokelatnya nendang!\"",
+        category: "Minuman",
+        products: [
+          { name: "Omura Cocoa Powder", role: "Bahan Utama", icon: "🍫" },
+          { name: "Philips Blender 3000", role: "Alat Pengolah", icon: "⚡" }
+        ],
+        time: "6 mnt • 1 Porsi",
+        ingredients: [
+          { text: "• 1 Buah Alpukat Mentega", tag: "Bahan Alami", type: "cat" },
+          { text: "• 2 sdm Omura Premium Cocoa Powder", tag: "🍫 Bahan Utama", type: "cat" },
+          { text: "• 1 Unit Blender Philips 3000", tag: "⚡ Alat Pengolah", type: "synergy" },
+          { text: "• 1 shot Espresso & Susu Cair", tag: "Pelengkap", type: "prod" }
+        ],
+        steps: [
+          "Blend alpukat dan susu di Blender Philips hingga lembut.",
+          "Larutkan Omura Cocoa dengan espresso hangat, siram di sekeliling dinding gelas.",
+          "Tuang smoothie alpukat ke dalam gelas berlumur cokelat."
+        ],
+        storyboard: [
+          { scene: "Scene 1 (Hook 4s)", action: "Drizzle cokelat tebal di dinding gelas sebelum dituang jus alpukat.", vo: "\"Alpukat kocok biasa mah lewat, cobain Avocado Silk Frappe ini!\"" },
+          { scene: "Scene 2 (Blend 6s)", action: "Philips Blender memproses alpukat menjadi tekstur pasta lembut.", vo: "\"Pakai Blender Philips biar alpukatnya halus merata tanpa serat kasar.\"" },
+          { scene: "Scene 3 (Pour 5s)", action: "Omura Cocoa kental dituangkan di atas es alpukat.", vo: "\"Omura Cocoa ngasih rasa cokelat Belgia pekat yang balance banget sama alpukat.\"" },
+          { scene: "Scene 4 (CTA 5s)", action: "Menyeruput minuman dan dual product callout.", vo: "\"Beli Omura Cocoa dan Blender Philips-nya di keranjang kuning ya!\"" }
+        ]
+      },
+      {
+        title: "Banana Choco Protein Ice Blend",
+        hook: "\"Menu sarapan praktis penambah energi 3 menit sebelum workout!\"",
+        category: "Minuman",
+        products: [
+          { name: "Omura Cocoa Powder", role: "Bahan Utama", icon: "🍫" },
+          { name: "Philips Blender 3000", role: "Alat Pengolah", icon: "⚡" }
+        ],
+        time: "4 mnt • 1 Porsi",
+        ingredients: [
+          { text: "• 2 Buah Pisang Cavendish", tag: "Bahan", type: "cat" },
+          { text: "• 2 sdm Omura Cocoa Powder", tag: "🍫 Cokelat Murni", type: "cat" },
+          { text: "• 1 Unit Philips Blender 3000", tag: "⚡ Alat Pengolah", type: "synergy" },
+          { text: "• 200 ml Susu Oat", tag: "Susu Nabati", type: "prod" }
+        ],
+        steps: [
+          "Masukkan pisang, Omura Cocoa, dan susu oat ke dalam blender.",
+          "Blend kecepatan tinggi selama 25 detik.",
+          "Tuang ke tumbler gym untuk bekal workout."
+        ],
+        storyboard: [
+          { scene: "Scene 1 (Hook 4s)", action: "Host berpakaian olahraga memegang tumbler.", vo: "\"Minuman sarapan workout 3 menit yang rasanya kayak es krim cokelat!\"" },
+          { scene: "Scene 2 (Prep 5s)", action: "Memasukkan pisang dan Omura Cocoa ke blender.", vo: "\"Cukup pisang matang, susu oat, dan 2 scoop Omura Cocoa Powder.\"" },
+          { scene: "Scene 3 (Blend 6s)", action: "Blender berputar cepat menghaluskan bahan.", vo: "\"Blender Philips bikin teksturnya creamy thick tanpa gula tambahan.\"" },
+          { scene: "Scene 4 (CTA 5s)", action: "Closing CTA keranjang ganda.", vo: "\"Cek paket kombo hematnya di link keranjang kuning!\"" }
+        ]
+      },
+      {
+        title: "Belgian Choco Sea Salt Creamy Mocktail",
+        hook: "\"Mocktail cokelat dingin ala hotel bintang 5 cuma 4 bahan!\"",
+        category: "Minuman",
+        products: [
+          { name: "Omura Cocoa Powder", role: "Bahan Utama", icon: "🍫" },
+          { name: "Philips Blender 3000", role: "Alat Pengolah", icon: "⚡" }
+        ],
+        time: "5 mnt • 1 Porsi",
+        ingredients: [
+          { text: "• 3 sdm Omura Premium Cocoa Powder", tag: "🍫 Cokelat Pekat", type: "cat" },
+          { text: "• 1 Unit Philips Blender 3000", tag: "⚡ Alat Pengolah", type: "synergy" },
+          { text: "• 100 ml Whipping Cream & Es", tag: "Creamy Foam", type: "prod" },
+          { text: "• Sea Salt Flakes", tag: "Topping", type: "default" }
+        ],
+        steps: [
+          "Blend Omura Cocoa dan es batu dengan susu hingga velvety.",
+          "Kocok sea salt cream terpisah, tuang di atas cokelat dingin.",
+          "Sajikan dingin dengan sensasi gurih asin dan manis pekat."
+        ],
+        storyboard: [
+          { scene: "Scene 1 (Hook 4s)", action: "Shot cream cheese foam menetes di atas dark choco frappe.", vo: "\"Minuman kafe mewah ini bisa kamu bikin di rumah tiap hari!\"" },
+          { scene: "Scene 2 (Blend 6s)", action: "Blender Philips menghancurkan es dan Omura Cocoa.", vo: "\"Rahasia cokelat pekat ada di Omura Cocoa, dan halusnya dari Blender Philips.\"" },
+          { scene: "Scene 3 (Pour 5s)", action: "Menuang cream foam di atas es cokelat kental.", vo: "\"Perpaduan sea salt foam dan dark choco beneran nagih banget!\"" },
+          { scene: "Scene 4 (CTA 5s)", action: "Dual product callout.", vo: "\"Borong Omura Cocoa & Blender Philips sekarang di keranjang kuning!\"" }
+        ]
+      }
+    ];
+
+    const rotationRowsData = [
+      {
+        title: "Es Cokelat Murni Creamy ala Cafe Kekinian",
+        hook: "\"Stop beli es cokelat 35rb di mall, bikin sendiri pakai bubuk cocoa ini jauh lebih pekat!\"",
+        category: "Minuman",
+        products: [
+          { name: "Omura Premium Cocoa", role: "Bahan Utama", icon: "🍫" }
+        ],
+        time: "5 mnt • 1 Porsi",
+        ingredients: [
+          { text: "• 2 sdm Omura Premium Cocoa Powder", tag: "🍫 Produk Utama", type: "cat" },
+          { text: "• 150 ml Susu UHT Full Cream", tag: "Bahan Pelengkap", type: "prod" },
+          { text: "• 20 ml Gula Aren Cair", tag: "Pemanis", type: "default" },
+          { text: "• Es Batu Kristal", tag: "Pelengkap", type: "default" }
+        ],
+        steps: [
+          "Larutkan 2 sdm Omura Cocoa Powder dengan 40ml air panas sampai licin.",
+          "Siapkan gelas berisi es batu dan gula aren, tuang susu cair.",
+          "Tuang larutan cokelat kental di atasnya."
+        ],
+        storyboard: [
+          { scene: "Scene 1 (Hook 4s)", action: "Penuangan cokelat pekat ke atas es susu putih.", vo: "\"Stop beli es cokelat 35rb di mall, ini resep rahasia kafe!\"" },
+          { scene: "Scene 2 (Prep 5s)", action: "Mengaduk bubuk Omura Cocoa.", vo: "\"Pakai Omura Cocoa Powder biar aromanya wangi cokelat asli tanpa pemanis buatan.\"" },
+          { scene: "Scene 3 (Pour 6s)", action: "Layer cokelat terbentuk indah di gelas.", vo: "\"Tuang ke atas susu dingin, langsung jadi minuman ala kafe!\"" },
+          { scene: "Scene 4 (CTA 5s)", action: "Cek keranjang kuning.", vo: "\"Cek keranjang kuning buat dapatkan Omura Cocoa Powder promo hari ini!\"" }
+        ]
+      },
+      {
+        title: "Mango Creamy Smoothie Smooth Tanpa Gumpalan",
+        hook: "\"Bikin smoothie buah beku anti macet, rahasianya pakai blender dengan pisau 4-star ini!\"",
+        category: "Minuman",
+        products: [
+          { name: "Philips Blender 3000 Series", role: "Peralatan Utama", icon: "⚡" }
+        ],
+        time: "4 mnt • 2 Porsi",
+        ingredients: [
+          { text: "• 1 Unit Blender Philips 3000 Series", tag: "⚡ Produk Utama", type: "synergy" },
+          { text: "• 2 Buah Mangga Beku", tag: "Buah", type: "cat" },
+          { text: "• 100 ml Yogurt & Es Batu", tag: "Pelengkap", type: "prod" }
+        ],
+        steps: [
+          "Masukkan mangga beku dan yogurt ke tabung Blender Philips.",
+          "Nyalakan kecepatan 2 selama 30 detik sampai super smooth.",
+          "Tuang ke mangkuk atau gelas saji."
+        ],
+        storyboard: [
+          { scene: "Scene 1 (Hook 4s)", action: "Blender Philips menghancurkan buah beku dalam hitungan detik.", vo: "\"Bikin smoothie buah beku anti macet, ini solusinya!\"" },
+          { scene: "Scene 2 (Action 6s)", action: "Putaran mesin blender yang bertenaga.", vo: "\"Blender Philips 3000 Series punya motor 290W kuat halusin es batu tanpa sisa kasar.\"" },
+          { scene: "Scene 3 (Pour 5s)", action: "Hasil smoothie kental dituang lembut.", vo: "\"Teksturnya beneran kayak es krim gelato!\"" },
+          { scene: "Scene 4 (CTA 5s)", action: "Call to action blender.", vo: "\"Dapatkan Blender Philips original di keranjang kuning sekarang!\"" }
+        ]
+      }
+    ];
+
+    function renderWorkbenchTable() {
+      const rows = currentStrategy === 'synergy' ? synergyRowsData : rotationRowsData;
+      const tbody = document.getElementById('workbenchTbody');
+      
+      tbody.innerHTML = rows.map((r, idx) => {
+        const isSelected = idx === selectedRowIndex;
+        const prodBadges = r.products.map(p => {
+          const badgeClass = p.role.includes('Alat') || p.icon === '⚡' ? 'badge-pill synergy' : 'badge-pill cat';
+          return `<span class="${badgeClass}" style="margin-right:4px;">${p.icon} ${p.name} <small>(${p.role})</small></span>`;
+        }).join('');
+
+        return `
+          <tr style="${isSelected ? 'background: var(--status-info-soft);' : ''}">
+            <td><input type="checkbox" checked></td>
+            <td style="font-weight:800;">${idx + 1}</td>
+            <td>
+              <div style="font-weight:700;">${r.title}</div>
+              <div style="font-size:0.75rem; color:var(--text-secondary);">${r.hook}</div>
+            </td>
+            <td><span class="badge-pill cat">${r.category}</span></td>
+            <td><div>${prodBadges}</div></td>
+            <td><span class="badge-pill" style="background:var(--surface-interactive);">${r.time}</span></td>
+            <td><span class="badge-pill status-ready">Fase 1 Siap</span></td>
+            <td>
+              <button class="btn ${isSelected ? 'btn-recipe' : 'btn-secondary'} btn-sm" onclick="selectRow(${idx})">
+                ${isSelected ? 'Dipilih ↓' : 'Buka Resep'}
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      renderDrawerContent();
+    }
+
+    function selectRow(idx) {
+      selectedRowIndex = idx;
+      renderWorkbenchTable();
+      showToast(`Membuka Detail Resep #${idx + 1}`);
+    }
+
+    function renderDrawerContent() {
+      const rows = currentStrategy === 'synergy' ? synergyRowsData : rotationRowsData;
+      const row = rows[selectedRowIndex] || rows[0];
+
+      document.getElementById('drawerRecipeTitle').textContent = `📜 Detail Resep: ${row.title}`;
+      document.getElementById('drawerLineageInfo').textContent = `Lineage: Row #${selectedRowIndex + 1} → OPC Item #REC-00${selectedRowIndex + 1} • Strategi: ${currentStrategy === 'synergy' ? 'Sinergi Kombo (2 Produk Terikat)' : 'Rotasi 1 Produk'} • Target Audiens: Gen-Z & Milenial`;
+
+      // Ingredients
+      const ingUl = document.getElementById('drawerIngredientsList');
+      ingUl.innerHTML = row.ingredients.map(ing => {
+        let badgeClass = 'badge-pill';
+        if (ing.type === 'cat') badgeClass += ' cat';
+        else if (ing.type === 'synergy') badgeClass += ' synergy';
+        else if (ing.type === 'prod') badgeClass += ' prod';
+        else badgeClass += ' style="background:var(--surface-interactive);"';
+
+        return `
+          <li style="background:var(--surface); padding:8px 12px; border-radius:6px; font-size:0.85rem; display:flex; justify-content:space-between; align-items:center;">
+            <span>${ing.text}</span>
+            <span class="${badgeClass}">${ing.tag}</span>
+          </li>
+        `;
+      }).join('');
+
+      // Steps
+      const stepsOl = document.getElementById('drawerStepsList');
+      stepsOl.innerHTML = row.steps.map(s => `<li>${s}</li>`).join('');
+
+      // Storyboard
+      const sbDiv = document.getElementById('drawerStoryboardList');
+      sbDiv.innerHTML = row.storyboard.map(sc => `
+        <div style="padding:10px; background:var(--surface); border-radius:8px; margin-bottom:8px;">
+          <strong>${sc.scene}:</strong> ${sc.action}<br>
+          <span style="color:var(--status-info);">VO: ${sc.vo}</span>
+        </div>
+      `).join('');
+
+      // Caption Box
+      const captionProducts = row.products.map(p => p.name).join(' & ');
+      const captionTags = row.products.map(p => '#' + p.name.replace(/\s+/g, '')).join(' ');
+      document.getElementById('drawerCaptionBox').textContent = `Stop beli minuman kafe 50rb! Bikin sendiri cuma 5 menit praktis banget pakai ${captionProducts}! ✨\n\n${row.title.toUpperCase()}\nPorsi: ${row.time}\n\nBAHAN & ALAT:\n${row.ingredients.map(i => i.text).join('\n')}\n\nCARA MEMBUAT:\n${row.steps.map((s, idx) => `${idx + 1}. ${s}`).join('\n')}\n\n🛒 Cek keranjang kuning di bawah untuk ${captionProducts}! 👇\n${captionTags} #ResepViral #MinumanKafe #ResepPraktis`;
+    }
+
+    function setWorkbenchMode(mode) {
+      currentStrategy = mode;
+      selectedRowIndex = 0;
+
+      if (mode === 'synergy') {
+        document.getElementById('simSynergyBtn').style.background = 'var(--recipe-synergy)';
+        document.getElementById('simSynergyBtn').style.color = '#fff';
+        document.getElementById('simRotationBtn').style.background = 'var(--surface-interactive)';
+        document.getElementById('simRotationBtn').style.color = 'var(--text-primary)';
+        document.getElementById('workbenchStrategyBadge').textContent = '🌟 Sinergi Kombo (2 Produk per Resep)';
+        document.getElementById('workbenchStrategyBadge').className = 'badge-pill synergy';
+        document.getElementById('simStrategyHint').innerHTML = 'Semua 5 resep mengombinasikan <strong>Omura Cocoa + Blender Philips</strong>';
+      } else {
+        document.getElementById('simRotationBtn').style.background = 'var(--recipe-accent)';
+        document.getElementById('simRotationBtn').style.color = 'var(--on-action-primary)';
+        document.getElementById('simSynergyBtn').style.background = 'var(--surface-interactive)';
+        document.getElementById('simSynergyBtn').style.color = 'var(--text-primary)';
+        document.getElementById('workbenchStrategyBadge').textContent = '🔄 Rotasi Bergantian (1 Produk / Resep)';
+        document.getElementById('workbenchStrategyBadge').className = 'badge-pill cat';
+        document.getElementById('simStrategyHint').innerHTML = 'Resep 1 = <strong>Omura Cocoa</strong>, Resep 2 = <strong>Blender Philips</strong>';
+      }
+
+      renderWorkbenchTable();
+      showToast(`Mode strategi diubah ke: ${mode.toUpperCase()}`);
+    }
 
     function toggleTheme() {
       const html = document.documentElement;
@@ -981,6 +1319,7 @@ Cek produk di link bio! 👇
         document.getElementById('dashboardView').style.display = 'none';
         document.getElementById('workbenchView').style.display = 'block';
         document.getElementById('pageTitleHeading').textContent = 'Content Planner Workbench';
+        renderWorkbenchTable();
       }
     }
 
@@ -1004,6 +1343,28 @@ Cek produk di link bio! 👇
       showToast(`Fokus dipilih: ${focus}`);
     }
 
+    function selectStrategy(strat) {
+      currentStrategy = strat;
+      document.getElementById('stratComboCard').classList.remove('selected');
+      document.getElementById('stratRotationCard').classList.remove('selected');
+
+      if (strat === 'synergy') {
+        document.getElementById('stratComboCard').classList.add('selected');
+        showToast('🌟 Strategi: Sinergi Kombo (Semua produk dalam tiap resep)');
+      } else {
+        document.getElementById('stratRotationCard').classList.add('selected');
+        showToast('🔄 Strategi: Rotasi Bergantian (1 produk per resep)');
+      }
+    }
+
+    function updateModalProductCount() {
+      const c1 = document.getElementById('chkProd1').checked;
+      const c2 = document.getElementById('chkProd2').checked;
+      const c3 = document.getElementById('chkProd3').checked;
+      const count = (c1 ? 1 : 0) + (c2 ? 1 : 0) + (c3 ? 1 : 0);
+      showToast(`Produk dipilih: ${count} item`);
+    }
+
     function handleTargetAudienceChange(val) {
       const customInput = document.getElementById('customAudienceInput');
       if (val === 'custom') {
@@ -1016,11 +1377,10 @@ Cek produk di link bio! 👇
     }
 
     function autoFillTitle() {
-      document.getElementById('plannerTitleInput').value = 'maknaculinary - 20260917 - Resep Minuman Kafe';
+      document.getElementById('plannerTitleInput').value = 'nutribake - 20260916 - Resep Kafe Kombo';
       showToast('✨ Judul planner di-autofill!');
     }
 
-    // Save as Draft action (Simulates saving draft to database)
     function savePlannerAsDraft() {
       const btn = document.getElementById('saveDraftModalBtn');
       btn.innerHTML = '⏳ Menyimpan Draft Planner...';
@@ -1031,36 +1391,12 @@ Cek produk di link bio! 👇
         btn.disabled = false;
         closeCreatePlannerModal();
 
-        isPlannerExecuted = false;
         document.getElementById('cardStatusBadge').textContent = 'Draft';
         document.getElementById('cardStatusBadge').className = 'badge-pill status-draft';
-        
-        // Reset card action to show execute button
-        document.getElementById('cardActionArea').innerHTML = `
-          <button
-            type="button"
-            onclick="executePlannerFromCard(event)"
-            style="
-              width: 100%; padding: 10px; margin-bottom: 10px;
-              background: linear-gradient(135deg, var(--recipe-accent) 0%, #b45309 100%);
-              color: var(--on-action-primary); border: none; border-radius: 8px; font-weight: 700;
-              cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px;
-              box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
-            "
-          >
-            <span>🚀 Eksekusi AI Pipeline (Generate 5 Resep)</span>
-          </button>
-          <div style="border-top:1px solid color-mix(in srgb, var(--recipe-accent) 30%, transparent); padding-top:8px; display:flex; justify-content:space-between; font-size:12px; color:var(--recipe-accent); font-weight:700;" onclick="openRecipeWorkbench()">
-            <span>Status: Draft (Tersimpan)</span>
-            <span style="cursor:pointer;">Buka Detail Planner →</span>
-          </div>
-        `;
-
         showToast('💾 Draft Content Planner Berhasil Disimpan!');
-      }, 500);
+      }, 400);
     }
 
-    // Execute Planner Action (Simulates single-pass AI generation)
     function executePlannerFromCard(event) {
       if (event) event.stopPropagation();
       
@@ -1069,22 +1405,14 @@ Cek produk di link bio! 👇
       btn.disabled = true;
 
       setTimeout(() => {
-        isPlannerExecuted = true;
         document.getElementById('cardStatusBadge').textContent = '5 Resep';
         document.getElementById('cardStatusBadge').className = 'badge-pill status-ready';
 
-        document.getElementById('cardActionArea').innerHTML = `
-          <div style="border-top:1px solid color-mix(in srgb, var(--recipe-accent) 30%, transparent); padding-top:10px; display:flex; justify-content:space-between; font-size:12px; color:var(--recipe-accent); font-weight:700;" onclick="openRecipeWorkbench()">
-            <span>Status: 5 Baris Terencana</span>
-            <span style="cursor:pointer;">Buka Detail Planner →</span>
-          </div>
-        `;
-
-        showToast('✅ Berhasil dieksekusi! 5 baris ide resep telah tergenerate.');
+        showToast('✅ Berhasil dieksekusi! 5 baris resep kombo tergenerate.');
         setTimeout(() => {
           showView('workbench');
         }, 500);
-      }, 700);
+      }, 600);
     }
 
     function openRecipeWorkbench() {
@@ -1100,25 +1428,22 @@ Cek produk di link bio! 👇
       document.getElementById(`tabContent${tabNum}`).style.display = 'block';
     }
 
+    function simulateOpcIngest() {
+      const btn = document.getElementById('workbenchIngestBtn');
+      btn.innerHTML = '⏳ Meng-ingest ke OPC Studio...';
+      btn.disabled = true;
+
+      setTimeout(() => {
+        btn.innerHTML = '🚀 Ingest ke OPC Studio';
+        btn.disabled = false;
+        showToast('🎉 Berhasil Ingest! Kampanye OPC + 5 Item + Multi Product Bindings terbuat!');
+      }, 700);
+    }
+
     function copyFullRecipePlainText() {
-      const text = `ICED MATCHA OAT LATTE CREAMY KAFE
-Porsi: 1 Gelas (350ml) | Waktu: 5 Menit
-
-BAHAN-BAHAN:
-• 150 ml Susu Oat Barista Blend (Produk Utama)
-• 1.5 sdt (3g) Bubuk Pure Matcha Ceremonial
-• 50 ml Air Hangat (70-80°C)
-• 15-20 ml Sirup Gula Aren Organik
-• Es Batu Kristal Secukupnya
-
-CARA MEMBUAT:
-1. Larutkan matcha dengan air hangat sampai berbusa halus.
-2. Tuang sirup aren ke dasar gelas, beri es batu.
-3. Tuang 150 ml Susu Oat Barista secara perlahan.
-4. Tuang larutan matcha di bagian paling atas.
-
-TIPS:
-Gunakan Susu Oat Barista Blend agar gurih alami tanpa kental manis!`;
+      const rows = currentStrategy === 'synergy' ? synergyRowsData : rotationRowsData;
+      const row = rows[selectedRowIndex] || rows[0];
+      const text = `${row.title.toUpperCase()}\nPorsi: ${row.time}\n\nBAHAN & ALAT:\n${row.ingredients.map(i => i.text).join('\n')}\n\nCARA MEMBUAT:\n${row.steps.map((s, idx) => `${idx + 1}. ${s}`).join('\n')}\n\nTIPS:\nGunakan Omura Cocoa & Blender Philips agar hasil frappe super smooth tanpa gumpalan!`;
 
       navigator.clipboard.writeText(text).then(() => {
         showToast('📋 Teks resep lengkap berhasil disalin ke clipboard!');
@@ -1133,6 +1458,9 @@ Gunakan Susu Oat Barista Blend agar gurih alami tanpa kental manis!`;
         toast.classList.remove('show');
       }, 2500);
     }
+
+    // Initialize
+    renderWorkbenchTable();
   </script>
 </body>
 </html>
