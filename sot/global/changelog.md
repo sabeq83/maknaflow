@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.31.5 — Fix ImportPlannerModal preset loading, clip duration ingestion, and dynamic micro-pacing sync (17/09/2026)
+- Synchronize clip_duration and calibrated word limits when applying presets in ImportPlannerModal
+- Propagate clip_duration across pillar and RE campaign ingestion and PostgreSQL database layers
+- Fix dynamic 2-beat micro-pacing for 4-second video clips
+- Add unit tests and interactive mockup for preset duration loading
+
 ## V2.31.4 — Fix G-Labs image lane stale waiting lease auto-recovery (17/09/2026)
 - Auto-expire stale waiting leases in glabs-image-lane-service
 - Add startup cleanup in db-pg for orphaned waiting leases

@@ -81,6 +81,7 @@ export const POST = withTenantContext(async (request) => {
       voice_provider: global_settings.voice_provider || 'minimax',
       voice_persona: global_settings.voice_persona || 'Indonesian_casual_reporter_vv2',
       words_per_clip: global_settings.words_per_clip || '17-19 kata',
+      clip_duration: Number(global_settings.clip_duration || 8),
       tts_model_quality: global_settings.tts_model_quality || 'speech-2.8-turbo',
       voice_speed: global_settings.voice_speed !== undefined ? Number(global_settings.voice_speed) : 1.0,
       voice_volume: global_settings.voice_volume !== undefined ? Number(global_settings.voice_volume) : 1.0,

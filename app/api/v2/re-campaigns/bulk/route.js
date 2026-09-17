@@ -65,6 +65,7 @@ export const POST = withTenantContext(async (request) => {
       ffmpeg_bgm_volume: global_settings.ffmpeg_bgm_volume !== undefined ? Number(global_settings.ffmpeg_bgm_volume) : 0.15,
       video_model: global_settings.video_model || 'veo_31_lite',
       words_per_clip: global_settings.words_per_clip || '17-19 kata',
+      clip_duration: Number(global_settings.clip_duration || 8),
       face_visibility: global_settings.face_visibility || 'Faceless',
       enable_tts: global_settings.enable_tts ? 1 : 0,
       enable_glabs: global_settings.enable_glabs ? 1 : 0,

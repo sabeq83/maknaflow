@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Presets & Durasi Klip — Import Content Planner</title>
+  <link rel="stylesheet" href="/theme.css">
+  <style>
+    :root {
+      --surface: #0f172a;
+      --surface-raised: #1e293b;
+      --surface-interactive: #334155;
+      --surface-subtle: #1e293b80;
+      --border-subtle: #334155;
+      --border-strong: #475569;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --action-primary: #3b82f6;
+      --action-primary-hover: #2563eb;
+      --on-action-primary: #ffffff;
+      --status-success: #10b981;
+      --status-success-soft: rgba(16, 185, 129, 0.15);
+      --status-warning: #f59e0b;
+      --status-warning-soft: rgba(245, 158, 11, 0.15);
+      --status-info: #38bdf8;
+      --status-info-soft: rgba(56, 189, 248, 0.15);
+      --overlay-backdrop: rgba(0, 0, 0, 0.7);
+    }
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #020617;
+      color: var(--text-primary);
+    }
+    .modal-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .preset-box {
+      padding: 16px 20px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    select, input {
+      background: var(--surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+      outline: none;
+      box-sizing: border-box;
+      width: 100%;
+    }
+    select:focus, input:focus {
+      border-color: var(--action-primary);
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .grid-4 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .form-group label {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+    .preview-card {
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--surface-subtle);
+      border: 1px dashed var(--action-primary);
+      border-radius: 10px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .badge-info {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info-soft);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="modal-container">
+    <div class="header">
+      <h2 style="margin:0; font-size: 18px; display:flex; align-items:center; gap:8px;">
+        <span>🌱</span> Impor Content Planner ke Organic Pillar (OPC) — Simulasi Form & Preset
+      </h2>
+      <span class="badge badge-info">Mockup Interaktif V2.31.5</span>
+    </div>
+
+    <!-- PRESET SELECTOR -->
+    <div class="preset-box">
+      <div style="display:flex; align-items:center; gap:12px; flex:1;">
+        <span style="font-size:13px; font-weight:700; color:var(--status-info);">📋 Gunakan Preset:</span>
+        <select id="presetSelect" style="max-width: 320px;" onchange="handleSelectPreset(this.value)">
+          <option value="">-- Buat dari Awal (Tanpa Preset) --</option>
+          <option value="preset_4s">⚡ Omni Flash Fast 4s (8-9 kata, 2 Micro-Beats)</option>
+          <option value="preset_6s">⚡ Omni Flash Medium 6s (12-14 kata, 3 Micro-Beats)</option>
+          <option value="preset_8s">🎬 Standard Veo 8s (17-19 kata, 4 Micro-Beats)</option>
+          <option value="preset_10s">⚡ Omni Flash Story 10s (22-24 kata, 5 Micro-Beats)</option>
+        </select>
+      </div>
+      <button type="button" style="padding: 8px 14px; font-size: 12px; background: var(--surface-interactive); color: var(--text-primary); border: 1px solid var(--border-strong); border-radius: 6px; font-weight: 600; cursor: pointer;">
+        💾 Simpan Preset
+      </button>
+    </div>
+
+    <!-- ACCORDION CONTENT SIMULATION -->
+    <div style="background:var(--surface-raised); border:1px solid var(--border-subtle); border-radius:10px; padding:20px;">
+      <h3 style="margin-top:0; font-size:14px; color:var(--text-primary); margin-bottom:16px;">
+        2. Aesthetics & Veo Engine Settings
+      </h3>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Model Video Veo:</label>
+          <select id="videoModel" onchange="handleModelChange(this.value)">
+            <option value="omni_flash">⚡ Google Veo Omni Flash (Support 4s/6s/8s/10s)</option>
+            <option value="veo_31_lite">Google Veo 3.1 Lite (Standar Cepat 8s)</option>
+            <option value="veo_31_quality">Google Veo 3.1 Quality (Kualitas Tinggi 8s)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Durasi per Klip Video:</label>
+          <select id="clipDuration" onchange="handleDurationChange(Number(this.value))">
+            <option value="4">4s per klip (⚡ 2 Micro-Pacing Beats)</option>
+            <option value="6">6s per klip (⚡ 3 Micro-Pacing Beats)</option>
+            <option value="8">8s per klip (Default 4 Micro-Pacing Beats)</option>
+            <option value="10">10s per klip (Khusus Omni Flash 5 Micro-Pacing Beats)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-4">
+        <div class="form-group">
+          <label>Visual Style:</label>
+          <select id="visualStyle">
+            <option value="Cinematic">Cinematic</option>
+            <option value="UGC">UGC Realistis</option>
+            <option value="3D Claymation">3D Claymation</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Jumlah Klip (N):</label>
+          <input type="number" id="targetClipsCount" value="4" min="1" max="12">
+        </div>
+
+        <div class="form-group">
+          <label id="wordsLabel">Batasan Kata (4s):</label>
+          <select id="wordsPerClip">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Aspect Ratio:</label>
+          <select id="aspectRatio">
+            <option value="9:16">9:16 (Vertical)</option>
+            <option value="16:9">16:9 (Horizontal)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIVE AI PROMPT PACING SIMULATION -->
+    <div class="preview-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <strong style="font-size:13px; color:var(--status-info);">✨ Live Prompt Generator Preview (Generated Micro-Pacing I2V/T2V):</strong>
+        <span id="pacingSummary" class="badge badge-info">2 Segmen Micro-Pacing</span>
+      </div>
+      <pre id="promptPreview" style="background:#020617; padding:12px; border-radius:8px; font-size:11px; color:#e2e8f0; overflow-x:auto; margin:0; line-height:1.5;"></pre>
+    </div>
+  </div>
+
+  <script>
+    const WORDS_CONFIG = {
+      4: [
+        { value: '6-7 kata', label: '6-7 kata (Santai / Cinematic)' },
+        { value: '8-9 kata', label: '8-9 kata (Standar UGC / Default)' },
+        { value: '10-11 kata', label: '10-11 kata (Cepat / Punchy Hook)' }
+      ],
+      6: [
+        { value: '10-11 kata', label: '10-11 kata (Santai / Cinematic)' },
+        { value: '12-14 kata', label: '12-14 kata (Standar UGC / Default)' },
+        { value: '15-16 kata', label: '15-16 kata (Cepat / Fast Promo)' }
+      ],
+      8: [
+        { value: '15-16 kata', label: '15-16 kata (Santai / Cinematic)' },
+        { value: '17-19 kata', label: '17-19 kata (Standar UGC / Default)' },
+        { value: '20-22 kata', label: '20-22 kata (Cepat / Hard Sell)' }
+      ],
+      10: [
+        { value: '18-20 kata', label: '18-20 kata (Santai / Cinematic)' },
+        { value: '22-24 kata', label: '22-24 kata (Standar UGC / Default)' },
+        { value: '25-28 kata', label: '25-28 kata (Cepat / Story Deep)' }
+      ]
+    };
+
+    const PRESET_MOCKS = {
+      preset_4s: {
+        video_model: 'omni_flash',
+        clip_duration: 4,
+        words_per_clip: '8-9 kata',
+        visual_style: 'UGC'
+      },
+      preset_6s: {
+        video_model: 'omni_flash',
+        clip_duration: 6,
+        words_per_clip: '12-14 kata',
+        visual_style: 'Cinematic'
+      },
+      preset_8s: {
+        video_model: 'veo_31_lite',
+        clip_duration: 8,
+        words_per_clip: '17-19 kata',
+        visual_style: 'Cinematic'
+      },
+      preset_10s: {
+        video_model: 'omni_flash',
+        clip_duration: 10,
+        words_per_clip: '22-24 kata',
+        visual_style: 'Cinematic'
+      }
+    };
+
+    function updateWordsOptions(duration, selectedValue) {
+      const select = document.getElementById('wordsPerClip');
+      const label = document.getElementById('wordsLabel');
+      label.innerText = `Batasan Kata (${duration}s):`;
+      select.innerHTML = '';
+      const opts = WORDS_CONFIG[duration] || WORDS_CONFIG[8];
+      opts.forEach(opt => {
+        const el = document.createElement('option');
+        el.value = opt.value;
+        el.innerText = opt.label;
+        select.appendChild(el);
+      });
+      select.value = selectedValue || opts[1].value;
+    }
+
+    function updatePromptPreview(duration) {
+      const count = Math.max(1, Math.round(duration / 2));
+      const segments = [];
+      for (let i = 0; i < count; i++) {
+        const start = String(i * 2).padStart(2, '0');
+        const end = String(Math.min((i + 1) * 2, duration)).padStart(2, '0');
+        const isLast = (i === count - 1);
+        const lock = isLast ? ' + [TRANSITION LOCK]' : '';
+        segments.push(`([00:${start}-00:${end}]): (Visual Action: [Move]${lock})`);
+      }
+      const pacingStr = segments.join(', ') + '.';
+      const sample = `(VERTICAL 9:16) --ar 9:16 --no landscape [LAYER 1: INPUT & TRUTH LOCK] (Start Frame: source_frame.png), (Consistency: MAX). [LAYER 2: MICRO-PACING & ACTION (MANDATE 49)] ${pacingStr} [LAYER 3: SFX] SFX: swoosh, soft steam.`;
+      
+      document.getElementById('promptPreview').innerText = sample;
+      document.getElementById('pacingSummary').innerText = `${count} Segmen Micro-Pacing (${duration} Detik)`;
+    }
+
+    function handleDurationChange(duration) {
+      updateWordsOptions(duration);
+      updatePromptPreview(duration);
+    }
+
+    function handleSelectPreset(key) {
+      if (!key || !PRESET_MOCKS[key]) return;
+      const p = PRESET_MOCKS[key];
+      document.getElementById('videoModel').value = p.video_model;
+      document.getElementById('clipDuration').value = p.clip_duration;
+      document.getElementById('visualStyle').value = p.visual_style;
+      updateWordsOptions(p.clip_duration, p.words_per_clip);
+      updatePromptPreview(p.clip_duration);
+    }
+
+    function handleModelChange(model) {
+      const durEl = document.getElementById('clipDuration');
+      if (model !== 'omni_flash' && Number(durEl.value) === 10) {
+        durEl.value = 8;
+        handleDurationChange(8);
+      }
+    }
+
+    // Init with 4s default for test
+    handleDurationChange(4);
+  </script>
+</body>
+</html>

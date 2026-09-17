@@ -267,12 +267,17 @@ export default function ImportPlannerModal({
     if (config.visual_engine) {
       setVisualStyle(config.visual_engine.visual_style || 'Cinematic');
       setVisualMode(config.visual_engine.visual_mode || 'hybrid_lock');
-      setVideoModel(config.visual_engine.video_model || 'veo_31_lite');
+      const mod = config.visual_engine.video_model || 'veo_31_lite';
+      setVideoModel(mod);
+      const dur = Number(config.visual_engine.clip_duration ?? (mod === 'omni_flash' ? 4 : 8));
+      setClipDuration(dur);
       setFaceVisibility(config.visual_engine.face_visibility || 'Faceless');
       setTargetClipsCount(Number(config.visual_engine.target_clips_count ?? 4));
-      setWordsPerClip(config.visual_engine.words_per_clip || '20-22 kata');
+      setWordsPerClip(config.visual_engine.words_per_clip || getDefaultWordsPerClip(dur));
       setAspectRatio(config.visual_engine.aspect_ratio || '9:16');
-      if (config.visual_engine.video_model === 'veo_31_lite') {
+      if (mod === 'omni_flash') {
+        setTargetAi('Google Veo Omni Flash');
+      } else if (mod === 'veo_31_lite') {
         setTargetAi('Google Veo (8s)');
       } else {
         setTargetAi('Google Veo (5s)');
@@ -315,6 +320,16 @@ export default function ImportPlannerModal({
     } else {
       setIsVsoActive(false);
     }
+
+    // Accordion 5: Workflow Defaults
+    if (config.workflow) {
+      if (config.workflow.enable_tts !== undefined) setEnableTts(Boolean(config.workflow.enable_tts));
+      if (config.workflow.enable_glabs !== undefined) setEnableGlabs(Boolean(config.workflow.enable_glabs));
+      if (config.workflow.enable_ffmpeg !== undefined) setEnableFfmpeg(Boolean(config.workflow.enable_ffmpeg));
+      if (config.workflow.enable_social_post !== undefined) setEnableSocialPost(Boolean(config.workflow.enable_social_post));
+      if (config.workflow.ffmpeg_sync_option) setFfmpegSyncOption(config.workflow.ffmpeg_sync_option);
+      if (config.workflow.ffmpeg_video_scale !== undefined) setFfmpegVideoScale(Number(config.workflow.ffmpeg_video_scale));
+    }
   };
 
   const handleSaveAsPreset = async (e) => {
@@ -355,7 +370,7 @@ export default function ImportPlannerModal({
         target_clips_count: Number(targetClipsCount ?? 4),
         words_per_clip: wordsPerClip,
         aspect_ratio: aspectRatio,
-        clip_duration: videoModel === 'veo_31_lite' ? 8 : 5
+        clip_duration: Number(clipDuration || 8)
       },
       product_bridging: {
         is_bridging_active: Boolean(isBridgingActive),
