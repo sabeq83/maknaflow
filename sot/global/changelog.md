@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.2 — Fix OPC Ingest and Multi-Product Snapshot for Recipe Campaign (17/09/2026)
+- Fix createPillarCampaignBundle signature in recipe campaign ingest
+- Add persistent multi-product snapshot and auto-hydration from product_extractions
+- Rotate all selected catalog products across generated recipe rows
+
 ## V2.31.1 — Fix Recipe Planner execution and key resolution (16/09/2026)
 - Fix content_planner_rows column insertion for recipe campaign
 - Fallback Gemini API key resolution to environment and key pool

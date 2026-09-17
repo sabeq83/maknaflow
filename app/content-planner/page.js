@@ -18,6 +18,7 @@ export default function ContentPlannerDashboard() {
   const [plannerFocus, setPlannerFocus] = useState('product_campaign');
   const [recipeCategory, setRecipeCategory] = useState('minuman');
   const [recipeProductIds, setRecipeProductIds] = useState([]);
+  const [selectedProductsMap, setSelectedProductsMap] = useState({});
   const [recipeCount, setRecipeCount] = useState(5);
   const [brandContext, setBrandContext] = useState('');
   const [contentGoal, setContentGoal] = useState('');
@@ -365,13 +366,15 @@ export default function ContentPlannerDashboard() {
             category: recipeCategory,
             product_ids: recipeProductIds
           } : null,
-          products_snapshot: plannerFocus === 'recipe_campaign' ? existingProducts.filter(p => recipeProductIds.includes(p.id)).map(p => ({
-            product_id: p.id,
-            name: p.product_name,
-            description: p.product_description,
-            usp: p.unique_selling_point,
-            reference_image: p.product_photo_url || p.photo_url || null
-          })) : [],
+          products_snapshot: plannerFocus === 'recipe_campaign' 
+            ? recipeProductIds.map(id => selectedProductsMap[id] || existingProducts.find(p => p.id === id)).filter(Boolean).map(p => ({
+                product_id: p.id,
+                name: p.product_name,
+                description: p.product_description,
+                usp: p.unique_selling_point,
+                reference_image: p.product_photo_url || p.photo_url || null
+              }))
+            : [],
           // World-Aware fields (Tahap 1)
           content_world: contentWorld,
           knowledge_domain: knowledgeDomain,
@@ -1367,6 +1370,7 @@ export default function ContentPlannerDashboard() {
                                       setRecipeProductIds(recipeProductIds.filter(id => id !== p.id));
                                     } else {
                                       setRecipeProductIds([...recipeProductIds, p.id]);
+                                      setSelectedProductsMap(prev => ({ ...prev, [p.id]: p }));
                                     }
                                   }}
                                   style={{ cursor: 'pointer', width: '16px', height: '16px' }}
