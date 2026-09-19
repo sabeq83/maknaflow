@@ -305,42 +305,109 @@ export default function ContentPlannerWorkbench() {
   const selectedRow = rows.find(r => r.id === selectedRowId) || (rows.length > 0 ? rows[0] : null);
   const selectedRecipeIdea = parseJsonSafe(selectedRow?.recipe_idea_json, {});
 
+  function getResolvedIngredients(idea, row) {
+    if (Array.isArray(idea?.ingredients) && idea.ingredients.length > 0) {
+      return idea.ingredients;
+    }
+    if (Array.isArray(idea?.featured_products) && idea.featured_products.length > 0) {
+      const list = idea.featured_products.map(fp => ({
+        name: fp.name || fp.product_name,
+        amount: fp.role === 'appliance' ? '1' : '1-2',
+        unit: fp.role === 'appliance' ? 'Unit' : 'sdm',
+        product_id: fp.product_id || null
+      }));
+      list.push({ name: 'Susu / Air Kelapa & Es Batu', amount: '150', unit: 'ml', product_id: null });
+      return list;
+    }
+    if (row?.product || row?.product_reference) {
+      return [
+        { name: row.product || row.product_reference, amount: '1-2', unit: 'sdm', product_id: row.product_id || null },
+        { name: 'Susu / Pelengkap & Es Batu', amount: '150', unit: 'ml', product_id: null }
+      ];
+    }
+    return [{ name: 'Bahan-Bahan Sesuai Resep', amount: '', unit: '', product_id: null }];
+  }
+
+  function getResolvedSteps(idea, row) {
+    if (Array.isArray(idea?.steps) && idea.steps.length > 0) {
+      return idea.steps.map((st, i) => ({
+        index: st.index || (i + 1),
+        instruction: typeof st === 'string' ? st : (st.instruction || '')
+      }));
+    }
+    return [
+      { index: 1, instruction: `Persiapkan semua bahan dan alat untuk ${idea?.recipe_title || row?.title || 'resep kuliner'}.` },
+      { index: 2, instruction: `Olah bahan utama ${row?.product_reference || 'katalog'} sampai larut dan bertekstur lembut.` },
+      { index: 3, instruction: `Tuangkan ke dalam wadah atau gelas saji dan sajikan segar segera.` }
+    ];
+  }
+
+  function getResolvedStoryboard(idea, row) {
+    if (Array.isArray(idea?.storyboard) && idea.storyboard.length > 0) {
+      return idea.storyboard.map((sc, i) => ({
+        num: sc.index || (i + 1),
+        title: sc.title || `Scene ${i + 1}`,
+        visual: sc.visual || 'Tampilan visual menggugah selera.',
+        vo: sc.vo || 'Naskah narasi kuliner yang engaging.'
+      }));
+    }
+    return [
+      {
+        num: 1,
+        title: 'Scene 1: Hook / Problem (3-4 Detik)',
+        visual: row?.visual_action || idea?.visual_highlight || 'Beauty close-up hidangan segar menggugah selera.',
+        vo: row?.hook || idea?.hook_3s || idea?.hook || 'Mau resep praktis yang lezat di rumah? Simak yang satu ini yuk!'
+      },
+      {
+        num: 2,
+        title: 'Scene 2: Persiapan Bahan & Mixing',
+        visual: `Penakaran dan persiapan bahan ${row?.product_reference || 'katalog'}.`,
+        vo: `Campurkan ${row?.product_reference || 'bahan utama'} agar aromanya wangi dan rasanya autentik.`
+      },
+      {
+        num: 3,
+        title: 'Scene 3: Eksekusi Produk & Pengolahan',
+        visual: `Aksi pengolahan menggunakan ${row?.product_reference || 'produk'} secara praktis.`,
+        vo: `Prosesnya super cepat dan menghasilkan tekstur sempurna tanpa ribet.`
+      },
+      {
+        num: 4,
+        title: 'Scene 4: Plating / Hero Taste Shot & CTA',
+        visual: 'Hero shot hasil akhir dengan garnish menarik dan ajakan checkout.',
+        vo: row?.cta || idea?.cta || 'Yuk recook sekarang! Klik keranjang kuning untuk pesan produk originalnya!'
+      }
+    ];
+  }
+
   function getRecipePlainText(row) {
     if (!row) return '';
     const idea = parseJsonSafe(row.recipe_idea_json, {});
     const title = (idea.recipe_title || row.title || 'Resep Kuliner').toUpperCase();
-    const servings = idea.servings || '1-2 Porsi';
-    const prep = idea.prep_time_minutes || 5;
-    const cook = idea.cook_time_minutes || 10;
+    const servings = idea.servings || idea.estimated_servings || '1-2 Porsi';
+    const prep = idea.prep_time_minutes || 2;
+    const cook = idea.cook_time_minutes || idea.estimated_cooking_minutes || 3;
     const total = Number(prep) + Number(cook);
 
     let text = `${title}\nPorsi: ${servings} | Waktu: ${total} Menit\n\nBAHAN-BAHAN:\n`;
-    const ings = Array.isArray(idea.ingredients) ? idea.ingredients : [];
-    if (ings.length === 0) {
-      text += `- Bahan-bahan sesuai selera\n`;
-    } else {
-      for (const ing of ings) {
-        const amt = ing.amount ? `${ing.amount} ` : '';
-        const unt = ing.unit ? `${ing.unit} ` : '';
-        const nm = ing.name || 'Bahan';
-        const tag = ing.product_id ? ' (Produk Utama)' : '';
-        text += `- ${amt}${unt}${nm}${tag}\n`;
-      }
+    const ings = getResolvedIngredients(idea, row);
+    for (const ing of ings) {
+      const amt = ing.amount ? `${ing.amount} ` : '';
+      const unt = ing.unit ? `${ing.unit} ` : '';
+      const nm = ing.name || 'Bahan';
+      const tag = ing.product_id ? ' (Produk Terikat)' : '';
+      text += `- ${amt}${unt}${nm}${tag}\n`;
     }
 
     text += `\nCARA MEMBUAT:\n`;
-    const stps = Array.isArray(idea.steps) ? idea.steps : [];
-    if (stps.length === 0) {
-      text += `1. Campurkan semua bahan hingga matang dan sajikan.\n`;
-    } else {
-      stps.forEach((st, i) => {
-        text += `${i + 1}. ${st.instruction || st}\n`;
-      });
-    }
+    const stps = getResolvedSteps(idea, row);
+    stps.forEach((st, i) => {
+      text += `${i + 1}. ${st.instruction || st}\n`;
+    });
 
-    if (Array.isArray(idea.chef_tips) && idea.chef_tips.length > 0) {
+    const tips = Array.isArray(idea.chef_tips) && idea.chef_tips.length > 0 ? idea.chef_tips : (idea.tips || []);
+    if (tips.length > 0) {
       text += `\nTIPS CHEF:\n`;
-      idea.chef_tips.forEach(tp => {
+      tips.forEach(tp => {
         text += `- ${tp}\n`;
       });
     }
@@ -359,8 +426,9 @@ export default function ContentPlannerWorkbench() {
     if (!selectedRow) return;
     const idea = parseJsonSafe(selectedRow.recipe_idea_json, {});
     const rText = getRecipePlainText(selectedRow);
-    const hook = selectedRow.hook || idea.hook_3s || 'Resep viral yang wajib dicoba!';
-    const caption = `${hook}\n\n${rText}\n\nYuk recook sekarang! Simpan postingan ini ya ✨\n#ResepKuliner #ResepMudah #MasakDiRumah`;
+    const hook = selectedRow.hook || idea.hook_3s || idea.hook || 'Resep viral yang wajib dicoba!';
+    const cta = selectedRow.cta || idea.cta || 'Yuk recook sekarang! Simpan postingan ini ya ✨';
+    const caption = `${hook}\n\n${rText}\n\n${cta}\n#ResepKuliner #ResepMudah #MasakDiRumah #ResepViral`;
     navigator.clipboard.writeText(caption);
     showToast('📱 Caption Media Sosial Lengkap Berhasil Disalin!');
   }
@@ -1026,15 +1094,15 @@ export default function ContentPlannerWorkbench() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '20px' }}>
                   <div style={{ background: 'var(--surface-raised)', padding: '12px', borderRadius: '10px', textAlign: 'center' }}>
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Porsi</div>
-                    <div style={{ fontWeight: 800, fontSize: '15px', color: 'var(--text-primary)' }}>{selectedRecipeIdea.servings || '1-2 Porsi'}</div>
+                    <div style={{ fontWeight: 800, fontSize: '15px', color: 'var(--text-primary)' }}>{selectedRecipeIdea.servings || selectedRecipeIdea.estimated_servings || '1-2 Porsi'}</div>
                   </div>
                   <div style={{ background: 'var(--surface-raised)', padding: '12px', borderRadius: '10px', textAlign: 'center' }}>
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Waktu Persiapan</div>
-                    <div style={{ fontWeight: 800, fontSize: '15px', color: 'var(--text-primary)' }}>{selectedRecipeIdea.prep_time_minutes || 5} Menit</div>
+                    <div style={{ fontWeight: 800, fontSize: '15px', color: 'var(--text-primary)' }}>{selectedRecipeIdea.prep_time_minutes || 2} Menit</div>
                   </div>
                   <div style={{ background: 'var(--surface-raised)', padding: '12px', borderRadius: '10px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Waktu Memasak</div>
-                    <div style={{ fontWeight: 800, fontSize: '15px', color: 'var(--text-primary)' }}>{selectedRecipeIdea.cook_time_minutes || 10} Menit</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Waktu Memasak / Blend</div>
+                    <div style={{ fontWeight: 800, fontSize: '15px', color: 'var(--text-primary)' }}>{selectedRecipeIdea.cook_time_minutes || selectedRecipeIdea.estimated_cooking_minutes || 3} Menit</div>
                   </div>
                   <div style={{ background: 'var(--surface-raised)', padding: '12px', borderRadius: '10px', textAlign: 'center' }}>
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Tingkat Kesulitan</div>
@@ -1048,18 +1116,13 @@ export default function ContentPlannerWorkbench() {
                     🛒 Bahan-Bahan &amp; Takaran Pas:
                   </h4>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '10px' }}>
-                    {(Array.isArray(selectedRecipeIdea.ingredients) && selectedRecipeIdea.ingredients.length > 0 ? selectedRecipeIdea.ingredients : [
-                      { name: 'Susu Oat Barista Blend', amount: '150', unit: 'ml', product_id: 'prod_1' },
-                      { name: 'Bubuk Pure Matcha', amount: '1.5', unit: 'sdt' },
-                      { name: 'Sirup Gula Aren', amount: '15', unit: 'ml' },
-                      { name: 'Es Batu & Air Hangat', amount: '', unit: 'secukupnya' }
-                    ]).map((ing, iIdx) => (
+                    {getResolvedIngredients(selectedRecipeIdea, selectedRow).map((ing, iIdx) => (
                       <div key={iIdx} style={{ background: 'var(--surface-raised)', padding: '10px 14px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--border-subtle)' }}>
                         <span style={{ fontWeight: 600, fontSize: '13px', color: 'var(--text-primary)' }}>
                           • {ing.name || 'Bahan'}
                         </span>
                         <span style={{ fontSize: '12px', color: ing.product_id ? 'var(--status-info)' : 'var(--text-secondary)', fontWeight: 700, background: ing.product_id ? 'var(--status-info-soft)' : 'var(--surface-interactive)', padding: '2px 8px', borderRadius: '4px' }}>
-                          {ing.amount ? `${ing.amount} ` : ''}{ing.unit || ''}{ing.product_id ? ' (Produk Utama)' : ''}
+                          {ing.amount ? `${ing.amount} ` : ''}{ing.unit || ''}{ing.product_id ? ' (Produk Terikat)' : ''}
                         </span>
                       </div>
                     ))}
@@ -1072,12 +1135,7 @@ export default function ContentPlannerWorkbench() {
                     🍳 Cara Membuat (Langkah Berurutan):
                   </h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {(Array.isArray(selectedRecipeIdea.steps) && selectedRecipeIdea.steps.length > 0 ? selectedRecipeIdea.steps : [
-                      { index: 1, instruction: 'Larutkan bubuk matcha dengan 50 ml air hangat menggunakan frother hingga berbusa halus.' },
-                      { index: 2, instruction: 'Tuang sirup gula aren di dasar gelas saji, lalu tambahkan es batu secukupnya.' },
-                      { index: 3, instruction: 'Tuang Susu Oat Barista secara perlahan hingga mengisi 3/4 bagian gelas.' },
-                      { index: 4, instruction: 'Tuangkan larutan matcha di bagian paling atas untuk menciptakan layer cantik yang siap disajikan!' }
-                    ]).map((st, sIdx) => (
+                    {getResolvedSteps(selectedRecipeIdea, selectedRow).map((st, sIdx) => (
                       <div key={sIdx} style={{ background: 'var(--surface-raised)', padding: '12px 14px', borderRadius: '8px', display: 'flex', gap: '12px', border: '1px solid var(--border-subtle)' }}>
                         <span style={{ background: 'var(--recipe-accent, #f59e0b)', color: 'var(--on-action-primary)', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '12px', flexShrink: 0 }}>
                           {st.index || (sIdx + 1)}
@@ -1091,13 +1149,13 @@ export default function ContentPlannerWorkbench() {
                 </div>
 
                 {/* Chef Tips */}
-                {Array.isArray(selectedRecipeIdea.chef_tips) && selectedRecipeIdea.chef_tips.length > 0 && (
+                {((Array.isArray(selectedRecipeIdea.chef_tips) && selectedRecipeIdea.chef_tips.length > 0) || (Array.isArray(selectedRecipeIdea.tips) && selectedRecipeIdea.tips.length > 0)) && (
                   <div style={{ background: 'var(--status-warning-soft)', border: '1px solid var(--status-warning)', padding: '14px', borderRadius: '10px' }}>
                     <h5 style={{ margin: '0 0 6px', color: 'var(--status-warning)', fontSize: '13px', fontWeight: 800 }}>
                       💡 Tips Chef Agar Anti-Gagal:
                     </h5>
                     <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '12px', color: 'var(--text-primary)' }}>
-                      {selectedRecipeIdea.chef_tips.map((tip, tIdx) => (
+                      {(selectedRecipeIdea.chef_tips || selectedRecipeIdea.tips).map((tip, tIdx) => (
                         <li key={tIdx} style={{ marginBottom: '4px' }}>{tip}</li>
                       ))}
                     </ul>
@@ -1109,28 +1167,7 @@ export default function ContentPlannerWorkbench() {
             {/* Tab 2: Storyboard & VO */}
             {drawerTab === 2 && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
-                {[
-                  {
-                    num: 1, title: 'Scene 1: Hook / Problem (3-4 Detik)',
-                    visual: selectedRow.visual_action || 'Beauty close-up hidangan es batu & pour shot yang menggugah selera.',
-                    vo: selectedRow.hook || selectedRecipeIdea.hook_3s || 'Stop beli mahal di kafe, ini resep rahasia 3 bahan yang wajib kamu coba!'
-                  },
-                  {
-                    num: 2, title: 'Scene 2: Persiapan Bahan & Mixing',
-                    visual: 'Aksi melarutkan bahan utama dengan foam mixer dan drizzle sirup di dinding gelas.',
-                    vo: 'Campurkan bahan utama dengan air hangat sampai merata dan harum sempurna.'
-                  },
-                  {
-                    num: 3, title: 'Scene 3: Eksekusi Produk & Layering',
-                    visual: `Tuang produk ${selectedRow.product_reference || 'katalog'} secara perlahan membentuk layer estetik.`,
-                    vo: `Tambahkan ${selectedRow.product_reference || 'bahan utama'} agar teksturnya super creamy dan rich.`
-                  },
-                  {
-                    num: 4, title: 'Scene 4: Plating / Hero Taste Shot & CTA',
-                    visual: 'Hero shot hasil akhir dengan sedotan, diangkat ke kamera dalam pencahayaan kafe alami.',
-                    vo: 'Rasanya mewah banget persis di kafe! Cek link di bio untuk coba produknya ya!'
-                  }
-                ].map((sc, scIdx) => (
+                {getResolvedStoryboard(selectedRecipeIdea, selectedRow).map((sc, scIdx) => (
                   <div key={scIdx} style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', borderRadius: '10px', padding: '14px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                       <span style={{ fontWeight: 800, fontSize: '13px', color: 'var(--recipe-accent, var(--status-warning))' }}>

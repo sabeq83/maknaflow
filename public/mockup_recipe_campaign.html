@@ -998,139 +998,143 @@ CARA MEMBUAT:
 
     const synergyRowsData = [
       {
-        title: "Es Dark Chocolate Sea Salt Silk Frappe",
-        hook: "\"Stop beli choco frappe 50rb di kafe, blender ini bikin cokelat pekat sehalus sutra dalam 20 detik!\"",
+        title: "Smoothie Diet Choco-Matcha Layer Shake",
+        hook: "\"Mau minum manis pas diet tapi takut berat badan naik? Bikin minuman 2-layer rendah kalori ini yuk, Bun!\"",
+        category: "Minuman",
+        products: [
+          { name: "Nutrifarm Matcha Premium", role: "Bahan Utama", icon: "🍵" },
+          { name: "Omura Cocoa Powder", role: "Bahan Pendukung", icon: "🍫" },
+          { name: "SAMONO Juicer Y5 Plus", role: "Alat Pengolah", icon: "⚡" }
+        ],
+        time: "3 mnt • 1 Porsi",
+        ingredients: [
+          { text: "• 1 sdt Nutrifarm Matcha Premium", tag: "🍵 Matcha Diet", type: "cat" },
+          { text: "• 1 sdt Omura Premium Cocoa Powder", tag: "🍫 Cokelat Murni", type: "cat" },
+          { text: "• 1 Unit SAMONO Juicer Y5 Plus", tag: "⚡ Alat Pengolah", type: "synergy" },
+          { text: "• 100 ml Susu Almond & Es Batu", tag: "Pelengkap Sehat", type: "prod" }
+        ],
+        steps: [
+          "Blend 1 sdt Nutrifarm Matcha dengan 100ml susu almond dan es batu di SAMONO Juicer 15 detik untuk layer hijau.",
+          "Blend 1 sdt Omura Cocoa dengan 50ml air kelapa dan setengah pisang untuk layer cokelat.",
+          "Tuang layer cokelat di dasar gelas, lalu tuang layer matcha di atasnya hingga terbentuk gradasi 2 warna estetik."
+        ],
+        storyboard: [
+          { scene: "Scene 1 (Hook 4s)", action: "Visual gradasi hijau matcha dan cokelat murni dalam gelas saji bening.", vo: "\"Mau minum manis pas diet tapi takut timbangan naik? Bikin minuman 2-layer rendah kalori ini yuk!\"" },
+          { scene: "Scene 2 (Matcha 5s)", action: "Memasukkan Nutrifarm Matcha ke botol SAMONO Juicer.", vo: "\"Nutrifarm Matcha murni kaya antioksidan bantu bakar lemak dan jaga fokus sepanjang hari.\"" },
+          { scene: "Scene 3 (Juicer 6s)", action: "SAMONO Juicer berputar 15 detik menghaluskan es batu dan Cocoa Omura.", vo: "\"Cukup tekan SAMONO Juicer 15 detik, teksturnya langsung super creamy tanpa gula tambahan.\"" },
+          { scene: "Scene 4 (CTA 5s)", action: "Tampilan hidangan dan callout paket hemat 3 produk.", vo: "\"Yuk recook sekarang! Checkout paket Matcha, Cocoa, dan SAMONO Juicer di keranjang kuning!\"" }
+        ]
+      },
+      {
+        title: "Choco-Matcha Oat Booster Diet Shake",
+        hook: "\"Sarapan diet anti ribet yang bikin kenyang seharian cuma butuh waktu 15 detik!\"",
         category: "Minuman",
         products: [
           { name: "Omura Cocoa Powder", role: "Bahan Utama", icon: "🍫" },
-          { name: "Philips Blender 3000", role: "Alat Pengolah", icon: "⚡" }
+          { name: "Nutrifarm Matcha Premium", role: "Bahan Pendukung", icon: "🍵" },
+          { name: "SAMONO Juicer Y5 Plus", role: "Alat Pengolah", icon: "⚡" }
+        ],
+        time: "2 mnt • 1 Porsi",
+        ingredients: [
+          { text: "• 1 sdm Omura Premium Cocoa Powder", tag: "🍫 Cokelat Murni", type: "cat" },
+          { text: "• 1/2 sdt Nutrifarm Matcha Premium", tag: "🍵 Energi Booster", type: "cat" },
+          { text: "• 3 sdm Rolled Oat", tag: "Serat Alami", type: "prod" },
+          { text: "• 1 Unit SAMONO Juicer Y5 Plus", tag: "⚡ Alat Pengolah", type: "synergy" }
+        ],
+        steps: [
+          "Masukkan rolled oat, Omura Cocoa, dan Nutrifarm Matcha ke dalam botol SAMONO Juicer.",
+          "Tambahkan 200ml susu kedelai tawar dingin.",
+          "Pasang mata pisau dan nyalakan SAMONO Juicer selama 15 detik sampai oat halus lembut siap minum."
+        ],
+        storyboard: [
+          { scene: "Scene 1 (Hook 4s)", action: "Tuangan oat shake lembut nan kental langsung dari botol SAMONO Juicer.", vo: "\"Sarapan diet anti ribet yang bikin kenyang seharian cuma butuh 15 detik!\"" },
+          { scene: "Scene 2 (Prep 5s)", action: "Memasukkan 1 sdm Omura Cocoa Powder dan 1/2 sdt Matcha.", vo: "\"Omura Cocoa beri rasa dark choco autentik, ditambah Nutrifarm Matcha biar gak lemas pas diet.\"" },
+          { scene: "Scene 3 (Juicer 5s)", action: "6 mata pisau SAMONO Juicer melumat oat dan bahan dalam sekejap.", vo: "\"SAMONO Juicer 6 mata pisau bikin tekstur oat shake super lembut tanpa ampas kasar.\"" },
+          { scene: "Scene 4 (CTA 5s)", action: "Host meminum shake segar dan menunjuk keranjang kuning.", vo: "\"Sarapan praktis bantu hempas lemak! Klik keranjang kuning sebelum kehabisan promo!\"" }
+        ]
+      },
+      {
+        title: "Avocado Choco-Matcha Slim Detox Juice",
+        hook: "\"Bunda mau jus alpukat creamy tapi tetap aman buat garis pinggang? Ini dia rahasianya!\"",
+        category: "Minuman",
+        products: [
+          { name: "SAMONO Juicer Y5 Plus", role: "Alat Pengolah Utama", icon: "⚡" },
+          { name: "Nutrifarm Matcha Premium", role: "Bahan Utama", icon: "🍵" },
+          { name: "Omura Cocoa Powder", role: "Garnish Topping", icon: "🍫" }
         ],
         time: "5 mnt • 1 Porsi",
         ingredients: [
-          { text: "• 2 sdm Omura Premium Cocoa Powder", tag: "🍫 Bahan Utama", type: "cat" },
-          { text: "• 1 Unit Blender Philips 3000 Series", tag: "⚡ Alat Pengolah", type: "synergy" },
-          { text: "• 150 ml Susu Full Cream UHT", tag: "Bahan Pelengkap", type: "prod" },
-          { text: "• 1 cup Es Batu Kristal & Sejumput Sea Salt", tag: "Topping", type: "default" }
+          { text: "• 1 Unit SAMONO Juicer Y5 Plus", tag: "⚡ Alat Pengolah", type: "synergy" },
+          { text: "• 1 sdt Nutrifarm Matcha Premium", tag: "🍵 Matcha EGCG", type: "cat" },
+          { text: "• 1/2 sdt Omura Cocoa Powder (Ayak)", tag: "🍫 Topping Cokelat", type: "cat" },
+          { text: "• 1/2 Buah Alpukat Beku & 150ml Air Es", tag: "Lemak Baik", type: "prod" }
         ],
         steps: [
-          "Masukkan 2 sdm Omura Premium Cocoa Powder, susu, gula aren, dan es batu ke tabung Blender Philips.",
-          "Nyalakan Blender Philips dengan mode pulse selama 20 detik hingga es batu hancur lembut menjadi frappe sutra.",
-          "Tuang frappe ke gelas saji, beri taburan sea salt dan dusting sedikit bubuk cocoa di atasnya.",
-          "Es Dark Chocolate Frappe siap dinikmati—super creamy tanpa ampas berkat ProBlend Philips & Omura Cocoa!"
+          "Lumatkan 1/2 buah alpukat beku dan 150ml air es dengan SAMONO Juicer selama 15 detik.",
+          "Larutkan 1 sdt Nutrifarm Matcha ke dalam adonan alpukat hingga hijau pekat kaya nutrisi.",
+          "Tuang ke gelas saji dan ayak 1/2 sdt Omura Cocoa Powder di atasnya sebagai aroma garnish."
         ],
         storyboard: [
-          { scene: "Scene 1 (Hook 4s)", action: "Host memegang bungkus Omura Cocoa di samping Blender Philips menyala.", vo: "\"Stop beli choco frappe 50rb di kafe, rahasia selembut sutra ada di kombinasi ini!\"" },
-          { scene: "Scene 2 (Prep 5s)", action: "Menakar 2 sdm Omura Cocoa Powder dan es batu ke dalam tabung Blender Philips.", vo: "\"Tuang 2 scoop Omura Cocoa pekat dan es batu langsung ke Blender Philips 3000 Series.\"" },
-          { scene: "Scene 3 (Blend Action 6s)", action: "Close-up pusaran es dan cokelat berputar velvet tanpa hambatan di dalam blender.", vo: "\"Teknologi ProBlend Philips bikin es batu dan cokelat menyatu sehalus es krim cuma 20 detik!\"" },
-          { scene: "Scene 4 (CTA 5s)", action: "Host menyedot frappe, menunjuk keranjang kuning berisi 2 produk.", vo: "\"Hasilnya super mewah! Dapatkan Omura Cocoa & Blender Philips di keranjang kuning sekarang!\"" }
+          { scene: "Scene 1 (Hook 4s)", action: "Jus alpukat hijau pekat dengan taburan cocoa powder di atas foam.", vo: "\"Bunda mau jus alpukat creamy tapi tetap aman buat lingkar pinggang? Ini rahasianya!\"" },
+          { scene: "Scene 2 (Alpukat 5s)", action: "Melumat alpukat beku dengan SAMONO Juicer kaca.", vo: "\"SAMONO Juicer wadah kaca higienis kuat haluskan buah beku dalam 15 detik.\"" },
+          { scene: "Scene 3 (Matcha 5s)", action: "Mencampurkan Nutrifarm Matcha dan taburan Omura Cocoa.", vo: "\"Nutrifarm Matcha bakar kalori lebih optimal, ditambah aroma cokelat murni dari Omura Cocoa.\"" },
+          { scene: "Scene 4 (CTA 5s)", action: "Call to action promo combo 3 produk.", vo: "\"Tampil langsing gak pakai mahal! Ambil promo kombo 3 produk di keranjang kuning ya!\"" }
         ]
       },
       {
-        title: "Mango Chocolate Layered Ice Smoothie",
-        hook: "\"Smoothie mangga cokelat lapis dua yang viral, bikinnya cuma 3 menit anti ribet!\"",
+        title: "Banana Matcha-Choco Energy Slim Shake",
+        hook: "\"Sering lemas pas lagi diet? Coba bikin energy booster enak bebas rasa bersalah ini!\"",
         category: "Minuman",
         products: [
-          { name: "Omura Cocoa Powder", role: "Bahan Layer", icon: "🍫" },
-          { name: "Philips Blender 3000", role: "Alat Pengolah", icon: "⚡" }
+          { name: "Nutrifarm Matcha Premium", role: "Bahan Utama", icon: "🍵" },
+          { name: "Omura Cocoa Powder", role: "Bahan Pendukung", icon: "🍫" },
+          { name: "SAMONO Juicer Y5 Plus", role: "Alat Pengolah", icon: "⚡" }
         ],
-        time: "5 mnt • 2 Porsi",
+        time: "3 mnt • 1 Porsi",
         ingredients: [
-          { text: "• 2 buah Mangga Matang Beku", tag: "Buah Segar", type: "cat" },
-          { text: "• 2 sdm Omura Premium Cocoa Powder", tag: "🍫 Bahan Cokelat", type: "cat" },
-          { text: "• 1 Unit Blender Philips 3000", tag: "⚡ Alat Pengolah", type: "synergy" },
-          { text: "• 100 ml Susu & Es Batu", tag: "Pelengkap", type: "prod" }
+          { text: "• 1 sdt Nutrifarm Matcha Premium", tag: "🍵 L-Theanine Focus", type: "cat" },
+          { text: "• 1 sdt Omura Premium Cocoa Powder", tag: "🍫 Dark Choco Murni", type: "cat" },
+          { text: "• 1 Buah Pisang Matang & 150ml Air Kelapa", tag: "Energi Alami", type: "prod" },
+          { text: "• 1 Unit SAMONO Juicer Y5 Plus", tag: "⚡ Alat Pengolah", type: "synergy" }
         ],
         steps: [
-          "Blend potongan mangga beku dan susu di Blender Philips sampai halus kental, tuang separuh ke gelas.",
-          "Tambahkan 2 sdm Omura Cocoa Powder ke sisa mangga di blender, blend 10 detik lagi untuk layer cokelat.",
-          "Tuang layer cokelat di atas mangga untuk gradasi warna kafe estetik."
+          "Potong pisang dan masukkan ke dalam wadah kaca SAMONO Juicer.",
+          "Tambahkan Nutrifarm Matcha, Omura Cocoa, dan 150ml air kelapa segar.",
+          "Putar blender secara portable selama 15 detik, siap diminum langsung dari botol."
         ],
         storyboard: [
-          { scene: "Scene 1 (Hook 4s)", action: "Visual layer kuning mangga dan cokelat gelap dalam gelas kaca.", vo: "\"Smoothie mangga cokelat kafe viral ini ternyata segampang ini bikinnya di rumah!\"" },
-          { scene: "Scene 2 (Action 6s)", action: "Blender Philips menghaluskan mangga beku tanpa air tambahan.", vo: "\"Blender Philips beneran kuat halusin buah beku tanpa macet, langsung super creamy!\"" },
-          { scene: "Scene 3 (Action 5s)", action: "Menambahkan Omura Cocoa Powder ke tabung blender.", vo: "\"Campur Omura Cocoa pekat buat layer cokelatnya yang rich dan wangi.\"" },
-          { scene: "Scene 4 (CTA 5s)", action: "Presentation shot dan dual CTA keranjang.", vo: "\"Cobain resep ini weekend ini ya, link produk ada di bio!\"" }
+          { scene: "Scene 1 (Hook 4s)", action: "Pusaran cokelat-hijau berbusa halus saat SAMONO Juicer beroperasi.", vo: "\"Sering lemas pas lagi diet? Bikin energy booster enak tanpa rasa bersalah ini!\"" },
+          { scene: "Scene 2 (Prep 5s)", action: "Memasukkan potongan pisang, bubuk Matcha dan Cocoa.", vo: "\"Nutrifarm Matcha kasih fokus seharian, dan Omura Cocoa memanjakan lidah tanpa gula.\"" },
+          { scene: "Scene 3 (Juice 5s)", action: "Botol portable SAMONO Juicer dibalik dan siap dibawa beraktivitas.", vo: "\"SAMONO Juicer praktis banget dibawa kemana-mana, tinggal klik langsung blend!\"" },
+          { scene: "Scene 4 (CTA 5s)", action: "Closing call to action.", vo: "\"Ingin energi maksimal saat diet? Checkout Nutrifarm, Omura, dan SAMONO Juicer sekarang!\"" }
         ]
       },
       {
-        title: "Avocado Choco Coffee Silk Frappe",
-        hook: "\"Pecinta alpukat kocok wajib coba versi frappe kafe ini, creamy cokelatnya nendang!\"",
+        title: "Iced Almond Choco-Matcha Fusion Latte",
+        hook: "\"Kangen jajan minuman kekinian di mall pas diet? Bikin versi zero sugar hemat kalori ini aja!\"",
         category: "Minuman",
         products: [
           { name: "Omura Cocoa Powder", role: "Bahan Utama", icon: "🍫" },
-          { name: "Philips Blender 3000", role: "Alat Pengolah", icon: "⚡" }
-        ],
-        time: "6 mnt • 1 Porsi",
-        ingredients: [
-          { text: "• 1 Buah Alpukat Mentega", tag: "Bahan Alami", type: "cat" },
-          { text: "• 2 sdm Omura Premium Cocoa Powder", tag: "🍫 Bahan Utama", type: "cat" },
-          { text: "• 1 Unit Blender Philips 3000", tag: "⚡ Alat Pengolah", type: "synergy" },
-          { text: "• 1 shot Espresso & Susu Cair", tag: "Pelengkap", type: "prod" }
-        ],
-        steps: [
-          "Blend alpukat dan susu di Blender Philips hingga lembut.",
-          "Larutkan Omura Cocoa dengan espresso hangat, siram di sekeliling dinding gelas.",
-          "Tuang smoothie alpukat ke dalam gelas berlumur cokelat."
-        ],
-        storyboard: [
-          { scene: "Scene 1 (Hook 4s)", action: "Drizzle cokelat tebal di dinding gelas sebelum dituang jus alpukat.", vo: "\"Alpukat kocok biasa mah lewat, cobain Avocado Silk Frappe ini!\"" },
-          { scene: "Scene 2 (Blend 6s)", action: "Philips Blender memproses alpukat menjadi tekstur pasta lembut.", vo: "\"Pakai Blender Philips biar alpukatnya halus merata tanpa serat kasar.\"" },
-          { scene: "Scene 3 (Pour 5s)", action: "Omura Cocoa kental dituangkan di atas es alpukat.", vo: "\"Omura Cocoa ngasih rasa cokelat Belgia pekat yang balance banget sama alpukat.\"" },
-          { scene: "Scene 4 (CTA 5s)", action: "Menyeruput minuman dan dual product callout.", vo: "\"Beli Omura Cocoa dan Blender Philips-nya di keranjang kuning ya!\"" }
-        ]
-      },
-      {
-        title: "Banana Choco Protein Ice Blend",
-        hook: "\"Menu sarapan praktis penambah energi 3 menit sebelum workout!\"",
-        category: "Minuman",
-        products: [
-          { name: "Omura Cocoa Powder", role: "Bahan Utama", icon: "🍫" },
-          { name: "Philips Blender 3000", role: "Alat Pengolah", icon: "⚡" }
+          { name: "Nutrifarm Matcha Premium", role: "Bahan Foam", icon: "🍵" },
+          { name: "SAMONO Juicer Y5 Plus", role: "Alat Frothing", icon: "⚡" }
         ],
         time: "4 mnt • 1 Porsi",
         ingredients: [
-          { text: "• 2 Buah Pisang Cavendish", tag: "Bahan", type: "cat" },
-          { text: "• 2 sdm Omura Cocoa Powder", tag: "🍫 Cokelat Murni", type: "cat" },
-          { text: "• 1 Unit Philips Blender 3000", tag: "⚡ Alat Pengolah", type: "synergy" },
-          { text: "• 200 ml Susu Oat", tag: "Susu Nabati", type: "prod" }
+          { text: "• 1 sdt Omura Premium Cocoa Powder", tag: "🍫 Dasar Cokelat", type: "cat" },
+          { text: "• 1 sdt Nutrifarm Matcha Premium", tag: "🍵 Foam Matcha", type: "cat" },
+          { text: "• 100 ml Susu Almond Dingin & Es Batu", tag: "Susu Nabati", type: "prod" },
+          { text: "• 1 Unit SAMONO Juicer Y5 Plus", tag: "⚡ Frother / Blender", type: "synergy" }
         ],
         steps: [
-          "Masukkan pisang, Omura Cocoa, dan susu oat ke dalam blender.",
-          "Blend kecepatan tinggi selama 25 detik.",
-          "Tuang ke tumbler gym untuk bekal workout."
+          "Larutkan 1 sdt Omura Cocoa Powder dengan 50ml air hangat, tuang ke gelas berisi es batu.",
+          "Emulsikan 1 sdt Nutrifarm Matcha dan susu almond dingin di SAMONO Juicer hingga berbusa tebal.",
+          "Tuangkan matcha foam di atas cairan cokelat dan es untuk sensasi latte kafe 2 rasa."
         ],
         storyboard: [
-          { scene: "Scene 1 (Hook 4s)", action: "Host berpakaian olahraga memegang tumbler.", vo: "\"Minuman sarapan workout 3 menit yang rasanya kayak es krim cokelat!\"" },
-          { scene: "Scene 2 (Prep 5s)", action: "Memasukkan pisang dan Omura Cocoa ke blender.", vo: "\"Cukup pisang matang, susu oat, dan 2 scoop Omura Cocoa Powder.\"" },
-          { scene: "Scene 3 (Blend 6s)", action: "Blender berputar cepat menghaluskan bahan.", vo: "\"Blender Philips bikin teksturnya creamy thick tanpa gula tambahan.\"" },
-          { scene: "Scene 4 (CTA 5s)", action: "Closing CTA keranjang ganda.", vo: "\"Cek paket kombo hematnya di link keranjang kuning!\"" }
-        ]
-      },
-      {
-        title: "Belgian Choco Sea Salt Creamy Mocktail",
-        hook: "\"Mocktail cokelat dingin ala hotel bintang 5 cuma 4 bahan!\"",
-        category: "Minuman",
-        products: [
-          { name: "Omura Cocoa Powder", role: "Bahan Utama", icon: "🍫" },
-          { name: "Philips Blender 3000", role: "Alat Pengolah", icon: "⚡" }
-        ],
-        time: "5 mnt • 1 Porsi",
-        ingredients: [
-          { text: "• 3 sdm Omura Premium Cocoa Powder", tag: "🍫 Cokelat Pekat", type: "cat" },
-          { text: "• 1 Unit Philips Blender 3000", tag: "⚡ Alat Pengolah", type: "synergy" },
-          { text: "• 100 ml Whipping Cream & Es", tag: "Creamy Foam", type: "prod" },
-          { text: "• Sea Salt Flakes", tag: "Topping", type: "default" }
-        ],
-        steps: [
-          "Blend Omura Cocoa dan es batu dengan susu hingga velvety.",
-          "Kocok sea salt cream terpisah, tuang di atas cokelat dingin.",
-          "Sajikan dingin dengan sensasi gurih asin dan manis pekat."
-        ],
-        storyboard: [
-          { scene: "Scene 1 (Hook 4s)", action: "Shot cream cheese foam menetes di atas dark choco frappe.", vo: "\"Minuman kafe mewah ini bisa kamu bikin di rumah tiap hari!\"" },
-          { scene: "Scene 2 (Blend 6s)", action: "Blender Philips menghancurkan es dan Omura Cocoa.", vo: "\"Rahasia cokelat pekat ada di Omura Cocoa, dan halusnya dari Blender Philips.\"" },
-          { scene: "Scene 3 (Pour 5s)", action: "Menuang cream foam di atas es cokelat kental.", vo: "\"Perpaduan sea salt foam dan dark choco beneran nagih banget!\"" },
-          { scene: "Scene 4 (CTA 5s)", action: "Dual product callout.", vo: "\"Borong Omura Cocoa & Blender Philips sekarang di keranjang kuning!\"" }
+          { scene: "Scene 1 (Hook 4s)", action: "Perpaduan cairan cokelat pekat di bawah dan foam matcha hijau yang mengapung.", vo: "\"Kangen jajan minuman kekinian di mall pas diet? Bikin versi zero sugar hemat kalori ini!\"" },
+          { scene: "Scene 2 (Cocoa 5s)", action: "Menuang cairan cokelat Omura di atas es batu.", vo: "\"Omura Cocoa bebas gula bikin rasa cokelatnya rich dan harum banget.\"" },
+          { scene: "Scene 3 (Foam 5s)", action: "SAMONO Juicer mem-froth matcha foam super creamy.", vo: "\"SAMONO Juicer bikin matcha foam lembut berlimpah persis buatan barista kafe!\"" },
+          { scene: "Scene 4 (CTA 5s)", action: "Menikmati latte segar dan mengajak beli kombo.", vo: "\"Bikin latte kafe sehat sendiri di rumah! Klik keranjang kuning untuk pesan paket kombonya!\"" }
         ]
       }
     ];

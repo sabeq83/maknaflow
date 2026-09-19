@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.6 — Enrich Recipe Campaign dynamic canonical recipe generation and drawer rendering (19/09/2026)
+- Upgrade recipe planner engine schema to output complete canonical ingredients, steps, and storyboards
+- Eliminate static hardcoded fallback ingredients in content planner recipe drawer
+- Enrich multi-product synergy recipe rows with distinct measurements and steps
+
 ## V2.31.5 — Fix ImportPlannerModal preset loading, clip duration ingestion, and dynamic micro-pacing sync (17/09/2026)
 - Synchronize clip_duration and calibrated word limits when applying presets in ImportPlannerModal
 - Propagate clip_duration across pillar and RE campaign ingestion and PostgreSQL database layers
