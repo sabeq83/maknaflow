@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.18 — Recipe campaign: full config pass-through & TTS blocker fix (22/09/2026)
+- Teruskan 11 field konfigurasi ke prompt AI: recipe_idea, visual_action_guideline, narrative_mode, mandatory_outro_line, ai_directive, featured_products, integration_step_hint, cta, clip_duration, words_per_clip, target_language
+- recipe_data_json sekarang diisi saat generation selesai — fix blocker yang mencegah TTS berjalan
+- Item 283-285 direset ke pending untuk regenerasi lengkap dengan semua konfigurasi
+
 ## V2.31.17 — Recipe campaign: jumlah klip dinamis dari target_clips_count (22/09/2026)
 - processRecipeCampaignCreative sekarang membaca campaign.target_clips_count dan meneruskannya ke prompt AI — tidak lagi hardcode 4 klip
 - Scene naming otomatis menyesuaikan jumlah klip yang dikonfigurasi
