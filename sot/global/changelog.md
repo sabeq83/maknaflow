@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.16 — Fix recipe campaign: storyboard tidak tampil di UI (22/09/2026)
+- processRecipeCampaignCreative sekarang mengisi new_video_plan_json, video_dna_json, dan content_kind yang dibutuhkan UI
+- Scenes dari result_json di-map ke unified clip format yang dibaca oleh storyboard renderer
+- Backfill patch untuk item 283-285 yang sudah completed tapi belum punya new_video_plan_json
+
 ## V2.31.15 — Tambah gemini-flash-latest sebagai fallback terakhir cascade (22/09/2026)
 - gemini-flash-latest ditambahkan sebagai tier ke-5 di GEMINI_CASCADE_ORDER — wildcard model Google yang aktif saat semua versi spesifik overloaded
 
