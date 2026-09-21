@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.31.11 — Fix renderCollapsibleCard closing parenthesis di Menu Settings (21/09/2026)
+- Memperbaiki penutupan fungsi renderCollapsibleCard pada Settings Page
+
 ## V2.31.10 — Fix JSX nesting tags di Menu Settings (21/09/2026)
 - Menyempurnakan penutupan div dan rendering container Gemini Model Waterfall
 
