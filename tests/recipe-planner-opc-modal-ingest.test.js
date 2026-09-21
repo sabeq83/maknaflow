@@ -2,6 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { ingestPlannerToPillarCampaign } from '../lib/pillar-campaign-ingest.js';
 import { getDb } from '../lib/db.js';
+import { closePgPool } from '../lib/db-pg.js';
+
+test.after(async () => {
+  await closePgPool();
+});
 
 test('ingestPlannerToPillarCampaign successfully handles Recipe Campaign planners with multi-products and custom settings', async () => {
   const db = getDb();

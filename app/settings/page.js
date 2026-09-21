@@ -1117,12 +1117,12 @@ export default function SettingsPage() {
               <div style={{ borderTop: '1px solid var(--border-subtle)', marginTop: '20px', paddingTop: '20px' }}>
                 <h4 style={{ margin: '0 0 12px 0', fontSize: '0.88rem', fontWeight: '700', color: 'var(--text-primary)' }}>🤖 Konfigurasi Model AI Gemini</h4>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px', marginBottom: '16px' }}>
                   <div className="form-group">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                      <label className="form-label" style={{ margin: 0 }}>Primary Gemini Model</label>
+                      <label className="form-label" style={{ margin: 0 }}>Pilihan Model AI Utama (Starting Primary)</label>
                       <span style={{ fontSize: '10px', background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success)', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
-                        ✓ Free Tier Ready
+                        ✓ Free Tier Ready (15 RPM / 1M TPM)
                       </span>
                     </div>
                     <select
@@ -1131,53 +1131,79 @@ export default function SettingsPage() {
                       onChange={e => setGeminiModelPrimary(e.target.value)}
                       style={{ background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
                     >
-                      <option value="gemini-3.7-flash">gemini-3.7-flash (Hybrid Reasoning - Direkomendasikan)</option>
-                      <option value="gemini-3.8-flash">gemini-3.8-flash (Flash Terbaru)</option>
-                      <option value="gemini-3.6-flash">gemini-3.6-flash (Generasi Stabil)</option>
-                      <option value="gemini-3.5-flash">gemini-3.5-flash (Flash Standard)</option>
-                      <option value="gemini-2.5-flash">gemini-2.5-flash (Compliance & Extraction)</option>
-                      <option value="gemini-2.0-flash">gemini-2.0-flash</option>
-                      <option value="gemini-flash-latest">gemini-flash-latest (Auto Latest Flash)</option>
+                      <option value="gemini-3.8-flash">gemini-3.8-flash (Flash Terbaru — Rekomendasi)</option>
+                      <option value="gemini-3.7-flash">gemini-3.7-flash (Hybrid Reasoning / Thinking)</option>
+                      <option value="gemini-3.6-flash">gemini-3.6-flash (Generasi Stabil & Cepat)</option>
+                      <option value="gemini-3.5-flash">gemini-3.5-flash (Standard Flash)</option>
+                      <option value="gemini-2.5-flash">gemini-2.5-flash (High Throughput / Safety Net)</option>
                       <option value="custom">✏️ Custom Model ID...</option>
                     </select>
                     <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                      Digunakan untuk seluruh pipeline generatif (Storyboard, Naskah Resep, Social Package & Riset).
+                      Model ini akan diprioritaskan pertama kali. Jika Google mengembalikan error 503 (High Demand), sistem otomatis beralih ke model di bawahnya secara berurutan.
                     </p>
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label" style={{ marginBottom: '6px' }}>Fallback Gemini Model</label>
-                    <select
-                      className="form-input"
-                      value={geminiModelFallback}
-                      onChange={e => setGeminiModelFallback(e.target.value)}
-                      style={{ background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
-                    >
-                      <option value="gemini-3.6-flash">gemini-3.6-flash (Stabil)</option>
-                      <option value="gemini-3.5-flash">gemini-3.5-flash</option>
-                      <option value="gemini-2.5-flash">gemini-2.5-flash</option>
-                      <option value="gemini-flash-latest">gemini-flash-latest</option>
-                    </select>
-                    <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                      Otomatis dipanggil jika model utama terkena limit rate 429 atau 503 high demand.
-                    </p>
+                  {geminiModelPrimary === 'custom' && (
+                    <div className="form-group">
+                      <label className="form-label">Custom Gemini Model ID</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        placeholder="Masukkan model ID (contoh: gemini-3.8-flash-preview-092026)"
+                        value={geminiCustomModel}
+                        onChange={e => setGeminiCustomModel(e.target.value)}
+                        style={{ background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Live Waterfall Sequential Visualizer */}
+                  <div style={{ background: 'var(--surface-subtle)', border: '1px solid var(--border-subtle)', borderRadius: '10px', padding: '14px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)' }}>🌊 Rantai Eksekusi Berjenjang (Waterfall Fallback)</span>
+                      <span style={{ fontSize: '10px', background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success)', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                        ✓ Otomatis Aktif
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      {(() => {
+                        const standardList = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-2.5-flash'];
+                        let chain = [];
+                        if (geminiModelPrimary === 'custom') {
+                          chain = [geminiCustomModel.trim() || 'custom-model', ...standardList];
+                        } else {
+                          const idx = standardList.indexOf(geminiModelPrimary);
+                          chain = idx !== -1 ? standardList.slice(idx) : [geminiModelPrimary, ...standardList];
+                        }
+                        return chain.map((modelName, idx, arr) => (
+                          <div key={modelName}>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '10px',
+                              padding: '6px 10px',
+                              background: idx === 0 ? 'rgba(45, 212, 191, 0.08)' : 'var(--surface-raised)',
+                              border: `1px solid ${idx === 0 ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                              borderRadius: '6px',
+                              fontSize: '0.78rem'
+                            }}>
+                              <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: idx === 0 ? 'var(--action-primary)' : 'var(--surface-interactive)', color: idx === 0 ? 'var(--on-action-primary)' : 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>{idx + 1}</span>
+                              <span style={{ fontFamily: 'var(--font-mono)', fontWeight: idx === 0 ? 700 : 500 }}>{modelName}</span>
+                              <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                                {idx === 0 ? '⭐ Model Utama (Trial 1 + 1x Quick Retry)' : (idx === arr.length - 1 ? '🛡️ Safety Net Terakhir' : `⬇️ Fallback Step ${idx}`)}
+                              </span>
+                            </div>
+                            {idx < arr.length - 1 && (
+                              <div style={{ textAlign: 'center', fontSize: '10px', color: 'var(--text-muted)', margin: '2px 0' }}>
+                                ⬇️ Jika 503 (High Demand)
+                              </div>
+                            )}
+                          </div>
+                        ));
+                      })()}
+                    </div>
                   </div>
                 </div>
-
-                {geminiModelPrimary === 'custom' && (
-                  <div className="form-group" style={{ marginBottom: '16px' }}>
-                    <label className="form-label">Custom Gemini Model ID</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="Masukkan model ID (contoh: gemini-3.8-flash-preview-092026)"
-                      value={geminiCustomModel}
-                      onChange={e => setGeminiCustomModel(e.target.value)}
-                      style={{ background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
-                    />
-                  </div>
-                )}
-              </div>
 
               <div style={{ borderTop: '1px solid var(--border-subtle)', marginTop: '20px', paddingTop: '20px' }}>
                 <h4 style={{ margin: '0 0 12px 0', fontSize: '0.88rem', fontWeight: '600' }}>Pengaturan Tier API & Context Caching</h4>

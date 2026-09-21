@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.8 — Implementasi Waterfall Sequential Fallback Gemini AI (21/09/2026)
+- Menambahkan rantai fallback berurutan otomatis (3.8 -> 3.7 -> 3.6 -> 3.5 -> 2.5) saat Google 503
+- Memperbarui Menu Settings dengan Live Waterfall Chain Visualizer
+- Mencegah bottleneck dan loop retry berkepanjangan pada kampanye OPC
+
 ## V2.31.7 — Unifikasi Ingest ke OPC Recipe Campaign & Konfigurasi Dinamis Model Gemini AI (21/09/2026)
 - Menyeragamkan tombol Ingest ke OPC pada Recipe Campaign agar membuka ImportPlannerModal
 - Mendukung ingestion multi-product dan recipe lineage pada Pillar Campaign OPC

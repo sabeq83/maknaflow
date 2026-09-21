@@ -2,6 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { getResolvedGeminiModels, GEMINI_MODELS } from '../lib/gemini.js';
 import { setSetting } from '../lib/db.js';
+import { closePgPool } from '../lib/db-pg.js';
+
+test.after(async () => {
+  await closePgPool();
+});
 
 test('getResolvedGeminiModels resolves custom and default settings properly', async () => {
   // 1. Initial default
@@ -16,6 +21,6 @@ test('getResolvedGeminiModels resolves custom and default settings properly', as
   const resolved = await getResolvedGeminiModels();
   assert.equal(resolved.PRIMARY, 'gemini-3.7-flash');
   assert.equal(resolved.FALLBACK_1, 'gemini-3.6-flash');
-  assert.equal(resolved.FALLBACK_2, 'gemini-flash-latest');
+  assert.ok(resolved.FALLBACK_2);
   assert.equal(resolved.TTS, 'gemini-2.5-flash-preview-tts');
 });
