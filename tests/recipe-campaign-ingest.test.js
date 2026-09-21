@@ -63,23 +63,23 @@ test('ingestRecipePlannerToPillarCampaign successfully ingests recipe planner ro
   await db.prepare(`
     INSERT INTO content_planner_rows (
       id, planner_id, sequence, title, hook, status, recipe_idea_json, product, product_id,
-      pillar, category_cep, ws_matrix, context, vfo, strategic_angle, video_id, tenant_id
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      pillar, category_cep, ws_matrix, context, vfo, strategic_angle, video_id, tenant_id, visual_action
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     row1Id, testPlannerId, 1, idea1.title, idea1.hook, 'planned', JSON.stringify(idea1),
     idea1.primary_product_name, idea1.primary_product_id,
-    'Recipe Campaign', 'minuman', 'Resep & Tutorial', idea1.title, 'Kreasi Praktis', 'Resep Cepat', 'REC-001', testTenantId
+    'Recipe Campaign', 'minuman', 'Resep & Tutorial', idea1.title, 'Kreasi Praktis', 'Resep Cepat', 'REC-001', testTenantId, idea1.visual_highlight
   );
 
   await db.prepare(`
     INSERT INTO content_planner_rows (
       id, planner_id, sequence, title, hook, status, recipe_idea_json, product, product_id,
-      pillar, category_cep, ws_matrix, context, vfo, strategic_angle, video_id, tenant_id
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      pillar, category_cep, ws_matrix, context, vfo, strategic_angle, video_id, tenant_id, visual_action
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     row2Id, testPlannerId, 2, idea2.title, idea2.hook, 'planned', JSON.stringify(idea2),
     idea2.primary_product_name, idea2.primary_product_id,
-    'Recipe Campaign', 'minuman', 'Resep & Tutorial', idea2.title, 'Kreasi Praktis', 'Resep Cepat', 'REC-002', testTenantId
+    'Recipe Campaign', 'minuman', 'Resep & Tutorial', idea2.title, 'Kreasi Praktis', 'Resep Cepat', 'REC-002', testTenantId, idea2.visual_highlight
   );
 
   // 3. Execute ingest

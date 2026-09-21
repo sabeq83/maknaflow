@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Settings — Gemini AI Model Configuration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme='dark'] {
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --on-action-primary: #042f2e;
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.4);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background: var(--canvas);
+      color: var(--text-primary);
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .card {
+      width: 100%;
+      max-width: 760px;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 14px;
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 16px 20px;
+      background: var(--surface-raised);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .card-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    select, input {
+      background: var(--input-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+      font-family: inherit;
+    }
+    select:focus, input:focus {
+      border-color: var(--action-primary);
+    }
+    .badge-free {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .help-text {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .btn {
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-secondary {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+    }
+  </style>
+</head>
+<body>
+  <div style="margin-bottom: 24px; text-align: center;">
+    <h1 style="font-size: 20px; font-weight: 800; margin-bottom: 6px;">Simulasi Konfigurasi Model Gemini AI</h1>
+    <p style="font-size: 13px; color: var(--text-secondary);">Fitur pemilihan model AI dinamis di Menu Settings MAKNA Flow.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span>🔑</span>
+      <span>Gemini API Configuration</span>
+    </div>
+
+    <div class="card-body">
+      <div class="form-group">
+        <label>Gemini API Key</label>
+        <input type="password" value="AIzaSyA1234567890abcdef..." readonly>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label>Primary Gemini Model</label>
+            <span class="badge-free">✓ Free Tier Compatible</span>
+          </div>
+          <select id="primaryModelSelect" onchange="toggleCustom(this.value)">
+            <option value="gemini-3.7-flash" selected>gemini-3.7-flash (Hybrid Reasoning - Direkomendasikan)</option>
+            <option value="gemini-3.8-flash">gemini-3.8-flash (Flash Terbaru)</option>
+            <option value="gemini-3.6-flash">gemini-3.6-flash (Generasi Stabil)</option>
+            <option value="gemini-3.5-flash">gemini-3.5-flash (Flash Standard)</option>
+            <option value="gemini-2.5-flash">gemini-2.5-flash (Compliance & Extraction)</option>
+            <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+            <option value="gemini-flash-latest">gemini-flash-latest (Auto Latest Flash)</option>
+            <option value="custom">✏️ Custom Model ID...</option>
+          </select>
+          <span class="help-text">Model utama untuk storyboard, naskah narasi, social package & extraction.</span>
+        </div>
+
+        <div class="form-group">
+          <label>Fallback Gemini Model</label>
+          <select>
+            <option value="gemini-3.6-flash" selected>gemini-3.6-flash (Stabil)</option>
+            <option value="gemini-3.5-flash">gemini-3.5-flash</option>
+            <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+            <option value="gemini-flash-latest">gemini-flash-latest</option>
+          </select>
+          <span class="help-text">Otomatis digunakan jika model utama terkena limit rate / error 503.</span>
+        </div>
+      </div>
+
+      <div id="customModelGroup" class="form-group" style="display: none;">
+        <label>Custom Gemini Model ID</label>
+        <input type="text" placeholder="Contoh: gemini-3.8-flash-preview-092026 atau custom endpoint">
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+        <button class="btn btn-secondary">⚡ Test Connection</button>
+        <button class="btn btn-primary">💾 Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleCustom(val) {
+      document.getElementById('customModelGroup').style.display = val === 'custom' ? 'flex' : 'none';
+    }
+  </script>
+</body>
+</html>

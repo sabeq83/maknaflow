@@ -31,6 +31,8 @@ export const GET = withTenantContext(async (request, _context, user) => {
         has_api_key: !!apiKey,
         gemini_api_tier: await getSetting('gemini_api_tier') || 'paid',
         gemini_context_caching: await getSetting('gemini_context_caching') || 'on',
+        gemini_model_primary: await getSetting('gemini_model_primary') || 'gemini-3.7-flash',
+        gemini_model_fallback: await getSetting('gemini_model_fallback') || 'gemini-3.6-flash',
         minimax_api_key: maskSecret(minimaxKey) || null,
         has_minimax_key: !!minimaxKey,
         minimax_group_id: await getSetting('minimax_group_id') || '',
@@ -97,7 +99,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       return NextResponse.json({ success: false, error: 'Hanya Admin tenant yang dapat mengelola credential.' }, { status: 403 });
     }
     const body = await request.json();
-    const { gemini_api_key, gemini_api_tier, gemini_context_caching, google_client_id, google_client_secret,
+    const { gemini_api_key, gemini_api_tier, gemini_context_caching, gemini_model_primary, gemini_model_fallback, google_client_id, google_client_secret,
       webhook_api_key, webhook_host, webhook_port, webhook_image_model, webhook_video_model,
       webhook_delay_enabled, webhook_delay_min, webhook_delay_max, webhook_t2i_pattern,
       drive_target_folder, drive_glabs_folder_id, drive_re_markdown_folder_id, master_re_sheet_id, drive_product_photo_folder,
@@ -116,6 +118,12 @@ export const POST = withTenantContext(async (request, _context, user) => {
     }
     if (gemini_context_caching !== undefined) {
       await setSetting('gemini_context_caching', gemini_context_caching);
+    }
+    if (gemini_model_primary !== undefined) {
+      await setSetting('gemini_model_primary', gemini_model_primary);
+    }
+    if (gemini_model_fallback !== undefined) {
+      await setSetting('gemini_model_fallback', gemini_model_fallback);
     }
     if (isNewSecret(minimax_api_key)) {
       await setSetting('minimax_api_key', minimax_api_key);

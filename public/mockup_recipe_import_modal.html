@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Import Planner Modal — Recipe Campaign</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme='dark'] {
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-backdrop: rgba(2, 6, 14, 0.8);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --recipe-accent: #f59e0b;
+      --recipe-accent-soft: rgba(245, 158, 11, 0.16);
+      --shadow-modal: 0 24px 60px rgba(0, 0, 0, 0.65);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background: var(--canvas);
+      color: var(--text-primary);
+      padding: 40px 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .modal-card {
+      width: 100%;
+      max-width: 860px;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 16px;
+      box-shadow: var(--shadow-modal);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 20px 24px;
+      background: var(--surface-raised);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge-recipe {
+      background: var(--recipe-accent-soft);
+      color: var(--recipe-accent);
+      border: 1px solid var(--recipe-accent);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+    .modal-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    input, select, textarea {
+      background: var(--input-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--action-primary);
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+    .recipe-list-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+    .recipe-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .recipe-row:hover {
+      background: var(--surface-interactive);
+    }
+    .accordion-section {
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .accordion-header {
+      padding: 12px 16px;
+      background: var(--surface-raised);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+    .accordion-body {
+      padding: 16px;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .modal-footer {
+      padding: 16px 24px;
+      background: var(--surface-raised);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn {
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-secondary {
+      background: var(--surface-interactive);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-strong);
+    }
+    .btn-draft {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+  </style>
+</head>
+<body>
+  <div style="margin-bottom: 24px; text-align: center;">
+    <h1 style="font-size: 20px; font-weight: 800; margin-bottom: 6px;">Simulasi Dialog Ingest ke OPC (Recipe Campaign)</h1>
+    <p style="font-size: 13px; color: var(--text-secondary);">Mockup terpadu untuk planner resep <code>pln_db44602b</code> dengan seleksi resep dan kustomisasi parameter.</p>
+  </div>
+
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span>🌱 Ingest ke OPC Studio</span>
+        <span class="badge-recipe">🍳 Recipe Campaign</span>
+      </div>
+      <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;">✕ Tutup</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Planner & Campaign Info -->
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Pilih Content Planner</label>
+          <select disabled>
+            <option>[Recipe Planner] nutribake - 20260917 - Resep - Diet (5 baris resep)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Brand Profile / Akun</label>
+          <select>
+            <option>nutribake (Official Account)</option>
+            <option>Umum / Tanpa Brand</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Nama Kampanye OPC</label>
+        <input type="text" value="[ Recipe OPC 20260921 ] - nutribake - nutribake - 20260917 - Resep - Diet">
+      </div>
+
+      <!-- Recipe Rows Selection -->
+      <div class="form-group">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <label>📋 Daftar Resep yang Di-ingest (5 dari 5 dipilih)</label>
+          <span style="font-size: 11px; color: var(--link); cursor: pointer; font-weight: 600;">Batal Pilih Semua</span>
+        </div>
+        <div class="recipe-list-box">
+          <label class="recipe-row">
+            <input type="checkbox" checked>
+            <span style="font-weight: 700; color: var(--recipe-accent);">#1 [Minuman]</span>
+            <span style="font-weight: 600; color: var(--text-primary);">Iced Almond Choco-Matcha Fusion Latte —</span>
+            <span style="color: var(--text-muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Stop beli latte 50 ribuan di kafe! Ini resep 3 layer terenak...</span>
+          </label>
+          <label class="recipe-row">
+            <input type="checkbox" checked>
+            <span style="font-weight: 700; color: var(--recipe-accent);">#2 [Minuman]</span>
+            <span style="font-weight: 600; color: var(--text-primary);">Smoothie Diet Choco-Matcha Layer Shake —</span>
+            <span style="color: var(--text-muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Pengen diet tapi gak tahan rasa hambar jus sayur? Kamu wajib coba...</span>
+          </label>
+          <label class="recipe-row">
+            <input type="checkbox" checked>
+            <span style="font-weight: 700; color: var(--recipe-accent);">#3 [Minuman]</span>
+            <span style="font-weight: 600; color: var(--text-primary);">Choco-Matcha Oat Booster Diet Shake —</span>
+            <span style="color: var(--text-muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Gak sempat sarapan tapi lagi program diet? Bikin shake ini...</span>
+          </label>
+          <label class="recipe-row">
+            <input type="checkbox" checked>
+            <span style="font-weight: 700; color: var(--recipe-accent);">#4 [Minuman]</span>
+            <span style="font-weight: 600; color: var(--text-primary);">Avocado Choco-Matcha Slim Detox Juice —</span>
+            <span style="color: var(--text-muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Detox sehat rasa dessert mewah tanpa rasa bersalah!</span>
+          </label>
+          <label class="recipe-row">
+            <input type="checkbox" checked>
+            <span style="font-weight: 700; color: var(--recipe-accent);">#5 [Minuman]</span>
+            <span style="font-weight: 600; color: var(--text-primary);">Hot Creamy Matcha-Cocoa Zen Elixir —</span>
+            <span style="color: var(--text-muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Malam hari butuh rileksasi hangat bebas kafein tinggi?</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Strategy & Audio Settings -->
+      <div class="accordion-section">
+        <div class="accordion-header">
+          <span>🎙️ 1. Strategi Narasi & Voice Persona</span>
+          <span>▼</span>
+        </div>
+        <div class="accordion-body">
+          <div class="grid-3">
+            <div class="form-group">
+              <label>Voice Provider</label>
+              <select>
+                <option>Minimax Voice Engine</option>
+                <option>Gemini 2.5 TTS</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Voice Persona</label>
+              <select>
+                <option>Compelling Storyteller (Male)</option>
+                <option selected>Casual Reporter (Male)</option>
+                <option>Crisp Reporter (Female)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Narrative Mode</label>
+              <select>
+                <option selected>Storytelling</option>
+                <option>Educational Review</option>
+                <option>Promo Hard Sell</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visual & Veo Settings -->
+      <div class="accordion-section">
+        <div class="accordion-header">
+          <span>🎬 2. Visual Style & Veo Engine Settings</span>
+          <span>▼</span>
+        </div>
+        <div class="accordion-body">
+          <div class="grid-3">
+            <div class="form-group">
+              <label>Visual Style</label>
+              <select>
+                <option selected>photorealistic_culinary (Food & Beverage)</option>
+                <option>Cinematic 4K</option>
+                <option>Warm Cozy Kitchen</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Video Model Engine</label>
+              <select>
+                <option selected>Google Veo 3.1 Lite (8s)</option>
+                <option>Google Veo Omni Flash (4s)</option>
+                <option>Google Veo 2.0 (5s)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Aspect Ratio</label>
+              <select>
+                <option selected>9:16 (Vertical TikTok/Reels/Shorts)</option>
+                <option>16:9 (Horizontal YouTube)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary">Batal</button>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-draft">💾 Simpan Draf</button>
+        <button class="btn btn-primary">🚀 Mulai Produksi Massal</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

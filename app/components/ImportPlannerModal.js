@@ -505,19 +505,25 @@ export default function ImportPlannerModal({
         const now = new Date();
         const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
         const acc = p.account_name || 'Umum';
-        setCampaignName(`[ OPC ${dateStr} ] - ${acc} - ${p.title || p.product_name || ''}`);
+        const isRecipe = p.planner_focus === 'recipe_campaign';
+        const prefix = isRecipe ? '[ Recipe OPC' : '[ OPC';
+        setCampaignName(`${prefix} ${dateStr} ] - ${acc} - ${p.title || p.product_name || ''}`);
         setAccountName(acc);
         setProductName(p.product_name || '');
         setProductDesc(p.product_description || '');
         setProductUsp(p.product_usp || '');
         setProductRefImage(p.product_ref_image || p.product_photo_url || '');
-        if (p.planner_focus === 'brand_editorial') {
+        if (p.planner_focus === 'brand_editorial' || isRecipe) {
           setIsBridgingActive(false);
         } else {
           setIsBridgingActive(true);
         }
+        if (isRecipe) {
+          setVisualStyle('photorealistic_culinary');
+          setNarrativeMode('Storytelling');
+        }
         setCustomInstruction('');
-        setAiDirective('Konten edukasi brand; jangan mengarang atau membahas produk tertentu.');
+        setAiDirective(isRecipe ? 'Konten edukasi resep & kreasi kuliner autentik.' : 'Konten edukasi brand; jangan mengarang atau membahas produk tertentu.');
         const instructions = resolvePlannerInstructions(p);
         setMandatoryOutroLine(instructions.mandatoryOutroLine || 'jangan lupa follow dan komen mau ya!');
         if (p.target_audience) {
@@ -679,6 +685,11 @@ export default function ImportPlannerModal({
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h2 style={{ fontSize: '20px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span>🌱</span> Impor Content Planner ke Organic Pillar (OPC)
+            {planner?.planner_focus === 'recipe_campaign' && (
+              <span style={{ fontSize: '11px', background: 'var(--recipe-accent-soft, rgba(245, 158, 11, 0.16))', color: 'var(--recipe-accent, #f59e0b)', border: '1px solid var(--recipe-accent, #f59e0b)', padding: '2px 8px', borderRadius: '6px', fontWeight: 700, textTransform: 'uppercase' }}>
+                🍳 Recipe Campaign
+              </span>
+            )}
           </h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '20px', cursor: 'pointer' }}>✕</button>
         </div>
@@ -686,11 +697,12 @@ export default function ImportPlannerModal({
         <form onSubmit={handleSubmit}>
           {/* Top Mode Header Banner */}
           <div style={{
-            padding: '12px 16px', background: 'var(--status-neutral-soft)', border: '1px solid var(--status-neutral-soft)',
-            borderRadius: '10px', marginBottom: '16px', color: 'var(--status-neutral)', fontWeight: 700, fontSize: '13px',
-            display: 'flex', alignItems: 'center', gap: '8px'
+            padding: '12px 16px', background: planner?.planner_focus === 'recipe_campaign' ? 'var(--recipe-accent-soft, rgba(245, 158, 11, 0.16))' : 'var(--status-neutral-soft)',
+            border: `1px solid ${planner?.planner_focus === 'recipe_campaign' ? 'var(--recipe-accent, #f59e0b)' : 'var(--status-neutral-soft)'}`,
+            borderRadius: '10px', marginBottom: '16px', color: planner?.planner_focus === 'recipe_campaign' ? 'var(--recipe-accent, #f59e0b)' : 'var(--status-neutral)',
+            fontWeight: 700, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px'
           }}>
-            <span>📊 Mode Impor Content Planner Master ke Engine Produksi Autopilot OPC</span>
+            <span>{planner?.planner_focus === 'recipe_campaign' ? '🍳 Mode Impor Recipe Campaign ke Engine Produksi Autopilot OPC' : '📊 Mode Impor Content Planner Master ke Engine Produksi Autopilot OPC'}</span>
           </div>
 
           {/* EXECUTION MODE SWITCHER (Full Auto Pilot vs Manual Review) */}
@@ -880,18 +892,36 @@ export default function ImportPlannerModal({
                           </button>
                         </div>
 
-                        <div style={{ maxHeight: '140px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px', background: 'var(--surface)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
-                          {rows.map(r => (
-                            <label key={r.id} style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                              <input
-                                type="checkbox"
-                                checked={selectedRowIds.includes(r.id)}
-                                onChange={() => toggleRowSelection(r.id)}
-                              />
-                              <span style={{ fontWeight: 600, color: 'var(--status-neutral)' }}>#{r.sequence} [{r.pillar}]</span>
-                              <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>{r.hook}</span>
-                            </label>
-                          ))}
+                        <div style={{ maxHeight: '160px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px', background: 'var(--surface)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
+                          {rows.map(r => {
+                            const isRecipe = planner?.planner_focus === 'recipe_campaign';
+                            let recipeIdea = {};
+                            if (isRecipe && r.recipe_idea_json) {
+                              try {
+                                recipeIdea = typeof r.recipe_idea_json === 'string' ? JSON.parse(r.recipe_idea_json) : r.recipe_idea_json;
+                              } catch (_) {}
+                            }
+                            const displayTitle = recipeIdea.title || r.title;
+                            const displayHook = recipeIdea.hook || r.hook;
+                            const displayPillar = isRecipe ? (recipeIdea.category || r.pillar || 'Resep') : r.pillar;
+
+                            return (
+                              <label key={r.id} style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', padding: '4px 6px', borderRadius: '4px' }}>
+                                <input
+                                  type="checkbox"
+                                  checked={selectedRowIds.includes(r.id)}
+                                  onChange={() => toggleRowSelection(r.id)}
+                                />
+                                <span style={{ fontWeight: 600, color: isRecipe ? 'var(--recipe-accent, #f59e0b)' : 'var(--status-neutral)', whiteSpace: 'nowrap' }}>
+                                  #{r.sequence} [{displayPillar}]
+                                </span>
+                                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, color: 'var(--text-primary)' }}>
+                                  {displayTitle ? <strong style={{ color: 'var(--text-primary)' }}>{displayTitle} — </strong> : null}
+                                  <span style={{ color: 'var(--text-muted)' }}>{displayHook}</span>
+                                </span>
+                              </label>
+                            );
+                          })}
                         </div>
                       </div>
 

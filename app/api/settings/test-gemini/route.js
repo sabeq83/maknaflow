@@ -5,7 +5,7 @@ import { withTenantContext } from '@/lib/auth';
 
 export const POST = withTenantContext(async (request) => {
   try {
-    const { api_key, use_stored } = await request.json();
+    const { api_key, use_stored, model } = await request.json();
 
     let keyToTest = api_key;
     if (use_stored) {
@@ -16,7 +16,7 @@ export const POST = withTenantContext(async (request) => {
       return NextResponse.json({ success: false, error: 'API Key is required' }, { status: 400 });
     }
 
-    const result = await testGeminiConnection(keyToTest);
+    const result = await testGeminiConnection(keyToTest, model || null);
     return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

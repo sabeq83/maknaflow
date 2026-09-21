@@ -55,9 +55,12 @@ export default function SettingsPage() {
   const [editingMinimax, setEditingMinimax] = useState(false);
   const [savingMinimax, setSavingMinimax] = useState(false);
 
-  // Gemini API Tier & Caching
+  // Gemini API Tier, Model Selection & Caching
   const [geminiApiTier, setGeminiApiTier] = useState('paid');
   const [geminiContextCaching, setGeminiContextCaching] = useState('on');
+  const [geminiModelPrimary, setGeminiModelPrimary] = useState('gemini-3.7-flash');
+  const [geminiModelFallback, setGeminiModelFallback] = useState('gemini-3.6-flash');
+  const [geminiCustomModel, setGeminiCustomModel] = useState('');
   const [savingGeminiConfig, setSavingGeminiConfig] = useState(false);
 
   // Gemini API Pool Manager
@@ -214,6 +217,18 @@ export default function SettingsPage() {
       setDriveTargetFolder(data.data.drive_target_folder || '/MAKNA_Video_Generations');
       setGeminiApiTier(data.data.gemini_api_tier || 'paid');
       setGeminiContextCaching(data.data.gemini_context_caching || 'on');
+
+      const primary = data.data.gemini_model_primary || 'gemini-3.7-flash';
+      const knownModels = ['gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest'];
+      if (knownModels.includes(primary)) {
+        setGeminiModelPrimary(primary);
+        setGeminiCustomModel('');
+      } else {
+        setGeminiModelPrimary('custom');
+        setGeminiCustomModel(primary);
+      }
+      setGeminiModelFallback(data.data.gemini_model_fallback || 'gemini-3.6-flash');
+
       setFbPageId(data.data.fb_page_id || '');
       setFbPageIds(data.data.fb_page_ids || '');
       setMaskedFbToken(data.data.fb_page_token || '');
@@ -569,17 +584,20 @@ export default function SettingsPage() {
   async function saveGeminiSettings() {
     setSavingGeminiConfig(true);
     try {
+      const activePrimaryModel = geminiModelPrimary === 'custom' ? geminiCustomModel.trim() : geminiModelPrimary;
       const res = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           gemini_api_tier: geminiApiTier,
           gemini_context_caching: geminiContextCaching,
+          gemini_model_primary: activePrimaryModel,
+          gemini_model_fallback: geminiModelFallback,
         }),
       });
       const data = await res.json();
       if (data.success) {
-        showToast('Pengaturan Tier & Caching berhasil disimpan');
+        showToast('Pengaturan Model, Tier & Caching Gemini berhasil disimpan');
         fetchSettings();
       } else {
         showToast(data.error, 'error');
@@ -595,10 +613,11 @@ export default function SettingsPage() {
     setTestResult(null);
     try {
       const keyToTest = editing ? apiKey : maskedKey;
+      const activeModel = geminiModelPrimary === 'custom' ? geminiCustomModel.trim() : geminiModelPrimary;
       const res = await fetch('/api/settings/test-gemini', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apiKey: keyToTest }),
+        body: JSON.stringify({ apiKey: keyToTest, model: activeModel }),
       });
       const data = await res.json();
       setTestResult(data);
@@ -1095,7 +1114,72 @@ export default function SettingsPage() {
                 )}
               </div>
 
-              <div style={{ borderTop: '1px solid var(--border)', marginTop: '20px', paddingTop: '20px' }}>
+              <div style={{ borderTop: '1px solid var(--border-subtle)', marginTop: '20px', paddingTop: '20px' }}>
+                <h4 style={{ margin: '0 0 12px 0', fontSize: '0.88rem', fontWeight: '700', color: 'var(--text-primary)' }}>🤖 Konfigurasi Model AI Gemini</h4>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+                  <div className="form-group">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <label className="form-label" style={{ margin: 0 }}>Primary Gemini Model</label>
+                      <span style={{ fontSize: '10px', background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success)', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                        ✓ Free Tier Ready
+                      </span>
+                    </div>
+                    <select
+                      className="form-input"
+                      value={geminiModelPrimary}
+                      onChange={e => setGeminiModelPrimary(e.target.value)}
+                      style={{ background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
+                    >
+                      <option value="gemini-3.7-flash">gemini-3.7-flash (Hybrid Reasoning - Direkomendasikan)</option>
+                      <option value="gemini-3.8-flash">gemini-3.8-flash (Flash Terbaru)</option>
+                      <option value="gemini-3.6-flash">gemini-3.6-flash (Generasi Stabil)</option>
+                      <option value="gemini-3.5-flash">gemini-3.5-flash (Flash Standard)</option>
+                      <option value="gemini-2.5-flash">gemini-2.5-flash (Compliance & Extraction)</option>
+                      <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+                      <option value="gemini-flash-latest">gemini-flash-latest (Auto Latest Flash)</option>
+                      <option value="custom">✏️ Custom Model ID...</option>
+                    </select>
+                    <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                      Digunakan untuk seluruh pipeline generatif (Storyboard, Naskah Resep, Social Package & Riset).
+                    </p>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label" style={{ marginBottom: '6px' }}>Fallback Gemini Model</label>
+                    <select
+                      className="form-input"
+                      value={geminiModelFallback}
+                      onChange={e => setGeminiModelFallback(e.target.value)}
+                      style={{ background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
+                    >
+                      <option value="gemini-3.6-flash">gemini-3.6-flash (Stabil)</option>
+                      <option value="gemini-3.5-flash">gemini-3.5-flash</option>
+                      <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+                      <option value="gemini-flash-latest">gemini-flash-latest</option>
+                    </select>
+                    <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                      Otomatis dipanggil jika model utama terkena limit rate 429 atau 503 high demand.
+                    </p>
+                  </div>
+                </div>
+
+                {geminiModelPrimary === 'custom' && (
+                  <div className="form-group" style={{ marginBottom: '16px' }}>
+                    <label className="form-label">Custom Gemini Model ID</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="Masukkan model ID (contoh: gemini-3.8-flash-preview-092026)"
+                      value={geminiCustomModel}
+                      onChange={e => setGeminiCustomModel(e.target.value)}
+                      style={{ background: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div style={{ borderTop: '1px solid var(--border-subtle)', marginTop: '20px', paddingTop: '20px' }}>
                 <h4 style={{ margin: '0 0 12px 0', fontSize: '0.88rem', fontWeight: '600' }}>Pengaturan Tier API & Context Caching</h4>
 
                 <div className="form-group" style={{ marginBottom: '16px' }}>

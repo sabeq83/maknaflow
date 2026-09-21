@@ -558,32 +558,25 @@ export default function ContentPlannerWorkbench() {
             >
               {archiving ? '⏳ Memproses...' : (planner?.is_archived ? '🔄 Pulihkan dari Arsip' : '📦 Arsipkan')}
             </button>
-            {isRecipeCampaign ? (
-              <button
-                onClick={handleIngestRecipeToOpc}
-                disabled={ingestingRecipe || rows.length === 0}
-                style={{
-                  padding: '8px 16px',
-                  background: 'linear-gradient(135deg, var(--recipe-accent, #f59e0b) 0%, #b45309 100%)',
-                  color: 'var(--on-action-primary)',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontWeight: 700,
-                  cursor: (ingestingRecipe || rows.length === 0) ? 'not-allowed' : 'pointer',
-                  fontSize: '13px',
-                  boxShadow: '0 4px 12px rgba(245, 158, 11, 0.25)'
-                }}
-              >
-                {ingestingRecipe ? '⏳ Meng-ingest ke OPC...' : '🚀 Ingest ke OPC Studio'}
-              </button>
-            ) : (
-              <button
-                onClick={() => setShowOpcModal(true)}
-                style={{ padding: '8px 14px', background: 'var(--status-neutral-soft)', color: 'var(--status-neutral)', border: '1px solid var(--status-neutral)', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', fontSize: '13px' }}
-              >
-                🌱 Ingest ke OPC
-              </button>
-            )}
+            <button
+              onClick={() => setShowOpcModal(true)}
+              disabled={rows.length === 0}
+              style={{
+                padding: '8px 14px',
+                background: 'var(--status-neutral-soft)',
+                color: 'var(--status-neutral)',
+                border: '1px solid var(--status-neutral)',
+                borderRadius: '8px',
+                fontWeight: 700,
+                cursor: rows.length === 0 ? 'not-allowed' : 'pointer',
+                fontSize: '13px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              🌱 Ingest ke OPC
+            </button>
             <button
               onClick={handleSyncContentFlow}
               disabled={syncing}

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.7 — Unifikasi Ingest ke OPC Recipe Campaign & Konfigurasi Dinamis Model Gemini AI (21/09/2026)
+- Menyeragamkan tombol Ingest ke OPC pada Recipe Campaign agar membuka ImportPlannerModal
+- Mendukung ingestion multi-product dan recipe lineage pada Pillar Campaign OPC
+- Menambahkan pemilihan dinamis model Gemini AI (gemini-3.7-flash, gemini-3.8-flash, custom) di halaman Settings
+
 ## V2.31.6 — Enrich Recipe Campaign dynamic canonical recipe generation and drawer rendering (19/09/2026)
 - Upgrade recipe planner engine schema to output complete canonical ingredients, steps, and storyboards
 - Eliminate static hardcoded fallback ingredients in content planner recipe drawer
