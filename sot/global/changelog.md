@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.17 — Recipe campaign: jumlah klip dinamis dari target_clips_count (22/09/2026)
+- processRecipeCampaignCreative sekarang membaca campaign.target_clips_count dan meneruskannya ke prompt AI — tidak lagi hardcode 4 klip
+- Scene naming otomatis menyesuaikan jumlah klip yang dikonfigurasi
+- Item 283-285 direset ke pending untuk regenerasi ulang dengan 20 klip sesuai konfigurasi
+
 ## V2.31.16 — Fix recipe campaign: storyboard tidak tampil di UI (22/09/2026)
 - processRecipeCampaignCreative sekarang mengisi new_video_plan_json, video_dna_json, dan content_kind yang dibutuhkan UI
 - Scenes dari result_json di-map ke unified clip format yang dibaca oleh storyboard renderer
