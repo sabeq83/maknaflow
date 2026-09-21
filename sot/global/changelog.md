@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.31.12 — Integrasikan Waterfall Sequential Fallback ke generateContentFlexible (21/09/2026)
+- Menghubungkan getModelWaterfallChain ke executeContentGeneration untuk eksekusi storyboard OPC
+
 ## V2.31.11 — Fix renderCollapsibleCard closing parenthesis di Menu Settings (21/09/2026)
 - Memperbaiki penutupan fungsi renderCollapsibleCard pada Settings Page
 
