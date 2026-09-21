@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.31.15 — Tambah gemini-flash-latest sebagai fallback terakhir cascade (22/09/2026)
+- gemini-flash-latest ditambahkan sebagai tier ke-5 di GEMINI_CASCADE_ORDER — wildcard model Google yang aktif saat semua versi spesifik overloaded
+
 ## V2.31.14 — Gemini Waterfall: Full Cycle Retry & Anti-Loop Fix (22/09/2026)
 - Tambah mekanisme 4-cycle retry loop di gemini.js — semua model 503 trigger pause 30 detik lalu coba ulang seluruh waterfall
 - QUOTA_EXHAUSTED sekarang reset item ke pending bukan failed di processPillarGenerator untuk mencegah infinite loop scheduler
