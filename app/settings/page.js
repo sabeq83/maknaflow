@@ -1204,6 +1204,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
                 </div>
+              </div>
 
               <div style={{ borderTop: '1px solid var(--border-subtle)', marginTop: '20px', paddingTop: '20px' }}>
                 <h4 style={{ margin: '0 0 12px 0', fontSize: '0.88rem', fontWeight: '600' }}>Pengaturan Tier API & Context Caching</h4>

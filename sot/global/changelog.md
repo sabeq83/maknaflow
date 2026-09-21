@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.31.10 — Fix JSX nesting tags di Menu Settings (21/09/2026)
+- Menyempurnakan penutupan div dan rendering container Gemini Model Waterfall
+
 ## V2.31.9 — Fix JSX syntax di Menu Settings Waterfall visualizer (21/09/2026)
 - Memperbaiki penutupan tag JSX pada Card Gemini Configuration Settings
 
