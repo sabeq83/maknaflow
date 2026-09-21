@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.14 — Gemini Waterfall: Full Cycle Retry & Anti-Loop Fix (22/09/2026)
+- Tambah mekanisme 4-cycle retry loop di gemini.js — semua model 503 trigger pause 30 detik lalu coba ulang seluruh waterfall
+- QUOTA_EXHAUSTED sekarang reset item ke pending bukan failed di processPillarGenerator untuk mencegah infinite loop scheduler
+- Identifikasi root cause looping: auto-recovery scheduler salah reset status processing ke pending saat job error
+
 ## V2.31.13 — Hapus deprecated gemini-2.5-flash dan tingkatkan ketahanan Waterfall Gemini (21/09/2026)
 - Hapus model deprecated gemini-2.5-flash dan gemini-2.0-flash dari daftar rekomendasi
 - Integrasi getCascadeAction untuk cascade otomatis saat Google mengembalikan 404 atau 503
