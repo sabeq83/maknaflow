@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.31.13 — Hapus deprecated gemini-2.5-flash dan tingkatkan ketahanan Waterfall Gemini (21/09/2026)
+- Hapus model deprecated gemini-2.5-flash dan gemini-2.0-flash dari daftar rekomendasi
+- Integrasi getCascadeAction untuk cascade otomatis saat Google mengembalikan 404 atau 503
+- Wrap seluruh eksekusi Gemini di scheduler-processors dengan makeModelResilient
+- Update UI Pengaturan Model AI dengan 4 model aktif resmi dan live waterfall visualizer
+
 ## V2.31.12 — Integrasikan Waterfall Sequential Fallback ke generateContentFlexible (21/09/2026)
 - Menghubungkan getModelWaterfallChain ke executeContentGeneration untuk eksekusi storyboard OPC
 

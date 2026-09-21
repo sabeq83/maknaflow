@@ -237,11 +237,10 @@
           <option value="gemini-3.8-flash" selected>gemini-3.8-flash (Flash Terbaru — Rekomendasi)</option>
           <option value="gemini-3.7-flash">gemini-3.7-flash (Hybrid Reasoning / Thinking)</option>
           <option value="gemini-3.6-flash">gemini-3.6-flash (Generasi Stabil & Cepat)</option>
-          <option value="gemini-3.5-flash">gemini-3.5-flash (Standard Flash)</option>
-          <option value="gemini-2.5-flash">gemini-2.5-flash (High Throughput / Safety Net)</option>
+          <option value="gemini-3.5-flash">gemini-3.5-flash (Standard Flash — Safety Net)</option>
           <option value="custom">✏️ Custom Model ID...</option>
         </select>
-        <span class="help-text">Model ini akan diprioritaskan pertama kali. Jika Google mengembalikan error 503 (High Demand), sistem otomatis beralih ke model di bawahnya secara berurutan.</span>
+        <span class="help-text">Model ini akan diprioritaskan pertama kali. Jika Google mengembalikan error 503 (High Demand) atau 404 (Model Tidak Tersedia), sistem otomatis beralih ke model di bawahnya secara berurutan.</span>
       </div>
 
       <div id="customGroup" class="form-group" style="display: none;">
@@ -273,8 +272,7 @@
       'gemini-3.8-flash',
       'gemini-3.7-flash',
       'gemini-3.6-flash',
-      'gemini-3.5-flash',
-      'gemini-2.5-flash'
+      'gemini-3.5-flash'
     ];
 
     function renderWaterfall(selected) {

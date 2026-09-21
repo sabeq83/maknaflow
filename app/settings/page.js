@@ -1134,12 +1134,11 @@ export default function SettingsPage() {
                       <option value="gemini-3.8-flash">gemini-3.8-flash (Flash Terbaru — Rekomendasi)</option>
                       <option value="gemini-3.7-flash">gemini-3.7-flash (Hybrid Reasoning / Thinking)</option>
                       <option value="gemini-3.6-flash">gemini-3.6-flash (Generasi Stabil & Cepat)</option>
-                      <option value="gemini-3.5-flash">gemini-3.5-flash (Standard Flash)</option>
-                      <option value="gemini-2.5-flash">gemini-2.5-flash (High Throughput / Safety Net)</option>
+                      <option value="gemini-3.5-flash">gemini-3.5-flash (Standard Flash — Safety Net)</option>
                       <option value="custom">✏️ Custom Model ID...</option>
                     </select>
                     <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                      Model ini akan diprioritaskan pertama kali. Jika Google mengembalikan error 503 (High Demand), sistem otomatis beralih ke model di bawahnya secara berurutan.
+                      Model ini akan diprioritaskan pertama kali. Jika Google mengembalikan error 503 (High Demand) atau 404 (Model Tidak Tersedia), sistem otomatis beralih ke model di bawahnya secara berurutan.
                     </p>
                   </div>
 
@@ -1167,13 +1166,13 @@ export default function SettingsPage() {
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       {(() => {
-                        const standardList = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-2.5-flash'];
+                        const standardList = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash'];
                         let chain = [];
                         if (geminiModelPrimary === 'custom') {
                           chain = [geminiCustomModel.trim() || 'custom-model', ...standardList];
                         } else {
                           const idx = standardList.indexOf(geminiModelPrimary);
-                          chain = idx !== -1 ? standardList.slice(idx) : [geminiModelPrimary, ...standardList];
+                          chain = idx !== -1 ? standardList.slice(idx) : [geminiModelPrimary, ...standardList.filter(m => m !== geminiModelPrimary)];
                         }
                         return chain.map((modelName, idx, arr) => (
                           <div key={modelName}>
@@ -1195,7 +1194,7 @@ export default function SettingsPage() {
                             </div>
                             {idx < arr.length - 1 && (
                               <div style={{ textAlign: 'center', fontSize: '10px', color: 'var(--text-muted)', margin: '2px 0' }}>
-                                ⬇️ Jika 503 (High Demand)
+                                ⬇️ Jika 503 (High Demand) / 404 (Unavailable)
                               </div>
                             )}
                           </div>
