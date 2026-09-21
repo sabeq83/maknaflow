@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.31.9 — Fix JSX syntax di Menu Settings Waterfall visualizer (21/09/2026)
+- Memperbaiki penutupan tag JSX pada Card Gemini Configuration Settings
+
 ## V2.31.8 — Implementasi Waterfall Sequential Fallback Gemini AI (21/09/2026)
 - Menambahkan rantai fallback berurutan otomatis (3.8 -> 3.7 -> 3.6 -> 3.5 -> 2.5) saat Google 503
 - Memperbarui Menu Settings dengan Live Waterfall Chain Visualizer

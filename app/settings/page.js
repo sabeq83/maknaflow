@@ -1199,7 +1199,7 @@ export default function SettingsPage() {
                               </div>
                             )}
                           </div>
-                        ));
+                        ))
                       })()}
                     </div>
                   </div>
@@ -1265,7 +1265,7 @@ export default function SettingsPage() {
                 </button>
               </div>
             </div>
-          ))}
+          )}
 
           {/* 2. CARD: Gemini API Pool Manager */}
           {renderCollapsibleCard('pool_manager', 'ai', 'Gemini API Pool Manager', '🏊', (
