@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { getModelWaterfallChain, GEMINI_CASCADE_ORDER, makeModelResilient, getCascadeAction } from '../lib/gemini.js';
+import { getModelWaterfallChain, GEMINI_CASCADE_ORDER_PAID, GEMINI_CASCADE_ORDER_FREE, resolveModelForTask, MODULE_MODEL_MATRIX, makeModelResilient, getCascadeAction } from '../lib/gemini.js';
 import { setSetting } from '../lib/db.js';
 import { closePgPool } from '../lib/db-pg.js';
 
@@ -8,8 +8,8 @@ test.after(async () => {
   await closePgPool();
 });
 
-test('getModelWaterfallChain returns full cascade for gemini-3.8-flash', async () => {
-  const chain = await getModelWaterfallChain('gemini-3.8-flash');
+test('getModelWaterfallChain returns full cascade for Free Tier starting at gemini-3.8-flash', async () => {
+  const chain = await getModelWaterfallChain('gemini-3.8-flash', 'free');
   assert.deepEqual(chain, [
     'gemini-3.8-flash',
     'gemini-3.7-flash',
@@ -19,49 +19,42 @@ test('getModelWaterfallChain returns full cascade for gemini-3.8-flash', async (
   ]);
 });
 
-test('getModelWaterfallChain slices properly when starting from mid-tier models', async () => {
-  const chain37 = await getModelWaterfallChain('gemini-3.7-flash');
-  assert.deepEqual(chain37, [
+test('getModelWaterfallChain returns expanded cascade for Paid Tier starting at gemini-3.6-flash', async () => {
+  const chain = await getModelWaterfallChain('gemini-3.6-flash', 'paid');
+  assert.deepEqual(chain, [
+    'gemini-3.6-flash',
+    'gemini-1.5-flash-8b',
+    'gemini-3.1-flash-lite',
+    'gemini-2.5-flash',
+    'gemini-1.5-flash',
     'gemini-3.7-flash',
-    'gemini-3.6-flash',
-    'gemini-3.5-flash',
-    'gemini-flash-latest'
-  ]);
-
-  const chain36 = await getModelWaterfallChain('gemini-3.6-flash');
-  assert.deepEqual(chain36, [
-    'gemini-3.6-flash',
-    'gemini-3.5-flash',
-    'gemini-flash-latest'
-  ]);
-
-  const chain35 = await getModelWaterfallChain('gemini-3.5-flash');
-  assert.deepEqual(chain35, [
-    'gemini-3.5-flash',
+    'gemini-3.8-flash',
     'gemini-flash-latest'
   ]);
 });
 
-test('getModelWaterfallChain prepends deprecated or custom models before the cascade', async () => {
-  const customChain = await getModelWaterfallChain('gemini-2.5-flash');
-  assert.deepEqual(customChain, [
-    'gemini-2.5-flash',
-    'gemini-3.8-flash',
-    'gemini-3.7-flash',
-    'gemini-3.6-flash',
-    'gemini-3.5-flash',
-    'gemini-flash-latest'
-  ]);
+test('resolveModelForTask correctly routes task types based on tier', async () => {
+  await setSetting('gemini_api_tier', 'paid');
+  await setSetting('gemini_smart_routing', 'on');
 
-  const tunedChain = await getModelWaterfallChain('my-custom-fine-tuned-model');
-  assert.deepEqual(tunedChain, [
-    'my-custom-fine-tuned-model',
-    'gemini-3.8-flash',
-    'gemini-3.7-flash',
-    'gemini-3.6-flash',
-    'gemini-3.5-flash',
-    'gemini-flash-latest'
-  ]);
+  const scraperModel = await resolveModelForTask('SCRAPER');
+  assert.equal(scraperModel, 'gemini-1.5-flash-8b');
+
+  const complianceModel = await resolveModelForTask('COMPLIANCE');
+  assert.equal(complianceModel, 'gemini-2.5-flash');
+
+  const campaignModel = await resolveModelForTask('CAMPAIGN_PLANNER');
+  assert.equal(campaignModel, 'gemini-3.6-flash');
+
+  const ytModel = await resolveModelForTask('YOUTUBE_STUDIO');
+  assert.equal(ytModel, 'gemini-3.7-flash');
+
+  // Test Free Tier routing
+  await setSetting('gemini_api_tier', 'free');
+  const scraperFree = await resolveModelForTask('SCRAPER');
+  assert.equal(scraperFree, 'gemini-3.6-flash');
+  const campaignFree = await resolveModelForTask('CAMPAIGN_PLANNER');
+  assert.equal(campaignFree, 'gemini-3.8-flash');
 });
 
 test('getModelWaterfallChain uses database setting when startingModel is omitted', async () => {

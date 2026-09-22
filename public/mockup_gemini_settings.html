@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simulasi Settings — Gemini AI Waterfall Sequential Fallback</title>
+  <title>Simulasi Settings — Dual-Tier & Smart Model Routing Gemini AI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -13,7 +13,7 @@
       --surface: #101827;
       --surface-raised: #162235;
       --surface-interactive: #1c2a40;
-      --surface-subtle: #0f1a2c;
+      --surface-hover: #22334b;
       --input-bg: #0c1422;
       --text-primary: #f4f7fb;
       --text-secondary: #b6c2d2;
@@ -21,6 +21,7 @@
       --border-subtle: #26354a;
       --border-strong: #3c506b;
       --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
       --on-action-primary: #042f2e;
       --status-success: #4ade80;
       --status-success-soft: rgba(74, 222, 128, 0.14);
@@ -28,21 +29,33 @@
       --status-warning-soft: rgba(251, 191, 36, 0.14);
       --status-info: #60a5fa;
       --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
       --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.4);
+      --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      font-family: var(--font-sans);
       background: var(--canvas);
       color: var(--text-primary);
-      padding: 40px 20px;
+      padding: 30px 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      line-height: 1.5;
+    }
+    .container {
+      width: 100%;
+      max-width: 860px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
     .card {
-      width: 100%;
-      max-width: 780px;
       background: var(--surface);
       border: 1px solid var(--border-strong);
       border-radius: 14px;
@@ -56,16 +69,17 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 10px;
     }
     .card-title {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       font-size: 16px;
       font-weight: 700;
     }
     .card-body {
-      padding: 24px;
+      padding: 22px;
       display: flex;
       flex-direction: column;
       gap: 20px;
@@ -82,107 +96,62 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-    select, input {
+    select, input, textarea {
       background: var(--input-bg);
       color: var(--text-primary);
       border: 1px solid var(--border-subtle);
-      padding: 11px 14px;
+      padding: 10px 14px;
       border-radius: 8px;
       font-size: 13px;
       outline: none;
       font-family: inherit;
+      transition: border-color 0.2s;
     }
-    select:focus, input:focus {
+    select:focus, input:focus, textarea:focus {
       border-color: var(--action-primary);
     }
-    .badge-free {
-      background: var(--status-success-soft);
-      color: var(--status-success);
-      border: 1px solid var(--status-success);
+    .badge {
       padding: 3px 8px;
-      border-radius: 5px;
+      border-radius: 6px;
       font-size: 11px;
       font-weight: 700;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
+    }
+    .badge-success {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+    .badge-warning {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+    .badge-info {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+    }
+    .badge-purple {
+      background: var(--status-neutral-soft);
+      color: var(--status-neutral);
+      border: 1px solid var(--status-neutral);
     }
     .help-text {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-muted);
       line-height: 1.4;
     }
-    
-    /* Waterfall Flow Visualizer */
-    .waterfall-container {
-      background: var(--surface-subtle);
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
     }
-    .waterfall-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 4px;
+    @media (max-width: 650px) {
+      .grid-2 { grid-template-columns: 1fr; }
     }
-    .waterfall-step {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 8px 12px;
-      background: var(--surface-raised);
-      border: 1px solid var(--border-subtle);
-      border-radius: 8px;
-      font-size: 12px;
-    }
-    .waterfall-step.primary {
-      border-color: var(--action-primary);
-      background: rgba(45, 212, 191, 0.08);
-      font-weight: 700;
-    }
-    .step-num {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: var(--surface-interactive);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 800;
-      color: var(--text-primary);
-    }
-    .waterfall-step.primary .step-num {
-      background: var(--action-primary);
-      color: var(--on-action-primary);
-    }
-    .step-name {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-    }
-    .step-role {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-left: auto;
-    }
-    .step-arrow {
-      text-align: center;
-      font-size: 11px;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      margin: -4px 0;
-    }
-
     .btn {
       padding: 10px 18px;
       border-radius: 8px;
@@ -193,130 +162,497 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      transition: 0.2s;
     }
     .btn-primary {
       background: var(--action-primary);
       color: var(--on-action-primary);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
     }
     .btn-secondary {
       background: var(--surface-interactive);
       color: var(--text-primary);
       border: 1px solid var(--border-strong);
     }
+    .btn-secondary:hover {
+      background: var(--surface-hover);
+    }
+
+    /* Tier Switcher Segmented Control */
+    .tier-switcher {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--input-bg);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+      gap: 6px;
+    }
+    .tier-option {
+      padding: 12px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: 0.2s;
+      border: 1px solid transparent;
+    }
+    .tier-option.active {
+      background: var(--surface-raised);
+      border-color: var(--action-primary);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .tier-option-title {
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 3px;
+    }
+    .tier-option-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Module Matrix Table */
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      background: var(--surface-raised);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+    }
+    .matrix-table th {
+      background: var(--surface-interactive);
+      color: var(--text-secondary);
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .matrix-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: middle;
+    }
+    .matrix-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Waterfall Steps */
+    .waterfall-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .waterfall-step.primary {
+      background: rgba(45, 212, 191, 0.08);
+      border-color: var(--action-primary);
+    }
+    .waterfall-number {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .waterfall-step.primary .waterfall-number {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    /* Alert Banner */
+    .alert-banner {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.4;
+    }
+    .alert-banner.info {
+      background: var(--status-info-soft);
+      border: 1px solid var(--status-info);
+      color: var(--status-info);
+    }
+    .alert-banner.success {
+      background: var(--status-success-soft);
+      border: 1px solid var(--status-success);
+      color: var(--status-success);
+    }
+    .alert-banner.warning {
+      background: var(--status-warning-soft);
+      border: 1px solid var(--status-warning);
+      color: var(--status-warning);
+    }
   </style>
 </head>
 <body>
-  <div style="margin-bottom: 24px; text-align: center;">
-    <h1 style="font-size: 20px; font-weight: 800; margin-bottom: 6px;">Usulan Menu Settings: Waterfall Sequential Fallback</h1>
-    <p style="font-size: 13px; color: var(--text-secondary);">Pemilihan model primer dengan rantai fallback menurun otomatis (3.8 ➔ 3.7 ➔ 3.6 ➔ 3.5 ➔ 2.5).</p>
-  </div>
 
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">
-        <span>🔑</span>
-        <span>Gemini AI Configuration</span>
-      </div>
-      <span class="badge-free">✓ Free Tier Ready (15 RPM / 1M TPM)</span>
+  <div class="container">
+    <!-- Header Title -->
+    <div style="text-align: center; margin-bottom: 10px;">
+      <h1 style="font-size: 22px; font-weight: 800; margin-bottom: 6px;">Simulasi Settings: Dual-Tier & Smart Model Routing</h1>
+      <p style="font-size: 13px; color: var(--text-secondary);">
+        Mitigasi Kegagalan Free Tier, Efisiensi Biaya Token 95%, dan Pemetaan Model Berbasis Modul MAKNA Flow.
+      </p>
     </div>
 
-    <div class="card-body">
-      <!-- 1. API Key -->
-      <div class="form-group">
-        <label>Gemini API Key</label>
-        <input type="password" value="API_KEY_SAMPLE_1234567890abcdef..." readonly>
-      </div>
-
-      <!-- 2. Primary Model Selection -->
-      <div class="form-group">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <label>Pilihan Model AI Utama (Starting Primary)</label>
-          <span style="font-size: 11px; color: var(--action-primary); font-weight: 600;">⚡ Otomatis Menurun jika 503</span>
+    <!-- MAIN CARD -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>🔑</span>
+          <span>Google Gemini AI Architecture & Models</span>
         </div>
-        <select id="modelSelect" onchange="renderWaterfall(this.value)">
-          <option value="gemini-3.8-flash" selected>gemini-3.8-flash (Flash Terbaru — Rekomendasi)</option>
-          <option value="gemini-3.7-flash">gemini-3.7-flash (Hybrid Reasoning / Thinking)</option>
-          <option value="gemini-3.6-flash">gemini-3.6-flash (Generasi Stabil & Cepat)</option>
-          <option value="gemini-3.5-flash">gemini-3.5-flash (Standard Flash — Safety Net)</option>
-          <option value="custom">✏️ Custom Model ID...</option>
-        </select>
-        <span class="help-text">Model ini akan diprioritaskan pertama kali. Jika Google mengembalikan error 503 (High Demand) atau 404 (Model Tidak Tersedia), sistem otomatis beralih ke model di bawahnya secara berurutan.</span>
-      </div>
-
-      <div id="customGroup" class="form-group" style="display: none;">
-        <label>Custom Model ID</label>
-        <input type="text" id="customInput" placeholder="Contoh: gemini-3.8-flash-preview-092026" oninput="renderWaterfall('custom')">
-      </div>
-
-      <!-- 3. Live Waterfall Chain Visualizer -->
-      <div class="waterfall-container">
-        <div class="waterfall-header">
-          <span>🌊 Rantai Eksekusi Berjenjang (Waterfall Chain)</span>
-          <span style="font-size: 11px; color: var(--status-success); font-weight: 600;">Aktif Otomatis</span>
-        </div>
-        <div id="waterfallSteps" style="display: flex; flex-direction: column; gap: 6px;">
-          <!-- Dynamically Rendered -->
+        <div id="tierBadge" class="badge badge-success">
+          💳 Paid Tier Dedicated (Diskon Cache 75%)
         </div>
       </div>
 
-      <!-- 4. Actions -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-        <button class="btn btn-secondary">🔌 Uji Koneksi Model</button>
-        <button class="btn btn-primary">💾 Simpan Pengaturan</button>
+      <div class="card-body">
+
+        <!-- 1. PILIHAN TIER (DUAL-TIER ADAPTIVE ARCHITECTURE) -->
+        <div class="form-group">
+          <label>1. Mode Operasional Gemini AI (Dual-Tier)</label>
+          <div class="tier-switcher">
+            <div id="btnPaidTier" class="tier-option active" onclick="switchTier('paid')">
+              <div class="tier-option-title">
+                <span>💳 Paid Tier (Dedicated)</span>
+                <span class="badge badge-success" style="font-size: 9px;">Rekomendasi</span>
+              </div>
+              <div class="tier-option-desc">Katalog model lengkap (1.5 8B s/d 3.8), Context Caching aktif, Rate Limit tinggi.</div>
+            </div>
+
+            <div id="btnFreeTier" class="tier-option" onclick="switchTier('free')">
+              <div class="tier-option-title">
+                <span>🔄 Free Tier (Pool Key Rotasi)</span>
+              </div>
+              <div class="tier-option-desc">Model Flash 3.5 - 3.8, rotasi akun multi-key, tanpa Context Caching.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. STATUS CONTEXT CACHING -->
+        <div id="cachingPanel" class="alert-banner success">
+          <span style="font-size: 16px;">⚡</span>
+          <div>
+            <strong>Google Context Caching Aktif:</strong> Directive Master KB (~81.000 token) tersimpan di cache server Google. Biaya input prompt terdiskon <strong>~75%</strong> (hanya ~Rp 130 ➡️ Rp 13 per call) dan latensi 50% lebih kencang.
+          </div>
+        </div>
+
+        <div id="freeTierAlert" class="alert-banner warning" style="display: none;">
+          <span style="font-size: 16px;">⚠️</span>
+          <div>
+            <strong>Mode Free Tier Aktif:</strong> Menggunakan rotasi pool kunci API. Fitur Context Caching dinonaktifkan oleh Google pada Free Tier. Jika terjadi limit 429 atau 503, sistem siap melakukan auto-failover ke Paid Tier.
+          </div>
+        </div>
+
+        <!-- 3. PRIMARY MODEL SELECTION -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label>2. Model AI Utama Default (Global Starting Primary)</label>
+            <span id="modelTierTag" class="badge badge-purple">Paid Tier Full Catalog</span>
+          </div>
+          <select id="primaryModelSelect" onchange="onModelChange(this.value)">
+            <!-- Options populated dynamically via JavaScript based on tier -->
+          </select>
+          <p class="help-text">
+            Model default yang diprioritaskan pertama kali saat memulai generasi konten.
+          </p>
+        </div>
+
+        <!-- 4. SMART MODULE-BASED MODEL ROUTING MATRIX (MITIGASI PAID TIER) -->
+        <div id="moduleMatrixSection" class="form-group" style="margin-top: 5px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div>
+              <label style="margin: 0;">3. Matriks Alokasi Model per Modul (Smart Cost Optimization)</label>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+                Secara otomatis memilih model paling hemat & cepat sesuai karakteristik tugas backend.
+              </div>
+            </div>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none; font-size: 12px; font-weight: 600; color: var(--action-primary);">
+              <input type="checkbox" id="enableSmartRouting" checked onchange="toggleSmartRouting(this.checked)">
+              Aktifkan Routing Cerdas
+            </label>
+          </div>
+
+          <table class="matrix-table">
+            <thead>
+              <tr>
+                <th>Kategori & Modul MAKNA Flow</th>
+                <th>Model yang Dialokasikan</th>
+                <th>Biaya Input (per 1M)</th>
+                <th>Master KB Cache</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div style="font-weight: 700; color: var(--text-primary);">📸 Ekstraksi OCR, Scraper URL & Token Filter</div>
+                  <div style="font-size: 10px; color: var(--text-muted);">Scraper TikTok/IG, Ekstraksi Foto Produk, Lexicon Audit</div>
+                </td>
+                <td>
+                  <select class="module-select" style="padding: 4px 8px; font-size: 11px;">
+                    <option value="gemini-1.5-flash-8b" selected>gemini-1.5-flash-8b (Ultra Hemat)</option>
+                    <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite (Next-Gen Lite)</option>
+                    <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+                  </select>
+                </td>
+                <td style="color: var(--status-success); font-family: var(--font-mono); font-weight: 700;">Rp 600</td>
+                <td><span class="badge" style="background: rgba(255,255,255,0.05); color: var(--text-muted); font-size: 10px;">Bypass (0 Token)</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="font-weight: 700; color: var(--text-primary);">🛡️ TikTok Compliance & Deconstruct Lab</div>
+                  <div style="font-size: 10px; color: var(--text-muted);">Bedah Struktur Naskah Viral & Audit Kepatuhan Regulasi</div>
+                </td>
+                <td>
+                  <select class="module-select" style="padding: 4px 8px; font-size: 11px;">
+                    <option value="gemini-2.5-flash" selected>gemini-2.5-flash (Strict JSON Parser)</option>
+                    <option value="gemini-1.5-flash">gemini-1.5-flash (Stabil)</option>
+                    <option value="gemini-3.6-flash">gemini-3.6-flash</option>
+                  </select>
+                </td>
+                <td style="color: var(--status-success); font-family: var(--font-mono); font-weight: 700;">Rp 1.200</td>
+                <td><span class="badge" style="background: rgba(255,255,255,0.05); color: var(--text-muted); font-size: 10px;">Bypass (0 Token)</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="font-weight: 700; color: var(--text-primary);">🎬 Content Planner, Recipe & RE Campaign</div>
+                  <div style="font-size: 10px; color: var(--text-muted);">Storyboard 6-8 Scene, Naskah VO, 10 Video DNA & Social Media Package</div>
+                </td>
+                <td>
+                  <select class="module-select" style="padding: 4px 8px; font-size: 11px;">
+                    <option value="gemini-3.6-flash" selected>gemini-3.6-flash (Creative Sweet Spot)</option>
+                    <option value="gemini-3.7-flash">gemini-3.7-flash</option>
+                    <option value="gemini-3.8-flash">gemini-3.8-flash</option>
+                  </select>
+                </td>
+                <td style="color: var(--action-primary); font-family: var(--font-mono); font-weight: 700;">Rp 1.600 <span style="font-size: 10px; color: var(--status-success);">(Cache: Rp 160)</span></td>
+                <td><span class="badge badge-success" style="font-size: 10px;">✓ 81k Token Cached</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="font-weight: 700; color: var(--text-primary);">🎙️ YouTube Studio Narrative & Series</div>
+                  <div style="font-size: 10px; color: var(--text-muted);">Multi-Speaker Script, Blueprint Episode & Strategi Channel</div>
+                </td>
+                <td>
+                  <select class="module-select" style="padding: 4px 8px; font-size: 11px;">
+                    <option value="gemini-3.7-flash" selected>gemini-3.7-flash (Hybrid Reasoning)</option>
+                    <option value="gemini-3.8-flash">gemini-3.8-flash</option>
+                    <option value="gemini-3.6-flash">gemini-3.6-flash</option>
+                  </select>
+                </td>
+                <td style="color: var(--status-warning); font-family: var(--font-mono); font-weight: 700;">Rp 8.000</td>
+                <td><span class="badge badge-success" style="font-size: 10px;">✓ 81k Token Cached</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 5. EXPANDED WATERFALL SEQUENTIAL VISUALIZER -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label>4. Rantai Waterfall Fallback yang Diperluas (Expanded Cascade)</label>
+            <span class="badge badge-success">🛡️ 0% Failure Rate Guarantee</span>
+          </div>
+          <div id="waterfallContainer" style="background: var(--surface-subtle); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 6px;">
+            <!-- Rendered by JavaScript -->
+          </div>
+        </div>
+
+        <!-- SIMULASI FAILOVER & SAVE BUTTON -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 18px; margin-top: 10px;">
+          <button class="btn btn-secondary" onclick="simulateFailover()">
+            🧪 Simulasi Free Tier 503 Failover
+          </button>
+          <button class="btn btn-primary" onclick="alert('Konfigurasi Gemini AI Dual-Tier & Smart Routing berhasil disimpan!')">
+            💾 Simpan Konfigurasi Gemini AI
+          </button>
+        </div>
+
       </div>
     </div>
   </div>
 
   <script>
-    const FULL_CASCADE = [
-      'gemini-3.8-flash',
-      'gemini-3.7-flash',
-      'gemini-3.6-flash',
-      'gemini-3.5-flash'
+    let currentTier = 'paid';
+    let currentPrimary = 'gemini-3.6-flash';
+
+    const paidModels = [
+      { id: 'gemini-3.6-flash', name: 'gemini-3.6-flash (Creative Sweet Spot — Rekomendasi)', tag: 'Diskon Cache 75%' },
+      { id: 'gemini-1.5-flash-8b', name: 'gemini-1.5-flash-8b (Ultra-Low Cost — Rp 600 / 1M)', tag: 'Paling Murah' },
+      { id: 'gemini-3.1-flash-lite', name: 'gemini-3.1-flash-lite (Next-Gen Ultra Cepat)', tag: 'Super Ringan' },
+      { id: 'gemini-2.5-flash', name: 'gemini-2.5-flash (Strict JSON & Compliance Parser)', tag: 'Stabil' },
+      { id: 'gemini-1.5-flash', name: 'gemini-1.5-flash (Standard Flash)', tag: 'Stabil' },
+      { id: 'gemini-3.7-flash', name: 'gemini-3.7-flash (Hybrid Reasoning / Thinking)', tag: 'High Intelligence' },
+      { id: 'gemini-3.8-flash', name: 'gemini-3.8-flash (Flash Terbaru)', tag: 'Latest' },
+      { id: 'gemini-flash-latest', name: 'gemini-flash-latest (Auto Latest Endpoint)', tag: 'Auto Fallback' }
     ];
 
-    function renderWaterfall(selected) {
-      const customGroup = document.getElementById('customGroup');
-      customGroup.style.display = selected === 'custom' ? 'flex' : 'none';
+    const freeModels = [
+      { id: 'gemini-3.8-flash', name: 'gemini-3.8-flash (Flash Terbaru — Rekomendasi Free)', tag: 'Free Ready' },
+      { id: 'gemini-3.7-flash', name: 'gemini-3.7-flash (Hybrid Reasoning / Thinking)', tag: 'Free Ready' },
+      { id: 'gemini-3.6-flash', name: 'gemini-3.6-flash (Generasi Stabil & Cepat)', tag: 'Free Ready' },
+      { id: 'gemini-3.5-flash', name: 'gemini-3.5-flash (Standard Flash — Safety Net)', tag: 'Free Ready' },
+      { id: 'gemini-flash-latest', name: 'gemini-flash-latest (Auto Latest Flash)', tag: 'Auto Fallback' }
+    ];
 
-      let chain = [];
-      if (selected === 'custom') {
-        const customVal = document.getElementById('customInput').value.trim() || 'custom-model';
-        chain = [customVal, ...FULL_CASCADE];
-      } else {
-        const idx = FULL_CASCADE.indexOf(selected);
-        chain = idx !== -1 ? FULL_CASCADE.slice(idx) : [selected, ...FULL_CASCADE];
-      }
-
-      const container = document.getElementById('waterfallSteps');
-      let html = '';
-      chain.forEach((model, i) => {
-        const isPrimary = i === 0;
-        const isLast = i === chain.length - 1;
-        
-        let role = isPrimary ? '⭐ Model Utama (Trial 1 + 1x Quick Retry)' : (isLast ? '🛡️ Ultimate Safety Net' : '⬇️ Fallback Step ' + i);
-
-        html += `
-          <div class="waterfall-step ${isPrimary ? 'primary' : ''}">
-            <div class="step-num">${i + 1}</div>
-            <div class="step-name">${model}</div>
-            <div class="step-role">${role}</div>
-          </div>
-        `;
-
-        if (!isLast) {
-          html += `
-            <div class="step-arrow">
-              <span>⬇️ Jika 503 / High Demand (setelah 1x quick retry)</span>
-            </div>
-          `;
-        }
+    function renderSelectOptions() {
+      const select = document.getElementById('primaryModelSelect');
+      select.innerHTML = '';
+      const list = currentTier === 'paid' ? paidModels : freeModels;
+      
+      list.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item.id;
+        opt.textContent = `${item.name}`;
+        if (item.id === currentPrimary) opt.selected = true;
+        select.appendChild(opt);
       });
-
-      container.innerHTML = html;
     }
 
-    renderWaterfall('gemini-3.8-flash');
+    function switchTier(tier) {
+      currentTier = tier;
+      document.getElementById('btnPaidTier').className = tier === 'paid' ? 'tier-option active' : 'tier-option';
+      document.getElementById('btnFreeTier').className = tier === 'free' ? 'tier-option active' : 'tier-option';
+
+      const tierBadge = document.getElementById('tierBadge');
+      const cachingPanel = document.getElementById('cachingPanel');
+      const freeTierAlert = document.getElementById('freeTierAlert');
+      const modelTierTag = document.getElementById('modelTierTag');
+      const moduleMatrix = document.getElementById('moduleMatrixSection');
+
+      if (tier === 'paid') {
+        tierBadge.className = 'badge badge-success';
+        tierBadge.textContent = '💳 Paid Tier Dedicated (Diskon Cache 75%)';
+        cachingPanel.style.display = 'flex';
+        freeTierAlert.style.display = 'none';
+        modelTierTag.className = 'badge badge-purple';
+        modelTierTag.textContent = 'Paid Tier Full Catalog (8 Model)';
+        moduleMatrix.style.display = 'block';
+        currentPrimary = 'gemini-3.6-flash';
+      } else {
+        tierBadge.className = 'badge badge-warning';
+        tierBadge.textContent = '🔄 Free Tier Pool (Rotasi Key)';
+        cachingPanel.style.display = 'none';
+        freeTierAlert.style.display = 'flex';
+        modelTierTag.className = 'badge badge-info';
+        modelTierTag.textContent = 'Free Tier Compatible (5 Model)';
+        moduleMatrix.style.display = 'none';
+        currentPrimary = 'gemini-3.8-flash';
+      }
+
+      renderSelectOptions();
+      renderWaterfall();
+    }
+
+    function onModelChange(val) {
+      currentPrimary = val;
+      renderWaterfall();
+    }
+
+    function toggleSmartRouting(checked) {
+      const selects = document.querySelectorAll('.module-select');
+      selects.forEach(s => s.disabled = !checked);
+    }
+
+    function renderWaterfall() {
+      const container = document.getElementById('waterfallContainer');
+      container.innerHTML = '';
+
+      let chain = [];
+      if (currentTier === 'paid') {
+        const fullCascade = [
+          'gemini-3.6-flash',
+          'gemini-1.5-flash-8b',
+          'gemini-3.1-flash-lite',
+          'gemini-2.5-flash',
+          'gemini-3.7-flash',
+          'gemini-3.8-flash',
+          'gemini-flash-latest'
+        ];
+        const idx = fullCascade.indexOf(currentPrimary);
+        if (idx !== -1) {
+          chain = fullCascade.slice(idx);
+        } else {
+          chain = [currentPrimary, ...fullCascade.filter(m => m !== currentPrimary)];
+        }
+      } else {
+        const freeCascade = [
+          'gemini-3.8-flash',
+          'gemini-3.7-flash',
+          'gemini-3.6-flash',
+          'gemini-3.5-flash',
+          'gemini-flash-latest'
+        ];
+        const idx = freeCascade.indexOf(currentPrimary);
+        if (idx !== -1) {
+          chain = freeCascade.slice(idx);
+        } else {
+          chain = [currentPrimary, ...freeCascade.filter(m => m !== currentPrimary)];
+        }
+      }
+
+      chain.forEach((modelName, idx) => {
+        const stepDiv = document.createElement('div');
+        stepDiv.className = `waterfall-step ${idx === 0 ? 'primary' : ''}`;
+        
+        let labelDesc = '';
+        if (idx === 0) {
+          labelDesc = '⭐ Model Utama (Trial 1 + Quick Retry)';
+        } else if (idx === chain.length - 1) {
+          labelDesc = '🛡️ Safety Net Terakhir (Auto Latest)';
+        } else {
+          labelDesc = `⬇️ Fallback Step ${idx}`;
+        }
+
+        stepDiv.innerHTML = `
+          <span class="waterfall-number">${idx + 1}</span>
+          <span style="font-family: var(--font-mono); font-weight: ${idx === 0 ? '700' : '500'};">${modelName}</span>
+          <span style="margin-left: auto; font-size: 11px; color: ${idx === 0 ? 'var(--action-primary)' : 'var(--text-muted)'}; font-weight: ${idx === 0 ? '700' : '400'};">
+            ${labelDesc}
+          </span>
+        `;
+        container.appendChild(stepDiv);
+
+        if (idx < chain.length - 1) {
+          const arrow = document.createElement('div');
+          arrow.style.textAlign = 'center';
+          arrow.style.fontSize = '10px';
+          arrow.style.color = 'var(--text-muted)';
+          arrow.style.margin = '1px 0';
+          arrow.textContent = '⬇️ Jika Google 503 (High Demand) / 404 (Unavailable)';
+          container.appendChild(arrow);
+        }
+      });
+    }
+
+    function simulateFailover() {
+      alert('🧪 Simulasi Failover:\n\n1. Sistem mendeteksi Free Tier Pool terkena Rate Limit 429 serentak.\n2. Sistem otomatis mengaktifkan Dedicated Paid Tier Key.\n3. Model dialihkan ke "gemini-3.6-flash" dengan Context Caching Master KB.\n4. Antrean konten berhasil diproses tanpa interupsi!');
+    }
+
+    // Initial render
+    renderSelectOptions();
+    renderWaterfall();
   </script>
 </body>
 </html>

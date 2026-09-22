@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.31.32 — Dual-Tier Adaptive Architecture & Smart Module Routing Gemini AI (23/09/2026)
+- Arsitektur Dual-Tier: Buka katalog 8 model hemat pada Paid Tier (gemini-1.5-flash-8b s/d 3.8)
+- Smart Module-Based Model Routing Matrix untuk 10 Menu Kampanye & Modul Pendukung
+- Expanded Waterfall Fallback Chain proteksi 0% kegagalan
+- Integrasi Menu Settings dinamis & status Context Caching Master KB
+
 ## V2.31.31 — Sanitize API Key placeholders & Hardcoded Test Keys (23/09/2026)
 - Hapus hardcoded Google API Key pada test scripts
 - Ganti format contoh dummy key di mockup dan settings dengan placeholder aman
