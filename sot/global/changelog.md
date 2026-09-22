@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.31.24 — Culinary Continuity & Cookware Kit Lock pada Recipe Campaign (22/09/2026)
+- Implementasi Locked Cookware Palette per kategori kuliner (Mixing Bowl, Pan, Utensils, Plating)
+- Food-State Truth Lock dan larangan kontaminasi visual objek makanan asing pada prompt T2I/I2V
+
 ## V2.31.23 — Fix Resilient JSON Parser & Route Timeout Content Planner (22/09/2026)
 - Konfigurasi maxDuration 120s dan force-dynamic pada route API execute Content Planner
 - Resilient response parser di UI Content Planner untuk mencegah syntax error <!DOCTYPE HTML saat network glitch
