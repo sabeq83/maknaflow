@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.20 — Recipe campaign: Visual Identity & Faceless Lock integration (22/09/2026)
+- Integrasikan resolveVisualOverrides ke recipe adapter untuk mematuhi konfigurasi visual_overrides_json
+- Terapkan Faceless Hands-Only mandate dan Wardrobe Terracotta lock
+- Pastikan deskripsi aksi visual Indonesia berfokus pada gerakan tangan dan bahan resep
+
 ## V2.31.19 — Recipe campaign: V10 visual standard & unified caption (22/09/2026)
 - Standardisasi prompt T2I 4-layer optics & I2V micro-pacing pada recipe adapter
 - Satukan seluruh social media captions ke naskah resep utuh universal
