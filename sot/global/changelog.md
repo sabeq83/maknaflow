@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.27 — Pembersihan Croissant Hardcoded & Fix Sanitasi Negative Prompt (22/09/2026)
+- Hapus kata kunci hardcoded croissant pada template T2I resep kuliner
+- Perbaiki regex sanitasi negative prompt di webhook-client agar tidak bocor
+- Validasi unit test sanitasi prompt T2I
+
 ## V2.31.26 — Eliminasi Double Safety Delay G-Labs (22/09/2026)
 - Hapus sisa jeda manual loop di scheduler-processors dan multiplier-worker
 - Standarisasi safety delay terpusat murni di webhook-client.js

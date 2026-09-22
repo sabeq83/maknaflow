@@ -95,3 +95,16 @@ test('Recipe Production Package validates unified cookware & scenes integrity', 
     assert.doesNotMatch(scene.visual_action, /croissant|roti sobek|pizza/i);
   });
 });
+
+test('sanitizeImagePrompt strips multi-word --no clauses without leaking negative keywords into positive prompt', async () => {
+  const { sanitizeImagePrompt } = await import('../lib/webhook-client.js');
+
+  const dirtyPrompt = '(VERTICAL 9:16) --ar 9:16 --no landscape, croissant, unrelated food [LAYER 1: OPTICS] (Shot on 100mm Macro). [LAYER 2: SUBJECT] (Food Truth: Fudgy brownies in square pan).';
+  const cleaned = sanitizeImagePrompt(dirtyPrompt);
+
+  assert.doesNotMatch(cleaned, /croissant/i, 'Negative keyword croissant must NOT leak into positive prompt');
+  assert.doesNotMatch(cleaned, /unrelated food/i, 'Negative clause must be completely stripped');
+  assert.doesNotMatch(cleaned, /--no/i, '--no syntax must be stripped');
+  assert.doesNotMatch(cleaned, /--ar/i, '--ar syntax must be stripped');
+  assert.match(cleaned, /Fudgy brownies/i, 'Positive prompt content must remain intact');
+});
