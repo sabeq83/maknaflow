@@ -1037,7 +1037,7 @@ export default function SheetsAutopilotDashboard() {
                         style={{ padding: '14px 18px', background: 'var(--bg-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', fontWeight: '600', fontSize: '0.88rem' }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span>⚡ 4. Visual Swap Overrides (VSO)</span>
+                          <span>⚡ 4. Visual Identity</span>
                           <span style={{ fontSize: '0.75rem', background: isVsoActive ? 'var(--success-glow)' : 'var(--border)', color: isVsoActive ? 'var(--success)' : 'var(--text-muted)', padding: '2px 6px', borderRadius: '4px' }}>
                             {isVsoActive ? 'Active' : 'Inactive'}
                           </span>
@@ -1057,11 +1057,11 @@ export default function SheetsAutopilotDashboard() {
                               <span className="slider"></span>
                             </label>
                             <strong style={{ fontSize: '14px', color: 'var(--text-primary)', cursor: 'pointer' }} onClick={() => setIsVsoActive(!isVsoActive)}>
-                              🎭 Aktifkan Visual Swap Overrides
+                              🎭 Aktifkan Visual Identity
                             </strong>
                           </div>
                           <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', margin: 0 }}>
-                            Pilih dari preset kurasi MAKNA untuk mengubah estetika visual video kompetitor secara instan tanpa perlu mengetik prompt dari nol.
+                            Pilih dari preset kurasi MAKNA untuk mengontrol estetika visual video secara konsisten tanpa perlu mengetik prompt dari nol.
                           </p>
 
                           {isVsoActive && (

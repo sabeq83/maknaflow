@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.31.29 — Visual Identity End-to-End Pipeline & VSO Terminology Renaming (22/09/2026)
+- Penyelarasan submit visualIdentity pada form Single RE Campaign
+- Resilient fallback pada resolveVisualIdentitySubmission
+- Renaming seluruh istilah Visual Swap Overrides menjadi Visual Identity
+- Update snapshot kampanye Staging re_260922_7ctaoy ke Caucasian Male
+
 ## V2.31.28 — Exponential Backoff Retry 4s-8s-16s & Resilient Waterfall Cascade (22/09/2026)
 - Pola retry exponential 4s 8s 16s untuk meredakan error 503
 - Kapasitas 4 percobaan per model sebelum cascade

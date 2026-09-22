@@ -1235,13 +1235,13 @@ export default function RECampaignDetailPage() {
     if (campaign.visual_overrides_json) {
       try {
         const vso = JSON.parse(campaign.visual_overrides_json);
-        lines.push(`- **Visual Swap Overrides:**`);
+        lines.push(`- **Visual Identity:**`);
         lines.push(`  - **Concept:** ${vso.character_concept || '-'}`);
         lines.push(`  - **Demographic:** ${vso.subject_demographic || '-'}`);
         lines.push(`  - **Wardrobe:** ${vso.wardrobe_style || '-'}${vso.wardrobe_style === 'custom' ? ` (${vso.wardrobe_style_custom || ''})` : ''}`);
         lines.push(`  - **Lighting:** ${vso.lighting_style || '-'}${vso.lighting_style === 'custom' ? ` (${vso.lighting_style_custom || ''})` : ''}`);
       } catch (e) {
-        lines.push(`- **Visual Swap Overrides:** invalid JSON`);
+        lines.push(`- **Visual Identity:** invalid JSON`);
       }
     }
     lines.push('');
@@ -4743,10 +4743,10 @@ export default function RECampaignDetailPage() {
                 </div>
               </details>
 
-              {/* Accordion 4: Info Konfigurasi Visual Swap Overrides */}
+              {/* Accordion 4: Info Konfigurasi Visual Identity */}
               <details style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-color)', borderRadius: '8px', overflow: 'hidden' }}>
                 <summary style={{ padding: '16px 20px', fontWeight: 600, fontSize: '0.92rem', cursor: 'pointer', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)' }}>
-                  <span>🎭 Info Konfigurasi Visual Swap Overrides</span>
+                  <span>🎭 Info Konfigurasi Visual Identity</span>
                 </summary>
                 <div style={{ padding: '20px', borderTop: '1px solid var(--border-color)', background: 'var(--overlay-subtle)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                   {visualOverrides.identity_ref && (

@@ -752,23 +752,19 @@ export default function RECampaignsPage() {
       formData.append('target_demographic_custom', targetDemographicCustom);
       formData.append('target_spreadsheet_id', '');
       formData.append('sfx_setting', sfxSetting);
-      formData.append('enable_audio_segment', enableAudioSegment);
+      formData.append('enable_audio_segment', enableAudioSegment ? '1' : '0');
       formData.append('ai_directive', aiDirective);
       formData.append('mandatory_outro_line', mandatoryOutroLine);
       if (voiceCast.length > 0) formData.append('voice_cast_json', JSON.stringify({ characters: voiceCast }));
 
-      if (isVsoActive) {
-        const isMascot = subjectDemographic.startsWith('mascot_universe_');
-        const vsoData = {
-          character_concept: characterConcept,
-          subject_demographic: subjectDemographic,
-          visual_style_preset: isMascot ? visualStylePreset : null,
-          wardrobe_style: wardrobeStyle,
-          wardrobe_style_custom: wardrobeStyle === 'custom' ? wardrobeStyleCustom.trim() : '',
-          lighting_style: lightingStyle,
-          lighting_style_custom: lightingStyle === 'custom' ? lightingStyleCustom.trim() : ''
-        };
-        formData.append('visual_overrides_json', JSON.stringify(vsoData));
+      if (isVsoActive && visualIdentity) {
+        formData.append('visual_identity_preset_id', visualIdentity.preset_id || '');
+        if (visualIdentity.preset_id === 'inline' && visualIdentity.inline_config) {
+          formData.append('visual_identity_inline_config', JSON.stringify(visualIdentity.inline_config));
+        }
+        if (visualIdentity.preset_id === 'custom' && visualIdentity.visual_overrides_json) {
+          formData.append('visual_overrides_json', JSON.stringify(visualIdentity.visual_overrides_json));
+        }
       }
 
       formData.append('status', submitStatus);
@@ -1938,13 +1934,18 @@ export default function RECampaignsPage() {
                 )}
               </div>
 
-              {/* ACCORDION SECTION 4: Visual Swap Overrides */}
+              {/* ACCORDION SECTION 4: Visual Identity */}
               <div style={{ borderBottom: '1px solid var(--border-color)' }}>
                 <div
                   onClick={() => setActiveAccordion(3)}
                   style={{ padding: '16px 24px', background: activeAccordion === 3 ? 'var(--status-info-soft)' : 'transparent', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                 >
-                  <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>4. Visual Swap Overrides</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>🎭 4. Visual Identity</span>
+                    <span style={{ fontSize: '0.72rem', background: isVsoActive ? 'var(--status-info-soft)' : 'var(--surface-interactive)', color: isVsoActive ? 'var(--action-primary)' : 'var(--text-muted)', padding: '2px 6px', borderRadius: 4 }}>
+                      {isVsoActive ? 'Customized' : 'Default Identity'}
+                    </span>
+                  </div>
                   <span>{activeAccordion === 3 ? '▲' : '▼'}</span>
                 </div>
                 {activeAccordion === 3 && (
@@ -1959,11 +1960,11 @@ export default function RECampaignsPage() {
                         <span className="slider"></span>
                       </label>
                       <strong style={{ fontSize: '14px', color: 'var(--text-primary)', cursor: 'pointer' }} onClick={() => setIsVsoActive(!isVsoActive)}>
-                        🎭 Aktifkan Visual Swap Overrides
+                        🎭 Aktifkan Visual Identity
                       </strong>
                     </div>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0 }}>
-                      Pilih dari preset kurasi MAKNA untuk mengubah estetika visual video kompetitor secara instan tanpa perlu mengetik prompt dari nol.
+                      Pilih dari preset kurasi MAKNA untuk mengontrol estetika visual video secara konsisten tanpa perlu mengetik prompt dari nol.
                     </p>
 
                     {isVsoActive && (
