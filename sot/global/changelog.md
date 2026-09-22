@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.25 — Single-Pass TikTok Compliance & Zero-Token Lexicon Pre-Filter (22/09/2026)
+- Injeksi guardrail kepatuhan TikTok langsung pada prompt generasi Call 1
+- Zero-Token Lexicon Pre-Filter bypass 0ms untuk naskah aman
+- Jeda cooldown 12s jika terdeteksi blocker untuk mencegah error 503 di Free Tier
+
 ## V2.31.24 — Culinary Continuity & Cookware Kit Lock pada Recipe Campaign (22/09/2026)
 - Implementasi Locked Cookware Palette per kategori kuliner (Mixing Bowl, Pan, Utensils, Plating)
 - Food-State Truth Lock dan larangan kontaminasi visual objek makanan asing pada prompt T2I/I2V
