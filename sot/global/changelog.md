@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.19 — Recipe campaign: V10 visual standard & unified caption (22/09/2026)
+- Standardisasi prompt T2I 4-layer optics & I2V micro-pacing pada recipe adapter
+- Satukan seluruh social media captions ke naskah resep utuh universal
+- Lengkapi struktur storyboard, t2i_prompts, dan i2v_prompts di root result_json
+
 ## V2.31.18 — Recipe campaign: full config pass-through & TTS blocker fix (22/09/2026)
 - Teruskan 11 field konfigurasi ke prompt AI: recipe_idea, visual_action_guideline, narrative_mode, mandatory_outro_line, ai_directive, featured_products, integration_step_hint, cta, clip_duration, words_per_clip, target_language
 - recipe_data_json sekarang diisi saat generation selesai — fix blocker yang mencegah TTS berjalan
