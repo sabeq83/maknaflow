@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { executeContentPlanner } from '@/lib/content-planner-engine';
 import { withTenantContext } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+export const maxDuration = 120;
+
 export const POST = withTenantContext(async (request, { params }, user) => {
   try {
     const { id } = await params;

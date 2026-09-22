@@ -387,13 +387,24 @@ export default function ContentPlannerDashboard() {
         })
       });
 
-      const data = await res.json();
+      let data = {};
+      try {
+        const text = await res.text();
+        data = JSON.parse(text);
+      } catch (parseErr) {
+        fetchPlanners();
+        if (!res.ok) {
+          throw new Error(`Server response error (${res.status}). Data sedang diproses di latar belakang, silakan cek daftar planner.`);
+        }
+        throw new Error('Respon server tidak valid.');
+      }
+
       if (data.success) {
         showToast('Draft Content Planner Berhasil Disimpan!');
         setShowModal(false);
         fetchPlanners();
       } else {
-        showToast('Gagal menyimpan draft planner: ' + data.error, 'error');
+        showToast('Gagal menyimpan draft planner: ' + (data.error || 'Terjadi kesalahan internal'), 'error');
       }
     } catch (e) {
       showToast('Error: ' + e.message, 'error');
@@ -410,16 +421,31 @@ export default function ContentPlannerDashboard() {
       const res = await fetch(`/api/content-planner/${id}/execute`, {
         method: 'POST'
       });
-      const data = await res.json();
+
+      let data = {};
+      try {
+        const text = await res.text();
+        data = JSON.parse(text);
+      } catch (parseErr) {
+        // Jika server mengembalikan timeout gateway / HTML tapi proses tetap selesai di backend
+        fetchPlanners();
+        if (!res.ok) {
+          showToast('Proses AI sedang berlangsung atau selesai di latar belakang. Menyegarkan data...', 'info');
+          return;
+        }
+        throw new Error('Respon server tidak valid.');
+      }
+
       if (data.success) {
         showToast('AI Content Planner Berhasil Dieksekusi!');
         fetchPlanners();
       } else {
-        showToast('Gagal eksekusi AI: ' + data.error, 'error');
+        showToast('Gagal eksekusi AI: ' + (data.error || 'Terjadi kesalahan sistem'), 'error');
         fetchPlanners();
       }
     } catch (e) {
       showToast('Error eksekusi: ' + e.message, 'error');
+      fetchPlanners();
     } finally {
       setExecutingIds(prev => ({ ...prev, [id]: false }));
     }
@@ -433,12 +459,21 @@ export default function ContentPlannerDashboard() {
       const res = await fetch(`/api/content-planner/${id}/sync-sheets`, {
         method: 'POST'
       });
-      const data = await res.json();
+
+      let data = {};
+      try {
+        const text = await res.text();
+        data = JSON.parse(text);
+      } catch (parseErr) {
+        if (!res.ok) throw new Error(`Server error (${res.status}) saat sinkronisasi Google Sheet.`);
+        throw new Error('Respon Google Sheet tidak valid.');
+      }
+
       if (data.success) {
         showToast(`Berhasil sinkronisasi ${data.synced_rows} baris ke Tab "${data.tab_name}" di Google Sheet! ✨`);
         fetchPlanners();
       } else {
-        showToast('Gagal sinkronisasi Google Sheet: ' + data.error, 'error');
+        showToast('Gagal sinkronisasi Google Sheet: ' + (data.error || 'Gagal sinkronisasi'), 'error');
       }
     } catch (e) {
       showToast('Error sync: ' + e.message, 'error');

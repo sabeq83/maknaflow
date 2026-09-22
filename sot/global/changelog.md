@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.31.23 — Fix Resilient JSON Parser & Route Timeout Content Planner (22/09/2026)
+- Konfigurasi maxDuration 120s dan force-dynamic pada route API execute Content Planner
+- Resilient response parser di UI Content Planner untuk mencegah syntax error <!DOCTYPE HTML saat network glitch
+
 ## V2.31.22 — Fix NOT NULL Constraint Kolom Product pada Recipe Planner Organik (22/09/2026)
 - Defensive fallback value pada query insert content_planner_rows untuk mode organik
 - Auto-migrasi PostgreSQL DROP NOT NULL pada kolom product content_planner_rows

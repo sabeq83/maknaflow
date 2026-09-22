@@ -3,6 +3,9 @@ import { getDb } from '@/lib/db';
 import { createDraftContentPlanner } from '@/lib/content-planner-engine';
 import { withTenantContext } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+export const maxDuration = 120;
+
 export const GET = withTenantContext(async (request, _context, user) => {
   try {
     const { searchParams } = new URL(request.url);
