@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.28 — Exponential Backoff Retry 4s-8s-16s & Resilient Waterfall Cascade (22/09/2026)
+- Pola retry exponential 4s 8s 16s untuk meredakan error 503
+- Kapasitas 4 percobaan per model sebelum cascade
+- Penyempurnaan rantai cascade hingga gemini-flash-latest
+
 ## V2.31.27 — Pembersihan Croissant Hardcoded & Fix Sanitasi Negative Prompt (22/09/2026)
 - Hapus kata kunci hardcoded croissant pada template T2I resep kuliner
 - Perbaiki regex sanitasi negative prompt di webhook-client agar tidak bocor
