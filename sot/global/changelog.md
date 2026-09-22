@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.31.31 — Sanitize API Key placeholders & Hardcoded Test Keys (23/09/2026)
+- Hapus hardcoded Google API Key pada test scripts
+- Ganti format contoh dummy key di mockup dan settings dengan placeholder aman
+
 ## V2.31.30 — Fix Gemini Context Caching Model Parameter & Token Savings Log (23/09/2026)
 - Fix parameter model pada getGenerativeModelFromCachedContent
 - Tracking token savings cachedContentTokenCount pada log terminal

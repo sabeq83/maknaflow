@@ -128,7 +128,7 @@ async function runTests() {
         VALUES ($1, $2)
         ON CONFLICT (id) DO NOTHING
       `, ['test_tenant_d', 'Test Tenant D']);
-      await setSetting('gemini_api_key', 'AIzaSyBLBzhB27BQA8ura8zeX0BGlY9eb7m08Y4');
+      await setSetting('gemini_api_key', process.env.GEMINI_API_KEY || 'AIzaMockKeyForTestRuns');
 
       // Create channel, strategy, series, planned episodes
       const channel = await createChannel({ name: 'Duration Test Channel', primary_locale: 'id-ID' }, { username: 'test_user' });

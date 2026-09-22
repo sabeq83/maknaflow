@@ -1479,7 +1479,7 @@ export default function SettingsPage() {
                     <textarea
                       className="form-input"
                       rows="6"
-                      placeholder="Tempelkan daftar Gemini API Keys di sini (1 baris per API Key)&#10;Contoh:&#10;AIzaSyA1234567890abcdef...&#10;AIzaSyB0987654321fedcba...&#10;&#10;Atau format custom:&#10;Akun_Kerja_1 : AIzaSyA1234567890abcdef..."
+                      placeholder="Tempelkan daftar Gemini API Keys di sini (1 baris per API Key)&#10;Contoh:&#10;API_KEY_SAMPLE_A123456789...&#10;API_KEY_SAMPLE_B987654321...&#10;&#10;Atau format custom:&#10;Akun_Kerja_1 : API_KEY_SAMPLE_A123456789..."
                       value={bulkKeysText}
                       onChange={e => setBulkKeysText(e.target.value)}
                       style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)', lineHeight: '1.5' }}

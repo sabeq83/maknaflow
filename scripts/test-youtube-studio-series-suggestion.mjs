@@ -60,7 +60,7 @@ async function runTests() {
       WHERE setting_key = 'gemini_api_key' AND setting_value IS NOT NULL AND setting_value != '' 
       LIMIT 1
     `);
-    const resolvedApiKey = apiKeyRes.rows[0]?.setting_value || process.env.GEMINI_API_KEY || 'AIzaSyBLBzhB27BQA8ura8zeX0BGlY9eb7m08Y4';
+    const resolvedApiKey = apiKeyRes.rows[0]?.setting_value || process.env.GEMINI_API_KEY || 'AIzaMockKeyForTestRuns';
     if (!resolvedApiKey) {
       throw new Error('Gemini API key is not configured in DB settings or env.');
     }
