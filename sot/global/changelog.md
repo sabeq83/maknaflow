@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.31.33 — Add SOP Keamanan Secret & Zero Secret Exposure Rule (23/09/2026)
+- Tambahkan SOP Keamanan Secret & Pencegahan Kebocoran API Key pada AGENTS.md
+- Larangan hardcoded credential pada skrip pengujian & format placeholder netral
+
 ## V2.31.32 — Dual-Tier Adaptive Architecture & Smart Module Routing Gemini AI (23/09/2026)
 - Arsitektur Dual-Tier: Buka katalog 8 model hemat pada Paid Tier (gemini-1.5-flash-8b s/d 3.8)
 - Smart Module-Based Model Routing Matrix untuk 10 Menu Kampanye & Modul Pendukung
