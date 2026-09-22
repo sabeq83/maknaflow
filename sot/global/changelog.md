@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.26 — Eliminasi Double Safety Delay G-Labs (22/09/2026)
+- Hapus sisa jeda manual loop di scheduler-processors dan multiplier-worker
+- Standarisasi safety delay terpusat murni di webhook-client.js
+- Performa eksekusi adegan video 2x lebih cepat tanpa jeda redundan
+
 ## V2.31.25 — Single-Pass TikTok Compliance & Zero-Token Lexicon Pre-Filter (22/09/2026)
 - Injeksi guardrail kepatuhan TikTok langsung pada prompt generasi Call 1
 - Zero-Token Lexicon Pre-Filter bypass 0ms untuk naskah aman
