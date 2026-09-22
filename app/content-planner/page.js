@@ -317,10 +317,6 @@ export default function ContentPlannerDashboard() {
       showToast('Konteks Brand dan minimal satu Pilar Konten wajib diisi', 'error');
       return;
     }
-    if (plannerFocus === 'recipe_campaign' && recipeProductIds.length === 0) {
-      showToast('Minimal satu produk katalog wajib dipilih untuk Recipe Campaign', 'error');
-      return;
-    }
 
     const selectedBrand = brandProfiles.find(b => b.id === selectedBrandId);
     const effectiveAccountName = (
@@ -1325,17 +1321,25 @@ export default function ContentPlannerDashboard() {
                     <div style={{ marginBottom: '16px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                         <label style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: 700 }}>
-                          📦 Pilih Produk Katalog Terkait (Rotasi 1 Produk per Resep):
+                          📦 Pilih Produk Katalog Terkait (Opsional):
                         </label>
-                        <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--status-info)' }}>
-                          {recipeProductIds.length} Produk Dipilih
+                        <span style={{
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          padding: '3px 8px',
+                          borderRadius: '12px',
+                          background: recipeProductIds.length > 0 ? 'var(--status-info-soft)' : 'var(--status-success-soft)',
+                          color: recipeProductIds.length > 0 ? 'var(--status-info)' : 'var(--status-success)',
+                          border: `1px solid ${recipeProductIds.length > 0 ? 'var(--status-info)' : 'var(--status-success)'}`
+                        }}>
+                          {recipeProductIds.length > 0 ? `📦 ${recipeProductIds.length} Produk Dipilih` : '🌿 Mode Resep Organik'}
                         </span>
                       </div>
                       
                       <div style={{ position: 'relative', marginBottom: '8px' }}>
                         <input
                           type="text"
-                          placeholder="Cari produk dari katalog tenant..."
+                          placeholder="Cari produk dari katalog tenant (opsional)..."
                           value={productSearchQuery}
                           onChange={(e) => setProductSearchQuery(e.target.value)}
                           style={{
@@ -1345,10 +1349,10 @@ export default function ContentPlannerDashboard() {
                         />
                       </div>
 
-                      <div style={{ maxHeight: '180px', overflowY: 'auto', borderRadius: '8px', border: '1px solid var(--border-subtle)', background: 'var(--input-bg)', padding: '6px' }}>
+                      <div style={{ maxHeight: '160px', overflowY: 'auto', borderRadius: '8px', border: '1px solid var(--border-subtle)', background: 'var(--input-bg)', padding: '6px' }}>
                         {existingProducts.length === 0 ? (
                           <div style={{ padding: '12px', fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center' }}>
-                            Tidak ada produk ditemukan di database.
+                            Tidak ada produk ditemukan di database. (Mode Organik aktif secara otomatis)
                           </div>
                         ) : (
                           existingProducts.map(p => {
@@ -1392,54 +1396,63 @@ export default function ContentPlannerDashboard() {
                           })
                         )}
                       </div>
+
+                      {recipeProductIds.length === 0 && (
+                        <div style={{ marginTop: '8px', padding: '8px 12px', background: 'var(--status-success-soft)', border: '1px solid var(--status-success)', borderRadius: '8px', fontSize: '11px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span>🌿</span>
+                          <span><strong>Mode Organik:</strong> AI akan merancang resep rumahan berbahan dapur umum (murni edukasi &amp; estetika viral tanpa sponsor produk katalog).</span>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Multi-Product Strategy Mode */}
-                    <div style={{ marginBottom: '16px' }}>
-                      <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-primary)', marginBottom: '8px', fontWeight: 700 }}>
-                        🔀 Strategi Integrasi Produk:
-                      </label>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                        <div
-                          onClick={() => setRecipeStrategyMode('synergy')}
-                          style={{
-                            background: recipeStrategyMode === 'synergy' ? 'var(--status-success-soft)' : 'var(--surface-interactive)',
-                            border: recipeStrategyMode === 'synergy' ? '1px solid var(--status-success)' : '1px solid var(--border-subtle)',
-                            borderRadius: '8px',
-                            padding: '10px 12px',
-                            cursor: 'pointer',
-                            transition: 'all 0.15s ease'
-                          }}
-                        >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                            <span style={{ fontWeight: 700, fontSize: '12px', color: 'var(--text-primary)' }}>🌟 Sinergi Kombo</span>
-                            <span style={{ fontSize: '9px', background: 'var(--status-success)', color: '#ffffff', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>Rekomendasi</span>
+                    {/* Multi-Product Strategy Mode (Hanya jika produk dipilih) */}
+                    {recipeProductIds.length > 0 && (
+                      <div style={{ marginBottom: '16px' }}>
+                        <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-primary)', marginBottom: '8px', fontWeight: 700 }}>
+                          🔀 Strategi Integrasi Produk:
+                        </label>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                          <div
+                            onClick={() => setRecipeStrategyMode('synergy')}
+                            style={{
+                              background: recipeStrategyMode === 'synergy' ? 'var(--status-success-soft)' : 'var(--surface-interactive)',
+                              border: recipeStrategyMode === 'synergy' ? '1px solid var(--status-success)' : '1px solid var(--border-subtle)',
+                              borderRadius: '8px',
+                              padding: '10px 12px',
+                              cursor: 'pointer',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                              <span style={{ fontWeight: 700, fontSize: '12px', color: 'var(--text-primary)' }}>🌟 Sinergi Kombo</span>
+                              <span style={{ fontSize: '9px', background: 'var(--status-success)', color: '#ffffff', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>Rekomendasi</span>
+                            </div>
+                            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.35 }}>
+                              Padukan <strong>semua produk</strong> (Bahan + Alat) di tiap resep &amp; keranjang ganda.
+                            </div>
                           </div>
-                          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.35 }}>
-                            Padukan <strong>semua produk</strong> (Bahan + Alat) di tiap resep &amp; keranjang ganda.
-                          </div>
-                        </div>
 
-                        <div
-                          onClick={() => setRecipeStrategyMode('rotation')}
-                          style={{
-                            background: recipeStrategyMode === 'rotation' ? 'var(--status-warning-soft)' : 'var(--surface-interactive)',
-                            border: recipeStrategyMode === 'rotation' ? '1px solid var(--status-warning)' : '1px solid var(--border-subtle)',
-                            borderRadius: '8px',
-                            padding: '10px 12px',
-                            cursor: 'pointer',
-                            transition: 'all 0.15s ease'
-                          }}
-                        >
-                          <div style={{ fontWeight: 700, fontSize: '12px', color: 'var(--text-primary)', marginBottom: '4px' }}>
-                            🔄 Rotasi Bergantian
-                          </div>
-                          <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.35 }}>
-                            Bagi produk <strong>secara terpisah</strong> (1 produk per baris resep).
+                          <div
+                            onClick={() => setRecipeStrategyMode('rotation')}
+                            style={{
+                              background: recipeStrategyMode === 'rotation' ? 'var(--status-warning-soft)' : 'var(--surface-interactive)',
+                              border: recipeStrategyMode === 'rotation' ? '1px solid var(--status-warning)' : '1px solid var(--border-subtle)',
+                              borderRadius: '8px',
+                              padding: '10px 12px',
+                              cursor: 'pointer',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            <div style={{ fontWeight: 700, fontSize: '12px', color: 'var(--text-primary)', marginBottom: '4px' }}>
+                              🔄 Rotasi Bergantian
+                            </div>
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.35 }}>
+                              Bagi produk <strong>secara terpisah</strong> (1 produk per baris resep).
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    )}
 
                     {/* Culinary Category Chips */}
                     <div style={{ marginBottom: '16px' }}>

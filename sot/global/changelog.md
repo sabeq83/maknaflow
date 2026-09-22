@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.21 — Dukungan Recipe Campaign Tanpa Produk (Organik) & Konsistensi AI (22/09/2026)
+- Dukungan pembuatan Recipe Campaign tanpa produk sponsor (Mode Resep Organik Murni)
+- Mandat instruksi ketat AI untuk konsistensi resep canonical, takaran bahan, langkah memasak, dan storyboard kronologis
+- Penyelarasan UI Content Planner dengan status badge Mode Resep Organik
+
 ## V2.31.20 — Recipe campaign: Visual Identity & Faceless Lock integration (22/09/2026)
 - Integrasikan resolveVisualOverrides ke recipe adapter untuk mematuhi konfigurasi visual_overrides_json
 - Terapkan Faceless Hands-Only mandate dan Wardrobe Terracotta lock

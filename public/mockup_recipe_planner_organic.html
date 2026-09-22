@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Content Planner - Recipe Campaign (Organik vs Produk)</title>
+  <link rel="stylesheet" href="/theme.css">
+  <style>
+    :root {
+      --surface: #0f172a;
+      --surface-raised: #1e293b;
+      --surface-interactive: #334155;
+      --surface-subtle: #1e293b80;
+      --border-subtle: #334155;
+      --border-strong: #475569;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --action-primary: #f59e0b;
+      --action-primary-hover: #d97706;
+      --on-action-primary: #ffffff;
+      --status-success: #10b981;
+      --status-success-soft: rgba(16, 185, 129, 0.15);
+      --status-info: #3b82f6;
+      --status-info-soft: rgba(59, 130, 246, 0.15);
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 32px 16px;
+      font-family: var(--font-family);
+      background: var(--surface);
+      color: var(--text-primary);
+      display: flex;
+      justify-content: center;
+    }
+    .card {
+      width: 100%;
+      max-width: 680px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    h2 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+    }
+    .badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--action-primary);
+      color: #000;
+      font-weight: 700;
+    }
+    .desc {
+      color: var(--text-secondary);
+      font-size: 13px;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-primary);
+    }
+    .hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+    select, input, textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--action-primary);
+    }
+    .mode-pill-box {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .mode-pill {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-subtle);
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .mode-pill.active {
+      border-color: var(--action-primary);
+      background: rgba(245, 158, 11, 0.12);
+    }
+    .mode-pill strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 3px;
+    }
+    .mode-pill span {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+    .product-select-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .prod-item {
+      padding: 10px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      background: var(--surface-subtle);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .prod-item.selected {
+      border-color: var(--action-primary);
+      background: rgba(245, 158, 11, 0.15);
+    }
+    .prod-checkbox {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--action-primary);
+    }
+    .info-banner {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 12px;
+      line-height: 1.5;
+      margin-top: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .info-organic {
+      background: var(--status-success-soft);
+      border: 1px solid var(--status-success);
+      color: #34d399;
+    }
+    .info-sponsored {
+      background: var(--status-info-soft);
+      border: 1px solid var(--status-info);
+      color: #60a5fa;
+    }
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      background: var(--action-primary);
+      color: #000;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    .btn-submit:hover {
+      background: var(--action-primary-hover);
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>🍳 Buat Content Planner — Recipe Campaign <span class="badge">V10 Organic / Sponsor</span></h2>
+    <div class="desc">
+      Hasilkan ide konten resep kuliner dengan alur naskah & storyboard yang konsisten. Pilih produk katalog jika ada sponsor/affiliate, atau <strong>kosongkan produk</strong> untuk membuat resep organik murni edukasi memasak.
+    </div>
+
+    <div class="form-group">
+      <label>Kategori Resep</label>
+      <select id="categorySelect">
+        <option value="minuman">🍹 Minuman & Kopi / Smoothie</option>
+        <option value="masakan">🍲 Masakan / Lauk Pauk</option>
+        <option value="dessert">🍨 Dessert & Es Krim</option>
+        <option value="kue">🍰 Kue & Roti / Pastry</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>📦 Produk Katalog Terintegrasi <span style="font-weight: normal; color: var(--text-muted);">(Opsional)</span></label>
+      <div class="hint">Centang produk jika ingin integrasi sponsor/affiliate. Jika tidak dicentang sama sekali, sistem akan otomatis masuk ke <strong>Mode Resep Organik (Murni Edukasi)</strong>.</div>
+      
+      <div class="product-select-grid">
+        <div class="prod-item" onclick="toggleProduct(1)">
+          <input type="checkbox" id="prod1" class="prod-checkbox" onchange="updateMode()">
+          <div>
+            <strong>Nutrifarm Matcha</strong>
+            <div style="font-size: 11px; color: var(--text-muted);">Bahan / Bubuk Teh</div>
+          </div>
+        </div>
+        <div class="prod-item" onclick="toggleProduct(2)">
+          <input type="checkbox" id="prod2" class="prod-checkbox" onchange="updateMode()">
+          <div>
+            <strong>SAMONO Portable Juicer</strong>
+            <div style="font-size: 11px; color: var(--text-muted);">Peralatan / Blender</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="statusBanner" class="info-banner info-organic">
+        🌿 <strong>Mode Resep Organik Aktif</strong>: Karena tidak ada produk yang dipilih, AI akan menghasilkan resep masakan/minuman lezat menggunakan bahan-bahan dapur umum (pantry staples) dengan fokus murni pada edukasi kuliner dan daya tarik visual.
+      </div>
+    </div>
+
+    <div id="strategyBox" class="form-group" style="display: none;">
+      <label>Strategi Multi-Produk</label>
+      <div class="mode-pill-box">
+        <div id="pillSynergy" class="mode-pill active" onclick="setStrategy('synergy')">
+          <strong>⚡ Sinergi Kombo</strong>
+          <span>Padukan semua produk di tiap resep</span>
+        </div>
+        <div id="pillRotation" class="mode-pill" onclick="setStrategy('rotation')">
+          <strong>🔄 Rotasi Bergantian</strong>
+          <span>1 produk utama per baris resep</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Jumlah Ide Resep</label>
+      <select id="recipeCount">
+        <option value="5">5 Ide Resep</option>
+        <option value="10">10 Ide Resep</option>
+        <option value="15">15 Ide Resep</option>
+        <option value="20">20 Ide Resep</option>
+      </select>
+    </div>
+
+    <button class="btn-submit" onclick="simulasiGenerate()">🚀 Generate Ide Resep Konsisten</button>
+  </div>
+
+  <script>
+    function toggleProduct(id) {
+      const cb = document.getElementById('prod' + id);
+      cb.checked = !cb.checked;
+      updateMode();
+    }
+    function updateMode() {
+      const p1 = document.getElementById('prod1').checked;
+      const p2 = document.getElementById('prod2').checked;
+      const banner = document.getElementById('statusBanner');
+      const stratBox = document.getElementById('strategyBox');
+      
+      const item1 = document.getElementById('prod1').parentElement;
+      const item2 = document.getElementById('prod2').parentElement;
+      if (p1) item1.classList.add('selected'); else item1.classList.remove('selected');
+      if (p2) item2.classList.add('selected'); else item2.classList.remove('selected');
+
+      const count = (p1 ? 1 : 0) + (p2 ? 1 : 0);
+
+      if (count === 0) {
+        banner.className = 'info-banner info-organic';
+        banner.innerHTML = '🌿 <strong>Mode Resep Organik Aktif</strong>: AI akan menyusun resep lezat berbahan dasar dapur umum tanpa ikatan produk sponsor/affiliate.';
+        stratBox.style.display = 'none';
+      } else {
+        banner.className = 'info-banner info-sponsored';
+        banner.innerHTML = `🛍️ <strong>Mode Integrasi Produk Aktif (${count} Produk)</strong>: AI akan menyusun resep yang mengintegrasikan produk terpilih sebagai bahan atau alat pengolah secara alami.`;
+        stratBox.style.display = count > 1 ? 'block' : 'none';
+      }
+    }
+    function setStrategy(mode) {
+      document.getElementById('pillSynergy').classList.toggle('active', mode === 'synergy');
+      document.getElementById('pillRotation').classList.toggle('active', mode === 'rotation');
+    }
+    function simulasiGenerate() {
+      const p1 = document.getElementById('prod1').checked;
+      const p2 = document.getElementById('prod2').checked;
+      const count = (p1 ? 1 : 0) + (p2 ? 1 : 0);
+      alert(count === 0 
+        ? "✅ Berhasil! Membuat Recipe Planner dalam Mode Resep Organik (Tanpa Produk). AI akan menyusun resep & storyboard konsisten dengan takaran bahan umum dapur." 
+        : `✅ Berhasil! Membuat Recipe Planner dalam Mode Integrasi ${count} Produk.`
+      );
+    }
+  </script>
+</body>
+</html>
