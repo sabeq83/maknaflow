@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.31.22 — Fix NOT NULL Constraint Kolom Product pada Recipe Planner Organik (22/09/2026)
+- Defensive fallback value pada query insert content_planner_rows untuk mode organik
+- Auto-migrasi PostgreSQL DROP NOT NULL pada kolom product content_planner_rows
+
 ## V2.31.21 — Dukungan Recipe Campaign Tanpa Produk (Organik) & Konsistensi AI (22/09/2026)
 - Dukungan pembuatan Recipe Campaign tanpa produk sponsor (Mode Resep Organik Murni)
 - Mandat instruksi ketat AI untuk konsistensi resep canonical, takaran bahan, langkah memasak, dan storyboard kronologis
