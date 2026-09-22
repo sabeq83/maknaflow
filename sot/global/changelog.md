@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.30 — Fix Gemini Context Caching Model Parameter & Token Savings Log (23/09/2026)
+- Fix parameter model pada getGenerativeModelFromCachedContent
+- Tracking token savings cachedContentTokenCount pada log terminal
+- Optimasi Paid Tier Context Caching untuk Master KB 81k token
+
 ## V2.31.29 — Visual Identity End-to-End Pipeline & VSO Terminology Renaming (22/09/2026)
 - Penyelarasan submit visualIdentity pada form Single RE Campaign
 - Resilient fallback pada resolveVisualIdentitySubmission
