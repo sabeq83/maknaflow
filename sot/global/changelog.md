@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.31.41 — Fix Start Frame Reuse in Glabs, Forward video_length to Webhook, and Dinamise Gemini Models (23/09/2026)
+- Reuse existing start frames in pillar_glabs to prevent duplicate T2I
+- Forward video_length to G-Labs video generation for exact 4s/6s/8s/10s duration
+- Dinamise Gemini AI models based on tier and menu settings
+- Enhance visual identity narrative mode allocation for N-clips
+
 ## V2.31.40 — Integrate Schema v2 Visual Identity and Dynamic Mode Allocator on Pillar Campaigns (23/09/2026)
 - Dynamic narrative mode allocator for 4-20 clips
 - Inject Visual Identity Schema v2 prompt section with Metaphor Engine and textures
