@@ -222,7 +222,7 @@ export default function SettingsPage() {
       setGeminiContextCaching(data.data.gemini_context_caching || 'on');
       setGeminiSmartRouting(data.data.gemini_smart_routing || 'on');
 
-      const primary = data.data.gemini_model_primary || (data.data.gemini_api_tier === 'free' ? 'gemini-3.8-flash' : 'gemini-3.6-flash');
+      const primary = data.data.gemini_model_primary || 'gemini-3.6-flash';
       const knownModels = ['gemini-3.6-flash', 'gemini-1.5-flash-8b', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-flash-latest'];
       if (knownModels.includes(primary)) {
         setGeminiModelPrimary(primary);
@@ -1213,7 +1213,7 @@ export default function SettingsPage() {
                         setGeminiApiTier('free');
                         setGeminiContextCaching('off');
                         if (geminiModelPrimary === 'gemini-1.5-flash-8b' || geminiModelPrimary === 'gemini-3.1-flash-lite' || geminiModelPrimary === 'gemini-2.5-flash' || geminiModelPrimary === 'gemini-1.5-flash') {
-                          setGeminiModelPrimary('gemini-3.8-flash');
+                          setGeminiModelPrimary('gemini-3.6-flash');
                         }
                       }}
                       style={{
@@ -1268,9 +1268,9 @@ export default function SettingsPage() {
                         </>
                       ) : (
                         <>
-                          <option value="gemini-3.8-flash">gemini-3.8-flash (Flash Terbaru — Rekomendasi Free)</option>
+                          <option value="gemini-3.6-flash">gemini-3.6-flash (Generasi Stabil & Cepat — Rekomendasi Free)</option>
                           <option value="gemini-3.7-flash">gemini-3.7-flash (Hybrid Reasoning / Thinking)</option>
-                          <option value="gemini-3.6-flash">gemini-3.6-flash (Generasi Stabil & Cepat)</option>
+                          <option value="gemini-3.8-flash">gemini-3.8-flash (Flash Terbaru)</option>
                           <option value="gemini-3.5-flash">gemini-3.5-flash (Standard Flash — Safety Net)</option>
                           <option value="gemini-flash-latest">gemini-flash-latest (Auto Latest Flash)</option>
                           <option value="custom">✏️ Custom Model ID...</option>
@@ -1375,14 +1375,19 @@ export default function SettingsPage() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       {(() => {
                         const paidCascade = ['gemini-3.6-flash', 'gemini-1.5-flash-8b', 'gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-flash-latest'];
-                        const freeCascade = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-flash-latest'];
+                        const freeCascade = ['gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-flash-latest'];
                         const standardList = geminiApiTier === 'paid' ? paidCascade : freeCascade;
-                        let chain = [];
-                        if (geminiModelPrimary === 'custom') {
-                          chain = [geminiCustomModel.trim() || 'custom-model', ...standardList];
-                        } else {
-                          const idx = standardList.indexOf(geminiModelPrimary);
-                          chain = idx !== -1 ? standardList.slice(idx) : [geminiModelPrimary, ...standardList.filter(m => m !== geminiModelPrimary)];
+                        const activePrimary = geminiModelPrimary === 'custom' ? (geminiCustomModel.trim() || 'custom-model') : geminiModelPrimary;
+                        const activeFallback = geminiModelFallback && geminiModelFallback.trim() ? geminiModelFallback.trim() : null;
+
+                        const chain = [activePrimary];
+                        if (activeFallback && activeFallback !== activePrimary) {
+                          chain.push(activeFallback);
+                        }
+                        for (const m of standardList) {
+                          if (!chain.includes(m)) {
+                            chain.push(m);
+                          }
                         }
                         return chain.map((modelName, idx, arr) => (
                           <div key={modelName}>

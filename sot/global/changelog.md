@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.43 — Enforce 100 Percent Menu Settings Precedence for Gemini AI Models (24/09/2026)
+- Strictly honor gemini_model_primary from database settings for all creative tasks
+- Dynamically start waterfall chain with user primary and fallback models
+- Remove hardcoded free tier overrides and update settings waterfall visualizer
+
 ## V2.31.42 — Fix POSIX Web Path Resolution and Multi-Layer Start Frame Reuse (23/09/2026)
 - Create central resolvePublicFilePath and findExistingStartFrameFile in file-path-resolver
 - Fix POSIX path.isAbsolute bug on web paths starting with /uploads

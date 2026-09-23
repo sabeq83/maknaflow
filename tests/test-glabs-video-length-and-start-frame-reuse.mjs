@@ -20,7 +20,7 @@ async function testGeminiDynamicResolution() {
     explicitTier: 'free'
   });
   console.log('Free tier result:', freeResult);
-  assert.strictEqual(freeResult.resolvedPrimary, 'gemini-3.8-flash');
+  assert.strictEqual(freeResult.resolvedPrimary, 'gemini-3.6-flash');
 
   const scraperResult = await getResolvedGeminiModels({
     taskType: 'SCRAPER',
