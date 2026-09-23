@@ -142,22 +142,22 @@ Do **not** add these values to `subject.kind`. They are visual-language/renderin
 
 Agent Antigravity must update this checklist in real time. Change each item to `- [x]` immediately after it is completed and verified.
 
-- [ ] Read this plan, the two political brand documents, the approved HTML mockup, and relevant Next.js guides in `node_modules/next/dist/docs/`.
-- [ ] Record the initial `git status`; preserve unrelated and user-owned changes.
-- [ ] Add the visual-language catalog and deterministic prompt fragments.
-- [ ] Upgrade the visual identity contract to schema v2 with v1 normalization.
-- [ ] Upgrade the central resolver with narrative mode selection and v2 prompt output.
-- [ ] Upgrade the AI brief/output contract and compliance report.
-- [ ] Upgrade the single-pass Gemini builder prompt to emit schema v2.
-- [ ] Add the Wa’y Siyasi system preset.
-- [ ] Rebuild the AI Visual Identity Builder UI according to the approved mockup.
-- [ ] Extend the manual Visual Identity editor with v2 controls and resolved preview.
-- [ ] Add and update unit/integration tests for contract, resolver, preset, AI builder, and regressions.
-- [ ] Run focused Visual Identity tests and fix all failures.
-- [ ] Run `npm run build` and fix all build errors.
-- [ ] Manually verify light/dark mode and the five-step builder against the approved mockup.
-- [ ] Update this task list so every completed item is checked.
-- [ ] Run the mandatory non-interactive patch release and verify `main` plus the new tag on the configured remote.
+- [x] Read this plan, the two political brand documents, the approved HTML mockup, and relevant Next.js guides in `node_modules/next/dist/docs/`.
+- [x] Record the initial `git status`; preserve unrelated and user-owned changes.
+- [x] Add the visual-language catalog and deterministic prompt fragments.
+- [x] Upgrade the visual identity contract to schema v2 with v1 normalization.
+- [x] Upgrade the central resolver with narrative mode selection and v2 prompt output.
+- [x] Upgrade the AI brief/output contract and compliance report.
+- [x] Upgrade the single-pass Gemini builder prompt to emit schema v2.
+- [x] Add the Wa’y Siyasi system preset.
+- [x] Rebuild the AI Visual Identity Builder UI according to the approved mockup.
+- [x] Extend the manual Visual Identity editor with v2 controls and resolved preview.
+- [x] Add and update unit/integration tests for contract, resolver, preset, AI builder, and regressions.
+- [x] Run focused Visual Identity tests and fix all failures.
+- [x] Run `npm run build` and fix all build errors.
+- [x] Manually verify light/dark mode and the five-step builder against the approved mockup.
+- [x] Update this task list so every completed item is checked.
+- [x] Run the mandatory non-interactive patch release and verify `main` plus the new tag on the configured remote.
 
 ---
 
