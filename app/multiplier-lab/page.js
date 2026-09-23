@@ -126,6 +126,17 @@ function MultiplierLabPageContent() {
   const [editorialTopic, setEditorialTopic] = useState('');
   const [editorialOutro, setEditorialOutro] = useState('');
 
+  // Dynamic Angle Generator & Non-Product Multiplier States
+  const [selectedNicheKb, setSelectedNicheKb] = useState('HERBAL_CONTENT_KB.md');
+  const [availableNicheKBs, setAvailableNicheKBs] = useState([]);
+  const [angleCount, setAngleCount] = useState(5);
+  const [customAngleTheme, setCustomAngleTheme] = useState('');
+  const [generatedAngles, setGeneratedAngles] = useState([]);
+  const [selectedAngleIds, setSelectedAngleIds] = useState(new Set());
+  const [generatingAngles, setGeneratingAngles] = useState(false);
+  const [excludedHistory, setExcludedHistory] = useState([]);
+  const [showExcludedModal, setShowExcludedModal] = useState(false);
+
   const [isBridgingActive, setIsBridgingActive] = useState(true);
   const [targetClipsCount, setTargetClipsCount] = useState(4);
   const [bridgeAtClip, setBridgeAtClip] = useState(2);
@@ -369,6 +380,7 @@ function MultiplierLabPageContent() {
     fetchAssets('', '');
     fetchTasks();
     pollLogs();
+    fetchNicheKBs();
     fetch('/api/v2/brand-profiles').then(r => r.json()).then(d => { if (d.success) setBrandProfiles(d.data || []); }).catch(() => {});
     fetch('/api/v2/deconstruct?limit=1').then(r => r.json()).then(d => { if (d.success) setNiches(d.niches || []); }).catch(() => {});
     fetchProducts('');
@@ -395,12 +407,90 @@ function MultiplierLabPageContent() {
   useEffect(() => {
     if (assets.length > 0 && preSelectedAssetId) {
       setSelectedAssetId(preSelectedAssetId);
+      fetchExcludedHistory(preSelectedAssetId);
     }
   }, [assets, preSelectedAssetId]);
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 4000);
+  };
+
+  const fetchNicheKBs = async () => {
+    try {
+      const res = await fetch('/api/v2/multiplier/generate-angles');
+      const data = await res.json();
+      if (data.success && data.niche_kbs) {
+        setAvailableNicheKBs(data.niche_kbs);
+        if (data.niche_kbs.length > 0 && !selectedNicheKb) {
+          setSelectedNicheKb(data.niche_kbs[0].file);
+        }
+      }
+    } catch (_) {}
+  };
+
+  const fetchExcludedHistory = async (bpId) => {
+    if (!bpId) {
+      setExcludedHistory([]);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/v2/multiplier/generate-angles?blueprintId=${bpId}`);
+      const data = await res.json();
+      if (data.success) {
+        setExcludedHistory(data.excluded_history || []);
+      }
+    } catch (_) {}
+  };
+
+  const handleGenerateAngles = async (isMore = false) => {
+    const bpId = workflowMode === 'multi_blueprint_one_angle' ? (selectedBlueprintIds[0] || selectedAssetId) : selectedAssetId;
+    if (!bpId && workflowMode !== 'multi_blueprint_one_angle') {
+      showToast('Pilih satu blueprint video terlebih dahulu!', 'error');
+      return;
+    }
+    if (workflowMode === 'multi_blueprint_one_angle' && selectedBlueprintIds.length === 0) {
+      showToast('Pilih setidaknya satu blueprint video terlebih dahulu!', 'error');
+      return;
+    }
+
+    setGeneratingAngles(true);
+    try {
+      const res = await fetch('/api/v2/multiplier/generate-angles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          blueprint_id: bpId,
+          blueprint_ids: selectedBlueprintIds,
+          mode: workflowMode === 'multi_blueprint_one_angle' ? 'multi_to_1' : '1_to_multi',
+          niche_kb_name: selectedNicheKb,
+          angle_count: isMore ? 3 : angleCount,
+          custom_theme: customAngleTheme || editorialTopic
+        })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Gagal menghasilkan angles dari Gemini AI');
+
+      const newAngles = data.angles || [];
+      if (isMore) {
+        setGeneratedAngles(prev => [...prev, ...newAngles]);
+        setSelectedAngleIds(prev => {
+          const next = new Set(prev);
+          newAngles.forEach(a => next.add(a.angle_id));
+          return next;
+        });
+        showToast(`Berhasil menambahkan ${newAngles.length} sudut pandang baru!`);
+      } else {
+        setGeneratedAngles(newAngles);
+        const allIds = new Set(newAngles.map(a => a.angle_id));
+        setSelectedAngleIds(allIds);
+        showToast(`Berhasil menghasilkan ${newAngles.length} sudut pandang unik dengan Gemini AI!`);
+      }
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setGeneratingAngles(false);
+    }
   };
 
   const fetchAssets = async (query = '', niche = '') => {
@@ -420,6 +510,78 @@ function MultiplierLabPageContent() {
 
   const generateCombinationRows = () => {
     let rows = [];
+
+    // Mode: 1 Blueprint -> Multi Angle (Non-Product Dynamic AI Generator)
+    if (workflowMode === 'one_blueprint_multi_angle' || (campaignType === 'editorial' && generatedAngles.length > 0)) {
+      const bp = assets.find(a => a.id === selectedAssetId);
+      if (!bp) {
+        showToast('Pilih satu blueprint video terlebih dahulu!', 'error');
+        return;
+      }
+      const activeAngles = generatedAngles.filter(a => selectedAngleIds.has(a.angle_id));
+      if (activeAngles.length === 0) {
+        showToast('Pilih setidaknya satu sudut pandang (angle) yang dicentang!', 'error');
+        return;
+      }
+
+      for (const ang of activeAngles) {
+        rows.push({
+          deconstruct_asset_id: bp.id,
+          deconstruct_asset_url: bp.source_url,
+          deconstruct_asset_title: bp.niche || bp.original_caption || bp.id,
+          target_product_id: null,
+          target_product_name: `🌟 ${ang.title}`,
+          target_product_url: '',
+          affiliate_url: '',
+          campaign_type: 'pure_storytelling',
+          editorial_topic: ang.title,
+          editorial_outro: ang.cta_type || editorialOutro.trim(),
+          angle_title: ang.title,
+          hook_type: ang.hook_type,
+          hook_text: ang.hook_text,
+          target_persona: ang.target_persona,
+          emotional_trigger: ang.emotional_trigger,
+          cta_type: ang.cta_type,
+          niche_kb_name: selectedNicheKb
+        });
+      }
+
+      setCombinationRows(rows);
+      showToast(`Tabel tinjauan kampanye multi-angle berhasil dibuat (${rows.length} baris)!`);
+      return;
+    }
+
+    // Mode: Multi Blueprint -> 1 Angle (Non-Product Cross-Formula Synthesis)
+    if (workflowMode === 'multi_blueprint_one_angle') {
+      const selectedBlueprints = assets.filter(a => selectedBlueprintIds.includes(a.id));
+      if (selectedBlueprints.length === 0) {
+        showToast('Pilih setidaknya satu blueprint video terlebih dahulu!', 'error');
+        return;
+      }
+      const masterAngle = editorialTopic.trim() || (generatedAngles[0]?.title) || 'Organic Viral Video';
+
+      for (const bp of selectedBlueprints) {
+        rows.push({
+          deconstruct_asset_id: bp.id,
+          deconstruct_asset_url: bp.source_url,
+          deconstruct_asset_title: bp.niche || bp.original_caption || bp.id,
+          target_product_id: null,
+          target_product_name: `🌟 ${masterAngle}`,
+          target_product_url: '',
+          affiliate_url: '',
+          campaign_type: 'pure_storytelling',
+          editorial_topic: masterAngle,
+          editorial_outro: editorialOutro.trim(),
+          angle_title: masterAngle,
+          niche_kb_name: selectedNicheKb
+        });
+      }
+
+      setCombinationRows(rows);
+      showToast(`Tabel tinjauan kampanye cross-blueprint berhasil dibuat (${rows.length} baris)!`);
+      return;
+    }
+
     const selectedBlueprints = workflowMode === 'multi_blueprint_one_product'
       ? assets.filter(a => selectedBlueprintIds.includes(a.id))
       : (selectedAssetId ? assets.filter(a => a.id === selectedAssetId) : []);
@@ -849,15 +1011,48 @@ function MultiplierLabPageContent() {
         {showConfigForm && (
           <div className="card" style={{ marginBottom: 28, border: '1px solid var(--border)', background: 'var(--bg-card)', padding: 0 }}>
             
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
               <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>⚙️ Konfigurasi Kampanye Multiplier Baru</strong>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ display: 'flex', gap: 6, background: 'var(--overlay-subtle)', padding: 3, borderRadius: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: 6, background: 'var(--overlay-subtle)', padding: 3, borderRadius: 6, flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWorkflowMode('one_blueprint_multi_angle');
+                      setCampaignType('editorial');
+                      setSelectedBlueprintIds([]);
+                      setSelectedProductIds([]);
+                      setCombinationRows([]);
+                    }}
+                    style={{
+                      border: 'none', background: workflowMode === 'one_blueprint_multi_angle' ? 'var(--action-primary, #6366f1)' : 'transparent',
+                      color: workflowMode === 'one_blueprint_multi_angle' ? '#ffffff' : 'var(--text-secondary)', fontSize: '0.72rem', fontWeight: 700, padding: '5px 10px', borderRadius: 4, cursor: 'pointer'
+                    }}
+                  >
+                    🎯 1 BP → Multi Angle (Non-Produk)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWorkflowMode('multi_blueprint_one_angle');
+                      setCampaignType('editorial');
+                      setSelectedBlueprintIds([]);
+                      setSelectedProductIds([]);
+                      setCombinationRows([]);
+                    }}
+                    style={{
+                      border: 'none', background: workflowMode === 'multi_blueprint_one_angle' ? 'var(--action-primary, #6366f1)' : 'transparent',
+                      color: workflowMode === 'multi_blueprint_one_angle' ? '#ffffff' : 'var(--text-secondary)', fontSize: '0.72rem', fontWeight: 700, padding: '5px 10px', borderRadius: 4, cursor: 'pointer'
+                    }}
+                  >
+                    🔄 Multi BP → 1 Angle (Non-Produk)
+                  </button>
                   <button
                     type="button"
                     onClick={() => {
                       setWorkflowMode('multi_blueprint_one_product');
-                      setProductionMode('single'); // backward sync
+                      setCampaignType('product');
+                      setProductionMode('single');
                       setSelectedBlueprintIds([]);
                       setSelectedProductIds([]);
                       setCombinationRows([]);
@@ -867,13 +1062,14 @@ function MultiplierLabPageContent() {
                       color: 'var(--text-primary)', fontSize: '0.72rem', fontWeight: 600, padding: '5px 10px', borderRadius: 4, cursor: 'pointer'
                     }}
                   >
-                    Multi Blueprint → 1 Produk
+                    🛍️ Multi BP → 1 Produk
                   </button>
                   <button
                     type="button"
                     onClick={() => {
                       setWorkflowMode('one_blueprint_multi_product');
-                      setProductionMode('mass'); // backward sync
+                      setCampaignType('product');
+                      setProductionMode('mass');
                       setSelectedBlueprintIds([]);
                       setSelectedProductIds([]);
                       setCombinationRows([]);
@@ -883,7 +1079,7 @@ function MultiplierLabPageContent() {
                       color: 'var(--text-primary)', fontSize: '0.72rem', fontWeight: 600, padding: '5px 10px', borderRadius: 4, cursor: 'pointer'
                     }}
                   >
-                    1 Blueprint → Multi Produk
+                    📦 1 BP → Multi Produk
                   </button>
                 </div>
                 <button
@@ -911,7 +1107,7 @@ function MultiplierLabPageContent() {
               <div style={{ padding: 24, borderBottom: '1px solid var(--border)' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>
-                    📹 Pilih Blueprint Video Target ({workflowMode === 'multi_blueprint_one_product' ? 'Bisa Pilih Banyak' : 'Pilih Satu'})
+                    📹 Pilih Blueprint Video Target ({workflowMode === 'multi_blueprint_one_product' || workflowMode === 'multi_blueprint_one_angle' ? 'Bisa Pilih Banyak' : 'Pilih Satu'})
                   </label>
                   
                   <div style={{ display: 'flex', gap: 12, marginBottom: 12, marginTop: 8 }}>
@@ -952,17 +1148,19 @@ function MultiplierLabPageContent() {
                   ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16, maxHeight: '350px', overflowY: 'auto', padding: 8, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface-interactive)' }}>
                       {assets.map(a => {
-                        const isSelected = workflowMode === 'multi_blueprint_one_product'
+                        const isMultiBp = workflowMode === 'multi_blueprint_one_product' || workflowMode === 'multi_blueprint_one_angle';
+                        const isSelected = isMultiBp
                           ? selectedBlueprintIds.includes(a.id)
                           : selectedAssetId === a.id;
                         
                         const handleToggle = () => {
-                          if (workflowMode === 'multi_blueprint_one_product') {
+                          if (isMultiBp) {
                             setSelectedBlueprintIds(prev =>
                               prev.includes(a.id) ? prev.filter(id => id !== a.id) : [...prev, a.id]
                             );
                           } else {
                             setSelectedAssetId(a.id);
+                            fetchExcludedHistory(a.id);
                           }
                         };
 
@@ -1123,60 +1321,305 @@ function MultiplierLabPageContent() {
                   </div>
                 </div>
 
-                {/* Editorial Storytelling Panel */}
+                {/* Editorial / Non-Product Dynamic AI Angle Generator Panel */}
                 {campaignType === 'editorial' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 14, background: 'var(--surface-interactive)', borderRadius: 8, border: '1px solid var(--border-subtle)' }}>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--status-neutral)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span>💡</span> Mode Storytelling Aktif: Mengadaptasi hook & ritme blueprint asli menjadi alur narasi mendalam tanpa hard-selling.
-                    </div>
-                    <div className="form-group" style={{ margin: 0 }}>
-                      <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: 600 }}>Topik Utama / Sudut Pandang Cerita (Editorial Angle)</label>
-                      <textarea
-                        className="form-input"
-                        rows={2}
-                        value={editorialTopic}
-                        onChange={e => setEditorialTopic(e.target.value)}
-                        placeholder="Contoh: Pentingnya mengistirahatkan pikiran sebelum tidur, tips produktivitas kerja, atau refleksi hidup tenang."
-                        style={{ fontSize: '0.8rem' }}
-                      />
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
-                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', alignSelf: 'center' }}>⚡ Cepat:</span>
-                        {[
-                          'Mindset & konsistensi tanpa overthinking',
-                          'Refleksi diri & ketenangan pikiran harian',
-                          'Tips fokus kerja produktif tanpa distraksi',
-                          'Kisah motivasi bangkit dari kegagalan'
-                        ].map((sampleTopic, tIdx) => (
-                          <button
-                            key={tIdx}
-                            type="button"
-                            onClick={() => setEditorialTopic(sampleTopic)}
-                            style={{
-                              background: 'var(--surface-raised)',
-                              border: '1px solid var(--border-subtle)',
-                              color: 'var(--text-secondary)',
-                              fontSize: '0.7rem',
-                              padding: '2px 8px',
-                              borderRadius: 4,
-                              cursor: 'pointer'
-                            }}
-                          >
-                            {sampleTopic}
-                          </button>
-                        ))}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 16, background: 'var(--surface-interactive)', borderRadius: 10, border: '1px solid var(--border-subtle)' }}>
+                    
+                    {/* Header Info */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, paddingBottom: 10, borderBottom: '1px solid var(--border-subtle)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: '1.1rem' }}>🌟</span>
+                        <div>
+                          <strong style={{ fontSize: '0.86rem', color: 'var(--text-primary)' }}>
+                            {workflowMode === 'multi_blueprint_one_angle' ? 'Cross-Blueprint Formula Synthesis (Multi BP → 1 Angle)' : 'Dynamic AI Angle Generator (1 BP → Multi Angle)'}
+                          </strong>
+                          <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', margin: 0 }}>
+                            Monetisasi Organik FB Reels / In-Stream Ads dengan variasi sudut pandang unik tanpa jualan produk fisik.
+                          </p>
+                        </div>
                       </div>
+                      <span style={{ fontSize: '0.7rem', padding: '3px 8px', background: 'var(--status-success-soft)', color: 'var(--status-success)', borderRadius: 4, fontWeight: 700, border: '1px solid var(--status-success)' }}>
+                        🛡️ Anti-Duplication Active
+                      </span>
                     </div>
+
+                    {/* Controls: Niche KB & Angle Count */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label className="form-label" style={{ fontSize: '0.76rem', fontWeight: 600 }}>📚 Knowledge Base Konteks Niche:</label>
+                        <select
+                          className="form-input"
+                          value={selectedNicheKb}
+                          onChange={e => setSelectedNicheKb(e.target.value)}
+                          style={{ fontSize: '0.78rem', background: 'var(--input-bg)' }}
+                        >
+                          {availableNicheKBs.length > 0 ? (
+                            availableNicheKBs.map(kb => (
+                              <option key={kb.file} value={kb.file}>{kb.label}</option>
+                            ))
+                          ) : (
+                            <>
+                              <option value="HERBAL_CONTENT_KB.md">🌿 Resep Herbal & Jamu Tradisional</option>
+                              <option value="Food Styling & Photography KB.md">🍳 Food Styling & Kuliner</option>
+                              <option value="KITCHEN_CONTENT_KB.md">🔪 Dapur & Rumah Tangga</option>
+                              <option value="HOME_IMPROVEMENT_KB.md">🏠 Perbaikan Rumah & DIY</option>
+                              <option value="ISLAMIC_HISTORY_CONTENT_KB.md">🕌 Kisah Sejarah Islam</option>
+                              <option value="HISTORY_CONTENT_KB.md">📜 Sejarah Umum</option>
+                              <option value="PET_CONTENT_KB.md">🐾 Hewan Peliharaan</option>
+                            </>
+                          )}
+                        </select>
+                      </div>
+
+                      {workflowMode !== 'multi_blueprint_one_angle' && (
+                        <div className="form-group" style={{ margin: 0 }}>
+                          <label className="form-label" style={{ fontSize: '0.76rem', fontWeight: 600 }}>🔢 Jumlah Angle yang Dibuat (3 – 10):</label>
+                          <select
+                            className="form-input"
+                            value={angleCount}
+                            onChange={e => setAngleCount(Number(e.target.value))}
+                            style={{ fontSize: '0.78rem', background: 'var(--input-bg)' }}
+                          >
+                            <option value={3}>3 Sudut Pandang (Quick Test)</option>
+                            <option value={5}>5 Sudut Pandang (Standard Viral Pack)</option>
+                            <option value={7}>7 Sudut Pandang (Deep Matrix)</option>
+                            <option value={10}>10 Sudut Pandang (Full Saturation)</option>
+                          </select>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Custom Topic Direction / Theme */}
                     <div className="form-group" style={{ margin: 0 }}>
-                      <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: 600 }}>Pesan Moral / Closing Outro Terakhir (Opsional)</label>
+                      <label className="form-label" style={{ fontSize: '0.76rem', fontWeight: 600 }}>
+                        🎯 Arah Tema Khusus / Topik Panduan (Opsional - Biarkan Kosong Agar AI Eksplorasi Penuh):
+                      </label>
                       <input
                         type="text"
                         className="form-input"
-                        value={editorialOutro}
-                        onChange={e => setEditorialOutro(e.target.value)}
-                        placeholder="Contoh: Semoga harimu lebih tenang. Save & share jika video ini bermanfaat."
-                        style={{ fontSize: '0.8rem' }}
+                        value={customAngleTheme}
+                        onChange={e => {
+                          setCustomAngleTheme(e.target.value);
+                          setEditorialTopic(e.target.value);
+                        }}
+                        placeholder="Contoh: Fokus pada detoks badan capek, penenang tidur malam, atau penangkal flu musim hujan..."
+                        style={{ fontSize: '0.78rem' }}
                       />
                     </div>
+
+                    {/* Anti-Duplication Info Bar */}
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      background: 'var(--surface-raised)',
+                      padding: '10px 14px',
+                      borderRadius: 6,
+                      border: '1px solid var(--border-subtle)',
+                      flexWrap: 'wrap',
+                      gap: 8
+                    }}>
+                      <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span>🛡️</span>
+                        <span>
+                          <strong>Zero-Repetition Active:</strong> Memblokir {excludedHistory.length} sudut pandang riwayat sebelumnya agar konten selalu unik.
+                        </span>
+                      </div>
+                      {excludedHistory.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setShowExcludedModal(true)}
+                          style={{
+                            background: 'transparent',
+                            border: '1px solid var(--border-subtle)',
+                            color: 'var(--action-primary)',
+                            fontSize: '0.72rem',
+                            fontWeight: 600,
+                            padding: '3px 8px',
+                            borderRadius: 4,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          👁️ Lihat {excludedHistory.length} Riwayat
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Generate Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleGenerateAngles(false)}
+                      disabled={generatingAngles}
+                      style={{
+                        background: 'linear-gradient(135deg, var(--action-primary, #6366f1), #4338ca)',
+                        color: '#ffffff',
+                        border: 'none',
+                        padding: '12px 20px',
+                        borderRadius: 6,
+                        fontSize: '0.85rem',
+                        fontWeight: 700,
+                        cursor: generatingAngles ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 8,
+                        boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+                        opacity: generatingAngles ? 0.7 : 1
+                      }}
+                    >
+                      {generatingAngles ? (
+                        <>
+                          <div className="spinner" style={{ width: 16, height: 16 }}></div>
+                          <span>Sedang Menganalisis Knowledge Base & Menghasilkan {workflowMode === 'multi_blueprint_one_angle' ? 'Topik' : `${angleCount} Angles`} dengan Gemini AI...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>⚡</span>
+                          <span>{generatedAngles.length > 0 ? 'Regenerate Angles Baru dengan Gemini AI' : `Generate ${workflowMode === 'multi_blueprint_one_angle' ? 'Rekomendasi Topik' : `${angleCount} Angles Unik`} dengan Gemini AI`}</span>
+                        </>
+                      )}
+                    </button>
+
+                    {/* Generated Angles List */}
+                    {generatedAngles.length > 0 && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 8 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, background: 'var(--surface-raised)', padding: '10px 14px', borderRadius: 6, border: '1px solid var(--border-subtle)' }}>
+                          <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                            📋 Hasil Angles Terpilih ({selectedAngleIds.size} dari {generatedAngles.length}):
+                          </div>
+                          <div style={{ display: 'flex', gap: 6 }}>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedAngleIds(new Set(generatedAngles.map(a => a.angle_id)))}
+                              style={{ background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', fontSize: '0.7rem', padding: '3px 8px', borderRadius: 4, cursor: 'pointer' }}
+                            >
+                              ✅ Pilih Semua
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedAngleIds(new Set())}
+                              style={{ background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', fontSize: '0.7rem', padding: '3px 8px', borderRadius: 4, cursor: 'pointer' }}
+                            >
+                              ❌ Hapus Semua
+                            </button>
+                            {workflowMode !== 'multi_blueprint_one_angle' && (
+                              <button
+                                type="button"
+                                onClick={() => handleGenerateAngles(true)}
+                                disabled={generatingAngles}
+                                style={{ background: 'var(--surface)', border: '1px solid var(--action-primary)', color: 'var(--action-primary)', fontSize: '0.7rem', fontWeight: 600, padding: '3px 8px', borderRadius: 4, cursor: 'pointer' }}
+                              >
+                                ➕ Tambah 3 Angle Lagi
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Angle Cards Grid */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                          {generatedAngles.map((ang, aIdx) => {
+                            const isChecked = selectedAngleIds.has(ang.angle_id);
+                            return (
+                              <div
+                                key={ang.angle_id || aIdx}
+                                style={{
+                                  background: isChecked ? 'var(--status-info-soft, rgba(99,102,241,0.08))' : 'var(--surface-raised)',
+                                  border: `1px solid ${isChecked ? 'var(--action-primary, #6366f1)' : 'var(--border-subtle)'}`,
+                                  borderRadius: 8,
+                                  padding: 14,
+                                  display: 'flex',
+                                  gap: 12,
+                                  alignItems: 'flex-start',
+                                  transition: 'all 0.2s'
+                                }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => {
+                                    setSelectedAngleIds(prev => {
+                                      const next = new Set(prev);
+                                      if (next.has(ang.angle_id)) next.delete(ang.angle_id);
+                                      else next.add(ang.angle_id);
+                                      return next;
+                                    });
+                                  }}
+                                  style={{ marginTop: 3, width: 16, height: 16, accentColor: 'var(--action-primary, #6366f1)', cursor: 'pointer' }}
+                                />
+                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
+                                    <span style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                                      {aIdx + 1}. {ang.title}
+                                    </span>
+                                    <span style={{ fontSize: '0.68rem', padding: '2px 6px', background: 'var(--action-primary)', color: '#ffffff', borderRadius: 4, fontWeight: 600 }}>
+                                      {ang.estimated_retention || 'High Retention'}
+                                    </span>
+                                  </div>
+
+                                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: '0.7rem' }}>
+                                    <span style={{ padding: '2px 6px', background: 'var(--accent)', color: 'var(--on-accent, #042f2e)', borderRadius: 4, fontWeight: 600 }}>
+                                      🎯 Hook: {ang.hook_type}
+                                    </span>
+                                    <span style={{ padding: '2px 6px', background: 'var(--status-info-soft)', color: 'var(--status-info)', borderRadius: 4, fontWeight: 600 }}>
+                                      👤 Target: {ang.target_persona}
+                                    </span>
+                                    <span style={{ padding: '2px 6px', background: 'var(--status-warning-soft)', color: 'var(--status-warning)', borderRadius: 4, fontWeight: 600 }}>
+                                      🗣️ {ang.recommended_voice}
+                                    </span>
+                                  </div>
+
+                                  <div style={{ background: 'var(--surface)', padding: 10, borderRadius: 6, border: '1px solid var(--border-subtle)', fontSize: '0.74rem', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                    <div>
+                                      <strong style={{ color: 'var(--accent)' }}>🎙️ Hook 0-3s:</strong>
+                                      <span style={{ color: 'var(--text-primary)', marginLeft: 6 }}>"{ang.hook_text}"</span>
+                                    </div>
+                                    {ang.vo_preview && (
+                                      <div style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '0.72rem' }}>
+                                        Lanjutan: "{ang.vo_preview}"
+                                      </div>
+                                    )}
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4, paddingTop: 4, borderTop: '1px solid var(--border-subtle)', fontSize: '0.7rem' }}>
+                                      <span><strong>Emosi:</strong> {ang.emotional_trigger}</span>
+                                      <span style={{ color: 'var(--status-success)', fontWeight: 600 }}>CTA: {ang.cta_type}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Button to Apply to Combinations Table */}
+                        <div style={{ marginTop: 8, display: 'flex', justifyContent: 'flex-end' }}>
+                          <button
+                            type="button"
+                            onClick={generateCombinationRows}
+                            className="btn btn-primary"
+                            style={{ fontSize: '0.82rem', padding: '8px 18px', fontWeight: 700 }}
+                          >
+                            ➕ Terapkan {selectedAngleIds.size} Angle Terpilih ke Tabel Tinjauan
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Manual Fallback Inputs */}
+                    <div style={{ marginTop: 4, paddingTop: 10, borderTop: '1px dashed var(--border-subtle)' }}>
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label className="form-label" style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                          ✍️ Atau Tulis Manual Pesan Moral / Closing Outro (Opsional):
+                        </label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={editorialOutro}
+                          onChange={e => setEditorialOutro(e.target.value)}
+                          placeholder="Contoh: Semoga harimu lebih tenang. Komen MAU dan share ke temanmu ya!"
+                          style={{ fontSize: '0.78rem' }}
+                        />
+                      </div>
+                    </div>
+
                   </div>
                 )}
 
@@ -2586,6 +3029,98 @@ function MultiplierLabPageContent() {
                 </button>
               </div>
             </form>
+          </div>
+        )}
+
+        {/* Excluded History Modal (Anti-Duplication Inspector) */}
+        {showExcludedModal && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.85)',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(8px)',
+              padding: 20
+            }}
+            onClick={() => setShowExcludedModal(false)}
+          >
+            <div
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border-strong, var(--border))',
+                width: '100%',
+                maxWidth: '620px',
+                borderRadius: 12,
+                boxShadow: 'var(--shadow-modal)',
+                overflow: 'hidden'
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div
+                style={{
+                  padding: '16px 20px',
+                  borderBottom: '1px solid var(--border)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  background: 'var(--surface-raised)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: '1.2rem' }}>🛡️</span>
+                  <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>
+                    Riwayat Sudut Pandang yang Diblokir (Anti-Duplikasi)
+                  </strong>
+                </div>
+                <button
+                  type="button"
+                  style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '1.4rem', cursor: 'pointer' }}
+                  onClick={() => setShowExcludedModal(false)}
+                >
+                  &times;
+                </button>
+              </div>
+
+              <div style={{ padding: 20 }}>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 12, lineHeight: 1.4 }}>
+                  Daftar topik / hook berikut sudah pernah dibuat untuk blueprint ini dan <strong>secara ketat dilarang</strong> untuk diulang oleh Gemini AI agar konten yang dihasilkan selalu unik:
+                </p>
+
+                <div style={{ maxHeight: 280, overflowY: 'auto', background: 'var(--surface-raised)', padding: 14, borderRadius: 8, border: '1px solid var(--border-subtle)', fontSize: '0.78rem' }}>
+                  {excludedHistory.length > 0 ? (
+                    <ol style={{ paddingLeft: 18, margin: 0, display: 'flex', flexDirection: 'column', gap: 8, color: 'var(--text-secondary)' }}>
+                      {excludedHistory.map((topic, tIdx) => (
+                        <li key={tIdx}>
+                          <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{topic}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  ) : (
+                    <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 12 }}>
+                      Belum ada riwayat sudut pandang sebelumnya untuk blueprint ini.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', background: 'var(--surface-raised)' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowExcludedModal(false)}
+                  className="btn btn-secondary"
+                  style={{ fontSize: '0.8rem', padding: '6px 16px' }}
+                >
+                  Tutup
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

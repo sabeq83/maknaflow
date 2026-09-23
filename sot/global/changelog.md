@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.31.36 — Multiplier Lab Non-Product Engine & Dynamic AI Angle Generator (23/09/2026)
+- Dynamic AI Angle Generator dengan 5-Axis Permutation Matrix
+- Zero-Repetition Anti-Duplication System
+- Multi-Niche Knowledge Base Layering
+- Dukungan 1-to-Multi Angle & Multi-to-1 Angle non-product bridging
+
 ## V2.31.35 — Strict Dedicated Multi-Tenant Credentials & Zero-Leakage Secrets (23/09/2026)
 - Isolasi seluruh kredensial dan API key per tenant tanpa fallback ke default tenant
 - Mencegah kebocoran kuota API Gemini Minimax Webhook dan Social token

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simulasi Mockup - Multiplier Lab (Mode Tanpa Produk / Pure Storytelling)</title>
+  <title>Simulasi Interaktif - Multiplier Lab (Dynamic AI Angle Generator & Zero-Duplication)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -33,9 +33,12 @@
       --border-subtle: #26354a;
       --border-strong: #3c506b;
       --border: var(--border-subtle);
-      --action-primary: #2dd4bf;
-      --action-primary-hover: #5eead4;
-      --on-action-primary: #042f2e;
+      --action-primary: #6366f1;
+      --action-primary-hover: #818cf8;
+      --on-action-primary: #ffffff;
+      --accent: #2dd4bf;
+      --accent-hover: #5eead4;
+      --on-accent: #042f2e;
       --link: #67e8f9;
       --link-hover: #a5f3fc;
       --status-info: #60a5fa;
@@ -51,9 +54,6 @@
       --focus-ring: #a78bfa;
       --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
       --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
-      --accent: var(--action-primary);
-      --accent-light: var(--action-primary-hover);
-      --accent-glow: rgba(45, 212, 191, 0.18);
     }
 
     [data-theme='light'] {
@@ -72,9 +72,12 @@
       --border-subtle: #e2e8f0;
       --border-strong: #cbd5e1;
       --border: var(--border-subtle);
-      --action-primary: #0d9488;
-      --action-primary-hover: #14b8a6;
+      --action-primary: #4f46e5;
+      --action-primary-hover: #6366f1;
       --on-action-primary: #ffffff;
+      --accent: #0d9488;
+      --accent-hover: #14b8a6;
+      --on-accent: #ffffff;
       --link: #0284c7;
       --link-hover: #0369a1;
       --status-info: #2563eb;
@@ -90,9 +93,6 @@
       --focus-ring: #7c3aed;
       --shadow-card: 0 8px 24px rgba(15, 23, 42, 0.08);
       --shadow-modal: 0 20px 60px rgba(15, 23, 42, 0.16);
-      --accent: var(--action-primary);
-      --accent-light: var(--action-primary-hover);
-      --accent-glow: rgba(13, 148, 136, 0.15);
     }
 
     * {
@@ -103,71 +103,563 @@
 
     body {
       font-family: var(--font-sans);
-      background: var(--canvas);
+      background-color: var(--canvas);
       color: var(--text-primary);
       line-height: 1.5;
-      padding: 32px 20px;
+      padding: 24px;
+      font-size: 14px;
     }
 
     .container {
-      max-width: 1080px;
+      max-width: 1200px;
       margin: 0 auto;
     }
 
-    .header-bar {
+    /* Top Bar */
+    .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 24px;
       padding-bottom: 16px;
       border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
-    .title-group h1 {
-      font-size: 1.5rem;
+    .top-bar h1 {
+      font-size: 1.4rem;
       font-weight: 700;
       display: flex;
       align-items: center;
       gap: 10px;
-      color: var(--text-primary);
     }
 
-    .theme-toggle-btn {
+    .theme-toggle {
       background: var(--surface-raised);
-      border: 1px solid var(--border-strong);
+      border: 1px solid var(--border-subtle);
       color: var(--text-primary);
-      padding: 6px 12px;
+      padding: 6px 14px;
       border-radius: var(--radius-sm);
       cursor: pointer;
       font-size: 0.85rem;
       font-weight: 600;
+      transition: all 0.2s;
+    }
+    .theme-toggle:hover {
+      background: var(--surface-interactive);
     }
 
+    /* Banner */
+    .banner {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-left: 4px solid var(--action-primary);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .banner-content h2 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .banner-content p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: var(--radius-xs);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-primary { background: var(--action-primary); color: var(--on-action-primary); }
+    .badge-accent { background: var(--accent); color: var(--on-accent); }
+    .badge-success { background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success); }
+    .badge-warning { background: var(--status-warning-soft); color: var(--status-warning); }
+    .badge-info { background: var(--status-info-soft); color: var(--status-info); }
+    .badge-neutral { background: var(--status-neutral-soft); color: var(--status-neutral); }
+
+    /* Card System */
     .card {
       background: var(--surface);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
-      box-shadow: var(--shadow-card);
-      overflow: hidden;
+      padding: 20px;
       margin-bottom: 24px;
+      box-shadow: var(--shadow-card);
     }
 
-    .card-header {
-      padding: 16px 24px;
-      background: var(--surface-raised);
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-primary);
       border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 10px;
+    }
+
+    /* Mode Selection Tabs */
+    .mode-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .mode-card {
+      background: var(--surface-raised);
+      border: 2px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .mode-card:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-interactive);
+    }
+
+    .mode-card.active {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+      box-shadow: 0 0 0 1px var(--action-primary);
+    }
+
+    .mode-card input[type="radio"] {
+      margin-top: 3px;
+      accent-color: var(--action-primary);
+    }
+
+    .mode-card-text h3 {
+      font-size: 0.92rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mode-card-text p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Sub-mode selector (Pills) */
+    .submode-bar {
+      display: flex;
+      gap: 10px;
+      background: var(--surface-raised);
+      padding: 8px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      margin-bottom: 20px;
+    }
+
+    .submode-btn {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      font-weight: 600;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .submode-btn.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Blueprint Preview Card */
+    .blueprint-preview {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .bp-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
-    .section-block {
-      padding: 24px;
-      border-bottom: 1px solid var(--border-subtle);
+    .bp-scenes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
     }
 
-    .section-title {
+    .scene-box {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 12px;
+    }
+
+    .scene-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 6px;
+      display: block;
+      font-family: var(--font-mono);
+    }
+
+    .scene-desc {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .scene-vo {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-style: italic;
+      background: var(--surface-raised);
+      padding: 6px 8px;
+      border-radius: 4px;
+      border-left: 2px solid var(--action-primary);
+    }
+
+    /* Generator Form Controls */
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .form-control {
+      background: var(--input-bg);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-control:focus {
+      border-color: var(--focus-ring);
+    }
+
+    /* Anti Duplication Alert */
+    .anti-dup-bar {
+      background: var(--status-success-soft);
+      border: 1px solid var(--status-success);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .anti-dup-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      color: var(--text-primary);
+    }
+
+    .anti-dup-info span {
+      font-weight: 600;
+    }
+
+    .btn-view-excluded {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 4px 10px;
+      border-radius: var(--radius-xs);
+      font-size: 0.72rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* Generate Action Button */
+    .btn-generate {
+      background: linear-gradient(135deg, var(--action-primary), #4338ca);
+      color: #ffffff;
+      border: none;
+      padding: 14px 24px;
+      border-radius: var(--radius-sm);
       font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+      transition: all 0.2s;
+    }
+    .btn-generate:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+    }
+
+    /* Generated Angles Container */
+    .generated-angles-section {
+      margin-top: 24px;
+      display: none;
+    }
+
+    .angles-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: var(--surface-raised);
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.76rem;
+      border-radius: var(--radius-xs);
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface);
+      color: var(--text-primary);
+      transition: all 0.2s;
+    }
+    .btn-sm:hover {
+      background: var(--surface-interactive);
+    }
+
+    /* Angle Item Card */
+    .angle-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 14px;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .angle-card.selected {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+      box-shadow: 0 0 0 1px var(--action-primary);
+    }
+
+    .angle-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .angle-checkbox {
+      margin-top: 4px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--action-primary);
+      cursor: pointer;
+    }
+
+    .angle-main {
+      flex: 1;
+    }
+
+    .angle-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .angle-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+
+    .angle-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .angle-details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      background: var(--surface);
+      padding: 12px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.78rem;
+    }
+
+    .detail-item strong {
+      color: var(--text-muted);
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+
+    .detail-item p {
+      color: var(--text-secondary);
+    }
+
+    .vo-preview-box {
+      margin-top: 10px;
+      padding: 10px;
+      background: var(--surface);
+      border-radius: var(--radius-xs);
+      border-left: 3px solid var(--accent);
+      font-size: 0.78rem;
+    }
+
+    .vo-preview-box strong {
+      color: var(--accent);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* Final Submit Bar */
+    .submit-bar {
+      position: sticky;
+      bottom: 20px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow-modal);
+      margin-top: 30px;
+      z-index: 10;
+      backdrop-filter: blur(8px);
+    }
+
+    .submit-summary {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .submit-summary strong {
+      color: var(--status-success);
+      font-size: 1rem;
+    }
+
+    .btn-create-batch {
+      background: var(--status-success);
+      color: #064e3b;
+      font-weight: 700;
+      border: none;
+      padding: 12px 28px;
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+    .btn-create-batch:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      max-width: 600px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: var(--shadow-modal);
+    }
+
+    .modal h3 {
+      font-size: 1.1rem;
       font-weight: 700;
       margin-bottom: 12px;
       display: flex;
@@ -175,457 +667,496 @@
       gap: 8px;
     }
 
-    .mode-pill-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .mode-pill {
-      background: var(--surface-raised);
-      border: 2px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 14px 16px;
-      cursor: pointer;
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      transition: all 0.2s ease;
-    }
-
-    .mode-pill:hover {
-      border-color: var(--border-strong);
-      background: var(--surface-hover);
-    }
-
-    .mode-pill.active {
-      border-color: var(--action-primary);
-      background: var(--accent-glow);
-    }
-
-    .mode-pill input[type="radio"] {
-      margin-top: 3px;
-      accent-color: var(--action-primary);
-      cursor: pointer;
-    }
-
-    .mode-pill-content h4 {
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 2px;
-    }
-
-    .mode-pill-content p {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      line-height: 1.35;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .badge-teal {
-      background: var(--status-info-soft);
-      color: var(--status-info);
-      border: 1px solid var(--status-info);
-    }
-
-    .badge-purple {
-      background: var(--status-neutral-soft);
-      color: var(--status-neutral);
-      border: 1px solid var(--status-neutral);
-    }
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    .form-label {
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 6px;
-      display: block;
-    }
-
-    .form-input, .form-textarea, .form-select {
-      width: 100%;
-      background: var(--input-bg);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-primary);
-      padding: 10px 14px;
-      border-radius: var(--radius-sm);
-      font-size: 0.85rem;
-      font-family: var(--font-sans);
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .form-input:focus, .form-textarea:focus, .form-select:focus {
-      border-color: var(--focus-ring);
-      box-shadow: 0 0 0 2px var(--status-neutral-soft);
-    }
-
-    .form-textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
-
-    .tag-cloud {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    .tag-btn {
-      background: var(--surface-interactive);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-secondary);
-      font-size: 0.75rem;
-      padding: 4px 10px;
-      border-radius: var(--radius-xs);
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .tag-btn:hover {
-      background: var(--surface-hover);
-      color: var(--text-primary);
-      border-color: var(--action-primary);
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px 18px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
+    .modal-close {
+      float: right;
+      background: transparent;
       border: none;
-      transition: all 0.2s ease;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      cursor: pointer;
     }
 
-    .btn-primary {
-      background: var(--action-primary);
-      color: var(--on-action-primary);
+    /* Loading Pulse */
+    .loading-pulse {
+      display: inline-block;
+      animation: pulse 1.5s infinite;
     }
-
-    .btn-primary:hover {
-      background: var(--action-primary-hover);
-    }
-
-    .btn-secondary {
-      background: var(--surface-raised);
-      border: 1px solid var(--border-strong);
-      color: var(--text-primary);
-    }
-
-    .btn-secondary:hover {
-      background: var(--surface-hover);
-    }
-
-    .table-container {
-      overflow-x: auto;
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      margin-top: 12px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.8rem;
-    }
-
-    th {
-      background: var(--surface-raised);
-      padding: 10px 14px;
-      text-align: left;
-      font-weight: 600;
-      color: var(--text-secondary);
-      border-bottom: 1px solid var(--border-subtle);
-    }
-
-    td {
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--border-subtle);
-      color: var(--text-primary);
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    .notice-box {
-      padding: 12px 16px;
-      border-radius: var(--radius-sm);
-      font-size: 0.8rem;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-    }
-
-    .notice-purple {
-      background: var(--status-neutral-soft);
-      border: 1px solid var(--status-neutral);
-      color: var(--text-primary);
-    }
-
-    .notice-teal {
-      background: var(--status-info-soft);
-      border: 1px solid var(--status-info);
-      color: var(--text-primary);
-    }
-
-    .blueprint-card {
-      background: var(--surface-raised);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      padding: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
+    @keyframes pulse {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
     }
   </style>
 </head>
 <body>
+
   <div class="container">
-    <div class="header-bar">
-      <div class="title-group">
-        <h1>⚡ Multiplier Lab <span class="badge badge-purple" style="font-size: 0.75rem;">Simulasi Fitur Baru</span></h1>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div>
+        <h1>
+          <span>⚡ Multiplier Lab</span>
+          <span class="badge badge-primary">Next-Gen Multiplier Engine</span>
+        </h1>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+          Multiplying Proven Content Formulas for Maximum Viral Distribution & Facebook Monetization
+        </p>
       </div>
-      <button class="theme-toggle-btn" onclick="toggleTheme()">🌓 Ganti Tema (Dark/Light)</button>
+      <button class="theme-toggle" onclick="toggleTheme()">🌓 Switch Theme</button>
     </div>
 
-    <!-- MAIN FORM CARD -->
+    <!-- Workspace Context Banner -->
+    <div class="banner">
+      <div class="banner-content">
+        <h2>
+          <span>🏢 Workspace: Staging Environment</span>
+          <span class="badge badge-success">🛡️ Zero-Leakage Dedicated Secrets</span>
+        </h2>
+        <p>Seluruh task pembuatan video menggunakan API Key & model AI yang terisolasi penuh per tenant.</p>
+      </div>
+      <div style="font-size: 0.78rem; font-family: var(--font-mono); color: var(--text-muted);">
+        Model: <strong>gemini-2.5-flash</strong> (Primary)
+      </div>
+    </div>
+
+    <!-- 1. Monetization Type Selection -->
     <div class="card">
-      <div class="card-header">
-        <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary);">Konfigurasi Batch Multiplier Video</h3>
-        <span class="badge badge-teal">Adaptive Engine v2.32</span>
+      <div class="card-title">
+        <span>1. Pilih Tipe Monetisasi Kampanye</span>
+        <span class="badge badge-info">Langkah 1</span>
       </div>
 
-      <!-- 1. Blueprint Selection Preview -->
-      <div class="section-block">
-        <div class="section-title">
-          <span>🎬 1. Blueprint Video Terpilih (1 Blueprint)</span>
+      <div class="mode-selector">
+        <!-- Mode Affiliate / Product -->
+        <label class="mode-card" onclick="setMonetizationMode('product')">
+          <input type="radio" name="monetize_type" value="product">
+          <div class="mode-card-text">
+            <h3>🛍️ Product Bridging (E-Commerce & Affiliate)</h3>
+            <p>Menghubungkan visual storytelling dengan produk fisik (keranjang kuning / bio link) via hook bridging cerdas.</p>
+          </div>
+        </label>
+
+        <!-- Mode Pure Organic / Facebook Monetization -->
+        <label class="mode-card active" onclick="setMonetizationMode('non_product')">
+          <input type="radio" name="monetize_type" value="non_product" checked>
+          <div class="mode-card-text">
+            <h3>
+              <span>🌟 Non-Product (Organic FB Content Monetization)</span>
+              <span class="badge badge-accent">Direkomendasikan</span>
+            </h3>
+            <p>100% fokus pada Watch Time, High Retention, dan Komentar Beruntun untuk monetisasi FB Reels / In-Stream Ads.</p>
+          </div>
+        </label>
+      </div>
+
+      <!-- 2. Sub-mode Selector -->
+      <div style="margin-top: 20px;">
+        <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; display: block;">
+          Pilih Struktur Multiplier:
+        </label>
+        <div class="submode-bar">
+          <button type="button" class="submode-btn active" id="btnMode1" onclick="setSubmode('1_to_multi')">
+            <span>🎯 1 Blueprint ➔ Multi Angle (Dynamic AI Generator)</span>
+          </button>
+          <button type="button" class="submode-btn" id="btnMode2" onclick="setSubmode('multi_to_1')">
+            <span>🔄 Multi Blueprint ➔ 1 Angle (Cross-Formula Synthesis)</span>
+          </button>
         </div>
-        <div class="blueprint-card">
+      </div>
+    </div>
+
+    <!-- 2. Blueprint Selection & Preview -->
+    <div class="card">
+      <div class="card-title">
+        <span>2. Blueprint Master Terpilih</span>
+        <span class="badge badge-accent">Source DNA Asset</span>
+      </div>
+
+      <div class="blueprint-preview">
+        <div class="bp-header">
           <div>
-            <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">POV: Mengatasi Overthinking di Malam Hari (Viral Hook #442)</div>
-            <div style="font-size: 0.75rem; color: var(--text-muted);">Durasi Asli: 28 detik • 4 Adegan • Niche: Self Development / Daily Reflection</div>
+            <span style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">
+              🍵 Resep Herbal Detoks Alami (Bawang Putih, Kayu Manis & Lemon)
+            </span>
+            <div style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono); margin-top: 2px;">
+              ID: #6a3f5baa-3619-46f0-8264-5376e4c73aff | Status: Approved & Cached
+            </div>
           </div>
-          <span class="badge badge-teal">Terkunci</span>
+          <span class="badge badge-warning">🔥 Proven Viral Formula (85k+ Avg Views)</span>
+        </div>
+
+        <div class="bp-scenes-grid">
+          <div class="scene-box">
+            <span class="scene-badge">SCENE 1 (Close-up Macro)</span>
+            <p class="scene-desc">Seseorang mengupas kulit bawang putih di atas talenan kayu, lalu meletakkan batang kayu manis di sebelahnya.</p>
+            <div class="scene-vo">"Ternyata menakjubkan! Resep sederhana penolong tubuh yang lelah bekerja..."</div>
+          </div>
+          <div class="scene-box">
+            <span class="scene-badge">SCENE 2 (Medium Cozy Steam)</span>
+            <p class="scene-desc">Tangan memeras lemon segar ke dalam panci rebusan herbal beruap hangat di atas meja kayu rustic.</p>
+            <div class="scene-vo">"Rebusan bawang putih, kayu manis, dan perasan lemon segar berpadu indah..."</div>
+          </div>
+          <div class="scene-box">
+            <span class="scene-badge">SCENE 3 (POV Drinking & Table)</span>
+            <p class="scene-desc">Tangan memegang cangkir kaca berisi teh herbal hangat beruap, lalu meletakkannya kembali ke meja.</p>
+            <div class="scene-vo">"Detoksifikasi alami siap dinikmati hangat. Mau resep lainnya? Komen MAU!"</div>
+          </div>
         </div>
       </div>
 
-      <!-- 2. Target Campaign Mode (NEW PROPOSAL) -->
-      <div class="section-block">
-        <div class="section-title">
-          <span>🎯 2. Tipe Kampanye & Target Konten</span>
+      <!-- Generator Settings Form -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>📚 Knowledge Base Rujukan (Konteks Niche):</label>
+          <select class="form-control" id="kbSelect">
+            <option value="herbal">🌿 Resep Herbal, Jamu & Pengobatan Alami</option>
+            <option value="wellness">🧘 Gaya Hidup Sehat & Detoksifikasi Harian</option>
+            <option value="general">🌐 General Wellness & Healthy Habit</option>
+          </select>
         </div>
 
-        <!-- Mode Pill Switcher -->
-        <div class="mode-pill-container">
-          <label class="mode-pill" id="pillProduct" onclick="switchCampaignMode('product')">
-            <input type="radio" name="campaign_mode" id="radioProduct" value="product">
-            <div class="mode-pill-content">
-              <h4>📦 Promosi Produk (Product Bridging)</h4>
-              <p>Menyisipkan produk jualan (Shopee/Tokopedia/Affiliate) pada klip pivot dengan Sandwich Protocol.</p>
-            </div>
-          </label>
-
-          <label class="mode-pill active" id="pillEditorial" onclick="switchCampaignMode('editorial')">
-            <input type="radio" name="campaign_mode" id="radioEditorial" value="editorial" checked>
-            <div class="mode-pill-content">
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <h4>✨ Tanpa Produk (Pure Storytelling / Editorial)</h4>
-                <span class="badge badge-purple" style="font-size: 0.65rem;">Direkomendasikan</span>
-              </div>
-              <p>Murni remake narasi, edukasi, atau hiburan tanpa produk hard-selling. Mengutamakan engagement & brand authority.</p>
-            </div>
-          </label>
+        <div class="form-group">
+          <label>🔢 Jumlah Angle yang Diinginkan (3 – 10):</label>
+          <select class="form-control" id="angleCountSelect">
+            <option value="3">3 Sudut Pandang (Quick Test)</option>
+            <option value="5" selected>5 Sudut Pandang (Standard Viral Pack)</option>
+            <option value="7">7 Sudut Pandang (Comprehensive Exploration)</option>
+            <option value="10">10 Sudut Pandang (Full Matrix Saturation)</option>
+          </select>
         </div>
+      </div>
 
-        <!-- Dynamic Panel: Mode Produk -->
-        <div id="productSection" style="display: none;">
-          <div class="notice-box notice-teal">
-            <span>ℹ️</span>
-            <div><strong>Mode Produk Aktif:</strong> Pilih produk dari pustaka atau masukkan URL produk untuk di-bridge ke video.</div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Pilih Produk Jualan dari Pustaka</label>
-            <select class="form-select" id="selectProduct">
-              <option value="prod_1">Glow Serum Niacinamide 10% (ID: 1042)</option>
-              <option value="prod_2">Tumbler Stainless Smart LED 500ml (ID: 1088)</option>
-              <option value="prod_3">Ergonomic Wireless Mouse Silent Click (ID: 1105)</option>
-            </select>
+      <!-- Anti-Duplication Protection Indicator -->
+      <div class="anti-dup-bar">
+        <div class="anti-dup-info">
+          <span style="font-size: 1.1rem;">🛡️</span>
+          <div>
+            <span>Sistem Anti-Duplikasi Aktif (Zero-Repetition Engine)</span>
+            <p style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">
+              Gemini AI akan secara otomatis memblokir 14 sudut pandang yang SUDAH PERNAH dibuat sebelumnya untuk blueprint ini.
+            </p>
           </div>
         </div>
+        <button type="button" class="btn-view-excluded" onclick="openExcludedModal()">
+          👁️ Lihat 14 Angle Riwayat
+        </button>
+      </div>
 
-        <!-- Dynamic Panel: Mode Tanpa Produk (Pure Storytelling) -->
-        <div id="editorialSection" style="display: block;">
-          <div class="notice-box notice-purple">
-            <span>💡</span>
-            <div>
-              <strong>Mode Storytelling Aktif (Tanpa Produk):</strong> Sistem akan merekayasa ulang alur cerita viral secara utuh tanpa memaksakan scene sisipan produk.
-            </div>
-          </div>
+      <!-- Generate Button -->
+      <button type="button" class="btn-generate" id="btnGenerateAngles" onclick="generateAnglesWithAI()">
+        <span id="btnIcon">⚡</span>
+        <span id="btnText">Generate 5 Angles Unik dengan Gemini AI</span>
+      </button>
+    </div>
 
-          <div class="form-group">
-            <label class="form-label">Topik Utama / Sudut Pandang Cerita (Editorial Angle)</label>
-            <textarea class="form-textarea" id="editorialTopic" placeholder="Contoh: Menghadapi burnout kerja di usia 20-an, pentingnya batasan waktu istirahat, dan cara membangun ketenangan pikiran.">Pentingnya mengistirahatkan pikiran dari notifikasi HP sebelum tidur untuk meningkatkan kualitas istirahat dan kejernihan mental di pagi hari.</textarea>
-            
-            <div style="margin-top: 6px;">
-              <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">⚡ Contoh Cepat Angle Narasi:</span>
-              <div class="tag-cloud">
-                <button type="button" class="tag-btn" onclick="setTopic('Mindset sukses & konsistensi tanpa overthinking')">💡 Mindset & Konsistensi</button>
-                <button type="button" class="tag-btn" onclick="setTopic('Refleksi hidup sederhana & gratitude harian')">🌿 Ketenangan Diri & Gratitude</button>
-                <button type="button" class="tag-btn" onclick="setTopic('Tips fokus kerja produktif tanpa distraksi medsos')">⚡ Produktivitas & Fokus</button>
-                <button type="button" class="tag-btn" onclick="setTopic('Kisah motivasi bangkit dari kegagalan finansial')">🔥 Kisah Motivasi Finansial</button>
-              </div>
-            </div>
-          </div>
+    <!-- 3. AI Generated Angles Checklist Section -->
+    <div class="card generated-angles-section" id="generatedAnglesSection">
+      <div class="card-title">
+        <span>3. Hasil AI Generated Angles (Pilih & Sesuaikan)</span>
+        <span class="badge badge-success" id="countBadge">5 Generated</span>
+      </div>
 
-          <div class="form-group" style="margin-bottom: 0;">
-            <label class="form-label">Mandatory Closing / Pesan Moral Terakhir (Opsional)</label>
-            <input type="text" class="form-input" id="editorialOutro" value="Semoga harimu lebih tenang. Save & share jika video ini bermanfaat." placeholder="Kalimat penutup naskah di adegan terakhir">
-          </div>
+      <div class="angles-toolbar">
+        <div>
+          <span style="font-weight: 600; font-size: 0.85rem;">Pilih Angle yang Ingin Diproduksi:</span>
+          <span style="color: var(--text-muted); font-size: 0.75rem; margin-left: 6px;">(Centang untuk memasukkan ke antrean batch)</span>
         </div>
-
-        <div style="margin-top: 16px;">
-          <button type="button" onclick="generateRowsSimulated()" class="btn btn-secondary" style="width: 100%; padding: 10px 14px; font-weight: 700;">
-            ⚡ Buat / Refresh Tabel Tinjauan Kombinasi
+        <div class="toolbar-actions">
+          <button type="button" class="btn-sm" onclick="selectAll(true)">✅ Pilih Semua</button>
+          <button type="button" class="btn-sm" onclick="selectAll(false)">❌ Hapus Semua</button>
+          <button type="button" class="btn-sm" style="color: var(--action-primary);" onclick="generateMoreAngles()">
+            ➕ Generate 3 Angle Tambahan
           </button>
         </div>
       </div>
 
-      <!-- 3. Combination Review Table -->
-      <div class="section-block" id="reviewTableBlock">
-        <label class="form-label" style="font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 8px;">
-          📋 Tinjauan Kombinasi Kampanye Yang Akan Dibuat (<span id="rowCount">1</span> Baris)
-        </label>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Blueprint Asli</th>
-                <th>Tipe Kampanye</th>
-                <th>Target Konten / Produk</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody">
-              <tr>
-                <td><strong>POV: Mengatasi Overthinking</strong></td>
-                <td><span class="badge badge-purple">Tanpa Produk (Storytelling)</span></td>
-                <td>Pentingnya istirahat notifikasi HP sebelum tidur...</td>
-                <td><span style="color: var(--text-muted); font-size: 0.75rem;">Siap Submit</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <!-- Angles List Container -->
+      <div id="anglesList"></div>
+    </div>
 
-      <!-- Submit Action Bar -->
-      <div style="padding: 20px 24px; background: var(--surface-raised); display: flex; justify-content: space-between; align-items: center;">
-        <div style="font-size: 0.8rem; color: var(--text-muted);">
-          Estimasi: 1 Tugas Multiplier • 4 Klip Video • AI Model Dual-Tier Adaptive
-        </div>
-        <button type="button" onclick="submitSimulated()" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.9rem;">
-          🚀 Submit Kampanye Multiplier (Bypass Validasi Produk)
+    <!-- Sticky Submit Bar -->
+    <div class="submit-bar" id="submitBar" style="display: none;">
+      <div class="submit-summary">
+        Total Terpilih: <strong id="selectedCount">0</strong> Kampanye Video Baru
+        <span style="color: var(--text-muted); margin-left: 8px;">(Estimasi durasi render batch: ~2.5 menit)</span>
+      </div>
+      <button type="button" class="btn-create-batch" onclick="launchBatchProduction()">
+        <span>🚀</span>
+        <span>Buat <span id="btnSelectedCount">0</span> Kampanye Multiplier</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Modal Excluded History -->
+  <div class="modal-backdrop" id="excludedModal" onclick="closeExcludedModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeExcludedModal()">&times;</button>
+      <h3>
+        <span>🛡️ Riwayat Angle yang Diblokir (Negative Constraints)</span>
+      </h3>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">
+        Daftar sudut pandang berikut sudah pernah dibuat pada kampanye sebelumnya dan TIDAK AKAN diulang oleh Gemini AI:
+      </p>
+      <div style="max-height: 280px; overflow-y: auto; background: var(--surface-raised); padding: 12px; border-radius: var(--radius-xs); border: 1px solid var(--border-subtle); font-size: 0.78rem;">
+        <ol style="padding-left: 18px; line-height: 1.8; color: var(--text-secondary);">
+          <li>Penolong badan capek lembur seharian (Burnout Worker V1)</li>
+          <li>Detoks pagi penangkal flu & bersin-bersin</li>
+          <li>Minuman tidur nyenyak anti insomnia herbal</li>
+          <li>Mengapa orang tua zaman dulu merebus bawang & kayu manis</li>
+          <li>Khasiat kayu manis untuk pelancar darah leher kaku</li>
+          <li>Resep herbal penurun kolesterol setelah makan santan</li>
+          <li>Penghangat tubuh pengendara motor malam hari</li>
+          <li>Minuman pengganti kopi di pagi hari</li>
+          <li>Detoks racun rokok & polusi harian</li>
+          <li>Rahasia stamina lansia tetap bugar</li>
+          <li>Pereda batuk berdahak & tenggorokan gatal</li>
+          <li>Seduhan relaksasi pereda overthinking malam</li>
+          <li>Detoksifikasi ginjal & pencernaan alami</li>
+          <li>Tantangan minum herbal 3 hari berturut-turut</li>
+        </ol>
+      </div>
+      <div style="margin-top: 16px; text-align: right;">
+        <button type="button" class="btn-sm" style="background: var(--action-primary); color: white; border: none; padding: 8px 16px;" onclick="closeExcludedModal()">
+          Tutup
         </button>
       </div>
     </div>
   </div>
 
   <script>
+    // Theme toggle
     function toggleTheme() {
       const html = document.documentElement;
-      const current = html.getAttribute('data-theme') || 'dark';
+      const current = html.getAttribute('data-theme');
       const next = current === 'dark' ? 'light' : 'dark';
       html.setAttribute('data-theme', next);
     }
 
-    function switchCampaignMode(mode) {
-      const pillProd = document.getElementById('pillProduct');
-      const pillEdit = document.getElementById('pillEditorial');
-      const radioProd = document.getElementById('radioProduct');
-      const radioEdit = document.getElementById('radioEditorial');
-      const secProd = document.getElementById('productSection');
-      const secEdit = document.getElementById('editorialSection');
+    function setMonetizationMode(mode) {
+      document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+    }
 
-      if (mode === 'product') {
-        pillProd.classList.add('active');
-        pillEdit.classList.remove('active');
-        radioProd.checked = true;
-        secProd.style.display = 'block';
-        secEdit.style.display = 'none';
-      } else {
-        pillEdit.classList.add('active');
-        pillProd.classList.remove('active');
-        radioEdit.checked = true;
-        secEdit.style.display = 'block';
-        secProd.style.display = 'none';
+    function setSubmode(submode) {
+      document.getElementById('btnMode1').classList.toggle('active', submode === '1_to_multi');
+      document.getElementById('btnMode2').classList.toggle('active', submode === 'multi_to_1');
+    }
+
+    // Modal
+    function openExcludedModal() {
+      document.getElementById('excludedModal').style.display = 'flex';
+    }
+    function closeExcludedModal() {
+      document.getElementById('excludedModal').style.display = 'none';
+    }
+
+    // Dynamic Angles Database (Simulating Gemini AI Output)
+    const AI_ANGLES_DATABASE = [
+      {
+        id: 'ang_1',
+        title: '🎯 Tantangan 7 Hari Detoks Perut Begah Pasca Santan & Makanan Berlemak',
+        hook_type: 'Challenge & Gamification',
+        persona: 'Ibu Rumah Tangga & Pecinta Kuliner',
+        trigger: 'Rasa bersalah setelah makan berlemak & perut buncit kencang',
+        voice: 'Energetic & Inspiring (1.02x)',
+        cta: 'Komen "IKUTAN" kalau mau resep lengkapnya',
+        retention: 'High (Target: 82% 3s Retention)',
+        hook_text: 'Perut terasa kencang dan begah setelah makan enak? Jangan tunggu sampai jadi timbunan lemak, coba rutinkan seduhan 3 bahan ini 7 hari berturut-turut...',
+        vo_script: 'Sinergi zat allicin bawang putih dan minyak atsiri kayu manis membantu meluruhkan sisa minyak di saluran cerna. Ditambah perasan lemon segar yang menstimulasi enzim empedu alami.'
+      },
+      {
+        id: 'ang_2',
+        title: '🛡️ Penangkal Meriang & Leher Kaku Pasca Kehujanan / Cuaca Ekstrem',
+        hook_type: 'Problem-Agitation-Solution',
+        persona: 'Pengendara Motor & Pekerja Lapangan',
+        trigger: 'Kekhawatiran jatuh sakit di tengah tuntutan pekerjaan',
+        voice: 'Warm Mentor (0.98x)',
+        cta: 'Share ke teman kamu yang sering pulang malam naik motor!',
+        retention: 'Very High (Target: 88% 3s Retention)',
+        hook_text: 'Tiap musim hujan badan gampang meriang dan leher kaku? Jangan langsung buru-buru minum obat pereda, hangatkan tubuhmu dengan rebusan 3 bahan dapur ini...',
+        vo_script: 'Kandungan anti-inflamasi alami kayu manis dan antiseptik bawang putih langsung mengalir hangat ke seluruh persendian. Badan enteng seketika tanpa efek kantuk.'
+      },
+      {
+        id: 'ang_3',
+        title: '🌙 Night ASMR: Penenang Pikiran untuk Insomnia & Pikiran Kacau Sebelum Tidur',
+        hook_type: 'Cozy Relaxation & ASMR',
+        persona: 'Dewasa Usia 25-40 / Overthinking Malam',
+        trigger: 'Susah tidur, kepala tegang, butuh ketenangan batin',
+        voice: 'Calm ASMR Whisper (0.92x)',
+        cta: 'Simpan video ini buat dicoba malam ini!',
+        retention: 'Extreme (Target: 91% Re-watch Rate)',
+        hook_text: 'Jam segini masih belum bisa tidur nyenyak karena pikiran penuh? Hirup aroma uap seduhan hangat ini 15 menit sebelum merebahkan kepala...',
+        vo_script: 'Aroma terapi alami dari kayu manis dan lemon bekerja langsung merilekskan syaraf vagus. Menuntunmu tidur lelap hingga fajar menyapa.'
+      },
+      {
+        id: 'ang_4',
+        title: '🔍 Fakta Ilmiah: Mengapa Nenek Moyang Selalu Merebus Bawang Putih & Kayu Manis?',
+        hook_type: 'Curiosity Gap & Myth Buster',
+        persona: 'Pencari Fakta Unik & Penggemar Herbal',
+        trigger: 'Rasa penasaran kenapa kombinasi rasa kontras punya khasiat dahsyat',
+        voice: 'Storyteller / Educative (1.0x)',
+        cta: 'Kamu tim percaya resep tradisional atau modern? Tulis di komen!',
+        retention: 'Viral Bait (Target: 3.5k+ Komentar)',
+        hook_text: 'Awalnya terdengar aneh merebus bawang putih dicampur kayu manis dan perasan lemon. Tapi saat diteliti laboratorium, hasilnya bikin kaget banyak ahli...',
+        vo_script: 'Ternyata kombinasi ini melipatgandakan penyerapan antioksidan hingga 300 persen! Resep sederhana dengan khasiat luar biasa penakluk radikal bebas.'
+      },
+      {
+        id: 'ang_5',
+        title: '⚡ Booster Energi Alami Bebas Kafein untuk Pekerja Shift & Begadang',
+        hook_type: 'Direct Benefit & Alternative Habit',
+        persona: 'Freelancer, Programmer & Pekerja Shift Malam',
+        trigger: 'Asam lambung kambuh karena kopi, tapi butuh stamina tetap fokus',
+        voice: 'Fresh & Confident (1.0x)',
+        cta: 'Follow & Komen "SEHAT" untuk tips stamina lainnya',
+        retention: 'High (Target: 78% 3s Retention)',
+        hook_text: 'Mata berat tapi kerjaan masih numpuk, sementara lambung sudah nggak kuat minum kopi? Seduhan alami ini adalah penyelamat fokusmu...',
+        vo_script: 'Memberikan aliran energi stabil tanpa jantung berdebar atau pusing leher belakang. Tetap produktif dan segar alami sepanjang hari.'
+      },
+      {
+        id: 'ang_6',
+        title: '🫀 Rahasia Menjaga Sirkulasi Darah Lancar untuk Usia 45 Tahun ke Atas',
+        hook_type: 'Generational Empathy & Health Wisdom',
+        persona: 'Orang Tua & Anak Berbakti',
+        trigger: 'Kekhawatiran penyumbatan darah & kebas di ujung jari tangan/kaki',
+        voice: 'Respectful & Wise (0.95x)',
+        cta: 'Kirimkan resep ini ke grup WhatsApp keluarga tercinta!',
+        retention: 'High Shareability (Target: 1.2k+ Shares)',
+        hook_text: 'Bangun pagi jari tangan sering kaku atau kesemutan? Ini rahasia sederhana orang tua zaman dulu menjaga sirkulasi darah tetap lancar...',
+        vo_script: 'Rebusan bahan dapur yang melancarkan mikrosirkulasi perifer. Hangat di dada, nyaman di seluruh persendian.'
+      },
+      {
+        id: 'ang_7',
+        title: '🍋 Ritual Detoks Pagi Pembersih Lemak Hati & Metabolisme Lambat',
+        hook_type: 'Morning Habit & Body Re-set',
+        persona: 'Pria/Wanita Pejuang Diet & Gaya Hidup Sehat',
+        trigger: 'Metabolisme lambat, berat badan susah turun, badan sering lesu',
+        voice: 'Upbeat & Motivating (1.05x)',
+        cta: 'Komen "MAU COBA" kalau kamu mau reset pola hidup sehat!',
+        retention: 'High (Target: 84% 3s Retention)',
+        hook_text: 'Nggak perlu jus detox mahal jutaan rupiah! Bersihkan saluran pencernaanmu tiap pagi dengan ramuan 3 bahan dapur ini...',
+        vo_script: 'Mengaktifkan metabolisme pembakaran energi sejak jam pertama bangun tidur. Tubuh terasa ringan dan berenergi sepanjang hari.'
       }
-      generateRowsSimulated();
-    }
+    ];
 
-    function setTopic(text) {
-      document.getElementById('editorialTopic').value = text;
-      generateRowsSimulated();
-    }
+    let currentAngles = [];
 
-    function generateRowsSimulated() {
-      const isEditorial = document.getElementById('radioEditorial').checked;
-      const tbody = document.getElementById('tableBody');
+    function generateAnglesWithAI() {
+      const btn = document.getElementById('btnGenerateAngles');
+      const count = parseInt(document.getElementById('angleCountSelect').value);
       
-      if (isEditorial) {
-        const topic = document.getElementById('editorialTopic').value.trim() || 'Pure Narrative Remake';
-        const shortTopic = topic.length > 50 ? topic.substring(0, 50) + '...' : topic;
-        tbody.innerHTML = `
-          <tr>
-            <td><strong>POV: Mengatasi Overthinking</strong></td>
-            <td><span class="badge badge-purple">Tanpa Produk (Storytelling)</span></td>
-            <td>${shortTopic}</td>
-            <td><span style="color: var(--status-success); font-size: 0.75rem; font-weight: 600;">✓ Valid & Siap</span></td>
-          </tr>
-        `;
-      } else {
-        const sel = document.getElementById('selectProduct');
-        const prodName = sel.options[sel.selectedIndex].text;
-        tbody.innerHTML = `
-          <tr>
-            <td><strong>POV: Mengatasi Overthinking</strong></td>
-            <td><span class="badge badge-teal">Product Bridging</span></td>
-            <td>${prodName}</td>
-            <td><span style="color: var(--status-success); font-size: 0.75rem; font-weight: 600;">✓ Valid & Siap</span></td>
-          </tr>
-        `;
-      }
+      btn.disabled = true;
+      btn.innerHTML = `<span class="loading-pulse">⏳</span> Menghubungi Gemini AI & Menganalisis Knowledge Base...`;
+
+      setTimeout(() => {
+        currentAngles = AI_ANGLES_DATABASE.slice(0, count);
+        renderAngles();
+        
+        btn.disabled = false;
+        btn.innerHTML = `<span>⚡</span> <span>Regenerate ${count} Angles Baru (Anti-Duplikasi Aktif)</span>`;
+        
+        document.getElementById('generatedAnglesSection').style.display = 'block';
+        document.getElementById('submitBar').style.display = 'flex';
+        document.getElementById('generatedAnglesSection').scrollIntoView({ behavior: 'smooth' });
+      }, 1200);
     }
 
-    function submitSimulated() {
-      const isEditorial = document.getElementById('radioEditorial').checked;
-      if (isEditorial) {
-        alert('✅ SIMULASI BERHASIL!\n\nPayload kampanye tanpa produk berhasil diverifikasi:\n- campaign_mode: "editorial"\n- is_bridging_active: false\n- target_product_id: null\n- topic: "' + document.getElementById('editorialTopic').value.trim() + '"\n\nAPI & Worker siap memproses storyboard narasi murni tanpa error validasi produk!');
-      } else {
-        alert('✅ SIMULASI BERHASIL!\n\nKampanye Product Bridging dengan produk terdaftar berhasil disiapkan.');
+    function generateMoreAngles() {
+      if (currentAngles.length >= AI_ANGLES_DATABASE.length) {
+        alert('Semua variasi angle dari database simulasi sudah ditampilkan!');
+        return;
       }
+      const added = AI_ANGLES_DATABASE.slice(currentAngles.length, currentAngles.length + 2);
+      currentAngles = currentAngles.concat(added);
+      renderAngles();
+      updateSelectedCount();
+    }
+
+    function renderAngles() {
+      const container = document.getElementById('anglesList');
+      container.innerHTML = '';
+
+      currentAngles.forEach((ang, idx) => {
+        const isSelected = true; // default checked
+        const card = document.createElement('div');
+        card.className = `angle-card ${isSelected ? 'selected' : ''}`;
+        card.id = `card_${ang.id}`;
+
+        card.innerHTML = `
+          <div class="angle-top">
+            <input type="checkbox" class="angle-checkbox" id="check_${ang.id}" checked onchange="toggleAngleSelect('${ang.id}')">
+            <div class="angle-main">
+              <div class="angle-title-row">
+                <span class="angle-title" onclick="toggleAngleSelect('${ang.id}')">${idx + 1}. ${ang.title}</span>
+                <span class="badge badge-primary">${ang.retention}</span>
+              </div>
+              <div class="angle-tags">
+                <span class="badge badge-accent">🎯 Hook: ${ang.hook_type}</span>
+                <span class="badge badge-info">👤 Target: ${ang.persona}</span>
+                <span class="badge badge-warning">🗣️ Voice: ${ang.voice}</span>
+              </div>
+              <div class="angle-details-grid">
+                <div class="detail-item">
+                  <strong>Psikologi & Emosi</strong>
+                  <p>${ang.trigger}</p>
+                </div>
+                <div class="detail-item">
+                  <strong>Call to Action (CTA Bait)</strong>
+                  <p style="color: var(--status-success); font-weight: 600;">${ang.cta}</p>
+                </div>
+              </div>
+              <div class="vo-preview-box">
+                <strong>🎙️ Hook Naskah (0 - 3 Detik):</strong>
+                <p>"${ang.hook_text}"</p>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">
+                  <em>Lanjutan VO: "${ang.vo_script}"</em>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById('countBadge').innerText = `${currentAngles.length} Generated`;
+      updateSelectedCount();
+    }
+
+    function toggleAngleSelect(id) {
+      const chk = document.getElementById(`check_${id}`);
+      const card = document.getElementById(`card_${id}`);
+      if (event.target !== chk) {
+        chk.checked = !chk.checked;
+      }
+      card.classList.toggle('selected', chk.checked);
+      updateSelectedCount();
+    }
+
+    function selectAll(state) {
+      currentAngles.forEach(ang => {
+        const chk = document.getElementById(`check_${ang.id}`);
+        const card = document.getElementById(`card_${ang.id}`);
+        if (chk) chk.checked = state;
+        if (card) card.classList.toggle('selected', state);
+      });
+      updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+      const checkedBoxes = document.querySelectorAll('.angle-checkbox:checked');
+      const count = checkedBoxes.length;
+      document.getElementById('selectedCount').innerText = count;
+      document.getElementById('btnSelectedCount').innerText = count;
+    }
+
+    function launchBatchProduction() {
+      const count = document.querySelectorAll('.angle-checkbox:checked').length;
+      if (count === 0) {
+        alert('Pilih minimal 1 angle untuk diproduksi!');
+        return;
+      }
+      alert(`🎉 Sukses membuat ${count} Batch Kampanye Multiplier Non-Produk!\n\nSistem saat ini sedang mengeksekusi pembuatan video dengan naskah dan voice-over unik untuk masing-masing sudut pandang.`);
     }
   </script>
 </body>
