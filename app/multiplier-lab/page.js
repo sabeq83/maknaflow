@@ -122,6 +122,10 @@ function MultiplierLabPageContent() {
   const [lightingStyle, setLightingStyle] = useState('random');
   const [lightingStyleCustom, setLightingStyleCustom] = useState('');
 
+  const [campaignType, setCampaignType] = useState('editorial'); // 'editorial' | 'product'
+  const [editorialTopic, setEditorialTopic] = useState('');
+  const [editorialOutro, setEditorialOutro] = useState('');
+
   const [isBridgingActive, setIsBridgingActive] = useState(true);
   const [targetClipsCount, setTargetClipsCount] = useState(4);
   const [bridgeAtClip, setBridgeAtClip] = useState(2);
@@ -416,7 +420,38 @@ function MultiplierLabPageContent() {
 
   const generateCombinationRows = () => {
     let rows = [];
-    const selectedBlueprints = assets.filter(a => selectedBlueprintIds.includes(a.id));
+    const selectedBlueprints = workflowMode === 'multi_blueprint_one_product'
+      ? assets.filter(a => selectedBlueprintIds.includes(a.id))
+      : (selectedAssetId ? assets.filter(a => a.id === selectedAssetId) : []);
+
+    if (campaignType === 'editorial') {
+      if (selectedBlueprints.length === 0) {
+        showToast('Pilih setidaknya satu blueprint video terlebih dahulu', 'error');
+        return;
+      }
+      const labelTopic = editorialTopic.trim()
+        ? `Tanpa Produk (${editorialTopic.trim().length > 35 ? editorialTopic.trim().substring(0, 35) + '...' : editorialTopic.trim()})`
+        : 'Tanpa Produk (Pure Storytelling)';
+
+      for (const bp of selectedBlueprints) {
+        rows.push({
+          deconstruct_asset_id: bp.id,
+          deconstruct_asset_url: bp.source_url,
+          deconstruct_asset_title: bp.niche || bp.original_caption || bp.id,
+          target_product_id: null,
+          target_product_name: labelTopic,
+          target_product_url: '',
+          affiliate_url: '',
+          campaign_type: 'pure_storytelling',
+          editorial_topic: editorialTopic.trim(),
+          editorial_outro: editorialOutro.trim()
+        });
+      }
+
+      setCombinationRows(rows);
+      showToast(`Tabel tinjauan kampanye storytelling berhasil dibuat (${rows.length} baris)!`);
+      return;
+    }
 
     if (workflowMode === 'multi_blueprint_one_product') {
       if (selectedBlueprintIds.length === 0) {
@@ -644,31 +679,44 @@ function MultiplierLabPageContent() {
       const dbProduct = targetProductId ? products.find(p => p.id === targetProductId) : null;
       const dbPhotoUrl = dbProduct ? (dbProduct.cleaned_photo_url || dbProduct.clean_photo_url || dbProduct.raw_photo_url) : null;
 
+      const isPureStory = campaignType === 'editorial';
+
       const payload = {
         mode: workflowMode,
         rows: combinationRows.map(row => ({
           deconstruct_asset_id: row.deconstruct_asset_id,
           target_product_id: row.target_product_id,
           target_product_url: row.target_product_url,
-          affiliate_url: row.affiliate_url
+          affiliate_url: row.affiliate_url,
+          campaign_type: row.campaign_type || (isPureStory ? 'pure_storytelling' : 'product_campaign'),
+          editorial_topic: row.editorial_topic || editorialTopic.trim(),
+          editorial_outro: row.editorial_outro || editorialOutro.trim()
         })),
         vso_config_json: JSON.stringify({
           narrativeMode, visualStyle, targetAi, videoModel, clipDuration, aspectRatio, faceVisibility, wordsPerClip,
           isVsoActive, characterConcept, subjectDemographic, wardrobeStyle, wardrobeStyleCustom, lightingStyle, lightingStyleCustom
         }),
         bridging_config_json: JSON.stringify({
-          isBridgingActive, targetClipsCount, bridgeAtClip, bridgeDurationClips, promotionStyle, bridgingMode,
-          manualProductName, manualProductDesc, manualProductUsp, productUrl, visualMode
+          campaign_type: isPureStory ? 'pure_storytelling' : 'product_campaign',
+          isBridgingActive: isPureStory ? false : isBridgingActive,
+          targetClipsCount, bridgeAtClip, bridgeDurationClips, promotionStyle, bridgingMode,
+          manualProductName: isPureStory ? '' : manualProductName,
+          manualProductDesc: isPureStory ? '' : manualProductDesc,
+          manualProductUsp: isPureStory ? '' : manualProductUsp,
+          productUrl: isPureStory ? '' : productUrl,
+          visualMode,
+          editorialTopic: editorialTopic.trim(),
+          editorialOutro: editorialOutro.trim()
         }),
         audio_config_json: JSON.stringify({
           enableTts, voiceProvider, voicePersona, voiceSpeed, voiceVolume, ttsModelQuality,
           enableGlabs, enableFfmpeg, targetLanguage, ffmpegSyncOption, syncMode,
           ffmpegVideoScale, ffmpegSfxVolume, ffmpegBgmVolume, enableSocialPost,
           nextcloudParentFolder, targetDemographic, targetDemographicCustom, aiDirective,
-          mandatoryOutroLine, customInstruction
+          mandatoryOutroLine: editorialOutro.trim() || mandatoryOutroLine, customInstruction
         }),
         enable_vo_audit: enableVoAudit ? 1 : 0,
-        product_ref_image_path: dbPhotoUrl || productRefImage
+        product_ref_image_path: isPureStory ? null : (dbPhotoUrl || productRefImage)
       };
 
       const res = await fetch('/api/v2/multiplier', {
@@ -1005,11 +1053,139 @@ function MultiplierLabPageContent() {
                 </div>
               </div>
 
-              {/* 2. Product Selection */}
+              {/* 2. Campaign Type & Target Content */}
               <div style={{ padding: 24, borderBottom: '1px solid var(--border)' }}>
-                <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem', display: 'block', marginBottom: 8 }}>
-                  📦 Pilih Produk Jualan ({workflowMode === 'multi_blueprint_one_product' ? 'Pilih Satu' : 'Bisa Pilih Banyak'})
+                <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem', display: 'block', marginBottom: 12 }}>
+                  🎯 2. Tipe Kampanye & Target Konten
                 </label>
+
+                {/* Campaign Mode Switcher */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+                  <div
+                    onClick={() => setCampaignType('editorial')}
+                    style={{
+                      background: campaignType === 'editorial' ? 'var(--status-neutral-soft)' : 'var(--surface-raised)',
+                      border: `2px solid ${campaignType === 'editorial' ? 'var(--status-neutral)' : 'var(--border-subtle)'}`,
+                      borderRadius: 'var(--radius-md)',
+                      padding: '12px 14px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 10,
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="campaignTypeChoice"
+                      checked={campaignType === 'editorial'}
+                      onChange={() => setCampaignType('editorial')}
+                      style={{ marginTop: 3, accentColor: 'var(--status-neutral)', cursor: 'pointer' }}
+                    />
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                        <strong style={{ fontSize: '0.84rem', color: 'var(--text-primary)' }}>✨ Tanpa Produk (Pure Storytelling)</strong>
+                        <span style={{ fontSize: '0.65rem', padding: '1px 6px', background: 'var(--status-neutral-soft)', color: 'var(--status-neutral)', borderRadius: 4, fontWeight: 700 }}>RE Formula</span>
+                      </div>
+                      <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.35 }}>
+                        Remake narasi, edukasi, atau kisah reflektif tanpa jualan produk. Memakai formula viral RE Campaign.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div
+                    onClick={() => setCampaignType('product')}
+                    style={{
+                      background: campaignType === 'product' ? 'var(--status-info-soft)' : 'var(--surface-raised)',
+                      border: `2px solid ${campaignType === 'product' ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                      borderRadius: 'var(--radius-md)',
+                      padding: '12px 14px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 10,
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="campaignTypeChoice"
+                      checked={campaignType === 'product'}
+                      onChange={() => setCampaignType('product')}
+                      style={{ marginTop: 3, accentColor: 'var(--action-primary)', cursor: 'pointer' }}
+                    />
+                    <div>
+                      <strong style={{ fontSize: '0.84rem', color: 'var(--text-primary)', display: 'block', marginBottom: 2 }}>📦 Promosi Produk (Product Bridging)</strong>
+                      <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.35 }}>
+                        Menyisipkan produk jualan (Shopee/Tokopedia/Affiliate) pada klip pivot dengan Sandwich Protocol.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Editorial Storytelling Panel */}
+                {campaignType === 'editorial' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 14, background: 'var(--surface-interactive)', borderRadius: 8, border: '1px solid var(--border-subtle)' }}>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--status-neutral)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span>💡</span> Mode Storytelling Aktif: Mengadaptasi hook & ritme blueprint asli menjadi alur narasi mendalam tanpa hard-selling.
+                    </div>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: 600 }}>Topik Utama / Sudut Pandang Cerita (Editorial Angle)</label>
+                      <textarea
+                        className="form-input"
+                        rows={2}
+                        value={editorialTopic}
+                        onChange={e => setEditorialTopic(e.target.value)}
+                        placeholder="Contoh: Pentingnya mengistirahatkan pikiran sebelum tidur, tips produktivitas kerja, atau refleksi hidup tenang."
+                        style={{ fontSize: '0.8rem' }}
+                      />
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', alignSelf: 'center' }}>⚡ Cepat:</span>
+                        {[
+                          'Mindset & konsistensi tanpa overthinking',
+                          'Refleksi diri & ketenangan pikiran harian',
+                          'Tips fokus kerja produktif tanpa distraksi',
+                          'Kisah motivasi bangkit dari kegagalan'
+                        ].map((sampleTopic, tIdx) => (
+                          <button
+                            key={tIdx}
+                            type="button"
+                            onClick={() => setEditorialTopic(sampleTopic)}
+                            style={{
+                              background: 'var(--surface-raised)',
+                              border: '1px solid var(--border-subtle)',
+                              color: 'var(--text-secondary)',
+                              fontSize: '0.7rem',
+                              padding: '2px 8px',
+                              borderRadius: 4,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {sampleTopic}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label className="form-label" style={{ fontSize: '0.78rem', fontWeight: 600 }}>Pesan Moral / Closing Outro Terakhir (Opsional)</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={editorialOutro}
+                        onChange={e => setEditorialOutro(e.target.value)}
+                        placeholder="Contoh: Semoga harimu lebih tenang. Save & share jika video ini bermanfaat."
+                        style={{ fontSize: '0.8rem' }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Product Selection Panel */}
+                {campaignType === 'product' && (
+                  <div style={{ marginTop: 12 }}>
+                    <label className="form-label" style={{ fontWeight: 600, fontSize: '0.8rem', display: 'block', marginBottom: 8 }}>
+                      Pilih Produk ({workflowMode === 'multi_blueprint_one_product' ? 'Pilih Satu' : 'Bisa Pilih Banyak'})
+                    </label>
 
                 {workflowMode === 'multi_blueprint_one_product' ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -1202,6 +1378,8 @@ function MultiplierLabPageContent() {
                     )}
                   </div>
                 )}
+                </div>
+              )}
                 
                 <div style={{ marginTop: 16 }}>
                   <button type="button" onClick={generateCombinationRows} className="btn btn-secondary" style={{ width: '100%', padding: '10px 14px', fontWeight: 700 }}>

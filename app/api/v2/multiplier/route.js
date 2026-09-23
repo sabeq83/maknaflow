@@ -143,24 +143,25 @@ export const POST = withTenantContext(async (request) => {
         return NextResponse.json({ success: false, error: 'Maksimum 20 kombinasi per submit' }, { status: 400 });
       }
 
-      // Validate each row
-      for (const row of rows) {
-        if (!row.deconstruct_asset_id) {
-          return NextResponse.json({ success: false, error: 'Setiap baris wajib memiliki deconstruct_asset_id' }, { status: 400 });
-        }
-        if (!row.target_product_url && !row.target_product_id) {
-          return NextResponse.json({ success: false, error: 'Setiap baris wajib memiliki target_product_url atau target_product_id' }, { status: 400 });
-        }
-      }
-
-      const { createMultiplierBatchWithTasks } = await import('@/lib/db');
-      
       let vsoConfig = {};
       let bridgingConfig = {};
       let audioConfig = {};
       try { vsoConfig = typeof vso_config_json === 'string' ? JSON.parse(vso_config_json) : (vso_config_json || {}); } catch(_) {}
       try { bridgingConfig = typeof bridging_config_json === 'string' ? JSON.parse(bridging_config_json) : (bridging_config_json || {}); } catch(_) {}
       try { audioConfig = typeof audio_config_json === 'string' ? JSON.parse(audio_config_json) : (audio_config_json || {}); } catch(_) {}
+
+      // Validate each row
+      for (const row of rows) {
+        if (!row.deconstruct_asset_id) {
+          return NextResponse.json({ success: false, error: 'Setiap baris wajib memiliki deconstruct_asset_id' }, { status: 400 });
+        }
+        const isPureStorytelling = row.campaign_type === 'pure_storytelling' || bridgingConfig.campaign_type === 'pure_storytelling' || bridgingConfig.is_bridging_active === false;
+        if (!isPureStorytelling && !row.target_product_url && !row.target_product_id) {
+          return NextResponse.json({ success: false, error: 'Setiap baris wajib memiliki target_product_url atau target_product_id' }, { status: 400 });
+        }
+      }
+
+      const { createMultiplierBatchWithTasks } = await import('@/lib/db');
 
       if (productRefImagePath) {
         bridgingConfig.product_ref_image_path = productRefImagePath;

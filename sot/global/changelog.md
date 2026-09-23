@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.31.34 — Multiplier Lab Non-Product Mode with RE Viral Narrative Engine (23/09/2026)
+- Menambahkan Switcher Mode Tanpa Produk (Pure Storytelling) di Multiplier Lab UI
+- Bypass validasi wajib produk di API Route untuk kampanye narasi murni
+- Integrasi formula viral RE Campaign (Storytelling, Problem-Solution, Educational) ke Multiplier Prompt Engine
+- Menyesuaikan Worker Pipeline agar melewati pencarian produk & referensi foto saat mode storytelling aktif
+
 ## V2.31.33 — Add SOP Keamanan Secret & Zero Secret Exposure Rule (23/09/2026)
 - Tambahkan SOP Keamanan Secret & Pencegahan Kebocoran API Key pada AGENTS.md
 - Larangan hardcoded credential pada skrip pengujian & format placeholder netral
