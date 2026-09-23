@@ -4,29 +4,118 @@ import { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
 import AiVisualIdentityBuilderModal from '../../components/AiVisualIdentityBuilderModal';
 import ReferenceAssetManager from '../../components/ReferenceAssetManager';
-
-const SUBJECT_KINDS = ['human', 'blank_face_3d', 'animal', 'mascot_object'];
-const HUMAN_FACELESS_MODES = ['hands_only', 'crop_below_neck', 'back_view', 'silhouette', 'first_person_pov', 'blank_face_3d'];
-const ALL_FACELESS_MODES = [...HUMAN_FACELESS_MODES, 'not_applicable'];
-const WARDROBE_MODES = ['fixed', 'sequential', 'stable_random', 'custom'];
-const SLEEVE_POLICIES = ['wrists_covered', 'forearms_exposed', 'not_applicable'];
-const BACKGROUND_DENSITIES = ['minimal', 'balanced', 'dense'];
-const LIGHTING_TEMPERATURES = ['warm', 'cool', 'neutral', 'warm_neutral', 'cool_neutral'];
-const LIGHTING_CONTRASTS = ['soft', 'medium', 'high_contrast'];
-const CAMERA_FRAMINGS = ['hands_closeup', 'forearms_and_hands', 'crop_below_neck', 'back_view', 'full_body_blank_face', 'object_or_animal'];
-const CAMERA_PERSPECTIVES = ['first_person', 'third_person'];
-const CAMERA_LENS_LOOKS = ['natural_50mm', 'wide_angle_24mm', 'telephoto_85mm', 'macro_closeup'];
-const CAMERA_DEPTHS = ['shallow', 'deep', 'medium'];
-const CAMERA_MOVEMENTS = ['still', 'subtle_handheld', 'slow_pan', 'zoom_in'];
+import {
+  SUBJECT_KINDS,
+  HUMAN_FACELESS_MODES,
+  ALL_FACELESS_MODES,
+  POPULATION_MODES,
+  CAMERA_FRAMINGS,
+  CAMERA_PERSPECTIVES,
+  CAMERA_LENS_LOOKS,
+  CAMERA_DEPTHS,
+  CAMERA_MOVEMENTS,
+  WARDROBE_MODES,
+  SLEEVE_POLICIES,
+  BACKGROUND_DENSITIES,
+  LIGHTING_TEMPERATURES,
+  LIGHTING_CONTRASTS,
+  RENDERING_GEOMETRIES,
+  RENDERING_FINISHES,
+  SHADOW_STYLES,
+  NEGATIVE_SPACE_OPTIONS,
+  SAFE_ZONE_OPTIONS
+} from '../../../lib/visual-identity-contract';
+import {
+  VISUAL_STYLE_KEYS,
+  VISUAL_LANGUAGE_CATALOG,
+  NARRATIVE_FUNCTIONS,
+  getVisualStyleDefinition
+} from '../../../lib/visual-language-catalog';
 
 const DEFAULT_CONFIG = {
-  subject: { kind: 'human', faceless_mode: 'hands_only', demographic_key: 'syari_classic', custom_description: '', character_count: 1 },
-  wardrobe: { mode: 'fixed', preset_key: 'sage_muted', custom_description: '', primary_color: '', secondary_color: '', material: '', sleeve_policy: 'wrists_covered', accessories: [] },
-  environment: { preset_key: 'nordic_kitchen', custom_description: '', material_palette: [], props: [], background_density: 'balanced' },
-  lighting: { preset_key: 'window_daylight', custom_description: '', color_temperature: 'warm_neutral', contrast: 'soft' },
-  camera: { framing: 'forearms_and_hands', perspective: 'third_person', lens_look: 'natural_50mm', depth_of_field: 'shallow', movement: 'subtle_handheld' },
-  style: { preset_key: 'cinematic_realistic', custom_description: '', aspect_ratio: '9:16' },
-  guardrails: { face_visibility: 'prohibited', reflection_face: 'prohibited', extra_people: 'prohibited', identity_drift: 'prohibited', wardrobe_drift: 'prohibited', required_negative_prompts: [] }
+  schema_version: '2',
+  subject: {
+    kind: 'human',
+    faceless_mode: 'featureless_editorial',
+    demographic_key: 'custom',
+    custom_description: '',
+    character_count: 1,
+    population_mode: 'single_group_or_crowd'
+  },
+  visual_language: {
+    primary_style: 'editorial_graphic_novel',
+    supporting_styles: ['isometric_society', 'symbolic_surrealism', 'paper_cutout_documentary'],
+    disabled_styles: ['shadow_silhouette', 'clay_political_theater']
+  },
+  mode_routing: {
+    hook: 'symbolic_surrealism',
+    context: 'editorial_graphic_novel',
+    mechanism: 'isometric_society',
+    consequence: 'editorial_graphic_novel',
+    evidence_reveal: 'paper_cutout_documentary',
+    conclusion: 'symbolic_surrealism'
+  },
+  rendering: {
+    geometry: 'simplified_semi_realistic',
+    textures: ['printed_paper_grain', 'editorial_ink'],
+    shadow_style: 'strong_geometric',
+    finish: 'matte_editorial'
+  },
+  composition: {
+    primary_idea_count: 1,
+    primary_subject_count: 1,
+    negative_space: 'required',
+    safe_zone: 'vertical_social_ui'
+  },
+  metaphor_engine: {
+    enabled: true,
+    pattern: 'concept_to_object_to_action'
+  },
+  wardrobe: {
+    mode: 'fixed',
+    preset_key: 'sage_muted',
+    custom_description: '',
+    primary_color: '',
+    secondary_color: '',
+    material: '',
+    sleeve_policy: 'wrists_covered',
+    accessories: []
+  },
+  environment: {
+    preset_key: 'general_workspace',
+    custom_description: '',
+    material_palette: [],
+    props: [],
+    background_density: 'balanced'
+  },
+  lighting: {
+    preset_key: 'window_daylight',
+    custom_description: '',
+    color_temperature: 'warm_neutral',
+    contrast: 'soft'
+  },
+  camera: {
+    framing: 'editorial_wide',
+    perspective: 'third_person',
+    lens_look: 'natural_50mm',
+    depth_of_field: 'shallow',
+    movement: 'subtle_handheld'
+  },
+  style: {
+    preset_key: 'editorial_graphic_novel',
+    custom_description: '',
+    aspect_ratio: '9:16'
+  },
+  guardrails: {
+    face_visibility: 'prohibited',
+    reflection_face: 'prohibited',
+    unintended_people: 'prohibited',
+    extra_people: 'prohibited',
+    intentional_crowd: 'allowed_faceless',
+    identity_drift: 'prohibited',
+    wardrobe_drift: 'prohibited',
+    required_negative_prompts: []
+  }
 };
 
 export default function VisualIdentityStudioPage() {
@@ -58,7 +147,6 @@ export default function VisualIdentityStudioPage() {
       const json = await res.json();
       if (!json.success) throw new Error(json.error || 'Failed to fetch presets');
       
-      // Filter based on activeTab (system vs user)
       if (activeTab === 'system') {
         setPresets(json.data.filter(p => p.source === 'system'));
       } else if (activeTab === 'user') {
@@ -87,7 +175,27 @@ export default function VisualIdentityStudioPage() {
     setPresetKey(preset.preset_key);
     setConfig({
       ...DEFAULT_CONFIG,
-      ...preset.config
+      ...preset.config,
+      visual_language: {
+        ...DEFAULT_CONFIG.visual_language,
+        ...(preset.config?.visual_language || {})
+      },
+      mode_routing: {
+        ...DEFAULT_CONFIG.mode_routing,
+        ...(preset.config?.mode_routing || {})
+      },
+      rendering: {
+        ...DEFAULT_CONFIG.rendering,
+        ...(preset.config?.rendering || {})
+      },
+      composition: {
+        ...DEFAULT_CONFIG.composition,
+        ...(preset.config?.composition || {})
+      },
+      metaphor_engine: {
+        ...DEFAULT_CONFIG.metaphor_engine,
+        ...(preset.config?.metaphor_engine || {})
+      }
     });
     setEditingPreset(preset);
   };
@@ -186,572 +294,724 @@ export default function VisualIdentityStudioPage() {
     }));
   };
 
+  const handlePrimaryStyleChange = (newPrimary) => {
+    setConfig(prev => {
+      const oldPrimary = prev.visual_language?.primary_style;
+      let supporting = [...(prev.visual_language?.supporting_styles || [])];
+      if (oldPrimary && oldPrimary !== newPrimary && !supporting.includes(oldPrimary)) {
+        supporting.push(oldPrimary);
+      }
+      supporting = supporting.filter(s => s !== newPrimary);
+
+      const allowed = [newPrimary, ...supporting];
+      const nextRouting = { ...(prev.mode_routing || {}) };
+      for (const fn of NARRATIVE_FUNCTIONS) {
+        if (!allowed.includes(nextRouting[fn])) {
+          nextRouting[fn] = newPrimary;
+        }
+      }
+
+      return {
+        ...prev,
+        visual_language: {
+          ...prev.visual_language,
+          primary_style: newPrimary,
+          supporting_styles: supporting
+        },
+        mode_routing: nextRouting,
+        style: {
+          ...prev.style,
+          preset_key: newPrimary
+        }
+      };
+    });
+  };
+
+  const toggleSupportingStyle = (styleKey) => {
+    setConfig(prev => {
+      const primary = prev.visual_language?.primary_style;
+      if (styleKey === primary) return prev; // cannot toggle primary
+
+      let supporting = [...(prev.visual_language?.supporting_styles || [])];
+      if (supporting.includes(styleKey)) {
+        supporting = supporting.filter(s => s !== styleKey);
+      } else {
+        supporting.push(styleKey);
+      }
+
+      const allowed = [primary, ...supporting];
+      const nextRouting = { ...(prev.mode_routing || {}) };
+      for (const fn of NARRATIVE_FUNCTIONS) {
+        if (!allowed.includes(nextRouting[fn])) {
+          nextRouting[fn] = primary;
+        }
+      }
+
+      return {
+        ...prev,
+        visual_language: {
+          ...prev.visual_language,
+          supporting_styles: supporting
+        },
+        mode_routing: nextRouting
+      };
+    });
+  };
+
+  const handleRouteSelectionChange = (narrativeFn, styleKey) => {
+    setConfig(prev => ({
+      ...prev,
+      mode_routing: {
+        ...(prev.mode_routing || {}),
+        [narrativeFn]: styleKey
+      }
+    }));
+  };
+
+  const activeStylesForRouting = [
+    config.visual_language?.primary_style || 'editorial_graphic_novel',
+    ...(config.visual_language?.supporting_styles || [])
+  ];
+
   return (
     <div className="app-layout">
       <Sidebar />
       <main className="main-content">
         <div className="page-container">
           {/* Header */}
-          <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+          <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 14 }}>
             <div>
-              <h1>🎭 Visual Identity Studio</h1>
-              <p className="page-subtitle">Kelola preset identitas visual terpadu, spesifikasi model faceless, wardrobe, dan scene styling.</p>
+              <h1 style={{ color: 'var(--text-primary)' }}>🎭 Visual Identity Studio v2</h1>
+              <p className="page-subtitle">Sistem identitas visual multi-mode deterministik, narrative routing, dan faceless production rules.</p>
             </div>
             {!editingPreset && !previewPreset && (
-              <div style={{ display: 'flex', gap: 12 }}>
-                <button className="btn btn-secondary" onClick={() => setShowAiBuilder(true)}>
-                  ✨ Design with AI
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setShowAiBuilder(true)}
+                  style={{ background: 'var(--surface-interactive)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
+                >
+                  ✨ AI Studio Builder
                 </button>
-                <button className="btn btn-primary" onClick={handleOpenCreate}>
+                <button
+                  className="btn btn-primary"
+                  onClick={handleOpenCreate}
+                  style={{ background: 'var(--action-primary)', color: 'var(--on-action-primary)' }}
+                >
                   + Create Manually
                 </button>
               </div>
             )}
           </div>
 
-        {/* Tab Navigation */}
-        <div style={{ display: 'inline-flex', gap: 6, padding: 6, background: 'var(--sidebar)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius)', marginBottom: 24 }}>
-          {['system', 'user', 'archived'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => { setActiveTab(tab); setEditingPreset(null); setPreviewPreset(null); }}
-              style={{
-                background: 'none',
-                border: 'none',
-                padding: '10px 20px',
-                fontFamily: 'inherit',
-                fontSize: '0.85rem',
-                fontWeight: 700,
-                color: activeTab === tab ? 'var(--action-primary)' : 'var(--text-muted)',
-                backgroundColor: activeTab === tab ? 'var(--surface-interactive)' : 'transparent',
-                borderRadius: 'var(--radius-sm)',
-                cursor: 'pointer',
-                transition: 'var(--transition)'
-              }}
-            >
-              {tab === 'system' ? 'System Presets' : tab === 'user' ? 'My Presets' : 'Archived'}
-            </button>
-          ))}
-        </div>
-
-        {/* Main Workspace */}
-        {error && (
-          <div className="bg-rose-500/10 border border-rose-500/25 p-4 rounded-xl mb-6 text-sm text-rose-400 flex items-center gap-2">
-            <span>⚠️ Error:</span> {error}
+          {/* Tab Navigation */}
+          <div style={{ display: 'inline-flex', gap: 6, padding: 6, background: 'var(--sidebar)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius, 8px)', marginBottom: 24 }}>
+            {['system', 'user', 'archived'].map(tab => (
+              <button
+                key={tab}
+                onClick={() => { setActiveTab(tab); setEditingPreset(null); setPreviewPreset(null); }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: '9px 18px',
+                  fontFamily: 'inherit',
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  color: activeTab === tab ? 'var(--action-primary)' : 'var(--text-muted)',
+                  backgroundColor: activeTab === tab ? 'var(--surface-interactive)' : 'transparent',
+                  borderRadius: 'var(--radius-sm, 6px)',
+                  cursor: 'pointer'
+                }}
+              >
+                {tab === 'system' ? 'System Presets' : tab === 'user' ? 'My Presets' : 'Archived'}
+              </button>
+            ))}
           </div>
-        )}
 
-        {loading ? (
-          <div className="flex items-center justify-center py-20 text-slate-500 font-medium">
-            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-teal-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Loading Visual Catalog...
-          </div>
-        ) : !editingPreset && !previewPreset ? (
-          /* Preset Catalog Grid */
-          presets.length === 0 ? (
-            <div className="bg-slate-900/40 border border-dashed border-slate-800 p-12 text-center rounded-2xl text-slate-500">
-              No presets found in this category.
+          {/* Error Banner */}
+          {error && (
+            <div style={{ background: 'var(--status-danger-soft)', border: '1px solid var(--status-danger)', color: 'var(--status-danger)', padding: 14, borderRadius: 'var(--radius, 8px)', marginBottom: 20, fontSize: '0.85rem' }}>
+              ⚠️ <strong>Error:</strong> {error}
+            </div>
+          )}
+
+          {loading ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 0', color: 'var(--text-muted)', fontWeight: 600 }}>
+              Loading Visual Catalog...
+            </div>
+          ) : !editingPreset && !previewPreset ? (
+            /* Catalog Grid */
+            presets.length === 0 ? (
+              <div style={{ background: 'var(--surface-raised)', border: '1px dashed var(--border-subtle)', padding: 48, textAlign: 'center', borderRadius: 'var(--radius-md, 12px)', color: 'var(--text-muted)' }}>
+                Belum ada preset dalam kategori ini.
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(330px, 1fr))', gap: 20 }}>
+                {presets.map(preset => {
+                  const vl = preset.config?.visual_language || {};
+                  const primaryDef = getVisualStyleDefinition(vl.primary_style || preset.config?.style?.preset_key);
+                  const supportingList = Array.isArray(vl.supporting_styles) ? vl.supporting_styles : [];
+                  const isMultiMode = supportingList.length > 0;
+
+                  return (
+                    <div
+                      key={preset.id}
+                      className="card"
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        padding: 22,
+                        background: 'var(--surface)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-md, 12px)',
+                        boxShadow: 'var(--shadow-card, 0 4px 12px rgba(0,0,0,0.05))'
+                      }}
+                    >
+                      <div>
+                        {/* Header Badges */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                            <span
+                              style={{
+                                padding: '3px 8px',
+                                borderRadius: 12,
+                                fontSize: '0.7rem',
+                                fontWeight: 800,
+                                textTransform: 'uppercase',
+                                background: preset.source === 'system' ? 'var(--status-info-soft)' : 'var(--status-success-soft)',
+                                color: preset.source === 'system' ? 'var(--status-info)' : 'var(--status-success)'
+                              }}
+                            >
+                              {preset.source}
+                            </span>
+                            {isMultiMode && (
+                              <span
+                                style={{
+                                  padding: '3px 8px',
+                                  borderRadius: 12,
+                                  fontSize: '0.7rem',
+                                  fontWeight: 800,
+                                  background: 'var(--surface-interactive)',
+                                  color: 'var(--action-primary)'
+                                }}
+                              >
+                                Multi-mode ({1 + supportingList.length})
+                              </span>
+                            )}
+                          </div>
+                          <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600 }}>
+                            v{preset.version}
+                          </span>
+                        </div>
+
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: 750, color: 'var(--text-primary)', margin: '0 0 6px' }}>
+                          {preset.label}
+                        </h3>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.45', margin: '0 0 16px', minHeight: 36 }}>
+                          {preset.description || 'Tidak ada deskripsi.'}
+                        </p>
+
+                        {/* Visual Styles Preview */}
+                        <div style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', padding: 12, borderRadius: 'var(--radius-sm, 8px)', marginBottom: 16 }}>
+                          <div style={{ marginBottom: 6 }}>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                              Primary Style:
+                            </span>
+                            <strong style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-primary)' }}>
+                              {primaryDef.label}
+                            </strong>
+                          </div>
+
+                          {supportingList.length > 0 && (
+                            <div>
+                              <span style={{ color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: 4 }}>
+                                Supporting Modes:
+                              </span>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                                {supportingList.map(sKey => (
+                                  <span
+                                    key={sKey}
+                                    style={{
+                                      fontSize: '0.7rem',
+                                      padding: '2px 6px',
+                                      borderRadius: 'var(--radius-xs, 4px)',
+                                      background: 'var(--surface-interactive)',
+                                      color: 'var(--text-secondary)'
+                                    }}
+                                  >
+                                    {VISUAL_LANGUAGE_CATALOG[sKey]?.label || sKey}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Card Actions */}
+                      <div style={{ display: 'flex', gap: 8, borderTop: '1px solid var(--border-subtle)', paddingTop: 14 }}>
+                        <button
+                          onClick={() => handlePreview(preset)}
+                          className="btn btn-sm"
+                          style={{ flex: 1, fontSize: '0.75rem', background: 'var(--surface-interactive)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm, 6px)', padding: '6px 8px' }}
+                        >
+                          Preview Prompt
+                        </button>
+                        <button
+                          onClick={() => handleClone(preset)}
+                          className="btn btn-sm"
+                          style={{ flex: 1, fontSize: '0.75rem', background: 'var(--surface-interactive)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm, 6px)', padding: '6px 8px' }}
+                        >
+                          Clone
+                        </button>
+                        {preset.source === 'user' && activeTab === 'user' && (
+                          <>
+                            <button
+                              onClick={() => handleOpenEdit(preset)}
+                              className="btn btn-sm"
+                              style={{ flex: 1, fontSize: '0.75rem', background: 'var(--action-primary)', color: 'var(--on-action-primary)', border: 0, borderRadius: 'var(--radius-sm, 6px)', padding: '6px 8px' }}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleArchive(preset)}
+                              className="btn btn-sm"
+                              style={{ flex: 1, fontSize: '0.75rem', background: 'var(--status-danger-soft)', color: 'var(--status-danger)', border: '1px solid var(--status-danger)', borderRadius: 'var(--radius-sm, 6px)', padding: '6px 8px' }}
+                            >
+                              Archive
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )
+          ) : previewPreset ? (
+            /* Resolved Prompt Preview Pane */
+            <div className="card" style={{ padding: 28, background: 'var(--surface)', border: '1px solid var(--border-strong)', borderRadius: 'var(--radius-md, 12px)', position: 'relative' }}>
+              <button
+                onClick={() => setPreviewPreset(null)}
+                className="btn btn-sm"
+                style={{ position: 'absolute', top: 20, right: 20, padding: '6px 12px', background: 'var(--surface-interactive)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm, 6px)' }}
+              >
+                ✕ Tutup
+              </button>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--action-primary)', margin: '0 0 20px' }}>
+                Prompt Preview: {previewPreset.label}
+              </h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {Object.entries(previewPreset.resolved).map(([key, value]) => (
+                  <div key={key} style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', padding: 14, borderRadius: 'var(--radius-sm, 8px)' }}>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--action-primary)', display: 'block', marginBottom: 4 }}>
+                      {key.replace(/_/g, ' ')}
+                    </span>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0, whiteSpace: 'pre-wrap' }}>
+                      {value || 'N/A'}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 24 }}>
-              {presets.map(preset => (
-                <div
-                  key={preset.id}
-                  className="card"
-                  style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: 24 }}
+            /* Create & Edit Studio Form */
+            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 20, background: 'var(--surface)', padding: 28, borderRadius: 'var(--radius-md, 12px)', border: '1px solid var(--border-strong)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-subtle)', paddingBottom: 16 }}>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 850, color: 'var(--action-primary)', margin: 0 }}>
+                  {editingPreset.isNew ? 'Create New Preset' : `Editing Preset: ${editingPreset.label}`}
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setEditingPreset(null)}
+                  className="btn btn-sm"
+                  style={{ padding: '6px 12px', background: 'var(--surface-interactive)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm, 6px)', color: 'var(--text-secondary)' }}
                 >
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', items: 'center', marginBottom: 16 }}>
-                      <span style={{ 
-                        padding: '4px 10px', 
-                        borderRadius: 20, 
-                        fontSize: '0.7rem', 
-                        fontWeight: 700, 
-                        textTransform: 'uppercase', 
-                        background: preset.source === 'system' ? 'var(--status-info-soft)' : 'var(--status-success-soft)', 
-                        color: preset.source === 'system' ? 'var(--status-info)' : 'var(--status-success)', 
-                        border: `1px solid ${preset.source === 'system' ? 'rgba(96,165,250,0.2)' : 'rgba(74,222,128,0.2)'}`, 
-                        width: 'fit-content' 
-                      }}>
-                        {preset.source}
-                      </span>
-                      <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 600 }}>
-                        v{preset.version}
-                      </span>
-                    </div>
-                    <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
-                      {preset.label}
-                    </h3>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.5', marginBottom: 24, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                      {preset.description || 'No description provided.'}
-                    </p>
+                  ✕ Batal
+                </button>
+              </div>
 
-                    {/* Metadata Grid */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, background: 'rgba(12, 18, 30, 0.4)', border: '1px solid var(--border-color)', padding: 14, borderRadius: 'var(--radius)', fontSize: '0.75rem', marginBottom: 24 }}>
-                      <div>
-                        <span style={{ color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: '0.5px', display: 'block', marginBottom: 2 }}>Subject</span>
-                        <span style={{ color: 'var(--text-secondary)', fontWeight: 600, display: 'block', textTransform: 'capitalize' }}>{preset.config?.subject?.kind}</span>
-                      </div>
-                      <div>
-                        <span style={{ color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: '0.5px', display: 'block', marginBottom: 2 }}>Faceless Mode</span>
-                        <span style={{ color: 'var(--text-secondary)', fontWeight: 600, display: 'block', textTransform: 'capitalize' }}>{(preset.config?.subject?.faceless_mode || '').replace('_', ' ')}</span>
-                      </div>
-                      <div style={{ gridColumn: 'span 2' }}>
-                        <span style={{ color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: '0.5px', display: 'block', marginBottom: 2 }}>Environment Preset</span>
-                        <span style={{ color: 'var(--text-secondary)', fontWeight: 600, display: 'block', textTransform: 'capitalize' }}>{(preset.config?.environment?.preset_key || '').replace('_', ' ')}</span>
-                      </div>
-                    </div>
-                  </div>
+              {/* 1. Basic Info */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
+                <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                  Identity Name*
+                  <input
+                    type="text"
+                    required
+                    placeholder="Contoh: Wa’y Siyasi — Editorial System"
+                    value={label}
+                    onChange={(e) => setLabel(e.target.value)}
+                    style={{ padding: '9px 11px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
+                  />
+                </label>
+                {editingPreset.isNew && (
+                  <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                    Preset Key (Slug)
+                    <input
+                      type="text"
+                      placeholder="e.g. way_siyasi_editorial_system"
+                      value={presetKey}
+                      onChange={(e) => setPresetKey(e.target.value)}
+                      style={{ padding: '9px 11px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
+                    />
+                  </label>
+                )}
+                <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                  Description
+                  <input
+                    type="text"
+                    placeholder="Jelaskan karakteristik visual preset ini"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    style={{ padding: '9px 11px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
+                  />
+                </label>
+              </div>
 
-                  <div style={{ display: 'flex', gap: 8, borderTop: '1px solid var(--border-color)', paddingTop: 16 }}>
-                    <button
-                      onClick={() => handlePreview(preset)}
-                      className="btn btn-secondary btn-sm"
-                      style={{ flex: 1, fontSize: '0.75rem' }}
+              {/* 2. Visual Language Selection (Primary & Supporting) */}
+              <div style={{ background: 'var(--surface-raised)', padding: 18, borderRadius: 'var(--radius-sm, 8px)', border: '1px solid var(--border-subtle)', display: 'grid', gap: 14 }}>
+                <h3 style={{ fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--action-primary)', margin: 0 }}>
+                  2. Visual Language Modes (Primary & Supporting)
+                </h3>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
+                  <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                    Primary Visual Style
+                    <select
+                      value={config.visual_language?.primary_style || 'editorial_graphic_novel'}
+                      onChange={(e) => handlePrimaryStyleChange(e.target.value)}
+                      style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
                     >
-                      Preview Prompt
-                    </button>
-                    <button
-                      onClick={() => handleClone(preset)}
-                      className="btn btn-secondary btn-sm"
-                      style={{ flex: 1, fontSize: '0.75rem' }}
-                    >
-                      Clone
-                    </button>
-                    {preset.source === 'user' && activeTab === 'user' && (
-                      <>
-                        <button
-                          onClick={() => handleOpenEdit(preset)}
-                          className="btn btn-secondary btn-sm"
-                          style={{ flex: 1, fontSize: '0.75rem', borderColor: 'var(--accent-color)', color: 'var(--accent-color)' }}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleArchive(preset)}
-                          className="btn btn-danger btn-sm"
-                          style={{ flex: 1, fontSize: '0.75rem' }}
-                        >
-                          Archive
-                        </button>
-                      </>
-                    )}
-                  </div>
+                      {VISUAL_STYLE_KEYS.map(key => (
+                        <option key={key} value={key}>{VISUAL_LANGUAGE_CATALOG[key]?.label}</option>
+                      ))}
+                    </select>
+                  </label>
                 </div>
-              ))}
-            </div>
-          )
-        ) : previewPreset ? (
-          /* Resolved Prompt Preview Pane */
-          <div className="card" style={{ padding: 32, position: 'relative' }}>
-            <button
-              onClick={() => setPreviewPreset(null)}
-              className="btn btn-secondary btn-sm"
-              style={{ position: 'absolute', top: 20, right: 20, padding: '6px 12px' }}
-            >
-              ✕ Tutup
-            </button>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--action-primary)', marginBottom: 24 }}>
-              Prompt Preview for: {previewPreset.label}
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {Object.entries(previewPreset.resolved).map(([key, value]) => (
-                <div key={key} style={{ background: 'var(--input-bg)', border: '1px solid var(--border-color)', padding: 16, borderRadius: 'var(--radius)' }}>
-                  <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>
-                    {key.replace('_', ' ')}
+
+                <div>
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>
+                    Supporting Styles (Pilih gaya pendukung yang aktif):
                   </span>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>{value || 'N/A'}</p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {VISUAL_STYLE_KEYS.map(key => {
+                      const isPrimary = config.visual_language?.primary_style === key;
+                      const isSupporting = (config.visual_language?.supporting_styles || []).includes(key);
+
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => toggleSupportingStyle(key)}
+                          disabled={isPrimary}
+                          style={{
+                            padding: '6px 12px',
+                            fontSize: '12px',
+                            fontWeight: (isPrimary || isSupporting) ? 700 : 500,
+                            borderRadius: 20,
+                            border: isPrimary ? '1px solid var(--action-primary)' : isSupporting ? '1px solid var(--status-info)' : '1px solid var(--border-subtle)',
+                            background: isPrimary ? 'var(--action-primary)' : isSupporting ? 'var(--status-info-soft)' : 'var(--surface-interactive)',
+                            color: isPrimary ? 'var(--on-action-primary)' : isSupporting ? 'var(--status-info)' : 'var(--text-muted)',
+                            cursor: isPrimary ? 'default' : 'pointer'
+                          }}
+                        >
+                          {VISUAL_LANGUAGE_CATALOG[key]?.label} {isPrimary ? '(Primary)' : isSupporting ? '✓' : '+'}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          /* Create & Edit Studio Form */
-          <form onSubmit={handleSave} className="card" style={{ padding: 32, display: 'flex', flexDirection: 'column', gap: 24 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: 16 }}>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--action-primary)', margin: 0 }}>
-                {editingPreset.isNew ? 'Create New Preset' : `Editing Preset: ${editingPreset.label}`}
-              </h2>
-              <button
-                type="button"
-                onClick={() => setEditingPreset(null)}
-                className="btn btn-secondary btn-sm"
-              >
-                Cancel & Close
-              </button>
-            </div>
+              </div>
 
-            {/* Section 1: Basic Info */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
-              <label className="form-label">
-                Identity Name
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Muslimah Sage Kitchen"
-                  value={label}
-                  onChange={(e) => setLabel(e.target.value)}
-                  className="form-input"
-                />
-              </label>
-              {editingPreset.isNew && (
-                <label className="form-label">
-                  Custom Preset Key (Slug)
+              {/* 3. Narrative Mode Routing */}
+              <div style={{ background: 'var(--surface-raised)', padding: 18, borderRadius: 'var(--radius-sm, 8px)', border: '1px solid var(--border-subtle)', display: 'grid', gap: 12 }}>
+                <h3 style={{ fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--action-primary)', margin: 0 }}>
+                  3. Narrative Mode Routing
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
+                  {NARRATIVE_FUNCTIONS.map(fn => {
+                    const currentTarget = config.mode_routing?.[fn] || config.visual_language?.primary_style;
+
+                    return (
+                      <label key={fn} style={{ display: 'grid', gap: 4, fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                        <span style={{ textTransform: 'capitalize' }}>{fn.replace(/_/g, ' ')} Mode</span>
+                        <select
+                          value={currentTarget}
+                          onChange={(e) => handleRouteSelectionChange(fn, e.target.value)}
+                          style={{ padding: '7px 9px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '12px' }}
+                        >
+                          {activeStylesForRouting.map(sKey => (
+                            <option key={sKey} value={sKey}>
+                              {VISUAL_LANGUAGE_CATALOG[sKey]?.label} {sKey === config.visual_language?.primary_style ? '(Primary)' : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 4. Subject & Population Properties */}
+              <div style={{ background: 'var(--surface-raised)', padding: 18, borderRadius: 'var(--radius-sm, 8px)', border: '1px solid var(--border-subtle)', display: 'grid', gap: 14 }}>
+                <h3 style={{ fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--action-primary)', margin: 0 }}>
+                  4. Subject & Population Properties
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
+                  <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                    Subject Kind
+                    <select
+                      value={config.subject?.kind || 'human'}
+                      onChange={(e) => updateConfigField('subject', 'kind', e.target.value)}
+                      style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
+                    >
+                      {SUBJECT_KINDS.map(kind => (
+                        <option key={kind} value={kind}>{kind.replace(/_/g, ' ')}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                    Faceless Mode
+                    <select
+                      value={config.subject?.faceless_mode || 'featureless_editorial'}
+                      onChange={(e) => updateConfigField('subject', 'faceless_mode', e.target.value)}
+                      style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
+                    >
+                      {ALL_FACELESS_MODES.map(mode => (
+                        <option key={mode} value={mode}>{mode.replace(/_/g, ' ')}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                    Population Mode
+                    <select
+                      value={config.subject?.population_mode || 'single_group_or_crowd'}
+                      onChange={(e) => updateConfigField('subject', 'population_mode', e.target.value)}
+                      style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
+                    >
+                      {POPULATION_MODES.map(pop => (
+                        <option key={pop} value={pop}>{pop.replace(/_/g, ' ')}</option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+                <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                  Custom Subject Description
                   <input
                     type="text"
-                    placeholder="e.g. muslimah_sage_kitchen"
-                    value={presetKey}
-                    onChange={(e) => setPresetKey(e.target.value)}
-                    className="form-input"
+                    placeholder="e.g. Contemporary Southeast Asian citizens, diverse ages, everyday modest civilian attire"
+                    value={config.subject?.custom_description || ''}
+                    onChange={(e) => updateConfigField('subject', 'custom_description', e.target.value)}
+                    style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
                   />
                 </label>
+              </div>
+
+              {/* 5. Rendering & Composition */}
+              <div style={{ background: 'var(--surface-raised)', padding: 18, borderRadius: 'var(--radius-sm, 8px)', border: '1px solid var(--border-subtle)', display: 'grid', gap: 14 }}>
+                <h3 style={{ fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--action-primary)', margin: 0 }}>
+                  5. Rendering & Composition System
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
+                  <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                    Geometry
+                    <select
+                      value={config.rendering?.geometry || 'simplified_semi_realistic'}
+                      onChange={(e) => updateConfigField('rendering', 'geometry', e.target.value)}
+                      style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
+                    >
+                      {RENDERING_GEOMETRIES.map(g => (
+                        <option key={g} value={g}>{g.replace(/_/g, ' ')}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                    Shadow Style
+                    <select
+                      value={config.rendering?.shadow_style || 'strong_geometric'}
+                      onChange={(e) => updateConfigField('rendering', 'shadow_style', e.target.value)}
+                      style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
+                    >
+                      {SHADOW_STYLES.map(s => (
+                        <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                    Finish
+                    <select
+                      value={config.rendering?.finish || 'matte_editorial'}
+                      onChange={(e) => updateConfigField('rendering', 'finish', e.target.value)}
+                      style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
+                    >
+                      {RENDERING_FINISHES.map(f => (
+                        <option key={f} value={f}>{f.replace(/_/g, ' ')}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                    Negative Space
+                    <select
+                      value={config.composition?.negative_space || 'required'}
+                      onChange={(e) => updateConfigField('composition', 'negative_space', e.target.value)}
+                      style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
+                    >
+                      {NEGATIVE_SPACE_OPTIONS.map(opt => (
+                        <option key={opt} value={opt}>{opt.replace(/_/g, ' ')}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                    Safe Zone
+                    <select
+                      value={config.composition?.safe_zone || 'vertical_social_ui'}
+                      onChange={(e) => updateConfigField('composition', 'safe_zone', e.target.value)}
+                      style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
+                    >
+                      {SAFE_ZONE_OPTIONS.map(sz => (
+                        <option key={sz} value={sz}>{sz.replace(/_/g, ' ')}</option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+              </div>
+
+              {/* 6. Advanced Settings (Camera, Lighting, Wardrobe, Environment) */}
+              <details style={{ background: 'var(--surface-raised)', padding: 18, borderRadius: 'var(--radius-sm, 8px)', border: '1px solid var(--border-subtle)' }}>
+                <summary style={{ fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                  ⚙️ Advanced Settings (Camera, Lighting, Wardrobe, Environment)
+                </summary>
+                <div style={{ display: 'grid', gap: 16, marginTop: 16 }}>
+                  {/* Camera */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+                    <label style={{ display: 'grid', gap: 4, fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                      Camera Framing
+                      <select
+                        value={config.camera?.framing || 'editorial_wide'}
+                        onChange={(e) => updateConfigField('camera', 'framing', e.target.value)}
+                        style={{ padding: '7px 9px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '12px' }}
+                      >
+                        {CAMERA_FRAMINGS.map(f => (
+                          <option key={f} value={f}>{f.replace(/_/g, ' ')}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label style={{ display: 'grid', gap: 4, fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                      Perspective
+                      <select
+                        value={config.camera?.perspective || 'third_person'}
+                        onChange={(e) => updateConfigField('camera', 'perspective', e.target.value)}
+                        style={{ padding: '7px 9px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '12px' }}
+                      >
+                        {CAMERA_PERSPECTIVES.map(p => (
+                          <option key={p} value={p}>{p.replace(/_/g, ' ')}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label style={{ display: 'grid', gap: 4, fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                      Lens Look
+                      <select
+                        value={config.camera?.lens_look || 'natural_50mm'}
+                        onChange={(e) => updateConfigField('camera', 'lens_look', e.target.value)}
+                        style={{ padding: '7px 9px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '12px' }}
+                      >
+                        {CAMERA_LENS_LOOKS.map(l => (
+                          <option key={l} value={l}>{l.replace(/_/g, ' ')}</option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+
+                  {/* Lighting */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+                    <label style={{ display: 'grid', gap: 4, fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                      Color Temperature
+                      <select
+                        value={config.lighting?.color_temperature || 'warm_neutral'}
+                        onChange={(e) => updateConfigField('lighting', 'color_temperature', e.target.value)}
+                        style={{ padding: '7px 9px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '12px' }}
+                      >
+                        {LIGHTING_TEMPERATURES.map(t => (
+                          <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label style={{ display: 'grid', gap: 4, fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                      Lighting Contrast
+                      <select
+                        value={config.lighting?.contrast || 'soft'}
+                        onChange={(e) => updateConfigField('lighting', 'contrast', e.target.value)}
+                        style={{ padding: '7px 9px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '12px' }}
+                      >
+                        {LIGHTING_CONTRASTS.map(c => (
+                          <option key={c} value={c}>{c.replace(/_/g, ' ')}</option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                </div>
+              </details>
+
+              {/* 7. Locked Guardrails Summary */}
+              <div style={{ background: 'var(--status-danger-soft)', border: '1px solid var(--status-danger)', padding: 16, borderRadius: 'var(--radius-sm, 8px)' }}>
+                <h3 style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--status-danger)', margin: '0 0 6px' }}>
+                  Locked Deterministic Guardrails
+                </h3>
+                <ul style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: 3, paddingLeft: 16, margin: 0 }}>
+                  <li>Face Visibility is locked to <strong style={{ color: 'var(--text-primary)' }}>PROHIBITED</strong>.</li>
+                  <li>Reflections showing human faces is locked to <strong style={{ color: 'var(--text-primary)' }}>PROHIBITED</strong>.</li>
+                  <li>Unintended extra people in generation is locked to <strong style={{ color: 'var(--text-primary)' }}>PROHIBITED</strong>.</li>
+                  <li>Intentional crowds are <strong style={{ color: 'var(--text-primary)' }}>ALLOWED FACELESS</strong> (strictly featureless / turned away).</li>
+                </ul>
+              </div>
+
+              {editingPreset && !editingPreset.isNew && editingPreset.source === 'user' && (
+                <ReferenceAssetManager
+                  ownerType="visual_identity"
+                  ownerId={editingPreset.id}
+                  allowedRoles={['wardrobe', 'visual_style', 'palette_sheet', 'character_sheet']}
+                />
               )}
-              <label className="form-label">
-                Description
-                <input
-                  type="text"
-                  placeholder="Describe the aesthetic and purpose of this identity"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="form-input"
-                />
-              </label>
-            </div>
 
-            {/* Section 2: Subject */}
-            <div className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <h3 style={{ fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--action-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: 8, margin: 0 }}>Subject Properties</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
-                <label className="form-label">
-                  Subject Kind
-                  <select
-                    value={config.subject.kind}
-                    onChange={(e) => updateConfigField('subject', 'kind', e.target.value)}
-                    className="form-select"
-                    style={{ textTransform: 'capitalize' }}
-                  >
-                    {SUBJECT_KINDS.map(kind => (
-                      <option key={kind} value={kind}>{kind.replace('_', ' ')}</option>
-                    ))}
-                  </select>
-                </label>
-                <label className="form-label">
-                  Faceless Mode
-                  <select
-                    value={config.subject.faceless_mode}
-                    onChange={(e) => updateConfigField('subject', 'faceless_mode', e.target.value)}
-                    className="form-select"
-                    style={{ textTransform: 'capitalize' }}
-                  >
-                    {ALL_FACELESS_MODES.map(mode => (
-                      <option key={mode} value={mode}>{mode.replace('_', ' ')}</option>
-                    ))}
-                  </select>
-                </label>
-                <label className="form-label">
-                  Demographic Key
-                  <select
-                    value={config.subject.demographic_key}
-                    onChange={(e) => updateConfigField('subject', 'demographic_key', e.target.value)}
-                    className="form-select"
-                  >
-                    <option value="syari_classic">syari_classic (Muslimah Syar'i)</option>
-                    <option value="southeast_asian_male">southeast_asian_male (Pria Asia Tenggara / Indo)</option>
-                    <option value="caucasian_male">caucasian_male (Pria Kaukasia)</option>
-                    <option value="stylized_3d_muslimah">stylized_3d_muslimah (3D Muslimah)</option>
-                    <option value="stylized_3d_male">stylized_3d_male (3D Pria)</option>
-                    <option value="stylized_3d_duo">stylized_3d_duo (3D Duo)</option>
-                    <option value="custom">custom (Custom / Bebas)</option>
-                    {config.subject.demographic_key && !['syari_classic', 'southeast_asian_male', 'caucasian_male', 'stylized_3d_muslimah', 'stylized_3d_male', 'stylized_3d_duo', 'custom'].includes(config.subject.demographic_key) && (
-                      <option value={config.subject.demographic_key}>{config.subject.demographic_key}</option>
-                    )}
-                  </select>
-                </label>
+              {/* Form Action Buttons */}
+              <div style={{ display: 'flex', gap: 12, borderTop: '1px solid var(--border-subtle)', paddingTop: 18 }}>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="btn primary"
+                  style={{ padding: '10px 24px', fontSize: '13px', fontWeight: 700, background: 'var(--action-primary)', color: 'var(--on-action-primary)', border: 0, borderRadius: 'var(--radius-sm, 6px)', cursor: saving ? 'wait' : 'pointer' }}
+                >
+                  {saving ? 'Menyimpan...' : 'Simpan Visual Identity'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingPreset(null)}
+                  className="btn"
+                  style={{ padding: '10px 20px', fontSize: '13px', fontWeight: 600, background: 'var(--surface-interactive)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm, 6px)' }}
+                >
+                  Batal
+                </button>
               </div>
-              <label className="form-label" style={{ marginTop: 12 }}>
-                Custom Subject Description (Optional)
-                <input
-                  type="text"
-                  placeholder="e.g. delicate Southeast Asian female hands, smooth skin, slender fingers"
-                  value={config.subject.custom_description}
-                  onChange={(e) => updateConfigField('subject', 'custom_description', e.target.value)}
-                  className="form-input"
-                />
-              </label>
-            </div>
+            </form>
+          )}
 
-            {/* Section 3: Wardrobe */}
-            <div className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <h3 style={{ fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--action-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: 8, margin: 0 }}>Wardrobe & Colors</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
-                <label className="form-label">
-                  Wardrobe Mode
-                  <select
-                    value={config.wardrobe.mode}
-                    onChange={(e) => updateConfigField('wardrobe', 'mode', e.target.value)}
-                    className="form-select"
-                    style={{ textTransform: 'capitalize' }}
-                  >
-                    {WARDROBE_MODES.map(mode => (
-                      <option key={mode} value={mode}>{mode.replace('_', ' ')}</option>
-                    ))}
-                  </select>
-                </label>
-                <label className="form-label">
-                  Wardrobe Preset Key
-                  <input
-                    type="text"
-                    value={config.wardrobe.preset_key}
-                    onChange={(e) => updateConfigField('wardrobe', 'preset_key', e.target.value)}
-                    className="form-input"
-                  />
-                </label>
-                <label className="form-label">
-                  Sleeve Policy
-                  <select
-                    value={config.wardrobe.sleeve_policy}
-                    onChange={(e) => updateConfigField('wardrobe', 'sleeve_policy', e.target.value)}
-                    className="form-select"
-                    style={{ textTransform: 'capitalize' }}
-                  >
-                    {SLEEVE_POLICIES.map(policy => (
-                      <option key={policy} value={policy}>{policy.replace('_', ' ')}</option>
-                    ))}
-                  </select>
-                </label>
-                <label className="form-label">
-                  Primary Color (Hex or Label)
-                  <input
-                    type="text"
-                    placeholder="e.g. #8A9A7B"
-                    value={config.wardrobe.primary_color}
-                    onChange={(e) => updateConfigField('wardrobe', 'primary_color', e.target.value)}
-                    className="form-input"
-                  />
-                </label>
-              </div>
-              <label className="form-label" style={{ marginTop: 12 }}>
-                Custom Wardrobe Description (Optional)
-                <input
-                  type="text"
-                  placeholder="e.g. wearing a premium linen flowing modest dress with neat cuff details"
-                  value={config.wardrobe.custom_description}
-                  onChange={(e) => updateConfigField('wardrobe', 'custom_description', e.target.value)}
-                  className="form-input"
-                />
-              </label>
-            </div>
-
-            {/* Section 4: Environment */}
-            <div className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <h3 style={{ fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--action-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: 8, margin: 0 }}>Environment & Background</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
-                <label className="form-label">
-                  Environment Preset
-                  <input
-                    type="text"
-                    value={config.environment.preset_key}
-                    onChange={(e) => updateConfigField('environment', 'preset_key', e.target.value)}
-                    className="form-input"
-                  />
-                </label>
-                <label className="form-label">
-                  Background Density
-                  <select
-                    value={config.environment.background_density}
-                    onChange={(e) => updateConfigField('environment', 'background_density', e.target.value)}
-                    className="form-select"
-                    style={{ textTransform: 'capitalize' }}
-                  >
-                    {BACKGROUND_DENSITIES.map(d => (
-                      <option key={d} value={d}>{d}</option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-              <label className="form-label" style={{ marginTop: 12 }}>
-                Custom Environment Description (Optional)
-                <input
-                  type="text"
-                  placeholder="e.g. standing in a bright minimalist aesthetic cafe, blurred warm light bulbs background"
-                  value={config.environment.custom_description}
-                  onChange={(e) => updateConfigField('environment', 'custom_description', e.target.value)}
-                  className="form-input"
-                />
-              </label>
-            </div>
-
-            {/* Section 5: Lighting */}
-            <div className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <h3 style={{ fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--action-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: 8, margin: 0 }}>Lighting Style</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
-                <label className="form-label">
-                  Lighting Preset
-                  <input
-                    type="text"
-                    value={config.lighting.preset_key}
-                    onChange={(e) => updateConfigField('lighting', 'preset_key', e.target.value)}
-                    className="form-input"
-                  />
-                </label>
-                <label className="form-label">
-                  Color Temperature
-                  <select
-                    value={config.lighting.color_temperature}
-                    onChange={(e) => updateConfigField('lighting', 'color_temperature', e.target.value)}
-                    className="form-select"
-                    style={{ textTransform: 'capitalize' }}
-                  >
-                    {LIGHTING_TEMPERATURES.map(t => (
-                      <option key={t} value={t}>{t.replace('_', ' ')}</option>
-                    ))}
-                  </select>
-                </label>
-                <label className="form-label">
-                  Contrast
-                  <select
-                    value={config.lighting.contrast}
-                    onChange={(e) => updateConfigField('lighting', 'contrast', e.target.value)}
-                    className="form-select"
-                    style={{ textTransform: 'capitalize' }}
-                  >
-                    {LIGHTING_CONTRASTS.map(c => (
-                      <option key={c} value={c}>{c.replace('_', ' ')}</option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-            </div>
-
-            {/* Section 6: Camera */}
-            <div className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <h3 style={{ fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--action-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: 8, margin: 0 }}>Camera & Framing</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
-                <label className="form-label">
-                  Framing
-                  <select
-                    value={config.camera.framing}
-                    onChange={(e) => updateConfigField('camera', 'framing', e.target.value)}
-                    className="form-select"
-                    style={{ textTransform: 'capitalize' }}
-                  >
-                    {CAMERA_FRAMINGS.map(f => (
-                      <option key={f} value={f}>{f.replace('_', ' ')}</option>
-                    ))}
-                  </select>
-                </label>
-                <label className="form-label">
-                  Perspective
-                  <select
-                    value={config.camera.perspective}
-                    onChange={(e) => updateConfigField('camera', 'perspective', e.target.value)}
-                    className="form-select"
-                    style={{ textTransform: 'capitalize' }}
-                  >
-                    {CAMERA_PERSPECTIVES.map(p => (
-                      <option key={p} value={p}>{p.replace('_', ' ')}</option>
-                    ))}
-                  </select>
-                </label>
-                <label className="form-label">
-                  Lens Look
-                  <select
-                    value={config.camera.lens_look}
-                    onChange={(e) => updateConfigField('camera', 'lens_look', e.target.value)}
-                    className="form-select"
-                    style={{ textTransform: 'capitalize' }}
-                  >
-                    {CAMERA_LENS_LOOKS.map(l => (
-                      <option key={l} value={l}>{l.replace('_', ' ')}</option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-            </div>
-
-            {/* Section 7: Style */}
-            <div className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <h3 style={{ fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--action-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: 8, margin: 0 }}>Art Style</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
-                <label className="form-label">
-                  Style Preset
-                  <input
-                    type="text"
-                    value={config.style.preset_key}
-                    onChange={(e) => updateConfigField('style', 'preset_key', e.target.value)}
-                    className="form-input"
-                  />
-                </label>
-                <label className="form-label">
-                  Aspect Ratio
-                  <input
-                    type="text"
-                    value={config.style.aspect_ratio}
-                    onChange={(e) => updateConfigField('style', 'aspect_ratio', e.target.value)}
-                    className="form-input"
-                  />
-                </label>
-              </div>
-            </div>
-
-            {/* Locked Guardrails Summary */}
-            <div style={{ background: 'var(--status-danger-soft)', border: '1px solid rgba(251, 113, 133, 0.15)', padding: 18, borderRadius: 'var(--radius)' }}>
-              <h3 style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--status-danger)', marginBottom: 8, margin: 0 }}>Locked Deterministic Guardrails</h3>
-              <ul style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: 4, paddingLeft: 16, margin: 0 }}>
-                <li>Face Visibility is locked to <strong style={{ color: 'var(--text-secondary)' }}>PROHIBITED</strong>.</li>
-                <li>Reflections showing faces is locked to <strong style={{ color: 'var(--text-secondary)' }}>PROHIBITED</strong>.</li>
-                <li>Unintended extra people in generation is locked to <strong style={{ color: 'var(--text-secondary)' }}>PROHIBITED</strong>.</li>
-                <li>Character and Wardrobe consistency drift is locked to <strong style={{ color: 'var(--text-secondary)' }}>PROHIBITED</strong>.</li>
-              </ul>
-            </div>
-
-            {editingPreset && !editingPreset.isNew && editingPreset.source === 'user' && (
-              <ReferenceAssetManager
-                ownerType="visual_identity"
-                ownerId={editingPreset.id}
-                allowedRoles={['wardrobe', 'visual_style', 'palette_sheet', 'character_sheet']}
-              />
-            )}
-
-            <div style={{ display: 'flex', gap: 12, borderTop: '1px solid var(--border-color)', paddingTop: 20 }}>
-              <button
-                type="submit"
-                disabled={saving}
-                className="btn btn-primary"
-                style={{ padding: '12px 24px' }}
-              >
-                {saving ? 'Saving...' : 'Save Visual Identity'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setEditingPreset(null)}
-                className="btn btn-secondary"
-                style={{ padding: '12px 24px' }}
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        )}
-        {showAiBuilder && (
-          <AiVisualIdentityBuilderModal
-            onClose={() => setShowAiBuilder(false)}
-            onContinueEditing={(draftData) => {
-              setLabel(draftData.label);
-              setDescription(draftData.description || '');
-              setPresetKey(draftData.suggested_preset_key || '');
-              setConfig({
-                ...DEFAULT_CONFIG,
-                ...draftData.config
-              });
-              setEditingPreset({ isNew: true, origin: 'ai' });
-              setShowAiBuilder(false);
-            }}
-          />
-        )}
+          {showAiBuilder && (
+            <AiVisualIdentityBuilderModal
+              onClose={() => setShowAiBuilder(false)}
+              onContinueEditing={(draftConfig, draftLabel, draftDescription) => {
+                setLabel(draftLabel || 'Custom Visual Identity');
+                setDescription(draftDescription || '');
+                setPresetKey((draftLabel || 'custom_preset').toLowerCase().replace(/[^a-z0-9_-]/g, ''));
+                setConfig({
+                  ...DEFAULT_CONFIG,
+                  ...draftConfig
+                });
+                setEditingPreset({ isNew: true, origin: 'ai' });
+                setShowAiBuilder(false);
+              }}
+            />
+          )}
         </div>
       </main>
     </div>

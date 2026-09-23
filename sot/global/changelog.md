@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.37 — Visual Identity Studio v2 (23/09/2026)
+- Tambah multi-mode visual language dan narrative routing
+- Tambah preset editorial Wa’y Siyasi
+- Pertahankan kompatibilitas preset Visual Identity lama
+
 ## V2.31.36 — Multiplier Lab Non-Product Engine & Dynamic AI Angle Generator (23/09/2026)
 - Dynamic AI Angle Generator dengan 5-Axis Permutation Matrix
 - Zero-Repetition Anti-Duplication System

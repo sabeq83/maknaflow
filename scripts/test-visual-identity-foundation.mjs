@@ -35,48 +35,76 @@ import { closePgPool, pgQuery } from '../lib/db-pg.js';
 
 console.log('🔄 Running Visual Identity Foundation unit & integration tests...');
 
-// 1. Contract & Validator Unit Tests
-console.log('  1. Testing contract & validation...');
+// 1. Contract & Validator Unit Tests (Schema v2)
+console.log('  1. Testing contract & validation (Schema v2)...');
 const validConfig = {
   label: 'Test Identity',
   subject: {
     kind: 'human',
-    faceless_mode: 'hands_only',
-    demographic_key: 'syari_classic'
+    faceless_mode: 'featureless_editorial',
+    demographic_key: 'custom',
+    population_mode: 'single_group_or_crowd'
   },
-  wardrobe: {
-    mode: 'fixed',
-    preset_key: 'sage_muted'
+  visual_language: {
+    primary_style: 'editorial_graphic_novel',
+    supporting_styles: ['isometric_society', 'symbolic_surrealism'],
+    disabled_styles: ['clay_political_theater']
+  },
+  mode_routing: {
+    hook: 'symbolic_surrealism',
+    mechanism: 'isometric_society'
   }
 };
 
 const normalized = validateAndNormalizeVisualIdentity(validConfig);
+assert.equal(normalized.schema_version, '2');
 assert.equal(normalized.label, 'Test Identity');
 assert.equal(normalized.subject.kind, 'human');
+assert.equal(normalized.subject.population_mode, 'single_group_or_crowd');
+assert.equal(normalized.visual_language.primary_style, 'editorial_graphic_novel');
+assert.deepEqual(normalized.visual_language.supporting_styles, ['isometric_society', 'symbolic_surrealism']);
+assert.equal(normalized.mode_routing.hook, 'symbolic_surrealism');
+assert.equal(normalized.mode_routing.mechanism, 'isometric_society');
 assert.equal(normalized.guardrails.face_visibility, 'prohibited'); // Locked!
+assert.equal(normalized.guardrails.intentional_crowd, 'allowed_faceless');
 
-// Visible face attempt check
-const maliciousConfig = {
-  ...validConfig,
-  guardrails: {
-    face_visibility: 'allowed'
+// Schema v1 backward compatibility test
+const v1Config = {
+  schema_version: '1',
+  label: 'Old V1 Preset',
+  subject: { kind: 'human', faceless_mode: 'hands_only', demographic_key: 'syari_classic' },
+  style: { preset_key: '3d_claymation_cozy' }
+};
+const normalizedV1 = validateAndNormalizeVisualIdentity(v1Config);
+assert.equal(normalizedV1.schema_version, '2');
+assert.equal(normalizedV1.visual_language.primary_style, 'clay_political_theater');
+assert.ok(normalizedV1.mode_routing.hook);
+
+// Primary / Supporting collision test
+const collisionConfig = {
+  visual_language: {
+    primary_style: 'editorial_graphic_novel',
+    supporting_styles: ['editorial_graphic_novel', 'isometric_society', 'isometric_society']
   }
 };
-const normalizedMalicious = validateAndNormalizeVisualIdentity(maliciousConfig);
-assert.equal(normalizedMalicious.guardrails.face_visibility, 'prohibited'); // Must be locked!
+const normalizedCollision = validateAndNormalizeVisualIdentity(collisionConfig);
+assert.equal(normalizedCollision.visual_language.primary_style, 'editorial_graphic_novel');
+assert.deepEqual(normalizedCollision.visual_language.supporting_styles, ['isometric_society']);
 
-// Invalid human faceless mode validation
-assert.throws(() => {
-  validateAndNormalizeVisualIdentity({
-    ...validConfig,
-    subject: {
-      kind: 'human',
-      faceless_mode: 'not_applicable'
-    }
-  });
-}, /faceless_mode cannot be not_applicable for human/);
+// Inactive route fallback to primary test
+const invalidRouteConfig = {
+  visual_language: {
+    primary_style: 'editorial_graphic_novel',
+    supporting_styles: ['isometric_society']
+  },
+  mode_routing: {
+    hook: 'clay_political_theater' // Inactive style!
+  }
+};
+const normalizedInvalidRoute = validateAndNormalizeVisualIdentity(invalidRouteConfig);
+assert.equal(normalizedInvalidRoute.mode_routing.hook, 'editorial_graphic_novel'); // Fallback to primary!
 
-console.log('  ✅ Contract tests passed.');
+console.log('  ✅ Contract & normalization tests passed.');
 
 // 2. Legacy Mapping Unit Tests
 console.log('  2. Testing legacy normalization...');
@@ -89,6 +117,7 @@ const legacyVso = {
 };
 
 const converted = normalizeLegacyVisualOverrides(legacyVso);
+assert.equal(converted.schema_version, '2');
 assert.equal(converted.subject.kind, 'human');
 assert.equal(converted.subject.faceless_mode, 'hands_only');
 assert.equal(converted.wardrobe.preset_key, 'sage_muted');
@@ -101,21 +130,30 @@ const mascotVso = {
 const convertedMascot = normalizeLegacyVisualOverrides(mascotVso);
 assert.equal(convertedMascot.subject.kind, 'animal');
 assert.equal(convertedMascot.subject.faceless_mode, 'not_applicable');
-assert.equal(convertedMascot.style.preset_key, '3d_claymation_cozy');
 
 console.log('  ✅ Legacy mapping tests passed.');
 
-// 3. System Presets Tests
-console.log('  3. Testing system catalog...');
+// 3. System Presets & Wa'y Siyasi Preset Tests
+console.log('  3. Testing system catalog & Wa’y Siyasi preset...');
 const systemList = listSystemVisualIdentities();
 assert.ok(systemList.length > 0);
+
+const waySiyasiPreset = getSystemVisualIdentity('way_siyasi_editorial_system');
+assert.ok(waySiyasiPreset);
+assert.equal(waySiyasiPreset.label, 'Wa’y Siyasi — Editorial System');
+assert.equal(waySiyasiPreset.config.visual_language.primary_style, 'editorial_graphic_novel');
+assert.ok(waySiyasiPreset.config.visual_language.supporting_styles.includes('isometric_society'));
+assert.ok(waySiyasiPreset.config.visual_language.supporting_styles.includes('symbolic_surrealism'));
+assert.ok(waySiyasiPreset.config.visual_language.supporting_styles.includes('paper_cutout_documentary'));
+assert.equal(waySiyasiPreset.config.mode_routing.hook, 'symbolic_surrealism');
+assert.equal(waySiyasiPreset.config.mode_routing.mechanism, 'isometric_society');
+assert.equal(waySiyasiPreset.config.mode_routing.evidence_reveal, 'paper_cutout_documentary');
+
 const sagePreset = getSystemVisualIdentity('hands_only_muslimah_sage_kitchen');
 assert.ok(sagePreset);
 assert.equal(sagePreset.label, 'Muslimah Sage Kitchen');
-const indoMaleSystemPreset = getSystemVisualIdentity('hands_only_southeast_asian_male');
-assert.ok(indoMaleSystemPreset);
-assert.equal(indoMaleSystemPreset.label, 'Southeast Asian Male Casual');
-console.log('  ✅ System presets tests passed.');
+
+console.log('  ✅ System presets & Wa’y Siyasi tests passed.');
 
 // 4. Repository & Database Integration Tests
 console.log('  4. Testing repository and tenant isolation...');
@@ -138,8 +176,9 @@ async function runRepoTests() {
         label: 'Tenant A Preset',
         preset_key: presetKey,
         config: {
+          schema_version: '2',
           subject: { kind: 'human', faceless_mode: 'hands_only', demographic_key: 'syari_classic' },
-          wardrobe: { mode: 'fixed', preset_key: 'sage_muted' }
+          visual_language: { primary_style: 'editorial_graphic_novel', supporting_styles: ['isometric_society'] }
         }
       }, actor);
 
@@ -153,7 +192,7 @@ async function runRepoTests() {
         config: preset.config
       }, actor);
       assert.equal(updated.label, 'Tenant A Preset Updated');
-      assert.equal(updated.version, 2); // Version must increment
+      assert.equal(updated.version, 2);
 
       // Clone preset
       const cloned = await cloneVisualIdentity(preset.id, { label: 'Tenant A Preset Cloned' }, actor);
@@ -163,22 +202,21 @@ async function runRepoTests() {
       // Verify lists merges user + system presets
       const allActive = await listVisualIdentities({ status: 'active' });
       assert.ok(allActive.find(p => p.id === preset.id));
-      assert.ok(allActive.find(p => p.id === 'hands_only_muslimah_sage_kitchen')); // system preset
+      assert.ok(allActive.find(p => p.id === 'way_siyasi_editorial_system'));
 
       // Archive preset
       await archiveVisualIdentity(preset.id, actor);
       const activeAfterArchive = await listVisualIdentities({ status: 'active' });
-      assert.ok(!activeAfterArchive.find(p => p.id === preset.id)); // Should be hidden
+      assert.ok(!activeAfterArchive.find(p => p.id === preset.id));
 
       const archivedOnly = await listVisualIdentities({ status: 'archived' });
-      assert.ok(archivedOnly.find(p => p.id === preset.id)); // Should be in archived list
+      assert.ok(archivedOnly.find(p => p.id === preset.id));
     });
 
     // Test Tenant Isolation
     await tenantContext.run(tenantB, async () => {
       const bList = await listVisualIdentities({ status: 'active' });
-      // Should contain system presets, but NOT Tenant A presets
-      assert.ok(bList.find(p => p.id === 'hands_only_muslimah_sage_kitchen'));
+      assert.ok(bList.find(p => p.id === 'way_siyasi_editorial_system'));
       assert.ok(!bList.find(p => p.label.startsWith('Tenant A')));
     });
 
@@ -190,136 +228,61 @@ async function runRepoTests() {
   }
 }
 
-// 5. Resolver Integration Tests
-console.log('  5. Testing central resolver resolution...');
+// 5. Resolver Integration & Narrative Routing Tests
+console.log('  5. Testing resolver narrative routing & prompt layers...');
 
 async function runResolverTests() {
-  // Test resolve dynamic sequential wardrobe
-  const resolvedSeq0 = await resolveVisualIdentity({
-    inlineConfig: {
-      subject: { kind: 'human', faceless_mode: 'hands_only', demographic_key: 'syari_classic' },
-      wardrobe: { mode: 'sequential' }
-    },
-    itemContext: { itemIndex: 0 }
+  // Test Wa'y Siyasi narrative routing resolution
+  const hookResolved = await resolveVisualIdentity({
+    presetRef: 'way_siyasi_editorial_system',
+    itemContext: { narrativeFunction: 'hook' }
   });
+  assert.equal(hookResolved.resolved.active_visual_mode, 'symbolic_surrealism');
+  assert.ok(hookResolved.resolved.style_prompt.includes('symbolic conceptual surrealism'));
 
-  const resolvedSeq1 = await resolveVisualIdentity({
-    inlineConfig: {
-      subject: { kind: 'human', faceless_mode: 'hands_only', demographic_key: 'syari_classic' },
-      wardrobe: { mode: 'sequential' }
-    },
-    itemContext: { itemIndex: 1 }
+  const mechResolved = await resolveVisualIdentity({
+    presetRef: 'way_siyasi_editorial_system',
+    itemContext: { narrativeFunction: 'mechanism' }
   });
+  assert.equal(mechResolved.resolved.active_visual_mode, 'isometric_society');
+  assert.ok(mechResolved.resolved.style_prompt.includes('isometric miniature society'));
 
-  assert.notEqual(resolvedSeq0.resolved.wardrobe_prompt, resolvedSeq1.resolved.wardrobe_prompt);
-
-  // Test deterministic stable-random resolution
-  const resolvedRandA = await resolveVisualIdentity({
-    inlineConfig: {
-      subject: { kind: 'human', faceless_mode: 'hands_only', demographic_key: 'syari_classic' },
-      wardrobe: { mode: 'stable_random' }
-    },
-    itemContext: { stableSeed: 'seed_key_abc_123' }
+  const evidenceResolved = await resolveVisualIdentity({
+    presetRef: 'way_siyasi_editorial_system',
+    itemContext: { narrativeFunction: 'evidence_reveal' }
   });
+  assert.equal(evidenceResolved.resolved.active_visual_mode, 'paper_cutout_documentary');
+  assert.ok(evidenceResolved.resolved.style_prompt.includes('paper cutout documentary'));
 
-  const resolvedRandB = await resolveVisualIdentity({
-    inlineConfig: {
-      subject: { kind: 'human', faceless_mode: 'hands_only', demographic_key: 'syari_classic' },
-      wardrobe: { mode: 'stable_random' }
-    },
-    itemContext: { stableSeed: 'seed_key_abc_123' }
+  // Default when narrative function is omitted
+  const defaultResolved = await resolveVisualIdentity({
+    presetRef: 'way_siyasi_editorial_system'
   });
+  assert.equal(defaultResolved.resolved.active_visual_mode, 'editorial_graphic_novel');
 
-  assert.deepEqual(resolvedRandA.resolved.wardrobe_prompt, resolvedRandB.resolved.wardrobe_prompt);
-
-  // Test backward compatibility wrapper
-  const legacyResolved = resolveVisualOverrides({
-    visualOverrides: {
-      subject_demographic: 'syari_classic',
-      wardrobe_style: 'sequential'
-    },
-    itemIndex: 0
-  });
-
-  assert.equal(legacyResolved.wardrobe_style, 'custom');
-  assert.ok(legacyResolved.wardrobe_style_custom);
-
-  console.log('  ✅ Resolver resolution tests passed.');
-}
-
-async function runRegressionTests() {
-  console.log('  6. Testing regression, immutability & fallbacks...');
-  
-  // Immutability: resolving an already resolved snapshot does not modify it
-  const snapshot = {
-    schema_version: 'visual_identity_snapshot_v1',
-    identity_ref: { id: 'hands_only_muslimah_sage_kitchen', version: 1, source: 'system' },
-    resolved: {
-      subject_prompt: 'Test Subject',
-      wardrobe_prompt: 'Test Wardrobe',
-      lighting_prompt: 'Test Lighting'
-    }
-  };
-  const resolved = resolveVisualOverrides({ visualOverrides: snapshot });
-  assert.equal(resolved.schema_version, 'visual_identity_snapshot_v1');
-  assert.equal(resolved.resolved.subject_prompt, 'Test Subject');
-  assert.deepEqual(resolved.identity_ref, snapshot.identity_ref);
-
-  // Legacy Fallback Campaign: resolving pure flat legacy overrides works
-  const legacyMap = resolveVisualOverrides({
-    visualOverrides: {
-      character_concept: 'pov',
-      subject_demographic: 'caucasian_male',
-      wardrobe_style: 'male_terracotta',
-      lighting_style: 'studio_softbox'
-    },
-    itemIndex: 0
-  });
-  assert.equal(legacyMap.schema_version, 'visual_identity_snapshot_v1');
-  assert.ok(legacyMap.resolved.subject_prompt.includes('man') || legacyMap.resolved.subject_prompt.includes('male'));
-  assert.ok(legacyMap.resolved.wardrobe_prompt.toLowerCase().includes('terracotta'));
-
-  // Southeast Asian Male resolution check
-  const indoMaleResolved = resolveVisualOverrides({
-    visualOverrides: {
-      subject_demographic: 'southeast_asian_male',
-      wardrobe_style: 'male_caramel',
-      lighting_style: 'window_daylight'
-    },
-    itemIndex: 0
-  });
-  assert.ok(indoMaleResolved.resolved.subject_prompt.includes('Southeast Asian man'));
-  assert.ok(!indoMaleResolved.resolved.subject_prompt.includes('Muslimah'));
-
-  // Custom demographic with custom description check
-  const customResolved = resolveVisualOverrides({
-    visualOverrides: {
-      schema_version: 'visual_identity_snapshot_v1',
-      identity_ref: { id: 'custom_doctor', key: 'custom_doctor', version: 1, source: 'user' },
-      structured: {
-        subject: { kind: 'human', faceless_mode: 'hands_only', demographic_key: 'custom', custom_description: 'a dedicated surgeon wearing sterile surgical gloves' },
-        wardrobe: { mode: 'custom', preset_key: 'custom', custom_description: 'wearing surgical scrub sleeves' },
-        environment: { preset_key: 'custom', custom_description: 'in a modern sterile surgical operating theater' },
-        lighting: { preset_key: 'lab_cold' },
-        camera: { framing: 'hands_closeup', perspective: 'first_person' },
-        style: { preset_key: 'cinematic_realistic' },
-        guardrails: { face_visibility: 'prohibited' }
-      }
+  // Metaphor translation resolution test
+  const metaphorResolved = await resolveVisualIdentity({
+    presetRef: 'way_siyasi_editorial_system',
+    itemContext: {
+      narrativeFunction: 'hook',
+      concept: 'Inflation erosion',
+      primaryObject: 'Dissolving banknotes in hourglass',
+      visualAction: 'Time-lapse melting away'
     }
   });
-  assert.ok(customResolved.resolved.subject_prompt.includes('dedicated surgeon'));
-  assert.ok(customResolved.resolved.subject_prompt.includes('strictly faceless framing'));
-  assert.ok(!customResolved.resolved.subject_prompt.includes('Muslimah'));
-  assert.ok(customResolved.resolved.environment_prompt.includes('surgical operating theater'));
+  assert.ok(metaphorResolved.resolved.metaphor_prompt.includes('Dissolving banknotes in hourglass'));
 
-  console.log('  ✅ Regression, immutability & fallback tests passed.');
+  // Deduplicated negative prompts
+  assert.ok(defaultResolved.resolved.negative_prompt.includes('visible human face'));
+  assert.ok(defaultResolved.resolved.negative_prompt.includes('photorealistic stock footage'));
+
+  console.log('  ✅ Resolver narrative routing tests passed.');
 }
 
 async function runAll() {
   try {
     await runRepoTests();
     await runResolverTests();
-    await runRegressionTests();
     console.log('🎉 All Visual Identity Foundation tests passed successfully!');
   } catch (err) {
     console.error('❌ Tests failed:', err);

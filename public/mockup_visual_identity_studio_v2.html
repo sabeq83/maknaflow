@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Mockup — AI Visual Identity Studio Builder v2</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --font-sans: Inter, system-ui, sans-serif;
+      --font-mono: ui-monospace, monospace;
+      --radius-xs: 6px; --radius-sm: 8px; --radius-md: 12px;
+      --canvas: Canvas; --sidebar: color-mix(in srgb, Canvas 94%, CanvasText 6%);
+      --surface: color-mix(in srgb, Canvas 92%, CanvasText 8%);
+      --surface-raised: color-mix(in srgb, Canvas 86%, CanvasText 14%);
+      --surface-interactive: color-mix(in srgb, Canvas 80%, CanvasText 20%);
+      --surface-hover: color-mix(in srgb, Canvas 74%, CanvasText 26%);
+      --input-bg: Canvas; --text-primary: CanvasText;
+      --text-secondary: color-mix(in srgb, CanvasText 78%, Canvas 22%);
+      --text-muted: color-mix(in srgb, CanvasText 58%, Canvas 42%);
+      --border-subtle: color-mix(in srgb, CanvasText 22%, Canvas 78%);
+      --border-strong: color-mix(in srgb, CanvasText 38%, Canvas 62%);
+      --action-primary: Highlight; --action-primary-hover: color-mix(in srgb, Highlight 80%, CanvasText 20%);
+      --on-action-primary: HighlightText; --status-info: LinkText;
+      --status-info-soft: color-mix(in srgb, LinkText 14%, Canvas 86%);
+      --status-success: color-mix(in srgb, Highlight 70%, CanvasText 30%);
+      --status-success-soft: color-mix(in srgb, Highlight 12%, Canvas 88%);
+      --status-neutral: color-mix(in srgb, Highlight 65%, CanvasText 35%);
+      --shadow-card: 0 12px 34px color-mix(in srgb, CanvasText 16%, transparent);
+    }
+    [data-theme="light"] { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; font-family: var(--font-sans); background: var(--canvas); color: var(--text-primary); }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    .shell { min-height: 100vh; display: grid; grid-template-columns: 250px minmax(0,1fr); }
+    .sidebar { padding: 22px 16px; border-right: 1px solid var(--border-subtle); position: sticky; top: 0; height: 100vh; }
+    .brand { display: flex; gap: 10px; align-items: center; padding: 4px 8px 24px; }
+    .brand-mark { width: 38px; height: 38px; display: grid; place-items: center; border-radius: var(--radius-sm); background: var(--action-primary); color: var(--on-action-primary); font-weight: 900; }
+    .brand strong { display: block; }
+    .brand small, .muted { color: var(--text-muted); }
+    .nav-label { margin: 12px 10px 8px; color: var(--text-muted); font-size: 11px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+    .nav-item { width: 100%; border: 1px solid transparent; background: transparent; color: var(--text-secondary); border-radius: var(--radius-sm); padding: 11px 12px; display: flex; align-items: center; gap: 10px; text-align: left; }
+    .nav-item.active { color: var(--text-primary); background: var(--surface-interactive); border-color: var(--border-subtle); }
+    main { min-width: 0; padding: 28px; }
+    .topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; margin-bottom: 22px; }
+    h1 { margin: 0 0 7px; font-size: clamp(24px,3vw,34px); letter-spacing: -.04em; }
+    h2, h3, p { margin-top: 0; }
+    .top-actions, .actions, .inline { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .btn { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px 14px; font-weight: 750; background: var(--surface-interactive); color: var(--text-primary); }
+    .btn:hover { border-color: var(--border-strong); background: var(--surface-hover); }
+    .btn.primary { background: var(--action-primary); color: var(--on-action-primary); border-color: var(--action-primary); }
+    .btn.ghost { background: transparent; }
+    .btn.small { padding: 7px 10px; font-size: 12px; }
+    .steps { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-bottom: 22px; }
+    .step { border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: var(--surface); padding: 11px; color: var(--text-muted); text-align: left; }
+    .step span { width: 24px; height: 24px; display: inline-grid; place-items: center; border-radius: 50%; background: var(--surface-interactive); margin-right: 6px; font-size: 12px; }
+    .step.active { border-color: var(--action-primary); color: var(--text-primary); box-shadow: 0 0 0 1px color-mix(in srgb,var(--action-primary) 28%,transparent); }
+    .step.active span, .step.done span { background: var(--action-primary); color: var(--on-action-primary); }
+    .workspace { display: grid; grid-template-columns: minmax(0,1fr) 360px; gap: 18px; align-items: start; }
+    .panel { border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--surface); box-shadow: var(--shadow-card); }
+    .panel-head { padding: 20px 22px 0; }
+    .panel-body { padding: 20px 22px 22px; }
+    .preview { position: sticky; top: 22px; overflow: hidden; }
+    .eyebrow { font-size: 11px; font-weight: 850; color: var(--action-primary); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 7px; }
+    .helper { color: var(--text-muted); line-height: 1.55; font-size: 13px; }
+    .grid2 { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+    label { display: grid; gap: 7px; color: var(--text-secondary); font-size: 13px; font-weight: 700; }
+    input, textarea, select { width: 100%; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: var(--input-bg); color: var(--text-primary); padding: 10px 11px; }
+    textarea { min-height: 92px; resize: vertical; }
+    .choice-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+    .choice { border: 1px solid var(--border-subtle); background: var(--surface-raised); color: var(--text-primary); border-radius: var(--radius-sm); padding: 14px; text-align: left; }
+    .choice strong { display: block; margin-bottom: 5px; }
+    .choice small { color: var(--text-muted); line-height: 1.4; }
+    .choice.active { border-color: var(--action-primary); background: color-mix(in srgb,var(--surface-raised) 84%,var(--action-primary) 16%); }
+    .style-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+    .style-card { border: 1px solid var(--border-subtle); border-radius: var(--radius-md); overflow: hidden; background: var(--surface-raised); }
+    .style-art { min-height: 92px; padding: 14px; display: flex; align-items: flex-end; background: linear-gradient(135deg,var(--surface-interactive),color-mix(in srgb,var(--surface-raised) 74%,var(--status-neutral) 26%)); }
+    .style-art span { font-size: 31px; }
+    .style-content { padding: 13px; }
+    .style-content p { min-height: 36px; margin: 5px 0 11px; color: var(--text-muted); font-size: 12px; line-height: 1.45; }
+    .segmented { display: grid; grid-template-columns: repeat(3,1fr); border: 1px solid var(--border-subtle); border-radius: var(--radius-xs); overflow: hidden; }
+    .segmented button { border: 0; border-right: 1px solid var(--border-subtle); background: var(--input-bg); color: var(--text-muted); padding: 7px 4px; font-size: 11px; }
+    .segmented button:last-child { border-right: 0; }
+    .segmented button.active { background: var(--action-primary); color: var(--on-action-primary); font-weight: 800; }
+    .route-list { display: grid; gap: 9px; }
+    .route { display: grid; grid-template-columns: 38px minmax(100px,.8fr) minmax(170px,1.25fr); gap: 10px; align-items: center; padding: 10px; background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); }
+    .route-num { width: 32px; height: 32px; display: grid; place-items: center; border-radius: var(--radius-xs); background: var(--status-info-soft); color: var(--status-info); font-weight: 850; }
+    .route strong { font-size: 13px; }
+    .route small { display: block; color: var(--text-muted); margin-top: 2px; }
+    .checks { display: grid; gap: 8px; }
+    .check { display: flex; gap: 9px; align-items: flex-start; padding: 10px; border-radius: var(--radius-sm); background: var(--status-success-soft); color: var(--status-success); font-size: 12px; }
+    .preview-card { min-height: 280px; padding: 20px; position: relative; overflow: hidden; background: linear-gradient(145deg,var(--surface-interactive),var(--surface-raised)); border-bottom: 1px solid var(--border-subtle); }
+    .preview-card::before { content:""; position:absolute; inset:18px; border:1px solid var(--border-strong); border-radius:var(--radius-md); transform:rotate(-2deg); }
+    .visual { position: relative; z-index: 1; height: 240px; display: grid; grid-template-rows: 1fr auto; }
+    .city { display:flex; align-items:flex-end; justify-content:center; gap:8px; padding:20px; }
+    .building { width:42px; height:80px; background:var(--surface-hover); border:1px solid var(--border-strong); transform:skewY(-7deg); }
+    .building:nth-child(2) { height:130px; width:65px; background:color-mix(in srgb,var(--surface-hover) 72%,var(--action-primary) 28%); }
+    .building:nth-child(3) { height:54px; }
+    .figure { width:26px; height:58px; border-radius:45% 45% 10% 10%; background:var(--text-secondary); margin-left:12px; position:relative; }
+    .figure::before { content:""; position:absolute; width:24px; height:24px; left:1px; top:-17px; border-radius:50%; background:var(--text-secondary); }
+    .visual-copy { border-left: 4px solid var(--action-primary); padding-left: 11px; }
+    .visual-copy strong { display:block; font-size:20px; }
+    .visual-copy span { color:var(--text-secondary); font-size:12px; }
+    .preview-info { padding: 18px; }
+    .chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0 14px; }
+    .chip { border: 1px solid var(--border-subtle); border-radius: 999px; padding: 5px 8px; color: var(--text-secondary); font-size: 11px; background: var(--surface-raised); }
+    .code { padding: 12px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: var(--input-bg); color: var(--text-secondary); font: 11px/1.55 var(--font-mono); max-height: 170px; overflow: auto; white-space: pre-wrap; }
+    .footer-actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 18px; }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .notice { padding: 12px; border-radius: var(--radius-sm); background: var(--status-info-soft); color: var(--status-info); font-size: 13px; margin-bottom: 15px; }
+    @media (max-width: 980px) { .shell{grid-template-columns:1fr}.sidebar{display:none}.workspace{grid-template-columns:1fr}.preview{position:static}.steps{overflow:auto;grid-template-columns:repeat(5,170px)} }
+    @media (max-width: 620px) { main{padding:16px}.topbar{display:block}.top-actions{margin-top:14px}.grid2,.choice-grid,.style-grid{grid-template-columns:1fr}.route{grid-template-columns:38px 1fr}.route select{grid-column:2}.panel-body,.panel-head{padding-left:16px;padding-right:16px} }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">CF</div><div><strong>ContentFlow</strong><small>Creative Operating System</small></div></div>
+      <div class="nav-label">Settings</div>
+      <button class="nav-item">⚙️ General Settings</button>
+      <button class="nav-item">🌐 Universes</button>
+      <button class="nav-item active">🎨 Visual Identity</button>
+      <button class="nav-item">🧩 Prompt Presets</button>
+      <div class="nav-label">Current brand</div>
+      <button class="nav-item active">◈ Wa’y Siyasi</button>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div><div class="eyebrow">Interactive UI mockup</div><h1>AI Visual Identity Studio Builder v2</h1><p class="muted">Bangun bahasa visual multi-mode, bukan hanya memilih karakter dan wardrobe.</p></div>
+        <div class="top-actions"><button class="btn ghost" id="themeBtn">☀︎ Light mode</button><button class="btn">Save draft</button></div>
+      </header>
+
+      <nav class="steps" id="steps">
+        <button class="step active" data-step="0"><span>1</span>Foundation</button>
+        <button class="step" data-step="1"><span>2</span>Subject System</button>
+        <button class="step" data-step="2"><span>3</span>Visual Language</button>
+        <button class="step" data-step="3"><span>4</span>Mode Routing</button>
+        <button class="step" data-step="4"><span>5</span>Review</button>
+      </nav>
+
+      <div class="workspace">
+        <section class="panel">
+          <div class="panel-head"><div class="eyebrow" id="stepEyebrow">Step 1 of 5</div><h2 id="stepTitle">Brand Foundation</h2><p class="helper" id="stepHelp">Tetapkan tujuan, kepribadian, dan format. AI akan menggunakan bagian ini sebagai konteks kreatif.</p></div>
+          <div class="panel-body">
+            <div class="screen active" data-screen="0">
+              <div class="notice">Preset <strong>Wa’y Siyasi — Editorial System</strong> sudah dimuat dari brand profile.</div>
+              <div class="grid2">
+                <label>Nama identitas<input id="identityName" value="Wa’y Siyasi — Editorial System"></label>
+                <label>Format utama<select><option>Vertical video · 9:16</option><option>Square · 1:1</option><option>Landscape · 16:9</option></select></label>
+              </div>
+              <label style="margin-top:14px">Tujuan visual<textarea>Menjelaskan fenomena sosial, politik, dan ekonomi sebagai sebuah sistem melalui ilustrasi editorial faceless yang tenang, sistematis, dan mudah dipahami.</textarea></label>
+              <div class="grid2" style="margin-top:14px">
+                <label>Target audiens<input value="Audiens Indonesia umum, 18–44 tahun"></label>
+                <label>Tagline<input value="Membaca Fakta. Memahami Sistem."></label>
+              </div>
+              <label style="margin-top:14px">Kepribadian brand<input value="Tenang, rasional, sistematis, edukatif, kritis, berbasis sumber"></label>
+            </div>
+
+            <div class="screen" data-screen="1">
+              <h3>Siapa atau apa yang muncul dalam visual?</h3>
+              <p class="helper">Subject menentukan pelaku visual. Ia terpisah dari gaya rendering.</p>
+              <div class="choice-grid" id="subjectChoices">
+                <button class="choice active" data-value="Faceless human"><strong>◯ Faceless Human</strong><small>Manusia semi-realistis tanpa detail wajah.</small></button>
+                <button class="choice" data-value="Mixed society"><strong>◌ Mixed Society</strong><small>Individu, kelompok, dan kerumunan faceless.</small></button>
+                <button class="choice" data-value="Environment only"><strong>▦ Environment Only</strong><small>Institusi, bangunan, dokumen, dan infrastruktur.</small></button>
+                <button class="choice" data-value="Object and symbol"><strong>◆ Object & Symbol</strong><small>Objek metaforis sebagai subjek utama.</small></button>
+              </div>
+              <div class="grid2" style="margin-top:16px">
+                <label>Faceless treatment<select id="faceless"><option>Featureless editorial face</option><option>Back view</option><option>Silhouette</option><option>Crop below neck</option></select></label>
+                <label>Population policy<select id="population"><option>Single, group, or intentional crowd</option><option>Single subject only</option><option>Group only</option></select></label>
+              </div>
+              <label style="margin-top:14px">Character anchor<textarea>Contemporary Southeast Asian citizens with realistic but slightly simplified proportions, neutral context-appropriate clothing, clean silhouettes, restrained body language, no identifiable facial features.</textarea></label>
+            </div>
+
+            <div class="screen" data-screen="2">
+              <h3>Pilih sistem bahasa visual</h3>
+              <p class="helper">Tetapkan satu gaya utama, beberapa gaya pendukung, dan nonaktifkan yang tidak diperlukan.</p>
+              <div class="style-grid" id="styleGrid"></div>
+            </div>
+
+            <div class="screen" data-screen="3">
+              <h3>Atur mode berdasarkan fungsi narasi</h3>
+              <p class="helper">ContentFlow dapat memilih visual yang berbeda per scene tanpa kehilangan identitas channel.</p>
+              <div class="route-list" id="routeList"></div>
+            </div>
+
+            <div class="screen" data-screen="4">
+              <div class="notice">✓ Identity structure complete. Review apa yang akan disimpan sebagai preset reusable.</div>
+              <h3>Wa’y Siyasi Visual DNA</h3>
+              <div class="checks">
+                <div class="check">✓ Faceless invariant aktif untuk seluruh karakter manusia.</div>
+                <div class="check">✓ Crowd yang disengaja diperbolehkan; unintended people tetap dilarang.</div>
+                <div class="check">✓ Satu primary idea per scene dan safe zone 9:16 aktif.</div>
+                <div class="check">✓ Printed-paper grain, geometric shadow, dan restrained palette dikunci.</div>
+                <div class="check">✓ Mode visual dirutekan menurut fungsi narasi.</div>
+              </div>
+              <h3 style="margin-top:20px">Default palette & rendering</h3>
+              <div class="chips"><span class="chip">Charcoal</span><span class="chip">Off-white</span><span class="chip">Warm gray</span><span class="chip">Muted beige</span><span class="chip">1 accent / scene</span><span class="chip">Matte editorial</span><span class="chip">Paper grain</span></div>
+              <div class="actions"><button class="btn">Generate 3 test frames</button><button class="btn">Upload style reference</button><button class="btn primary" id="savePreset">Save Visual Identity</button></div>
+            </div>
+
+            <div class="footer-actions"><button class="btn ghost" id="backBtn">← Back</button><button class="btn primary" id="nextBtn">Continue →</button></div>
+          </div>
+        </section>
+
+        <aside class="panel preview">
+          <div class="preview-card">
+            <div class="visual">
+              <div class="city"><div class="building"></div><div class="building"></div><div class="building"></div><div class="figure"></div></div>
+              <div class="visual-copy"><strong>Membaca Fakta.</strong><span>Memahami Sistem.</span></div>
+            </div>
+          </div>
+          <div class="preview-info">
+            <div class="eyebrow">Live identity preview</div>
+            <h3 id="previewName">Wa’y Siyasi — Editorial System</h3>
+            <div class="chips" id="previewChips"></div>
+            <div class="eyebrow">Resolved prompt anchor</div>
+            <div class="code" id="promptPreview"></div>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const styles = [
+      {id:'editorial_graphic_novel', icon:'▧', name:'Editorial Graphic Novel', desc:'Storytelling manusia, fakta, peristiwa, dan dampak sosial.', role:'primary'},
+      {id:'isometric_society', icon:'⬡', name:'Isometric Society', desc:'Hubungan institusi, aliran, proses, dan mekanisme sistem.', role:'supporting'},
+      {id:'symbolic_surrealism', icon:'◆', name:'Symbolic Surrealism', desc:'Metafora kuat untuk hook, konsep abstrak, dan kesimpulan.', role:'supporting'},
+      {id:'paper_cutout', icon:'▤', name:'Paper Cutout Documentary', desc:'Dokumen, data, peta, berita, dan nuansa investigatif.', role:'supporting'},
+      {id:'shadow_silhouette', icon:'◐', name:'Shadow & Silhouette', desc:'Ketegangan, anonimitas aktor, dan transisi serius.', role:'off'},
+      {id:'clay_political_theater', icon:'●', name:'Clay Political Theater', desc:'Miniatur approachable untuk seri khusus atau audiens ringan.', role:'off'}
+    ];
+    const routes = [
+      {name:'Hook', hint:'Visual anomaly', style:'symbolic_surrealism'},
+      {name:'Context', hint:'Fakta & manusia', style:'editorial_graphic_novel'},
+      {name:'Mechanism', hint:'Cara sistem bekerja', style:'isometric_society'},
+      {name:'Consequence', hint:'Dampak masyarakat', style:'editorial_graphic_novel'},
+      {name:'Evidence / Reveal', hint:'Dokumen & hubungan', style:'paper_cutout'},
+      {name:'Conclusion', hint:'Satu visual memorable', style:'symbolic_surrealism'}
+    ];
+    const titles=['Brand Foundation','Subject System','Visual Language','Narrative Mode Routing','Consistency & Review'];
+    const helps=[
+      'Tetapkan tujuan, kepribadian, dan format. AI akan menggunakan bagian ini sebagai konteks kreatif.',
+      'Definisikan siapa atau apa yang boleh muncul, tanpa mencampurkannya dengan gaya rendering.',
+      'Susun satu gaya utama dan gaya pendukung dalam satu visual universe yang konsisten.',
+      'Pilih gaya yang paling tepat untuk setiap fungsi narasi dan scene.',
+      'Periksa Visual DNA, guardrail, routing, dan prompt sebelum menyimpan preset.'
+    ];
+    let current=0, subject='Faceless human';
+    const styleGrid=document.getElementById('styleGrid');
+    const routeList=document.getElementById('routeList');
+    function renderStyles(){
+      styleGrid.innerHTML=styles.map((s,i)=>`<article class="style-card"><div class="style-art"><span>${s.icon}</span></div><div class="style-content"><strong>${s.name}</strong><p>${s.desc}</p><div class="segmented">${['primary','supporting','off'].map(r=>`<button class="${s.role===r?'active':''}" onclick="setRole(${i},'${r}')">${r==='primary'?'Utama':r==='supporting'?'Pendukung':'Nonaktif'}</button>`).join('')}</div></div></article>`).join('');
+    }
+    function setRole(i,role){
+      if(role==='primary') styles.forEach((s,x)=>{ if(x!==i && s.role==='primary') s.role='supporting'; });
+      styles[i].role=role; renderStyles(); renderRoutes(); updatePreview();
+    }
+    function activeStyles(){ return styles.filter(s=>s.role!=='off'); }
+    function renderRoutes(){
+      const available=activeStyles();
+      routes.forEach(r=>{ if(!available.some(s=>s.id===r.style)) r.style=available[0]?.id||'editorial_graphic_novel'; });
+      routeList.innerHTML=routes.map((r,i)=>`<div class="route"><div class="route-num">${i+1}</div><div><strong>${r.name}</strong><small>${r.hint}</small></div><select onchange="routes[${i}].style=this.value;updatePreview()">${available.map(s=>`<option value="${s.id}" ${s.id===r.style?'selected':''}>${s.name}</option>`).join('')}</select></div>`).join('');
+    }
+    function updatePreview(){
+      const primary=styles.find(s=>s.role==='primary')||activeStyles()[0];
+      document.getElementById('previewName').textContent=document.getElementById('identityName').value||'Untitled Visual Identity';
+      document.getElementById('previewChips').innerHTML=[subject,primary?.name||'No primary style','9:16','Faceless','Paper grain'].map(x=>`<span class="chip">${x}</span>`).join('');
+      const routeSummary=routes.map(r=>`${r.name}: ${styles.find(s=>s.id===r.style)?.name||r.style}`).join('; ');
+      document.getElementById('promptPreview').textContent=`Faceless editorial political illustration, ${primary?.name||'editorial visual'} as the primary visual language, semi-realistic simplified human proportions, restrained editorial palette, strong geometric shadows, subtle printed-paper grain, clean hierarchy, one primary idea, vertical 9:16. Narrative routing — ${routeSummary}. No facial features, no photorealistic stock-footage aesthetic, no generic news-TV composition.`;
+    }
+    function go(step){
+      current=Math.max(0,Math.min(4,step));
+      document.querySelectorAll('.screen').forEach((el,i)=>el.classList.toggle('active',i===current));
+      document.querySelectorAll('.step').forEach((el,i)=>{el.classList.toggle('active',i===current);el.classList.toggle('done',i<current)});
+      document.getElementById('stepEyebrow').textContent=`Step ${current+1} of 5`;
+      document.getElementById('stepTitle').textContent=titles[current];
+      document.getElementById('stepHelp').textContent=helps[current];
+      document.getElementById('backBtn').style.visibility=current===0?'hidden':'visible';
+      document.getElementById('nextBtn').style.display=current===4?'none':'inline-block';
+      updatePreview();
+    }
+    document.querySelectorAll('.step').forEach((el,i)=>el.addEventListener('click',()=>go(i)));
+    document.getElementById('nextBtn').addEventListener('click',()=>go(current+1));
+    document.getElementById('backBtn').addEventListener('click',()=>go(current-1));
+    document.getElementById('identityName').addEventListener('input',updatePreview);
+    document.querySelectorAll('#subjectChoices .choice').forEach(el=>el.addEventListener('click',()=>{document.querySelectorAll('#subjectChoices .choice').forEach(x=>x.classList.remove('active'));el.classList.add('active');subject=el.dataset.value;updatePreview()}));
+    document.getElementById('themeBtn').addEventListener('click',()=>{const root=document.documentElement;const light=root.dataset.theme==='light';root.dataset.theme=light?'dark':'light';document.getElementById('themeBtn').textContent=light?'☀︎ Light mode':'☾ Dark mode'});
+    document.getElementById('savePreset').addEventListener('click',e=>{e.currentTarget.textContent='✓ Preset ready for implementation';e.currentTarget.disabled=true});
+    renderStyles();renderRoutes();go(0);
+  </script>
+</body>
+</html>
