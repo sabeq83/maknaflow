@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.40 — Integrate Schema v2 Visual Identity and Dynamic Mode Allocator on Pillar Campaigns (23/09/2026)
+- Dynamic narrative mode allocator for 4-20 clips
+- Inject Visual Identity Schema v2 prompt section with Metaphor Engine and textures
+- Add visual_mode attribute to storyboard JSON output
+
 ## V2.31.39 — Fix Webhook Endpoint Resolver and Manual Review Gate for Pillar Campaigns (23/09/2026)
 - Defensive resolveWebhookEndpoint helper dynamic from settings
 - Add manual review pause gate before start frame T2I in OPC
