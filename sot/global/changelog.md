@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.42 — Fix POSIX Web Path Resolution and Multi-Layer Start Frame Reuse (23/09/2026)
+- Create central resolvePublicFilePath and findExistingStartFrameFile in file-path-resolver
+- Fix POSIX path.isAbsolute bug on web paths starting with /uploads
+- Integrate disk pattern scanner fallback across processPillarGlabs, processReGlabs, and processIfcGlabs
+
 ## V2.31.41 — Fix Start Frame Reuse in Glabs, Forward video_length to Webhook, and Dinamise Gemini Models (23/09/2026)
 - Reuse existing start frames in pillar_glabs to prevent duplicate T2I
 - Forward video_length to G-Labs video generation for exact 4s/6s/8s/10s duration
