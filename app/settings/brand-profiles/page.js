@@ -298,15 +298,15 @@ export default function BrandProfilesPage() {
                     <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 2fr', gap: '12px' }}>
                       <div className="form-group">
                         <label className="form-label" style={{ fontSize: '0.75rem' }}>Webhook Host IP</label>
-                        <input className="form-input" name="webhook_host" value={formData.webhook_host} onChange={handleChange} placeholder="Contoh: 100.117.59.92" style={{ padding: '8px' }} />
+                        <input className="form-input" name="webhook_host" value={formData.webhook_host} onChange={handleChange} placeholder="Contoh: 100.117.59.92" autoComplete="off" data-lpignore="true" data-1p-ignore="true" style={{ padding: '8px' }} />
                       </div>
                       <div className="form-group">
                         <label className="form-label" style={{ fontSize: '0.75rem' }}>Port</label>
-                        <input className="form-input" name="webhook_port" value={formData.webhook_port} onChange={handleChange} placeholder="8765" style={{ padding: '8px' }} />
+                        <input className="form-input" name="webhook_port" value={formData.webhook_port} onChange={handleChange} placeholder="8765" autoComplete="off" data-lpignore="true" data-1p-ignore="true" style={{ padding: '8px' }} />
                       </div>
                       <div className="form-group">
                         <label className="form-label" style={{ fontSize: '0.75rem' }}>API Key Override</label>
-                        <input className="form-input" type="password" name="webhook_api_key" value={formData.webhook_api_key} onChange={handleChange} placeholder="Optional G-Labs API Key" style={{ padding: '8px' }} />
+                        <input className="form-input" type="password" name="webhook_api_key" value={formData.webhook_api_key} onChange={handleChange} placeholder="Optional G-Labs API Key" autoComplete="new-password" data-lpignore="true" data-1p-ignore="true" style={{ padding: '8px' }} />
                       </div>
                     </div>
                   </div>

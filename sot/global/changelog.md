@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.39 — Fix Webhook Endpoint Resolver and Manual Review Gate for Pillar Campaigns (23/09/2026)
+- Defensive resolveWebhookEndpoint helper dynamic from settings
+- Add manual review pause gate before start frame T2I in OPC
+- Form autofill protection and port sanitization for brand profiles
+
 ## V2.31.38 — Injeksi 4 Field Brand Identity ke Content Planner dan Pillar Generator (23/09/2026)
 - Injeksi 4 field utama brand profile (brand_name, editorial_brand_context, editorial_content_goal, editorial_content_pillars_json) ke Content Planner dan Organic Pillar Campaign Generator
 - Eliminasi bias analogi kuliner/teh herbal dan sesuaikan format sandwich_transition_plan pada kampanye non-bridging
