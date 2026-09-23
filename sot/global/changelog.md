@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.38 — Injeksi 4 Field Brand Identity ke Content Planner dan Pillar Generator (23/09/2026)
+- Injeksi 4 field utama brand profile (brand_name, editorial_brand_context, editorial_content_goal, editorial_content_pillars_json) ke Content Planner dan Organic Pillar Campaign Generator
+- Eliminasi bias analogi kuliner/teh herbal dan sesuaikan format sandwich_transition_plan pada kampanye non-bridging
+- Perbaikan validasi universeConfig pada cartoon-continuity-validator
+
 ## V2.31.37 — Visual Identity Studio v2 (23/09/2026)
 - Tambah multi-mode visual language dan narrative routing
 - Tambah preset editorial Wa’y Siyasi

@@ -49,6 +49,7 @@ console.log('\\n📋 Test Group 1: Cartoon Universe Prompt Generation');
 
 const cartoonCampaignData = {
   content_world: 'cartoon_universe',
+  knowledge_domain: 'pet_supplies',
   universe_profile: 'pawville',
   story_template: 'pet_problem_solution_7beat',
   universe_snapshot_json: JSON.stringify({ visual_style: 'cinematic_3d_clay' }),
