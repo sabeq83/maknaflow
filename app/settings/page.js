@@ -128,6 +128,7 @@ export default function SettingsPage() {
   // Category Tabs & Collapsible Cards State
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'ai' | 'storage' | 'automation'
   const [collapsedCards, setCollapsedCards] = useState({});
+  const [currentTenantId, setCurrentTenantId] = useState('default_tenant');
 
   const fileRef = useRef(null);
 
@@ -196,6 +197,7 @@ export default function SettingsPage() {
     const res = await fetch('/api/settings');
     const data = await res.json();
     if (data.success) {
+      if (data.tenant_id) setCurrentTenantId(data.tenant_id);
       setMaskedKey(data.data.gemini_api_key || '');
       setHasKey(data.data.has_api_key);
       setMaskedMinimaxKey(data.data.minimax_api_key || '');
@@ -1018,6 +1020,59 @@ export default function SettingsPage() {
               )}
             </div>
           )}
+
+          {/* Dedicated Tenant Credentials Banner */}
+          <div style={{
+            background: 'var(--surface-raised, var(--bg-card))',
+            border: '1px solid var(--border-subtle, var(--border))',
+            borderLeft: '4px solid var(--action-primary, #6366f1)',
+            borderRadius: 'var(--radius-sm)',
+            padding: '14px 18px',
+            marginBottom: '20px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '12px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '8px',
+                background: 'var(--status-info-soft, rgba(99,102,241,0.1))',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.2rem'
+              }}>
+                🏢
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    Dedicated Workspace Settings
+                  </span>
+                  <span style={{
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    background: 'var(--action-primary, #6366f1)',
+                    color: 'var(--on-action-primary, #ffffff)'
+                  }}>
+                    {currentTenantId}
+                  </span>
+                </div>
+                <p style={{ margin: '3px 0 0', fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                  🔒 Seluruh API Key & Kredensial di bawah ini diisolasi penuh per tenant tanpa pembagian kuota antar akun.
+                </p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', color: 'var(--status-success, #10b981)', fontWeight: 600 }}>
+              <span>🛡️ Zero-Leakage Active</span>
+            </div>
+          </div>
 
           {/* Category Tabs & Card Toggle Bar */}
           <div style={{

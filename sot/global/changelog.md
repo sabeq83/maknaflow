@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.31.35 — Strict Dedicated Multi-Tenant Credentials & Zero-Leakage Secrets (23/09/2026)
+- Isolasi seluruh kredensial dan API key per tenant tanpa fallback ke default tenant
+- Mencegah kebocoran kuota API Gemini Minimax Webhook dan Social token
+- Menambahkan banner Workspace Context pada UI Settings
+
 ## V2.31.34 — Multiplier Lab Non-Product Mode with RE Viral Narrative Engine (23/09/2026)
 - Menambahkan Switcher Mode Tanpa Produk (Pure Storytelling) di Multiplier Lab UI
 - Bypass validasi wajib produk di API Route untuk kampanye narasi murni

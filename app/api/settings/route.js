@@ -20,13 +20,21 @@ export const GET = withTenantContext(async (request, _context, user) => {
     if (user.role !== 'admin') {
       return NextResponse.json({ success: false, error: 'Hanya Admin tenant yang dapat mengelola credential.' }, { status: 403 });
     }
-    const apiKey = await getSetting('gemini_api_key');
-    const minimaxKey = await getSetting('minimax_api_key');
-    const webhookKey = await getSetting('webhook_api_key');
-    const nextcloudPassword = await getSetting('nextcloud_app_password');
+    const tenantId = user.tenant_id || 'default_tenant';
+    const apiKey = await getSetting('gemini_api_key', false);
+    const minimaxKey = await getSetting('minimax_api_key', false);
+    const webhookKey = await getSetting('webhook_api_key', false);
+    const nextcloudPassword = await getSetting('nextcloud_app_password', false);
+    const fbToken = await getSetting('fb_page_token', false);
+    const contentflowKey = await getSetting('contentflow_api_key', false);
+    const replizAccess = await getSetting('repliz_access_key', false);
+    const replizSecret = await getSetting('repliz_secret_key', false);
+
     return NextResponse.json({
       success: true,
+      tenant_id: tenantId,
       data: {
+        tenant_id: tenantId,
         gemini_api_key: maskSecret(apiKey) || null,
         has_api_key: !!apiKey,
         gemini_api_tier: await getSetting('gemini_api_tier') || 'paid',
@@ -36,7 +44,7 @@ export const GET = withTenantContext(async (request, _context, user) => {
         gemini_model_fallback: await getSetting('gemini_model_fallback') || 'gemini-3.6-flash',
         minimax_api_key: maskSecret(minimaxKey) || null,
         has_minimax_key: !!minimaxKey,
-        minimax_group_id: await getSetting('minimax_group_id') || '',
+        minimax_group_id: await getSetting('minimax_group_id', false) || '',
         webhook_api_key: maskSecret(webhookKey),
         has_webhook_key: !!webhookKey,
         webhook_host: await getSetting('webhook_host') || '100.64.70.61',
@@ -56,25 +64,25 @@ export const GET = withTenantContext(async (request, _context, user) => {
         // Nextcloud
         storage_provider: await getSetting('storage_provider') || 'gdrive',
         nextcloud_url: await getSetting('nextcloud_url') || '',
-        nextcloud_username: await getSetting('nextcloud_username') || '',
+        nextcloud_username: await getSetting('nextcloud_username', false) || '',
         nextcloud_app_password: maskSecret(nextcloudPassword),
         has_nextcloud_password: !!nextcloudPassword,
         nextcloud_target_folder: await getSetting('nextcloud_target_folder') || '/MAKNA_Video_Generations',
         save_to_local_storage: Number(await getSetting('save_to_local_storage') || 0),
         local_storage_path: await getSetting('local_storage_path') || 'renders',
         // Facebook Page Credentials
-        fb_page_id: await getSetting('fb_page_id') || '',
-        fb_page_ids: await getSetting('fb_page_ids') || '',
-        fb_page_token: maskSecret(await getSetting('fb_page_token')),
-        has_fb_token: !!await getSetting('fb_page_token'),
+        fb_page_id: await getSetting('fb_page_id', false) || '',
+        fb_page_ids: await getSetting('fb_page_ids', false) || '',
+        fb_page_token: maskSecret(fbToken),
+        has_fb_token: !!fbToken,
         fb_server_url: await getSetting('fb_server_url') || '',
         scraper_headless_enabled: await getSetting('scraper_headless_enabled') !== null ? Number(await getSetting('scraper_headless_enabled')) : 1,
         scraper_use_cdp: await getSetting('scraper_use_cdp') !== null ? Number(await getSetting('scraper_use_cdp')) : 0,
         scraper_chrome_profile: await getSetting('scraper_chrome_profile') || 'Default',
         ytdlp_cookies_from_browser: await getSetting('ytdlp_cookies_from_browser') || 'none',
         // Content Flow Direct Ingestion API
-        contentflow_api_key: maskSecret(await getSetting('contentflow_api_key')),
-        has_contentflow_key: !!await getSetting('contentflow_api_key'),
+        contentflow_api_key: maskSecret(contentflowKey),
+        has_contentflow_key: !!contentflowKey,
         contentflow_api_url: await getSetting('contentflow_api_url') || 'http://100.78.186.123:3001/api/v1/content/ingest',
         // Product Photo Pipeline
         product_photo_provider: await getSetting('product_photo_provider') || 'glabs',
@@ -83,10 +91,10 @@ export const GET = withTenantContext(async (request, _context, user) => {
         product_photo_auto_approve: Number(await getSetting('product_photo_auto_approve') || 0),
         // Repliz API Credentials
         repliz_api_url: await getSetting('repliz_api_url') || 'https://api.repliz.com',
-        repliz_access_key: maskSecret(await getSetting('repliz_access_key')),
-        repliz_secret_key: maskSecret(await getSetting('repliz_secret_key')),
-        repliz_drive_folder_id: await getSetting('repliz_drive_folder_id') || '',
-        has_repliz_credentials: !!(await getSetting('repliz_access_key') && await getSetting('repliz_secret_key')),
+        repliz_access_key: maskSecret(replizAccess),
+        repliz_secret_key: maskSecret(replizSecret),
+        repliz_drive_folder_id: await getSetting('repliz_drive_folder_id', false) || '',
+        has_repliz_credentials: !!(replizAccess && replizSecret),
       }
     });
   } catch (error) {
