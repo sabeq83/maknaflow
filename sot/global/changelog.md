@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.31.44 — Proteksi Status Publikasi ContentFlow & Lineage Guard (25/09/2026)
+- Proteksi status media sosial dan permalink pada upsertContentFlowItem
+- Silent guard mode tanpa produk pada resolveLineageAndAffiliate
+- Resolusi dinamis tenant_id dan tenantId pada auth dan settings API
+- Auto-healing data status Facebook live di PostgreSQL
+
 ## V2.31.43 — Enforce 100 Percent Menu Settings Precedence for Gemini AI Models (24/09/2026)
 - Strictly honor gemini_model_primary from database settings for all creative tasks
 - Dynamically start waterfall chain with user primary and fallback models
