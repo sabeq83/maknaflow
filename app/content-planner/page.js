@@ -20,7 +20,7 @@ export default function ContentPlannerDashboard() {
   const [recipeProductIds, setRecipeProductIds] = useState([]);
   const [selectedProductsMap, setSelectedProductsMap] = useState({});
   const [recipeStrategyMode, setRecipeStrategyMode] = useState('synergy');
-  const [recipeCount, setRecipeCount] = useState(5);
+  const [recipeCount, setRecipeCount] = useState(3);
   const [brandContext, setBrandContext] = useState('');
   const [contentGoal, setContentGoal] = useState('');
   const [pillars, setPillars] = useState([]);
@@ -102,7 +102,7 @@ export default function ContentPlannerDashboard() {
     : 0;
   const effectivePlannerCount = plannerFocus === 'brand_editorial'
     ? pillars.length * effectiveEditorialRowsPerPillar
-    : (plannerFocus === 'recipe_campaign' ? Number(recipeCount) : Number(productPlannerCount));
+    : (plannerFocus === 'recipe_campaign' ? (Number.parseInt(recipeCount, 10) || 3) : Number(productPlannerCount));
 
   useEffect(() => {
     fetchPlanners();
@@ -1770,45 +1770,82 @@ export default function ContentPlannerDashboard() {
                     </select>
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>Jumlah Baris Planner:</label>
-                    <select
-                      disabled={plannerFocus === 'brand_editorial' && pillars.length === 0}
-                      value={plannerFocus === 'brand_editorial' ? effectiveEditorialRowsPerPillar : (plannerFocus === 'recipe_campaign' ? recipeCount : productPlannerCount)}
-                      onChange={e => {
-                        if (plannerFocus === 'brand_editorial') {
-                          setEditorialRowsPerPillar(Number(e.target.value));
-                          setEditorialCountNotice('');
-                        } else if (plannerFocus === 'recipe_campaign') {
-                          setRecipeCount(Number(e.target.value));
-                        } else {
-                          setProductPlannerCount(Number(e.target.value));
-                        }
-                      }}
-                      style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
-                    >
-                      {plannerFocus === 'brand_editorial' ? (
-                        pillars.length === 0
-                          ? <option value={0}>Masukkan Pilar Konten terlebih dahulu</option>
-                          : editorialCountOptions.map(option => (
-                            <option key={option.rowsPerPillar} value={option.rowsPerPillar}>
-                              {option.label}{option.rowsPerPillar === DEFAULT_EDITORIAL_ROWS_PER_PILLAR ? ' (Direkomendasikan)' : ''}
-                            </option>
-                          ))
-                      ) : (plannerFocus === 'recipe_campaign' ? <>
-                        <option value="1">1 Resep (Quick Test)</option>
-                        <option value="3">3 Resep (Mini Pack)</option>
-                        <option value="5">5 Resep (Standar Direkomendasikan)</option>
-                        <option value="10">10 Resep (Batch 2 Minggu)</option>
-                        <option value="15">15 Resep (Batch 3 Minggu)</option>
-                        <option value="20">20 Resep (Batch 1 Bulan Maksimal)</option>
-                      </> : <>
-                        <option value="6">6 Baris Plan (1x CEP)</option>
-                        <option value="12">12 Baris Plan (2x CEP - Standar)</option>
-                        <option value="18">18 Baris Plan (3x CEP)</option>
-                        <option value="24">24 Baris Plan (4x CEP - Massal)</option>
-                        <option value="30">30 Baris Plan (5x CEP - Maksimal)</option>
-                      </>)}
-                    </select>
+                    <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>
+                      {plannerFocus === 'recipe_campaign' ? 'Jumlah Resep (1 - 30):' : 'Jumlah Baris Planner:'}
+                    </label>
+                    {plannerFocus === 'recipe_campaign' ? (
+                      <div>
+                        <input
+                          type="number"
+                          min="1"
+                          max="30"
+                          value={recipeCount}
+                          onChange={e => {
+                            const val = e.target.value;
+                            if (val === '') {
+                              setRecipeCount('');
+                              return;
+                            }
+                            const num = Number.parseInt(val, 10);
+                            if (Number.isNaN(num)) return;
+                            setRecipeCount(Math.max(1, Math.min(30, num)));
+                          }}
+                          onBlur={() => {
+                            if (!recipeCount || Number(recipeCount) < 1) {
+                              setRecipeCount(3);
+                            } else if (Number(recipeCount) > 30) {
+                              setRecipeCount(30);
+                            }
+                          }}
+                          placeholder="Default: 3 (Maks: 30)"
+                          style={{
+                            width: '100%',
+                            padding: '10px 12px',
+                            background: 'var(--bg-secondary)',
+                            border: '1px solid var(--border-subtle)',
+                            borderRadius: '8px',
+                            color: 'var(--text-primary)',
+                            fontSize: '14px',
+                            boxSizing: 'border-box'
+                          }}
+                        />
+                        <div style={{ marginTop: '4px', fontSize: '11px', color: 'var(--text-muted)' }}>
+                          Tentukan jumlah resep yang ingin digenerate (Default: 3, Maksimal: 30 resep).
+                        </div>
+                      </div>
+                    ) : (
+                      <select
+                        disabled={plannerFocus === 'brand_editorial' && pillars.length === 0}
+                        value={plannerFocus === 'brand_editorial' ? effectiveEditorialRowsPerPillar : productPlannerCount}
+                        onChange={e => {
+                          if (plannerFocus === 'brand_editorial') {
+                            setEditorialRowsPerPillar(Number(e.target.value));
+                            setEditorialCountNotice('');
+                          } else {
+                            setProductPlannerCount(Number(e.target.value));
+                          }
+                        }}
+                        style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                      >
+                        {plannerFocus === 'brand_editorial' ? (
+                          pillars.length === 0
+                            ? <option value={0}>Masukkan Pilar Konten terlebih dahulu</option>
+                            : editorialCountOptions.map(option => (
+                              <option key={option.rowsPerPillar} value={option.rowsPerPillar}>
+                                {option.label}{option.rowsPerPillar === DEFAULT_EDITORIAL_ROWS_PER_PILLAR ? ' (Direkomendasikan)' : ''}
+                              </option>
+                            ))
+                        ) : (
+                          <>
+                            <option value="6">6 Baris Plan (1x CEP)</option>
+                            <option value="12">12 Baris Plan (2x CEP - Standar)</option>
+                            <option value="18">18 Baris Plan (3x CEP)</option>
+                            <option value="24">24 Baris Plan (4x CEP - Massal)</option>
+                            <option value="30">30 Baris Plan (5x CEP - Maksimal)</option>
+                          </>
+                        )}
+                      </select>
+                    )}
                     {plannerFocus === 'brand_editorial' && editorialCountNotice && (
                       <div style={{ marginTop: '6px', color: 'var(--status-warning)', fontSize: '11px', lineHeight: 1.4 }}>
                         {editorialCountNotice}

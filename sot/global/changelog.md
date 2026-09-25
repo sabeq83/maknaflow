@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.31.45 — Make Recipe Campaign Planner Count Flexible with Default 3 and Max 30 (25/09/2026)
+- Convert Recipe Campaign planner count selector to pure number input with range 1 to 30
+- Set default recipe count to 3 across frontend state, backend contracts, and planner engine
+- Update validation contract constants MAX_RECIPE_COUNT to 30 and DEFAULT_RECIPE_COUNT to 3
+- Add unit test for count flexibility and valid range bounds
+
 ## V2.31.44 — Proteksi Status Publikasi ContentFlow & Lineage Guard (25/09/2026)
 - Proteksi status media sosial dan permalink pada upsertContentFlowItem
 - Silent guard mode tanpa produk pada resolveLineageAndAffiliate

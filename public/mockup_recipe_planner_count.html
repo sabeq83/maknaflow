@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup: Input Isian Fleksibel Jumlah Baris Recipe Campaign (Default 3, Max 30)</title>
+  <style>
+    :root {
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+    }
+
+    body {
+      margin: 0;
+      padding: 30px 20px;
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      margin-top: 0;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+      font-weight: 600;
+    }
+
+    p.desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .number-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px 14px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 1rem;
+      font-weight: 600;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .number-input:focus {
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.2);
+    }
+
+    .helper-text {
+      font-size: 0.78rem;
+      margin-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+    }
+
+    .feedback-box {
+      margin-top: 20px;
+      padding: 14px 18px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .feedback-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .feedback-val {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--action-primary);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      margin-top: 24px;
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.2s;
+    }
+
+    .btn-submit:hover {
+      background: var(--action-primary-hover);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>
+      <span>🍳 Recipe Campaign — Form Planner</span>
+      <span class="badge">Default: 3 (Max: 30)</span>
+    </h1>
+    <p class="desc">
+      Simulasi komponen pemilihan jumlah baris resep dengan format isian angka murni (input number) default 3 resep dan maksimal 30 resep.
+    </p>
+
+    <div class="form-group">
+      <label for="recipe-count-input">Jumlah Baris Resep yang Ingin Dibuat (1 - 30):</label>
+      <input 
+        type="number" 
+        id="recipe-count-input" 
+        class="number-input" 
+        min="1" 
+        max="30" 
+        value="3"
+        placeholder="Masukkan angka 1 s.d. 30"
+        oninput="handleInputChange(this.value)"
+        onblur="handleBlur(this.value)"
+      />
+      <div class="helper-text">
+        <span>💡 Masukkan jumlah ide resep yang ingin digenerate (default 3, minimal 1, maksimal 30).</span>
+        <span id="range-status" style="color: var(--status-success);">✓ Rentang Valid (1–30)</span>
+      </div>
+    </div>
+
+    <div class="feedback-box">
+      <div>
+        <div class="feedback-label">Kapasitas Generasi AI:</div>
+        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px;">
+          Sistem akan merancang storyboard, resep terstandarisasi, dan naskah VO.
+        </div>
+      </div>
+      <div style="text-align: right;">
+        <div class="feedback-label">Total Ide Resep:</div>
+        <div class="feedback-val" id="total-preview">3 Baris Ide</div>
+      </div>
+    </div>
+
+    <button class="btn-submit" type="button">
+      💾 Simpan Draft Planner (<span id="btn-count">3</span> Resep)
+    </button>
+  </div>
+
+  <script>
+    function handleInputChange(val) {
+      let num = parseInt(val, 10);
+      const statusEl = document.getElementById('range-status');
+      const totalPreview = document.getElementById('total-preview');
+      const btnCount = document.getElementById('btn-count');
+
+      if (isNaN(num) || num < 1) {
+        statusEl.textContent = '⚠️ Minimal 1 resep';
+        statusEl.style.color = 'var(--status-danger)';
+      } else if (num > 30) {
+        statusEl.textContent = '⚠️ Maksimal 30 resep';
+        statusEl.style.color = 'var(--status-danger)';
+      } else {
+        statusEl.textContent = '✓ Rentang Valid (1–30)';
+        statusEl.style.color = 'var(--status-success)';
+      }
+
+      totalPreview.textContent = (isNaN(num) ? '1' : num) + ' Baris Ide';
+      btnCount.textContent = (isNaN(num) ? '1' : num);
+    }
+
+    function handleBlur(val) {
+      let num = parseInt(val, 10);
+      const input = document.getElementById('recipe-count-input');
+      if (isNaN(num) || num < 1) {
+        input.value = 3;
+        handleInputChange(3);
+      } else if (num > 30) {
+        input.value = 30;
+        handleInputChange(30);
+      }
+    }
+  </script>
+</body>
+</html>
