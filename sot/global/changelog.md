@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.32.1 — Add Reports & Token Meter to Sidebar Navigation (25/09/2026)
+- Add Reports & Token Meter navigation link into Sidebar under SYSTEM section
+
 ## V2.32.0 — Implement AI Token Usage & Cost Metering Engine (25/09/2026)
 - Add ai_token_usage_ledger schema migration to track Gemini API prompt and candidates tokens
 - Create lib/ai-token-meter.js with Google AI Studio official Paid Tier pricing matrix

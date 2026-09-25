@@ -31,6 +31,7 @@ const menuKeyMap = {
   '/settings/users': 'admin_only',
   '/settings/tenants': 'superadmin_only',
   '/settings': 'system_settings',
+  '/reports': 'reports',
   '/system-health': 'system_health'
 };
 
@@ -67,6 +68,7 @@ const navItems = [
   { label: 'Video Library', href: '/scraper', icon: '📼' },
 
   { section: 'SYSTEM' },
+  { label: 'Reports & Token Meter', href: '/reports', icon: '📊' },
   { label: 'User Management', href: '/settings/users', icon: '👥', adminOnly: true },
   { label: 'Tenant Management', href: '/settings/tenants', icon: '🏢', superadminOnly: true },
   { label: 'System Health', href: '/system-health', icon: '🩺' },
