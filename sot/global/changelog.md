@@ -1,5 +1,13 @@
 # Changelog
 
+## V2.32.0 — Implement AI Token Usage & Cost Metering Engine (25/09/2026)
+- Add ai_token_usage_ledger schema migration to track Gemini API prompt and candidates tokens
+- Create lib/ai-token-meter.js with Google AI Studio official Paid Tier pricing matrix
+- Hook asynchronous token recording in lib/gemini.js on successful AI calls
+- Add API route /api/reports/token-usage for monthly MTD usage and live activity logs
+- Add AI Token & Cost Meter tab in Menu Reports with 4 metric cards, feature/model breakdown, and cost simulator
+- Add unit tests for pricing formulas, caching discounts, and MTD aggregations
+
 ## V2.31.45 — Make Recipe Campaign Planner Count Flexible with Default 3 and Max 30 (25/09/2026)
 - Convert Recipe Campaign planner count selector to pure number input with range 1 to 30
 - Set default recipe count to 3 across frontend state, backend contracts, and planner engine

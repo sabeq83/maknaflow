@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Mockup: AI Token Usage & Cost Metering — MAKNA Flow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --sidebar: #f1f5f9;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #f1f5f9;
+      --surface-hover: #e2e8f0;
+      --input-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border-subtle: #cbd5e1;
+      --border-strong: #94a3b8;
+      --action-primary: #0d9488;
+      --action-primary-hover: #0f766e;
+      --on-action-primary: #ffffff;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.12);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.12);
+      --status-neutral: #7c3aed;
+      --status-neutral-soft: rgba(124, 58, 237, 0.12);
+      --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--canvas);
+      color: var(--text-primary);
+      padding: 32px 24px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .header-title h1 {
+      font-size: 24px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-title p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    select, input, button {
+      font-family: inherit;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    .custom-select {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      cursor: pointer;
+      outline: none;
+    }
+    .btn-theme {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 8px 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+    }
+    .btn-theme:hover {
+      background: var(--surface-hover);
+    }
+
+    /* Top Metric Cards */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+      margin-bottom: 30px;
+    }
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .metric-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-strong);
+    }
+    .metric-card .icon-badge {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      font-size: 20px;
+      padding: 8px;
+      border-radius: 10px;
+      background: var(--surface-interactive);
+    }
+    .metric-card .card-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .metric-card .card-value {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .metric-card .card-subtext {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    .badge-success { background: var(--status-success-soft); color: var(--status-success); }
+    .badge-info { background: var(--status-info-soft); color: var(--status-info); }
+    .badge-warning { background: var(--status-warning-soft); color: var(--status-warning); }
+    .badge-neutral { background: var(--status-neutral-soft); color: var(--status-neutral); }
+
+    /* Tabs Navigation */
+    .tabs-nav {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 22px;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      position: relative;
+      white-space: nowrap;
+      transition: color 0.2s;
+    }
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+    .tab-btn.active {
+      color: var(--action-primary);
+    }
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--action-primary);
+      border-radius: 3px 3px 0 0;
+    }
+
+    /* Panels */
+    .tab-panel {
+      display: none;
+    }
+    .tab-panel.active {
+      display: block;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Content Cards */
+    .card-box {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-card);
+    }
+    .card-box-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .card-box-header h3 {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    /* Table Styles */
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+    th {
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      font-weight: 600;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    tr:hover td {
+      background: var(--surface-interactive);
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+
+    /* Progress Bar for share */
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: var(--surface-raised);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+    }
+
+    /* Cost Calculator Box */
+    .calc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 768px) {
+      .calc-grid { grid-template-columns: 1fr; }
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .calc-slider {
+      width: 100%;
+      accent-color: var(--action-primary);
+      cursor: pointer;
+    }
+    .calc-result-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .notice-banner {
+      background: var(--status-info-soft);
+      border: 1px solid var(--status-info);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header-bar">
+    <div class="header-title">
+      <h1>⚡ AI Token Usage & Cost Meter</h1>
+      <p>Pelacak pemakaian token riil Google Gemini AI, estimasi tagihan Paid Tier, dan efisiensi caching per tenant.</p>
+    </div>
+    <div class="controls-group">
+      <select id="tenantSelect" class="custom-select" onchange="updateData()">
+        <option value="sabeq_workspace">Tenant: sabeq_workspace (Active)</option>
+        <option value="default_tenant">Tenant: default_tenant</option>
+        <option value="agency_client_01">Tenant: agency_client_01</option>
+      </select>
+      <select id="monthSelect" class="custom-select" onchange="updateData()">
+        <option value="2026-09" selected>Bulan: September 2026</option>
+        <option value="2026-08">Bulan: Agustus 2026</option>
+        <option value="2026-07">Bulan: Juli 2026</option>
+      </select>
+      <button class="btn-theme" onclick="toggleTheme()">🌓 Ganti Tema</button>
+    </div>
+  </div>
+
+  <!-- Notice Banner -->
+  <div class="notice-banner">
+    <span>💡</span>
+    <div>
+      <strong>Model Riil Terdeteksi di MAKNA Flow</strong>: Model-model di bawah ini diselaraskan 100% dengan konstanta <code>MODULE_MODEL_MATRIX</code> &amp; <code>GEMINI_CASCADE_ORDER</code> dari <code>lib/gemini.js</code> (Default: <code>gemini-3.6-flash</code>, Turbo: <code>gemini-3.8-flash</code>, Video/Studio: <code>gemini-3.7-flash</code>, Scraper: <code>gemini-1.5-flash-8b</code>).
+    </div>
+  </div>
+
+  <!-- 4 Top Metric Cards -->
+  <div class="metric-grid">
+    <!-- Card 1 -->
+    <div class="metric-card">
+      <div class="icon-badge">🪙</div>
+      <div class="card-label">Total Token Bulan Ini (MTD)</div>
+      <div class="card-value" id="valTotalTokens">1,482,920</div>
+      <div class="card-subtext">
+        <span class="badge-pill badge-info">Prompt: 890k</span>
+        <span class="badge-pill badge-neutral">Output: 592k</span>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="metric-card">
+      <div class="icon-badge">💰</div>
+      <div class="card-label">Estimasi Biaya Paid Tier</div>
+      <div class="card-value" id="valTotalCost" style="color: var(--status-success);">$0.45 <span style="font-size: 16px; color: var(--text-muted);">(~Rp 7.200)</span></div>
+      <div class="card-subtext">
+        <span class="badge-pill badge-success">Sangat Hemat ($0.003/request)</span>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="metric-card">
+      <div class="icon-badge">🚀</div>
+      <div class="card-label">Total Panggilan AI (API Calls)</div>
+      <div class="card-value" id="valTotalCalls">156</div>
+      <div class="card-subtext">
+        <span class="badge-pill badge-success">100% Success Rate</span>
+        <span style="color: var(--text-muted); font-size: 11px;">0 Waterfall Fallback</span>
+      </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="metric-card">
+      <div class="icon-badge">🛡️</div>
+      <div class="card-label">Hemat Context Caching</div>
+      <div class="card-value" id="valCachedTokens">320,000</div>
+      <div class="card-subtext">
+        <span class="badge-pill badge-warning">Hemat ~$0.09 (~Rp 1.440)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="switchTab('featureBreakdown')">📦 Breakdown per Fitur</button>
+    <button class="tab-btn" onclick="switchTab('modelBreakdown')">🧠 Breakdown per Model AI</button>
+    <button class="tab-btn" onclick="switchTab('activityLog')">📜 Log Panggilan Terakhir</button>
+    <button class="tab-btn" onclick="switchTab('simulator')">🧮 Kalkulator Simulasi Biaya</button>
+  </div>
+
+  <!-- Tab 1: Breakdown per Fitur -->
+  <div id="featureBreakdown" class="tab-panel active">
+    <div class="card-box">
+      <div class="card-box-header">
+        <h3>Distribusi Penggunaan Token per Modul Generator</h3>
+        <span style="font-size: 12px; color: var(--text-muted);">Urut berdasarkan total token tertinggi</span>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Fitur / Modul</th>
+              <th>Panggilan API</th>
+              <th>Prompt Tokens</th>
+              <th>Candidates Tokens</th>
+              <th>Total Tokens</th>
+              <th>Porsi</th>
+              <th>Estimasi Biaya</th>
+            </tr>
+          </thead>
+          <tbody id="featureTableBody">
+            <tr>
+              <td><strong>🍳 Recipe Campaign Generator</strong><br><span style="font-size: 11px; color: var(--text-muted);">Single-Pass N Resep + DNA</span></td>
+              <td><span class="badge-pill badge-neutral">58 Calls</span></td>
+              <td class="font-mono">310,400</td>
+              <td class="font-mono">245,600</td>
+              <td class="font-mono" style="font-weight: 700;">556,000</td>
+              <td style="width: 140px;">
+                <div style="font-size: 11px; font-weight: 600;">37.5%</div>
+                <div class="progress-track"><div class="progress-fill" style="width: 37.5%; background: var(--action-primary);"></div></div>
+              </td>
+              <td class="font-mono" style="color: var(--status-success); font-weight: 700;">$0.17 (~Rp 2.720)</td>
+            </tr>
+            <tr>
+              <td><strong>🎯 Strategic Campaign Engine</strong><br><span style="font-size: 11px; color: var(--text-muted);">Storyboard, VO Script & Social Pack</span></td>
+              <td><span class="badge-pill badge-neutral">42 Calls</span></td>
+              <td class="font-mono">280,100</td>
+              <td class="font-mono">198,400</td>
+              <td class="font-mono" style="font-weight: 700;">478,500</td>
+              <td>
+                <div style="font-size: 11px; font-weight: 600;">32.3%</div>
+                <div class="progress-track"><div class="progress-fill" style="width: 32.3%; background: var(--status-info);"></div></div>
+              </td>
+              <td class="font-mono" style="color: var(--status-success); font-weight: 700;">$0.15 (~Rp 2.400)</td>
+            </tr>
+            <tr>
+              <td><strong>🏛️ Pillar Campaign Generator</strong><br><span style="font-size: 11px; color: var(--text-muted);">Brand Pillars & Narrative Matrix</span></td>
+              <td><span class="badge-pill badge-neutral">32 Calls</span></td>
+              <td class="font-mono">185,200</td>
+              <td class="font-mono">112,500</td>
+              <td class="font-mono" style="font-weight: 700;">297,700</td>
+              <td>
+                <div style="font-size: 11px; font-weight: 600;">20.1%</div>
+                <div class="progress-track"><div class="progress-fill" style="width: 20.1%; background: var(--status-warning);"></div></div>
+              </td>
+              <td class="font-mono" style="color: var(--status-success); font-weight: 700;">$0.09 (~Rp 1.440)</td>
+            </tr>
+            <tr>
+              <td><strong>🔬 Deconstruct & Ideation Lab</strong><br><span style="font-size: 11px; color: var(--text-muted);">Analisis Script & Ekstraksi Angle</span></td>
+              <td><span class="badge-pill badge-neutral">24 Calls</span></td>
+              <td class="font-mono">114,220</td>
+              <td class="font-mono">36,500</td>
+              <td class="font-mono" style="font-weight: 700;">150,720</td>
+              <td>
+                <div style="font-size: 11px; font-weight: 600;">10.1%</div>
+                <div class="progress-track"><div class="progress-fill" style="width: 10.1%; background: var(--status-neutral);"></div></div>
+              </td>
+              <td class="font-mono" style="color: var(--status-success); font-weight: 700;">$0.04 (~Rp 640)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 2: Breakdown per Model AI -->
+  <div id="modelBreakdown" class="tab-panel">
+    <div class="card-box">
+      <div class="card-box-header">
+        <h3>Katalog Model Riil MAKNA Flow & Tarif Resmi (Google AI Studio)</h3>
+        <span style="font-size: 12px; color: var(--text-muted);">Tarif per 1.000.000 Token</span>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Model Gemini</th>
+              <th>Peran di MAKNA Flow</th>
+              <th>Tarif Input / 1M</th>
+              <th>Tarif Output / 1M</th>
+              <th>Panggilan Bulan Ini</th>
+              <th>Total Token</th>
+              <th>Total Biaya</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>gemini-3.6-flash</strong></td>
+              <td>Workhorse Utama (Campaign, Recipe, Pillar, Multiplier)</td>
+              <td class="font-mono">$0.25 (~Rp 4.000)</td>
+              <td class="font-mono">$0.75 (~Rp 12.000)</td>
+              <td><span class="badge-pill badge-success">118 Calls</span></td>
+              <td class="font-mono">1,120,000</td>
+              <td class="font-mono" style="color: var(--status-success); font-weight: 700;">$0.34 (~Rp 5.440)</td>
+              <td><span class="badge-pill badge-success">Aktif (Primary)</span></td>
+            </tr>
+            <tr>
+              <td><strong>gemini-3.8-flash</strong></td>
+              <td>Waterfall Cascade & Turbo Execution</td>
+              <td class="font-mono">$0.30 (~Rp 4.800)</td>
+              <td class="font-mono">$0.90 (~Rp 14.400)</td>
+              <td><span class="badge-pill badge-neutral">22 Calls</span></td>
+              <td class="font-mono">245,000</td>
+              <td class="font-mono" style="color: var(--status-success); font-weight: 700;">$0.07 (~Rp 1.120)</td>
+              <td><span class="badge-pill badge-info">Aktif (Cascade)</span></td>
+            </tr>
+            <tr>
+              <td><strong>gemini-3.7-flash</strong></td>
+              <td>YouTube Studio & Sonic Scripting</td>
+              <td class="font-mono">$0.25 (~Rp 4.000)</td>
+              <td class="font-mono">$0.75 (~Rp 12.000)</td>
+              <td><span class="badge-pill badge-neutral">12 Calls</span></td>
+              <td class="font-mono">92,000</td>
+              <td class="font-mono" style="color: var(--status-success); font-weight: 700;">$0.03 (~Rp 480)</td>
+              <td><span class="badge-pill badge-info">Aktif</span></td>
+            </tr>
+            <tr>
+              <td><strong>gemini-1.5-flash-8b</strong></td>
+              <td>Product Scraper & OCR Extractions</td>
+              <td class="font-mono">$0.075 (~Rp 1.200)</td>
+              <td class="font-mono">$0.30 (~Rp 4.800)</td>
+              <td><span class="badge-pill badge-neutral">4 Calls</span></td>
+              <td class="font-mono">25,920</td>
+              <td class="font-mono" style="color: var(--status-success); font-weight: 700;">$0.01 (~Rp 160)</td>
+              <td><span class="badge-pill badge-info">Aktif</span></td>
+            </tr>
+            <tr>
+              <td><strong>gemini-2.5-flash</strong></td>
+              <td>Deconstruct & Content Compliance</td>
+              <td class="font-mono">$0.20 (~Rp 3.200)</td>
+              <td class="font-mono">$0.60 (~Rp 9.600)</td>
+              <td><span class="badge-pill badge-info">0 Calls</span></td>
+              <td class="font-mono">0</td>
+              <td class="font-mono" style="color: var(--text-muted); font-weight: 700;">$0.00</td>
+              <td><span class="badge-pill badge-warning">Standby</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 3: Log Aktivitas Panggilan Terakhir -->
+  <div id="activityLog" class="tab-panel">
+    <div class="card-box">
+      <div class="card-box-header">
+        <h3>Riwayat Transaksi Token Terakhir (Live Activity Log)</h3>
+        <span style="font-size: 12px; color: var(--text-muted);">5 Transaksi Terkini</span>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Fitur</th>
+              <th>Model Digunakan</th>
+              <th>Prompt Tok</th>
+              <th>Output Tok</th>
+              <th>Cached Tok</th>
+              <th>Biaya Estimasi</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="font-mono" style="font-size: 11px;">10:14:02 WIB</td>
+              <td>🍳 Recipe Campaign (3 Resep)</td>
+              <td class="font-mono">gemini-3.6-flash</td>
+              <td class="font-mono">4,820</td>
+              <td class="font-mono">3,450</td>
+              <td class="font-mono" style="color: var(--status-warning);">1,200</td>
+              <td class="font-mono" style="color: var(--status-success);">$0.003 (~Rp 48)</td>
+              <td><span class="badge-pill badge-success">OK (200)</span></td>
+            </tr>
+            <tr>
+              <td class="font-mono" style="font-size: 11px;">09:55:18 WIB</td>
+              <td>🎯 Strategic Campaign (WAYS_01)</td>
+              <td class="font-mono">gemini-3.6-flash</td>
+              <td class="font-mono">6,200</td>
+              <td class="font-mono">4,800</td>
+              <td class="font-mono">-</td>
+              <td class="font-mono" style="color: var(--status-success);">$0.005 (~Rp 80)</td>
+              <td><span class="badge-pill badge-success">OK (200)</span></td>
+            </tr>
+            <tr>
+              <td class="font-mono" style="font-size: 11px;">09:30:12 WIB</td>
+              <td>🏛️ Pillar Campaign (6 Ide)</td>
+              <td class="font-mono">gemini-3.6-flash</td>
+              <td class="font-mono">5,100</td>
+              <td class="font-mono">3,900</td>
+              <td class="font-mono">-</td>
+              <td class="font-mono" style="color: var(--status-success);">$0.004 (~Rp 64)</td>
+              <td><span class="badge-pill badge-success">OK (200)</span></td>
+            </tr>
+            <tr>
+              <td class="font-mono" style="font-size: 11px;">08:45:00 WIB</td>
+              <td>🔬 Deconstruct Narrative</td>
+              <td class="font-mono">gemini-3.8-flash</td>
+              <td class="font-mono">8,400</td>
+              <td class="font-mono">2,100</td>
+              <td class="font-mono">-</td>
+              <td class="font-mono" style="color: var(--status-success);">$0.004 (~Rp 64)</td>
+              <td><span class="badge-pill badge-success">OK (200)</span></td>
+            </tr>
+            <tr>
+              <td class="font-mono" style="font-size: 11px;">08:12:40 WIB</td>
+              <td>🍳 Recipe Campaign (5 Resep)</td>
+              <td class="font-mono">gemini-3.6-flash</td>
+              <td class="font-mono">5,800</td>
+              <td class="font-mono">5,100</td>
+              <td class="font-mono">-</td>
+              <td class="font-mono" style="color: var(--status-success);">$0.005 (~Rp 80)</td>
+              <td><span class="badge-pill badge-success">OK (200)</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 4: Kalkulator Simulasi Biaya -->
+  <div id="simulator" class="tab-panel">
+    <div class="card-box">
+      <div class="card-box-header">
+        <h3>🧮 Kalkulator Proyeksi Biaya API Bulanan</h3>
+        <span style="font-size: 12px; color: var(--text-muted);">Simulasikan rencana produksi konten bulanan Anda</span>
+      </div>
+
+      <div class="calc-grid">
+        <div>
+          <div class="form-group">
+            <label>Model yang Digunakan:</label>
+            <select id="simModel" class="custom-select" style="width: 100%;" onchange="runSimulation()">
+              <option value="flash-36" selected>gemini-3.6-flash ($0.25 / 1M input, $0.75 / 1M output) — Workhorse</option>
+              <option value="flash-38">gemini-3.8-flash ($0.30 / 1M input, $0.90 / 1M output) — Turbo</option>
+              <option value="flash-8b">gemini-1.5-flash-8b ($0.075 / 1M input, $0.30 / 1M output) — Scraper/Lite</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Jumlah Video / Ide Kampanye per Bulan: <span id="labelVideoCount" style="color: var(--action-primary); font-weight: 700;">100 Konten</span></label>
+            <input type="range" id="simVideoCount" class="calc-slider" min="10" max="1000" step="10" value="100" oninput="runSimulation()">
+          </div>
+
+          <div class="form-group">
+            <label>Rata-rata Resep / Variasi per Konten: <span id="labelVariasiCount" style="color: var(--action-primary); font-weight: 700;">3 Resep</span></label>
+            <input type="range" id="simVariasiCount" class="calc-slider" min="1" max="10" step="1" value="3" oninput="runSimulation()">
+          </div>
+        </div>
+
+        <div class="calc-result-box">
+          <div style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 8px;">Estimasi Total Tagihan Bulanan:</div>
+          <div id="simCostUsd" style="font-size: 36px; font-weight: 800; color: var(--status-success); font-family: 'JetBrains Mono', monospace;">$0.44</div>
+          <div id="simCostIdr" style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-top: 4px;">~Rp 7.040 / Bulan</div>
+          <div style="margin-top: 14px; font-size: 12px; color: var(--text-muted); line-height: 1.4;">
+            Estimasi konsumsi: <strong id="simTokensTotal" style="color: var(--text-primary);">960.000 Token</strong> (~9.600 token per konten lengkap).
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+  }
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const current = html.getAttribute('data-theme');
+    html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+  }
+
+  function updateData() {
+    const month = document.getElementById('monthSelect').value;
+    if (month === '2026-08') {
+      document.getElementById('valTotalTokens').innerText = '940,200';
+      document.getElementById('valTotalCost').innerHTML = '$0.29 <span style="font-size: 16px; color: var(--text-muted);">(~Rp 4.640)</span>';
+      document.getElementById('valTotalCalls').innerText = '98';
+      document.getElementById('valCachedTokens').innerText = '180,000';
+    } else if (month === '2026-07') {
+      document.getElementById('valTotalTokens').innerText = '420,000';
+      document.getElementById('valTotalCost').innerHTML = '$0.13 <span style="font-size: 16px; color: var(--text-muted);">(~Rp 2.080)</span>';
+      document.getElementById('valTotalCalls').innerText = '45';
+      document.getElementById('valCachedTokens').innerText = '60,000';
+    } else {
+      document.getElementById('valTotalTokens').innerText = '1,482,920';
+      document.getElementById('valTotalCost').innerHTML = '$0.45 <span style="font-size: 16px; color: var(--text-muted);">(~Rp 7.200)</span>';
+      document.getElementById('valTotalCalls').innerText = '156';
+      document.getElementById('valCachedTokens').innerText = '320,000';
+    }
+  }
+
+  function runSimulation() {
+    const videoCount = parseInt(document.getElementById('simVideoCount').value, 10);
+    const variasi = parseInt(document.getElementById('simVariasiCount').value, 10);
+    const model = document.getElementById('simModel').value;
+
+    document.getElementById('labelVideoCount').innerText = `${videoCount} Konten`;
+    document.getElementById('labelVariasiCount').innerText = `${variasi} Resep`;
+
+    const promptPerItem = 4200;
+    const outputPerItem = 1800 * (variasi / 3);
+    const totalPrompt = promptPerItem * videoCount;
+    const totalOutput = outputPerItem * videoCount;
+    const totalTokens = totalPrompt + totalOutput;
+
+    let inputRate = 0.25; // per 1M
+    let outputRate = 0.75; // per 1M
+    if (model === 'flash-8b') {
+      inputRate = 0.075;
+      outputRate = 0.30;
+    } else if (model === 'flash-38') {
+      inputRate = 0.30;
+      outputRate = 0.90;
+    }
+
+    const costUsd = ((totalPrompt / 1000000) * inputRate) + ((totalOutput / 1000000) * outputRate);
+    const costIdr = costUsd * 16000;
+
+    document.getElementById('simTokensTotal').innerText = `${totalTokens.toLocaleString()} Token`;
+    document.getElementById('simCostUsd').innerText = `$${costUsd.toFixed(2)}`;
+    document.getElementById('simCostIdr').innerText = `~Rp ${Math.round(costIdr).toLocaleString('id-ID')} / Bulan`;
+  }
+</script>
+
+</body>
+</html>
