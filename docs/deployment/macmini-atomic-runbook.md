@@ -38,8 +38,11 @@ npm run deploy:dev:rollback -- --release <release-id> --apply --confirm-dev
 
 ```bash
 cd /Users/masbenu/maknaflow-dev
-pm2 startOrGracefulReload ecosystem.macmini.config.cjs --only maknaflow-dev-ui,maknaflow-dev-api --update-env
+pm2 delete maknaflow-dev-ui maknaflow-dev-api
+pm2 start ecosystem.macmini.config.cjs --only maknaflow-dev-ui,maknaflow-dev-api --update-env
 ```
+
+`pm2 startOrGracefulReload` tidak dipakai untuk perpindahan antar-release karena PM2 dapat mempertahankan `cwd` proses lama. Deploy dan rollback wajib menolak aktivasi bila `pm_cwd` tidak sama dengan target.
 
 ## Verification
 
@@ -50,3 +53,12 @@ pm2 startOrGracefulReload ecosystem.macmini.config.cjs --only maknaflow-dev-ui,m
 - Jumlah mutable runtime files harus konsisten setelah dua deploy dan rollback.
 
 Rollback filesystem tidak mengembalikan schema database. Selama pilot, build tidak menjalankan auto-migration dan runtime hanya menggunakan schema `dev`. Migration destruktif membatalkan pilot.
+
+## Hasil Pilot 27 September 2026
+
+- Release aktif: `20260927T053541Z-e8ca71048d59`, Git SHA `e8ca71048d5925e466e06cad203568f27469f9bd` (`v2.32.7`).
+- UI `5020` dan API `7020` sehat; kedua proses PM2 online dengan `cwd` release aktif, `PG_SEARCH_PATH=dev`, dan `PGPOOL_MAX=3`.
+- Dua deployment berurutan, rollback ke release sebelumnya, dan aktivasi kembali release terbaru berhasil.
+- Shared runtime tetap konsisten: `data=2`, `logs=4`, `public/uploads=2124`, dan `public/temp=135` file.
+- Staging dan Production tidak dimutasi.
+- Siklus Recipe OPC end-to-end belum dapat diobservasi: schema Dev tidak memiliki kampanye `opc_260926_o6lpiv` atau item `content_kind=recipe_campaign`. Pilot tidak membuat job AI berbiaya secara otomatis.

@@ -3851,6 +3851,6 @@ Build Next.js saat ini mengimpor modul database yang dapat menjalankan auto-migr
 - [x] Jalankan bootstrap dry-run dan inventaris runtime Dev.
 - [x] Pilot deploy Dev menggunakan immutable Git SHA dan verifikasi port 5020/7020.
 - [x] Deploy release Dev kedua dan verifikasi shared runtime serta retention.
-- [ ] Uji rollback Dev serta persistensi data/uploads/video library.
-- [ ] Observasi workflow Dev end-to-end dan dokumentasikan hasil pilot tanpa tindakan pada Staging/Production.
-- [ ] Jalankan rilis patch non-interaktif dan verifikasi main/tag remote setelah implementasi selesai.
+- [x] Uji rollback Dev serta persistensi data/uploads/video library.
+- [ ] Observasi workflow Dev end-to-end dan dokumentasikan hasil pilot tanpa tindakan pada Staging/Production. (Menunggu satu Recipe OPC Dev: saat pilot tidak ada kampanye `opc_260926_o6lpiv` atau item `content_kind=recipe_campaign` pada schema `dev`; job AI baru tidak dibuat otomatis.)
+- [x] Jalankan rilis patch non-interaktif dan verifikasi main/tag remote setelah implementasi selesai.
