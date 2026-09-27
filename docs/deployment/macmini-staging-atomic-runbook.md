@@ -50,3 +50,12 @@ pm2 start ecosystem.macmini.config.cjs --only maknaflow-staging-ui,maknaflow-sta
 ```
 
 Jangan memakai `startOrGracefulReload` untuk perpindahan direktori karena PM2 dapat mempertahankan cwd lama. Folder legacy dipertahankan selama masa pilot.
+
+## Hasil Implementasi 28 September 2026
+
+- Release aktif: `20260927T224951Z-5be7268f7ede`, Git SHA `5be7268f7ede49e17de4ea28c6d1f7f9f4a7ecb7` (`v2.32.8`).
+- UI `5010` dan API `7010` mengembalikan HTTP 200.
+- Kedua proses PM2 online dengan cwd release aktif, `PG_SEARCH_PATH=staging`, dan `PGPOOL_MAX=3`.
+- Dua release immutable berhasil dibuat; rollback ke release pertama dan reaktivasi release terbaru berhasil.
+- Shared runtime setelah cutover: `data=2`, `logs=8`, `public/uploads=4491`, dan `public/temp=9736` file.
+- Folder legacy tetap tersedia untuk emergency recovery dan Production tidak dimutasi.

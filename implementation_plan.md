@@ -3915,7 +3915,7 @@ DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH="$schema" npm run build
 - [x] Perbarui runbook Staging, recovery legacy, dan prosedur rollback.
 - [x] Jalankan unit test serta validasi sintaks shell hasil generator.
 - [x] Jalankan bootstrap dry-run dan bootstrap apply pada Staging.
-- [ ] Rilis patch dan pastikan commit/tag tersedia di remote sebelum deployment.
-- [ ] Deploy immutable SHA ke Staging dan verifikasi UI 5010, API 7010, PM2 cwd, schema, pool, manifest, dan persistence.
-- [ ] Uji rollback Staging lalu aktifkan kembali release terbaru.
-- [ ] Dokumentasikan hasil implementasi tanpa mutasi Production.
+- [x] Rilis patch dan pastikan commit/tag tersedia di remote sebelum deployment.
+- [x] Deploy immutable SHA ke Staging dan verifikasi UI 5010, API 7010, PM2 cwd, schema, pool, manifest, dan persistence.
+- [x] Uji rollback Staging lalu aktifkan kembali release terbaru.
+- [x] Dokumentasikan hasil implementasi tanpa mutasi Production.
