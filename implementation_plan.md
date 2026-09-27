@@ -3849,8 +3849,8 @@ Build Next.js saat ini mengimpor modul database yang dapat menjalankan auto-migr
 - [x] Tambahkan unit/contract test deployment, failure injection, rollback, retention, dan non-Dev rejection.
 - [x] Tulis runbook bootstrap, deploy, rollback, backup, dan disaster recovery.
 - [x] Jalankan bootstrap dry-run dan inventaris runtime Dev.
-- [ ] Pilot deploy Dev menggunakan immutable Git SHA dan verifikasi port 5020/7020.
-- [ ] Deploy release Dev kedua dan verifikasi shared runtime serta retention.
+- [x] Pilot deploy Dev menggunakan immutable Git SHA dan verifikasi port 5020/7020.
+- [x] Deploy release Dev kedua dan verifikasi shared runtime serta retention.
 - [ ] Uji rollback Dev serta persistensi data/uploads/video library.
 - [ ] Observasi workflow Dev end-to-end dan dokumentasikan hasil pilot tanpa tindakan pada Staging/Production.
 - [ ] Jalankan rilis patch non-interaktif dan verifikasi main/tag remote setelah implementasi selesai.

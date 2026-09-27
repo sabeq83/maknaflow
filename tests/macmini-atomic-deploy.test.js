@@ -56,5 +56,8 @@ test('rollback only targets Dev atomic releases and checks both Dev endpoints', 
   assert.match(script, /127\.0\.0\.1:5020\/login/);
   assert.match(script, /127\.0\.0\.1:7020\/health/);
   assert.match(script, /pm2_env\.pm_cwd!==expected/);
+  assert.match(script, /for attempt in 1 2 3 4 5 6 7 8 9 10 11 12/);
+  assert.match(script, /recover_active_release/);
+  assert.match(script, /memulihkan release asal Dev/);
   assert.doesNotMatch(script, /maknaflow-staging|maknaflow-production/);
 });

@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.7 — Harden Atomic Rollback Health Checks (27/09/2026)
+- Retry Dev health checks while rollback processes start
+- Restore the original release automatically when a rollback target stays unhealthy
+
 ## V2.32.6 — Enforce Atomic PM2 Release CWD (27/09/2026)
 - Start Dev PM2 processes from the selected atomic release
 - Reject activation when PM2 cwd or online status does not match the target

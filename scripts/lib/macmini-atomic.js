@@ -222,11 +222,28 @@ test -d "$target"
 test -f "$target/deployment-manifest.json" || test "$target" = ${shellQuote(c.legacyRoot)}
 ln -s "$target" "$root/current.rollback"
 mv -h -f "$root/current.rollback" "$current"
+recover_active_release() {
+  status=$?
+  trap - ERR
+  ln -s "$active" "$root/current.recover"
+  mv -h -f "$root/current.recover" "$current"
+  activate_dev_processes "$active" || true
+  exit "$status"
+}
+trap recover_active_release ERR
 activate_dev_processes "$target"
-ui_code="$(curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:${c.uiPort}/login)"
-api_code="$(curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:${c.apiPort}/health)"
-test "$ui_code" = 200
-test "$api_code" = 200
+healthy=false
+for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+  ui_code="$(curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:${c.uiPort}/login || true)"
+  api_code="$(curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:${c.apiPort}/health || true)"
+  if test "$ui_code" = 200 && test "$api_code" = 200; then healthy=true; break; fi
+  sleep 5
+done
+if test "$healthy" != true; then
+  echo "Health check rollback gagal; memulihkan release asal Dev." >&2
+  false
+fi
+trap - ERR
 echo "rollback_success=true"
 echo "from=$active"
 echo "current=$target"`;
