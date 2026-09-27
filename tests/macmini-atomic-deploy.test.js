@@ -27,6 +27,7 @@ test('deploy builds before atomic activation and shares mutable paths', () => {
   assert.match(script, /DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev/);
   assert.match(script, /ln -s "\$shared\/data"/);
   assert.match(script, /ln -s "\$shared\/public\/uploads"/);
+  assert.match(script, /rm -f "\$release_log"[\s\S]*ln -s "\$log_file" "\$release_log"/);
   assert.doesNotMatch(script, /5010|7010|5000|6000|schema: 'staging'|schema: 'public'/);
 });
 

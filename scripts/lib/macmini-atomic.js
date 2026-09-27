@@ -137,7 +137,9 @@ ln -s "$shared/public/temp" "$release/public/temp"
 ln -s "$shared/.env.local" "$release/.env.local"
 for log_file in "$shared/public-runtime-logs"/*logs*.txt; do
   test -e "$log_file" || continue
-  ln -s "$log_file" "$release/public/$(basename "$log_file")"
+  release_log="$release/public/$(basename "$log_file")"
+  rm -f "$release_log"
+  ln -s "$log_file" "$release_log"
 done
 cd "$release"
 npm ci --no-audit --no-fund

@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.5 — Fix Atomic Shared Log Linking (27/09/2026)
+- Ganti tracked public runtime logs dengan symlink shared sebelum build
+- Pastikan kegagalan pre-activation membersihkan release dan mempertahankan PM2 legacy
+
 ## V2.32.4 — Fix Atomic Bootstrap Log Copy (27/09/2026)
 - Perbaiki escaping find exec pada bootstrap Dev atomic
 - Tambahkan regression assertion untuk command public runtime log copy
