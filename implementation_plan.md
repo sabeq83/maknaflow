@@ -3553,4 +3553,4 @@ Code Sesudah (Proposed/After):
 - [x] Jalankan unit test dan pemeriksaan statis terkait.
 - [x] Jalankan dry-run repair terhadap kampanye staging dan verifikasi cakupan 25 item.
 - [x] Terapkan repair staging lalu verifikasi seluruh representasi VO klip pertama.
-- [ ] Jalankan rilis patch non-interaktif serta verifikasi branch/tag remote.
+- [x] Jalankan rilis patch non-interaktif serta verifikasi branch/tag remote.
