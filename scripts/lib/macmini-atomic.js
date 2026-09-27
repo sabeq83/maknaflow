@@ -1,18 +1,18 @@
 import { execFileSync } from 'node:child_process';
-import { DEV_ATOMIC_CONFIG, assertDevOnlyEnvironment } from './macmini-dev-atomic-config.js';
+import { DEV_ATOMIC_CONFIG, getAtomicConfig } from './macmini-dev-atomic-config.js';
 
 export function shellQuote(value) {
   return `'${String(value).replaceAll("'", `'\\''`)}'`;
 }
 
-export function parseAtomicArgs(argv = []) {
+export function parseAtomicArgs(argv = [], { defaultEnvironment = 'dev' } = {}) {
   const valueOf = flag => {
     const index = argv.indexOf(flag);
     return index >= 0 ? argv[index + 1] : null;
   };
-  const environment = valueOf('--environment') || 'dev';
-  assertDevOnlyEnvironment(environment);
-  const keep = Number(valueOf('--keep') || DEV_ATOMIC_CONFIG.defaultRetention);
+  const environment = valueOf('--environment') || defaultEnvironment;
+  const config = getAtomicConfig(environment);
+  const keep = Number(valueOf('--keep') || config.defaultRetention);
   if (!Number.isInteger(keep) || keep < 2 || keep > 20) {
     throw new Error('--keep wajib berupa integer 2-20.');
   }
@@ -23,6 +23,8 @@ export function parseAtomicArgs(argv = []) {
     keep,
     apply: argv.includes('--apply'),
     confirmDev: argv.includes('--confirm-dev'),
+    confirmed: argv.includes(config.confirmationFlag),
+    config,
     dryRun: !argv.includes('--apply') || argv.includes('--dry-run')
   };
 }
@@ -41,8 +43,8 @@ export function resolveLocalGitSha(ref = 'HEAD') {
   return sha.toLowerCase();
 }
 
-export function runRemoteScript(script, { capture = false } = {}) {
-  return execFileSync('ssh', [...DEV_ATOMIC_CONFIG.sshOptions, DEV_ATOMIC_CONFIG.host, 'bash', '-s'], {
+export function runRemoteScript(script, { capture = false, config = DEV_ATOMIC_CONFIG } = {}) {
+  return execFileSync('ssh', [...config.sshOptions, config.host, 'bash', '-s'], {
     input: script,
     encoding: 'utf8',
     stdio: capture ? ['pipe', 'pipe', 'pipe'] : ['pipe', 'inherit', 'inherit'],
@@ -50,8 +52,8 @@ export function runRemoteScript(script, { capture = false } = {}) {
   });
 }
 
-export function buildBootstrapScript({ apply = false } = {}) {
-  const c = DEV_ATOMIC_CONFIG;
+export function buildBootstrapScript({ apply = false, config = DEV_ATOMIC_CONFIG } = {}) {
+  const c = config;
   const prefix = [
     'set -euo pipefail',
     'export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"',
@@ -97,9 +99,10 @@ for rel in data logs public/uploads public/temp; do
 done`;
 }
 
-export function buildDeployScript({ sha, keep = DEV_ATOMIC_CONFIG.defaultRetention } = {}) {
+export function buildDeployScript({ sha, keep, config = DEV_ATOMIC_CONFIG } = {}) {
   if (!/^[0-9a-f]{40}$/i.test(sha || '')) throw new Error('Deploy membutuhkan immutable 40-character Git SHA.');
-  const c = DEV_ATOMIC_CONFIG;
+  const c = config;
+  keep ??= c.defaultRetention;
   return `set -euo pipefail
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 root=${shellQuote(c.atomicRoot)}
@@ -110,7 +113,7 @@ current=${shellQuote(c.currentLink)}
 legacy=${shellQuote(c.legacyRoot)}
 sha=${shellQuote(sha)}
 keep=${Number(keep)}
-activate_dev_processes() {
+activate_environment_processes() {
   target="$1"
   expected_cwd="$(cd "$target" && pwd -P)"
   pm2 delete ${c.pm2Apps.join(' ')} >/dev/null 2>&1 || true
@@ -118,7 +121,7 @@ activate_dev_processes() {
   pm2 jlist | /opt/homebrew/bin/node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const expected=process.argv[1];const names=new Set(process.argv.slice(2));const apps=JSON.parse(s).filter(x=>names.has(x.name));if(apps.length!==names.size||apps.some(x=>x.pm2_env.status!=="online"||x.pm2_env.pm_cwd!==expected)){console.error(JSON.stringify(apps.map(x=>({name:x.name,status:x.pm2_env.status,cwd:x.pm2_env.pm_cwd,expected})),null,2));process.exit(1)}})' "$expected_cwd" ${c.pm2Apps.join(' ')}
 }
 lock="$root/.deploy-lock"
-if ! mkdir "$lock" 2>/dev/null; then echo "Deployment Dev lain sedang berjalan: $lock" >&2; exit 73; fi
+if ! mkdir "$lock" 2>/dev/null; then echo "Deployment ${c.environment} lain sedang berjalan: $lock" >&2; exit 73; fi
 cleanup() { rmdir "$lock" 2>/dev/null || true; }
 trap cleanup EXIT INT TERM
 test -d "$source_root/.git"
@@ -150,9 +153,21 @@ for log_file in "$shared/public-runtime-logs"/*logs*.txt; do
 done
 cd "$release"
 npm ci --no-audit --no-fund
-DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build
-printf '{"environment":"dev","release_id":"%s","git_sha":"%s","previous":"%s","built_at":"%s"}\n' \
+DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=${shellQuote(c.schema)} npm run build
+printf '{"environment":"${c.environment}","release_id":"%s","git_sha":"%s","previous":"%s","built_at":"%s"}\n' \
   "$release_id" "$sha" "$previous" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$release/deployment-manifest.json"
+if test -z "$previous"; then
+  for rel in data logs public/uploads public/temp; do
+    if test -d "$legacy/$rel"; then rsync -a "$legacy/$rel/" "$shared/$rel/"; fi
+  done
+  find "$legacy/public" -maxdepth 1 -type f -name '*logs*.txt' -exec cp -p {} "$shared/public-runtime-logs/" \\; 2>/dev/null || true
+  for log_file in "$shared/public-runtime-logs"/*logs*.txt; do
+    test -e "$log_file" || continue
+    release_log="$release/public/$(basename "$log_file")"
+    rm -f "$release_log"
+    ln -s "$log_file" "$release_log"
+  done
+fi
 ln -s "$release" "$root/current.next"
 mv -h -f "$root/current.next" "$current"
 rollback_after_activation() {
@@ -161,12 +176,12 @@ rollback_after_activation() {
   if test -n "$previous"; then rollback_target="$previous"; else rollback_target="$legacy"; fi
   ln -s "$rollback_target" "$root/current.rollback"
   mv -h -f "$root/current.rollback" "$current"
-  activate_dev_processes "$rollback_target" || true
+  activate_environment_processes "$rollback_target" || true
   cleanup
   exit "$status"
 }
 trap rollback_after_activation ERR
-activate_dev_processes "$release"
+activate_environment_processes "$release"
 healthy=false
 for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
   ui_code="$(curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:${c.uiPort}/login || true)"
@@ -175,10 +190,10 @@ for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
   sleep 5
 done
 if test "$healthy" != true; then
-  echo "Health check gagal; rollback Dev." >&2
+  echo "Health check gagal; rollback ${c.environment}." >&2
   false
 fi
-printf '{"environment":"dev","release_id":"%s","git_sha":"%s","previous":"%s","activated_at":"%s","health":"passed"}\n' \
+printf '{"environment":"${c.environment}","release_id":"%s","git_sha":"%s","previous":"%s","activated_at":"%s","health":"passed"}\n' \
   "$release_id" "$sha" "$previous" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$release/deployment-manifest.json"
 active="$(readlink "$current")"
 trap cleanup ERR
@@ -195,15 +210,15 @@ echo "previous=$previous"
 echo "current=$release"`;
 }
 
-export function buildRollbackScript({ targetRelease = null } = {}) {
-  const c = DEV_ATOMIC_CONFIG;
+export function buildRollbackScript({ targetRelease = null, config = DEV_ATOMIC_CONFIG } = {}) {
+  const c = config;
   const requested = targetRelease ? shellQuote(targetRelease) : "''";
   return `set -euo pipefail
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 root=${shellQuote(c.atomicRoot)}
 current=${shellQuote(c.currentLink)}
 requested=${requested}
-activate_dev_processes() {
+activate_environment_processes() {
   target="$1"
   expected_cwd="$(cd "$target" && pwd -P)"
   pm2 delete ${c.pm2Apps.join(' ')} >/dev/null 2>&1 || true
@@ -227,11 +242,11 @@ recover_active_release() {
   trap - ERR
   ln -s "$active" "$root/current.recover"
   mv -h -f "$root/current.recover" "$current"
-  activate_dev_processes "$active" || true
+  activate_environment_processes "$active" || true
   exit "$status"
 }
 trap recover_active_release ERR
-activate_dev_processes "$target"
+activate_environment_processes "$target"
 healthy=false
 for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
   ui_code="$(curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:${c.uiPort}/login || true)"
@@ -240,7 +255,7 @@ for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
   sleep 5
 done
 if test "$healthy" != true; then
-  echo "Health check rollback gagal; memulihkan release asal Dev." >&2
+  echo "Health check rollback gagal; memulihkan release asal ${c.environment}." >&2
   false
 fi
 trap - ERR

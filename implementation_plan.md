@@ -3854,3 +3854,68 @@ Build Next.js saat ini mengimpor modul database yang dapat menjalankan auto-migr
 - [x] Uji rollback Dev serta persistensi data/uploads/video library.
 - [ ] Observasi workflow Dev end-to-end dan dokumentasikan hasil pilot tanpa tindakan pada Staging/Production. (Menunggu satu Recipe OPC Dev: saat pilot tidak ada kampanye `opc_260926_o6lpiv` atau item `content_kind=recipe_campaign` pada schema `dev`; job AI baru tidak dibuat otomatis.)
 - [x] Jalankan rilis patch non-interaktif dan verifikasi main/tag remote setelah implementasi selesai.
+
+---
+
+# Implementation Plan — Git-Based Atomic Deployment Staging
+
+## Scope
+
+Memindahkan deployment Staging dari in-place `rsync --delete` ke release Git immutable di `/Users/masbenu/maknaflow-staging-atomic`, tanpa menyentuh Production. Staging tetap memakai UI `5010`, API `7010`, schema `staging`, `PGPOOL_MAX=3`, serta PM2 `maknaflow-staging-ui` dan `maknaflow-staging-api`.
+
+## Code Sebelum (Current/Before)
+
+### `scripts/lib/macmini-atomic.js`
+
+```js
+const c = DEV_ATOMIC_CONFIG;
+DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH=dev npm run build
+```
+
+### `package.json`
+
+```json
+"deploy:staging": "node scripts/deploy-macmini.js"
+```
+
+Deploy Staging saat ini melakukan transfer source dengan rsync dan build langsung di folder aktif `~/maknaflow-staging`.
+
+## Code Sesudah (Proposed/After)
+
+### `scripts/lib/macmini-atomic.js`
+
+```js
+const c = getAtomicConfig(environment);
+DISABLE_AUTO_MIGRATIONS=true PG_SEARCH_PATH="$schema" npm run build
+```
+
+### `package.json`
+
+```json
+"deploy:staging": "node scripts/deploy-macmini-staging-atomic.js",
+"deploy:staging:bootstrap": "node scripts/bootstrap-macmini-staging-atomic.js",
+"deploy:staging:rollback": "node scripts/rollback-macmini-staging.js"
+```
+
+## Safety and Verification
+
+- Konfigurasi Staging menggunakan root atomic terpisah dan hanya boleh mengelola dua proses PM2 Staging.
+- Build dilakukan sebelum symlink `current` dipindahkan.
+- Aktivasi memvalidasi `pm_cwd`, status PM2, port 5010/7010, schema, dan pool.
+- Health failure mengembalikan symlink serta PM2 ke release sebelumnya atau folder legacy.
+- Runtime paths dipindahkan ke `shared/` tanpa delete dari folder legacy.
+- Production tidak menjadi target atau fallback.
+
+## Execution Task List
+
+- [x] Generalisasi konfigurasi/orchestrator atomic dengan guard Dev dan Staging.
+- [x] Tambahkan CLI bootstrap, deploy, dan rollback khusus Staging.
+- [x] Alihkan hanya script `deploy:staging` ke jalur atomic dan pertahankan Production tanpa perubahan.
+- [x] Tambahkan contract test untuk root, port, schema, PM2, confirmation flag, dan penolakan Production.
+- [x] Perbarui runbook Staging, recovery legacy, dan prosedur rollback.
+- [x] Jalankan unit test serta validasi sintaks shell hasil generator.
+- [x] Jalankan bootstrap dry-run dan bootstrap apply pada Staging.
+- [ ] Rilis patch dan pastikan commit/tag tersedia di remote sebelum deployment.
+- [ ] Deploy immutable SHA ke Staging dan verifikasi UI 5010, API 7010, PM2 cwd, schema, pool, manifest, dan persistence.
+- [ ] Uji rollback Staging lalu aktifkan kembali release terbaru.
+- [ ] Dokumentasikan hasil implementasi tanpa mutasi Production.

@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.8 — Add Atomic Staging Deployment (28/09/2026)
+- Deploy Staging from immutable Git releases with atomic activation
+- Preserve runtime data in shared storage with validated rollback
+
 ## V2.32.7 — Harden Atomic Rollback Health Checks (27/09/2026)
 - Retry Dev health checks while rollback processes start
 - Restore the original release automatically when a rollback target stays unhealthy
