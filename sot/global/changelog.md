@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.6 — Enforce Atomic PM2 Release CWD (27/09/2026)
+- Start Dev PM2 processes from the selected atomic release
+- Reject activation when PM2 cwd or online status does not match the target
+
 ## V2.32.5 — Fix Atomic Shared Log Linking (27/09/2026)
 - Ganti tracked public runtime logs dengan symlink shared sebelum build
 - Pastikan kegagalan pre-activation membersihkan release dan mempertahankan PM2 legacy

@@ -39,6 +39,9 @@ test('deploy has lock, health checks, rollback, manifest, and safe retention gua
   assert.match(script, /Health check gagal; rollback Dev/);
   assert.match(script, /deployment-manifest\.json/);
   assert.match(script, /candidate.*active.*candidate.*previous/);
+  assert.match(script, /pm2 delete maknaflow-dev-ui maknaflow-dev-api/);
+  assert.match(script, /pm2_env\.pm_cwd!==expected/);
+  assert.doesNotMatch(script, /startOrGracefulReload/);
 });
 
 test('deploy requires immutable sha and bounded retention', () => {
@@ -52,5 +55,6 @@ test('rollback only targets Dev atomic releases and checks both Dev endpoints', 
   assert.match(script, /maknaflow-dev-atomic\/releases/);
   assert.match(script, /127\.0\.0\.1:5020\/login/);
   assert.match(script, /127\.0\.0\.1:7020\/health/);
+  assert.match(script, /pm2_env\.pm_cwd!==expected/);
   assert.doesNotMatch(script, /maknaflow-staging|maknaflow-production/);
 });

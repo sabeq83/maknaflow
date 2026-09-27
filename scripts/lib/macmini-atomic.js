@@ -110,6 +110,13 @@ current=${shellQuote(c.currentLink)}
 legacy=${shellQuote(c.legacyRoot)}
 sha=${shellQuote(sha)}
 keep=${Number(keep)}
+activate_dev_processes() {
+  target="$1"
+  expected_cwd="$(cd "$target" && pwd -P)"
+  pm2 delete ${c.pm2Apps.join(' ')} >/dev/null 2>&1 || true
+  pm2 start "$target/ecosystem.macmini.config.cjs" --only ${c.pm2Apps.join(',')} --update-env
+  pm2 jlist | /opt/homebrew/bin/node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const expected=process.argv[1];const names=new Set(process.argv.slice(2));const apps=JSON.parse(s).filter(x=>names.has(x.name));if(apps.length!==names.size||apps.some(x=>x.pm2_env.status!=="online"||x.pm2_env.pm_cwd!==expected)){console.error(JSON.stringify(apps.map(x=>({name:x.name,status:x.pm2_env.status,cwd:x.pm2_env.pm_cwd,expected})),null,2));process.exit(1)}})' "$expected_cwd" ${c.pm2Apps.join(' ')}
+}
 lock="$root/.deploy-lock"
 if ! mkdir "$lock" 2>/dev/null; then echo "Deployment Dev lain sedang berjalan: $lock" >&2; exit 73; fi
 cleanup() { rmdir "$lock" 2>/dev/null || true; }
@@ -154,12 +161,12 @@ rollback_after_activation() {
   if test -n "$previous"; then rollback_target="$previous"; else rollback_target="$legacy"; fi
   ln -s "$rollback_target" "$root/current.rollback"
   mv -h -f "$root/current.rollback" "$current"
-  pm2 startOrGracefulReload "$rollback_target/ecosystem.macmini.config.cjs" --only ${c.pm2Apps.join(',')} --update-env || true
+  activate_dev_processes "$rollback_target" || true
   cleanup
   exit "$status"
 }
 trap rollback_after_activation ERR
-pm2 startOrGracefulReload "$release/ecosystem.macmini.config.cjs" --only ${c.pm2Apps.join(',')} --update-env
+activate_dev_processes "$release"
 healthy=false
 for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
   ui_code="$(curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:${c.uiPort}/login || true)"
@@ -196,6 +203,13 @@ export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 root=${shellQuote(c.atomicRoot)}
 current=${shellQuote(c.currentLink)}
 requested=${requested}
+activate_dev_processes() {
+  target="$1"
+  expected_cwd="$(cd "$target" && pwd -P)"
+  pm2 delete ${c.pm2Apps.join(' ')} >/dev/null 2>&1 || true
+  pm2 start "$target/ecosystem.macmini.config.cjs" --only ${c.pm2Apps.join(',')} --update-env
+  pm2 jlist | /opt/homebrew/bin/node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const expected=process.argv[1];const names=new Set(process.argv.slice(2));const apps=JSON.parse(s).filter(x=>names.has(x.name));if(apps.length!==names.size||apps.some(x=>x.pm2_env.status!=="online"||x.pm2_env.pm_cwd!==expected)){console.error(JSON.stringify(apps.map(x=>({name:x.name,status:x.pm2_env.status,cwd:x.pm2_env.pm_cwd,expected})),null,2));process.exit(1)}})' "$expected_cwd" ${c.pm2Apps.join(' ')}
+}
 test -L "$current"
 active="$(readlink "$current")"
 if test -n "$requested"; then
@@ -208,7 +222,7 @@ test -d "$target"
 test -f "$target/deployment-manifest.json" || test "$target" = ${shellQuote(c.legacyRoot)}
 ln -s "$target" "$root/current.rollback"
 mv -h -f "$root/current.rollback" "$current"
-pm2 startOrGracefulReload "$target/ecosystem.macmini.config.cjs" --only ${c.pm2Apps.join(',')} --update-env
+activate_dev_processes "$target"
 ui_code="$(curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:${c.uiPort}/login)"
 api_code="$(curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:${c.apiPort}/health)"
 test "$ui_code" = 200
