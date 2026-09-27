@@ -3456,3 +3456,101 @@ origin                      = campaign_data_repair
 - [x] Verifikasi seluruh item kembali completed `4/4` dan review state konsisten.
 - [x] Resume campaign setelah acceptance criteria lulus.
 - [x] Pastikan tidak ada deployment atau mutasi Production.
+
+
+---
+
+# Implementation Plan: Exact Planner Hook for Recipe OPC
+
+## Scope
+
+Menjamin VO klip pertama Recipe Campaign hasil ingest Content Planner memakai hook planner secara verbatim, memvalidasi kontrak tersebut, dan memperbaiki data kampanye staging `opc_260926_o6lpiv` secara terarah.
+
+## File Changes
+
+### `lib/recipe-campaign-contract.js`
+
+Code Sebelum (Current/Before):
+
+```js
+export function validateRecipeProductionPackage(pkg) {
+  // hanya memeriksa recipe, scenes, dan social package
+}
+```
+
+Code Sesudah (Proposed/After):
+
+```js
+export function enforceExactRecipeHook(scenes, expectedHook) {
+  // menormalkan scene pertama sebagai hook dengan VO verbatim
+}
+
+export function validateRecipeProductionPackage(pkg, options = {}) {
+  // juga memvalidasi jumlah scene dan exact planner hook bila diberikan
+}
+```
+
+### `lib/recipe-production-adapter.js`
+
+Code Sebelum (Current/Before):
+
+```js
+const scenesArray = parsed.scenes || [];
+validateRecipeProductionPackage(finalPackage);
+```
+
+Code Sesudah (Proposed/After):
+
+```js
+const scenesArray = enforceExactRecipeHook(parsed.scenes || [], hook);
+validateRecipeProductionPackage(finalPackage, {
+  expectedHook: hook,
+  expectedSceneCount: targetClips
+});
+```
+
+Prompt juga menyatakan hook klip pertama wajib verbatim dan dikecualikan dari batas kata umum.
+
+### `tests/recipe-hook-fidelity.test.js`
+
+Code Sebelum (Current/Before):
+
+```js
+test('validateRecipeProductionPackage validates complete production package payload', () => {
+  // validasi struktur umum
+});
+```
+
+Code Sesudah (Proposed/After):
+
+```js
+test('enforces planner hook verbatim in the first recipe scene', () => {
+  // memastikan paraphrase model diganti hook planner exact
+});
+```
+
+### `scripts/repair-opc-recipe-hooks.mjs`
+
+Code Sebelum (Current/Before):
+
+```js
+// Belum ada repair terarah untuk sinkronisasi hook recipe OPC.
+```
+
+Code Sesudah (Proposed/After):
+
+```js
+// Dry-run secara default; --apply memerlukan --confirm-campaign.
+// Memperbarui result_json.storyboard, result_json.scenes,
+// dan new_video_plan_json klip pertama dari payload hook setiap item.
+```
+
+## Execution Task List
+
+- [x] Implementasikan exact-hook enforcement dan validasi kontrak.
+- [x] Tambahkan regression test untuk exact hook dan scene count.
+- [x] Buat script repair terarah dengan dry-run, transaksi, dan campaign confirmation.
+- [x] Jalankan unit test dan pemeriksaan statis terkait.
+- [x] Jalankan dry-run repair terhadap kampanye staging dan verifikasi cakupan 25 item.
+- [x] Terapkan repair staging lalu verifikasi seluruh representasi VO klip pertama.
+- [ ] Jalankan rilis patch non-interaktif serta verifikasi branch/tag remote.

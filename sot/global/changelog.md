@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.2 — Exact Recipe Planner Hook (27/09/2026)
+- Pastikan VO klip pertama Recipe OPC memakai hook Content Planner secara verbatim
+- Tambahkan validasi jumlah scene dan fidelity hook
+- Sediakan repair terarah untuk sinkronisasi hook kampanye existing
+
 ## V2.32.1 — Add Reports & Token Meter to Sidebar Navigation (25/09/2026)
 - Add Reports & Token Meter navigation link into Sidebar under SYSTEM section
 
