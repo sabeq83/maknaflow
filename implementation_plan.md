@@ -3554,3 +3554,303 @@ Code Sesudah (Proposed/After):
 - [x] Jalankan dry-run repair terhadap kampanye staging dan verifikasi cakupan 25 item.
 - [x] Terapkan repair staging lalu verifikasi seluruh representasi VO klip pertama.
 - [x] Jalankan rilis patch non-interaktif serta verifikasi branch/tag remote.
+
+---
+
+# Implementation Plan: Git-Based Atomic Deployment Pilot — Dev Only
+
+## Objective
+
+Menguji Git-based atomic deployment hanya pada environment Dev. Pilot mengambil commit/tag Git secara deterministik, membangun release baru di direktori terpisah, mengaktifkannya melalui symlink atomik, menjaga seluruh data runtime di `shared/`, dan menyediakan rollback cepat. Script, direktori, PM2 process, port, database schema, dan deployment workflow Staging maupun Production tidak diubah dalam fase ini.
+
+## Explicit Scope Boundary
+
+In scope:
+
+- Mac Mini Dev: `~/maknaflow-dev`, UI `5020`, API `7020`, schema `dev`.
+- PM2: `maknaflow-dev-ui` dan `maknaflow-dev-api`.
+- Git ref immutable, atomic activation, Dev health check, Dev rollback, dan Dev release retention.
+
+Out of scope:
+
+- `~/maknaflow-staging`, port `5010/7010`, schema `staging`, dan seluruh script deployment Staging.
+- `~/maknaflow-production`, port `5000/6000`, schema `public`, dan seluruh script deployment Production.
+- Perubahan data atau migrasi pada schema selain `dev`.
+- Penghapusan folder legacy `~/maknaflow-dev`; folder tersebut dipertahankan sebagai jalur pemulihan selama pilot.
+
+## Target Topology
+
+```text
+~/maknaflow-dev-atomic/
+├── source/                      # Git checkout/cache; read-only deploy credential
+├── releases/
+│   ├── <timestamp>-<sha>/
+│   └── <timestamp>-<sha>/
+├── shared/
+│   ├── .env.local
+│   ├── data/
+│   ├── logs/
+│   └── public/{uploads,temp}/
+└── current -> releases/<active-release>
+```
+
+Setiap release berasal dari SHA Git yang immutable. Build berlangsung sebelum symlink `current` dipindahkan. PM2 hanya di-reload setelah aktivasi; jika health check gagal, symlink dikembalikan ke release sebelumnya dan PM2 di-reload kembali.
+
+## Safety and Behavioral Decisions
+
+- Source deployment tidak lagi menggunakan `rsync --delete`.
+- Git checkout server menggunakan deploy key read-only atau credential helper read-only.
+- Orchestrator hard-coded menolak target selain `dev`; tidak tersedia argumen Staging atau Production.
+- Perintah deploy selalu mencatat SHA, release ID, previous release, waktu, dan hasil health check Dev.
+- Deploy lock mencegah dua deployment Dev berjalan bersamaan.
+- `.env.local`, `data/`, `logs/`, `public/uploads/`, dan `public/temp/` tidak pernah berada di release directory; semuanya berupa symlink ke `shared/`.
+- Release baru tidak menjadi aktif jika checkout, dependency install, build, atau preflight gagal.
+- Health check pascaaktivasi gagal akan memicu rollback otomatis ke symlink sebelumnya.
+- Retention default menyimpan lima release sukses terakhir; current dan previous tidak boleh dihapus.
+- Script Staging dan Production yang ada tidak disentuh dan tidak dipanggil selama pilot.
+- Rollback aplikasi tidak dianggap rollback database. Pilot hanya boleh memakai migration additive/backward-compatible pada schema `dev`.
+
+## Planned File Changes
+
+### `scripts/deploy-macmini-atomic.js` — new orchestrator
+
+Code Sebelum (Current/Before):
+
+```js
+// Belum ada orchestrator atomic deployment.
+// Masing-masing environment memakai script rsync in-place yang terpisah.
+```
+
+Code Sesudah (Proposed/After):
+
+```js
+const config = resolveDevAtomicConfig();
+assertDevOnlyTarget(args);
+const release = await resolveImmutableGitRelease(args.ref);
+
+await acquireDeployLock(config);
+await prepareRemoteRelease({ config, release });
+await linkSharedRuntimePaths({ config, release });
+await installAndBuild({ config, release });
+await activateSymlinkAtomically({ config, release });
+await reloadPm2({ config, release });
+
+if (!(await runHealthChecks(config))) {
+  await rollbackToPreviousRelease(config);
+  throw new Error('Health check gagal; release sebelumnya dipulihkan.');
+}
+
+await pruneInactiveReleases(config, { keep: 5 });
+```
+
+Tanggung jawab:
+
+- Memvalidasi bahwa target selalu Dev dan Git SHA/tag bersifat immutable.
+- Menolak working tree/ref ambigu serta seluruh argumen target Staging/Production.
+- Menjalankan satu sesi SSH panjang, bukan polling SSH berulang.
+- Menggunakan remote `git fetch`, `git worktree add --detach`, dan release directory baru.
+- Menyimpan deployment manifest JSON per release.
+- Mendukung `--dry-run`, `--ref`, `--keep`, dan `--rollback`.
+
+### `scripts/lib/macmini-dev-atomic-config.js` — new Dev-only configuration
+
+Code Sebelum (Current/Before):
+
+```js
+// Konfigurasi atomic deployment Dev belum tersedia.
+```
+
+Code Sesudah (Proposed/After):
+
+```js
+export const devAtomicConfig = {
+  legacyRoot: '~/maknaflow-dev',
+  atomicRoot: '~/maknaflow-dev-atomic',
+  uiPort: 5020,
+  apiPort: 7020,
+  schema: 'dev',
+  pm2Apps: ['maknaflow-dev-ui', 'maknaflow-dev-api']
+};
+```
+
+Tidak ada secret di file ini.
+
+### `scripts/bootstrap-macmini-atomic.js` — new one-time migration utility
+
+Code Sebelum (Current/Before):
+
+```js
+// Runtime source dan mutable data masih bercampur di ~/maknaflow-{environment}.
+```
+
+Code Sesudah (Proposed/After):
+
+```js
+assertDevOnlyTarget(args);
+await createAtomicDirectoryLayout('dev');
+await verifyReadOnlyGitAccess();
+await copyRuntimeDataWithoutDelete({
+  from: legacyRoot,
+  to: sharedRoot,
+  paths: ['.env.local', 'data', 'logs', 'public/uploads', 'public/temp']
+});
+await verifyChecksumsAndPermissions();
+```
+
+Utility berjalan dry-run secara default dan membutuhkan `--apply --confirm-dev`. Folder legacy tidak dihapus; ia menjadi rollback darurat selama seluruh pilot.
+
+### `scripts/deploy-macmini-dev.js`
+
+Code Sebelum (Current/Before):
+
+```js
+const rsyncCmd = `rsync -avz --delete ... ./ server:~/maknaflow-dev/`;
+execSync(rsyncCmd, { stdio: 'inherit' });
+```
+
+Code Sesudah (Proposed/After):
+
+```js
+await runAtomicDeployment({
+  ref: requestedRef || currentGitSha
+});
+```
+
+Wrapper dipertahankan agar perintah pengguna yang ada tidak berubah.
+
+### `scripts/rollback-macmini-dev.js` — new explicit Dev rollback command
+
+Code Sebelum (Current/Before):
+
+```js
+// Rollback membutuhkan deploy/build ulang secara manual.
+```
+
+Code Sesudah (Proposed/After):
+
+```js
+await rollbackAtomicRelease({
+  environment: 'dev',
+  targetRelease
+});
+```
+
+Rollback hanya boleh memilih release yang manifest dan build artifact-nya tervalidasi, kemudian menjalankan health check ulang.
+
+### `package.json`
+
+Code Sebelum (Current/Before):
+
+```json
+{
+  "deploy:staging": "node scripts/deploy-macmini.js",
+  "deploy:macmini-dev": "node scripts/deploy-macmini-dev.js",
+  "deploy:macmini-prod": "node scripts/deploy-macmini-prod.js"
+}
+```
+
+Code Sesudah (Proposed/After):
+
+```json
+{
+  "deploy:dev:atomic": "node scripts/deploy-macmini-atomic.js",
+  "deploy:dev:bootstrap": "node scripts/bootstrap-macmini-atomic.js",
+  "deploy:dev:rollback": "node scripts/rollback-macmini-dev.js",
+  "deploy:staging": "node scripts/deploy-macmini.js",
+  "deploy:macmini-dev": "node scripts/deploy-macmini-dev.js",
+  "deploy:macmini-prod": "node scripts/deploy-macmini-prod.js"
+}
+```
+
+### `tests/macmini-atomic-deploy.test.js` — new contract tests
+
+Code Sebelum (Current/Before):
+
+```js
+// Belum ada test kontrak deployment dan rollback.
+```
+
+Code Sesudah (Proposed/After):
+
+```js
+test('never places mutable runtime paths inside a release', () => {});
+test('does not activate a failed build', () => {});
+test('rolls current symlink back after failed health check', () => {});
+test('never prunes current or previous release', () => {});
+test('rejects every deployment target other than dev', () => {});
+test('serializes concurrent dev deploys with a lock', () => {});
+```
+
+Remote commands dibangun sebagai structured argument arrays dan diuji tanpa menjalankan SSH nyata.
+
+### `docs/deployment/macmini-atomic-runbook.md` — new operational runbook
+
+Code Sebelum (Current/Before):
+
+```md
+Deployment bergantung pada rsync in-place dan tidak memiliki prosedur rollback atomik.
+```
+
+Code Sesudah (Proposed/After):
+
+```md
+## Bootstrap
+## Deploy by immutable Git ref
+## Health verification
+## Automatic and manual rollback
+## Shared runtime backup
+## Release retention
+## Disaster recovery to legacy deployment
+```
+
+## Database Migration Boundary
+
+Build Next.js saat ini mengimpor modul database yang dapat menjalankan auto-migration. Karena itu, atomic filesystem rollback belum otomatis mengembalikan schema database. Pilot Dev harus:
+
+1. Identifikasi seluruh migration yang berjalan saat build/import.
+2. Pastikan migration bersifat additive dan backward-compatible minimal satu versi.
+3. Tambahkan mode build yang tidak menjalankan migration, atau pindahkan migration ke langkah eksplisit pre-activation.
+4. Catat versi schema pada deployment manifest.
+5. Menolak pilot bila ditemukan migration destruktif; tidak ada eksperimen pada schema Staging atau Production.
+
+## Rollout Sequence
+
+1. Implementasikan dan unit-test orchestrator secara lokal tanpa koneksi server.
+2. Jalankan bootstrap dry-run Dev dan inventarisasi permission, ukuran, serta checksum runtime paths.
+3. Bootstrap struktur atomic Dev tanpa menghapus folder legacy.
+4. Deploy satu immutable SHA ke Dev; verifikasi UI `5020`, API `7020`, database schema `dev`, worker, uploads, dan video library.
+5. Simulasikan build failure: pastikan `current` tidak berubah.
+6. Simulasikan health failure: pastikan rollback otomatis mengembalikan release lama.
+7. Deploy release Dev kedua untuk membuktikan retention dan persistensi shared runtime.
+8. Observasi Dev minimal satu siklus workflow Recipe OPC end-to-end.
+9. Simulasikan rollback manual ke release Dev sebelumnya.
+10. Buat laporan hasil pilot Dev. Rencana Staging/Production baru boleh disusun dalam permintaan terpisah setelah persetujuan pengguna.
+
+## Acceptance Criteria
+
+- Commit/tag yang aktif dapat dilacak dari deployment manifest dan endpoint system health.
+- Tidak ada `rsync --delete` dalam jalur deploy normal.
+- Kegagalan sebelum aktivasi tidak memengaruhi aplikasi aktif.
+- Kegagalan health check setelah aktivasi mengembalikan release lama otomatis.
+- Seluruh runtime asset bertahan melewati dua deployment dan satu rollback.
+- Dev lulus satu workflow Recipe OPC end-to-end pada release atomic.
+- Main dan release tag sudah tersedia di remote sebelum deployment.
+- Script atomic Dev menolak konfigurasi, port, schema, atau PM2 process di luar Dev.
+- Tidak ada perubahan file maupun remote state pada Staging dan Production.
+
+## Execution Task List
+
+- [x] Audit semua mutable runtime path dan migration side effect pada Dev saja.
+- [x] Implementasikan Dev-only configuration dan hard guard yang menolak target non-Dev.
+- [x] Implementasikan Git checkout/worktree, deployment lock, shared symlink, manifest, dan retention.
+- [x] Implementasikan atomic activation, PM2 reload, health check, serta automatic rollback.
+- [x] Implementasikan bootstrap/migration utility dari layout legacy tanpa delete.
+- [x] Ubah hanya wrapper Dev; jangan modifikasi wrapper Staging atau Production.
+- [x] Tambahkan unit/contract test deployment, failure injection, rollback, retention, dan non-Dev rejection.
+- [x] Tulis runbook bootstrap, deploy, rollback, backup, dan disaster recovery.
+- [x] Jalankan bootstrap dry-run dan inventaris runtime Dev.
+- [ ] Pilot deploy Dev menggunakan immutable Git SHA dan verifikasi port 5020/7020.
+- [ ] Deploy release Dev kedua dan verifikasi shared runtime serta retention.
+- [ ] Uji rollback Dev serta persistensi data/uploads/video library.
+- [ ] Observasi workflow Dev end-to-end dan dokumentasikan hasil pilot tanpa tindakan pada Staging/Production.
+- [ ] Jalankan rilis patch non-interaktif dan verifikasi main/tag remote setelah implementasi selesai.

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.3 — Pilot Atomic Deployment Dev (27/09/2026)
+- Tambahkan Git-based atomic deployment khusus Dev dengan hard guard non-Dev
+- Pisahkan mutable runtime paths ke shared storage tanpa rsync delete
+- Tambahkan health rollback retention contract tests dan runbook Dev
+
 ## V2.32.2 — Exact Recipe Planner Hook (27/09/2026)
 - Pastikan VO klip pertama Recipe OPC memakai hook Content Planner secara verbatim
 - Tambahkan validasi jumlah scene dan fidelity hook
