@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.4 — Fix Atomic Bootstrap Log Copy (27/09/2026)
+- Perbaiki escaping find exec pada bootstrap Dev atomic
+- Tambahkan regression assertion untuk command public runtime log copy
+
 ## V2.32.3 — Pilot Atomic Deployment Dev (27/09/2026)
 - Tambahkan Git-based atomic deployment khusus Dev dengan hard guard non-Dev
 - Pisahkan mutable runtime paths ke shared storage tanpa rsync delete

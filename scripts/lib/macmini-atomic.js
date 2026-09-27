@@ -88,7 +88,7 @@ for rel in data logs public/uploads public/temp; do
   if test -d "$legacy/$rel"; then rsync -a "$legacy/$rel/" "$shared/$rel/"; fi
 done
 if test ! -f "$shared/.env.local"; then cp -p "$legacy/.env.local" "$shared/.env.local"; fi
-find "$legacy/public" -maxdepth 1 -type f -name '*logs*.txt' -exec cp -p {} "$shared/public-runtime-logs/" \; 2>/dev/null || true
+find "$legacy/public" -maxdepth 1 -type f -name '*logs*.txt' -exec cp -p {} "$shared/public-runtime-logs/" \\; 2>/dev/null || true
 chmod 600 "$shared/.env.local"
 git -C "$source_root" fetch --prune --tags origin
 echo "bootstrap_ready=true"

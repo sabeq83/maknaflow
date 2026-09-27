@@ -14,6 +14,7 @@ test('bootstrap preserves legacy runtime and never uses rsync delete', () => {
   const script = buildBootstrapScript({ apply: true });
   assert.match(script, /maknaflow-dev-atomic/);
   assert.match(script, /rsync -a/);
+  assert.match(script, /-exec cp -p \{\} .* \\;/);
   assert.doesNotMatch(script, /--delete/);
   assert.doesNotMatch(script, /rm -rf.*maknaflow-dev/);
 });
