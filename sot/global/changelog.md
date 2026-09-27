@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.9 — Document Atomic Deployment SOT (28/09/2026)
+- Add authoritative Git-based atomic deployment architecture and operating rules
+- Define canonical Dev and Staging deploy, rollback, health, and database safety procedures
+
 ## V2.32.8 — Add Atomic Staging Deployment (28/09/2026)
 - Deploy Staging from immutable Git releases with atomic activation
 - Preserve runtime data in shared storage with validated rollback
