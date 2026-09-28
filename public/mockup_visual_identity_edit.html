@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Mockup — Visual Identity Studio Edit & Reference Asset (Metode A)</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --font-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --radius-xs: 4px;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      
+      --canvas: #090d16;
+      --sidebar: #0d1322;
+      --surface: #131b2e;
+      --surface-raised: #1a243d;
+      --surface-interactive: #222f4e;
+      --surface-hover: #2b3b61;
+      --surface-subtle: rgba(255, 255, 255, 0.03);
+      
+      --border-subtle: #243254;
+      --border-strong: #384d7d;
+      --border-color: #243254;
+      
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #8493b2;
+      
+      --input-bg: #0b101c;
+      --focus-ring: #6366f1;
+      
+      --action-primary: #6366f1;
+      --action-primary-hover: #4f46e5;
+      --on-action-primary: #ffffff;
+      
+      --status-info: #38bdf8;
+      --status-info-soft: rgba(56, 189, 248, 0.12);
+      --status-success: #34d399;
+      --status-success-soft: rgba(52, 211, 153, 0.12);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.12);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.12);
+      
+      --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.4);
+      --shadow-modal: 0 20px 50px rgba(0, 0, 0, 0.6);
+      --overlay-backdrop: rgba(4, 7, 13, 0.8);
+    }
+    
+    [data-theme="light"] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --sidebar: #f1f5f9;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --surface-subtle: rgba(0, 0, 0, 0.02);
+      
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-color: #e2e8f0;
+      
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      
+      --input-bg: #ffffff;
+      --focus-ring: #4f46e5;
+      
+      --action-primary: #4f46e5;
+      --action-primary-hover: #4338ca;
+      --on-action-primary: #ffffff;
+      
+      --status-info: #0284c7;
+      --status-info-soft: #e0f2fe;
+      --status-success: #059669;
+      --status-success-soft: #d1fae5;
+      --status-warning: #d97706;
+      --status-warning-soft: #fef3c7;
+      --status-danger: #e11d48;
+      --status-danger-soft: #ffe4e6;
+      
+      --shadow-card: 0 4px 14px rgba(0, 0, 0, 0.06);
+      --shadow-modal: 0 16px 36px rgba(0, 0, 0, 0.15);
+      --overlay-backdrop: rgba(15, 23, 42, 0.4);
+    }
+    
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; font-family: var(--font-sans); background: var(--canvas); color: var(--text-primary); -webkit-font-smoothing: antialiased; }
+    button, input, select, textarea { font-family: inherit; font-size: inherit; }
+    button { cursor: pointer; }
+    
+    .layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+    .sidebar { background: var(--sidebar); border-right: 1px solid var(--border-subtle); padding: 20px 16px; }
+    .sidebar-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.05rem; color: var(--text-primary); margin-bottom: 28px; }
+    .sidebar-brand-badge { width: 32px; height: 32px; border-radius: var(--radius-sm); background: var(--action-primary); color: var(--on-action-primary); display: grid; place-items: center; font-weight: 900; font-size: 14px; }
+    
+    .nav-link { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; transition: all 0.15s; }
+    .nav-link:hover { background: var(--surface-hover); color: var(--text-primary); }
+    .nav-link.active { background: var(--surface-interactive); color: var(--text-primary); border: 1px solid var(--border-subtle); }
+    
+    .main { padding: 32px; overflow-y: auto; max-height: 100vh; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+    .page-title { font-size: 1.5rem; font-weight: 800; margin: 0 0 4px; letter-spacing: -0.02em; }
+    .page-subtitle { color: var(--text-muted); font-size: 0.85rem; margin: 0; }
+    
+    .theme-toggle { background: var(--surface-interactive); border: 1px solid var(--border-subtle); color: var(--text-primary); padding: 6px 12px; border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 700; }
+    
+    .tabs { display: inline-flex; gap: 4px; padding: 4px; background: var(--sidebar); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); margin-bottom: 24px; }
+    .tab-btn { background: none; border: none; padding: 8px 16px; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); border-radius: var(--radius-xs); transition: all 0.15s; }
+    .tab-btn.active { background: var(--surface-interactive); color: var(--action-primary); }
+    
+    .preset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px; }
+    .preset-card { background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-card); display: flex; flex-direction: column; justify-content: space-between; position: relative; }
+    .preset-badge { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 8px; border-radius: 20px; background: var(--status-info-soft); color: var(--status-info); border: 1px solid rgba(56, 189, 248, 0.3); }
+    
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 14px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.8rem; border: 1px solid transparent; transition: all 0.15s; }
+    .btn-primary { background: var(--action-primary); color: var(--on-action-primary); }
+    .btn-primary:hover { background: var(--action-primary-hover); }
+    .btn-secondary { background: var(--surface-interactive); color: var(--text-primary); border-color: var(--border-subtle); }
+    .btn-secondary:hover { background: var(--surface-hover); }
+    .btn-danger { background: var(--status-danger-soft); color: var(--status-danger); border-color: rgba(251, 113, 133, 0.3); }
+    
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: var(--overlay-backdrop); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 999; padding: 20px; }
+    .modal-dialog { background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); width: 100%; max-width: 900px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-modal); display: flex; flex-direction: column; }
+    .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--surface); z-index: 10; }
+    .modal-body { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; gap: 12px; position: sticky; bottom: 0; background: var(--surface); z-index: 10; }
+    
+    .form-section { background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+    .section-title { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--action-primary); margin: 0; letter-spacing: 0.05em; }
+    
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); }
+    .form-input, .form-select, .form-textarea { background: var(--input-bg); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px 12px; color: var(--text-primary); font-size: 0.8rem; outline: none; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--focus-ring); box-shadow: 0 0 0 1px var(--focus-ring); }
+    
+    /* Reference Asset Registry */
+    .registry-box { background: var(--canvas); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 20px; }
+    .registry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+    .role-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .role-pill { background: var(--surface-interactive); border: 1px solid var(--border-subtle); color: var(--text-secondary); padding: 6px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+    .role-pill.active { background: var(--action-primary); color: var(--on-action-primary); border-color: var(--action-primary); }
+    
+    .asset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .asset-card { border-radius: var(--radius-sm); padding: 14px; border: 1px solid var(--border-subtle); background: var(--surface-raised); }
+    .asset-card.active-approved { border: 2px solid var(--status-success); background: rgba(52, 211, 153, 0.04); }
+    .asset-img { width: 100%; height: 160px; object-fit: cover; border-radius: var(--radius-xs); margin-bottom: 10px; background: var(--canvas); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-badge">M</div>
+        <span>MAKNA Flow</span>
+      </div>
+      <a href="#" class="nav-link">📊 Dashboard</a>
+      <a href="#" class="nav-link">✍️ Content Planner</a>
+      <a href="#" class="nav-link">🎥 Video Generator</a>
+      <a href="#" class="nav-link active">🎭 Visual Identity Studio</a>
+      <a href="#" class="nav-link">⚙️ Tenant Settings</a>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">🎭 Visual Identity Studio v2</h1>
+          <p class="page-subtitle">Sistem identitas visual multi-mode deterministik & Visual Reference Registry (Metode A).</p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button class="theme-toggle" onclick="toggleTheme()">🌓 Light / Dark</button>
+          <button class="btn btn-primary" onclick="openEditModal()">+ Create Manually</button>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn" onclick="setTab('system')">System Presets (6)</button>
+        <button class="tab-btn active" onclick="setTab('user')">My Presets (SasyaHouse)</button>
+        <button class="tab-btn" onclick="setTab('archived')">Archived</button>
+      </div>
+
+      <!-- Preset Grid -->
+      <div class="preset-grid">
+        <!-- SasyaHouse Preset Card -->
+        <div class="preset-card">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+              <div>
+                <span class="preset-badge">My Brand Preset</span>
+                <h3 style="margin: 8px 0 4px; font-size: 1.05rem; font-weight: 800; color: var(--text-primary);">
+                  SasyaHouse Modern Muslimah Lifestyle
+                </h3>
+                <code style="font-size: 0.7rem; color: var(--text-muted); background: var(--surface-interactive); padding: 2px 6px; border-radius: 4px;">
+                  sasyahouse_modern_muslimah_lifestyle
+                </code>
+              </div>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.45; margin-bottom: 16px;">
+              Visual identity resmi SasyaHouse: Mahasiswi muslimah faceless hands-only, gaya hidup modern minimalis Gen Z, kuliner & hunian estetik di Sigura-gura Malang.
+            </p>
+
+            <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); padding: 12px; border-radius: var(--radius-sm); margin-bottom: 16px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <span style="font-size: 0.65rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Primary Style</span>
+                <span style="font-size: 0.65rem; font-weight: 700; color: var(--status-success); background: var(--status-success-soft); padding: 1px 6px; border-radius: 10px;">culinary • photorealistic</span>
+              </div>
+              <strong style="font-size: 0.85rem; color: var(--text-primary);">Culinary Cinematic</strong>
+
+              <div style="margin-top: 8px;">
+                <span style="font-size: 0.65rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 4px;">Supporting Modes</span>
+                <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                  <span style="font-size: 0.65rem; background: var(--surface-interactive); padding: 2px 6px; border-radius: 4px; color: var(--text-secondary);">Commercial Product Cinematic</span>
+                  <span style="font-size: 0.65rem; background: var(--surface-interactive); padding: 2px 6px; border-radius: 4px; color: var(--text-secondary);">Cinematic Realistic</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 8px; border-top: 1px solid var(--border-subtle); padding-top: 14px;">
+            <button class="btn btn-secondary" style="flex: 1;" onclick="alert('Previewing prompt resolution!')">Preview</button>
+            <button class="btn btn-primary" style="flex: 1;" onclick="openEditModal()">Edit</button>
+            <button class="btn btn-danger" style="padding: 8px 12px;" onclick="alert('Archive confirm')">Archive</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Interactive Edit Modal -->
+  <div id="editModal" class="modal-overlay" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <h2 style="margin: 0 0 4px; font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">
+            ✏️ Edit Visual Identity — SasyaHouse
+          </h2>
+          <p style="margin: 0; font-size: 0.75rem; color: var(--text-muted);">
+            Konfigurasi deterministik & Reference Asset Conditioning (Metode A)
+          </p>
+        </div>
+        <button onclick="closeEditModal()" style="background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer;">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- 1. Basic Info -->
+        <div class="form-section">
+          <h3 class="section-title">1. Basic Info</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">Identity Name*</label>
+              <input type="text" class="form-input" value="SasyaHouse Modern Muslimah Lifestyle">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Preset Key (Slug)</label>
+              <input type="text" class="form-input" value="sasyahouse_modern_muslimah_lifestyle" disabled>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea class="form-textarea" rows="2">Visual identity resmi SasyaHouse: Mahasiswi muslimah faceless hands-only, gaya hidup modern minimalis Gen Z, kuliner & hunian estetik di Sigura-gura Malang.</textarea>
+          </div>
+        </div>
+
+        <!-- 2. Visual Language Selection -->
+        <div class="form-section">
+          <h3 class="section-title">2. Visual Language Modes (Primary & Supporting)</h3>
+          <div class="form-group">
+            <label class="form-label">Primary Visual Style (Pondasi Utama)</label>
+            <select class="form-select">
+              <option value="culinary_cinematic" selected>Culinary Cinematic (culinary • photorealistic)</option>
+              <option value="commercial_product_cinematic">Commercial Product Cinematic (commercial • photorealistic)</option>
+              <option value="cinematic_realistic">Cinematic Realistic (cinematic • photorealistic)</option>
+              <option value="stylized_3d_character">Stylized 3D Character (character_3d • stylized_3d)</option>
+              <option value="cozy_claymation">Cozy Claymation (character_3d • claymation)</option>
+              <option value="editorial_graphic_novel">Editorial Graphic Novel (editorial • illustration)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Supporting Styles (Pilih mode visual pendukung / transisi narasi):</label>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              <button class="role-pill active">Culinary Cinematic (Primary)</button>
+              <button class="role-pill active">Commercial Product Cinematic ✓</button>
+              <button class="role-pill active">Cinematic Realistic ✓</button>
+              <button class="role-pill">+ Isometric Society [Supp]</button>
+              <button class="role-pill">+ Symbolic Surrealism [Supp]</button>
+              <button class="role-pill">+ Paper Cutout Documentary [Supp]</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Visual Reference Registry (Metode A - Foto Riil Properti & Hunian) -->
+        <div class="registry-box">
+          <div class="registry-header">
+            <div>
+              <h3 style="margin: 0 0 2px; font-size: 0.95rem; font-weight: 800; color: var(--action-primary);">
+                🖼️ Visual Reference Registry (Metode A — Foto Riil Properti)
+              </h3>
+              <p style="margin: 0; font-size: 0.7rem; color: var(--text-muted);">
+                Unggah foto riil kost SasyaHouse (kamar, fasad, pantry, meja) untuk mengondisikan generator scene.
+              </p>
+            </div>
+            <div class="role-pills">
+              <button class="role-pill" onclick="switchRoleTab('visual_style', this)">Visual Style</button>
+              <button class="role-pill active" onclick="switchRoleTab('location', this)">Location / Hunian</button>
+              <button class="role-pill" onclick="switchRoleTab('wardrobe', this)">Wardrobe</button>
+              <button class="role-pill" onclick="switchRoleTab('palette_sheet', this)">Palette Sheet</button>
+            </div>
+          </div>
+
+          <!-- Upload / Action Bar -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+            <div style="background: var(--surface-raised); border: 1px dashed var(--border-strong); padding: 12px; border-radius: var(--radius-sm);">
+              <span style="font-size: 0.7rem; font-weight: 800; color: var(--text-muted); display: block; margin-bottom: 6px; text-transform: uppercase;">
+                📤 UPLOAD REAL KOST PHOTO
+              </span>
+              <input type="file" style="font-size: 0.75rem; color: var(--text-secondary);" onchange="simulateUpload(event)">
+            </div>
+            <div style="background: var(--surface-raised); border: 1px dashed var(--border-strong); padding: 12px; border-radius: var(--radius-sm); display: flex; flex-direction: column; justify-content: center;">
+              <button class="btn btn-secondary" style="font-size: 0.75rem;" onclick="alert('Importing legacy property references...')">
+                🔄 Import Legacy Photo Reference
+              </button>
+            </div>
+          </div>
+
+          <!-- Active Approved & Versions -->
+          <div class="asset-grid">
+            <div class="asset-card active-approved">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 0.7rem; font-weight: 800; color: var(--status-success); text-transform: uppercase;">
+                  ✓ ACTIVE APPROVED REFERENCE
+                </span>
+                <span style="font-size: 0.7rem; color: var(--text-muted);">v1 (Real Photo)</span>
+              </div>
+              <div style="height: 160px; background: #233554; border-radius: var(--radius-xs); display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-secondary); text-align: center; padding: 12px;">
+                <span style="font-size: 2rem; margin-bottom: 6px;">🛏️</span>
+                <strong style="font-size: 0.8rem; color: #fff;">Kamar Tidur Estetik & Meja Modern SasyaHouse</strong>
+                <span style="font-size: 0.65rem; color: var(--text-muted);">Foto riil meja belajar putih, aksen oakwood, pencahayaan alami</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--text-muted); margin-top: 8px;">
+                <span>Role: location</span>
+                <span>1080x1920 • SHA256: e8a91b...</span>
+              </div>
+            </div>
+
+            <div class="asset-card">
+              <span style="font-size: 0.7rem; font-weight: 800; color: var(--text-secondary); display: block; margin-bottom: 8px;">
+                VERSIONS & ALTERNATIVES (DRAFTS)
+              </span>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; gap: 10px; background: var(--surface); padding: 8px; border-radius: var(--radius-xs); border: 1px solid var(--border-subtle); align-items: center;">
+                  <span style="font-size: 1.4rem;">🍳</span>
+                  <div style="flex: 1;">
+                    <strong style="display: block; font-size: 0.75rem; color: var(--text-primary);">Shared Pantry & RO Drinking Station</strong>
+                    <span style="font-size: 0.65rem; color: var(--text-muted);">Draft v2 • Real photo uploaded</span>
+                  </div>
+                  <button class="btn btn-primary" style="font-size: 0.65rem; padding: 4px 8px;" onclick="alert('Approved v2 as active reference!')">Approve</button>
+                </div>
+                <div style="display: flex; gap: 10px; background: var(--surface); padding: 8px; border-radius: var(--radius-xs); border: 1px solid var(--border-subtle); align-items: center;">
+                  <span style="font-size: 1.4rem;">🏢</span>
+                  <div style="flex: 1;">
+                    <strong style="display: block; font-size: 0.75rem; color: var(--text-primary);">Fasad Bangunan SasyaHouse Malang</strong>
+                    <span style="font-size: 0.65rem; color: var(--text-muted);">Draft v3 • Real photo uploaded</span>
+                  </div>
+                  <button class="btn btn-primary" style="font-size: 0.65rem; padding: 4px 8px;" onclick="alert('Approved v3 as active reference!')">Approve</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeEditModal()">Batal</button>
+        <button class="btn btn-primary" onclick="alert('Visual Identity SasyaHouse berhasil disimpan!'); closeEditModal();">
+          Simpan Visual Identity
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+
+    function openEditModal() {
+      document.getElementById('editModal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').style.display = 'none';
+    }
+
+    function setTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    function switchRoleTab(role, el) {
+      document.querySelectorAll('.role-pills .role-pill').forEach(btn => btn.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function simulateUpload(e) {
+      if (e.target.files && e.target.files[0]) {
+        alert(`File "${e.target.files[0].name}" berhasil diunggah sebagai draft referensi foto riil untuk SasyaHouse!`);
+      }
+    }
+  </script>
+</body>
+</html>

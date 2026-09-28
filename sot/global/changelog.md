@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.12 — Fix Visual Identity Edit Modal and Add Location Reference Assets (29/09/2026)
+- Fix TypeError undefined map on PRIMARY_STYLE_KEYS in Visual Identity Studio
+- Harden handleOpenEdit with safe deep fallbacks for sub-objects
+- Expand Visual Reference Asset roles to include location for real photo conditioning
+
 ## V2.32.11 — Visual Identity Style Taxonomy & Safe Migration (28/09/2026)
 - Tambah taxonomy 3-layer rendering medium dan art direction dengan default neutral cinematic_realistic
 - Hapus silent fallback editorial_graphic_novel pada 5 system preset dan dynamic fallback allocator

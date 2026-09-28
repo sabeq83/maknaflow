@@ -173,12 +173,16 @@ export default function VisualIdentityStudioPage() {
   };
 
   const handleOpenEdit = (preset) => {
-    setLabel(preset.label);
+    setLabel(preset.label || '');
     setDescription(preset.description || '');
-    setPresetKey(preset.preset_key);
+    setPresetKey(preset.preset_key || '');
     setConfig({
       ...DEFAULT_CONFIG,
-      ...preset.config,
+      ...(preset.config || {}),
+      subject: {
+        ...DEFAULT_CONFIG.subject,
+        ...(preset.config?.subject || {})
+      },
       visual_language: {
         ...DEFAULT_CONFIG.visual_language,
         ...(preset.config?.visual_language || {})
@@ -198,6 +202,26 @@ export default function VisualIdentityStudioPage() {
       metaphor_engine: {
         ...DEFAULT_CONFIG.metaphor_engine,
         ...(preset.config?.metaphor_engine || {})
+      },
+      wardrobe: {
+        ...DEFAULT_CONFIG.wardrobe,
+        ...(preset.config?.wardrobe || {})
+      },
+      environment: {
+        ...DEFAULT_CONFIG.environment,
+        ...(preset.config?.environment || {})
+      },
+      lighting: {
+        ...DEFAULT_CONFIG.lighting,
+        ...(preset.config?.lighting || {})
+      },
+      camera: {
+        ...DEFAULT_CONFIG.camera,
+        ...(preset.config?.camera || {})
+      },
+      guardrails: {
+        ...DEFAULT_CONFIG.guardrails,
+        ...(preset.config?.guardrails || {})
       }
     });
     setEditingPreset(preset);
@@ -995,7 +1019,7 @@ export default function VisualIdentityStudioPage() {
                 <ReferenceAssetManager
                   ownerType="visual_identity"
                   ownerId={editingPreset.id}
-                  allowedRoles={['wardrobe', 'visual_style', 'palette_sheet', 'character_sheet']}
+                  allowedRoles={['visual_style', 'location', 'wardrobe', 'palette_sheet', 'character_sheet']}
                 />
               )}
 
