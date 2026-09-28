@@ -12,8 +12,8 @@ test('getModelWaterfallChain returns full cascade for Free Tier starting at gemi
   const chain = await getModelWaterfallChain('gemini-3.8-flash', 'free');
   assert.deepEqual(chain, [
     'gemini-3.8-flash',
-    'gemini-3.7-flash',
     'gemini-3.6-flash',
+    'gemini-3.7-flash',
     'gemini-3.5-flash',
     'gemini-flash-latest'
   ]);
@@ -54,15 +54,17 @@ test('resolveModelForTask correctly routes task types based on tier', async () =
   const scraperFree = await resolveModelForTask('SCRAPER');
   assert.equal(scraperFree, 'gemini-3.6-flash');
   const campaignFree = await resolveModelForTask('CAMPAIGN_PLANNER');
-  assert.equal(campaignFree, 'gemini-3.8-flash');
+  assert.equal(campaignFree, 'gemini-3.6-flash');
 });
 
 test('getModelWaterfallChain uses database setting when startingModel is omitted', async () => {
+  await setSetting('gemini_api_tier', 'free');
   await setSetting('gemini_model_primary', 'gemini-3.7-flash');
   const chain = await getModelWaterfallChain();
   assert.deepEqual(chain, [
     'gemini-3.7-flash',
     'gemini-3.6-flash',
+    'gemini-3.8-flash',
     'gemini-3.5-flash',
     'gemini-flash-latest'
   ]);

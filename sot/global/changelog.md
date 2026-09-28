@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.10 — Fix Empty Prompt Payload on Gemini Standard Requests (28/09/2026)
+- Perbaiki pengiriman prompt text ke parts array pada standard request Gemini API di lib/gemini.js
+- Cegah error No content is provided for sending chat message pada scheduler pillar_generator dan free tier
+- Tambahkan unit test verifikasi payload generateContentFlexible di tests/gemini-content-payload.test.js
+
 ## V2.32.9 — Document Atomic Deployment SOT (28/09/2026)
 - Add authoritative Git-based atomic deployment architecture and operating rules
 - Define canonical Dev and Staging deploy, rollback, health, and database safety procedures
