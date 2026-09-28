@@ -601,20 +601,20 @@ Verifikasi prompt harus membuktikan:
 ## Execution Task List
 
 - [x] Buat mockup HTML taxonomy menggunakan semantic CSS tokens.
-- [ ] Tunjukkan mockup kepada pengguna dan dapatkan review sebelum mengubah React UI.
+- [x] Tunjukkan mockup kepada pengguna dan dapatkan review sebelum mengubah React UI.
 - [x] Tambahkan style taxonomy baru, metadata family/medium/role, dan default netral.
 - [x] Implementasikan strict schema-v2 validation dan explicit legacy style mapper.
 - [x] Koreksi primary style kelima system preset non-editorial.
 - [x] Satukan lookup style resolver dan allocator pada katalog pusat.
 - [x] Perbarui AI contract dan prompt builder sambil mempertahankan single-pass engine.
-- [ ] Implementasikan UI Studio dan AI Builder sesuai mockup yang disetujui.
+- [x] Implementasikan UI Studio dan AI Builder sesuai mockup yang disetujui.
 - [x] Buat audit/migration script dengan dry-run default, transaksi, manifest, dan idempotency.
 - [x] Audit data tenant pada Dev dan klasifikasikan kandidat migrasi.
 - [x] Tambahkan dan jalankan regression tests untuk contract, presets, resolver, allocator, AI, dan migrasi.
-- [ ] Jalankan build Next.js 16 dan pemeriksaan semantic tokens.
-- [ ] Apply migrasi Dev setelah hasil dry-run tervalidasi.
-- [ ] Jalankan release non-interaktif patch, lalu verifikasi branch `main` dan tag remote.
-- [ ] Deploy full Git SHA release secara atomic ke Dev dan lakukan verifikasi wajib.
-- [ ] Jalankan dry-run lalu apply migrasi Staging setelah Dev lolos.
-- [ ] Deploy full Git SHA yang sama secara atomic ke Staging dan lakukan verifikasi wajib.
+- [x] Jalankan build Next.js 16 dan pemeriksaan semantic tokens.
+- [x] Apply migrasi Dev setelah hasil dry-run tervalidasi.
+- [x] Jalankan release non-interaktif patch, lalu verifikasi branch `main` dan tag remote.
+- [x] Deploy full Git SHA release secara atomic ke Dev dan lakukan verifikasi wajib.
+- [x] Jalankan dry-run lalu apply migrasi Staging setelah Dev lolos.
+- [x] Deploy full Git SHA yang sama secara atomic ke Staging dan lakukan verifikasi wajib.
 - [x] Perbarui dokumentasi SOT taxonomy dan prosedur migrasi.
