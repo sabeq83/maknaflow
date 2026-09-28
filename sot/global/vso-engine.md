@@ -382,6 +382,27 @@ const wardrobePrompt = visualOverrides.resolved.wardrobe_prompt;
 const lightingPrompt = visualOverrides.resolved.lighting_prompt;
 ```
 
+---
+
+## **8. VISUAL IDENTITY STYLE TAXONOMY & RESOLUTION ARCHITECTURE (MAKNA V2.32.11+)**
+
+Visual Identity schema v2 memisahkan estetika visual ke dalam 3 dimensi terpisah:
+
+1. **Rendering Medium**: Medium fisik bagaimana citra diwujudkan (`photorealistic`, `stylized_3d`, `claymation`, `illustration`, `paper_cutout`).
+2. **Art Direction (Primary Style)**: Bahasa estetika visual adegan utama (`cinematic_realistic`, `commercial_product_cinematic`, `culinary_cinematic`, `stylized_3d_character`, `cozy_claymation`, `editorial_graphic_novel`).
+3. **Narrative Modes (Supporting Styles)**: Variasi per-klip untuk fungsi adegan cerita (`symbolic_surrealism`, `isometric_society`, `paper_cutout_documentary`, `shadow_silhouette`, `clay_political_theater`).
+
+### **Aturan Strict-Write & Legacy-Read**
+- **Strict Write**: Schema v2 create/update dan AI builder menolak style tidak dikenal dengan error `INVALID_VISUAL_STYLE`. Supporting-only style dilarang di-assign sebagai primary style.
+- **Legacy Read**: Payload legacy dipetakan secara deterministik via `LEGACY_STYLE_MAP` (`cinematic_realistic` ➔ `cinematic_realistic`, `3d_claymation_cozy` ➔ `cozy_claymation`). Unknown legacy style menggunakan default netral `cinematic_realistic` dan dicatat dalam audit manifest.
+- **System Presets SOT Mapping**:
+  - `way_siyasi_editorial_system` ➔ `editorial_graphic_novel`
+  - `hands_only_muslimah_sage_kitchen` ➔ `culinary_cinematic`
+  - `hands_only_southeast_asian_male` ➔ `commercial_product_cinematic`
+  - `hands_only_caucasian_male_caramel` ➔ `commercial_product_cinematic`
+  - `stylized_3d_muslimah_emerald` ➔ `stylized_3d_character`
+  - `mascot_herbal_ginger_guardian` ➔ `cozy_claymation`
+
 **EOF (End of Blueprint Document)**
 
 *Sistem VSO MAKNA Engine V9.3.1 memberikan kemudahan operasional tertinggi melalui kurasi preset, sembari mempertahankan fleksibilitas kustomisasi visual iklan bagi pengguna.*

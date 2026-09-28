@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.11 — Visual Identity Style Taxonomy & Safe Migration (28/09/2026)
+- Tambah taxonomy 3-layer rendering medium dan art direction dengan default neutral cinematic_realistic
+- Hapus silent fallback editorial_graphic_novel pada 5 system preset dan dynamic fallback allocator
+- Update React UI Visual Identity Studio dan AI Builder dengan semantic CSS tokens
+- Tambah audit dan migrasi aman preset tenant di PostgreSQL cluster
+
 ## V2.32.10 — Fix Empty Prompt Payload on Gemini Standard Requests (28/09/2026)
 - Perbaiki pengiriman prompt text ke parts array pada standard request Gemini API di lib/gemini.js
 - Cegah error No content is provided for sending chat message pada scheduler pillar_generator dan free tier

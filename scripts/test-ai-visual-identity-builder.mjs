@@ -43,6 +43,14 @@ assert.equal(brief1.primary_style, 'editorial_graphic_novel');
 assert.deepEqual(brief1.supporting_styles, ['isometric_society', 'symbolic_surrealism', 'paper_cutout_documentary']);
 assert.equal(brief1.mood, 'intelektual, kritis, berwibawa');
 
+// Test neutral default when primary_style is omitted
+const neutralBrief = validateAiVisualIdentityBrief({
+  seed: 'Nordic aesthetic kitchen and barista coffee making',
+  subject_kind: 'human',
+  faceless_mode: 'hands_only'
+});
+assert.equal(neutralBrief.primary_style, 'cinematic_realistic');
+
 // Test invalid brief
 assert.throws(() => {
   validateAiVisualIdentityBrief({ seed: 'hi', subject_kind: 'human' });
@@ -51,6 +59,13 @@ assert.throws(() => {
 assert.throws(() => {
   validateAiVisualIdentityBrief({ seed: 'Political Education', subject_kind: 'human', faceless_mode: 'not_applicable' });
 }, /faceless_mode cannot be not_applicable for human/);
+
+assert.throws(() => {
+  validateAiVisualIdentityBrief({
+    seed: 'Test brief',
+    primary_style: 'invalid_unrecognized_style'
+  });
+}, (err) => err.code === 'INVALID_VISUAL_STYLE');
 
 console.log('  ✅ Creative Brief validation tests passed.');
 
@@ -210,12 +225,16 @@ await assert.rejects(async () => {
 // Test refinement preserves unchanged Schema v2 blocks
 const refinedEnvelope = {
   ...mockOutputEnvelope,
-  label: 'Wa’y Siyasi Refined Noir',
+  label: 'Commercial Kitchen Refined',
   config: {
     ...mockOutputEnvelope.config,
     visual_language: {
       ...mockOutputEnvelope.config.visual_language,
-      primary_style: 'shadow_silhouette'
+      primary_style: 'culinary_cinematic'
+    },
+    style: {
+      ...mockOutputEnvelope.config.style,
+      preset_key: 'culinary_cinematic'
     }
   }
 };
@@ -223,11 +242,11 @@ const fakeFactoryRefine = makeFakeModel(JSON.stringify(refinedEnvelope));
 const refineResult = await refineAiVisualIdentityDraft({
   brief: validHumanBrief,
   current_draft: mockOutputEnvelope,
-  instruction: 'Ubah gaya utama menjadi shadow silhouette'
+  instruction: 'Ubah gaya utama menjadi culinary cinematic'
 }, { modelFactory: fakeFactoryRefine });
 
-assert.equal(refineResult.label, 'Wa’y Siyasi Refined Noir');
-assert.equal(refineResult.config.visual_language.primary_style, 'shadow_silhouette');
+assert.equal(refineResult.label, 'Commercial Kitchen Refined');
+assert.equal(refineResult.config.visual_language.primary_style, 'culinary_cinematic');
 assert.ok(refineResult.config.mode_routing); // Preserved!
 
 console.log('  ✅ Single-pass generator & refinement tests passed.');

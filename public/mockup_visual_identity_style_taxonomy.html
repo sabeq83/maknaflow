@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup — Visual Identity Style Taxonomy & Architecture V2 | MAKNA Flow</title>
+  <link rel="stylesheet" href="/theme.css" />
+  <style>
+    /* Full Semantic Design Tokens from app/theme.css */
+    :root,
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --link-hover: #a5f3fc;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(30, 41, 59, 0.08);
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --text-disabled: #8794a6;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --link: #075ea8;
+      --link-hover: #064b86;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+      --focus-ring: #6d4ed6;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family-base);
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    /* Top Navigation Bar */
+    .top-nav {
+      background-color: var(--sidebar);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .brand-badge {
+      background-color: var(--action-primary);
+      color: var(--on-action-primary);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: var(--radius-xs);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background var(--transition);
+    }
+    .theme-toggle-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    /* Layout */
+    .app-body {
+      display: flex;
+      flex: 1;
+    }
+
+    .sidebar-nav {
+      width: 260px;
+      background-color: var(--sidebar);
+      border-right: 1px solid var(--border-subtle);
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .sidebar-section-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .sidebar-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all var(--transition);
+      margin-bottom: 4px;
+    }
+    .sidebar-menu-item:hover {
+      background-color: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+    .sidebar-menu-item.active {
+      background-color: var(--surface-interactive);
+      color: var(--action-primary);
+      border-left: 3px solid var(--action-primary);
+    }
+
+    .main-workspace {
+      flex: 1;
+      padding: 28px 36px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* Banner Comparison */
+    .comparison-banner {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .banner-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .banner-col.before {
+      border-right: 1px solid var(--border-subtle);
+      padding-right: 24px;
+    }
+
+    .banner-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: var(--radius-xs);
+      width: fit-content;
+    }
+    .banner-tag.before {
+      background-color: var(--status-danger-soft);
+      color: var(--status-danger);
+      border: 1px solid var(--status-danger);
+    }
+    .banner-tag.after {
+      background-color: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+
+    .banner-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    /* Taxonomy 3-Layer Architecture Card */
+    .architecture-box {
+      background-color: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 24px;
+    }
+
+    .architecture-header {
+      margin-bottom: 18px;
+    }
+    .architecture-title {
+      font-size: 16px;
+      font-weight: 750;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .architecture-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .layer-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .layer-card {
+      background-color: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .layer-badge {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--action-primary);
+      background-color: var(--surface-interactive);
+      padding: 2px 6px;
+      border-radius: var(--radius-xs);
+      width: fit-content;
+    }
+
+    .layer-card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .layer-card-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .layer-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .layer-chip {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: var(--radius-xs);
+      background: var(--surface-interactive);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      font-family: var(--font-family-mono);
+    }
+
+    /* Tabs Bar */
+    .tab-bar-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+    }
+
+    .tabs-group {
+      display: inline-flex;
+      gap: 6px;
+      background: var(--surface-raised);
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+    .tab-btn.active {
+      background-color: var(--surface-interactive);
+      color: var(--action-primary);
+    }
+
+    .filter-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .filter-select {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 7px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Cards Grid */
+    .presets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .preset-card {
+      background-color: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+      box-shadow: var(--shadow-card);
+    }
+    .preset-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+    }
+
+    .preset-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .preset-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .badge {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 3px 7px;
+      border-radius: 12px;
+    }
+    .badge-system {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+    }
+    .badge-user {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+    .badge-primary {
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      border: 1px solid var(--action-primary);
+    }
+    .badge-supporting {
+      background: var(--status-neutral-soft);
+      color: var(--status-neutral);
+      border: 1px solid var(--status-neutral);
+    }
+    .badge-review {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+
+    .preset-title {
+      font-size: 15px;
+      font-weight: 750;
+      color: var(--text-primary);
+      margin-top: 8px;
+    }
+
+    .preset-desc {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.45;
+      margin-top: 4px;
+    }
+
+    /* Style Mapping Box */
+    .style-meta-box {
+      background-color: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+    .meta-label {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .meta-value {
+      color: var(--text-primary);
+      font-weight: 700;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 14px;
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 7px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 650;
+      cursor: pointer;
+      text-align: center;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      transition: all var(--transition);
+    }
+    .btn-action:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+    .btn-action.primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+    }
+    .btn-action.primary:hover {
+      background: var(--action-primary-hover);
+    }
+
+    /* Interactive Studio Simulation Panel */
+    .interactive-panel {
+      background-color: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 24px;
+    }
+
+    .interactive-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .panel-heading {
+      font-size: 15px;
+      font-weight: 750;
+      color: var(--action-primary);
+      margin-bottom: 2px;
+    }
+
+    .style-picker-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .style-pick-card {
+      background-color: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-align: left;
+    }
+    .style-pick-card:hover {
+      border-color: var(--action-primary);
+      background-color: var(--surface-hover);
+    }
+    .style-pick-card.selected {
+      border-color: var(--action-primary);
+      background-color: var(--surface-interactive);
+      box-shadow: 0 0 0 1px var(--action-primary);
+    }
+
+    .pick-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .pick-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .prompt-preview-box {
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      font-family: var(--font-family-mono);
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+
+    .prompt-layer-label {
+      color: var(--action-primary);
+      font-weight: 700;
+    }
+
+    /* Notice box */
+    .notice-box {
+      background: var(--status-info-soft);
+      border: 1px solid var(--status-info);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    @media (max-width: 960px) {
+      .app-body {
+        flex-direction: column;
+      }
+      .sidebar-nav {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .comparison-banner,
+      .layer-grid,
+      .interactive-panel {
+        grid-template-columns: 1fr;
+      }
+      .style-picker-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="top-nav">
+    <div class="brand-title">
+      <span>🎭 MAKNA Flow</span>
+      <span class="brand-badge">Visual Identity Studio v2</span>
+    </div>
+    <div class="nav-actions">
+      <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()">
+        <span id="theme-icon">☀️</span> <span id="theme-text">Light Mode</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <!-- Sidebar -->
+    <aside class="sidebar-nav">
+      <div>
+        <div class="sidebar-section-title">Navigation</div>
+        <a class="sidebar-menu-item" href="#">📊 Dashboard</a>
+        <a class="sidebar-menu-item" href="#">🎬 Organic Campaigns</a>
+        <a class="sidebar-menu-item" href="#">🔬 Deconstruct Lab</a>
+        <a class="sidebar-menu-item active" href="#">🎭 Visual Identities</a>
+        <a class="sidebar-menu-item" href="#">⚙️ Settings</a>
+      </div>
+
+      <div>
+        <div class="sidebar-section-title">Environment Context</div>
+        <div style="font-size: 12px; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+          <div><strong>Active Schema:</strong> <code>dev</code> / <code>staging</code></div>
+          <div><strong>Catalog Engine:</strong> Schema v2 Single-Pass</div>
+          <div><strong>Secret Protection:</strong> Zero Secret Exposure</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-workspace">
+      
+      <!-- Header -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
+        <div>
+          <h1 style="font-size: 22px; font-weight: 800; color: var(--text-primary); margin-bottom: 4px;">
+            Visual Identity Style Taxonomy & Resolution Architecture
+          </h1>
+          <p style="color: var(--text-muted); font-size: 13.5px;">
+            Memisahkan <em>Rendering Medium</em>, <em>Art Direction</em>, dan <em>Narrative Modes</em> untuk mengeliminasi bias silent fallback <code>Editorial Graphic Novel</code> pada preset non-editorial.
+          </p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-action primary" style="padding: 9px 16px; font-size: 13px;" onclick="scrollToSimulation()">
+            ⚡ Uji Simulasi Interaktif
+          </button>
+        </div>
+      </div>
+
+      <!-- Before vs Proposed Comparison Banner -->
+      <div class="comparison-banner">
+        <div class="banner-col before">
+          <span class="banner-tag before">⚠️ Masalah Saat Ini (Before Bug)</span>
+          <p class="banner-desc">
+            • 5 dari 6 System Preset (Dapur Muslimah, Pria Kasual, 3D Muslimah, Ginger Guardian) secara keliru ter-normalisasi menjadi <strong>Editorial Graphic Novel</strong>.<br/>
+            • Default resolver dan validasi contract memiliki <em>silent fallback</em> yang memaksa semua unknown style menjadi ilustrasi politik editorial.<br/>
+            • Pengguna melihat label gaya yang salah dan resolver AI menyuntikkan prompt politik editorial ke video komersial/kuliner/3D.
+          </p>
+        </div>
+        <div class="banner-col">
+          <span class="banner-tag after">✅ Solusi Usulan (Proposed Fix)</span>
+          <p class="banner-desc">
+            • Setiap preset dipetakan ke <strong>Primary Art Direction</strong> yang semantik (misal: <code>culinary_cinematic</code>, <code>commercial_product_cinematic</code>, <code>stylized_3d_character</code>, <code>cozy_claymation</code>).<br/>
+            • Wa’y Siyasi tetap 100% editorial politik dengan multi-mode narrative routing.<br/>
+            • Validasi strict schema v2 menolak unknown style (tanpa silent coercion) & legacy mapper menjaga kompatibilitas snapshot lama.
+          </p>
+        </div>
+      </div>
+
+      <!-- 3-Layer Architecture Explanation -->
+      <section class="architecture-box">
+        <div class="architecture-header">
+          <div class="architecture-title">
+            <span>🏛️</span> Tiga Dimensi Visual Terpisah (The 3-Layer Visual Architecture)
+          </div>
+          <p class="architecture-subtitle">
+            Pemisahan dimensi menjamin fleksibilitas visual lintas industri tanpa merusak konsistensi guardrails dan pipeline single-pass.
+          </p>
+        </div>
+
+        <div class="layer-grid">
+          <div class="layer-card">
+            <span class="layer-badge">Lapisan 1</span>
+            <div class="layer-card-title">Rendering Medium</div>
+            <p class="layer-card-desc">Medium fisik bagaimana citra diwujudkan di kamera/render pipeline.</p>
+            <div class="layer-items">
+              <span class="layer-chip">photorealistic</span>
+              <span class="layer-chip">stylized_3d</span>
+              <span class="layer-chip">claymation</span>
+              <span class="layer-chip">illustration</span>
+              <span class="layer-chip">paper_cutout</span>
+            </div>
+          </div>
+
+          <div class="layer-card">
+            <span class="layer-badge">Lapisan 2</span>
+            <div class="layer-card-title">Art Direction (Primary)</div>
+            <p class="layer-card-desc">Bahasa estetika utama dan atmosfer visual adegan inti.</p>
+            <div class="layer-items">
+              <span class="layer-chip">cinematic_realistic</span>
+              <span class="layer-chip">commercial_product_cinematic</span>
+              <span class="layer-chip">culinary_cinematic</span>
+              <span class="layer-chip">stylized_3d_character</span>
+              <span class="layer-chip">cozy_claymation</span>
+              <span class="layer-chip">editorial_graphic_novel</span>
+            </div>
+          </div>
+
+          <div class="layer-card">
+            <span class="layer-badge">Lapisan 3</span>
+            <div class="layer-card-title">Narrative Modes (Supporting)</div>
+            <p class="layer-card-desc">Variasi per-klip untuk menjalankan fungsi cerita dinamis.</p>
+            <div class="layer-items">
+              <span class="layer-chip">symbolic_surrealism</span>
+              <span class="layer-chip">isometric_society</span>
+              <span class="layer-chip">paper_cutout_documentary</span>
+              <span class="layer-chip">shadow_silhouette</span>
+              <span class="layer-chip">clay_political_theater</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Preset Explorer & Catalog Grid -->
+      <section>
+        <div class="tab-bar-container">
+          <div class="tabs-group">
+            <button class="tab-btn active" onclick="switchPresetTab('system')">System Presets (6)</button>
+            <button class="tab-btn" onclick="switchPresetTab('tenant')">Tenant Presets (Snapshot Dev: 2)</button>
+            <button class="tab-btn" onclick="switchPresetTab('archived')">Archived (0)</button>
+          </div>
+
+          <div class="filter-controls">
+            <label style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Filter Family:</label>
+            <select class="filter-select" id="family-filter" onchange="filterFamily(this.value)">
+              <option value="all">Semua Family</option>
+              <option value="cinematic">Cinematic</option>
+              <option value="commercial">Commercial</option>
+              <option value="culinary">Culinary</option>
+              <option value="character_3d">3D & Clay Character</option>
+              <option value="editorial">Editorial / Political</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="presets-grid" id="presets-grid" style="margin-top: 20px;">
+          <!-- Injected via JavaScript based on actual code & DB snapshot -->
+        </div>
+      </section>
+
+      <!-- Interactive Studio Simulation -->
+      <section class="interactive-panel" id="simulation-panel">
+        <div class="interactive-col">
+          <div>
+            <div class="panel-heading">⚡ Interactive Style & Narrative Routing Simulator</div>
+            <p style="font-size: 12.5px; color: var(--text-muted);">
+              Pilih Primary Style dan Supporting Modes di bawah ini untuk melihat resolusi prompt live dan aturan role (supporting-only tidak bisa jadi primary).
+            </p>
+          </div>
+
+          <div>
+            <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">
+              Pilih Primary Art Direction:
+            </div>
+            <div class="style-picker-grid" id="primary-picker-grid">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">
+              Toggle Supporting Narrative Modes:
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;" id="supporting-toggle-group">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+        <div class="interactive-col">
+          <div class="panel-heading">🔍 Resolved Style & Production Prompt Output</div>
+          <div class="notice-box" id="mode-role-notice">
+            Mode aktif: <strong id="active-mode-name">Culinary Cinematic</strong>. Role: <span class="badge badge-primary">Primary</span>.
+          </div>
+
+          <div>
+            <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">
+              Prompt Layer Resolved (Sanitized & Production Ready):
+            </div>
+            <div class="prompt-preview-box" id="prompt-preview-box">
+              <!-- Live preview updated via JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // System & Tenant Presets Data (Exact match with lib/visual-identity-system-presets.js and Dev DB snapshot)
+    const SYSTEM_PRESETS = [
+      {
+        id: 'way_siyasi_editorial_system',
+        label: 'Wa’y Siyasi — Editorial System',
+        description: 'Faceless political education through editorial, isometric, and symbolic modes.',
+        source: 'system',
+        family: 'editorial',
+        medium: 'illustration',
+        before_primary: 'editorial_graphic_novel',
+        proposed_primary: 'editorial_graphic_novel',
+        supporting_modes: ['isometric_society', 'symbolic_surrealism', 'paper_cutout_documentary'],
+        status: 'already-correct'
+      },
+      {
+        id: 'hands_only_muslimah_sage_kitchen',
+        label: 'Muslimah Sage Kitchen',
+        description: 'Southeast Asian Muslimah in Sage Green attire, clean hands cooking in a Nordic-style kitchen.',
+        source: 'system',
+        family: 'culinary',
+        medium: 'photorealistic',
+        before_primary: 'editorial_graphic_novel (Bug)',
+        proposed_primary: 'culinary_cinematic',
+        supporting_modes: [],
+        status: 'fixed'
+      },
+      {
+        id: 'hands_only_southeast_asian_male',
+        label: 'Southeast Asian Male Casual',
+        description: 'Southeast Asian male featuring clean hands with warm light-tan/olive skin, stylish wristwatch, clean casual attire in a modern workspace.',
+        source: 'system',
+        family: 'commercial',
+        medium: 'photorealistic',
+        before_primary: 'editorial_graphic_novel (Bug)',
+        proposed_primary: 'commercial_product_cinematic',
+        supporting_modes: [],
+        status: 'fixed'
+      },
+      {
+        id: 'hands_only_caucasian_male_caramel',
+        label: 'Caucasian Male Caramel',
+        description: 'Caucasian man wearing a sophisticated caramel long-sleeve knit shirt, clean male hands in a kitchen workspace.',
+        source: 'system',
+        family: 'commercial',
+        medium: 'photorealistic',
+        before_primary: 'editorial_graphic_novel (Bug)',
+        proposed_primary: 'commercial_product_cinematic',
+        supporting_modes: [],
+        status: 'fixed'
+      },
+      {
+        id: 'stylized_3d_muslimah_emerald',
+        label: '3D Muslimah Emerald',
+        description: '3D stylized claymation Muslim woman in Emerald Green attire, blank face (no eyes, nose, or mouth).',
+        source: 'system',
+        family: 'character_3d',
+        medium: 'stylized_3d',
+        before_primary: 'editorial_graphic_novel (Bug)',
+        proposed_primary: 'stylized_3d_character',
+        supporting_modes: [],
+        status: 'fixed'
+      },
+      {
+        id: 'mascot_herbal_ginger_guardian',
+        label: 'Ginger Guardian',
+        description: 'Cute 3D stylized ginger root character with muscular tiny clay arms and legs.',
+        source: 'system',
+        family: 'character_3d',
+        medium: 'claymation',
+        before_primary: 'editorial_graphic_novel (Bug)',
+        proposed_primary: 'cozy_claymation',
+        supporting_modes: [],
+        status: 'fixed'
+      }
+    ];
+
+    const TENANT_PRESETS = [
+      {
+        id: 'vi_mt2mme5n_58935dcf',
+        label: 'Muslimah Sage Kitchen (Edited)',
+        description: 'User clone of kitchen preset with customized wardrobe & props.',
+        source: 'tenant (dev)',
+        family: 'culinary',
+        medium: 'photorealistic',
+        before_primary: 'editorial_graphic_novel (Bug)',
+        proposed_primary: 'culinary_cinematic',
+        supporting_modes: [],
+        status: 'safe-auto-fix'
+      },
+      {
+        id: 'vi_mtv0uq93_72820cdd',
+        label: '3D Claymation British Shorthair Cat Barista',
+        description: 'Cute 3D claymation grey cat acting as barista with miniature leather apron.',
+        source: 'tenant (dev)',
+        family: 'character_3d',
+        medium: 'claymation',
+        before_primary: 'editorial_graphic_novel (Bug)',
+        proposed_primary: 'cozy_claymation',
+        supporting_modes: [],
+        status: 'safe-auto-fix'
+      }
+    ];
+
+    // Taxonomy Catalog Definitions
+    const STYLE_DEFINITIONS = {
+      cinematic_realistic: {
+        label: 'Cinematic Realistic',
+        family: 'cinematic',
+        medium: 'photorealistic',
+        role: 'primary',
+        desc: 'Realistic cinematic film aesthetic with natural lighting and depth of field.',
+        prompt: 'premium cinematic realistic photography, natural film grain, authentic lighting roll-off, clean optics, dynamic depth of field, high aesthetic value, professional visual storytelling',
+        negative: 'oversaturated cartoon, CGI gloss, flat 2D graphic, distorted artifacts'
+      },
+      commercial_product_cinematic: {
+        label: 'Commercial Product Cinematic',
+        family: 'commercial',
+        medium: 'photorealistic',
+        role: 'primary',
+        desc: 'High-end commercial product and lifestyle workspace photography.',
+        prompt: 'high-end commercial product cinematography, crisp tactile material details, premium studio lighting, clean minimal surfaces, luxury brand color grading, professional hands-only interaction',
+        negative: 'messy cluttered background, cartoon 3D, harsh uncalibrated shadows, amateur snapshot'
+      },
+      culinary_cinematic: {
+        label: 'Culinary Cinematic',
+        family: 'culinary',
+        medium: 'photorealistic',
+        role: 'primary',
+        desc: 'Artisanal kitchen, culinary cooking action, and organic ingredients.',
+        prompt: 'mouth-watering culinary cinematography, rich food textures, natural soft kitchen daylight, artisanal cookware, fresh organic ingredients, tactile cooking action, appetizing warm aesthetic',
+        negative: 'political graphic novel, gloomy dark noir, cartoon illustration, stale untextured food'
+      },
+      stylized_3d_character: {
+        label: 'Stylized 3D Character',
+        family: 'character_3d',
+        medium: 'stylized_3d',
+        role: 'primary',
+        desc: 'Faceless stylized 3D character with smooth render geometry and clean lighting.',
+        prompt: 'stylized 3D cartoon render, smooth matte surfaces, charming geometric proportions, blank faceless character design, high-end 3D animation studio aesthetic, soft studio three-point lighting',
+        negative: 'photorealistic human face, uncanny live action, flat 2D vector, harsh gritty ink'
+      },
+      cozy_claymation: {
+        label: 'Cozy Claymation',
+        family: 'character_3d',
+        medium: 'claymation',
+        role: 'primary',
+        desc: 'Tactile stop-motion clay aesthetic for warm characters and mascot universes.',
+        prompt: 'tactile handcrafted stop-motion clay animation aesthetic, soft matte plasticine material, subtle organic craft fingerprints, miniature studio lighting setup, warm cozy whimsical charm',
+        negative: 'glossy digital CGI, live action human footage, sharp polygonal edges, dark violent mood'
+      },
+      editorial_graphic_novel: {
+        label: 'Editorial Graphic Novel',
+        family: 'editorial',
+        medium: 'illustration',
+        role: 'both',
+        desc: 'Modern political graphic novel with strong silhouettes and editorial journalism ink.',
+        prompt: 'premium editorial political illustration, modern graphic novel aesthetic, sharp graphic silhouettes, dynamic panel-like framing, matte vector ink finish, high contrast editorial composition',
+        negative: 'photorealistic stock footage, news TV broadcast composition, glossy 3D CGI'
+      },
+      isometric_society: {
+        label: 'Isometric Society',
+        family: 'editorial',
+        medium: 'illustration',
+        role: 'supporting',
+        desc: 'Miniature systemic overview explaining public infrastructure and institutions.',
+        prompt: 'isometric miniature society, elevated angled systemic perspective, interconnected urban infrastructure, transparent institutional cross-sections, readable supply and policy flow',
+        negative: 'decorative isometric without readable flow, flat 2D clipart'
+      },
+      symbolic_surrealism: {
+        label: 'Symbolic Surrealism',
+        family: 'editorial',
+        medium: 'illustration',
+        role: 'supporting',
+        desc: 'Metaphorical concept translation using physical scale shifts and symbolic objects.',
+        prompt: 'symbolic conceptual surrealism, editorial thought-experiment illustration, dramatic scale disparity, physical metaphor objects, clean negative space, thought-provoking philosophical composition',
+        negative: 'literal realistic scene, chaotic noise, fantasy magical glow'
+      },
+      paper_cutout_documentary: {
+        label: 'Paper Cutout Documentary',
+        family: 'editorial',
+        medium: 'paper_cutout',
+        role: 'supporting',
+        desc: 'Layered tactile collages for legal documents, budgets, and investigative facts.',
+        prompt: 'tactile paper cutout documentary collage, multi-layered textured paper crafts, archival document fragments, subtle physical drop shadows between layers, investigative newsroom dossier feel',
+        negative: 'smooth digital gradients, untextured flat graphics, glossy plastic finish'
+      },
+      shadow_silhouette: {
+        label: 'Shadow & Silhouette',
+        family: 'editorial',
+        medium: 'illustration',
+        role: 'supporting',
+        desc: 'High-contrast light and shadow drama representing power dynamics and barriers.',
+        prompt: 'dramatic high-contrast shadow and silhouette, stark chiaroscuro lighting, deep theatrical cast shadows revealing structural forces, back-lit faceless figures, bold minimalist noir atmosphere',
+        negative: 'soft flat low-contrast lighting, visible facial expressions'
+      },
+      clay_political_theater: {
+        label: 'Clay Political Theater',
+        family: 'editorial',
+        medium: 'claymation',
+        role: 'supporting',
+        desc: 'Tactile stop-motion clay aesthetic for political satire and institutional caricatures.',
+        prompt: 'tactile handcrafted stop-motion clay animation aesthetic, matte plasticine material texture, miniature studio lighting setup, satirical political theater staging, fingerprint craft details',
+        negative: 'smooth digital CGI render, photorealistic live action'
+      }
+    };
+
+    let activeTab = 'system';
+    let selectedPrimary = 'culinary_cinematic';
+    let selectedSupporting = ['symbolic_surrealism'];
+
+    function renderPresets() {
+      const grid = document.getElementById('presets-grid');
+      const familyFilter = document.getElementById('family-filter').value;
+      const list = activeTab === 'system' ? SYSTEM_PRESETS : activeTab === 'tenant' ? TENANT_PRESETS : [];
+
+      const filtered = list.filter(p => familyFilter === 'all' || p.family === familyFilter);
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1 / -1; padding: 40px; text-align: center; background: var(--surface); border: 1px dashed var(--border-subtle); border-radius: var(--radius-md); color: var(--text-muted);">Tidak ada preset pada filter ini.</div>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(p => {
+        const isSystem = p.source === 'system';
+        const isAutoFix = p.status === 'safe-auto-fix' || p.status === 'fixed';
+        const isEditorialValid = p.status === 'already-correct';
+
+        return `
+          <div class="preset-card">
+            <div>
+              <div class="preset-card-header">
+                <div class="preset-badges">
+                  <span class="badge ${isSystem ? 'badge-system' : 'badge-user'}">${p.source}</span>
+                  <span class="badge badge-primary">${p.family}</span>
+                  ${isAutoFix ? '<span class="badge badge-user">Proposed Fixed</span>' : ''}
+                  ${isEditorialValid ? '<span class="badge badge-primary">Valid Editorial</span>' : ''}
+                </div>
+                <span style="font-size: 11px; color: var(--text-muted); font-family: var(--font-family-mono);">${p.medium}</span>
+              </div>
+
+              <div class="preset-title">${p.label}</div>
+              <p class="preset-desc">${p.description}</p>
+            </div>
+
+            <div class="style-meta-box">
+              <div class="meta-row">
+                <span class="meta-label">Before (Current Bug):</span>
+                <span class="meta-value" style="color: var(--status-danger); font-size: 11.5px;">${p.before_primary}</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Proposed Target:</span>
+                <span class="meta-value" style="color: var(--action-primary); font-size: 12px;">${p.proposed_primary}</span>
+              </div>
+              ${p.supporting_modes.length > 0 ? `
+                <div class="meta-row" style="margin-top: 4px; align-items: flex-start;">
+                  <span class="meta-label">Supporting:</span>
+                  <span class="meta-value" style="font-size: 11px; color: var(--text-secondary); text-align: right;">${p.supporting_modes.join(', ')}</span>
+                </div>
+              ` : ''}
+            </div>
+
+            <div class="card-actions">
+              <button class="btn-action primary" onclick="simulatePreset('${p.proposed_primary}')">
+                Simulasikan Preset Ini
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderSimulator() {
+      const primaryGrid = document.getElementById('primary-picker-grid');
+      const supportingGroup = document.getElementById('supporting-toggle-group');
+
+      // 1. Render Primary Pickers (only styles with role 'primary' or 'both')
+      const primaryEligible = Object.entries(STYLE_DEFINITIONS).filter(([k, def]) => def.role === 'primary' || def.role === 'both');
+      primaryGrid.innerHTML = primaryEligible.map(([k, def]) => {
+        const isSel = selectedPrimary === k;
+        return `
+          <div class="style-pick-card ${isSel ? 'selected' : ''}" onclick="selectPrimaryStyle('${k}')">
+            <div class="pick-title">
+              <span>${def.label}</span>
+              ${isSel ? '<span style="color: var(--action-primary);">●</span>' : ''}
+            </div>
+            <div class="pick-meta">Family: <strong>${def.family}</strong> | ${def.medium}</div>
+          </div>
+        `;
+      }).join('');
+
+      // 2. Render Supporting Toggles
+      const allSupportingKeys = Object.entries(STYLE_DEFINITIONS).filter(([k, def]) => k !== selectedPrimary);
+      supportingGroup.innerHTML = allSupportingKeys.map(([k, def]) => {
+        const isChecked = selectedSupporting.includes(k);
+        return `
+          <button class="btn-action" 
+                  style="font-size: 11.5px; padding: 5px 10px; border-radius: 20px; ${isChecked ? 'background: var(--status-info-soft); border-color: var(--status-info); color: var(--status-info); font-weight: 700;' : ''}"
+                  onclick="toggleSupportingStyle('${k}')">
+            ${def.label} ${isChecked ? '✓' : '+'}
+          </button>
+        `;
+      }).join('');
+
+      // 3. Update Preview
+      updatePromptPreview();
+    }
+
+    function selectPrimaryStyle(styleKey) {
+      selectedPrimary = styleKey;
+      selectedSupporting = selectedSupporting.filter(k => k !== styleKey);
+      renderSimulator();
+    }
+
+    function toggleSupportingStyle(styleKey) {
+      if (styleKey === selectedPrimary) return;
+      if (selectedSupporting.includes(styleKey)) {
+        selectedSupporting = selectedSupporting.filter(k => k !== styleKey);
+      } else {
+        selectedSupporting.push(styleKey);
+      }
+      renderSimulator();
+    }
+
+    function simulatePreset(styleKey) {
+      if (STYLE_DEFINITIONS[styleKey]) {
+        selectPrimaryStyle(styleKey);
+        scrollToSimulation();
+      }
+    }
+
+    function updatePromptPreview() {
+      const def = STYLE_DEFINITIONS[selectedPrimary] || STYLE_DEFINITIONS.cinematic_realistic;
+      document.getElementById('active-mode-name').innerText = def.label;
+
+      const previewBox = document.getElementById('prompt-preview-box');
+      previewBox.innerHTML = `
+<span class="prompt-layer-label">[LAYER 0: VISUAL TRUTH]</span>
+(Aspect: 9:16) --ar 9:16, (Medium: ${def.medium}), (Family: ${def.family}), (Invariant: Faceless framing, strictly no human facial features visible)
+
+<span class="prompt-layer-label">[LAYER 1: PRIMARY ART DIRECTION]</span>
+${def.prompt}
+
+<span class="prompt-layer-label">[LAYER 2: DYNAMIC SUPPORTING MODES (Active for Narrative Routing)]</span>
+${selectedSupporting.length > 0 ? selectedSupporting.map(k => `• ${STYLE_DEFINITIONS[k]?.label}: "${STYLE_DEFINITIONS[k]?.prompt.slice(0, 80)}..."`).join('\n') : '(Tidak ada supporting mode tambahan, 100% klip mengikuti Primary Style)'}
+
+<span class="prompt-layer-label">[LAYER 3: NEGATIVE PROMPTS (Strict Guardrails)]</span>
+visible human face, eyes, nose, mouth, human portrait, ${def.negative}
+      `.trim();
+    }
+
+    function switchPresetTab(tab) {
+      activeTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      renderPresets();
+    }
+
+    function filterFamily(family) {
+      renderPresets();
+    }
+
+    function scrollToSimulation() {
+      document.getElementById('simulation-panel').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+
+      document.getElementById('theme-icon').innerText = next === 'dark' ? '☀️' : '🌙';
+      document.getElementById('theme-text').innerText = next === 'dark' ? 'Light Mode' : 'Dark Mode';
+    }
+
+    // Init
+    renderPresets();
+    renderSimulator();
+  </script>
+</body>
+</html>

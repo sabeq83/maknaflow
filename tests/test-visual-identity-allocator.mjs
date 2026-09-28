@@ -119,4 +119,19 @@ assert.ok(legacyPrompt.includes('VISUAL IDENTITY MANDATE'), 'Legacy must include
 assert.ok(!legacyPrompt.includes('METAPHOR ENGINE MANDATE'), 'Legacy must not include Metaphor Engine');
 console.log('  ✅ Legacy fallback works seamlessly without regression.');
 
-console.log('\n🎉 ALL 4 UNIT TESTS PASSED SUCCESSFULLY!');
+console.log('\n🧪 [TEST 5] Testing Non-Editorial Preset Dynamic Allocation...');
+const culinaryAlloc = allocateClipsToNarrativeModes(4, {}, 'culinary_cinematic');
+assert.equal(culinaryAlloc.length, 4);
+assert.equal(culinaryAlloc[0].visualMode, 'culinary_cinematic');
+assert.equal(culinaryAlloc[1].visualMode, 'culinary_cinematic');
+assert.equal(culinaryAlloc[2].visualMode, 'culinary_cinematic');
+assert.equal(culinaryAlloc[3].visualMode, 'culinary_cinematic');
+
+const threeDAlloc = allocateClipsToNarrativeModes(3, {}, 'stylized_3d_character');
+assert.equal(threeDAlloc[0].visualMode, 'stylized_3d_character');
+assert.equal(threeDAlloc[1].visualMode, 'stylized_3d_character');
+assert.equal(threeDAlloc[2].visualMode, 'stylized_3d_character');
+console.log('  ✅ Non-editorial presets correctly fallback to their own primary style.');
+
+console.log('\n🎉 ALL 5 UNIT TESTS PASSED SUCCESSFULLY!');
+

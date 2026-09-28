@@ -26,6 +26,9 @@ import {
   SAFE_ZONE_OPTIONS
 } from '../../../lib/visual-identity-contract';
 import {
+  DEFAULT_VISUAL_STYLE,
+  PRIMARY_STYLE_KEYS,
+  SUPPORTING_ONLY_STYLE_KEYS,
   VISUAL_STYLE_KEYS,
   VISUAL_LANGUAGE_CATALOG,
   NARRATIVE_FUNCTIONS,
@@ -43,15 +46,15 @@ const DEFAULT_CONFIG = {
     population_mode: 'single_group_or_crowd'
   },
   visual_language: {
-    primary_style: 'editorial_graphic_novel',
+    primary_style: DEFAULT_VISUAL_STYLE,
     supporting_styles: ['isometric_society', 'symbolic_surrealism', 'paper_cutout_documentary'],
     disabled_styles: ['shadow_silhouette', 'clay_political_theater']
   },
   mode_routing: {
     hook: 'symbolic_surrealism',
-    context: 'editorial_graphic_novel',
+    context: DEFAULT_VISUAL_STYLE,
     mechanism: 'isometric_society',
-    consequence: 'editorial_graphic_novel',
+    consequence: DEFAULT_VISUAL_STYLE,
     evidence_reveal: 'paper_cutout_documentary',
     conclusion: 'symbolic_surrealism'
   },
@@ -102,7 +105,7 @@ const DEFAULT_CONFIG = {
     movement: 'subtle_handheld'
   },
   style: {
-    preset_key: 'editorial_graphic_novel',
+    preset_key: DEFAULT_VISUAL_STYLE,
     custom_description: '',
     aspect_ratio: '9:16'
   },
@@ -295,6 +298,12 @@ export default function VisualIdentityStudioPage() {
   };
 
   const handlePrimaryStyleChange = (newPrimary) => {
+    const targetDef = getVisualStyleDefinition(newPrimary);
+    if (targetDef?.role === 'supporting') {
+      setError(`Gaya "${targetDef.label}" dirancang khusus sebagai Supporting Mode dan tidak dapat dijadikan Primary Style.`);
+      return;
+    }
+
     setConfig(prev => {
       const oldPrimary = prev.visual_language?.primary_style;
       let supporting = [...(prev.visual_language?.supporting_styles || [])];
@@ -369,7 +378,7 @@ export default function VisualIdentityStudioPage() {
   };
 
   const activeStylesForRouting = [
-    config.visual_language?.primary_style || 'editorial_graphic_novel',
+    config.visual_language?.primary_style || DEFAULT_VISUAL_STYLE,
     ...(config.visual_language?.supporting_styles || [])
   ];
 
@@ -515,11 +524,18 @@ export default function VisualIdentityStudioPage() {
                         {/* Visual Styles Preview */}
                         <div style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', padding: 12, borderRadius: 'var(--radius-sm, 8px)', marginBottom: 16 }}>
                           <div style={{ marginBottom: 6 }}>
-                            <span style={{ color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                              Primary Style:
-                            </span>
-                            <strong style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-primary)' }}>
-                              {primaryDef.label}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+                              <span style={{ color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                Primary Style:
+                              </span>
+                              {primaryDef && (
+                                <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '1px 6px', borderRadius: 10, background: 'var(--surface-interactive)', color: 'var(--text-secondary)' }}>
+                                  {primaryDef.family} • {primaryDef.rendering_medium}
+                                </span>
+                              )}
+                            </div>
+                            <strong style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                              {primaryDef?.label || 'Custom'}
                             </strong>
                           </div>
 
@@ -675,29 +691,36 @@ export default function VisualIdentityStudioPage() {
                   2. Visual Language Modes (Primary & Supporting)
                 </h3>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
                   <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                    Primary Visual Style
+                    Primary Visual Style (Pondasi Utama)
                     <select
-                      value={config.visual_language?.primary_style || 'editorial_graphic_novel'}
+                      value={config.visual_language?.primary_style || DEFAULT_VISUAL_STYLE}
                       onChange={(e) => handlePrimaryStyleChange(e.target.value)}
                       style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
                     >
-                      {VISUAL_STYLE_KEYS.map(key => (
-                        <option key={key} value={key}>{VISUAL_LANGUAGE_CATALOG[key]?.label}</option>
-                      ))}
+                      {PRIMARY_STYLE_KEYS.map(key => {
+                        const def = VISUAL_LANGUAGE_CATALOG[key];
+                        return (
+                          <option key={key} value={key}>
+                            {def?.label} ({def?.family} • {def?.rendering_medium})
+                          </option>
+                        );
+                      })}
                     </select>
                   </label>
                 </div>
 
                 <div>
                   <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>
-                    Supporting Styles (Pilih gaya pendukung yang aktif):
+                    Supporting Styles (Pilih mode visual pendukung / transisi narasi):
                   </span>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                     {VISUAL_STYLE_KEYS.map(key => {
+                      const def = VISUAL_LANGUAGE_CATALOG[key];
                       const isPrimary = config.visual_language?.primary_style === key;
                       const isSupporting = (config.visual_language?.supporting_styles || []).includes(key);
+                      const isSupportingOnly = def?.role === 'supporting';
 
                       return (
                         <button
@@ -715,8 +738,10 @@ export default function VisualIdentityStudioPage() {
                             color: isPrimary ? 'var(--on-action-primary)' : isSupporting ? 'var(--status-info)' : 'var(--text-muted)',
                             cursor: isPrimary ? 'default' : 'pointer'
                           }}
+                          title={isSupportingOnly ? 'Supporting-only mode' : undefined}
                         >
-                          {VISUAL_LANGUAGE_CATALOG[key]?.label} {isPrimary ? '(Primary)' : isSupporting ? '✓' : '+'}
+                          {def?.label} {isPrimary ? '(Primary)' : isSupporting ? '✓' : '+'}
+                          {isSupportingOnly && !isPrimary && !isSupporting ? ' [Supp]' : ''}
                         </button>
                       );
                     })}

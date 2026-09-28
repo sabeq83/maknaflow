@@ -1,6 +1,6 @@
 {
   "name": "maknaflow",
-  "version": "2.32.10",
+  "version": "2.32.11",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack -p 3005",
@@ -61,6 +61,8 @@
     "test:ai-universe-builder": "node scripts/test-ai-universe-builder.mjs",
     "test:visual-identity": "node scripts/test-visual-identity-foundation.mjs",
     "test:ai-visual-identity": "node scripts/test-ai-visual-identity-builder.mjs",
+    "visual-identity:style-audit": "node scripts/migrate-visual-identity-primary-styles.mjs --dry-run",
+    "visual-identity:style-migrate": "node scripts/migrate-visual-identity-primary-styles.mjs --apply",
     "contentflow:migration:export": "node scripts/export-legacy-contentflow.mjs",
     "contentflow:migration:import": "node scripts/import-legacy-contentflow.mjs",
     "contentflow:migration:assets": "node scripts/migrate-legacy-contentflow-assets.mjs",

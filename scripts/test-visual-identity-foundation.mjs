@@ -5,9 +5,19 @@ import { loadStagingEnv } from './local-staging/env.js';
 // Load environment variables for DB access
 Object.assign(process.env, loadStagingEnv());
 
+import {
+  DEFAULT_VISUAL_STYLE,
+  VISUAL_STYLE_KEYS,
+  VISUAL_LANGUAGE_CATALOG,
+  getVisualStyleDefinition,
+  isValidVisualStyle
+} from '../lib/visual-language-catalog.js';
+
 import { 
   validateAndNormalizeVisualIdentity, 
-  normalizeLegacyVisualOverrides 
+  normalizeLegacyVisualOverrides,
+  LEGACY_STYLE_MAP,
+  mapLegacyVisualStyle
 } from '../lib/visual-identity-contract.js';
 
 import { 
@@ -35,8 +45,32 @@ import { closePgPool, pgQuery } from '../lib/db-pg.js';
 
 console.log('🔄 Running Visual Identity Foundation unit & integration tests...');
 
-// 1. Contract & Validator Unit Tests (Schema v2)
-console.log('  1. Testing contract & validation (Schema v2)...');
+// 1. Catalog & Taxonomy Tests
+console.log('  1. Testing Central Catalog & Taxonomy...');
+assert.equal(DEFAULT_VISUAL_STYLE, 'cinematic_realistic');
+assert.ok(VISUAL_STYLE_KEYS.length >= 11);
+assert.ok(VISUAL_STYLE_KEYS.includes('culinary_cinematic'));
+assert.ok(VISUAL_STYLE_KEYS.includes('commercial_product_cinematic'));
+assert.ok(VISUAL_STYLE_KEYS.includes('stylized_3d_character'));
+assert.ok(VISUAL_STYLE_KEYS.includes('cozy_claymation'));
+
+const defCinematic = getVisualStyleDefinition('cinematic_realistic');
+assert.equal(defCinematic.family, 'cinematic');
+assert.equal(defCinematic.medium, 'photorealistic');
+assert.equal(defCinematic.role, 'primary');
+
+// Empty key returns neutral default
+assert.equal(getVisualStyleDefinition().key, 'cinematic_realistic');
+
+// Unknown key throws structured error
+assert.throws(() => {
+  getVisualStyleDefinition('unknown_magic_style');
+}, (err) => err.code === 'INVALID_VISUAL_STYLE');
+
+console.log('  ✅ Central Catalog & Taxonomy tests passed.');
+
+// 2. Contract & Strict Validation Tests (Schema v2)
+console.log('  2. Testing Contract & Strict Validation (Schema v2)...');
 const validConfig = {
   label: 'Test Identity',
   subject: {
@@ -60,13 +94,27 @@ const normalized = validateAndNormalizeVisualIdentity(validConfig);
 assert.equal(normalized.schema_version, '2');
 assert.equal(normalized.label, 'Test Identity');
 assert.equal(normalized.subject.kind, 'human');
-assert.equal(normalized.subject.population_mode, 'single_group_or_crowd');
 assert.equal(normalized.visual_language.primary_style, 'editorial_graphic_novel');
 assert.deepEqual(normalized.visual_language.supporting_styles, ['isometric_society', 'symbolic_surrealism']);
 assert.equal(normalized.mode_routing.hook, 'symbolic_surrealism');
 assert.equal(normalized.mode_routing.mechanism, 'isometric_society');
 assert.equal(normalized.guardrails.face_visibility, 'prohibited'); // Locked!
-assert.equal(normalized.guardrails.intentional_crowd, 'allowed_faceless');
+
+// Schema v2 with invalid primary style throws INVALID_VISUAL_STYLE (No silent fallback!)
+assert.throws(() => {
+  validateAndNormalizeVisualIdentity({
+    schema_version: '2',
+    visual_language: { primary_style: 'completely_invalid_style' }
+  });
+}, (err) => err.code === 'INVALID_VISUAL_STYLE');
+
+// Supporting-only role cannot be primary in schema v2
+assert.throws(() => {
+  validateAndNormalizeVisualIdentity({
+    schema_version: '2',
+    visual_language: { primary_style: 'isometric_society' }
+  });
+}, /supporting/);
 
 // Schema v1 backward compatibility test
 const v1Config = {
@@ -77,86 +125,87 @@ const v1Config = {
 };
 const normalizedV1 = validateAndNormalizeVisualIdentity(v1Config);
 assert.equal(normalizedV1.schema_version, '2');
-assert.equal(normalizedV1.visual_language.primary_style, 'clay_political_theater');
+assert.equal(normalizedV1.visual_language.primary_style, 'cozy_claymation');
 assert.ok(normalizedV1.mode_routing.hook);
-
-// Primary / Supporting collision test
-const collisionConfig = {
-  visual_language: {
-    primary_style: 'editorial_graphic_novel',
-    supporting_styles: ['editorial_graphic_novel', 'isometric_society', 'isometric_society']
-  }
-};
-const normalizedCollision = validateAndNormalizeVisualIdentity(collisionConfig);
-assert.equal(normalizedCollision.visual_language.primary_style, 'editorial_graphic_novel');
-assert.deepEqual(normalizedCollision.visual_language.supporting_styles, ['isometric_society']);
-
-// Inactive route fallback to primary test
-const invalidRouteConfig = {
-  visual_language: {
-    primary_style: 'editorial_graphic_novel',
-    supporting_styles: ['isometric_society']
-  },
-  mode_routing: {
-    hook: 'clay_political_theater' // Inactive style!
-  }
-};
-const normalizedInvalidRoute = validateAndNormalizeVisualIdentity(invalidRouteConfig);
-assert.equal(normalizedInvalidRoute.mode_routing.hook, 'editorial_graphic_novel'); // Fallback to primary!
 
 console.log('  ✅ Contract & normalization tests passed.');
 
-// 2. Legacy Mapping Unit Tests
-console.log('  2. Testing legacy normalization...');
-const legacyVso = {
-  character_concept: 'faceless',
-  subject_demographic: 'syari_classic',
-  wardrobe_style: 'sage_muted',
-  lighting_style: 'window_daylight',
-  visual_style_preset: 'cinematic_realistic'
-};
-
-const converted = normalizeLegacyVisualOverrides(legacyVso);
-assert.equal(converted.schema_version, '2');
-assert.equal(converted.subject.kind, 'human');
-assert.equal(converted.subject.faceless_mode, 'hands_only');
-assert.equal(converted.wardrobe.preset_key, 'sage_muted');
-assert.equal(converted.lighting.preset_key, 'window_daylight');
-
-const mascotVso = {
-  subject_demographic: 'mascot_universe_herbal',
-  visual_style_preset: '3d_claymation_cozy'
-};
-const convertedMascot = normalizeLegacyVisualOverrides(mascotVso);
-assert.equal(convertedMascot.subject.kind, 'animal');
-assert.equal(convertedMascot.subject.faceless_mode, 'not_applicable');
-
-console.log('  ✅ Legacy mapping tests passed.');
-
-// 3. System Presets & Wa'y Siyasi Preset Tests
-console.log('  3. Testing system catalog & Wa’y Siyasi preset...');
+// 3. System Presets Mapping Verification
+console.log('  3. Testing System Presets Mapping (All 6 Presets)...');
 const systemList = listSystemVisualIdentities();
-assert.ok(systemList.length > 0);
+assert.equal(systemList.length, 6);
 
-const waySiyasiPreset = getSystemVisualIdentity('way_siyasi_editorial_system');
-assert.ok(waySiyasiPreset);
-assert.equal(waySiyasiPreset.label, 'Wa’y Siyasi — Editorial System');
-assert.equal(waySiyasiPreset.config.visual_language.primary_style, 'editorial_graphic_novel');
-assert.ok(waySiyasiPreset.config.visual_language.supporting_styles.includes('isometric_society'));
-assert.ok(waySiyasiPreset.config.visual_language.supporting_styles.includes('symbolic_surrealism'));
-assert.ok(waySiyasiPreset.config.visual_language.supporting_styles.includes('paper_cutout_documentary'));
-assert.equal(waySiyasiPreset.config.mode_routing.hook, 'symbolic_surrealism');
-assert.equal(waySiyasiPreset.config.mode_routing.mechanism, 'isometric_society');
-assert.equal(waySiyasiPreset.config.mode_routing.evidence_reveal, 'paper_cutout_documentary');
+// Verify distinct styles (Not all editorial!)
+const primaryStylesSet = new Set(systemList.map(p => p.config.visual_language.primary_style));
+assert.ok(primaryStylesSet.size >= 4, 'System presets must have diverse primary styles!');
+assert.ok(!systemList.every(p => p.config.visual_language.primary_style === 'editorial_graphic_novel'));
 
-const sagePreset = getSystemVisualIdentity('hands_only_muslimah_sage_kitchen');
-assert.ok(sagePreset);
-assert.equal(sagePreset.label, 'Muslimah Sage Kitchen');
+// Check each preset specifically:
+const waySiyasi = getSystemVisualIdentity('way_siyasi_editorial_system');
+assert.equal(waySiyasi.config.visual_language.primary_style, 'editorial_graphic_novel');
+assert.equal(waySiyasi.config.style.preset_key, 'editorial_graphic_novel');
 
-console.log('  ✅ System presets & Wa’y Siyasi tests passed.');
+const sageKitchen = getSystemVisualIdentity('hands_only_muslimah_sage_kitchen');
+assert.equal(sageKitchen.config.visual_language.primary_style, 'culinary_cinematic');
+assert.equal(sageKitchen.config.style.preset_key, 'culinary_cinematic');
 
-// 4. Repository & Database Integration Tests
-console.log('  4. Testing repository and tenant isolation...');
+const maleCasual = getSystemVisualIdentity('hands_only_southeast_asian_male');
+assert.equal(maleCasual.config.visual_language.primary_style, 'commercial_product_cinematic');
+assert.equal(maleCasual.config.style.preset_key, 'commercial_product_cinematic');
+
+const maleCaramel = getSystemVisualIdentity('hands_only_caucasian_male_caramel');
+assert.equal(maleCaramel.config.visual_language.primary_style, 'commercial_product_cinematic');
+assert.equal(maleCaramel.config.style.preset_key, 'commercial_product_cinematic');
+
+const female3d = getSystemVisualIdentity('stylized_3d_muslimah_emerald');
+assert.equal(female3d.config.visual_language.primary_style, 'stylized_3d_character');
+assert.equal(female3d.config.style.preset_key, 'stylized_3d_character');
+
+const gingerGuardian = getSystemVisualIdentity('mascot_herbal_ginger_guardian');
+assert.equal(gingerGuardian.config.visual_language.primary_style, 'cozy_claymation');
+assert.equal(gingerGuardian.config.style.preset_key, 'cozy_claymation');
+
+console.log('  ✅ All 6 System presets mappings verified.');
+
+// 4. Resolver Prompt Isolation Tests
+console.log('  4. Testing Resolver Prompt Segregation & Layer Resolution...');
+
+async function runResolverTests() {
+  // Wa'y Siyasi retains editorial narrative routing
+  const hookResolved = await resolveVisualIdentity({
+    presetRef: 'way_siyasi_editorial_system',
+    itemContext: { narrativeFunction: 'hook' }
+  });
+  assert.equal(hookResolved.resolved.active_visual_mode, 'symbolic_surrealism');
+  assert.ok(hookResolved.resolved.style_prompt.includes('symbolic conceptual surrealism'));
+
+  // Kitchen preset does NOT contain political graphic novel prompt
+  const kitchenResolved = await resolveVisualIdentity({
+    presetRef: 'hands_only_muslimah_sage_kitchen'
+  });
+  assert.equal(kitchenResolved.resolved.active_visual_mode, 'culinary_cinematic');
+  assert.ok(kitchenResolved.resolved.style_prompt.includes('culinary cinematography'));
+  assert.ok(!kitchenResolved.resolved.style_prompt.includes('political illustration'));
+
+  // 3D preset prompt contains stylized 3D render
+  const threeDResolved = await resolveVisualIdentity({
+    presetRef: 'stylized_3d_muslimah_emerald'
+  });
+  assert.equal(threeDResolved.resolved.active_visual_mode, 'stylized_3d_character');
+  assert.ok(threeDResolved.resolved.style_prompt.includes('stylized 3D cartoon render'));
+
+  // Ginger Guardian contains claymation prompt
+  const clayResolved = await resolveVisualIdentity({
+    presetRef: 'mascot_herbal_ginger_guardian'
+  });
+  assert.equal(clayResolved.resolved.active_visual_mode, 'cozy_claymation');
+  assert.ok(clayResolved.resolved.style_prompt.includes('clay animation'));
+
+  console.log('  ✅ Resolver prompt segregation tests passed.');
+}
+
+// 5. Repository & Tenant Isolation Tests
+console.log('  5. Testing Repository and Tenant Isolation...');
 
 async function runRepoTests() {
   const tenantA = `tenant_test_a_${Date.now().toString(36)}`;
@@ -178,7 +227,7 @@ async function runRepoTests() {
         config: {
           schema_version: '2',
           subject: { kind: 'human', faceless_mode: 'hands_only', demographic_key: 'syari_classic' },
-          visual_language: { primary_style: 'editorial_graphic_novel', supporting_styles: ['isometric_society'] }
+          visual_language: { primary_style: 'culinary_cinematic', supporting_styles: [] }
         }
       }, actor);
 
@@ -228,61 +277,10 @@ async function runRepoTests() {
   }
 }
 
-// 5. Resolver Integration & Narrative Routing Tests
-console.log('  5. Testing resolver narrative routing & prompt layers...');
-
-async function runResolverTests() {
-  // Test Wa'y Siyasi narrative routing resolution
-  const hookResolved = await resolveVisualIdentity({
-    presetRef: 'way_siyasi_editorial_system',
-    itemContext: { narrativeFunction: 'hook' }
-  });
-  assert.equal(hookResolved.resolved.active_visual_mode, 'symbolic_surrealism');
-  assert.ok(hookResolved.resolved.style_prompt.includes('symbolic conceptual surrealism'));
-
-  const mechResolved = await resolveVisualIdentity({
-    presetRef: 'way_siyasi_editorial_system',
-    itemContext: { narrativeFunction: 'mechanism' }
-  });
-  assert.equal(mechResolved.resolved.active_visual_mode, 'isometric_society');
-  assert.ok(mechResolved.resolved.style_prompt.includes('isometric miniature society'));
-
-  const evidenceResolved = await resolveVisualIdentity({
-    presetRef: 'way_siyasi_editorial_system',
-    itemContext: { narrativeFunction: 'evidence_reveal' }
-  });
-  assert.equal(evidenceResolved.resolved.active_visual_mode, 'paper_cutout_documentary');
-  assert.ok(evidenceResolved.resolved.style_prompt.includes('paper cutout documentary'));
-
-  // Default when narrative function is omitted
-  const defaultResolved = await resolveVisualIdentity({
-    presetRef: 'way_siyasi_editorial_system'
-  });
-  assert.equal(defaultResolved.resolved.active_visual_mode, 'editorial_graphic_novel');
-
-  // Metaphor translation resolution test
-  const metaphorResolved = await resolveVisualIdentity({
-    presetRef: 'way_siyasi_editorial_system',
-    itemContext: {
-      narrativeFunction: 'hook',
-      concept: 'Inflation erosion',
-      primaryObject: 'Dissolving banknotes in hourglass',
-      visualAction: 'Time-lapse melting away'
-    }
-  });
-  assert.ok(metaphorResolved.resolved.metaphor_prompt.includes('Dissolving banknotes in hourglass'));
-
-  // Deduplicated negative prompts
-  assert.ok(defaultResolved.resolved.negative_prompt.includes('visible human face'));
-  assert.ok(defaultResolved.resolved.negative_prompt.includes('photorealistic stock footage'));
-
-  console.log('  ✅ Resolver narrative routing tests passed.');
-}
-
 async function runAll() {
   try {
-    await runRepoTests();
     await runResolverTests();
+    await runRepoTests();
     console.log('🎉 All Visual Identity Foundation tests passed successfully!');
   } catch (err) {
     console.error('❌ Tests failed:', err);

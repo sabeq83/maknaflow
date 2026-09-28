@@ -7,6 +7,9 @@ import {
   POPULATION_MODES
 } from '../../lib/visual-identity-contract';
 import {
+  DEFAULT_VISUAL_STYLE,
+  PRIMARY_STYLE_KEYS,
+  SUPPORTING_ONLY_STYLE_KEYS,
   VISUAL_STYLE_KEYS,
   VISUAL_LANGUAGE_CATALOG,
   NARRATIVE_FUNCTIONS,
@@ -70,6 +73,12 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
 
   // Handle Style Card Role Change (Primary / Supporting / Off)
   const handleSetStyleRole = (styleKey, role) => {
+    const targetDef = getVisualStyleDefinition(styleKey);
+    if (role === 'primary' && targetDef?.role === 'supporting') {
+      setError(`Gaya "${targetDef.label}" dirancang khusus sebagai Supporting Mode dan tidak dapat dijadikan Primary Style.`);
+      return;
+    }
+
     setBrief(prev => {
       let nextPrimary = prev.primary_style;
       let nextSupporting = [...(prev.supporting_styles || [])];
@@ -603,6 +612,7 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
                   const isPrimary = brief.primary_style === key;
                   const isSupporting = (brief.supporting_styles || []).includes(key);
                   const isOff = !isPrimary && !isSupporting;
+                  const isSupportingOnly = def?.role === 'supporting';
 
                   return (
                     <div
@@ -617,38 +627,60 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
                       }}
                     >
                       <div style={{ padding: 14, flexGrow: 1 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                          <strong style={{ fontSize: '13px', color: 'var(--text-primary)' }}>{def.label}</strong>
-                          {isPrimary && (
-                            <span
-                              style={{
-                                fontSize: '10px',
-                                fontWeight: 800,
-                                textTransform: 'uppercase',
-                                padding: '2px 6px',
-                                borderRadius: 'var(--radius-xs, 4px)',
-                                background: 'var(--action-primary)',
-                                color: 'var(--on-action-primary)'
-                              }}
-                            >
-                              PRIMARY
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+                          <div>
+                            <strong style={{ fontSize: '13px', color: 'var(--text-primary)', display: 'block' }}>{def.label}</strong>
+                            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                              {def.family} • {def.rendering_medium}
                             </span>
-                          )}
-                          {isSupporting && (
-                            <span
-                              style={{
-                                fontSize: '10px',
-                                fontWeight: 700,
-                                textTransform: 'uppercase',
-                                padding: '2px 6px',
-                                borderRadius: 'var(--radius-xs, 4px)',
-                                background: 'var(--status-info-soft)',
-                                color: 'var(--status-info)'
-                              }}
-                            >
-                              SUPPORTING
-                            </span>
-                          )}
+                          </div>
+                          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                            {isSupportingOnly && (
+                              <span
+                                style={{
+                                  fontSize: '9px',
+                                  fontWeight: 700,
+                                  textTransform: 'uppercase',
+                                  padding: '2px 5px',
+                                  borderRadius: 'var(--radius-xs, 4px)',
+                                  background: 'var(--surface-interactive)',
+                                  color: 'var(--text-secondary)'
+                                }}
+                              >
+                                Supp-Only
+                              </span>
+                            )}
+                            {isPrimary && (
+                              <span
+                                style={{
+                                  fontSize: '10px',
+                                  fontWeight: 800,
+                                  textTransform: 'uppercase',
+                                  padding: '2px 6px',
+                                  borderRadius: 'var(--radius-xs, 4px)',
+                                  background: 'var(--action-primary)',
+                                  color: 'var(--on-action-primary)'
+                                }}
+                              >
+                                PRIMARY
+                              </span>
+                            )}
+                            {isSupporting && (
+                              <span
+                                style={{
+                                  fontSize: '10px',
+                                  fontWeight: 700,
+                                  textTransform: 'uppercase',
+                                  padding: '2px 6px',
+                                  borderRadius: 'var(--radius-xs, 4px)',
+                                  background: 'var(--status-info-soft)',
+                                  color: 'var(--status-info)'
+                                }}
+                              >
+                                SUPPORTING
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 12px', lineHeight: 1.4 }}>
                           {def.description}
@@ -667,15 +699,18 @@ export default function AiVisualIdentityBuilderModal({ onClose, onContinueEditin
                         <button
                           type="button"
                           onClick={() => handleSetStyleRole(key, 'primary')}
+                          disabled={isSupportingOnly}
+                          title={isSupportingOnly ? 'Gaya ini khusus mode pendukung (supporting-only)' : undefined}
                           style={{
                             padding: '8px 4px',
                             fontSize: '11px',
                             fontWeight: isPrimary ? 800 : 500,
                             background: isPrimary ? 'var(--action-primary)' : 'transparent',
-                            color: isPrimary ? 'var(--on-action-primary)' : 'var(--text-secondary)',
+                            color: isPrimary ? 'var(--on-action-primary)' : isSupportingOnly ? 'var(--text-muted)' : 'var(--text-secondary)',
                             border: 0,
                             borderRight: '1px solid var(--border-subtle)',
-                            cursor: 'pointer'
+                            cursor: isSupportingOnly ? 'not-allowed' : 'pointer',
+                            opacity: isSupportingOnly ? 0.4 : 1
                           }}
                         >
                           Primary
