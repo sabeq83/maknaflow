@@ -1,215 +1,168 @@
-# Implementation Plan: Fix Visual Identity Edit Error & Reference Asset (Metode A) Integration
+# Implementation Plan: SasyaHouse Visual Identity Modernization & Multi-Pillar Realignment
 
 ## Problem Summary
-When the user clicks the "Edit" button on a Visual Identity preset (specifically `sasyahouse_modern_muslimah_lifestyle`) in `/settings/visual-identities`:
-1. **Critical Runtime Exception**: `PRIMARY_STYLE_KEYS` and `SUPPORTING_ONLY_STYLE_KEYS` were missing from the exports in [`lib/visual-language-catalog.js`](file:///Users/sabeqmmursyid/_contentflow-staging/lib/visual-language-catalog.js), causing `PRIMARY_STYLE_KEYS.map(...)` in [`app/settings/visual-identities/page.js`](file:///Users/sabeqmmursyid/_contentflow-staging/app/settings/visual-identities/page.js) to throw `TypeError: Cannot read properties of undefined (reading 'map')`.
-2. **Missing Safe Fallbacks**: In `handleOpenEdit`, sub-objects (`subject`, `wardrobe`, `environment`, `lighting`, `camera`, `guardrails`) were not fully merged with `DEFAULT_CONFIG` defaults, which could cause undefined property errors on legacy or partially populated presets.
-3. **Reference Asset Role Expansion**: SasyaHouse requires attaching real photos for rooms, facade, pantry, culinary items, and wardrobe. The `ROLE_COMPATIBILITY` in [`lib/reference-asset-contract.js`](file:///Users/sabeqmmursyid/_contentflow-staging/lib/reference-asset-contract.js) and `allowedRoles` in [`app/settings/visual-identities/page.js`](file:///Users/sabeqmmursyid/_contentflow-staging/app/settings/visual-identities/page.js) need to include `'location'` and `'environment'` roles so users can upload real property photos directly to the visual identity.
+Audit on Staging Campaign `opc_260929_hn6jsb` revealed that start frame generation for all rows (including studying/exams, P3K first aid, room organizing, budgeting, and emergency power-outage survival) defaulted to kitchen/culinary scenes because:
+1. **Locked Culinary Preset**: `visual_identity_presets` for `sasyahouse_modern_muslimah_lifestyle` had `style.preset_key: "culinary_cinematic"` and `visual_language.primary_style: "culinary_cinematic"`.
+2. **Strict Mode Routing**: `mode_routing.hook`, `mechanism`, and `conclusion` were all hardcoded to `"culinary_cinematic"`, injecting `[STYLE: culinary_cinematic]` to Clip 1, 4/5, and 8 across all content pillars.
+3. **Hardcoded Food Highlights in Lighting**: `lighting.custom_description` contained `"appetizing highlights on food and surfaces"`, prompting T2I models to generate kitchen counters and food props even for non-culinary scenes (such as folding clothes in Row 9 or blackout survival in Row 8).
+4. **Food Textures & Guardrails**: `rendering.textures` globally included `"authentic_steam_and_moisture"` and `guardrails` included `"unappetizing food"`.
 
 ---
 
 ## Proposed Changes
 
-### 1. Central Catalog (`lib/visual-language-catalog.js`)
-Export `PRIMARY_STYLE_KEYS` and `SUPPORTING_ONLY_STYLE_KEYS` so client pages and modals can map over them safely.
+### 1. Preset Configuration Refinement (`scripts/create-sasyahouse-preset.mjs`)
+Realign SasyaHouse visual identity to genuine Muslimah student lifestyle & education-first boarding house living:
+- Primary Style: `cinematic_realistic` (Clean modern Gen Z lifestyle)
+- Supporting Styles: `commercial_product_cinematic`, `culinary_cinematic`
+- Mode Routing:
+  - `hook`: `cinematic_realistic`
+  - `context`: `cinematic_realistic`
+  - `mechanism`: `cinematic_realistic`
+  - `consequence`: `commercial_product_cinematic`
+  - `evidence_reveal`: `commercial_product_cinematic`
+  - `conclusion`: `cinematic_realistic`
+- Lighting: Neutral warm morning daylight without food-specific prompts
+- Textures: Oak wood, clean matte white, soft cotton fabric, smooth paper, natural skin
+- Negative Prompts: Focused on modest wear invariants, clean minimalist rooms, and anti-clutter.
 
-#### Code Sebelum (Current/Before):
+#### Code Sebelum (Current/Before) in `scripts/create-sasyahouse-preset.mjs`:
 ```javascript
-export const VISUAL_STYLE_KEYS = [
-  'cinematic_realistic',
-  'commercial_product_cinematic',
-  'culinary_cinematic',
-  'stylized_3d_character',
-  'cozy_claymation',
-  'editorial_graphic_novel',
-  'isometric_society',
-  'symbolic_surrealism',
-  'paper_cutout_documentary',
-  'shadow_silhouette',
-  'clay_political_theater'
-];
+  visual_language: {
+    primary_style: 'culinary_cinematic',
+    supporting_styles: ['commercial_product_cinematic', 'cinematic_realistic'],
+    disabled_styles: ['editorial_graphic_novel', 'shadow_silhouette', 'clay_political_theater']
+  },
+  
+  mode_routing: {
+    hook: 'culinary_cinematic',
+    context: 'commercial_product_cinematic',
+    mechanism: 'culinary_cinematic',
+    consequence: 'commercial_product_cinematic',
+    evidence_reveal: 'commercial_product_cinematic',
+    conclusion: 'culinary_cinematic'
+  },
+  
+  rendering: {
+    geometry: 'photorealistic_clean',
+    textures: [
+      'natural_skin_textures',
+      'authentic_steam_and_moisture',
+      'clean_matte_white_surface',
+      'light_natural_oak_wood'
+    ],
+    shadow_style: 'soft_natural',
+    finish: 'photorealistic_cinematic'
+  },
 
-export const NARRATIVE_FUNCTIONS = [
-  'hook',
-  'context',
-  'mechanism',
-  'consequence',
-  'evidence_reveal',
-  'conclusion'
-];
+  lighting: {
+    preset_key: 'window_daylight',
+    custom_description: 'illuminated by soft natural warm golden daylight coming from side window, gentle ambient glow, appetizing highlights on food and surfaces, realistic soft-shadow roll-off',
+    color_temperature: 'warm_neutral',
+    contrast: 'soft'
+  },
+
+  style: {
+    preset_key: 'culinary_cinematic',
+    custom_description: 'premium modern Gen Z student lifestyle and culinary cinematography, warm inviting ambience, clean 8k photorealism',
+    aspect_ratio: '9:16'
+  },
+
+  guardrails: {
+    face_visibility: 'prohibited',
+    reflection_face: 'prohibited',
+    unintended_people: 'prohibited',
+    extra_people: 'prohibited',
+    intentional_crowd: 'allowed_faceless',
+    identity_drift: 'prohibited',
+    wardrobe_drift: 'prohibited',
+    required_negative_prompts: [
+      'rustic wooden table',
+      'worn-out rough wooden desk',
+      'cluttered messy desk',
+      'dark gloomy lighting',
+      'political editorial illustration',
+      'flat 2D vector clipart',
+      'visible human face',
+      'exposed arms',
+      'bare skin above wrists',
+      'unappetizing food'
+    ]
+  }
 ```
 
-#### Code Sesudah (Proposed/After):
+#### Code Sesudah (Proposed/After) in `scripts/create-sasyahouse-preset.mjs`:
 ```javascript
-export const VISUAL_STYLE_KEYS = [
-  'cinematic_realistic',
-  'commercial_product_cinematic',
-  'culinary_cinematic',
-  'stylized_3d_character',
-  'cozy_claymation',
-  'editorial_graphic_novel',
-  'isometric_society',
-  'symbolic_surrealism',
-  'paper_cutout_documentary',
-  'shadow_silhouette',
-  'clay_political_theater'
-];
+  visual_language: {
+    primary_style: 'cinematic_realistic',
+    supporting_styles: ['commercial_product_cinematic', 'culinary_cinematic'],
+    disabled_styles: ['editorial_graphic_novel', 'shadow_silhouette', 'clay_political_theater']
+  },
+  
+  mode_routing: {
+    hook: 'cinematic_realistic',
+    context: 'cinematic_realistic',
+    mechanism: 'cinematic_realistic',
+    consequence: 'commercial_product_cinematic',
+    evidence_reveal: 'commercial_product_cinematic',
+    conclusion: 'cinematic_realistic'
+  },
+  
+  rendering: {
+    geometry: 'photorealistic_clean',
+    textures: [
+      'natural_skin_textures',
+      'clean_matte_white_surface',
+      'light_natural_oak_wood',
+      'soft_neutral_cotton_fabric',
+      'smooth_paper_texture'
+    ],
+    shadow_style: 'soft_natural',
+    finish: 'photorealistic_cinematic'
+  },
 
-export const PRIMARY_STYLE_KEYS = [
-  'cinematic_realistic',
-  'commercial_product_cinematic',
-  'culinary_cinematic',
-  'stylized_3d_character',
-  'cozy_claymation',
-  'editorial_graphic_novel'
-];
+  lighting: {
+    preset_key: 'window_daylight',
+    custom_description: 'illuminated by soft natural warm golden daylight coming from side window, gentle ambient glow, clean airy highlights across surfaces and textures, realistic soft-shadow roll-off',
+    color_temperature: 'warm_neutral',
+    contrast: 'soft'
+  },
 
-export const SUPPORTING_ONLY_STYLE_KEYS = [
-  'isometric_society',
-  'symbolic_surrealism',
-  'paper_cutout_documentary',
-  'shadow_silhouette',
-  'clay_political_theater'
-];
+  style: {
+    preset_key: 'cinematic_realistic',
+    custom_description: 'premium modern Gen Z Muslimah student lifestyle cinematography, aesthetic Japanese-Scandinavian cozy dorm living in Sigura-gura Malang, clean, bright, airy 8k photorealism',
+    aspect_ratio: '9:16'
+  },
 
-export const NARRATIVE_FUNCTIONS = [
-  'hook',
-  'context',
-  'mechanism',
-  'consequence',
-  'evidence_reveal',
-  'conclusion'
-];
-```
-
----
-
-### 2. Reference Asset Contract & Prompt Builder (`lib/reference-asset-contract.js` & `lib/reference-asset-prompt-builder.js`)
-Allow `location` role on `visual_identity` owner type and build suitable prompts for property/interior assets.
-
-#### Code Sebelum (Current/Before) in `lib/reference-asset-contract.js`:
-```javascript
-export const ROLE_COMPATIBILITY = {
-  universe: ['visual_style', 'palette_sheet'],
-  character: ['identity', 'wardrobe', 'character_sheet'],
-  location: ['location'],
-  visual_identity: ['wardrobe', 'visual_style', 'palette_sheet', 'character_sheet']
-};
-```
-
-#### Code Sesudah (Proposed/After) in `lib/reference-asset-contract.js`:
-```javascript
-export const ROLE_COMPATIBILITY = {
-  universe: ['visual_style', 'palette_sheet'],
-  character: ['identity', 'wardrobe', 'character_sheet'],
-  location: ['location'],
-  visual_identity: ['visual_style', 'location', 'wardrobe', 'palette_sheet', 'character_sheet']
-};
-```
-
----
-
-### 3. Visual Identity Studio Page (`app/settings/visual-identities/page.js`)
-Harden `handleOpenEdit` with comprehensive deep-fallback merging and update `allowedRoles` for `ReferenceAssetManager`.
-
-#### Code Sebelum (Current/Before):
-```javascript
-  const handleOpenEdit = (preset) => {
-    setLabel(preset.label);
-    setDescription(preset.description || '');
-    setPresetKey(preset.preset_key);
-    setConfig({
-      ...DEFAULT_CONFIG,
-      ...preset.config,
-      visual_language: {
-        ...DEFAULT_CONFIG.visual_language,
-        ...(preset.config?.visual_language || {})
-      },
-      mode_routing: {
-        ...DEFAULT_CONFIG.mode_routing,
-        ...(preset.config?.mode_routing || {})
-      },
-      rendering: {
-        ...DEFAULT_CONFIG.rendering,
-        ...(preset.config?.rendering || {})
-      },
-      composition: {
-        ...DEFAULT_CONFIG.composition,
-        ...(preset.config?.composition || {})
-      },
-      metaphor_engine: {
-        ...DEFAULT_CONFIG.metaphor_engine,
-        ...(preset.config?.metaphor_engine || {})
-      }
-    });
-    setEditingPreset(preset);
-  };
-```
-
-#### Code Sesudah (Proposed/After):
-```javascript
-  const handleOpenEdit = (preset) => {
-    setLabel(preset.label || '');
-    setDescription(preset.description || '');
-    setPresetKey(preset.preset_key || '');
-    setConfig({
-      ...DEFAULT_CONFIG,
-      ...(preset.config || {}),
-      subject: {
-        ...DEFAULT_CONFIG.subject,
-        ...(preset.config?.subject || {})
-      },
-      visual_language: {
-        ...DEFAULT_CONFIG.visual_language,
-        ...(preset.config?.visual_language || {})
-      },
-      mode_routing: {
-        ...DEFAULT_CONFIG.mode_routing,
-        ...(preset.config?.mode_routing || {})
-      },
-      rendering: {
-        ...DEFAULT_CONFIG.rendering,
-        ...(preset.config?.rendering || {})
-      },
-      composition: {
-        ...DEFAULT_CONFIG.composition,
-        ...(preset.config?.composition || {})
-      },
-      metaphor_engine: {
-        ...DEFAULT_CONFIG.metaphor_engine,
-        ...(preset.config?.metaphor_engine || {})
-      },
-      wardrobe: {
-        ...DEFAULT_CONFIG.wardrobe,
-        ...(preset.config?.wardrobe || {})
-      },
-      environment: {
-        ...DEFAULT_CONFIG.environment,
-        ...(preset.config?.environment || {})
-      },
-      lighting: {
-        ...DEFAULT_CONFIG.lighting,
-        ...(preset.config?.lighting || {})
-      },
-      camera: {
-        ...DEFAULT_CONFIG.camera,
-        ...(preset.config?.camera || {})
-      },
-      guardrails: {
-        ...DEFAULT_CONFIG.guardrails,
-        ...(preset.config?.guardrails || {})
-      }
-    });
-    setEditingPreset(preset);
-  };
+  guardrails: {
+    face_visibility: 'prohibited',
+    reflection_face: 'prohibited',
+    unintended_people: 'prohibited',
+    extra_people: 'prohibited',
+    intentional_crowd: 'allowed_faceless',
+    identity_drift: 'prohibited',
+    wardrobe_drift: 'prohibited',
+    required_negative_prompts: [
+      'rustic wooden table',
+      'worn-out rough wooden desk',
+      'cluttered messy desk',
+      'dark gloomy lighting',
+      'political editorial illustration',
+      'flat 2D vector clipart',
+      'visible human face',
+      'exposed arms',
+      'bare skin above wrists',
+      'short sleeves'
+    ]
+  }
 ```
 
 ---
 
 ## Execution Task List
-- [x] Update `lib/visual-language-catalog.js` with `PRIMARY_STYLE_KEYS` and `SUPPORTING_ONLY_STYLE_KEYS` exports
-- [x] Update `lib/reference-asset-contract.js` and `lib/reference-asset-prompt-builder.js` to support `'location'` role for `visual_identity`
-- [x] Update `app/settings/visual-identities/page.js` with robust state fallbacks and extended allowed reference roles
-- [x] Create/update mockup HTML in `public/mockup_visual_identity_edit.html` demonstrating the fix and real photo reference manager
-- [x] Run test suite (`scripts/test-visual-identity-foundation.mjs` and build check) to verify resolution
-- [ ] Perform non-interactive release and atomic deployment to Dev & Staging
+- [x] Audit all 10 campaign rows on `opc_260929_hn6jsb` in staging DB to isolate all instances of culinary-forced prompts
+- [x] Formulate refined Visual Identity specification for SasyaHouse (Muslimah student lifestyle & room living)
+- [x] Update `scripts/create-sasyahouse-preset.mjs` with refined `SASYAHOUSE_CONFIG`
+- [x] Execute database migration script to apply updated preset to Staging & Dev schemas
+- [x] Verify database records for `vi_sasya_mul6jkxw` and resolved snapshot generation
+- [x] Validate test suite and cluster health

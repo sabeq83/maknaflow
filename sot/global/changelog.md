@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.13 — Realignment Preset Visual Identity SasyaHouse ke Muslimah Student Lifestyle (30/09/2026)
+- Revisi primary style dan mode routing SasyaHouse ke cinematic_realistic modern student lifestyle
+- Pembersihan hardcoded food lighting dan uap panas makanan dari default global
+- Aplikasi update preset sasyahouse_modern_muslimah_lifestyle ke schema staging dan dev
+
 ## V2.32.12 — Fix Visual Identity Edit Modal and Add Location Reference Assets (29/09/2026)
 - Fix TypeError undefined map on PRIMARY_STYLE_KEYS in Visual Identity Studio
 - Harden handleOpenEdit with safe deep fallbacks for sub-objects

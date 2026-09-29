@@ -17,27 +17,28 @@ const SASYAHOUSE_CONFIG = {
   },
   
   visual_language: {
-    primary_style: 'culinary_cinematic',
-    supporting_styles: ['commercial_product_cinematic', 'cinematic_realistic'],
+    primary_style: 'cinematic_realistic',
+    supporting_styles: ['commercial_product_cinematic', 'culinary_cinematic'],
     disabled_styles: ['editorial_graphic_novel', 'shadow_silhouette', 'clay_political_theater']
   },
   
   mode_routing: {
-    hook: 'culinary_cinematic',
-    context: 'commercial_product_cinematic',
-    mechanism: 'culinary_cinematic',
+    hook: 'cinematic_realistic',
+    context: 'cinematic_realistic',
+    mechanism: 'cinematic_realistic',
     consequence: 'commercial_product_cinematic',
     evidence_reveal: 'commercial_product_cinematic',
-    conclusion: 'culinary_cinematic'
+    conclusion: 'cinematic_realistic'
   },
   
   rendering: {
     geometry: 'photorealistic_clean',
     textures: [
       'natural_skin_textures',
-      'authentic_steam_and_moisture',
       'clean_matte_white_surface',
-      'light_natural_oak_wood'
+      'light_natural_oak_wood',
+      'soft_neutral_cotton_fabric',
+      'smooth_paper_texture'
     ],
     shadow_style: 'soft_natural',
     finish: 'photorealistic_cinematic'
@@ -87,7 +88,7 @@ const SASYAHOUSE_CONFIG = {
   
   lighting: {
     preset_key: 'window_daylight',
-    custom_description: 'illuminated by soft natural warm golden daylight coming from side window, gentle ambient glow, appetizing highlights on food and surfaces, realistic soft-shadow roll-off',
+    custom_description: 'illuminated by soft natural warm golden daylight coming from side window, gentle ambient glow, clean airy highlights across surfaces and textures, realistic soft-shadow roll-off',
     color_temperature: 'warm_neutral',
     contrast: 'soft'
   },
@@ -101,8 +102,8 @@ const SASYAHOUSE_CONFIG = {
   },
   
   style: {
-    preset_key: 'culinary_cinematic',
-    custom_description: 'premium modern Gen Z student lifestyle and culinary cinematography, warm inviting ambience, clean 8k photorealism',
+    preset_key: 'cinematic_realistic',
+    custom_description: 'premium modern Gen Z Muslimah student lifestyle cinematography, aesthetic Japanese-Scandinavian cozy dorm living in Sigura-gura Malang, clean, bright, airy 8k photorealism',
     aspect_ratio: '9:16'
   },
   
@@ -124,7 +125,7 @@ const SASYAHOUSE_CONFIG = {
       'visible human face',
       'exposed arms',
       'bare skin above wrists',
-      'unappetizing food'
+      'short sleeves'
     ]
   }
 };
