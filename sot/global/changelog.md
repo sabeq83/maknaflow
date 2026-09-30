@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.14 — Fix faceless culinary hands-only framing and prompt injection (01/10/2026)
+- Refactor demographic presets to POV hands-first
+- Inject negative prompt in startframe requests
+- Standardize top-down 45-deg macro framing in recipe adapter
+- Batch inject updated prompts into opc_260930_i2mczt
+
 ## V2.32.13 — Realignment Preset Visual Identity SasyaHouse ke Muslimah Student Lifestyle (30/09/2026)
 - Revisi primary style dan mode routing SasyaHouse ke cinematic_realistic modern student lifestyle
 - Pembersihan hardcoded food lighting dan uap panas makanan dari default global
