@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.15 — Enforce top-down 45-deg macro angle in recipe prompt templates (01/10/2026)
+- Add explicit top-down 45-deg angle to Layer 1 Optics in recipe adapter
+- Synchronize I2V action camera movements to 45-deg angle
+- Re-inject clean prompt structure to all 15 items in opc_260930_i2mczt
+
 ## V2.32.14 — Fix faceless culinary hands-only framing and prompt injection (01/10/2026)
 - Refactor demographic presets to POV hands-first
 - Inject negative prompt in startframe requests

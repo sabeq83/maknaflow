@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Deconstruct Lab - Page Source Support</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --border: var(--border-subtle);
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --accent: var(--action-primary);
+      --accent-light: #2dd4bf;
+      --accent-dark: #0f766e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(0, 0, 0, 0.04);
+      --overlay-backdrop: rgba(15, 23, 42, 0.45);
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border: var(--border-subtle);
+      --action-primary: #0d9488;
+      --action-primary-hover: #0f766e;
+      --on-action-primary: #ffffff;
+      --link: #0284c7;
+      --accent: #0d9488;
+      --accent-light: #0f766e;
+      --accent-dark: #115e59;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.12);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #dc2626;
+      --status-danger-soft: rgba(220, 38, 38, 0.12);
+      --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-sans); }
+    body { background: var(--canvas); color: var(--text-primary); min-height: 100vh; padding: 24px; }
+    
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .title-group h1 { font-size: 1.75rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.02em; }
+    .title-group p { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
+
+    .btn {
+      padding: 8px 16px; border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;
+    }
+    .btn-primary { background: var(--action-primary); color: var(--on-action-primary); }
+    .btn-primary:hover { background: var(--action-primary-hover); }
+    .btn-secondary { background: var(--surface-interactive); color: var(--text-primary); border: 1px solid var(--border-subtle); }
+    .btn-secondary:hover { background: var(--surface-hover); }
+
+    .card {
+      background: var(--surface); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm); padding: 16px; margin-bottom: 20px;
+    }
+
+    .table-container {
+      background: var(--surface); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm); overflow: hidden;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; text-align: left; }
+    th {
+      background: var(--surface-raised); color: var(--text-muted); padding: 12px 14px;
+      font-weight: 700; border-bottom: 1px solid var(--border-subtle); text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.04em;
+    }
+    td { padding: 12px 14px; border-bottom: 1px solid var(--border-subtle); color: var(--text-primary); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface-raised); }
+
+    .badge-page-source {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--surface-interactive); color: var(--text-primary);
+      padding: 4px 10px; border-radius: var(--radius-xs);
+      font-size: 0.75rem; font-weight: 600; border: 1px solid var(--border-strong);
+      max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .badge-niche {
+      display: inline-block; background: var(--status-info-soft); color: var(--status-info);
+      padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 600;
+    }
+    .badge-status {
+      display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700;
+    }
+    .status-saved { background: var(--surface-interactive); color: var(--text-muted); }
+    .status-deconstructed { background: var(--status-success-soft); color: var(--status-success); }
+    .status-analyzing { background: var(--status-info-soft); color: var(--status-info); }
+
+    /* Modal styles */
+    .modal-backdrop {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--overlay-backdrop); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal-box {
+      background: var(--surface); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md); width: 520px; max-width: 90vw; padding: 24px;
+      box-shadow: var(--shadow-modal);
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .modal-header h3 { font-size: 1.1rem; font-weight: 800; color: var(--text-primary); }
+    .close-btn { background: none; border: none; font-size: 1.3rem; color: var(--text-muted); cursor: pointer; }
+    
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; }
+    .form-control {
+      width: 100%; background: var(--input-bg); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm); padding: 10px 12px; color: var(--text-primary);
+      font-size: 0.82rem; outline: none; transition: border-color 0.2s;
+    }
+    .form-control:focus { border-color: var(--action-primary); box-shadow: 0 0 0 2px var(--status-info-soft); }
+
+    .highlight-pill {
+      background: var(--status-warning-soft); color: var(--status-warning); border: 1px dashed var(--status-warning);
+      padding: 4px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 12px;
+    }
+
+    .tab-bar { display: flex; border-bottom: 1px solid var(--border-subtle); margin-bottom: 14px; gap: 16px; }
+    .tab-btn {
+      background: none; border: none; padding: 8px 0; font-size: 0.8rem; font-weight: 600;
+      color: var(--text-muted); cursor: pointer; position: relative;
+    }
+    .tab-btn.active { color: var(--action-primary); border-bottom: 2px solid var(--action-primary); }
+
+    .theme-toggle {
+      position: fixed; bottom: 20px; right: 20px; z-index: 100;
+      background: var(--surface-raised); border: 1px solid var(--border-strong);
+      color: var(--text-primary); padding: 8px 14px; border-radius: 20px;
+      cursor: pointer; font-size: 0.78rem; font-weight: 600; box-shadow: var(--shadow-card);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="title-group">
+        <h1>Deconstruct Lab</h1>
+        <p>Library riset pola video viral dan blueprint konsep konten kreatif dengan dukungan <strong>Page Source</strong>.</p>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-primary" onclick="openModal()">
+          <span>+</span> Simpan URL
+        </button>
+      </div>
+    </div>
+
+    <!-- Explanation Box -->
+    <div class="card" style="border-left: 4px solid var(--action-primary); display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">✨ Fitur Baru yang Direncanakan:</div>
+        <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">
+          1. <strong>Field Page Source</strong> pada Modal "Simpan URL ke Library" (mendukung input manual & CSV).<br>
+          2. <strong>Kolom Page Source</strong> pada Tabel URL Pustaka diposisikan persis <u>sebelum kolom URL</u>.<br>
+          3. <strong>Auto-Backfill Data Existing</strong>: Semua URL yang sudah ada saat ini otomatis di-set ke <code>Siasat Sehat</code>.
+        </div>
+      </div>
+      <span class="highlight-pill">✓ Sesuai Request</span>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 40px; text-align: center;"><input type="checkbox" id="checkAll"></th>
+            <th style="width: 170px; color: var(--action-primary);">📌 Page Source (Baru)</th>
+            <th>URL</th>
+            <th style="width: 120px;">Niche</th>
+            <th style="width: 110px;">Proses</th>
+            <th style="width: 220px;">Keterangan</th>
+            <th style="width: 130px;">Tgl Input</th>
+            <th style="width: 90px; text-align: center;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr>
+            <td style="text-align: center;"><input type="checkbox"></td>
+            <td>
+              <span class="badge-page-source" title="Siasat Sehat">
+                🏷️ Siasat Sehat
+              </span>
+            </td>
+            <td>
+              <a href="#" style="color: var(--link); text-decoration: none; font-weight: 500;">
+                tiktok.com/@siasatsehat/video/7391823901
+              </a>
+            </td>
+            <td><span class="badge-niche">Health</span></td>
+            <td><span class="badge-status status-deconstructed">Selesai</span></td>
+            <td style="color: var(--text-secondary); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              5 Kebiasaan pagi untuk menurunkan gula darah alami
+            </td>
+            <td style="color: var(--text-muted); font-size: 0.75rem;">01/10/2026 06:30</td>
+            <td style="text-align: center;"><button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;">Detail</button></td>
+          </tr>
+          <tr>
+            <td style="text-align: center;"><input type="checkbox"></td>
+            <td>
+              <span class="badge-page-source" title="Siasat Sehat">
+                🏷️ Siasat Sehat
+              </span>
+            </td>
+            <td>
+              <a href="#" style="color: var(--link); text-decoration: none; font-weight: 500;">
+                instagram.com/reel/C89x123abc
+              </a>
+            </td>
+            <td><span class="badge-niche">Health</span></td>
+            <td><span class="badge-status status-saved">Belum</span></td>
+            <td style="color: var(--text-secondary); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              Minuman herbal penurun kolesterol setelah makan berlemak
+            </td>
+            <td style="color: var(--text-muted); font-size: 0.75rem;">01/10/2026 06:45</td>
+            <td style="text-align: center;"><button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;">Detail</button></td>
+          </tr>
+          <tr>
+            <td style="text-align: center;"><input type="checkbox"></td>
+            <td>
+              <span class="badge-page-source" title="Siasat Sehat">
+                🏷️ Siasat Sehat
+              </span>
+            </td>
+            <td>
+              <a href="#" style="color: var(--link); text-decoration: none; font-weight: 500;">
+                facebook.com/watch/?v=9988776655
+              </a>
+            </td>
+            <td><span class="badge-niche">Health</span></td>
+            <td><span class="badge-status status-analyzing">Analyzing</span></td>
+            <td style="color: var(--text-secondary); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              Resep ramuan kunyit madu untuk imunitas tubuh
+            </td>
+            <td style="color: var(--text-muted); font-size: 0.75rem;">01/10/2026 06:50</td>
+            <td style="text-align: center;"><button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;">Detail</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Simpan URL -->
+  <div class="modal-backdrop" id="saveModal" style="display: none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>📥 Simpan URL ke Library</h3>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+
+      <form onsubmit="handleFormSubmit(event)">
+        <!-- Page Source Input (BARU) -->
+        <div class="form-group" style="background: var(--surface-raised); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label style="font-weight: 700; color: var(--action-primary); margin: 0;">
+              ✨ Page Source / Sumber Konten (Baru)
+            </label>
+            <span style="font-size: 0.7rem; color: var(--text-muted);">Opsional</span>
+          </div>
+          <input
+            type="text"
+            id="pageSourceInput"
+            class="form-control"
+            placeholder="Contoh: @dr.richardlee, TikTok Dapur Mama, Facebook Page X"
+          />
+          <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">
+            Nama akun kreator, fanspage, atau channel rujukan video.
+          </div>
+        </div>
+
+        <!-- Niche Input -->
+        <div class="form-group">
+          <label>Niche Konten (Opsional - Kosongkan untuk Deteksi Otomatis)</label>
+          <input
+            type="text"
+            id="nicheInput"
+            class="form-control"
+            placeholder="Contoh: Skincare, Gadget, Kuliner"
+          />
+        </div>
+
+        <!-- Tabs Input Mode -->
+        <div class="tab-bar">
+          <button type="button" class="tab-btn active" id="tabManual" onclick="switchTab('manual')">Input Manual</button>
+          <button type="button" class="tab-btn" id="tabCsv" onclick="switchTab('csv')">Unggah CSV</button>
+        </div>
+
+        <!-- Manual Input Tab Content -->
+        <div id="manualContent">
+          <div class="form-group">
+            <label>Video URLs (satu per baris) <span style="color: var(--status-danger);">*</span></label>
+            <textarea
+              id="urlsInput"
+              class="form-control"
+              rows="4"
+              required
+              placeholder="https://tiktok.com/@creator/video/123456789&#10;https://instagram.com/reel/abcdef"
+              style="font-family: var(--font-mono); resize: none;"
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Keterangan / Caption (Opsional, satu per baris)</label>
+            <textarea
+              id="captionsInput"
+              class="form-control"
+              rows="2"
+              placeholder="Caption video pertama&#10;Caption video kedua"
+              style="resize: none;"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- CSV Input Tab Content -->
+        <div id="csvContent" style="display: none;">
+          <div class="form-group">
+            <label>File CSV</label>
+            <input type="file" accept=".csv" class="form-control" />
+            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 6px;">
+              Mendukung kolom header: <code>url</code>, <code>page_source</code> (atau <code>source</code>/<code>page</code>), dan <code>caption</code>.
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan ke Library</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Light/Dark</button>
+
+  <script>
+    function openModal() {
+      document.getElementById('saveModal').style.display = 'flex';
+    }
+    function closeModal() {
+      document.getElementById('saveModal').style.display = 'none';
+    }
+    function switchTab(tab) {
+      const isManual = tab === 'manual';
+      document.getElementById('tabManual').classList.toggle('active', isManual);
+      document.getElementById('tabCsv').classList.toggle('active', !isManual);
+      document.getElementById('manualContent').style.display = isManual ? 'block' : 'none';
+      document.getElementById('csvContent').style.display = isManual ? 'none' : 'block';
+    }
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const pageSource = document.getElementById('pageSourceInput').value.trim() || '—';
+      const niche = document.getElementById('nicheInput').value.trim() || 'Auto-Detect';
+      const urls = document.getElementById('urlsInput').value.trim().split('\n').filter(Boolean);
+      const captions = document.getElementById('captionsInput').value.trim().split('\n');
+
+      if (urls.length === 0) return;
+
+      const tbody = document.getElementById('tableBody');
+      urls.forEach((url, i) => {
+        const caption = captions[i] || '—';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="text-align: center;"><input type="checkbox"></td>
+          <td>
+            <span class="badge-page-source" title="${pageSource}">
+              ${pageSource !== '—' ? '🏷️ ' + pageSource : '—'}
+            </span>
+          </td>
+          <td>
+            <a href="${url}" target="_blank" style="color: var(--link); text-decoration: none; font-weight: 500;">
+              ${url.replace(/https?:\/\/(www\.)?/, '')}
+            </a>
+          </td>
+          <td><span class="badge-niche">${niche}</span></td>
+          <td><span class="badge-status status-saved">Belum</span></td>
+          <td style="color: var(--text-secondary); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            ${caption}
+          </td>
+          <td style="color: var(--text-muted); font-size: 0.75rem;">Baru Saja</td>
+          <td style="text-align: center;"><button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;">Detail</button></td>
+        `;
+        tbody.insertBefore(tr, tbody.firstChild);
+      });
+
+      closeModal();
+      document.getElementById('pageSourceInput').value = '';
+      document.getElementById('nicheInput').value = '';
+      document.getElementById('urlsInput').value = '';
+      document.getElementById('captionsInput').value = '';
+    }
+  </script>
+</body>
+</html>

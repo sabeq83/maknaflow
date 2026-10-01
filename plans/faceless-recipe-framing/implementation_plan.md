@@ -22,9 +22,9 @@ Pada kampanye resep (seperti `opc_260930_i2mczt` di staging), generator Start Fr
 - [x] **Task 5: Sinkronisasi Dokumentasi SOT di `sot/global/vso-engine.md`**
 - [x] **Task 6: Eksekusi Skrip Batch Injection Prompt T2I & I2V ke Seluruh Baris Kampanye `opc_260930_i2mczt` di Staging DB**
 - [x] **Task 7: Uji Validasi Unit Test & Verifikasi Data Hasil Injeksi di Server Staging**
-- [ ] **Task 8: SOP Rilis & Auto Git Sync (`npm run release-non-interactive`)**
-- [ ] **Task 9: SOP Git-Based Atomic Deployment ke Server Dev Mac Mini (Port 5020/7020)**
-- [ ] **Task 10: SOP Git-Based Atomic Deployment ke Server Staging Mac Mini (Port 5010/7010)**
+- [x] **Task 8: SOP Rilis & Auto Git Sync (`npm run release-non-interactive`)**
+- [x] **Task 9: SOP Git-Based Atomic Deployment ke Server Dev Mac Mini (Port 5020/7020)**
+- [x] **Task 10: SOP Git-Based Atomic Deployment ke Server Staging Mac Mini (Port 5010/7010)**
 
 ---
 
