@@ -16,6 +16,7 @@ export default function AssetDetailPage({ params }) {
 
   // Metadata Editor State
   const [editingMeta, setEditingMeta] = useState(false);
+  const [pageSourceInput, setPageSourceInput] = useState('');
   const [nicheInput, setNicheInput] = useState('');
   const [tagsInput, setTagsInput] = useState('');
   const [savingMeta, setSavingMeta] = useState(false);
@@ -40,6 +41,7 @@ export default function AssetDetailPage({ params }) {
       const data = await res.json();
       if (data.success) {
         setAsset(data.asset);
+        setPageSourceInput(data.asset.page_source || 'Siasat Sehat');
         setNicheInput(data.asset.niche || '');
         setTagsInput(data.asset.tags || '');
         setError(null);
@@ -84,15 +86,25 @@ export default function AssetDetailPage({ params }) {
     }
     setSavingMeta(true);
     try {
+      const payload = {
+        niche: nicheInput.trim(),
+        tags: tagsInput,
+        page_source: pageSourceInput.trim() || 'Siasat Sehat'
+      };
       const res = await fetch(`/api/v2/deconstruct/assets/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ niche: nicheInput.trim(), tags: tagsInput })
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       if (data.success) {
         showToast('Metadata berhasil diperbarui');
-        setAsset(prev => ({ ...prev, niche: nicheInput.trim(), tags: tagsInput }));
+        setAsset(prev => ({
+          ...prev,
+          niche: nicheInput.trim(),
+          tags: tagsInput,
+          page_source: pageSourceInput.trim() || 'Siasat Sehat'
+        }));
         setEditingMeta(false);
       } else {
         showToast(data.error || 'Gagal memperbarui metadata', 'error');
@@ -194,6 +206,9 @@ export default function AssetDetailPage({ params }) {
         }}>
           <div style={{ flex: 1, minWidth: 280 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.68rem', padding: '3px 8px', borderRadius: 4, background: 'var(--surface-interactive)', color: 'var(--text-primary)', fontWeight: 700, border: '1px solid var(--border-subtle)' }}>
+                🏷️ {asset.page_source || 'Siasat Sehat'}
+              </span>
               <span style={{ fontSize: '0.68rem', padding: '3px 8px', borderRadius: 4, background: 'rgba(108, 92, 231, 0.08)', color: 'var(--accent-light)', fontWeight: 700, border: '1px solid rgba(108, 92, 231, 0.15)' }}>
                 {asset.niche || 'TANPA NICHE'}
               </span>
@@ -300,7 +315,17 @@ export default function AssetDetailPage({ params }) {
           }}>
             <h4 style={{ fontSize: '0.88rem', margin: '0 0 14px 0', color: 'var(--text-primary)' }}>Ubah Metadata Aset</h4>
             <form onSubmit={handleSaveMetadata} style={{ display: 'flex', gap: 16, alignItems: 'flex-end', flexWrap: 'wrap' }}>
-              <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ flex: 1, minWidth: 180 }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: 4 }}>Page Source</label>
+                <input
+                  type="text"
+                  value={pageSourceInput}
+                  onChange={(e) => setPageSourceInput(e.target.value)}
+                  placeholder="Contoh: Siasat Sehat, @dr.richardlee"
+                  style={{ width: '100%', padding: '8px 10px', background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: '0.8rem' }}
+                />
+              </div>
+              <div style={{ flex: 1, minWidth: 180 }}>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: 4 }}>Niche</label>
                 <input
                   type="text"
@@ -310,7 +335,7 @@ export default function AssetDetailPage({ params }) {
                   style={{ width: '100%', padding: '8px 10px', background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontSize: '0.8rem' }}
                 />
               </div>
-              <div style={{ flex: 2, minWidth: 280 }}>
+              <div style={{ flex: 2, minWidth: 240 }}>
                 <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: 4 }}>Tags (pisahkan dengan koma)</label>
                 <input
                   type="text"

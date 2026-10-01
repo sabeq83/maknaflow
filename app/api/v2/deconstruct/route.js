@@ -97,6 +97,7 @@ export const POST = withTenantContext(async (request) => {
     const tenantId = getActiveTenantId();
 
     const nicheVal = (niche && niche.trim()) ? niche.trim() : 'Auto-Detect';
+    const defaultPageSource = (body.page_source && body.page_source.trim()) ? body.page_source.trim() : 'Siasat Sehat';
 
     let items = [];
 
@@ -105,6 +106,7 @@ export const POST = withTenantContext(async (request) => {
         .filter(row => row.url && row.url.trim())
         .map(row => ({
           url: row.url.trim(),
+          page_source: (row.page_source && row.page_source.trim()) ? row.page_source.trim() : defaultPageSource,
           caption: (row.caption || '').trim() || null,
         }));
     } else if (body.urls) {
@@ -119,6 +121,7 @@ export const POST = withTenantContext(async (request) => {
 
       items = urls.map((url, i) => ({
         url,
+        page_source: defaultPageSource,
         caption: captions[i] || null,
       }));
     }

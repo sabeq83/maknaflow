@@ -30,6 +30,7 @@ export default function DeconstructPage() {
   const [showEnqueueModal, setShowEnqueueModal] = useState(false);
 
   // Save Form States
+  const [pageSourceInput, setPageSourceInput] = useState('');
   const [nicheInput, setNicheInput] = useState('');
   const [urlsInput, setUrlsInput] = useState('');
   const [captionsInput, setCaptionsInput] = useState('');
@@ -193,8 +194,12 @@ export default function DeconstructPage() {
 
       const urlIdx = header.findIndex(h =>
         h === 'url' || h === 'video_url' || h === 'link' ||
-        (h.includes('url') && !h.includes('caption')) ||
-        (h.includes('link') && !h.includes('caption'))
+        (h.includes('url') && !h.includes('caption') && !h.includes('source')) ||
+        (h.includes('link') && !h.includes('caption') && !h.includes('source'))
+      );
+      const pageSourceIdx = header.findIndex(h =>
+        h === 'page_source' || h === 'page' || h === 'source' || h === 'creator' ||
+        h === 'account' || h === 'channel' || h === 'page_name' || h === 'sumber'
       );
       const captionIdx = header.findIndex(h =>
         h === 'caption' || h === 'caption_ori' || h === 'original_caption' ||
@@ -213,6 +218,7 @@ export default function DeconstructPage() {
         if (!url) continue;
         rows.push({
           url,
+          page_source: pageSourceIdx !== -1 && pageSourceIdx !== urlIdx ? (cols[pageSourceIdx] || '').trim() : '',
           caption: captionIdx !== -1 && captionIdx !== urlIdx ? (cols[captionIdx] || '').trim() : ''
         });
       }
@@ -221,6 +227,7 @@ export default function DeconstructPage() {
       setCsvDebug({
         headers: headerRaw,
         urlCol: headerRaw[urlIdx] || '—',
+        pageSourceCol: pageSourceIdx !== -1 ? headerRaw[pageSourceIdx] : '(default)',
         captionCol: captionIdx !== -1 ? headerRaw[captionIdx] : '(tidak ada)',
         delimiter
       });
@@ -253,7 +260,10 @@ export default function DeconstructPage() {
   // --- Actions ---
   async function handleSaveUrls(e) {
     e.preventDefault();
-    const body = { niche: nicheInput.trim() || 'Auto-Detect' };
+    const body = {
+      niche: nicheInput.trim() || 'Auto-Detect',
+      page_source: pageSourceInput.trim() || 'Siasat Sehat'
+    };
     if (inputMode === 'csv') {
       if (csvData.length === 0) {
         showToast('Unggah CSV yang valid terlebih dahulu', 'error');
@@ -280,6 +290,7 @@ export default function DeconstructPage() {
       if (data.success) {
         showToast(`Berhasil menyimpan ke Library! ${data.saved_count} baru, ${data.duplicate_count} duplikat diabaikan.`);
         setShowSaveModal(false);
+        setPageSourceInput('');
         setNicheInput('');
         setUrlsInput('');
         setCaptionsInput('');
@@ -585,6 +596,7 @@ export default function DeconstructPage() {
                         disabled={eligibleAssets.length === 0}
                       />
                     </th>
+                    <th style={{ width: 140 }}>Page Source</th>
                     <th>URL</th>
                     <th style={{ width: 130 }}>Niche</th>
                     <th style={{ width: 110 }}>Proses</th>
@@ -607,6 +619,24 @@ export default function DeconstructPage() {
                             onChange={(e) => handleSelectOne(asset.id, e.target.checked)}
                             disabled={!isEligible}
                           />
+                        </td>
+                        <td style={{ maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <span style={{
+                            display: 'inline-block',
+                            background: 'var(--surface-interactive)',
+                            color: 'var(--text-primary)',
+                            padding: '3px 8px',
+                            borderRadius: 'var(--radius-xs)',
+                            fontSize: '0.72rem',
+                            fontWeight: 600,
+                            border: '1px solid var(--border-subtle)',
+                            maxWidth: '100%',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                          }} title={asset.page_source || 'Siasat Sehat'}>
+                            🏷️ {asset.page_source || 'Siasat Sehat'}
+                          </span>
                         </td>
                         <td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           <a
@@ -741,6 +771,29 @@ export default function DeconstructPage() {
               </div>
 
               <form onSubmit={handleSaveUrls}>
+                {/* Page Source Input */}
+                <div style={{ marginBottom: 14 }}>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>
+                    Page Source / Sumber Konten (Opsional - Default: Siasat Sehat)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: Siasat Sehat, @dr.richardlee, TikTok Resep Bunda"
+                    value={pageSourceInput}
+                    onChange={(e) => setPageSourceInput(e.target.value)}
+                    style={{
+                      width: '100%',
+                      background: 'var(--surface-interactive)',
+                      border: '1px solid var(--border)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: 10,
+                      color: 'var(--text-primary)',
+                      fontSize: '0.82rem',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+
                 {/* Niche Input */}
                 <div style={{ marginBottom: 14 }}>
                   <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6 }}>

@@ -9,25 +9,25 @@ Menambahkan fitur identifikasi sumber halaman/kreator (**Page Source**) pada mod
 ---
 
 ## 2. Execution Task List
-- [ ] **Task 1: Mockup HTML Interaktif**
+- [x] **Task 1: Mockup HTML Interaktif**
   - Buat & uji file standalone mockup `public/mockup_deconstruct_page_source.html` untuk memverifikasi tata letak input modal dan posisi kolom sebelum URL baik di mode gelap maupun terang.
-- [ ] **Task 2: Database Schema, Backfill & Data Layer (`lib/db-pg.js` & `lib/db.js`)**
+- [x] **Task 2: Database Schema, Backfill & Data Layer (`lib/db-pg.js` & `lib/db.js`)**
   - Tambahkan migrasi otomatis `ALTER TABLE re_deconstructed_assets ADD COLUMN IF NOT EXISTS page_source TEXT;` di `lib/db-pg.js`.
   - **Jalankan backfill data existing**: `UPDATE re_deconstructed_assets SET page_source = 'Siasat Sehat' WHERE page_source IS NULL OR page_source = '';` di `lib/db-pg.js`.
   - Update `createSavedDeconstructAssets` di `lib/db.js` agar menerima dan menyimpan `page_source`.
   - Update `listDeconstructAssets` di `lib/db.js` agar menyertakan pencarian `page_source` pada parameter filter query `q`.
   - Update `updateDeconstructAsset` / API PUT untuk mengizinkan perubahan metadata `page_source`.
-- [ ] **Task 3: Backend API Endpoint (`app/api/v2/deconstruct/route.js` & `app/api/v2/deconstruct/assets/[id]/route.js`)**
+- [x] **Task 3: Backend API Endpoint (`app/api/v2/deconstruct/route.js` & `app/api/v2/deconstruct/assets/[id]/route.js`)**
   - Adaptasi handler `POST /api/v2/deconstruct` untuk mengekstrak `page_source` dari payload body manual maupun CSV.
   - Adaptasi handler `PUT /api/v2/deconstruct/assets/[id]` untuk mendukung update field `page_source`.
-- [ ] **Task 4: Antarmuka Frontend Deconstruct (`app/deconstruct/page.js`)**
+- [x] **Task 4: Antarmuka Frontend Deconstruct (`app/deconstruct/page.js`)**
   - Tambahkan state `pageSourceInput` pada form modal Simpan URL.
   - Tambahkan field input `Page Source` di atas / di dalam modal form simpan URL.
   - Tambahkan parser kolom `page_source` / `source` / `page` / `creator` pada parser CSV `handleCsvUpload`.
   - Ubah susunan tabel pustaka URL: Tempatkan header `<th>Page Source</th>` dan `<td>` persis sebelum kolom `URL`.
-- [ ] **Task 5: Detail View & Metadata Update (`app/deconstruct/[id]/page.js`)**
+- [x] **Task 5: Detail View & Metadata Update (`app/deconstruct/[id]/page.js`)**
   - Tampilkan informasi `Page Source` pada header detail aset dan izinkan pengeditan pada form metadata jika diperlukan.
-- [ ] **Task 6: Pengujian Unit Test & Verifikasi**
+- [x] **Task 6: Pengujian Unit Test & Verifikasi**
   - Jalankan test suite `tests/deconstruct-library.test.js` untuk memastikan backward-compatibility dan isolasi multi-tenant tetap 100% valid.
 
 ---

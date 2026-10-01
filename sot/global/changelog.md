@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.16 — Dukungan Page Source pada Deconstruct Lab (01/10/2026)
+- Penambahan field input Page Source pada Modal Simpan URL ke Library (manual & CSV)
+- Penambahan kolom Page Source persis sebelum kolom URL pada tabel Deconstruct Lab
+- Auto-migration database dan backfill default Siasat Sehat untuk semua aset existing
+- Dukungan detail view, metadata editor, dan unit test untuk Page Source
+
 ## V2.32.15 — Enforce top-down 45-deg macro angle in recipe prompt templates (01/10/2026)
 - Add explicit top-down 45-deg angle to Layer 1 Optics in recipe adapter
 - Synchronize I2V action camera movements to 45-deg angle

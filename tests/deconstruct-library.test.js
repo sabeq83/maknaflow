@@ -19,8 +19,8 @@ test('Deconstruct Library - Save URLs as saved without running scheduler', async
     await db.prepare("DELETE FROM re_deconstructed_assets WHERE tenant_id = ?").run('test_tenant_a');
 
     const urls = [
-      { url: 'https://example.com/video1', caption: 'Test Video 1' },
-      { url: 'https://example.com/video2', caption: 'Test Video 2' }
+      { url: 'https://example.com/video1', caption: 'Test Video 1', page_source: 'Custom Creator' },
+      { url: 'https://example.com/video2', caption: 'Test Video 2' } // Should default to 'Siasat Sehat'
     ];
     
     const res = await createSavedDeconstructAssets(urls, 'Skincare', 'test_tenant_a');
@@ -31,6 +31,17 @@ test('Deconstruct Library - Save URLs as saved without running scheduler', async
     assert.equal(list.assets.length, 2);
     assert.equal(list.assets[0].status, 'saved');
     assert.equal(list.assets[0].niche, 'Skincare');
+    
+    // Verify custom page_source and default Siasat Sehat
+    const customAsset = list.assets.find(a => a.source_url === 'https://example.com/video1');
+    const defaultAsset = list.assets.find(a => a.source_url === 'https://example.com/video2');
+    assert.equal(customAsset.page_source, 'Custom Creator');
+    assert.equal(defaultAsset.page_source, 'Siasat Sehat');
+
+    // Verify search filter q on page_source
+    const searchRes = await listDeconstructAssets({ q: 'Custom Creator' }, 'test_tenant_a');
+    assert.equal(searchRes.assets.length, 1);
+    assert.equal(searchRes.assets[0].source_url, 'https://example.com/video1');
   });
 });
 
