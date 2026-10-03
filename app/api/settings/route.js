@@ -20,6 +20,8 @@ export const GET = withTenantContext(async (request, _context, user) => {
     if (user.role !== 'admin') {
       return NextResponse.json({ success: false, error: 'Hanya Admin tenant yang dapat mengelola credential.' }, { status: 403 });
     }
+    const { ensureDbCachesLoaded } = await import('@/lib/db');
+    await ensureDbCachesLoaded().catch(() => {});
     const tenantId = user.tenantId || user.tenant_id || 'default_tenant';
     const apiKey = await getSetting('gemini_api_key', false);
     const minimaxKey = await getSetting('minimax_api_key', false);

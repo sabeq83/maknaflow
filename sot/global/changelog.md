@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.17 — Fix Database Cache Startup Resilience & Settings Lazy-Load (03/10/2026)
+- Continuous auto-retry cache load pada startup saat database connection lag
+- Lazy-load ensureDbCachesLoaded pada API settings dan Google connection status
+- Perbaikan ketersediaan kredensial Repliz dan integrasi di UI Staging/Dev
+
 ## V2.32.16 — Dukungan Page Source pada Deconstruct Lab (01/10/2026)
 - Penambahan field input Page Source pada Modal Simpan URL ke Library (manual & CSV)
 - Penambahan kolom Page Source persis sebelum kolom URL pada tabel Deconstruct Lab
