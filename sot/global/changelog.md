@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.24 — Fix Cartoon Universe Manifest Reference Availability & Planner Ingest (05/10/2026)
+- Dukungan remote HTTP reference URL pada manifest API
+- Auto-detection universe profile pada Import Planner Modal
+
 ## V2.32.23 — Paritas Referensi Karakter Universe & KB Kio Wonders (05/10/2026)
 - Pembersihan negative prompt kartun di Start-Frames builder agar tidak memotong wajah/mata
 - Menambahkan KB Universe Kio Wonders & WonderQuest Kids dengan dynamic fallback

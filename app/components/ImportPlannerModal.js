@@ -135,16 +135,42 @@ export default function ImportPlannerModal({
   const [manifest, setManifest] = useState(null);
   const [characterStatuses, setCharacterStatuses] = useState({});
 
+  const getUsedCharacters = () => {
+    if (!planner || !rows || rows.length === 0) return [];
+    const selectedRows = rows.filter(r => selectedRowIds.includes(r.id));
+    const targetRows = selectedRows.length > 0 ? selectedRows : rows;
+    const used = new Set();
+    targetRows.forEach(r => {
+      if (r.main_character) {
+        const clean = r.main_character.trim().toLowerCase().replace(/[\s\.]+/g, '_');
+        if (clean) used.add(clean);
+      }
+      if (r.supporting_characters) {
+        r.supporting_characters.split(',').forEach(c => {
+          const clean = c.trim().toLowerCase().replace(/[\s\.]+/g, '_');
+          if (clean) used.add(clean);
+        });
+      }
+    });
+    return Array.from(used);
+  };
+
   useEffect(() => {
     if (planner && planner.content_world === 'cartoon_universe') {
-      const profile = planner.universe_profile || 'pawville';
+      let profile = planner.universe_profile || 'pawville';
+      const used = getUsedCharacters();
+      if (used.includes('kio') || used.includes('bimo')) {
+        profile = 'kio-wonders';
+      } else if (used.includes('luna') || used.includes('miko')) {
+        profile = 'wonderquest-kids';
+      }
       fetch(`/api/v2/cartoon-universe/manifest?profile=${profile}`)
         .then(res => res.json())
         .then(data => {
           if (data.success && data.manifest) {
             setManifest(data.manifest);
             const statuses = {};
-            Object.keys(data.manifest.characters).forEach(key => {
+            Object.keys(data.manifest.characters || {}).forEach(key => {
               const char = data.manifest.characters[key];
               statuses[key] = {
                 available: char.available,
@@ -163,26 +189,7 @@ export default function ImportPlannerModal({
       setManifest(null);
       setCharacterStatuses({});
     }
-  }, [planner]);
-
-  const getUsedCharacters = () => {
-    if (!planner || !rows || rows.length === 0) return [];
-    const selectedRows = rows.filter(r => selectedRowIds.includes(r.id));
-    const used = new Set();
-    selectedRows.forEach(r => {
-      if (r.main_character) {
-        const clean = r.main_character.trim().toLowerCase().replace(/[\s\.]+/g, '_');
-        if (clean) used.add(clean);
-      }
-      if (r.supporting_characters) {
-        r.supporting_characters.split(',').forEach(c => {
-          const clean = c.trim().toLowerCase().replace(/[\s\.]+/g, '_');
-          if (clean) used.add(clean);
-        });
-      }
-    });
-    return Array.from(used);
-  };
+  }, [planner, rows, selectedRowIds]);
 
   const handleUploadCharacterRef = async (charKey, file) => {
     if (!file) return;
@@ -574,8 +581,14 @@ export default function ImportPlannerModal({
       return;
     }
 
+    let effectiveProfile = planner?.universe_profile || 'pawville';
     if (planner && planner.content_world === 'cartoon_universe') {
       const usedChars = getUsedCharacters();
+      if (usedChars.includes('kio') || usedChars.includes('bimo')) {
+        effectiveProfile = 'kio-wonders';
+      } else if (usedChars.includes('luna') || usedChars.includes('miko')) {
+        effectiveProfile = 'wonderquest-kids';
+      }
       const missing = usedChars.filter(charKey => {
         const status = characterStatuses[charKey];
         return !status || !status.available;
@@ -596,6 +609,7 @@ export default function ImportPlannerModal({
         global_settings: {
           status: targetStatus,
           execution_mode: executionMode,
+          universe_profile: effectiveProfile,
           brand_profile_id: selectedBrandId || null,
           account_name: accountName || null,
           custom_instruction: customInstruction,

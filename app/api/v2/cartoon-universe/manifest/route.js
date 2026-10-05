@@ -1,31 +1,40 @@
-import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { getUniverseManifest } from '@/lib/universe-manifests';
-import { withTenantContext } from '@/lib/auth';
+import { getUniverseManifest, ensureManifestsLoaded } from '../../../../../lib/universe-manifests.js';
+import { withTenantContext } from '../../../../../lib/auth.js';
 
 export const GET = withTenantContext(async (req) => {
   try {
+    await ensureManifestsLoaded();
     const url = new URL(req.url);
     const profile = url.searchParams.get('profile') || 'pawville';
 
     const manifest = getUniverseManifest(profile);
     if (!manifest) {
-      return NextResponse.json({ success: false, error: `Universe profile '${profile}' not found` }, { status: 404 });
+      return Response.json({ success: false, error: `Universe profile '${profile}' not found` }, { status: 404 });
     }
 
-    // Add availability status based on file existence
+    // Add availability status based on file existence or valid remote URL
     const updatedCharacters = {};
-    for (const [key, character] of Object.entries(manifest.characters)) {
-      const absolutePath = path.join(process.cwd(), 'public', character.identity_reference_path);
-      const available = fs.existsSync(absolutePath);
+    for (const [key, character] of Object.entries(manifest.characters || {})) {
+      const refPath = character.identity_reference_path || character.reference_image_path || '';
+      let available = false;
+      if (refPath && typeof refPath === 'string') {
+        if (refPath.startsWith('http://') || refPath.startsWith('https://') || refPath.startsWith('data:image/')) {
+          available = true;
+        } else {
+          const absolutePath = path.isAbsolute(refPath) ? refPath : path.join(process.cwd(), 'public', refPath.startsWith('/') ? refPath.slice(1) : refPath);
+          available = fs.existsSync(absolutePath);
+        }
+      }
       updatedCharacters[key] = {
         ...character,
+        identity_reference_path: refPath,
         available
       };
     }
 
-    return NextResponse.json({
+    return Response.json({
       success: true,
       manifest: {
         ...manifest,
@@ -33,15 +42,16 @@ export const GET = withTenantContext(async (req) => {
       }
     });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return Response.json({ success: false, error: error.message }, { status: 500 });
   }
 });
 
 export const POST = withTenantContext(async (req) => {
   try {
+    await ensureManifestsLoaded();
     const contentType = req.headers.get('content-type') || '';
     if (!contentType.includes('multipart/form-data')) {
-      return NextResponse.json({ success: false, error: 'Content type must be multipart/form-data' }, { status: 400 });
+      return Response.json({ success: false, error: 'Content type must be multipart/form-data' }, { status: 400 });
     }
 
     const formData = await req.formData();
@@ -50,39 +60,42 @@ export const POST = withTenantContext(async (req) => {
     const characterId = formData.get('character_id');
 
     if (!file || typeof file === 'string') {
-      return NextResponse.json({ success: false, error: 'No image file uploaded' }, { status: 400 });
+      return Response.json({ success: false, error: 'No image file uploaded' }, { status: 400 });
     }
     if (!universeProfile || !characterId) {
-      return NextResponse.json({ success: false, error: 'universe_profile and character_id are required' }, { status: 400 });
+      return Response.json({ success: false, error: 'universe_profile and character_id are required' }, { status: 400 });
     }
 
     // Strict validation of inputs to prevent path traversal
     const manifest = getUniverseManifest(universeProfile);
     if (!manifest) {
-      return NextResponse.json({ success: false, error: 'Invalid universe profile' }, { status: 400 });
+      return Response.json({ success: false, error: 'Invalid universe profile' }, { status: 400 });
     }
 
     const character = manifest.characters[characterId];
     if (!character) {
-      return NextResponse.json({ success: false, error: `Invalid character ID: ${characterId}` }, { status: 400 });
+      return Response.json({ success: false, error: `Invalid character ID: ${characterId}` }, { status: 400 });
     }
 
     // Enforce image-only and 5MB limit
     const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
     if (!allowedMimeTypes.includes(file.type)) {
-      return NextResponse.json({ success: false, error: 'Only PNG, JPEG, and WebP images are allowed' }, { status: 400 });
+      return Response.json({ success: false, error: 'Only PNG, JPEG, and WebP images are allowed' }, { status: 400 });
     }
     const maxSizeBytes = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSizeBytes) {
-      return NextResponse.json({ success: false, error: 'Image size exceeds maximum limit of 5MB' }, { status: 400 });
+      return Response.json({ success: false, error: 'Image size exceeds maximum limit of 5MB' }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
     // Identity reference path from manifest
-    const relativePath = character.identity_reference_path;
-    const absolutePath = path.join(process.cwd(), 'public', relativePath);
+    const existingRef = character.identity_reference_path || '';
+    const relativePath = (existingRef && !existingRef.startsWith('http') && !existingRef.startsWith('data:'))
+      ? existingRef
+      : `/uploads/universe-assets/${universeProfile}/${characterId}_anchor.png`;
+    const absolutePath = path.join(process.cwd(), 'public', relativePath.startsWith('/') ? relativePath.slice(1) : relativePath);
 
     // Ensure parent directories exist
     const parentDir = path.dirname(absolutePath);
@@ -92,12 +105,12 @@ export const POST = withTenantContext(async (req) => {
 
     fs.writeFileSync(absolutePath, buffer);
 
-    return NextResponse.json({
+    return Response.json({
       success: true,
       message: `Identity reference image updated successfully for character ${character.display_name}`,
       path: `${relativePath}?t=${Date.now()}`
     });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return Response.json({ success: false, error: error.message }, { status: 500 });
   }
 });
