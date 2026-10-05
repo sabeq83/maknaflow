@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.25 — Fix Multi-Tenant Universe Manifest Cache & Planner Modal Validation (05/10/2026)
+- Global manifest cache loader under __none__ tenant context
+- Dynamic getUniverseManifestAsync fallback
+- Defense-in-depth character reference check in ImportPlannerModal
+
 ## V2.32.24 — Fix Cartoon Universe Manifest Reference Availability & Planner Ingest (05/10/2026)
 - Dukungan remote HTTP reference URL pada manifest API
 - Auto-detection universe profile pada Import Planner Modal

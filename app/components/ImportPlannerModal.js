@@ -172,9 +172,10 @@ export default function ImportPlannerModal({
             const statuses = {};
             Object.keys(data.manifest.characters || {}).forEach(key => {
               const char = data.manifest.characters[key];
+              const hasRef = Boolean(char.available || (char.identity_reference_path && !char.identity_reference_path.includes('identity-anchor.png')) || (char.reference_image_path && !char.reference_image_path.includes('identity-anchor.png')) || char.available === true);
               statuses[key] = {
-                available: char.available,
-                previewUrl: char.identity_reference_path,
+                available: hasRef,
+                previewUrl: char.identity_reference_path || char.reference_image_path,
                 version: char.version
               };
             });
@@ -591,7 +592,12 @@ export default function ImportPlannerModal({
       }
       const missing = usedChars.filter(charKey => {
         const status = characterStatuses[charKey];
-        return !status || !status.available;
+        if (status && status.available) return false;
+        const charInManifest = manifest?.characters?.[charKey];
+        if (charInManifest && (charInManifest.available || (charInManifest.identity_reference_path && !charInManifest.identity_reference_path.includes('identity-anchor.png')) || (charInManifest.reference_image_path && !charInManifest.reference_image_path.includes('identity-anchor.png')))) {
+          return false;
+        }
+        return true;
       });
       if (missing.length > 0) {
         alert(`Produksi diblokir: Karakter wajib berikut belum memiliki reference image kanonis: ${missing.map(m => m.toUpperCase()).join(', ')}.`);

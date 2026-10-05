@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { getUniverseManifest, ensureManifestsLoaded } from '../../../../../lib/universe-manifests.js';
+import { getUniverseManifest, getUniverseManifestAsync, ensureManifestsLoaded } from '../../../../../lib/universe-manifests.js';
 import { withTenantContext } from '../../../../../lib/auth.js';
 
 export const GET = withTenantContext(async (req) => {
@@ -9,7 +9,10 @@ export const GET = withTenantContext(async (req) => {
     const url = new URL(req.url);
     const profile = url.searchParams.get('profile') || 'pawville';
 
-    const manifest = getUniverseManifest(profile);
+    let manifest = getUniverseManifest(profile);
+    if (!manifest) {
+      manifest = await getUniverseManifestAsync(profile);
+    }
     if (!manifest) {
       return Response.json({ success: false, error: `Universe profile '${profile}' not found` }, { status: 404 });
     }
@@ -67,7 +70,10 @@ export const POST = withTenantContext(async (req) => {
     }
 
     // Strict validation of inputs to prevent path traversal
-    const manifest = getUniverseManifest(universeProfile);
+    let manifest = getUniverseManifest(universeProfile);
+    if (!manifest) {
+      manifest = await getUniverseManifestAsync(universeProfile);
+    }
     if (!manifest) {
       return Response.json({ success: false, error: 'Invalid universe profile' }, { status: 400 });
     }
