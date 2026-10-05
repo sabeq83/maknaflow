@@ -171,21 +171,13 @@ export default function ImportPlannerModal({
     const used = new Set();
     selectedRows.forEach(r => {
       if (r.main_character) {
-        const clean = r.main_character.trim().toLowerCase();
-        if (clean === 'mochi') used.add('mochi');
-        else if (clean === 'dr. paw' || clean === 'dr paw') used.add('dr_paw');
-        else if (clean === 'coco') used.add('coco');
-        else if (clean === 'boba') used.add('boba');
-        else if (clean === 'tofu') used.add('tofu');
+        const clean = r.main_character.trim().toLowerCase().replace(/[\s\.]+/g, '_');
+        if (clean) used.add(clean);
       }
       if (r.supporting_characters) {
         r.supporting_characters.split(',').forEach(c => {
-          const clean = c.trim().toLowerCase();
-          if (clean === 'mochi') used.add('mochi');
-          else if (clean === 'dr. paw' || clean === 'dr paw') used.add('dr_paw');
-          else if (clean === 'coco') used.add('coco');
-          else if (clean === 'boba') used.add('boba');
-          else if (clean === 'tofu') used.add('tofu');
+          const clean = c.trim().toLowerCase().replace(/[\s\.]+/g, '_');
+          if (clean) used.add(clean);
         });
       }
     });

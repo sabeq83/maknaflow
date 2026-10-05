@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.20 — Fix PawVille Character Leakage & Universal Universe Linkage (05/10/2026)
+- Eliminate hardcoded PawVille character leakage from prompt engine
+- Prioritize Visual Identity universe linkage in campaign ingest and generator
+- Dynamic character identity locks and story directives based on active universe manifest
+- Sanitize staging campaign opc_261005_1t11n5 to Kio Wonders
+
 ## V2.32.19 — Integrasi Karakter Universe Manager ke Visual Identity Studio (05/10/2026)
 - Mendukung linking Universe Profile ke Visual Identity subject config
 - Menampilkan Grid Kartu Karakter live (Kio & BIMO) di Visual Identity Studio UI

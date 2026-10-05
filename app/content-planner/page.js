@@ -1032,13 +1032,14 @@ export default function ContentPlannerDashboard() {
                       <button key={value} type="button" onClick={() => {
                         setContentWorld(value);
                         if (value === 'cartoon_universe') {
-                          setUniverseProfile('pawville');
-                          setKnowledgeDomain('pet_supplies');
+                          if (availableUniverses.length > 0) {
+                            const first = availableUniverses[0];
+                            setUniverseProfile(first.slug);
+                            setKnowledgeDomain(first.knowledge_domain || 'general');
+                            setSelectedUniverseInfo(first);
+                          }
                         } else {
                           setUniverseProfile(null);
-                          if (knowledgeDomain === 'pet_supplies' && value === 'real_world') {
-                            // Keep pet_supplies if user already selected it
-                          }
                         }
                       }} style={{
                         padding: '10px 8px', textAlign: 'left', borderRadius: '10px', cursor: 'pointer',
