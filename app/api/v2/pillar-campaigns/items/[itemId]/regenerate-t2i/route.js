@@ -85,6 +85,8 @@ export const POST = withTenantContext(async (req, { params }) => {
 
     const isCartoon = rowPayload.content_world === 'cartoon_universe' || campaign.content_world === 'cartoon_universe';
     let contextReferences = [];
+    let finalPrompt = t2i_prompt;
+
     if (isCartoon) {
       let universeSnapshot = null;
       try {
@@ -100,13 +102,32 @@ export const POST = withTenantContext(async (req, { params }) => {
         clipCharacters: normalizedClipChars
       });
       contextReferences = resolvedRefs.allReferences || [];
+
+      // Deterministic Canonical Prompt Injection
+      const manifestChars = universeSnapshot?.manifest?.characters || universeSnapshot?.characters || {};
+      const canonsToInject = [];
+      for (const charKey of normalizedClipChars) {
+        const cleanKey = charKey.toLowerCase().replace(/[\s\.]+/g, '_');
+        const charData = manifestChars[cleanKey] || manifestChars[charKey];
+        const canon = charData?.canonical_description || charData?.canonical_prompt;
+        if (canon && !finalPrompt.includes(canon) && !canonsToInject.includes(canon)) {
+          canonsToInject.push(canon);
+        }
+      }
+      if (canonsToInject.length > 0) {
+        finalPrompt = `${canonsToInject.join(', ')}, ${finalPrompt}`;
+      }
+    }
+
+    if (newVideoPlan[clipIndex - 1]) {
+      newVideoPlan[clipIndex - 1].t2i_prompt = finalPrompt;
     }
 
     const context = {
       campaign,
       item: { ...item, new_video_plan_json: JSON.stringify(newVideoPlan), result_json: updatedResultJson },
       clipIndex: Number(clipIndex),
-      prompt: t2i_prompt,
+      prompt: finalPrompt,
       origin: 'manual_regen',
       contextReferences
     };

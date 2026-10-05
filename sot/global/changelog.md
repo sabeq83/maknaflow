@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.21 — Deterministic Canonical Character T2I Prompt Injector (05/10/2026)
+- Inject full canonical character descriptions into T2I prompts for cartoon universe scenes
+- Parity with YouTube Studio canonical prompt injection in scheduler processors and regenerate-t2i API
+- Update staging campaign opc_261005_1t11n5 Item 1595 with rigid Kio and BIMO canonical T2I prompts
+
 ## V2.32.20 — Fix PawVille Character Leakage & Universal Universe Linkage (05/10/2026)
 - Eliminate hardcoded PawVille character leakage from prompt engine
 - Prioritize Visual Identity universe linkage in campaign ingest and generator
