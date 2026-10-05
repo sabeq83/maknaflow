@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.23 — Paritas Referensi Karakter Universe & KB Kio Wonders (05/10/2026)
+- Pembersihan negative prompt kartun di Start-Frames builder agar tidak memotong wajah/mata
+- Menambahkan KB Universe Kio Wonders & WonderQuest Kids dengan dynamic fallback
+- Paritas penuh injeksi gambar referensi karakter dari Universe Manager
+
 ## V2.32.22 — Dukungan Reference Images Karakter Universe ke T2I Start-Frames (05/10/2026)
 - Menambahkan resolver async gambar karakter URL remote ke Base64 Data URL
 - Otomatisasi injeksi referensi gambar karakter Universe ke payload T2I G-Labs pada Pillar Campaigns dan Start Frame Builder
