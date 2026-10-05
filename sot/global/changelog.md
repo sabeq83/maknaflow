@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.26 — Auto-Heal Brand-Product Binding on OPC Ingest (05/10/2026)
+- Auto-activate and auto-bind brand_products in resolveAndValidateOpcProductLineage
+- Prevent blocking OPC_PRODUCT_BINDING_UNAVAILABLE on valid tenant product import
+
 ## V2.32.25 — Fix Multi-Tenant Universe Manifest Cache & Planner Modal Validation (05/10/2026)
 - Global manifest cache loader under __none__ tenant context
 - Dynamic getUniverseManifestAsync fallback
