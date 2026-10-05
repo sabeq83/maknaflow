@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup: Visual Identity Universe Link & Character Cards</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --surface: #0f172a;
+      --surface-raised: #1e293b;
+      --surface-interactive: #334155;
+      --surface-subtle: #1e293b80;
+      --border-color: #334155;
+      --border-subtle: #1e293b;
+      --border-strong: #475569;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --action-primary: #f97316;
+      --action-primary-hover: #ea580c;
+      --on-action-primary: #ffffff;
+      --status-info: #38bdf8;
+      --status-info-soft: rgba(56, 189, 248, 0.15);
+      --status-success: #34d399;
+      --status-success-soft: rgba(52, 211, 153, 0.15);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.15);
+      --input-bg: #020617;
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-subtle: #f8fafc;
+      --border-color: #cbd5e1;
+      --border-subtle: #e2e8f0;
+      --border-strong: #94a3b8;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --input-bg: #ffffff;
+      --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-sans); }
+    body { background-color: var(--bg); color: var(--text-primary); padding: 32px 16px; line-height: 1.5; }
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .badge-demo { background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+    .theme-toggle { background: var(--surface-interactive); color: var(--text-primary); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; font-weight: 600; }
+    
+    .card { background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-md); padding: 24px; box-shadow: var(--shadow-card); margin-bottom: 24px; }
+    .card-header { border-bottom: 1px solid var(--border-subtle); padding-bottom: 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+    .card-title { font-size: 1.15rem; font-weight: 800; color: var(--action-primary); }
+    
+    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .form-label { font-size: 13px; font-weight: 700; color: var(--text-secondary); display: flex; justify-content: space-between; }
+    .form-input, .form-select { background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-primary); padding: 10px 12px; border-radius: var(--radius-sm); font-size: 13px; outline: none; }
+    .form-input:focus, .form-select:focus { border-color: var(--action-primary); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* Character Section */
+    .universe-section { background: var(--surface-raised); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 18px; margin-top: 10px; }
+    .universe-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .universe-title { font-size: 13px; font-weight: 800; text-transform: uppercase; color: var(--action-primary); letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+    
+    .char-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 12px; }
+    .char-card { background: var(--surface); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 14px; display: flex; gap: 14px; position: relative; transition: transform 0.2s, border-color 0.2s; }
+    .char-card:hover { border-color: var(--action-primary); transform: translateY(-2px); }
+    
+    .char-avatar { width: 68px; height: 68px; border-radius: var(--radius-sm); object-fit: cover; background: var(--surface-interactive); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; font-size: 28px; }
+    .char-info { flex: 1; min-width: 0; }
+    .char-name { font-size: 14px; font-weight: 800; color: var(--text-primary); margin-bottom: 2px; }
+    .char-role { font-size: 11px; font-weight: 700; color: var(--status-info); background: var(--status-info-soft); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 6px; }
+    .char-species { font-size: 11px; color: var(--text-muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .char-prompt-preview { font-size: 11px; color: var(--text-secondary); margin-top: 6px; background: var(--input-bg); padding: 6px 8px; border-radius: 4px; border: 1px solid var(--border-subtle); max-height: 48px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+    .btn { padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+    .btn-primary { background: var(--action-primary); color: var(--on-action-primary); }
+    .btn-primary:hover { background: var(--action-primary-hover); }
+    .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); }
+    .btn-outline:hover { background: var(--surface-interactive); }
+    .btn-sm { padding: 4px 10px; font-size: 11px; }
+
+    .sync-banner { background: var(--status-success-soft); border: 1px solid var(--status-success); color: var(--status-success); padding: 10px 14px; border-radius: var(--radius-sm); font-size: 12px; margin-top: 12px; display: flex; justify-content: space-between; align-items: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="top-bar">
+      <div>
+        <span class="badge-demo">Interactive Simulation</span>
+        <h2 style="margin-top: 6px; font-size: 1.4rem;">🎭 Visual Identity ➔ Universe Manager Link</h2>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()">🌗 Switch Light/Dark</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title">Editing Preset: Kio Wonders — 3D Sci-Fi Curiosity</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Key: <code>kio_wonders_3d_scifi</code> • Source: System / Tenant <code>syd_admin</code></p>
+        </div>
+        <span style="font-size: 12px; color: var(--status-success); font-weight: 700;">● Active</span>
+      </div>
+
+      <!-- Section 1 & 2 Preview -->
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Identity Name</label>
+          <input type="text" class="form-input" value="Kio Wonders — 3D Sci-Fi Curiosity" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Primary Visual Style</label>
+          <select class="form-select">
+            <option selected>3D Stylized Character (Family Animation / Pixar Style)</option>
+            <option>Editorial Graphic Novel</option>
+            <option>Symbolic Surrealism</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Section 4: Subject & Universe Manager Link -->
+      <div class="universe-section">
+        <div class="universe-header">
+          <div class="universe-title">
+            <span>🪐 4. Subject & Universe Manager Integration</span>
+          </div>
+          <span style="font-size: 11px; color: var(--text-muted);">Tenant: syd_admin (Staging)</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">
+              <span>Tautkan ke Universe Profile</span>
+              <a href="#" style="color: var(--action-primary); font-size: 11px; text-decoration: none;" onclick="alert('Membuka halaman Universe Manager...')">Buka Universe Manager ↗</a>
+            </label>
+            <select id="universeSelect" class="form-select" onchange="handleUniverseChange(this.value)">
+              <option value="kio-wonders" selected>Kio Wonders (Science Curiosity & 3D Sci-Fi)</option>
+              <option value="wonderquest-kids">WonderQuest Kids (3D Adventure Duo)</option>
+              <option value="pawville">PawVille (Animal Universe)</option>
+              <option value="none">-- Tanpa Universe (Manual Subject) --</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Subject Kind</label>
+            <select class="form-select">
+              <option selected>stylized_3d_character</option>
+              <option>human</option>
+              <option>animal</option>
+              <option>mascot_object</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Dynamic Character Cards from Universe Manager -->
+        <div id="characterCardsContainer">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+            <span style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">
+              Karakter Terhubung dari Universe <strong id="universeNameLabel" style="color: var(--text-primary);">Kio Wonders</strong> (2 Karakter):
+            </span>
+            <button type="button" class="btn btn-outline btn-sm" onclick="syncDescription()">🔄 Sync Prompt ke Subject Desc</button>
+          </div>
+
+          <div class="char-cards-grid" id="cardsGrid">
+            <!-- Character 1: Kio -->
+            <div class="char-card">
+              <div class="char-avatar">👦</div>
+              <div class="char-info">
+                <div class="char-name">Kio</div>
+                <span class="char-role">Main Character</span>
+                <span class="char-species">Human (Stylized 3D Boy)</span>
+                <div class="char-prompt-preview" title="Stylized 3D animated 8-year-old boy named Kio, messy dark brown spiky hair, bright warm hazel eyes with wide curious expression, round orange goggles on forehead, orange and navy utility vest...">
+                  Stylized 3D animated 8-year-old boy named Kio, messy dark brown spiky hair, bright warm hazel eyes...
+                </div>
+              </div>
+            </div>
+
+            <!-- Character 2: BIMO -->
+            <div class="char-card">
+              <div class="char-avatar">🤖</div>
+              <div class="char-info">
+                <div class="char-name">BIMO</div>
+                <span class="char-role" style="color: var(--status-warning); background: var(--status-warning-soft);">Co-Host Companion</span>
+                <span class="char-species">AI Companion Hover-Bot</span>
+                <div class="char-prompt-preview" title="Cute 3D animated companion hover-bot named BIMO, spherical smooth pearl-white chassis with glowing cyan neon trim, curved dark digital visor face...">
+                  Cute 3D animated companion hover-bot named BIMO, spherical smooth pearl-white chassis with glowing cyan LED...
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sync-banner" id="syncBanner">
+            <span>✅ <strong>Triple-Lock Aktif:</strong> Karakter di atas akan diinjeksi otomatis sebagai <em>Reference Image & Canonical Prompt</em> di setiap adegan kampanye Kio Wonders.</span>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 14px;">
+          <label class="form-label">Custom Subject Description (Resolved)</label>
+          <input type="text" id="customDescInput" class="form-input" value="Expressive 3D animated boy explorer (Kio) with messy hair and goggles, accompanied by a cute floating AI robot (BIMO) with glowing cyan LED visor eyes." />
+        </div>
+      </div>
+
+      <!-- Action Footer -->
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
+        <button type="button" class="btn btn-outline" onclick="alert('Perubahan dibatalkan')">Batal</button>
+        <button type="button" class="btn btn-primary" onclick="alert('Preset berhasil disimpan dengan referensi Universe Kio Wonders!')">Simpan Perubahan Preset</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const universeData = {
+      'kio-wonders': {
+        name: 'Kio Wonders',
+        desc: 'Expressive 3D animated boy explorer (Kio) with messy hair and goggles, accompanied by a cute floating AI robot (BIMO) with glowing cyan LED visor eyes.',
+        chars: [
+          { icon: '👦', name: 'Kio', role: 'Main Character', roleStyle: '', species: 'Human (Stylized 3D Boy)', prompt: 'Stylized 3D animated 8-year-old boy named Kio, messy dark brown spiky hair, bright warm hazel eyes...' },
+          { icon: '🤖', name: 'BIMO', role: 'Co-Host Companion', roleStyle: 'color: var(--status-warning); background: var(--status-warning-soft);', species: 'AI Companion Hover-Bot', prompt: 'Cute 3D animated companion hover-bot named BIMO, spherical smooth pearl-white chassis with glowing cyan LED...' }
+        ]
+      },
+      'wonderquest-kids': {
+        name: 'WonderQuest Kids',
+        desc: 'Intrepid young 3D explorers Luna (adventurer girl with red bandana and magic map) and Miko (observant boy with safari hat and backpack).',
+        chars: [
+          { icon: '👧', name: 'Luna', role: 'Lead Explorer', roleStyle: '', species: 'Human (Stylized 3D Girl)', prompt: 'Stylized 3D explorer girl named Luna, red bandana, confident posture, holding glowing ancient map...' },
+          { icon: '👦', name: 'Miko', role: 'Navigator', roleStyle: 'color: var(--status-warning); background: var(--status-warning-soft);', species: 'Human (Stylized 3D Boy)', prompt: 'Stylized 3D explorer boy named Miko, safari hat, glasses, field backpack, curious expression...' }
+        ]
+      },
+      'pawville': {
+        name: 'PawVille',
+        desc: 'Mochi the chubby British Shorthair cat in green scarf and Dr. Paw the wise Shiba Inu.',
+        chars: [
+          { icon: '🐱', name: 'Mochi', role: 'Main Character', roleStyle: '', species: 'Cat (British Shorthair)', prompt: 'Cute chubby grey British Shorthair cat named Mochi wearing green scarf...' },
+          { icon: '🐕', name: 'Dr. Paw', role: 'Mentor', roleStyle: 'color: var(--status-warning); background: var(--status-warning-soft);', species: 'Dog (Shiba Inu)', prompt: 'Wise Shiba Inu wearing a white coat carrying a vintage medical bag...' }
+        ]
+      }
+    };
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
+    }
+
+    function handleUniverseChange(slug) {
+      const container = document.getElementById('characterCardsContainer');
+      const grid = document.getElementById('cardsGrid');
+      const nameLabel = document.getElementById('universeNameLabel');
+      const customDesc = document.getElementById('customDescInput');
+
+      if (slug === 'none' || !universeData[slug]) {
+        container.style.display = 'none';
+        return;
+      }
+
+      const data = universeData[slug];
+      container.style.display = 'block';
+      nameLabel.textContent = data.name;
+      customDesc.value = data.desc;
+
+      grid.innerHTML = data.chars.map(c => `
+        <div class="char-card">
+          <div class="char-avatar">${c.icon}</div>
+          <div class="char-info">
+            <div class="char-name">${c.name}</div>
+            <span class="char-role" style="${c.roleStyle}">${c.role}</span>
+            <span class="char-species">${c.species}</span>
+            <div class="char-prompt-preview">${c.prompt}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function syncDescription() {
+      const slug = document.getElementById('universeSelect').value;
+      if (universeData[slug]) {
+        document.getElementById('customDescInput').value = universeData[slug].desc;
+        alert('Deskripsi subjek berhasil disinkronisasi dari karakter ' + universeData[slug].name + '!');
+      }
+    }
+  </script>
+</body>
+</html>

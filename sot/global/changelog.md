@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.19 — Integrasi Karakter Universe Manager ke Visual Identity Studio (05/10/2026)
+- Mendukung linking Universe Profile ke Visual Identity subject config
+- Menampilkan Grid Kartu Karakter live (Kio & BIMO) di Visual Identity Studio UI
+- Sinkronisasi prompt DNA karakter ke deskripsi subjek Visual Identity
+- Seeding data Kio Wonders dan WonderQuest Kids tertaut ke staging DB
+
 ## V2.32.18 — Harmonisasi Cartoon Universe & Stylized 3D Character Prompt Rules (05/10/2026)
 - Export getWorldAwareKB di lib/kb-loader.js untuk perbaikan pemuatan KB kartun
 - Harmonisasi Cartoon Continuity Validator untuk semesta 3D stylized human

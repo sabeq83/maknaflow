@@ -19,6 +19,8 @@ export const GET = withTenantContext(async (req, { params }, user) => {
     success: true,
     data: {
       ...profile,
+      characters,
+      locations,
       characterCount: characters.length,
       locationCount: locations.length
     }

@@ -136,10 +136,90 @@ export default function VisualIdentityStudioPage() {
   const [description, setDescription] = useState('');
   const [presetKey, setPresetKey] = useState('');
   const [config, setConfig] = useState(DEFAULT_CONFIG);
+  const [universeProfiles, setUniverseProfiles] = useState([]);
+  const [selectedUniverseData, setSelectedUniverseData] = useState(null);
 
   useEffect(() => {
     fetchPresets();
+    fetchUniverseProfiles();
   }, [activeTab]);
+
+  const fetchUniverseProfiles = async () => {
+    try {
+      const res = await fetch('/api/v2/universe-profiles');
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data)) {
+        setUniverseProfiles(json.data);
+      }
+    } catch (e) {
+      console.warn('Failed to fetch universe profiles:', e.message);
+    }
+  };
+
+  const loadUniverseDetails = async (universeIdOrSlug) => {
+    if (!universeIdOrSlug) {
+      setSelectedUniverseData(null);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/v2/universe-profiles/${universeIdOrSlug}`);
+      const json = await res.json();
+      if (json.success && json.data) {
+        setSelectedUniverseData(json.data);
+      }
+    } catch (e) {
+      console.warn('Failed to fetch universe details:', e.message);
+    }
+  };
+
+  const handleUniverseProfileChange = async (univId) => {
+    if (!univId) {
+      setSelectedUniverseData(null);
+      setConfig(prev => ({
+        ...prev,
+        subject: {
+          ...prev.subject,
+          universe_profile_id: null,
+          universe_slug: null,
+          universe_name: null,
+          character_keys: []
+        }
+      }));
+      return;
+    }
+
+    const univ = universeProfiles.find(u => u.id === univId || u.slug === univId);
+    if (univ) {
+      await loadUniverseDetails(univ.id);
+      setConfig(prev => ({
+        ...prev,
+        subject: {
+          ...prev.subject,
+          universe_profile_id: univ.id,
+          universe_slug: univ.slug,
+          universe_name: univ.name,
+          character_keys: Array.isArray(univ.characters) ? univ.characters.map(c => c.character_key) : []
+        }
+      }));
+    }
+  };
+
+  const syncSubjectDescFromUniverse = () => {
+    if (!selectedUniverseData) return;
+    const chars = selectedUniverseData.characters || [];
+    let desc = '';
+    if (chars.length > 0) {
+      desc = chars.map(c => `${c.name} (${c.species || c.role || 'Character'})`).join(', ');
+      if (selectedUniverseData.premise) {
+        desc += ` — ${selectedUniverseData.premise}`;
+      }
+    } else if (selectedUniverseData.premise) {
+      desc = selectedUniverseData.premise;
+    }
+    if (desc) {
+      updateConfigField('subject', 'custom_description', desc);
+    }
+  };
 
   const fetchPresets = async () => {
     setLoading(true);
@@ -169,6 +249,7 @@ export default function VisualIdentityStudioPage() {
     setDescription('');
     setPresetKey('');
     setConfig(DEFAULT_CONFIG);
+    setSelectedUniverseData(null);
     setEditingPreset({ isNew: true });
   };
 
@@ -176,12 +257,13 @@ export default function VisualIdentityStudioPage() {
     setLabel(preset.label || '');
     setDescription(preset.description || '');
     setPresetKey(preset.preset_key || '');
+    const presetConfig = preset.config || {};
     setConfig({
       ...DEFAULT_CONFIG,
-      ...(preset.config || {}),
+      ...presetConfig,
       subject: {
         ...DEFAULT_CONFIG.subject,
-        ...(preset.config?.subject || {})
+        ...(presetConfig.subject || {})
       },
       visual_language: {
         ...DEFAULT_CONFIG.visual_language,
@@ -224,6 +306,14 @@ export default function VisualIdentityStudioPage() {
         ...(preset.config?.guardrails || {})
       }
     });
+
+    const univId = presetConfig.subject?.universe_profile_id || presetConfig.subject?.universe_slug;
+    if (univId) {
+      loadUniverseDetails(univId);
+    } else {
+      setSelectedUniverseData(null);
+    }
+
     setEditingPreset(preset);
   };
 
@@ -802,12 +892,29 @@ export default function VisualIdentityStudioPage() {
                 </div>
               </div>
 
-              {/* 4. Subject & Population Properties */}
+              {/* 4. Subject & Population Properties (With Universe Manager Integration) */}
               <div style={{ background: 'var(--surface-raised)', padding: 18, borderRadius: 'var(--radius-sm, 8px)', border: '1px solid var(--border-subtle)', display: 'grid', gap: 14 }}>
-                <h3 style={{ fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--action-primary)', margin: 0 }}>
-                  4. Subject & Population Properties
-                </h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3 style={{ fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--action-primary)', margin: 0 }}>
+                    4. Subject & Universe Manager Integration
+                  </h3>
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Tautkan karakter dari Universe Manager</span>
+                </div>
+
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
+                  <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                    Tautkan ke Universe Profile
+                    <select
+                      value={config.subject?.universe_profile_id || config.subject?.universe_slug || ''}
+                      onChange={(e) => handleUniverseProfileChange(e.target.value)}
+                      style={{ padding: '8px 10px', borderRadius: 'var(--radius-sm, 6px)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '13px' }}
+                    >
+                      <option value="">-- Tanpa Universe (Manual / Standalone) --</option>
+                      {universeProfiles.map(u => (
+                        <option key={u.id} value={u.id}>{u.name} ({u.slug})</option>
+                      ))}
+                    </select>
+                  </label>
                   <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
                     Subject Kind
                     <select
@@ -845,6 +952,45 @@ export default function VisualIdentityStudioPage() {
                     </select>
                   </label>
                 </div>
+
+                {/* Character Gallery Card Preview */}
+                {selectedUniverseData && selectedUniverseData.characters?.length > 0 && (
+                  <div style={{ marginTop: 8, background: 'var(--surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm, 6px)', padding: 14 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                        Karakter Terhubung dari Semesta <strong style={{ color: 'var(--text-primary)' }}>{selectedUniverseData.name}</strong> ({selectedUniverseData.characters.length} Karakter):
+                      </span>
+                      <button
+                        type="button"
+                        onClick={syncSubjectDescFromUniverse}
+                        className="btn btn-sm"
+                        style={{ fontSize: '11px', padding: '4px 10px', background: 'var(--surface-interactive)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-xs, 4px)', color: 'var(--text-primary)', cursor: 'pointer' }}
+                      >
+                        🔄 Sync ke Subject Desc
+                      </button>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
+                      {selectedUniverseData.characters.map(char => (
+                        <div key={char.id || char.character_key} style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm, 6px)', padding: 12, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                          <div style={{ width: 44, height: 44, borderRadius: 4, background: 'var(--surface-interactive)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
+                            {char.role === 'main_character' ? '👦' : '🤖'}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <strong style={{ fontSize: '13px', color: 'var(--text-primary)', display: 'block' }}>{char.name}</strong>
+                            <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--status-info)', background: 'var(--status-info-soft)', padding: '1px 6px', borderRadius: 3, display: 'inline-block', marginBottom: 4 }}>{char.role}</span>
+                            <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{char.species || 'Karakter 3D'}</p>
+                            {char.canonical_prompt && (
+                              <p style={{ fontSize: '10px', color: 'var(--text-secondary)', margin: '4px 0 0', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: '1.3' }}>
+                                {char.canonical_prompt}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <label style={{ display: 'grid', gap: 6, fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>
                   Custom Subject Description
                   <input
