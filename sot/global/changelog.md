@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.18 — Harmonisasi Cartoon Universe & Stylized 3D Character Prompt Rules (05/10/2026)
+- Export getWorldAwareKB di lib/kb-loader.js untuk perbaikan pemuatan KB kartun
+- Harmonisasi Cartoon Continuity Validator untuk semesta 3D stylized human
+- Penyesuaian Visual Identity Allocator & Prompts melepaskan faceless saat memakai gaya 3D cartoon
+- Unit test validasi kelayakan karakter kartun 3D
+
 ## V2.32.17 — Fix Database Cache Startup Resilience & Settings Lazy-Load (03/10/2026)
 - Continuous auto-retry cache load pada startup saat database connection lag
 - Lazy-load ensureDbCachesLoaded pada API settings dan Google connection status

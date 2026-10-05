@@ -200,6 +200,6 @@ export const GET = withTenantContext(async (request, _context, user) => {
 ## Execution Task List
 - [x] Task 1: Terapkan patch resilience auto-retry & `ensureDbCachesLoaded` pada `lib/db.js` & `app/api/settings/route.js`
 - [x] Task 2: Verifikasi build lokal dan jalankan pengujian unit
-- [ ] Task 3: Eksekusi rilis non-interaktif sesuai SOP (`npm run release-non-interactive`)
-- [ ] Task 4: Deploy atomic ke Mac Mini Dev Server & verifikasi
-- [ ] Task 5: Deploy atomic ke Mac Mini Staging Server & verifikasi UI/API Settings
+- [x] Task 3: Eksekusi rilis non-interaktif sesuai SOP (`npm run release-non-interactive`)
+- [x] Task 4: Deploy atomic ke Mac Mini Dev Server & verifikasi
+- [x] Task 5: Deploy atomic ke Mac Mini Staging Server & verifikasi UI/API Settings
