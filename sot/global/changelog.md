@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.22 — Dukungan Reference Images Karakter Universe ke T2I Start-Frames (05/10/2026)
+- Menambahkan resolver async gambar karakter URL remote ke Base64 Data URL
+- Otomatisasi injeksi referensi gambar karakter Universe ke payload T2I G-Labs pada Pillar Campaigns dan Start Frame Builder
+
 ## V2.32.21 — Deterministic Canonical Character T2I Prompt Injector (05/10/2026)
 - Inject full canonical character descriptions into T2I prompts for cartoon universe scenes
 - Parity with YouTube Studio canonical prompt injection in scheduler processors and regenerate-t2i API
