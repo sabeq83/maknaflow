@@ -376,12 +376,14 @@ const IDENTITIES = [
   }
 ];
 
+const TARGET_TENANT_IDS = ['tnt_pt-gim-sosmed_62d0d9'];
+
 async function registerVisualIdentities() {
   const pool = getPgPool();
-  const schemas = ['staging', 'dev'];
+  const schemas = ['staging', 'dev', 'public'];
 
   console.log(`========================================================================`);
-  console.log(`🚀 STARTING PTGIM VISUAL IDENTITIES REGISTRATION (TENANT: ${TENANT_ID})`);
+  console.log(`🚀 STARTING PTGIM VISUAL IDENTITIES REGISTRATION`);
   console.log(`========================================================================\n`);
 
   for (const s of schemas) {
@@ -394,144 +396,159 @@ async function registerVisualIdentities() {
       await client.query(`SET search_path TO ${s},public;`);
       await client.query('BEGIN');
 
-      for (const item of IDENTITIES) {
-        console.log(`\n🔹 Processing [${item.preset_key}] - ${item.label}...`);
+      // Ensure tenant exists in this schema
+      await client.query(`
+        INSERT INTO ${s}.tenants (id, name, slug, status)
+        VALUES ('tnt_pt-gim-sosmed_62d0d9', 'PT GIM Sosmed', 'pt-gim-sosmed', 'active')
+        ON CONFLICT (id) DO NOTHING;
+      `);
 
-        // Validate config against Schema v2
-        const validatedConfig = validateAndNormalizeVisualIdentity(item.config);
+      for (const tenantId of TARGET_TENANT_IDS) {
+        console.log(`\n🏢 Registering for Tenant ID: [${tenantId}]...`);
 
-        // 1. Upsert visual_identity_presets
-        const viQuery = `
-          INSERT INTO ${s}.visual_identity_presets (
-            id, tenant_id, preset_key, label, description, status, version, config_json
-          )
-          VALUES ($1, $2, $3, $4, $5, 'active', 1, $6)
-          ON CONFLICT (tenant_id, preset_key) DO UPDATE
-          SET
-            label = EXCLUDED.label,
-            description = EXCLUDED.description,
-            config_json = EXCLUDED.config_json,
-            version = ${s}.visual_identity_presets.version + 1,
-            updated_at = CURRENT_TIMESTAMP
-          RETURNING id, preset_key, label, version;
-        `;
-        const viRes = await client.query(viQuery, [
-          item.preset_id,
-          TENANT_ID,
-          item.preset_key,
-          item.label,
-          item.description,
-          JSON.stringify(validatedConfig)
-        ]);
-        console.log(`  ✅ Visual Identity Preset:`, viRes.rows[0]);
+        for (const item of IDENTITIES) {
+          console.log(`\n🔹 Processing [${item.preset_key}] - ${item.label}...`);
 
-        // 2. Upsert universe_profiles
-        const univ = item.universe;
-        const univQuery = `
-          INSERT INTO ${s}.universe_profiles (
-            id, tenant_id, name, slug, premise, tone, knowledge_domain, human_presence,
-            default_visual_style, default_aspect_ratio, status, version
-          )
-          VALUES ($1, $2, $3, $4, $5, $6, $7, 'stylized_3d_character', 'stylized_3d_character', '9:16', 'active', 1)
-          ON CONFLICT (tenant_id, slug) DO UPDATE
-          SET
-            name = EXCLUDED.name,
-            premise = EXCLUDED.premise,
-            tone = EXCLUDED.tone,
-            knowledge_domain = EXCLUDED.knowledge_domain,
-            default_visual_style = EXCLUDED.default_visual_style,
-            version = ${s}.universe_profiles.version + 1,
-            updated_at = CURRENT_TIMESTAMP
-          RETURNING id, slug, name, version;
-        `;
-        const univRes = await client.query(univQuery, [
-          univ.id,
-          TENANT_ID,
-          univ.name,
-          univ.slug,
-          univ.premise,
-          univ.tone,
-          univ.knowledge_domain
-        ]);
-        console.log(`  ✅ Universe Profile:`, univRes.rows[0]);
+          // Validate config against Schema v2
+          const validatedConfig = validateAndNormalizeVisualIdentity(item.config);
 
-        // 3. Upsert universe_characters
-        const char = item.character;
-        const charQuery = `
-          INSERT INTO ${s}.universe_characters (
-            id, tenant_id, universe_id, name, character_key, role, canonical_prompt, version
-          )
-          VALUES ($1, $2, $3, $4, $5, $6, $7, 1)
-          ON CONFLICT (universe_id, character_key) DO UPDATE
-          SET
-            name = EXCLUDED.name,
-            role = EXCLUDED.role,
-            canonical_prompt = EXCLUDED.canonical_prompt,
-            version = ${s}.universe_characters.version + 1,
-            updated_at = CURRENT_TIMESTAMP
-          RETURNING id, character_key, name, version;
-        `;
-        const charRes = await client.query(charQuery, [
-          char.id,
-          TENANT_ID,
-          univRes.rows[0].id,
-          char.name,
-          char.character_key,
-          char.role,
-          char.canonical_prompt
-        ]);
-        console.log(`  ✅ Universe Character:`, charRes.rows[0]);
+          const customPresetId = `${item.preset_id}_${tenantId.replace(/[^a-zA-Z0-9]/g, '_')}`;
 
-        // 4. Upsert universe_locations
-        const loc = item.location;
-        const locQuery = `
-          INSERT INTO ${s}.universe_locations (
-            id, tenant_id, universe_id, name, location_key, visual_description, version
-          )
-          VALUES ($1, $2, $3, $4, $5, $6, 1)
-          ON CONFLICT DO NOTHING
-          RETURNING id, location_key, name;
-        `;
-        const locRes = await client.query(locQuery, [
-          loc.id,
-          TENANT_ID,
-          univRes.rows[0].id,
-          loc.name,
-          loc.location_key,
-          loc.visual_description
-        ]);
-        if (locRes.rows.length > 0) {
-          console.log(`  ✅ Universe Location:`, locRes.rows[0]);
-        } else {
-          console.log(`  ℹ️ Universe Location already registered.`);
+          // 1. Upsert visual_identity_presets
+          const viQuery = `
+            INSERT INTO ${s}.visual_identity_presets (
+              id, tenant_id, preset_key, label, description, status, version, config_json
+            )
+            VALUES ($1, $2, $3, $4, $5, 'active', 1, $6)
+            ON CONFLICT (tenant_id, preset_key) DO UPDATE
+            SET
+              label = EXCLUDED.label,
+              description = EXCLUDED.description,
+              config_json = EXCLUDED.config_json,
+              version = ${s}.visual_identity_presets.version + 1,
+              updated_at = CURRENT_TIMESTAMP
+            RETURNING id, tenant_id, preset_key, label, version;
+          `;
+          const viRes = await client.query(viQuery, [
+            customPresetId,
+            tenantId,
+            item.preset_key,
+            item.label,
+            item.description,
+            JSON.stringify(validatedConfig)
+          ]);
+          console.log(`  ✅ Visual Identity Preset:`, viRes.rows[0]);
+
+          // 2. Upsert universe_profiles
+          const univ = item.universe;
+          const customUnivId = `${univ.id}_${tenantId.replace(/[^a-zA-Z0-9]/g, '_')}`;
+          const univQuery = `
+            INSERT INTO ${s}.universe_profiles (
+              id, tenant_id, name, slug, premise, tone, knowledge_domain, human_presence,
+              default_visual_style, default_aspect_ratio, status, version
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, 'stylized_3d_character', 'stylized_3d_character', '9:16', 'active', 1)
+            ON CONFLICT (tenant_id, slug) DO UPDATE
+            SET
+              name = EXCLUDED.name,
+              premise = EXCLUDED.premise,
+              tone = EXCLUDED.tone,
+              knowledge_domain = EXCLUDED.knowledge_domain,
+              default_visual_style = EXCLUDED.default_visual_style,
+              version = ${s}.universe_profiles.version + 1,
+              updated_at = CURRENT_TIMESTAMP
+            RETURNING id, tenant_id, slug, name, version;
+          `;
+          const univRes = await client.query(univQuery, [
+            customUnivId,
+            tenantId,
+            univ.name,
+            univ.slug,
+            univ.premise,
+            univ.tone,
+            univ.knowledge_domain
+          ]);
+          console.log(`  ✅ Universe Profile:`, univRes.rows[0]);
+
+          // 3. Upsert universe_characters
+          const char = item.character;
+          const customCharId = `${char.id}_${tenantId.replace(/[^a-zA-Z0-9]/g, '_')}`;
+          const charQuery = `
+            INSERT INTO ${s}.universe_characters (
+              id, tenant_id, universe_id, name, character_key, role, canonical_prompt, version
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, 1)
+            ON CONFLICT (universe_id, character_key) DO UPDATE
+            SET
+              name = EXCLUDED.name,
+              role = EXCLUDED.role,
+              canonical_prompt = EXCLUDED.canonical_prompt,
+              version = ${s}.universe_characters.version + 1,
+              updated_at = CURRENT_TIMESTAMP
+            RETURNING id, tenant_id, character_key, name, version;
+          `;
+          const charRes = await client.query(charQuery, [
+            customCharId,
+            tenantId,
+            univRes.rows[0].id,
+            char.name,
+            char.character_key,
+            char.role,
+            char.canonical_prompt
+          ]);
+          console.log(`  ✅ Universe Character:`, charRes.rows[0]);
+
+          // 4. Upsert universe_locations
+          const loc = item.location;
+          const customLocId = `${loc.id}_${tenantId.replace(/[^a-zA-Z0-9]/g, '_')}`;
+          const locQuery = `
+            INSERT INTO ${s}.universe_locations (
+              id, tenant_id, universe_id, name, location_key, visual_description, version
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, 1)
+            ON CONFLICT DO NOTHING
+            RETURNING id, location_key, name;
+          `;
+          const locRes = await client.query(locQuery, [
+            customLocId,
+            tenantId,
+            univRes.rows[0].id,
+            loc.name,
+            loc.location_key,
+            loc.visual_description
+          ]);
+          if (locRes.rows.length > 0) {
+            console.log(`  ✅ Universe Location:`, locRes.rows[0]);
+          }
+
+          // 5. Upsert brand_profiles
+          const bp = item.brand_profile;
+          const customBpId = `${bp.id}_${tenantId.replace(/[^a-zA-Z0-9]/g, '_')}`;
+          const bpQuery = `
+            INSERT INTO ${s}.brand_profiles (
+              id, tenant_id, brand_name, tone_of_voice, visual_signature, color_palette, forbidden_elements
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            ON CONFLICT (id) DO UPDATE
+            SET
+              brand_name = EXCLUDED.brand_name,
+              tone_of_voice = EXCLUDED.tone_of_voice,
+              visual_signature = EXCLUDED.visual_signature,
+              color_palette = EXCLUDED.color_palette,
+              forbidden_elements = EXCLUDED.forbidden_elements
+            RETURNING id, tenant_id, brand_name;
+          `;
+          const bpRes = await client.query(bpQuery, [
+            customBpId,
+            tenantId,
+            bp.brand_name,
+            bp.tone_of_voice,
+            bp.visual_signature,
+            bp.color_palette,
+            bp.forbidden_elements
+          ]);
+          console.log(`  ✅ Brand Profile:`, bpRes.rows[0]);
         }
-
-        // 5. Upsert brand_profiles
-        const bp = item.brand_profile;
-        const bpQuery = `
-          INSERT INTO ${s}.brand_profiles (
-            id, tenant_id, brand_name, tone_of_voice, visual_signature, color_palette, forbidden_elements
-          )
-          VALUES ($1, $2, $3, $4, $5, $6, $7)
-          ON CONFLICT (id) DO UPDATE
-          SET
-            brand_name = EXCLUDED.brand_name,
-            tone_of_voice = EXCLUDED.tone_of_voice,
-            visual_signature = EXCLUDED.visual_signature,
-            color_palette = EXCLUDED.color_palette,
-            forbidden_elements = EXCLUDED.forbidden_elements
-          RETURNING id, brand_name;
-        `;
-        const bpRes = await client.query(bpQuery, [
-          bp.id,
-          TENANT_ID,
-          bp.brand_name,
-          bp.tone_of_voice,
-          bp.visual_signature,
-          bp.color_palette,
-          bp.forbidden_elements
-        ]);
-        console.log(`  ✅ Brand Profile:`, bpRes.rows[0]);
       }
 
       await client.query('COMMIT');
@@ -546,7 +563,7 @@ async function registerVisualIdentities() {
   }
 
   await closePgPool();
-  console.log(`\n🏁 ALL IDENTITIES REGISTERED SUCCESSFULLY FOR TENANT [${TENANT_ID}]!`);
+  console.log(`\n🏁 ALL IDENTITIES REGISTERED SUCCESSFULLY!`);
 }
 
 registerVisualIdentities().catch((err) => {

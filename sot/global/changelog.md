@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.32.28 — Sync Visual Identity Presets untuk Tenant PT GIM Sosmed (08/10/2026)
+- Mendaftarkan preset visual identity, universe, character, location, dan brand profile ke tenant ID tnt_pt-gim-sosmed_62d0d9 di staging, dev, dan public schemas
+
 ## V2.32.27 — Registrasi 3 Identitas Visual PTGIM Sosmed (Reno, Maya, Bima) (08/10/2026)
 - Mendaftarkan 3 Visual Identity Presets Schema v2 (solusi_thermal_id, ruang_akustik_id, jasa_insulasi_id) untuk tenant ptgim_sosmed
 - Membuat Universe Profiles, Characters 3D (Reno, Maya, Bima), Locations, dan Brand Profiles di schema dev & staging
