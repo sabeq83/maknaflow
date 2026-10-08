@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.27 — Registrasi 3 Identitas Visual PTGIM Sosmed (Reno, Maya, Bima) (08/10/2026)
+- Mendaftarkan 3 Visual Identity Presets Schema v2 (solusi_thermal_id, ruang_akustik_id, jasa_insulasi_id) untuk tenant ptgim_sosmed
+- Membuat Universe Profiles, Characters 3D (Reno, Maya, Bima), Locations, dan Brand Profiles di schema dev & staging
+- Menyempurnakan resolver prompt agar mendukung face_visibility allowed pada karakter 3D
+
 ## V2.32.26 — Auto-Heal Brand-Product Binding on OPC Ingest (05/10/2026)
 - Auto-activate and auto-bind brand_products in resolveAndValidateOpcProductLineage
 - Prevent blocking OPC_PRODUCT_BINDING_UNAVAILABLE on valid tenant product import
