@@ -20,7 +20,7 @@ Berdasarkan arahan pengguna, rencana ini mencakup dua peningkatan utama pada sis
 - [x] **Task 2: Ubah Aturan Approval Backend Menjadi Autopilot (`approvalStatus = 'not_required'`)** (`app/api/v2/publishing/jobs/route.js` & `app/api/v2/publishing/bulk-jobs/route.js`)
 - [x] **Task 3: Selaraskan Default Repository `createPublishingJobs`** (`lib/publishing-repository.js`)
 - [x] **Task 4: Sesuaikan dan Validasi Suite Unit Test Terkait Kontrak Penjadwalan** (`tests/bulk-publishing-jobs.test.js`, `tests/repliz-client.test.js`, `tests/publishing-scheduler.test.js`)
-- [ ] **Task 5: Build Produksi Lokal, Verifikasi Zero Error, Rilis Patch Non-Interaktif, dan Deploy ke Dev & Staging Mac Mini**
+- [x] **Task 5: Build Produksi Lokal, Verifikasi Zero Error, Rilis Patch Non-Interaktif, dan Deploy ke Dev & Staging Mac Mini**
 
 ---
 
