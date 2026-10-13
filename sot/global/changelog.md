@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.31 — Skrip Batch Injection YouTube Title OPC (13/10/2026)
+- Runner skrip inject-opc-youtube-titles.js dengan dukungan AI Gemini
+- Penyuntikan YouTube Title pada kampanye opc_261012_lyg6eh dan opc_261012_9ibcvk
+- Sinkronisasi data otomatis ke content_flow_items dan pipeline Repliz
+
 ## V2.32.30 — Integrasi YouTube Title pada Menu Pillar Campaign (13/10/2026)
 - Dukungan YouTube Title pada AI prompt generator (Single-Pass Engine)
 - Editor YouTube Title interaktif pada Workbench Pillar Campaign dengan live char counter
