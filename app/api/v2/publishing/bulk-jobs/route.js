@@ -73,7 +73,7 @@ export const POST = withTenantContext(async (request, user) => {
         caption: caption,
         mediaUrl: mediaUrl,
         scheduledAt: scheduledAt,
-        approvalStatus: publish_mode === 'live' ? 'pending_approval' : 'not_required',
+        approvalStatus: 'not_required',
         isAiGenerated: !!is_ai_generated
       }));
 

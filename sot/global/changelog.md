@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.35 — Default AIGC Label Checked & Autopilot Live Publishing Without Approval (13/10/2026)
+- Label AIGC default tercentang di modal scheduler
+- Mode publikasi Live autopilot tanpa approval manual
+
 ## V2.32.34 — Fix Drive Staging Local Media & Needs Review Visibility (13/10/2026)
 - Dukungan streaming file fisik lokal langsung ke Google Drive di drive-uploader
 - Visibilitas status needs_review pada riwayat publikasi

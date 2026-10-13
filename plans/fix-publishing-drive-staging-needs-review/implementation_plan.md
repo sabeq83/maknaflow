@@ -15,7 +15,7 @@ Investigasi membuktikan bahwa kegagalan publikasi pada jam 07:47, 07:57, 09:47, 
 - [x] **Task 3: Perkaya Status Badge `NEEDS REVIEW` di Antarmuka Publishing Scheduler** (`app/content-flow/PublishingScheduler.js`)
 - [x] **Task 4: Validasi dan Uji Coba Unit Test Staging Uploader** (`tests/publishing-drive-staging.test.js`)
 - [x] **Task 5: Jalankan Script Reschedule Job Database ke Jam 17:47, 17:57, 19:47, dan 19:57 WIB** (Database PostgreSQL `staging.publishing_jobs`)
-- [ ] **Task 6: Build Produksi Lokal, Verifikasi Zero Error, Rilis Patch, dan Deploy ke Dev & Staging Mac Mini**
+- [x] **Task 6: Build Produksi Lokal, Verifikasi Zero Error, Rilis Patch, dan Deploy ke Dev & Staging Mac Mini**
 
 ---
 

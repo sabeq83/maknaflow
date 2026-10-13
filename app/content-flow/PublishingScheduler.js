@@ -135,7 +135,7 @@ export default function PublishingScheduler({
     account_schedules: {},
     timezone: 'Asia/Jakarta',
     activeTabProvider: 'repliz',  // Default Repliz Cloud
-    is_ai_generated: false
+    is_ai_generated: true
   });
   const [submittingSchedule, setSubmittingSchedule] = useState(false);
   const [preflightResult, setPreflightResult] = useState(null);
@@ -2854,7 +2854,7 @@ export default function PublishingScheduler({
                     onChange={(e) => setScheduleForm({ ...scheduleForm, publish_mode: e.target.value })}
                     style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}
                   >
-                    <option value="live">Live (Memerlukan Approval sebelum publikasi)</option>
+                    <option value="live">Live (Langsung publish otomatis sesuai jadwal — Tanpa Approval)</option>
                     <option value="draft">Draft (Tersimpan sebagai draft platform)</option>
                   </select>
                 </div>
