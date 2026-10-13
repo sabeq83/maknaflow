@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.33 — Perbaikan Judul High CTR YouTube Shorts OPC opc_261012_lyg6eh dan opc_261012_9ibcvk (13/10/2026)
+- Pembaruan 39 judul YouTube Shorts berkualitas High CTR dan utuh tanpa terpotong
+- Pencegahan pemotongan string statis pada skrip inject YouTube Title
+- Sinkronisasi data judul baru pada tabel pillar_campaign_items dan content_flow_items
+
 ## V2.32.32 — Pemisahan Title & Caption Card ContentFlow serta Filter Platform YouTube (13/10/2026)
 - Pemisahan visual Title dan Caption di tengah card ContentFlow
 - Penambahan filter platform YouTube pada toolbar ContentFlow (5 kolom)
