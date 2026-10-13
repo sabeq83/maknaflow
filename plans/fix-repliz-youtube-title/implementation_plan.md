@@ -22,7 +22,7 @@ Rencana ini memperbaiki seluruh lapisan tersebut secara tuntas (*defense-in-dept
 - [x] **Task 5: Dukung Field `title` pada Kontrak Validasi & API Routes** (`lib/publishing-contract.js`, `app/api/v2/publishing/jobs/route.js`, `app/api/v2/publishing/bulk-jobs/route.js`)
 - [x] **Task 6: Tampilkan dan Integrasikan Input Judul YouTube pada UI Modal Penjadwalan** (`app/content-flow/PublishingScheduler.js`)
 - [x] **Task 7: Validasi Suite Unit Test Terkait Resolusi Judul YouTube** (`tests/publishing-scheduler.test.js` & `tests/repliz-client.test.js`)
-- [ ] **Task 8: Build Produksi Lokal, Verifikasi Zero Error, Rilis Patch Non-Interaktif, dan Deploy ke Dev & Staging Mac Mini**
+- [x] **Task 8: Build Produksi Lokal, Verifikasi Zero Error, Rilis Patch Non-Interaktif, dan Deploy ke Dev & Staging Mac Mini**
 
 ---
 
