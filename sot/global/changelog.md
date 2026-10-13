@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.30 — Integrasi YouTube Title pada Menu Pillar Campaign (13/10/2026)
+- Dukungan YouTube Title pada AI prompt generator (Single-Pass Engine)
+- Editor YouTube Title interaktif pada Workbench Pillar Campaign dengan live char counter
+- Sinkronisasi otomatis YouTube Title ke Content Flow dan Publishing Scheduler
+
 ## V2.32.29 — Unified Bulk Publishing Scheduler Modal & Media Preview Guard (13/10/2026)
 - Unified PublishingScheduler modal mendukung mode Single dan Bulk secara terpadu
 - Media preview dinonaktifkan otomatis saat mode bulk untuk optimasi memori dan performa browser

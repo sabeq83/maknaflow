@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Usulan: YouTube Title di Menu Pillar Campaign — MAKNA Flow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    /* CSS Semantic Design Tokens dari app/theme.css */
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --platform-youtube: #ef4444;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+      --font-sans: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --sidebar: #f1f5f9;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(0, 0, 0, 0.05);
+      --overlay-backdrop: rgba(15, 23, 42, 0.6);
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --action-primary: #0d9488;
+      --action-primary-hover: #14b8a6;
+      --on-action-primary: #ffffff;
+      --link: #0284c7;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.1);
+      --platform-youtube: #dc2626;
+      --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.08);
+      --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.16);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding: 24px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .badge-opc {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .view-toggle {
+      display: inline-flex;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 4px;
+    }
+
+    .view-toggle button {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .view-toggle button.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    /* Comparison Banner */
+    .banner-notice {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-left: 4px solid var(--platform-youtube);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 992px) {
+      .grid-layout { grid-template-columns: 1fr; }
+    }
+
+    /* Card Panels */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .form-input, .form-textarea {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.15);
+    }
+
+    .char-count {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .char-count.optimal {
+      color: var(--status-success);
+      font-weight: 700;
+    }
+
+    .char-count.warning {
+      color: var(--status-warning);
+      font-weight: 700;
+    }
+
+    .char-count.danger {
+      color: var(--status-danger);
+      font-weight: 700;
+    }
+
+    .helper-pills {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+
+    .helper-pill {
+      font-size: 10px;
+      font-weight: 600;
+      background: var(--surface-interactive);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      padding: 2px 8px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+
+    .helper-pill:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    /* Mobile Preview Simulator */
+    .mobile-simulator {
+      background: #000;
+      border-radius: 28px;
+      border: 4px solid var(--border-strong);
+      overflow: hidden;
+      width: 280px;
+      height: 480px;
+      margin: 0 auto;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      color: #fff;
+    }
+
+    .simulator-overlay {
+      background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
+      padding: 16px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sim-channel {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .sim-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #ef4444;
+      display: grid;
+      place-items: center;
+      font-size: 10px;
+    }
+
+    .sim-title {
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .sim-desc {
+      font-size: 10px;
+      color: rgba(255,255,255,0.7);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn-action {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: opacity 0.2s;
+    }
+
+    .btn-action:hover { opacity: 0.9; }
+
+    .btn-secondary {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover { background: var(--surface-hover); }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface-raised);
+      border: 1px solid var(--action-primary);
+      color: var(--text-primary);
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: var(--shadow-modal);
+      display: none;
+      align-items: center;
+      gap: 8px;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+          <span class="badge-opc">Strategic Pillar Campaign Workbench</span>
+          <span style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">Item #1595</span>
+        </div>
+        <h1 style="font-size: 20px; font-weight: 800;">Solusi Thermal ID — Kampanye Atap Dingin Anti Panas</h1>
+      </div>
+
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <!-- Theme Switcher -->
+        <button id="themeToggle" class="btn-secondary" onclick="toggleTheme()" title="Ganti Mode Gelap / Terang">
+          ☀️ Light Mode
+        </button>
+        <!-- View Comparison Toggle -->
+        <div class="view-toggle">
+          <button id="btnCurrent" onclick="switchState('current')">Kondisi Eksisting</button>
+          <button id="btnProposed" class="active" onclick="switchState('proposed')">✨ Usulan Baru (With YouTube Title)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Explanatory Notice Banner -->
+    <div class="banner-notice">
+      <div>
+        <div style="font-size: 13px; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+          <span>🔴 Solusi Integrasi Publikasi YouTube Shorts / Video</span>
+        </div>
+        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px; max-width: 820px; line-height: 1.5;">
+          Saat ini form hanya memiliki 1 field caption yang digunakan sebagai deskripsi. Pada usulan ini, kami memisahkan <strong>YouTube Video Title</strong> (spesifik untuk judul clickable & high CTR di YouTube) dari <strong>Universal Caption / Content Description</strong> (untuk deskripsi YouTube & feed caption sosmed lainnya).
+        </div>
+      </div>
+      <button class="btn-action" onclick="simulateAiGenerate()">
+        <span>⚡ Simulasi AI Gemini Generate Title</span>
+      </button>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid-layout">
+      <!-- Left: Workbench Editor Panel -->
+      <div class="card">
+        <div class="section-title">
+          <span>📲 Social Media Package & Publishing Metadata</span>
+          <span style="margin-left: auto; font-size: 11px; color: var(--text-muted); font-weight: 500;">Tab: Workbench Editor</span>
+        </div>
+
+        <form onsubmit="event.preventDefault()">
+          <!-- 1. FIELD BARU USULAN: YouTube Title (Bisa di-toggle untuk membandingkan) -->
+          <div id="youtubeTitleContainer" class="form-group" style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 14px;">
+            <div class="form-label">
+              <span style="color: var(--platform-youtube); display: flex; align-items: center; gap: 6px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+                <span>YouTube Video / Shorts Title</span>
+                <span style="background: var(--status-danger-soft); color: var(--platform-youtube); font-size: 9px; padding: 1px 6px; border-radius: 4px; font-weight: 800;">BARU</span>
+              </span>
+              <span id="charCount" class="char-count optimal">0 / 100</span>
+            </div>
+
+            <input
+              type="text"
+              id="ytTitleInput"
+              class="form-input"
+              value="Atap Metal Panas Bikin Rumah Gerah? Ini Solusi Insulasi Termal Terbaik! #Shorts"
+              oninput="handleTitleInput(this.value)"
+              placeholder="Ketik judul YouTube yang menarik & ringkas (rekomendasi 50-70 karakter)..."
+            />
+
+            <!-- Helper Quick Actions -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+              <div class="helper-pills">
+                <span class="helper-pill" onclick="appendTag('#Shorts')">+ #Shorts</span>
+                <span class="helper-pill" onclick="appendTag('#TipsRumah')">+ #TipsRumah</span>
+                <span class="helper-pill" onclick="appendTag('#SolusiThermal')">+ #SolusiThermal</span>
+              </div>
+              <button type="button" class="btn-secondary" style="font-size: 10px; padding: 3px 8px;" onclick="copyField('ytTitleInput', 'Judul YouTube')">
+                📋 Salin Judul
+              </button>
+            </div>
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 6px;">
+              💡 <em>Judul ini akan dikirimkan ke parameter <code>title</code> pada API YouTube / Repliz saat dijadwalkan.</em>
+            </div>
+          </div>
+
+          <!-- 2. Universal Caption / YouTube Description -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Universal Caption & YouTube Content Description</span>
+              <button type="button" class="btn-secondary" style="font-size: 10px; padding: 3px 8px;" onclick="copyField('captionInput', 'Caption')">
+                📋 Salin Deskripsi
+              </button>
+            </div>
+            <textarea
+              id="captionInput"
+              class="form-textarea"
+              rows="6"
+              oninput="handleCaptionInput(this.value)"
+              placeholder="Naskah caption & deskripsi lengkap..."
+            >Banyak yang belum tahu, 70% panas dalam ruangan berasal dari radiasi atap metal! Jangan tunggu tagihan listrik AC jebol. Gunakan peredam insulasi termal berlapis aluminium murni yang mampu menolak panas hingga 97%.
+
+Cek spesifikasi lengkap & promo di link profil!
+
+#insulasiterpal #solusithermal #atapdingin #hematlistrik #renovasirumah #rumahsejuk #tipsbangunan</textarea>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+              Digunakan sebagai <code>description</code> pada YouTube, serta caption utama di TikTok, Instagram Reels, dan Facebook.
+            </div>
+          </div>
+
+          <!-- Bottom Action Buttons in Pillar Campaign Detail -->
+          <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; border-top: 1px solid var(--border-subtle); paddingTop: 16px;">
+            <button type="button" class="btn-secondary" style="padding: 9px 16px;">
+              💾 Simpan Saja (Draft)
+            </button>
+            <button type="button" class="btn-action" style="padding: 9px 20px;">
+              ✓ Setujui & Lanjutkan Produksi
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Right: Live Smartphone YouTube Shorts Simulator & Preview -->
+      <div class="card" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <div style="width: 100%; margin-bottom: 14px; text-align: center;">
+          <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">📱 Live Pratinjau Tampilan YouTube Shorts</div>
+          <div style="font-size: 10px; color: var(--text-muted);">Simulasi bagaimana penonton melihat Judul di aplikasi YouTube HP</div>
+        </div>
+
+        <div class="mobile-simulator">
+          <!-- Background Placeholder with Nice Dark Gradient -->
+          <div style="position: absolute; inset: 0; background: radial-gradient(circle at 50% 30%, #1e293b 0%, #090d16 100%); display: flex; align-items: center; justify-content: center;">
+            <span style="font-size: 48px; opacity: 0.3;">▶️</span>
+          </div>
+
+          <!-- YouTube Shorts UI Elements Overlay -->
+          <div class="simulator-overlay" style="position: relative; z-index: 2;">
+            <div class="sim-channel">
+              <div class="sim-avatar">ST</div>
+              <span>@solusithermal.id</span>
+              <span style="background: red; color: #fff; font-size: 8px; padding: 2px 6px; border-radius: 12px; font-weight: 800;">SUBSCRIBE</span>
+            </div>
+
+            <!-- The YouTube Title Preview -->
+            <div id="simTitle" class="sim-title">
+              Atap Metal Panas Bikin Rumah Gerah? Ini Solusi Insulasi Termal Terbaik! #Shorts
+            </div>
+
+            <!-- Snippet Description -->
+            <div id="simDesc" class="sim-desc">
+              Banyak yang belum tahu, 70% panas dalam ruangan berasal dari...
+            </div>
+          </div>
+        </div>
+
+        <!-- Metric Recommendation -->
+        <div style="margin-top: 16px; background: var(--surface-raised); border-radius: 8px; padding: 10px 14px; width: 100%; border: 1px solid var(--border-subtle); font-size: 11px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+            <span style="color: var(--text-muted);">Rekomendasi Panjang Judul:</span>
+            <span style="font-weight: 700; color: var(--status-success);">50 - 70 Karakter</span>
+          </div>
+          <div style="color: var(--text-secondary); line-height: 1.4;">
+            Judul &le; 70 karakter tidak akan terpotong (ellipsis) di layar ponsel pengguna, sehingga CTR tayangan YouTube lebih optimal.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <span id="toastMsg">Tersalin ke clipboard!</span>
+  </div>
+
+  <script>
+    // State Simulation
+    let currentState = 'proposed';
+
+    function handleTitleInput(val) {
+      const charCountEl = document.getElementById('charCount');
+      const simTitleEl = document.getElementById('simTitle');
+      const len = val.length;
+
+      charCountEl.textContent = `${len} / 100`;
+      simTitleEl.textContent = val || '(Judul YouTube kosong)';
+
+      charCountEl.className = 'char-count';
+      if (len === 0) {
+        charCountEl.classList.add('danger');
+      } else if (len >= 40 && len <= 75) {
+        charCountEl.classList.add('optimal');
+      } else if (len > 75 && len <= 100) {
+        charCountEl.classList.add('warning');
+      } else if (len > 100) {
+        charCountEl.classList.add('danger');
+      }
+    }
+
+    function handleCaptionInput(val) {
+      const simDescEl = document.getElementById('simDesc');
+      simDescEl.textContent = val.split('\n')[0] || '';
+    }
+
+    function appendTag(tag) {
+      const input = document.getElementById('ytTitleInput');
+      if (!input.value.includes(tag)) {
+        input.value = `${input.value.trim()} ${tag}`;
+        handleTitleInput(input.value);
+      }
+    }
+
+    function switchState(state) {
+      currentState = state;
+      const btnCurrent = document.getElementById('btnCurrent');
+      const btnProposed = document.getElementById('btnProposed');
+      const ytContainer = document.getElementById('youtubeTitleContainer');
+      const simTitleEl = document.getElementById('simTitle');
+
+      if (state === 'current') {
+        btnCurrent.classList.add('active');
+        btnProposed.classList.remove('active');
+        ytContainer.style.display = 'none';
+        simTitleEl.textContent = 'OPC Video Item #1595 (Fallback Nama Item/Hook)';
+        showToast('Menampilkan kondisi saat ini: Tidak ada input judul YouTube.');
+      } else {
+        btnProposed.classList.add('active');
+        btnCurrent.classList.remove('active');
+        ytContainer.style.display = 'block';
+        handleTitleInput(document.getElementById('ytTitleInput').value);
+        showToast('Menampilkan usulan baru: Tersedia input judul YouTube mandiri.');
+      }
+    }
+
+    function simulateAiGenerate() {
+      const titles = [
+        "Rahasia Rumah Bebas Gerah Tanpa Harus Pasang AC Baru! #Shorts",
+        "Atap Seng Bikin Kamar Seperti Oven? Pasang Ini Langsung Sejuk!",
+        "Eksperimen Suhu: Uji Coba Insulasi Termal di Atap Rumah Tropis #Shorts",
+        "Jangan Beli AC Dulu Sebelum Cek Panas Atap Rumah Kamu!"
+      ];
+      const randomTitle = titles[Math.floor(Math.random() * titles.length)];
+      const input = document.getElementById('ytTitleInput');
+      input.value = randomTitle;
+      handleTitleInput(randomTitle);
+      showToast('✨ AI Gemini berhasil merumuskan judul YouTube bernilai CTR tinggi!');
+    }
+
+    function copyField(elementId, label) {
+      const el = document.getElementById(elementId);
+      navigator.clipboard.writeText(el.value).then(() => {
+        showToast(`✓ ${label} berhasil disalin!`);
+      });
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('themeToggle').textContent = next === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      toast.style.display = 'flex';
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+
+    // Init
+    handleTitleInput(document.getElementById('ytTitleInput').value);
+    handleCaptionInput(document.getElementById('captionInput').value);
+  </script>
+</body>
+</html>

@@ -1366,10 +1366,29 @@ export default function PillarCampaignDetailPage() {
     }
 
     const capKey = `cap-${item.id}`;
+    const ytKey = `yt-${item.id}`;
     const universalCap = parsed.caption || parsed.universal_caption || (typeof parsed.social_media_package === 'object' ? parsed.social_media_package?.caption : '') || parsed.tiktok_caption || parsed.ig_caption || '';
+    const ytTitle = parsed.yt_title || (typeof parsed.social_media_package === 'object' ? parsed.social_media_package?.title : '') || '';
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {/* YouTube Title Preview */}
+        {ytTitle && (
+          <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-color)', borderRadius: 8, padding: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontWeight: 600, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ color: 'var(--status-danger)' }}>▶</span> YouTube Shorts / Video Title
+              </span>
+              <button className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '0.75rem' }} onClick={() => handleCopy(ytTitle, ytKey)}>
+                {copySuccess[ytKey] ? 'Tersalin ✓' : 'Salin Judul'}
+              </button>
+            </div>
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--border-subtle)', borderRadius: 6, padding: '10px 12px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+              {ytTitle}
+            </div>
+          </div>
+        )}
+
         <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-color)', borderRadius: 8, padding: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>📱 Universal Social Media Caption</span>
@@ -1379,9 +1398,9 @@ export default function PillarCampaignDetailPage() {
           </div>
           <textarea
             className="form-textarea"
+            readOnly
             style={{ width: '100%', minHeight: 120, fontSize: '0.85rem', background: 'var(--surface)', color: 'var(--text-primary)', borderRadius: 6, padding: 10 }}
             value={universalCap}
-            onChange={(e) => updateSocialField('caption', e.target.value)}
             placeholder="Naskah caption universal media sosial (TikTok, Instagram, Facebook, Shorts)..."
           />
         </div>
@@ -1497,12 +1516,13 @@ export default function PillarCampaignDetailPage() {
       try {
         const parsed = JSON.parse(item.result_json || '{}');
         const capVal = parsed.caption || (typeof parsed.social_media_package === 'object' ? parsed.social_media_package?.caption : '') || parsed.tiktok_caption || parsed.ig_caption || '';
+        const ytTitleVal = parsed.yt_title || (typeof parsed.social_media_package === 'object' ? parsed.social_media_package?.title : '') || '';
         sc = {
           caption: capVal,
           tiktok_caption: parsed.tiktok_caption || capVal,
           ig_caption: parsed.ig_caption || capVal,
-          yt_title: parsed.yt_title || '',
-          yt_desc: parsed.yt_desc || ''
+          yt_title: ytTitleVal,
+          yt_desc: parsed.yt_desc || capVal
         };
       } catch {}
       setTimeout(() => {
@@ -2405,23 +2425,116 @@ export default function PillarCampaignDetailPage() {
               );
             })}
 
-            {/* Unified Social Caption Editor */}
-            <div style={{ background: 'var(--surface-interactive)', borderRadius: '8px', border: '1px solid var(--surface-interactive)', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--accent-light)', borderBottom: '1px solid var(--surface-interactive)', paddingBottom: '8px' }}>
-                📲 Social Media Package & Caption
+            {/* Unified Social Caption & YouTube Title Editor */}
+            <div style={{ background: 'var(--surface-interactive)', borderRadius: '8px', border: '1px solid var(--border-subtle)', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '10px' }}>
+                <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>📲</span> Social Media Package & Distribution
+                </span>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', background: 'var(--surface-raised)', padding: '3px 8px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+                  Multi-Platform Ready
+                </span>
               </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '6px' }}>Caption & Social Media Copy (Unified Single Field)</label>
+
+              {/* YouTube Title Field */}
+              <div style={{ background: 'var(--surface)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={{ fontSize: '0.75rem', color: 'var(--text-primary)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ color: 'var(--platform-youtube, #ef4444)', fontWeight: 800 }}>▶</span>
+                    <span>Judul YouTube Video / Shorts</span>
+                  </label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {(() => {
+                      const ytLen = (sc.yt_title || '').length;
+                      let color = 'var(--text-muted)';
+                      let label = '';
+                      if (ytLen >= 50 && ytLen <= 70) {
+                        color = 'var(--status-success)';
+                        label = ' (Optimal)';
+                      } else if (ytLen > 70 && ytLen <= 90) {
+                        color = 'var(--status-warning)';
+                      } else if (ytLen > 90) {
+                        color = 'var(--status-danger)';
+                        label = ' (Maks 100)';
+                      }
+                      return (
+                        <span style={{ fontSize: '0.7rem', fontFamily: 'monospace', color, fontWeight: 700 }}>
+                          {ytLen}/100{label}
+                        </span>
+                      );
+                    })()}
+                    <button
+                      type="button"
+                      disabled={!sc.yt_title}
+                      onClick={() => {
+                        navigator.clipboard.writeText(sc.yt_title || '');
+                        showToast('Judul YouTube berhasil disalin!');
+                      }}
+                      style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', borderRadius: '4px', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                    >
+                      Salin Judul
+                    </button>
+                  </div>
+                </div>
+                <input
+                  type="text"
+                  maxLength={100}
+                  disabled={isReadOnly}
+                  value={sc.yt_title || ''}
+                  onChange={(e) => updateSocialField('yt_title', e.target.value)}
+                  placeholder="Ketik atau edit judul YouTube Shorts yang memikat (50-70 karakter)..."
+                  style={{ width: '100%', background: 'var(--input-bg)', border: '1px solid var(--border-strong)', borderRadius: '6px', padding: '10px 12px', color: 'var(--text-primary)', fontSize: '0.82rem' }}
+                />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px' }}>
+                  <button
+                    type="button"
+                    disabled={isReadOnly}
+                    onClick={() => {
+                      const cur = (sc.yt_title || '').trim();
+                      if (!cur.includes('#Shorts')) {
+                        updateSocialField('yt_title', cur ? `${cur} #Shorts` : '#Shorts');
+                      }
+                    }}
+                    style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', borderRadius: '4px', color: 'var(--text-muted)', cursor: isReadOnly ? 'not-allowed' : 'pointer' }}
+                  >
+                    + #Shorts
+                  </button>
+                  <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                    Digunakan saat upload ke YouTube Shorts
+                  </span>
+                </div>
+              </div>
+
+              {/* Universal Caption / Description Field */}
+              <div style={{ background: 'var(--surface)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={{ fontSize: '0.75rem', color: 'var(--text-primary)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>📝</span>
+                    <span>Universal Caption & YouTube Content Description</span>
+                  </label>
+                  <button
+                    type="button"
+                    disabled={!(sc.caption || sc.tiktok_caption || sc.ig_caption)}
+                    onClick={() => {
+                      navigator.clipboard.writeText(sc.caption || sc.tiktok_caption || sc.ig_caption || '');
+                      showToast('Caption/Deskripsi berhasil disalin!');
+                    }}
+                    style={{ fontSize: '0.68rem', padding: '2px 8px', background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', borderRadius: '4px', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                  >
+                    Salin Deskripsi
+                  </button>
+                </div>
                 <textarea
                   disabled={isReadOnly}
-                  style={{ width: '100%', minHeight: '140px', background: 'var(--overlay-subtle)', border: '1px solid var(--border-subtle)', borderRadius: '6px', padding: '12px', color: 'var(--text-primary)', fontSize: '0.82rem', resize: 'vertical', lineHeight: 1.5 }}
+                  style={{ width: '100%', minHeight: '130px', background: 'var(--input-bg)', border: '1px solid var(--border-strong)', borderRadius: '6px', padding: '10px 12px', color: 'var(--text-primary)', fontSize: '0.82rem', resize: 'vertical', lineHeight: 1.5 }}
                   value={sc.caption || sc.tiktok_caption || sc.ig_caption || ''}
                   onChange={(e) => {
                     updateSocialField('caption', e.target.value);
                     updateSocialField('tiktok_caption', e.target.value);
                     updateSocialField('ig_caption', e.target.value);
+                    updateSocialField('yt_desc', e.target.value);
                   }}
-                  placeholder="Caption media sosial lengkap..."
+                  placeholder="Deskripsi YouTube dan caption universal media sosial lengkap (Hook, isi, link CTA, hashtags)..."
                 />
               </div>
             </div>
