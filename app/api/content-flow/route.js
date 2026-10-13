@@ -9,6 +9,7 @@ export const GET = withTenantContext(async (request, _context, user) => {
     const accountName = searchParams.get('account') || 'all';
     const productName = searchParams.get('product') || 'all';
     const pipelineStatus = searchParams.get('pipeline_status') || 'all';
+    const youtubeStatus = searchParams.get('youtube_status') || 'Semua';
     const tiktokStatus = searchParams.get('tiktok_status') || 'Semua';
     const facebookStatus = searchParams.get('facebook_status') || 'Semua';
     const instagramStatus = searchParams.get('instagram_status') || 'Semua';
@@ -17,7 +18,7 @@ export const GET = withTenantContext(async (request, _context, user) => {
     const limit = searchParams.get('limit') || '50';
 
     const allowedAccounts = user.role === 'admin' ? undefined : user.assignedBrandNames;
-    const result = await listContentFlowItems({ sourceType, accountName, productName, pipelineStatus, tiktokStatus, facebookStatus, instagramStatus, q, page, limit, allowedAccounts });
+    const result = await listContentFlowItems({ sourceType, accountName, productName, pipelineStatus, youtubeStatus, tiktokStatus, facebookStatus, instagramStatus, q, page, limit, allowedAccounts });
     return NextResponse.json({ success: true, ...result });
   } catch (err) {
     console.error('[API /api/content-flow Error]', err);

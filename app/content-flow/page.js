@@ -175,6 +175,7 @@ function ContentFlowHubPageContent() {
   const [accountFilter, setAccountFilter] = useState(accountQuery);
   const [productFilter, setProductFilter] = useState('all');
   const [pipelineFilter, setPipelineFilter] = useState('Completed');
+  const [youtubeFilter, setYoutubeFilter] = useState('Semua');
   const [tiktokFilter, setTiktokFilter] = useState('Semua');
   const [fbFilter, setFbFilter] = useState('Semua');
   const [igFilter, setIgFilter] = useState('Semua');
@@ -388,6 +389,7 @@ function ContentFlowHubPageContent() {
     setAccountFilter('all');
     setProductFilter('all');
     setPipelineFilter('Completed');
+    setYoutubeFilter('Semua');
     setTiktokFilter('Semua');
     setFbFilter('Semua');
     setIgFilter('Semua');
@@ -418,6 +420,7 @@ function ContentFlowHubPageContent() {
       if (accountFilter !== 'all') url += `account=${encodeURIComponent(accountFilter)}&`;
       if (productFilter !== 'all') url += `product=${encodeURIComponent(productFilter)}&`;
       if (pipelineFilter !== 'all') url += `pipeline_status=${encodeURIComponent(pipelineFilter)}&`;
+      if (youtubeFilter !== 'Semua') url += `youtube_status=${encodeURIComponent(youtubeFilter)}&`;
       if (tiktokFilter !== 'Semua') url += `tiktok_status=${encodeURIComponent(tiktokFilter)}&`;
       if (fbFilter !== 'Semua') url += `facebook_status=${encodeURIComponent(fbFilter)}&`;
       if (igFilter !== 'Semua') url += `instagram_status=${encodeURIComponent(igFilter)}&`;
@@ -436,7 +439,7 @@ function ContentFlowHubPageContent() {
     } finally {
       setLoading(false);
     }
-  }, [searchTerm, sourceFilter, accountFilter, productFilter, pipelineFilter, tiktokFilter, fbFilter, igFilter, showToast]);
+  }, [searchTerm, sourceFilter, accountFilter, productFilter, pipelineFilter, youtubeFilter, tiktokFilter, fbFilter, igFilter, showToast]);
 
   useEffect(() => {
     if (mainView !== 'analytics') {
@@ -1312,8 +1315,21 @@ function ContentFlowHubPageContent() {
               </div>
             </div>
 
-            {/* Row 2: Platform Status Filters + Reset Button (4 Columns) */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', paddingTop: '14px', borderTop: '1px solid #1f2937', alignItems: 'center' }}>
+            {/* Row 2: Platform Status Filters + Reset Button (5 Columns dengan YouTube) */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px', paddingTop: '14px', borderTop: '1px solid var(--border-subtle)', alignItems: 'center' }}>
+              <div>
+                <select
+                  value={youtubeFilter}
+                  onChange={(e) => setYoutubeFilter(e.target.value)}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', background: 'var(--input-bg)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)', fontSize: '12px', outline: 'none' }}
+                >
+                  <option value="Semua">▶️ Semua YouTube Status</option>
+                  <option value="Not Published">Not Published</option>
+                  <option value="Scheduled">Scheduled</option>
+                  <option value="Published">Published</option>
+                </select>
+              </div>
+
               <div>
                 <select
                   value={tiktokFilter}
@@ -1481,11 +1497,12 @@ function ContentFlowHubPageContent() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {items.map((item) => {
+                const isYtPub = item.youtube_status === 'Published' || item.youtube_status === 'Skipped';
                 const isTkPub = item.tiktok_status === 'Published' || item.tiktok_status === 'Skipped';
                 const isFbPub = item.facebook_status === 'Published' || item.facebook_status === 'Skipped';
                 const isIgPub = item.instagram_status === 'Published' || item.instagram_status === 'Skipped';
-                const publishedPlatformCount = [isTkPub, isFbPub, isIgPub].filter(Boolean).length;
-                const isAll3Published = publishedPlatformCount === 3;
+                const publishedPlatformCount = [isYtPub, isTkPub, isFbPub, isIgPub].filter(Boolean).length;
+                const isAll4Published = publishedPlatformCount === 4;
 
                 const isSelected = selectedItemIds.has(item.id);
                 return (
@@ -1495,18 +1512,18 @@ function ContentFlowHubPageContent() {
                       background: isSelected ? 'var(--surface-raised)' : 'var(--bg-secondary)',
                       border: isSelected
                         ? '1px solid var(--action-primary)'
-                        : isAll3Published
+                        : isAll4Published
                         ? '1px solid var(--status-success)'
                         : '1px solid var(--border)',
                       borderRadius: '16px',
-                      padding: isAll3Published ? '22px 20px 16px' : '16px 20px',
+                      padding: isAll4Published ? '22px 20px 16px' : '16px 20px',
                       display: 'grid',
                       gridTemplateColumns: '36px 200px 1fr 240px',
                       gap: '16px',
                       alignItems: 'center',
                       boxShadow: isSelected
                         ? '0 0 0 1px var(--action-primary), 0 8px 24px var(--overlay-subtle)'
-                        : isAll3Published
+                        : isAll4Published
                         ? '0 0 20px var(--status-success-soft)'
                         : '0 4px 16px var(--overlay-subtle)',
                       transition: 'all 0.2s ease',
@@ -1514,12 +1531,12 @@ function ContentFlowHubPageContent() {
                     }}
                     onMouseEnter={(e) => {
                       if (!isSelected) {
-                        e.currentTarget.style.borderColor = isAll3Published ? 'var(--status-success)' : 'var(--border-strong)';
+                        e.currentTarget.style.borderColor = isAll4Published ? 'var(--status-success)' : 'var(--border-strong)';
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!isSelected) {
-                        e.currentTarget.style.borderColor = isAll3Published ? 'var(--status-success)' : 'var(--border)';
+                        e.currentTarget.style.borderColor = isAll4Published ? 'var(--status-success)' : 'var(--border)';
                       }
                     }}
                   >
@@ -1534,7 +1551,7 @@ function ContentFlowHubPageContent() {
                       />
                     </div>
                     {/* Top Status Badge Banner */}
-                    {isAll3Published ? (
+                    {isAll4Published ? (
                       <div style={{
                         position: 'absolute', top: '-11px', left: '24px',
                         background: 'linear-gradient(135deg, var(--status-success) 0%, var(--status-success) 100%)',
@@ -1543,7 +1560,7 @@ function ContentFlowHubPageContent() {
                         boxShadow: '0 4px 12px var(--status-success-soft)',
                         letterSpacing: '0.04em', border: '1px solid var(--status-success)'
                       }}>
-                        🎉 3/3 PUBLISHED (ALL PLATFORMS)
+                        🎉 4/4 PUBLISHED (ALL PLATFORMS)
                       </div>
                     ) : publishedPlatformCount > 0 ? (
                       <div style={{
@@ -1552,7 +1569,7 @@ function ContentFlowHubPageContent() {
                         border: '1px solid var(--status-warning)', color: 'var(--status-warning)', fontSize: '10px', fontWeight: 800,
                         padding: '2px 10px', borderRadius: '12px', letterSpacing: '0.04em'
                       }}>
-                        ⏳ {publishedPlatformCount}/3 TERPUBLIKASI
+                        ⏳ {publishedPlatformCount}/4 TERPUBLIKASI
                       </div>
                     ) : null}
 
@@ -1643,48 +1660,118 @@ function ContentFlowHubPageContent() {
                       </div>
                     </div>
 
-                    {/* KOLOM TENGAH: 1. Nama Produk ➡️ 2. Pratinjau Caption 10 Kata (11px) ➡️ 3. Platform Status Bar */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: 0 }}>
-                      {/* 1. Nama Produk SKU */}
+                    {/* KOLOM TENGAH: 1. Nama Produk ➡️ 2. YouTube Title Box ➡️ 3. Caption Box ➡️ 4. Platform Status Bar */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0 }}>
+                      {/* 1. Nama Produk SKU & Link */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--status-success)', background: 'rgba(16, 185, 129, 0.12)', padding: '3px 10px', borderRadius: '8px', border: '1px solid var(--status-success-soft)' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--status-success)', background: 'var(--status-success-soft)', padding: '3px 10px', borderRadius: '8px', border: '1px solid var(--status-success-soft)' }}>
                           📦 {item.nama_produk || 'Umum'}
                         </span>
                         {item.link_produk && (
-                          <a href={item.link_produk} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: 'var(--link)', background: 'rgba(2, 132, 199, 0.15)', padding: '2px 8px', borderRadius: '6px', border: '1px solid var(--status-info)', textDecoration: 'none', fontWeight: 600 }}>
+                          <a href={item.link_produk} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: 'var(--link)', background: 'var(--status-info-soft)', padding: '2px 8px', borderRadius: '6px', border: '1px solid var(--status-info)', textDecoration: 'none', fontWeight: 600 }}>
                             🔗 Link Produk
                           </a>
                         )}
                         {item.link_affiliate && (
-                          <button type="button" onClick={(e) => { e.stopPropagation(); copyToClipboard(item.link_affiliate, 'Link Affiliate', `card_affiliate_${item.id}`); }} style={{ fontSize: '11px', color: 'var(--status-neutral)', background: 'rgba(168, 85, 247, 0.15)', padding: '2px 8px', borderRadius: '6px', border: '1px solid var(--status-neutral)', cursor: 'pointer', fontWeight: 600 }}>
+                          <button type="button" onClick={(e) => { e.stopPropagation(); copyToClipboard(item.link_affiliate, 'Link Affiliate', `card_affiliate_${item.id}`); }} style={{ fontSize: '11px', color: 'var(--status-neutral)', background: 'var(--status-neutral-soft)', padding: '2px 8px', borderRadius: '6px', border: '1px solid var(--status-neutral)', cursor: 'pointer', fontWeight: 600 }}>
                             {copiedKeys[`card_affiliate_${item.id}`] ? '✓ Copied!' : '🛒 Affiliate Link'}
                           </button>
                         )}
                       </div>
 
-                      {/* 2. Pratinjau Caption 10 Kata (Font Monospace 11px) + Tombol Copy */}
-                      <div style={{ position: 'relative', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border)', padding: '8px 12px' }}>
-                        <p style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-secondary)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', paddingRight: '80px', lineHeight: '1.4' }}>
-                          {item.caption ? item.caption.split(' ').slice(0, 10).join(' ') + '...' : '(Tidak ada caption)'}
+                      {/* 2. 🔴 YOUTUBE TITLE BOX (TERPISAH) */}
+                      {(() => {
+                        let ytTitle = '';
+                        try {
+                          const smp = item.social_media_package_json ? (typeof item.social_media_package_json === 'string' ? JSON.parse(item.social_media_package_json) : item.social_media_package_json) : null;
+                          ytTitle = smp?.title || item.hook || '';
+                        } catch (_) {
+                          ytTitle = item.hook || '';
+                        }
+                        const ytLen = (ytTitle || '').length;
+
+                        return (
+                          <div style={{ background: 'var(--surface-interactive)', borderRadius: '10px', border: '1px solid var(--border-strong)', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <span style={{ fontSize: '11px', fontWeight: 750, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ color: 'var(--platform-youtube, #ef4444)', fontWeight: 800 }}>▶</span> Judul YouTube Video / Shorts
+                              </span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {ytLen > 0 && (
+                                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', fontWeight: 700, color: ytLen >= 50 && ytLen <= 75 ? 'var(--status-success)' : 'var(--text-muted)', background: 'var(--surface)', padding: '1px 6px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+                                    {ytLen}/100{ytLen >= 50 && ytLen <= 75 ? ' (Optimal)' : ''}
+                                  </span>
+                                )}
+                                {ytTitle && (
+                                  <button
+                                    type="button"
+                                    onClick={() => copyToClipboard(ytTitle, 'Judul YouTube', `card_title_${item.id}`)}
+                                    style={{
+                                      padding: '3px 8px', borderRadius: '6px',
+                                      background: copiedKeys[`card_title_${item.id}`] ? 'var(--status-success-soft)' : 'var(--surface)',
+                                      border: `1px solid ${copiedKeys[`card_title_${item.id}`] ? 'var(--status-success)' : 'var(--border-subtle)'}`,
+                                      color: copiedKeys[`card_title_${item.id}`] ? 'var(--status-success)' : 'var(--text-secondary)',
+                                      fontSize: '10px', cursor: 'pointer', fontWeight: 700
+                                    }}
+                                  >
+                                    {copiedKeys[`card_title_${item.id}`] ? '✓ Copied!' : '📋 Salin Judul'}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                            <p style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text-primary)', margin: 0, lineHeight: '1.4', wordBreak: 'break-word' }}>
+                              {ytTitle || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontWeight: 400 }}>Belum ada judul YouTube khusus</span>}
+                            </p>
+                          </div>
+                        );
+                      })()}
+
+                      {/* 3. 📱 CAPTION BOX (TERPISAH) */}
+                      <div style={{ background: 'var(--surface)', borderRadius: '10px', border: '1px solid var(--border-subtle)', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <span>📱</span> Naskah Caption & Deskripsi Sosmed
+                          </span>
+                          {item.caption && (
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(item.caption, 'Caption', `card_caption_${item.id}`)}
+                              style={{
+                                padding: '3px 8px', borderRadius: '6px',
+                                background: copiedKeys[`card_caption_${item.id}`] ? 'var(--status-success-soft)' : 'var(--surface-interactive)',
+                                border: `1px solid ${copiedKeys[`card_caption_${item.id}`] ? 'var(--status-success)' : 'var(--border-subtle)'}`,
+                                color: copiedKeys[`card_caption_${item.id}`] ? 'var(--status-success)' : 'var(--text-secondary)',
+                                fontSize: '10px', cursor: 'pointer', fontWeight: 700
+                              }}
+                            >
+                              {copiedKeys[`card_caption_${item.id}`] ? '✓ Copied!' : '📋 Salin Caption'}
+                            </button>
+                          )}
+                        </div>
+                        <p style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.45', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', wordBreak: 'break-word' }}>
+                          {item.caption ? item.caption : <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Tidak ada naskah caption</span>}
                         </p>
-                        {item.caption && (
-                          <button
-                            onClick={() => copyToClipboard(item.caption, 'Caption', `card_caption_${item.id}`)}
-                            style={{
-                              position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
-                              padding: '3px 8px', borderRadius: '6px',
-                              background: copiedKeys[`card_caption_${item.id}`] ? 'linear-gradient(135deg, var(--status-success) 0%, var(--status-success) 100%)' : 'var(--bg-secondary)',
-                              border: `1px solid ${copiedKeys[`card_caption_${item.id}`] ? 'var(--status-success)' : 'var(--surface-interactive)'}`,
-                              color: 'var(--text-primary)', fontSize: '10px', cursor: 'pointer', fontWeight: 600
-                            }}
-                          >
-                            {copiedKeys[`card_caption_${item.id}`] ? '✓ Copied!' : '📋 Copy'}
-                          </button>
-                        )}
                       </div>
 
-                      {/* 3. Platform Status Chips Bar */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', paddingTop: '2px' }}>
+                      {/* 4. Platform Status Chips Bar (Lengkap dengan YouTube) */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', paddingTop: '2px' }}>
+                        {/* YouTube Chip */}
+                        {(() => {
+                          const isYtPubItem = item.youtube_status === 'Published';
+                          return (
+                            <div style={{
+                              padding: '3px 8px', borderRadius: '6px', fontSize: '10.5px', fontWeight: 700,
+                              background: isYtPubItem ? 'var(--status-success-soft)' : 'rgba(239, 68, 68, 0.1)',
+                              border: `1px solid ${isYtPubItem ? 'var(--status-success)' : 'rgba(239, 68, 68, 0.3)'}`,
+                              color: isYtPubItem ? 'var(--status-success)' : 'var(--platform-youtube, #ef4444)',
+                              display: 'flex', alignItems: 'center', gap: '4px'
+                            }}>
+                              <span>▶ YouTube:</span>
+                              <span>{isYtPubItem ? `✓ Published (${formatDate(item.youtube_publish_date)})` : item.youtube_status || 'Draft'}</span>
+                            </div>
+                          );
+                        })()}
+
                         {/* TikTok Chip */}
                         <div className={!isTkPub ? 'contentflow-platform-chip' : ''} style={{
                           padding: '3px 9px', borderRadius: '6px', fontSize: '11px', fontWeight: 700,
@@ -1692,7 +1779,7 @@ function ContentFlowHubPageContent() {
                           border: isTkPub ? '1px solid var(--status-success)' : undefined,
                           color: isTkPub ? 'var(--status-success)' : undefined, display: 'flex', alignItems: 'center', gap: '4px'
                         }}>
-                          <span>🎵 TikTok</span>
+                          <span>🎵 TikTok:</span>
                           <span>{item.tiktok_status === 'Published' ? `✓ Published (${formatDate(item.tiktok_publish_date)})` : item.tiktok_status === 'Skipped' ? '⏭️ Skipped' : item.tiktok_status}</span>
                         </div>
 
@@ -1703,7 +1790,7 @@ function ContentFlowHubPageContent() {
                           border: isFbPub ? '1px solid var(--status-info)' : undefined,
                           color: isFbPub ? 'var(--status-info)' : undefined, display: 'flex', alignItems: 'center', gap: '4px'
                         }}>
-                          <span>📘 FB</span>
+                          <span>📘 FB:</span>
                           <span>{item.facebook_status === 'Published' ? `✓ Published (${formatDate(item.facebook_publish_date)})` : item.facebook_status === 'Skipped' ? '⏭️ Skipped' : item.facebook_status}</span>
                         </div>
 
@@ -1714,7 +1801,7 @@ function ContentFlowHubPageContent() {
                           border: isIgPub ? '1px solid var(--status-danger)' : undefined,
                           color: isIgPub ? 'var(--status-danger)' : undefined, display: 'flex', alignItems: 'center', gap: '4px'
                         }}>
-                          <span>📸 IG</span>
+                          <span>📸 IG:</span>
                           <span>{item.instagram_status === 'Published' ? `✓ Published (${formatDate(item.instagram_publish_date)})` : item.instagram_status === 'Skipped' ? '⏭️ Skipped' : item.instagram_status}</span>
                         </div>
                       </div>

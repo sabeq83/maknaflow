@@ -119,6 +119,7 @@ activate_environment_processes() {
   pm2 delete ${c.pm2Apps.join(' ')} >/dev/null 2>&1 || true
   pm2 start "$target/ecosystem.macmini.config.cjs" --only ${c.pm2Apps.join(',')} --update-env
   pm2 jlist | /opt/homebrew/bin/node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const expected=process.argv[1];const names=new Set(process.argv.slice(2));const apps=JSON.parse(s).filter(x=>names.has(x.name));if(apps.length!==names.size||apps.some(x=>x.pm2_env.status!=="online"||x.pm2_env.pm_cwd!==expected)){console.error(JSON.stringify(apps.map(x=>({name:x.name,status:x.pm2_env.status,cwd:x.pm2_env.pm_cwd,expected})),null,2));process.exit(1)}})' "$expected_cwd" ${c.pm2Apps.join(' ')}
+  pm2 save
 }
 lock="$root/.deploy-lock"
 if ! mkdir "$lock" 2>/dev/null; then echo "Deployment ${c.environment} lain sedang berjalan: $lock" >&2; exit 73; fi
@@ -224,6 +225,7 @@ activate_environment_processes() {
   pm2 delete ${c.pm2Apps.join(' ')} >/dev/null 2>&1 || true
   pm2 start "$target/ecosystem.macmini.config.cjs" --only ${c.pm2Apps.join(',')} --update-env
   pm2 jlist | /opt/homebrew/bin/node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const expected=process.argv[1];const names=new Set(process.argv.slice(2));const apps=JSON.parse(s).filter(x=>names.has(x.name));if(apps.length!==names.size||apps.some(x=>x.pm2_env.status!=="online"||x.pm2_env.pm_cwd!==expected)){console.error(JSON.stringify(apps.map(x=>({name:x.name,status:x.pm2_env.status,cwd:x.pm2_env.pm_cwd,expected})),null,2));process.exit(1)}})' "$expected_cwd" ${c.pm2Apps.join(' ')}
+  pm2 save
 }
 test -L "$current"
 active="$(readlink "$current")"

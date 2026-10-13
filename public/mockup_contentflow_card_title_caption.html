@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Usulan: Card ContentFlow (Title & Caption Terpisah) + Filter YouTube — MAKNA Flow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    /* CSS Semantic Design Tokens dari app/theme.css */
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.28);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --border: #26354a;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #c084fc;
+      --status-neutral-soft: rgba(192, 132, 252, 0.14);
+      --platform-youtube: #ef4444;
+      --platform-tiktok: #06b6d4;
+      --platform-meta: #3b82f6;
+      --platform-instagram: #ec4899;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+      --font-sans: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --bg-secondary: #131d2e;
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --sidebar: #f1f5f9;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(0, 0, 0, 0.05);
+      --overlay-backdrop: rgba(15, 23, 42, 0.6);
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border: #e2e8f0;
+      --action-primary: #0d9488;
+      --action-primary-hover: #14b8a6;
+      --on-action-primary: #ffffff;
+      --link: #0284c7;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.1);
+      --status-neutral: #9333ea;
+      --status-neutral-soft: rgba(147, 51, 234, 0.1);
+      --platform-youtube: #dc2626;
+      --platform-tiktok: #0891b2;
+      --platform-meta: #2563eb;
+      --platform-instagram: #db2777;
+      --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.08);
+      --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.16);
+      --bg-secondary: #f1f5f9;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--canvas);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding: 24px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    /* Top Control Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .top-title h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .top-title p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .theme-toggle {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .theme-toggle:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    /* Tab Switcher */
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      background: var(--surface-raised);
+      padding: 6px;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      width: fit-content;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-btn.active {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 2px 8px var(--overlay-subtle);
+    }
+
+    /* Explanation Banner */
+    .info-banner {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-left: 4px solid var(--action-primary);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      font-size: 12.5px;
+      line-height: 1.6;
+    }
+
+    .info-banner strong {
+      color: var(--action-primary);
+    }
+
+    /* ============================================================ */
+    /* FILTER & CONTROL PANEL (REVISI: MENAMBAHKAN FILTER YOUTUBE) */
+    /* ============================================================ */
+    .filter-panel {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .filter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .filter-title {
+      font-size: 12.5px;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-grid-row1 {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .filter-grid-row2 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-subtle);
+      align-items: center;
+    }
+
+    .filter-input, .filter-select {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .filter-input:focus, .filter-select:focus {
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.15);
+    }
+
+    /* Highlight Filter YouTube Khusus */
+    .filter-select-youtube {
+      border-color: rgba(239, 68, 68, 0.5);
+      background: rgba(239, 68, 68, 0.05);
+      font-weight: 700;
+    }
+    .filter-select-youtube:focus {
+      border-color: var(--platform-youtube);
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-reset-filters {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-reset-filters:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+    }
+
+    /* Bulk Toolbar */
+    .bulk-toolbar {
+      padding: 10px 18px;
+      border-radius: 12px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    /* Card Grid Container */
+    .cards-container {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .cf-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 20px;
+      display: grid;
+      grid-template-columns: 36px 200px 1fr 240px;
+      gap: 18px;
+      align-items: center;
+      box-shadow: 0 4px 16px var(--overlay-subtle);
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .cf-card:hover {
+      border-color: var(--border-strong);
+      box-shadow: 0 8px 24px var(--overlay-subtle);
+    }
+
+    .cf-card.selected {
+      background: var(--surface-raised);
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 1px var(--action-primary), 0 8px 24px var(--overlay-subtle);
+    }
+
+    .cf-card.completed-badge {
+      border-color: var(--status-success);
+      box-shadow: 0 0 16px var(--status-success-soft);
+      padding-top: 22px;
+    }
+
+    /* Status Badge Banner */
+    .top-badge-banner {
+      position: absolute;
+      top: -11px;
+      left: 24px;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 12px;
+      border-radius: 12px;
+      letter-spacing: 0.04em;
+    }
+    .badge-success {
+      background: linear-gradient(135deg, var(--status-success) 0%, var(--status-success) 100%);
+      color: #042f2e;
+      border: 1px solid var(--status-success);
+      box-shadow: 0 4px 12px var(--status-success-soft);
+    }
+    .badge-warning {
+      background: var(--status-warning-soft);
+      border: 1px solid var(--status-warning);
+      color: var(--status-warning);
+    }
+
+    /* Kolom 1: Checkbox */
+    .col-checkbox {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .col-checkbox input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--action-primary);
+      cursor: pointer;
+    }
+
+    /* Kolom 2: Media & Assets */
+    .col-media {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .video-thumbnail {
+      position: relative;
+      width: 100%;
+      height: 110px;
+      border-radius: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .video-icon-box {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--status-info-soft);
+      border: 1px solid var(--status-info-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .video-id-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--link);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      z-index: 2;
+    }
+
+    .video-date-badge {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.7);
+      color: var(--text-secondary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 600;
+      z-index: 2;
+    }
+
+    .action-btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 8px;
+      text-decoration: none;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .action-cloud {
+      background: var(--surface-interactive);
+      color: var(--link);
+      border-color: var(--border-subtle);
+    }
+    .action-cloud:hover {
+      background: var(--surface-hover);
+      border-color: var(--link);
+    }
+    .action-download {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      font-weight: 700;
+    }
+    .action-download:hover {
+      background: var(--action-primary-hover);
+    }
+
+    /* ============================================================ */
+    /* KOLOM TENGAH: BAGIAN UTAMA (TITLE & CAPTION TERPISAH) */
+    /* ============================================================ */
+    .col-center {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .sku-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge-product {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--status-success);
+      background: var(--status-success-soft);
+      padding: 3px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--status-success-soft);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-chip {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+    .chip-product-link {
+      color: var(--link);
+      background: var(--status-info-soft);
+      border: 1px solid var(--status-info);
+    }
+    .chip-affiliate {
+      color: var(--status-neutral);
+      background: var(--status-neutral-soft);
+      border: 1px solid var(--status-neutral);
+    }
+
+    /* 🔴 SECTION A: YOUTUBE / VIDEO TITLE CARD (BARU) */
+    .title-box {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      transition: border-color 0.2s;
+    }
+    .title-box:hover {
+      border-color: var(--platform-youtube);
+    }
+
+    .title-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .title-label {
+      font-size: 11px;
+      font-weight: 750;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .yt-icon {
+      color: var(--platform-youtube);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .title-meta-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .char-badge {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--status-success);
+      background: var(--surface);
+      padding: 1px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-copy-mini {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+    .btn-copy-mini:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+    }
+    .btn-copy-mini.copied {
+      background: var(--status-success-soft);
+      border-color: var(--status-success);
+      color: var(--status-success);
+    }
+
+    .title-content {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.4;
+      margin: 0;
+      word-break: break-word;
+    }
+
+    /* 📝 SECTION B: CAPTION CARD (TERPISAH) */
+    .caption-box {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+    }
+
+    .caption-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .caption-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .caption-content {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+      line-height: 1.45;
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      word-break: break-word;
+    }
+
+    /* Platform Status Chips Bar */
+    .chips-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      padding-top: 2px;
+    }
+
+    .platform-chip {
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 10.5px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+    }
+    .platform-chip.published {
+      background: var(--status-success-soft);
+      border-color: var(--status-success);
+      color: var(--status-success);
+    }
+    .platform-chip.yt-chip {
+      border-color: rgba(239, 68, 68, 0.4);
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--platform-youtube);
+    }
+
+    /* Kolom 4: Brand & Actions */
+    .col-right {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      height: 100%;
+      border-left: 1px solid var(--border-subtle);
+      padding-left: 18px;
+    }
+
+    .brand-badge {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      display: inline-block;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .brand-ruang {
+      background: rgba(236, 72, 153, 0.14);
+      border: 1px solid #ec4899;
+      color: #ec4899;
+    }
+    .brand-thermal {
+      background: rgba(249, 115, 22, 0.14);
+      border: 1px solid #f97316;
+      color: #f97316;
+    }
+
+    .campaign-info {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    .btn-detail {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .btn-detail:hover {
+      background: var(--surface-hover);
+      border-color: var(--action-primary);
+      color: var(--action-primary);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      border: 1px solid var(--action-primary);
+      padding: 12px 20px;
+      border-radius: 10px;
+      box-shadow: var(--shadow-modal);
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 999;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Comparison Table Mode */
+    .compare-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 10px;
+    }
+    @media (max-width: 1024px) {
+      .compare-container { grid-template-columns: 1fr; }
+      .filter-grid-row1 { grid-template-columns: 1fr; }
+      .filter-grid-row2 { grid-template-columns: 1fr 1fr; }
+      .cf-card { grid-template-columns: 36px 1fr; }
+      .col-right { border-left: none; padding-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Top Control Bar -->
+    <div class="top-bar">
+      <div class="top-title">
+        <h1><span>🎨</span> Mockup ContentFlow: Title & Caption Terpisah + Filter YouTube</h1>
+        <p>Revisi usulan UI: Menambahkan filter platform YouTube ke baris filter platform (5 kolom) & pemisahan visual Title & Caption di tengah card.</p>
+      </div>
+      <div class="top-actions">
+        <button class="theme-toggle" onclick="toggleTheme()">
+          <span id="theme-icon">☀️</span> <span id="theme-text">Mode Terang</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Tab Switcher -->
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchView('proposed', this)">
+        <span>✨ Usulan Desain Baru (Filter YouTube + Card Title & Caption)</span>
+      </button>
+      <button class="tab-btn" onclick="switchView('compare', this)">
+        <span>⚖️ Komparasi Filter & Card (Sebelum vs Sesudah)</span>
+      </button>
+    </div>
+
+    <!-- Info Banner -->
+    <div class="info-banner">
+      <strong>🎯 Poin Perubahan Utama yang Ditambahkan:</strong>
+      <ul style="margin: 6px 0 0 18px; padding: 0;">
+        <li><strong>🔴 Filter Platform YouTube Ditambahkan:</strong> Baris 2 filter kini memiliki <strong>5 Kolom</strong>: <code>▶️ Semua YouTube Status</code>, <code>🎵 Semua TikTok Status</code>, <code>📷 Semua Instagram Status</code>, <code>📘 Semua Facebook Status</code>, dan <code>🔄 Reset Filter</code>.</li>
+        <li><strong>Title & Caption Terpisah di Tengah Card:</strong> Blok YouTube Title (<span style="color:var(--platform-youtube)">▶</span>) ditaruh di atas dengan indikator karakter counter & tombol <code>Salin Judul</code>, disusul blok Caption di bawahnya dengan tombol <code>Salin Caption</code>.</li>
+        <li><strong>Simulasi Interaktif:</strong> Silakan ubah dropdown <strong>"▶️ YouTube Status"</strong> di bawah untuk memfilter card secara langsung!</li>
+      </ul>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 🎛️ PANEL FILTER CONTENTFLOW (DENGAN FILTER YOUTUBE BARU) -->
+    <!-- ============================================================ */ -->
+    <div class="filter-panel">
+      <div class="filter-header">
+        <span class="filter-title">
+          <span>🔍</span> Filter & Pencarian Konten Multi-Platform
+        </span>
+        <span style="font-size: 11px; color: var(--text-muted);" id="filter-indicator">
+          Menampilkan <strong style="color: var(--action-primary);" id="visible-count">3</strong> dari 3 konten
+        </span>
+      </div>
+
+      <!-- Baris 1: Pencarian, Modul Sumber, Status Pipeline, Produk -->
+      <div class="filter-grid-row1">
+        <input type="text" class="filter-input" placeholder="Cari Video ID, judul, produk, atau caption..." id="input-search" oninput="applyFilters()">
+        <select class="filter-select">
+          <option value="all">Semua Modul Sumber</option>
+          <option value="opc">OPC (Pillar Campaign)</option>
+          <option value="re">RE (Real Estate Campaign)</option>
+        </select>
+        <select class="filter-select">
+          <option value="Completed">Pipeline: Completed</option>
+          <option value="In Production">Pipeline: In Production</option>
+          <option value="all">Semua Status Pipeline</option>
+        </select>
+        <select class="filter-select">
+          <option value="all">Semua Produk (5)</option>
+          <option value="diffuser">Panel Akustik Diffuser</option>
+          <option value="rockwool">Insulasi Rockwool</option>
+        </select>
+      </div>
+
+      <!-- Baris 2: FILTER PLATFORM STATUS (5 KOLOM LENGKAP DENGAN YOUTUBE) -->
+      <div class="filter-grid-row2">
+        <!-- 🔴 1. Filter Platform YouTube (FITUR BARU) -->
+        <select class="filter-select filter-select-youtube" id="filter-yt" onchange="applyFilters()">
+          <option value="all">▶️ Semua YouTube Status</option>
+          <option value="Not Published">Not Published (Draft)</option>
+          <option value="Scheduled">Scheduled</option>
+          <option value="Published">Published</option>
+        </select>
+
+        <!-- 🎵 2. Filter TikTok -->
+        <select class="filter-select" id="filter-tk" onchange="applyFilters()">
+          <option value="all">🎵 Semua TikTok Status</option>
+          <option value="Not Published">Not Published</option>
+          <option value="Scheduled">Scheduled</option>
+          <option value="Published">Published</option>
+        </select>
+
+        <!-- 📷 3. Filter Instagram -->
+        <select class="filter-select" id="filter-ig" onchange="applyFilters()">
+          <option value="all">📷 Semua Instagram Status</option>
+          <option value="Not Published">Not Published</option>
+          <option value="Scheduled">Scheduled</option>
+          <option value="Published">Published</option>
+        </select>
+
+        <!-- 📘 4. Filter Facebook -->
+        <select class="filter-select" id="filter-fb" onchange="applyFilters()">
+          <option value="all">📘 Semua Facebook Status</option>
+          <option value="Not Published">Not Published</option>
+          <option value="Scheduled">Scheduled</option>
+          <option value="Published">Published</option>
+        </select>
+
+        <!-- 🔄 5. Tombol Reset Filter -->
+        <button type="button" class="btn-reset-filters" onclick="resetAllFilters()">
+          🔄 Reset Filter
+        </button>
+      </div>
+    </div>
+
+    <!-- Bulk Toolbar -->
+    <div class="bulk-toolbar">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 700; color: var(--text-primary);">
+          <input type="checkbox" id="check-all" onchange="toggleSelectAll(this.checked)">
+          <span>Pilih Semua</span>
+        </label>
+        <span style="color: var(--border-strong);">|</span>
+        <span style="font-size: 12px; color: var(--text-secondary);">
+          Terpilih: <strong style="color: var(--action-primary);" id="selected-count">1</strong> konten
+        </span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button type="button" class="btn-copy-mini" style="padding: 6px 12px; font-size: 11px;" onclick="triggerToast('Menjadwalkan publikasi massal...')">
+          📅 Jadwalkan Publikasi Multi-Platform
+        </button>
+      </div>
+    </div>
+
+    <!-- VIEW 1: PROPOSED CARDS (USULAN DESAIN BARU) -->
+    <div id="view-proposed" class="cards-container">
+
+      <!-- ITEM 1: Ruang Akustik ID #1 (YouTube: Published) -->
+      <div class="cf-card completed-badge selected" id="card-1" data-yt="Published" data-tk="Published" data-ig="Published" data-fb="Published">
+        <!-- Badge Banner Atas -->
+        <div class="top-badge-banner badge-success">
+          🎉 4/4 PUBLISHED (ALL PLATFORMS TERMASUK YOUTUBE)
+        </div>
+
+        <!-- Kolom 1: Checkbox -->
+        <div class="col-checkbox">
+          <input type="checkbox" checked onchange="toggleSelect('card-1', this.checked)">
+        </div>
+
+        <!-- Kolom 2: Media Asset -->
+        <div class="col-media">
+          <div class="video-thumbnail">
+            <span class="video-id-badge">ruangakustikid_opc_9ibcvk_01</span>
+            <div class="video-icon-box">🎬</div>
+            <span class="video-date-badge">📅 13 Okt 2026</span>
+          </div>
+          <a class="action-btn action-cloud" href="#">☁️ Nextcloud Asset</a>
+          <button class="action-btn action-download" onclick="triggerToast('Mengunduh video final...')">📥 Download Video</button>
+        </div>
+
+        <!-- Kolom 3 (TENGAH): Title & Caption Terpisah -->
+        <div class="col-center">
+          <!-- 1. SKU & Affiliate -->
+          <div class="sku-row">
+            <span class="badge-product">📦 Panel Akustik Diffuser Kayu</span>
+            <a class="btn-chip chip-product-link" href="#" target="_blank">🔗 Link Tokopedia</a>
+            <button class="btn-chip chip-affiliate" onclick="copyText('https://tokopedia.link/ruangakustik-diffuser', 'Link Affiliate')">🛒 Affiliate Link</button>
+          </div>
+
+          <!-- 2. 🔴 YOUTUBE TITLE CARD (TERPISAH) -->
+          <div class="title-box">
+            <div class="title-header">
+              <span class="title-label">
+                <span class="yt-icon">▶</span> Judul YouTube Video / Shorts
+              </span>
+              <div class="title-meta-right">
+                <span class="char-badge" title="Panjang judul optimal untuk YouTube Shorts">73/100 (Optimal)</span>
+                <button class="btn-copy-mini" onclick="copyText('Stop! Latar belakang VCmu hancurkan profesionalisme di mata klien? #Shorts', 'Judul YouTube', this)">
+                  📋 Salin Judul
+                </button>
+              </div>
+            </div>
+            <p class="title-content">
+              Stop! Latar belakang VCmu hancurkan profesionalisme di mata klien? #Shorts
+            </p>
+          </div>
+
+          <!-- 3. 📝 CAPTION & METADATA CARD (TERPISAH) -->
+          <div class="caption-box">
+            <div class="caption-header">
+              <span class="caption-label">
+                <span>📱</span> Naskah Caption & Deskripsi Sosmed
+              </span>
+              <button class="btn-copy-mini" onclick="copyText('Klien sering terdistraksi suara gema di ruanganmu? Yuk perbaiki akustik ruangan sekarang bersama Ruang Akustik ID! #ruangakustik #diffuser #acoustictreatment', 'Caption Sosmed', this)">
+                📋 Salin Caption
+              </button>
+            </div>
+            <p class="caption-content">
+              Klien sering terdistraksi suara gema di ruanganmu? Yuk perbaiki akustik ruangan sekarang bersama Ruang Akustik ID! Solusi redam gema estetik tanpa bongkar dinding...
+            </p>
+          </div>
+
+          <!-- 4. Platform Status Chips Bar -->
+          <div class="chips-bar">
+            <span class="platform-chip published">▶ YouTube: ✓ Published</span>
+            <span class="platform-chip published">🎵 TikTok: ✓ Published</span>
+            <span class="platform-chip published">📸 IG: ✓ Published</span>
+            <span class="platform-chip published">📘 FB: ✓ Published</span>
+          </div>
+        </div>
+
+        <!-- Kolom 4: Brand Tag & Detail -->
+        <div class="col-right">
+          <div>
+            <span class="brand-badge brand-ruang">Ruang Akustik ID</span>
+            <div class="campaign-info">
+              <strong>Pilar:</strong> Solusi VC & Ruang Kerja<br>
+              <strong>Fase:</strong> ✅ Fase 2 Completed
+            </div>
+          </div>
+          <button class="btn-detail" onclick="triggerToast('Membuka modal detail dan publish scheduler...')">
+            📖 Detail & Jadwal Publikasi
+          </button>
+        </div>
+      </div>
+
+      <!-- ITEM 2: Solusi Thermal ID #1 (YouTube: Not Published / Draft) -->
+      <div class="cf-card" id="card-2" data-yt="Not Published" data-tk="Not Published" data-ig="Not Published" data-fb="Not Published">
+        <!-- Kolom 1: Checkbox -->
+        <div class="col-checkbox">
+          <input type="checkbox" onchange="toggleSelect('card-2', this.checked)">
+        </div>
+
+        <!-- Kolom 2: Media Asset -->
+        <div class="col-media">
+          <div class="video-thumbnail">
+            <span class="video-id-badge">solusithermalid_opc_lyg6eh_01</span>
+            <div class="video-icon-box">🎬</div>
+            <span class="video-date-badge">📅 13 Okt 2026</span>
+          </div>
+          <a class="action-btn action-cloud" href="#">☁️ Nextcloud Asset</a>
+          <button class="action-btn action-download" onclick="triggerToast('Mengunduh video final...')">📥 Download Video</button>
+        </div>
+
+        <!-- Kolom 3 (TENGAH): Title & Caption Terpisah -->
+        <div class="col-center">
+          <!-- 1. SKU & Affiliate -->
+          <div class="sku-row">
+            <span class="badge-product">📦 Insulasi Atap Rockwool Blanket 50mm</span>
+            <a class="btn-chip chip-product-link" href="#" target="_blank">🔗 Link Shopee</a>
+            <button class="btn-chip chip-affiliate" onclick="copyText('https://shopee.co.id/solusithermal-rockwool-50mm', 'Link Affiliate')">🛒 Affiliate Link</button>
+          </div>
+
+          <!-- 2. 🔴 YOUTUBE TITLE CARD (TERPISAH) -->
+          <div class="title-box">
+            <div class="title-header">
+              <span class="title-label">
+                <span class="yt-icon">▶</span> Judul YouTube Video / Shorts
+              </span>
+              <div class="title-meta-right">
+                <span class="char-badge" title="Panjang judul optimal untuk YouTube Shorts">61/100 (Optimal)</span>
+                <button class="btn-copy-mini" onclick="copyText('Material insulasi sebagus apa pun tidak akan bekerja #Shorts', 'Judul YouTube', this)">
+                  📋 Salin Judul
+                </button>
+              </div>
+            </div>
+            <p class="title-content">
+              Material insulasi sebagus apa pun tidak akan bekerja #Shorts
+            </p>
+          </div>
+
+          <!-- 3. 📝 CAPTION & METADATA CARD (TERPISAH) -->
+          <div class="caption-box">
+            <div class="caption-header">
+              <span class="caption-label">
+                <span>📱</span> Naskah Caption & Deskripsi Sosmed
+              </span>
+              <button class="btn-copy-mini" onclick="copyText('Suhu ruangan pabrik atau kantor panas menyengat? Jangan biarkan AC jebol karena beban berlebih! Gunakan peredam panas atap industri terbaik.', 'Caption Sosmed', this)">
+                📋 Salin Caption
+              </button>
+            </div>
+            <p class="caption-content">
+              Suhu ruangan pabrik atau kantor panas menyengat? Jangan biarkan AC jebol karena beban berlebih! Gunakan peredam panas atap industri terbaik dari Solusi Thermal ID...
+            </p>
+          </div>
+
+          <!-- 4. Platform Status Chips Bar -->
+          <div class="chips-bar">
+            <span class="platform-chip yt-chip">▶ YouTube: Draft (Ready)</span>
+            <span class="platform-chip">🎵 TikTok: Antrean</span>
+            <span class="platform-chip">📸 IG: Antrean</span>
+            <span class="platform-chip">📘 FB: Antrean</span>
+          </div>
+        </div>
+
+        <!-- Kolom 4: Brand Tag & Detail -->
+        <div class="col-right">
+          <div>
+            <span class="brand-badge brand-thermal">Solusi Thermal ID</span>
+            <div class="campaign-info">
+              <strong>Pilar:</strong> Efisiensi Energi AC Gedung<br>
+              <strong>Fase:</strong> ✅ Fase 2 Completed
+            </div>
+          </div>
+          <button class="btn-detail" onclick="triggerToast('Membuka modal detail dan publish scheduler...')">
+            📖 Detail & Jadwal Publikasi
+          </button>
+        </div>
+      </div>
+
+      <!-- ITEM 3: Ruang Akustik ID #2 (YouTube: Scheduled) -->
+      <div class="cf-card" id="card-3" data-yt="Scheduled" data-tk="Published" data-ig="Scheduled" data-fb="Not Published">
+        <!-- Kolom 1: Checkbox -->
+        <div class="col-checkbox">
+          <input type="checkbox" onchange="toggleSelect('card-3', this.checked)">
+        </div>
+
+        <!-- Kolom 2: Media Asset -->
+        <div class="col-media">
+          <div class="video-thumbnail">
+            <span class="video-id-badge">ruangakustikid_opc_9ibcvk_02</span>
+            <div class="video-icon-box">🎬</div>
+            <span class="video-date-badge">📅 13 Okt 2026</span>
+          </div>
+          <a class="action-btn action-cloud" href="#">☁️ Nextcloud Asset</a>
+          <button class="action-btn action-download" onclick="triggerToast('Mengunduh video final...')">📥 Download Video</button>
+        </div>
+
+        <!-- Kolom 3 (TENGAH): Title & Caption Terpisah -->
+        <div class="col-center">
+          <div class="sku-row">
+            <span class="badge-product">📦 Rockwool Density 60kg Peredam Suara</span>
+            <a class="btn-chip chip-product-link" href="#" target="_blank">🔗 Link Tokopedia</a>
+            <button class="btn-chip chip-affiliate" onclick="copyText('https://tokopedia.link/ruangakustik-rockwool', 'Link Affiliate')">🛒 Affiliate Link</button>
+          </div>
+
+          <!-- Title Box -->
+          <div class="title-box">
+            <div class="title-header">
+              <span class="title-label">
+                <span class="yt-icon">▶</span> Judul YouTube Video / Shorts
+              </span>
+              <div class="title-meta-right">
+                <span class="char-badge">80/100 (Optimal)</span>
+                <button class="btn-copy-mini" onclick="copyText('Bising ganggu kerja malam? Rockwool redam bocor suara sampai berapa dB? #Shorts', 'Judul YouTube', this)">
+                  📋 Salin Judul
+                </button>
+              </div>
+            </div>
+            <p class="title-content">
+              Bising ganggu kerja malam? Rockwool redam bocor suara sampai berapa dB? #Shorts
+            </p>
+          </div>
+
+          <!-- Caption Box -->
+          <div class="caption-box">
+            <div class="caption-header">
+              <span class="caption-label">
+                <span>📱</span> Naskah Caption & Deskripsi Sosmed
+              </span>
+              <button class="btn-copy-mini" onclick="copyText('Tetangga bising atau suara bocor keluar saat rekaman? Yuk simak rahasia instalasi rockwool yang benar agar isolasi suara maksimal! #kedapsuara #akustikruang', 'Caption Sosmed', this)">
+                📋 Salin Caption
+              </button>
+            </div>
+            <p class="caption-content">
+              Tetangga bising atau suara bocor keluar saat rekaman? Yuk simak rahasia instalasi rockwool yang benar agar isolasi suara maksimal! #kedapsuara #akustikruang...
+            </p>
+          </div>
+
+          <div class="chips-bar">
+            <span class="platform-chip" style="background: rgba(239, 68, 68, 0.15); border-color: #ef4444; color: #ef4444;">▶ YouTube: ⏳ Scheduled (14 Okt 10:00)</span>
+            <span class="platform-chip published">🎵 TikTok: ✓ Published</span>
+            <span class="platform-chip" style="background: rgba(236, 72, 153, 0.15); border-color: #ec4899; color: #ec4899;">📸 IG: ⏳ Scheduled</span>
+            <span class="platform-chip">📘 FB: Draft</span>
+          </div>
+        </div>
+
+        <!-- Kolom 4 -->
+        <div class="col-right">
+          <div>
+            <span class="brand-badge brand-ruang">Ruang Akustik ID</span>
+            <div class="campaign-info">
+              <strong>Pilar:</strong> Peredam Suara Dinding<br>
+              <strong>Fase:</strong> ✅ Fase 2 Completed
+            </div>
+          </div>
+          <button class="btn-detail" onclick="triggerToast('Membuka modal detail dan publish scheduler...')">
+            📖 Detail & Jadwal Publikasi
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- VIEW 2: SIDE-BY-SIDE COMPARISON (SEBELUM VS SESUDAH) -->
+    <div id="view-compare" class="compare-container" style="display: none;">
+      <!-- KIRI: DESAIN LAMA (SEBELUM) -->
+      <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 18px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border-subtle);">
+          <span style="font-weight: 800; font-size: 13px; color: var(--status-warning);">❌ DESAIN SAAT INI (SEBELUM)</span>
+          <span style="font-size: 11px; color: var(--text-muted);">Hanya 3 Platform Filter (TikTok, FB, IG)</span>
+        </div>
+
+        <div style="background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+          <!-- Filter Bar Lama (Grid 4 Kolom) -->
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; background: var(--surface); padding: 10px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+            <div style="font-size: 11px; padding: 6px; background: var(--input-bg); border-radius: 6px; border: 1px solid var(--border-strong); color: var(--text-muted);">🎵 Semua TikTok</div>
+            <div style="font-size: 11px; padding: 6px; background: var(--input-bg); border-radius: 6px; border: 1px solid var(--border-strong); color: var(--text-muted);">📘 Semua Facebook</div>
+            <div style="font-size: 11px; padding: 6px; background: var(--input-bg); border-radius: 6px; border: 1px solid var(--border-strong); color: var(--text-muted);">📷 Semua Instagram</div>
+            <div style="font-size: 11px; padding: 6px; background: var(--surface-interactive); border-radius: 6px; text-align: center; color: var(--text-secondary); font-weight: 700;">🔄 Reset</div>
+          </div>
+          <div style="font-size: 11px; color: var(--status-danger); background: var(--status-danger-soft); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--status-danger-soft);">
+            ⚠️ <strong>Kelemahan:</strong> Filter platform YouTube tidak ada! Pengguna tidak dapat memfilter video mana saja yang sudah publish di YouTube atau yang masih draft.
+          </div>
+
+          <!-- Preview Caption 10 Kata (Desain Lama) -->
+          <div style="position: relative; background: var(--surface-interactive); border-radius: 6px; padding: 8px 12px; border: 1px solid var(--border-subtle);">
+            <p style="font-size: 11px; font-family: monospace; color: var(--text-secondary); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 70px;">
+              Klien sering terdistraksi suara gema di ruanganmu? Yuk perbaiki akustik...
+            </p>
+            <button style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font-size: 10px; padding: 2px 6px; background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 4px; color: var(--text-secondary);">
+              📋 Copy
+            </button>
+          </div>
+          <div style="font-size: 11px; color: var(--status-danger); background: var(--status-danger-soft); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--status-danger-soft);">
+            ⚠️ <strong>Kelemahan:</strong> YouTube Title tidak terlihat sama sekali di card tengah!
+          </div>
+        </div>
+      </div>
+
+      <!-- KANAN: DESAIN USULAN (SESUDAH) -->
+      <div style="background: var(--surface); border: 2px solid var(--action-primary); border-radius: 14px; padding: 18px; box-shadow: 0 4px 20px var(--overlay-subtle);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border-subtle);">
+          <span style="font-weight: 800; font-size: 13px; color: var(--action-primary);">✅ USULAN BARU (SESUDAH)</span>
+          <span style="font-size: 11px; color: var(--status-success); font-weight: 700;">Filter YouTube (5 Kolom) + Title/Caption Terpisah</span>
+        </div>
+
+        <div style="background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+          <!-- Filter Bar Baru (Grid 5 Kolom) -->
+          <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; background: var(--surface); padding: 10px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+            <div style="font-size: 10.5px; padding: 6px; background: rgba(239, 68, 68, 0.1); border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.4); color: var(--platform-youtube); font-weight: 800;">▶️ YouTube (Baru)</div>
+            <div style="font-size: 10.5px; padding: 6px; background: var(--input-bg); border-radius: 6px; border: 1px solid var(--border-strong); color: var(--text-muted);">🎵 TikTok</div>
+            <div style="font-size: 10.5px; padding: 6px; background: var(--input-bg); border-radius: 6px; border: 1px solid var(--border-strong); color: var(--text-muted);">📷 Instagram</div>
+            <div style="font-size: 10.5px; padding: 6px; background: var(--input-bg); border-radius: 6px; border: 1px solid var(--border-strong); color: var(--text-muted);">📘 Facebook</div>
+            <div style="font-size: 10.5px; padding: 6px; background: var(--surface-interactive); border-radius: 6px; text-align: center; color: var(--text-secondary); font-weight: 700;">🔄 Reset</div>
+          </div>
+          <div style="font-size: 11px; color: var(--status-success); background: var(--status-success-soft); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--status-success-soft);">
+            ✓ <strong>Kelebihan:</strong> Filter platform YouTube lengkap (Not Published, Scheduled, Published) dapat dikombinasikan dengan platform lain.
+          </div>
+
+          <!-- 1. Box Title -->
+          <div style="background: var(--surface-interactive); border: 1px solid var(--border-strong); border-radius: 8px; padding: 8px 12px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <span style="font-size: 11px; font-weight: 800; color: var(--text-primary);"><span style="color:var(--platform-youtube)">▶</span> Judul YouTube</span>
+              <span style="font-size: 10px; font-family: monospace; color: var(--status-success); font-weight: 700;">73 char ✓</span>
+            </div>
+            <div style="font-size: 12px; font-weight: 700; color: var(--text-primary);">
+              Stop! Latar belakang VCmu hancurkan profesionalisme di mata klien? #Shorts
+            </div>
+          </div>
+
+          <!-- 2. Box Caption -->
+          <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 12px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <span style="font-size: 10px; font-weight: 700; color: var(--text-muted);">📱 Caption Sosmed</span>
+              <span style="font-size: 10px; color: var(--link); cursor: pointer;">📋 Salin Caption</span>
+            </div>
+            <div style="font-size: 10.5px; font-family: monospace; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              Klien sering terdistraksi suara gema di ruanganmu? Yuk perbaiki akustik...
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <span id="toast-icon">✓</span>
+    <span id="toast-msg">Pesan toast</span>
+  </div>
+
+  <script>
+    // Theme toggle
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      const target = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', target);
+
+      const icon = document.getElementById('theme-icon');
+      const text = document.getElementById('theme-text');
+      if (target === 'light') {
+        icon.textContent = '🌙';
+        text.textContent = 'Mode Gelap';
+      } else {
+        icon.textContent = '☀️';
+        text.textContent = 'Mode Terang';
+      }
+    }
+
+    // Tab switcher
+    function switchView(viewId, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      if (viewId === 'proposed') {
+        document.getElementById('view-proposed').style.display = 'flex';
+        document.getElementById('view-compare').style.display = 'none';
+      } else {
+        document.getElementById('view-proposed').style.display = 'none';
+        document.getElementById('view-compare').style.display = 'grid';
+      }
+    }
+
+    // Toggle card selection
+    function toggleSelect(cardId, isChecked) {
+      const card = document.getElementById(cardId);
+      if (isChecked) {
+        card.classList.add('selected');
+      } else {
+        card.classList.remove('selected');
+      }
+      updateSelectedCount();
+    }
+
+    function toggleSelectAll(isChecked) {
+      document.querySelectorAll('.cf-card').forEach(card => {
+        const input = card.querySelector('input[type="checkbox"]');
+        if (input && card.style.display !== 'none') {
+          input.checked = isChecked;
+          if (isChecked) card.classList.add('selected');
+          else card.classList.remove('selected');
+        }
+      });
+      updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+      const selected = document.querySelectorAll('.cf-card.selected').length;
+      document.getElementById('selected-count').textContent = selected;
+    }
+
+    // 🎛️ FILTER LOGIC INTERAKTIF
+    function applyFilters() {
+      const ytVal = document.getElementById('filter-yt').value;
+      const tkVal = document.getElementById('filter-tk').value;
+      const igVal = document.getElementById('filter-ig').value;
+      const fbVal = document.getElementById('filter-fb').value;
+      const searchVal = document.getElementById('input-search').value.toLowerCase().trim();
+
+      const cards = document.querySelectorAll('#view-proposed .cf-card');
+      let visible = 0;
+
+      cards.forEach(card => {
+        const cardYt = card.getAttribute('data-yt') || 'Not Published';
+        const cardTk = card.getAttribute('data-tk') || 'Not Published';
+        const cardIg = card.getAttribute('data-ig') || 'Not Published';
+        const cardFb = card.getAttribute('data-fb') || 'Not Published';
+        const cardText = card.innerText.toLowerCase();
+
+        const matchYt = (ytVal === 'all') || (cardYt === ytVal);
+        const matchTk = (tkVal === 'all') || (cardTk === tkVal);
+        const matchIg = (igVal === 'all') || (cardIg === igVal);
+        const matchFb = (fbVal === 'all') || (cardFb === fbVal);
+        const matchSearch = !searchVal || cardText.includes(searchVal);
+
+        if (matchYt && matchTk && matchIg && matchFb && matchSearch) {
+          card.style.display = 'grid';
+          visible++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      document.getElementById('visible-count').textContent = visible;
+    }
+
+    function resetAllFilters() {
+      document.getElementById('filter-yt').value = 'all';
+      document.getElementById('filter-tk').value = 'all';
+      document.getElementById('filter-ig').value = 'all';
+      document.getElementById('filter-fb').value = 'all';
+      document.getElementById('input-search').value = '';
+      applyFilters();
+      triggerToast('Filter berhasil direset ke Semua');
+    }
+
+    // Copy text with toast
+    function copyText(text, label, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        triggerToast(`${label} berhasil disalin ke clipboard!`);
+        if (btn) {
+          const original = btn.innerHTML;
+          btn.classList.add('copied');
+          btn.innerHTML = '✓ Tersalin!';
+          setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.innerHTML = original;
+          }, 2000);
+        }
+      }).catch(() => {
+        triggerToast(`Gagal menyalin ${label}`, true);
+      });
+    }
+
+    // Toast trigger
+    function triggerToast(msg, isError = false) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      const toastIcon = document.getElementById('toast-icon');
+
+      toastMsg.textContent = msg;
+      toastIcon.textContent = isError ? '⚠️' : '✓';
+      toast.style.borderColor = isError ? 'var(--status-danger)' : 'var(--action-primary)';
+      toast.classList.add('show');
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+  </script>
+</body>
+</html>

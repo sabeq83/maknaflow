@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.32 — Pemisahan Title & Caption Card ContentFlow serta Filter Platform YouTube (13/10/2026)
+- Pemisahan visual Title dan Caption di tengah card ContentFlow
+- Penambahan filter platform YouTube pada toolbar ContentFlow (5 kolom)
+- Dukungan query youtube_status pada API dan repository
+- Pencegahan PM2 reset pada atomic deployment macmini
+
 ## V2.32.31 — Skrip Batch Injection YouTube Title OPC (13/10/2026)
 - Runner skrip inject-opc-youtube-titles.js dengan dukungan AI Gemini
 - Penyuntikan YouTube Title pada kampanye opc_261012_lyg6eh dan opc_261012_9ibcvk
