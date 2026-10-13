@@ -41,15 +41,16 @@ export const POST = withTenantContext(async (request, user) => {
       const contentId = rawItem.content_id || rawItem.video_id;
       if (!contentId) continue;
 
+      let title = rawItem.title || '';
       let caption = rawItem.caption || '';
       let mediaUrl = rawItem.media_url || '';
       const scheduledAt = rawItem.scheduled_at || new Date().toISOString();
 
-      // Hydrate missing caption or mediaUrl from database jika belum ada
-      if (!caption || !mediaUrl) {
+      // Hydrate missing title, caption or mediaUrl from database jika belum ada
+      if (!title || !caption || !mediaUrl) {
         try {
           const dbItemRes = await pgQuery(
-            `SELECT hook, caption, url_asset, nextcloud_url 
+            `SELECT hook, caption, url_asset, nextcloud_url, social_media_package_json, campaign_title 
              FROM content_flow_items 
              WHERE (video_id = $1 OR id::text = $1) AND tenant_id = $2
              LIMIT 1`,
@@ -57,6 +58,18 @@ export const POST = withTenantContext(async (request, user) => {
           );
           if (dbItemRes.rowCount > 0) {
             const dbRow = dbItemRes.rows[0];
+            if (!title) {
+              let pkgTitle = '';
+              if (dbRow.social_media_package_json) {
+                try {
+                  const pkg = typeof dbRow.social_media_package_json === 'string'
+                    ? JSON.parse(dbRow.social_media_package_json)
+                    : dbRow.social_media_package_json;
+                  pkgTitle = pkg?.title || '';
+                } catch (_) {}
+              }
+              title = pkgTitle || dbRow.hook || dbRow.campaign_title || '';
+            }
             if (!caption) caption = dbRow.caption || dbRow.hook || '';
             if (!mediaUrl) mediaUrl = dbRow.url_asset || dbRow.nextcloud_url || '';
           }
@@ -70,6 +83,7 @@ export const POST = withTenantContext(async (request, user) => {
         accountId: accId,
         publishMode: publish_mode,
         mediaType: rawItem.media_type || media_type || 'reels',
+        title: String(title || '').trim().replace(/^["'\s]+|["'\s]+$/g, '').slice(0, 100),
         caption: caption,
         mediaUrl: mediaUrl,
         scheduledAt: scheduledAt,

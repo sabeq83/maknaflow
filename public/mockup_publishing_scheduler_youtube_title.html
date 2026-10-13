@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup — Publishing Scheduler: Form Judul Video YouTube (High-CTR Title)</title>
+  <style>
+    :root {
+      --surface: #0f172a;
+      --surface-raised: #1e293b;
+      --surface-interactive: #334155;
+      --surface-subtle: rgba(30, 41, 59, 0.7);
+      --border-color: #334155;
+      --border-subtle: #1e293b;
+      --border-strong: #475569;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --input-bg: #0f172a;
+      --focus-ring: #38bdf8;
+      --action-primary: #3b82f6;
+      --action-primary-hover: #2563eb;
+      --on-action-primary: #ffffff;
+      --status-info: #38bdf8;
+      --status-info-soft: rgba(56, 189, 248, 0.15);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.15);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.15);
+      --status-danger: #f87171;
+      --status-danger-soft: rgba(248, 113, 113, 0.15);
+      --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-theme="light"] {
+      --surface: #f8fafc;
+      --surface-raised: #ffffff;
+      --surface-interactive: #f1f5f9;
+      --surface-subtle: #f8fafc;
+      --border-color: #e2e8f0;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --input-bg: #ffffff;
+      --focus-ring: #2563eb;
+      --action-primary: #2563eb;
+      --action-primary-hover: #1d4ed8;
+      --on-action-primary: #ffffff;
+      --status-info: #0284c7;
+      --status-info-soft: rgba(2, 132, 199, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #dc2626;
+      --status-danger-soft: rgba(220, 38, 38, 0.1);
+      --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 30px 20px;
+      background: var(--surface);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.5;
+    }
+
+    .modal-container {
+      max-width: 620px;
+      margin: 0 auto;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: var(--shadow-modal);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .badge-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+    }
+    .badge-info { background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info); }
+    .badge-success { background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success); }
+    .badge-danger { background: var(--status-danger-soft); color: var(--status-danger); border: 1px solid var(--status-danger); }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .form-input, .form-textarea, .form-select {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-size: 12.5px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      border-color: var(--focus-ring);
+    }
+
+    .account-badge-list {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .account-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      background: var(--surface-interactive);
+      color: var(--text-secondary);
+      transition: all 0.15s ease;
+    }
+    .account-badge.active {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: var(--action-primary);
+      color: var(--text-primary);
+    }
+    .account-badge.youtube.active {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+
+    .highlight-card {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: var(--action-primary); color: var(--on-action-primary); }
+    .btn-primary:hover { background: var(--action-primary-hover); }
+    .btn-secondary { background: var(--surface-interactive); color: var(--text-primary); border: 1px solid var(--border-color); }
+  </style>
+</head>
+<body>
+
+  <div class="modal-container">
+    
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div>
+        <h3 style="margin: 0; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+          📅 Jadwalkan Publikasi Konten
+          <span class="badge-tag badge-success">Live (Tanpa Approval)</span>
+        </h3>
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">
+          Video ID: <b>solusithermalid_opc_lyg6eh_06</b> · Media: Reels / Video 9:16
+        </div>
+      </div>
+      <button onclick="toggleTheme()" style="background: none; border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 6px; padding: 4px 8px; font-size: 11px; cursor: pointer;">
+        🌓 Ganti Tema
+      </button>
+    </div>
+
+    <!-- Pilih Akun Target Multi-Platform -->
+    <div class="form-group">
+      <label class="form-label">
+        <span>Akun Target Publikasi (Pilih Satu atau Lebih)</span>
+        <span style="color: var(--status-info);">Klik untuk aktifkan/nonaktifkan</span>
+      </label>
+      <div class="account-badge-list">
+        <div class="account-badge youtube active" id="acc-yt" onclick="togglePlatform('yt')">
+          🎥 YouTube (@SolusiThermalID)
+        </div>
+        <div class="account-badge active" id="acc-tk" onclick="togglePlatform('tk')">
+          🎵 TikTok (@solusithermal.id)
+        </div>
+        <div class="account-badge active" id="acc-fb" onclick="togglePlatform('fb')">
+          📘 Facebook (Solusi Thermal ID)
+        </div>
+        <div class="account-badge active" id="acc-ig" onclick="togglePlatform('ig')">
+          📸 Instagram (@solusithermal.id)
+        </div>
+      </div>
+    </div>
+
+    <!-- FIELD BARU: JUDUL VIDEO YOUTUBE (HIGH-CTR TITLE) -->
+    <div id="ytTitleContainer" class="highlight-card">
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label">
+          <span style="color: #ef4444; display: flex; align-items: center; gap: 6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            JUDUL VIDEO YOUTUBE (HIGH-CTR TITLE)
+          </span>
+          <span id="charCountLabel" style="color: var(--status-success); font-size: 11px;">
+            68 / 85 Karakter (Optimal ✅)
+          </span>
+        </label>
+        <input
+          type="text"
+          class="form-input"
+          id="ytTitleInput"
+          value="Panas Atap Seng Rusak Kargo Gudang? Lindungi Area Loading Dock! #Shorts"
+          oninput="updateCharCount(this.value)"
+          placeholder="Judul YouTube Shorts click-worthy..."
+          style="border-color: rgba(239, 68, 68, 0.5); font-weight: 600;"
+        />
+        <div style="font-size: 10.5px; color: var(--text-muted); margin-top: 5px;">
+          💡 <b>Perbaikan:</b> Judul ini otomatis terisi dari AI Generator dan terkunci di <code>title_snapshot</code>. Dilarang memakai ID file mentah (<code>solusithermalid_opc_lyg6eh_06</code>).
+        </div>
+      </div>
+    </div>
+
+    <!-- Caption Input -->
+    <div class="form-group">
+      <label class="form-label">
+        <span>Caption & Deskripsi Konten (Universal)</span>
+        <span style="color: var(--status-info);">Autoload dari Video</span>
+      </label>
+      <textarea class="form-textarea" rows="4">Area loading dock sering dianggap aman dari panas karena terbuka, padahal radiasi atap seng tetap sanggup merusak kualitas kargo kemasan! 🚚☀️ Pemasangan insulasi thermal seperti Bubble Foil atau Alum Thermal dari Solusi Thermal ID (PT GIM) membantu memantulkan radiasi panas atap, menjaga suhu kargo tetap stabil dan aman. Kamu punya masalah panas di bangunan jenis apa? Komen di bawah ya! #SolusiThermalID #PTGIM #InsulasiBangunan #InsulasiAtap #BubbleFoil #SolusiPanasLoadingDock #EdukasiBangunan #InsulasiPabrik</textarea>
+    </div>
+
+    <!-- Mode Publikasi & Jadwal -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label">Mode Publikasi</label>
+        <select class="form-select">
+          <option value="live">Live (Langsung publish otomatis — Tanpa Approval)</option>
+          <option value="draft">Draft Platform</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label">Waktu Tayang (WIB)</label>
+        <input type="text" class="form-input" value="14 Okt 2026, 09:30 WIB" readonly />
+      </div>
+    </div>
+
+    <!-- AIGC Label Checked -->
+    <div style="margin-bottom: 20px; padding: 10px 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+      <input type="checkbox" id="aigcCheck" checked style="cursor: pointer; width: 16px; height: 16px;" />
+      <label for="aigcCheck" style="font-size: 11px; cursor: pointer;">
+        <b>Label AI-Generated Content (AIGC)</b> — Default Checked ✅
+      </label>
+    </div>
+
+    <!-- Action Buttons -->
+    <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 14px; border-top: 1px solid var(--border-color);">
+      <button class="btn btn-secondary">Batal</button>
+      <button class="btn btn-primary" onclick="simulateSchedule()">🚀 Jadwalkan Sekarang</button>
+    </div>
+
+  </div>
+
+  <script>
+    let activePlatforms = { yt: true, tk: true, fb: true, ig: true };
+
+    function togglePlatform(key) {
+      activePlatforms[key] = !activePlatforms[key];
+      const el = document.getElementById(`acc-${key}`);
+      if (activePlatforms[key]) {
+        el.classList.add('active');
+      } else {
+        el.classList.remove('active');
+      }
+
+      // Show/hide YouTube Title field
+      const ytBox = document.getElementById('ytTitleContainer');
+      if (activePlatforms.yt) {
+        ytBox.style.display = 'block';
+      } else {
+        ytBox.style.display = 'none';
+      }
+    }
+
+    function updateCharCount(val) {
+      const len = (val || '').length;
+      const lbl = document.getElementById('charCountLabel');
+      lbl.innerText = `${len} / 85 Karakter (${len <= 85 ? 'Optimal ✅' : 'Terlalu Panjang ⚠️'})`;
+      lbl.style.color = len <= 85 ? 'var(--status-success)' : 'var(--status-warning)';
+    }
+
+    function simulateSchedule() {
+      const ytTitle = document.getElementById('ytTitleInput').value;
+      const isYt = activePlatforms.yt;
+      let msg = 'Konten berhasil dijadwalkan!';
+      if (isYt) {
+        msg += `\n🎥 YouTube Title yang akan diposting:\n"${ytTitle}"\n(Bukan ID internal "solusithermalid_opc_lyg6eh_06"!)`;
+      }
+      alert(msg);
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>

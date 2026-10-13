@@ -68,6 +68,7 @@ export const POST = withTenantContext(async (request, user) => {
       accountId: accId,
       publishMode: validated.publish_mode,
       mediaType: validated.media_type,
+      title: validated.title,
       caption: validated.caption,
       mediaUrl: validated.media_url,
       scheduledAt: validated.schedules?.[accId] || validated.scheduled_at,

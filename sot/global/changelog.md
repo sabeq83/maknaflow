@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.36 — Fix Repliz YouTube Video Title Using High-CTR Title Instead of Slug (14/10/2026)
+- Perbaiki query claimDuePublishingJob dengan join content_flow_items
+- Tambahkan title_snapshot pada publishing_jobs dan fallback di publishing-worker
+- Tambahkan form input YouTube Title di modal scheduler
+
 ## V2.32.35 — Default AIGC Label Checked & Autopilot Live Publishing Without Approval (13/10/2026)
 - Label AIGC default tercentang di modal scheduler
 - Mode publikasi Live autopilot tanpa approval manual

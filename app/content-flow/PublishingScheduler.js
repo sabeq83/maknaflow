@@ -42,6 +42,29 @@ const XIcon = ({ style }) => (
   </svg>
 );
 
+const YoutubeIcon = ({ style }) => (
+  <svg style={style} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+  </svg>
+);
+
+function extractHighCtrTitle(item) {
+  if (!item) return '';
+  let title = '';
+  if (item.social_media_package_json) {
+    try {
+      const pkg = typeof item.social_media_package_json === 'string'
+        ? JSON.parse(item.social_media_package_json)
+        : item.social_media_package_json;
+      title = pkg?.title || '';
+    } catch (_) {}
+  }
+  if (!title) {
+    title = item.title || item.hook || item.campaign_title || '';
+  }
+  return String(title || '').trim().replace(/^["'\s]+|["'\s]+$/g, '').slice(0, 100);
+}
+
 export default function PublishingScheduler({
   initialPreloadItem = null,
   initialPreloadItems = null, // Prop baru untuk mode bulk scheduling
@@ -129,6 +152,7 @@ export default function PublishingScheduler({
     platform: 'facebook',
     publish_mode: 'live',
     media_type: 'reels',
+    title: extractHighCtrTitle(initialItemsList[0]),
     caption: initialItemsList[0]?.caption || '',
     media_url: initialItemsList[0]?.url_asset || initialItemsList[0]?.nextcloud_url || '',
     scheduled_at: defaultScheduleTime,
@@ -152,6 +176,7 @@ export default function PublishingScheduler({
       setScheduleForm(prev => ({
         ...prev,
         content_id: first.video_id || first.id || '',
+        title: extractHighCtrTitle(first),
         caption: first.caption || '',
         media_url: first.url_asset || first.nextcloud_url || ''
       }));
@@ -162,6 +187,7 @@ export default function PublishingScheduler({
       setScheduleForm(prev => ({
         ...prev,
         content_id: initialPreloadItem.video_id || '',
+        title: extractHighCtrTitle(initialPreloadItem),
         caption: initialPreloadItem.caption || '',
         media_url: initialPreloadItem.url_asset || initialPreloadItem.nextcloud_url || ''
       }));
@@ -202,6 +228,7 @@ export default function PublishingScheduler({
       return {
         item,
         content_id: item.video_id || item.id,
+        title: extractHighCtrTitle(item),
         scheduled_at: itemDate.toISOString(),
         displayTime: itemDate.toLocaleString('id-ID', {
           day: 'numeric',
@@ -457,12 +484,15 @@ export default function PublishingScheduler({
       autoCaption = `✨ ${topic.toUpperCase()} ✨\n\n${item.hook || ''}\n\n${item.nama_produk ? `Produk: ${item.nama_produk}\n` : ''}#${(item.account_name || 'resep').replace(/\s+/g, '')} #kuliner #viral #fyp`;
     }
 
+    const autoTitle = extractHighCtrTitle(item);
+
     setScheduleForm(prev => ({
       ...prev,
       content_id: item.video_id,
       media_url: resolvedMediaUrl,
       media_type: mediaType,
-      caption: autoCaption
+      caption: autoCaption,
+      title: autoTitle
     }));
     setVideoSearchQuery(`${item.video_id} - ${item.campaign_title || item.hook || item.nama_produk || ''}`);
     setShowVideoDropdown(false);
@@ -841,6 +871,7 @@ export default function PublishingScheduler({
         const bulkPayload = {
           items: calculatedBulkSchedules.map(bs => ({
             content_id: bs.content_id,
+            title: bs.title || (scheduleForm.title ? scheduleForm.title.slice(0, 100) : ''),
             caption: bs.caption,
             media_url: bs.media_url,
             scheduled_at: bs.scheduled_at
@@ -871,6 +902,7 @@ export default function PublishingScheduler({
           account_ids: scheduleForm.account_ids,
           publish_mode: scheduleForm.publish_mode,
           media_type: scheduleForm.media_type,
+          title: (scheduleForm.title || '').trim().replace(/^["'\s]+|["'\s]+$/g, '').slice(0, 100),
           caption: scheduleForm.caption,
           media_url: scheduleForm.media_url,
           scheduled_at: new Date(scheduleForm.scheduled_at).toISOString(),
@@ -2938,6 +2970,59 @@ export default function PublishingScheduler({
                     </div>
                   </div>
                 )
+              )}
+
+              {/* Field: Judul Video YouTube (High-CTR) - Ditampilkan jika akun YouTube dipilih */}
+              {accounts.some(a => scheduleForm.account_ids.includes(a.id) && a.platform === 'youtube') && (
+                <div style={{
+                  marginBottom: 12,
+                  padding: '10px 12px',
+                  background: 'rgba(239, 68, 68, 0.04)',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  borderRadius: 8
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                    <label style={{
+                      fontSize: 11,
+                      color: '#ef4444',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6
+                    }}>
+                      <YoutubeIcon style={{ width: 14, height: 14 }} />
+                      JUDUL VIDEO YOUTUBE (HIGH-CTR)
+                      <span style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-muted)' }}>(Autoload dari Generator)</span>
+                    </label>
+                    <span style={{
+                      fontSize: 10,
+                      fontWeight: 600,
+                      color: (scheduleForm.title || '').length > 100 ? 'var(--status-danger)' : ((scheduleForm.title || '').length >= 50 && (scheduleForm.title || '').length <= 85 ? 'var(--status-success)' : 'var(--text-muted)')
+                    }}>
+                      {(scheduleForm.title || '').length} / 100 Karakter {(scheduleForm.title || '').length >= 50 && (scheduleForm.title || '').length <= 85 ? '✅' : ''}
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    maxLength={100}
+                    value={scheduleForm.title || ''}
+                    onChange={(e) => setScheduleForm({ ...scheduleForm, title: e.target.value })}
+                    placeholder="Judul menarik YouTube Shorts (contoh: Panas Atap Rusak Kargo Gudang? Lindungi Area Loading Dock! #Shorts)"
+                    style={{
+                      width: '100%',
+                      background: 'var(--surface)',
+                      border: '1px solid rgba(239, 68, 68, 0.4)',
+                      padding: '8px 10px',
+                      borderRadius: 6,
+                      color: 'var(--text-primary)',
+                      fontSize: 12,
+                      fontWeight: 600
+                    }}
+                  />
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4 }}>
+                    💡 <b>Pemberitahuan:</b> Judul ini langsung dikirim ke YouTube melalui Repliz menggantikan nama file mentah (slug).
+                  </div>
+                </div>
               )}
 
               {/* 5. Caption & Tag */}

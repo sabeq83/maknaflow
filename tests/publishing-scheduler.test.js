@@ -794,6 +794,174 @@ test('Repliz Failure Handling: TikTok transient internal error retries then tran
     await pgQuery('DELETE FROM publishing_jobs WHERE tenant_id = $1', [testTenant]);
     await pgQuery('DELETE FROM publishing_accounts WHERE tenant_id = $1', [testTenant]);
     await pgQuery('DELETE FROM tenants WHERE id = $1', [testTenant]);
+  }
+});
+
+test('Publishing Contract: validateScheduleRequest accepts and sanitizes title field', () => {
+  const req = validateScheduleRequest({
+    content_id: 'opc_261012_lyg6eh',
+    account_ids: ['acc_yt_1'],
+    platform: 'youtube',
+    publish_mode: 'live',
+    media_type: 'video',
+    title: '  "Panas Atap Seng Rusak Kargo Gudang? Lindungi Area Loading Dock! #Shorts"  ',
+    caption: 'Deskripsi video',
+    media_url: 'https://example.com/video.mp4',
+    scheduled_at: new Date().toISOString()
+  });
+
+  assert.equal(req.title, 'Panas Atap Seng Rusak Kargo Gudang? Lindungi Area Loading Dock! #Shorts');
+
+  // Test truncation to 100 chars
+  const longTitleReq = validateScheduleRequest({
+    content_id: 'opc_261012_lyg6eh',
+    account_ids: ['acc_yt_1'],
+    platform: 'youtube',
+    publish_mode: 'live',
+    media_type: 'video',
+    title: 'A'.repeat(150),
+    caption: 'Deskripsi video',
+    media_url: 'https://example.com/video.mp4',
+    scheduled_at: new Date().toISOString()
+  });
+  assert.equal(longTitleReq.title.length, 100);
+});
+
+test('Publishing Repository: creates title_snapshot and claimDuePublishingJob returns High-CTR title', async () => {
+  const testTenant = `t_yttitle_${Date.now()}`;
+  const testJobId = `pub_test_yt_${Date.now()}`;
+  const testAccId = `acc_yt_${Date.now()}`;
+  const testContentId = `solusithermalid_opc_${Date.now()}`;
+  const expectedHighCtrTitle = 'Panas Atap Seng Rusak Kargo Gudang? Lindungi Area Loading Dock! #Shorts';
+
+  await pgQuery('INSERT INTO tenants (id, name) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING', [testTenant, 'YouTube Title Tenant']);
+  await pgQuery(`
+    INSERT INTO publishing_accounts (
+      id, tenant_id, platform, display_name, provider, provider_account_id, status
+    ) VALUES ($1, $2, 'youtube', 'Solusi Thermal YouTube', 'repliz', 'acc_repliz_yt_1', 'active')
+  `, [testAccId, testTenant]);
+
+  // Insert mock content_flow_items with high CTR title
+  await pgQuery(`
+    INSERT INTO content_flow_items (
+      id, tenant_id, video_id, campaign_title, hook, social_media_package_json
+    ) VALUES ($1, $2, $3, $4, $5, $6)
+    ON CONFLICT (tenant_id, video_id) DO NOTHING
+  `, [
+    `cf_${Date.now()}`,
+    testTenant,
+    testContentId,
+    'Solusi Panas Gudang',
+    'Lindungi Area Loading Dock',
+    JSON.stringify({ title: expectedHighCtrTitle, hashtags: ['#Shorts'] })
+  ]);
+
+  try {
+    // 1. Create job with title
+    const created = await createPublishingJobs({
+      tenantId: testTenant,
+      contentId: testContentId,
+      targets: [{
+        accountId: testAccId,
+        platform: 'youtube',
+        publishMode: 'live',
+        mediaType: 'reels',
+        title: expectedHighCtrTitle,
+        caption: 'Deskripsi',
+        mediaUrl: 'https://drive.google.com/uc?export=download&id=verified_id',
+        scheduledAt: new Date(Date.now() - 60000).toISOString() // due immediately
+      }]
+    });
+
+    assert.equal(created.length, 1);
+    assert.equal(created[0].title_snapshot, expectedHighCtrTitle);
+
+    // 2. Claim job and verify content_title is resolved from title_snapshot/content_flow_items, NOT content_id slug
+    const claimed = await claimDuePublishingJob('test-worker-yt');
+    assert.ok(claimed);
+    assert.equal(claimed.content_title, expectedHighCtrTitle);
+    assert.notEqual(claimed.content_title, testContentId);
+  } finally {
+    await pgQuery('DELETE FROM publishing_attempts WHERE tenant_id = $1', [testTenant]);
+    await pgQuery('DELETE FROM publishing_jobs WHERE tenant_id = $1', [testTenant]);
+    await pgQuery('DELETE FROM content_flow_items WHERE tenant_id = $1', [testTenant]);
+    await pgQuery('DELETE FROM publishing_accounts WHERE tenant_id = $1', [testTenant]);
+    await pgQuery('DELETE FROM tenants WHERE id = $1', [testTenant]);
+  }
+});
+
+test('Repliz Publishing Worker: sends High-CTR title to Repliz for YouTube and blocks raw slug fallback', async () => {
+  const { processReplizJob } = await import('../lib/publishing-worker.js');
+  const previousFetch = globalThis.fetch;
+  let sentPayload = null;
+
+  globalThis.fetch = async (url, options = {}) => {
+    if (String(url).includes('/public/schedule')) {
+      sentPayload = JSON.parse(options.body || '{}');
+      return new Response(JSON.stringify({
+        data: {
+          id: 'sch_yt_999',
+          status: 'success'
+        }
+      }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    return new Response(JSON.stringify({ data: { isConnected: true, status: 'connected' } }), {
+      status: 200, headers: { 'Content-Type': 'application/json' }
+    });
+  };
+
+  const testTenant = `t_ytworker_${Date.now()}`;
+  const testJobId = `pub_test_ytw_${Date.now()}`;
+  const testAccId = `acc_ytw_${Date.now()}`;
+  const expectedHighCtrTitle = 'Panas Atap Seng Rusak Kargo Gudang? Lindungi Area Loading Dock! #Shorts';
+
+  await pgQuery('INSERT INTO tenants (id, name) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING', [testTenant, 'YouTube Worker Tenant']);
+  await pgQuery(`
+    INSERT INTO publishing_accounts (
+      id, tenant_id, platform, display_name, provider, provider_account_id, status
+    ) VALUES ($1, $2, 'youtube', 'Solusi Thermal YouTube', 'repliz', 'acc_repliz_ytw_1', 'active')
+  `, [testAccId, testTenant]);
+
+  await pgQuery(`
+    INSERT INTO publishing_jobs (
+      id, tenant_id, content_id, account_id, platform, publish_mode, media_type, title_snapshot,
+      caption_snapshot, media_url_snapshot, scheduled_at, status, idempotency_key, provider, max_attempts
+    ) VALUES ($1, $2, 'solusithermalid_opc_lyg6eh_06', $3, 'youtube', 'live', 'video', $4,
+      'Deskripsi YouTube', 'https://drive.google.com/uc?export=download&id=verified_id', CURRENT_TIMESTAMP, 'scheduled', $5, 'repliz', 3)
+  `, [testJobId, testTenant, testAccId, expectedHighCtrTitle, `idem_${testJobId}`]);
+
+  try {
+    const fakeJob = {
+      id: testJobId,
+      tenant_id: testTenant,
+      content_id: 'solusithermalid_opc_lyg6eh_06',
+      account_id: testAccId,
+      platform: 'youtube',
+      media_type: 'video',
+      title_snapshot: expectedHighCtrTitle,
+      content_title: expectedHighCtrTitle,
+      caption_snapshot: 'Deskripsi YouTube',
+      media_url_snapshot: 'https://drive.google.com/uc?export=download&id=verified_id',
+      scheduled_at: new Date().toISOString(),
+      provider: 'repliz',
+      provider_account_id: 'acc_repliz_ytw_1',
+      attempt_count: 0,
+      max_attempts: 3
+    };
+
+    const credentials = { apiUrl: 'https://api.repliz.com', accessKey: 'k', secretKey: 's' };
+
+    await processReplizJob(fakeJob, credentials, { correlationId: 'corr_yt_1', attemptNumber: 1, startedAt: new Date().toISOString() });
+
+    assert.ok(sentPayload);
+    assert.equal(sentPayload.title, expectedHighCtrTitle);
+    assert.notEqual(sentPayload.title, 'solusithermalid_opc_lyg6eh_06');
+  } finally {
+    globalThis.fetch = previousFetch;
+    await pgQuery('DELETE FROM publishing_attempts WHERE tenant_id = $1', [testTenant]);
+    await pgQuery('DELETE FROM publishing_jobs WHERE tenant_id = $1', [testTenant]);
+    await pgQuery('DELETE FROM publishing_accounts WHERE tenant_id = $1', [testTenant]);
+    await pgQuery('DELETE FROM tenants WHERE id = $1', [testTenant]);
     const { closePgPool } = await import('../lib/db-pg.js');
     await closePgPool();
   }

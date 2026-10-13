@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup — RE Campaign: Toggle Resep (Herbal, Rempah & Kuliner) + YouTube High-CTR Title</title>
+  <style>
+    :root {
+      --surface: #0f172a;
+      --surface-raised: #1e293b;
+      --surface-interactive: #334155;
+      --surface-subtle: rgba(30, 41, 59, 0.7);
+      --border-color: #334155;
+      --border-subtle: #1e293b;
+      --border-strong: #475569;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --input-bg: #0f172a;
+      --focus-ring: #38bdf8;
+      --action-primary: #0284c7;
+      --action-primary-hover: #0369a1;
+      --on-action-primary: #ffffff;
+      --status-info: #38bdf8;
+      --status-info-soft: rgba(56, 189, 248, 0.15);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.15);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.15);
+      --status-danger: #f87171;
+      --status-danger-soft: rgba(248, 113, 113, 0.15);
+      --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+      --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-theme="light"] {
+      --surface: #f8fafc;
+      --surface-raised: #ffffff;
+      --surface-interactive: #f1f5f9;
+      --surface-subtle: #f8fafc;
+      --border-color: #e2e8f0;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --input-bg: #ffffff;
+      --focus-ring: #0284c7;
+      --action-primary: #0284c7;
+      --action-primary-hover: #0369a1;
+      --on-action-primary: #ffffff;
+      --status-info: #0284c7;
+      --status-info-soft: rgba(2, 132, 199, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #dc2626;
+      --status-danger-soft: rgba(220, 38, 38, 0.1);
+      --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      background: var(--surface);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .badge-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-info { background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info); }
+    .badge-success { background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success); }
+    .badge-warning { background: var(--status-warning-soft); color: var(--status-warning); border: 1px solid var(--status-warning); }
+
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 960px) {
+      .layout-grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--focus-ring);
+    }
+
+    /* Modern Switch Toggle */
+    .toggle-wrapper {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      transition: all 0.2s ease;
+    }
+    .toggle-wrapper.active {
+      background: var(--status-success-soft);
+      border-color: var(--status-success);
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: var(--border-strong);
+      transition: .25s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .25s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: var(--status-success);
+    }
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    .preview-box {
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 12px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      max-height: 380px;
+      overflow-y: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: var(--text-primary);
+    }
+
+    .title-pill {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .char-counter {
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+    .btn-secondary {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+    .theme-toggle-btn {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header Bar -->
+  <div class="header-bar">
+    <div>
+      <h2 style="margin: 0; font-size: 18px; display: flex; align-items: center; gap: 10px;">
+        🎬 RE Campaign — Form Pembuatan & Ekstraksi Resep / Racikan
+        <span class="badge-tag badge-info">v2.32.36 Mockup</span>
+      </h2>
+      <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">
+        Simulasi Fitur Toggle Resep (Herbal, Rempah & Kuliner) + YouTube Title High-CTR Mandate
+      </div>
+    </div>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <button class="theme-toggle-btn" onclick="toggleTheme()">🌓 Ganti Tema (Dark/Light)</button>
+    </div>
+  </div>
+
+  <div class="layout-grid">
+    
+    <!-- LEFT PANEL: Form Pembuatan Kampanye RE -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">📝 Form Konfigurasi RE Campaign</h3>
+        <span class="badge-tag badge-warning">Accordion Section 1</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Nama Kampanye</label>
+        <input class="form-input" id="campaignName" value="[ RE 20261014 ] - Jamu Herbal Rempah Indonesia" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Contoh Kategori / Niche Konten</label>
+        <select class="form-select" id="sampleCategory" onchange="switchSampleCategory(this.value)">
+          <option value="herbal">🌿 Minuman Herbal & Rempah (Wedang Jahe, Kunyit, Jamu)</option>
+          <option value="culinary">🍳 Kuliner & Masakan Praktis (Tumis Kangkung Resto)</option>
+          <option value="general">📱 Konten Umum Non-Resep (Review Gadget/Lifehack)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Daftar URL Video Kompetitor/Referensi</label>
+        <textarea class="form-textarea" style="min-height: 70px;" readonly>https://www.tiktok.com/@herbalalami/video/729182390123
+https://www.instagram.com/reel/C89283921/</textarea>
+      </div>
+
+      <!-- NEW TOGGLE: HASILKAN RESEP -->
+      <div class="form-group" style="margin-top: 20px;">
+        <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+          <span>FITUR BARU: EKSTRAKSI & SAJIKAN RESEP</span>
+          <span class="badge-tag badge-success" id="recipeStateBadge">Aktif</span>
+        </label>
+        
+        <div class="toggle-wrapper active" id="toggleCard">
+          <label class="switch">
+            <input type="checkbox" id="recipeToggle" checked onchange="toggleRecipe(this.checked)" />
+            <span class="slider"></span>
+          </label>
+          <div style="flex: 1;">
+            <div style="font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+              <span>🍳</span> Hasilkan Resep / Racikan (Herbal, Rempah, & Kuliner)
+            </div>
+            <div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 4px; line-height: 1.4;">
+              Instruksikan AI Gemini untuk mengekstrak bahan & takaran, khasiat kesehatan, dan langkah pembuatan dari video dekonstruksi, lalu menyajikannya dalam format teks rapi di <b>Caption Media Sosial</b>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Format Target Narrative Mode</label>
+        <select class="form-select">
+          <option>Storytelling (Bercerita / Daily-life)</option>
+          <option>Problem-Solution (Keluhan & Solusi)</option>
+          <option>Educational (Edukasi Ilmiah & Manfaat Herbal)</option>
+        </select>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border-color);">
+        <button class="btn btn-primary" onclick="simulateRun()">🚀 Simpan & Jalankan Kampanye</button>
+        <button class="btn btn-secondary" onclick="resetForm()">Reset Default</button>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: Simulasi Output Gemini & ContentFlow -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">🔍 Hasil Simulasi Output AI Gemini</h3>
+        <span class="badge-tag badge-success">High-CTR & Ready-to-Publish</span>
+      </div>
+
+      <!-- YouTube Title High-CTR Box -->
+      <div class="title-pill">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 11px; font-weight: 700; color: #ef4444; display: flex; align-items: center; gap: 5px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            YOUTUBE SHORTS HIGH-CTR TITLE
+          </span>
+          <span class="char-counter" id="charCounterBadge" style="color: var(--status-success);">
+            68 / 85 Karakter (Optimal ✅)
+          </span>
+        </div>
+        <div id="ytTitlePreview" style="font-weight: 700; font-size: 13.5px; color: var(--text-primary); margin-top: 4px;">
+          Badan Pegal & Meriang? Rebus 4 Rempah Ini Sebelum Tidur! #Shorts
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 6px; font-size: 11px; color: var(--text-muted);">
+          <span>Formula: <b>Curiosity Gap + Instant Solution</b></span>
+          <span>•</span>
+          <span>Garansi: <b>Kalimat Utuh / Anti-Cutoff</b></span>
+        </div>
+      </div>
+
+      <!-- Caption with Recipe Box -->
+      <div class="form-group">
+        <label class="form-label" style="display: flex; justify-content: space-between;">
+          <span id="captionLabel">Teks Caption Media Sosial (Otomatis Berisi Resep & Racikan)</span>
+          <span style="color: var(--status-info); font-size: 11px; cursor: pointer;" onclick="copyCaption()">📋 Salin Caption</span>
+        </label>
+        <div class="preview-box" id="captionPreview"></div>
+      </div>
+
+      <!-- Before vs After Comparison -->
+      <div style="background: var(--surface-interactive); border-radius: 8px; padding: 12px; font-size: 11.5px; border: 1px solid var(--border-color);">
+        <div style="font-weight: 700; margin-bottom: 6px; color: var(--text-primary);">⚡ Perbandingan dengan Versi Sebelumnya:</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div style="background: var(--status-danger-soft); padding: 8px; border-radius: 6px; border: 1px solid var(--status-danger);">
+            <div style="color: var(--status-danger); font-weight: 700; margin-bottom: 2px;">❌ SEBELUM (Terpotong / Polos)</div>
+            <div style="color: var(--text-muted); font-size: 11px;">"Bekerja di bawah atap tanpa insulasi sama seperti #Shorts"</div>
+            <div style="color: var(--text-muted); font-size: 10px; margin-top: 4px;">Caption: Hanya hook 1 baris tanpa naskah resep/takaran.</div>
+          </div>
+          <div style="background: var(--status-success-soft); padding: 8px; border-radius: 6px; border: 1px solid var(--status-success);">
+            <div style="color: var(--status-success); font-weight: 700; margin-bottom: 2px;">✅ SESUDAH (High CTR & Resep Lengkap)</div>
+            <div style="color: var(--text-primary); font-size: 11px;">"Badan Pegal & Meriang? Rebus 4 Rempah Ini Sebelum Tidur! #Shorts"</div>
+            <div style="color: var(--text-primary); font-size: 10px; margin-top: 4px;">Caption: Resep herbal/kuliner terperinci + Takaran + Pro-tip.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    const sampleData = {
+      herbal: {
+        campaignName: "[ RE 20261014 ] - Jamu Herbal Rempah Indonesia",
+        titleWithRecipe: "Badan Pegal & Meriang? Rebus 4 Rempah Ini Sebelum Tidur! #Shorts",
+        titleWithoutRecipe: "Rahasia Rebusan Herbal Alami Nenek Moyang Untuk Imunitas #Shorts",
+        captionWithRecipe: `Badan pegal linu, tenggorokan gatal, atau meriang? Jangan buru-buru minum obat kimia! 🌿✨
+Save dulu resep ramuan rempah hangat ini biar nggak hilang pas badan lagi drop! 👇
+
+🌿 RACIKAN BAHAN ALAMI:
+• 2 ruas Jahe Merah (bakar sebentar lalu geprek)
+• 2 batang Serai (memarkan bagian putihnya)
+• 1 batang Kayu Manis (sekitar 3-4 cm)
+• 1 sdt Cengkeh & Kapulaga utuh
+• 500 ml Air mineral
+• 2 sdm Madu Murni (masukkan saat sudah hangat kuku)
+• 1 iris Jeruk Nipis / Lemon peras
+
+☕ CARA MERACIK:
+1. Rebus air bersama jahe merah, serai, kayu manis, dan cengkeh dengan api kecil selama 10-15 menit hingga sari rempah keluar dan aromanya semerbak.
+2. Matikan kompor, saring air rebusan ke dalam cangkir favorit.
+3. Diamkan sebentar hingga hangat kuku, lalu tambahkan madu murni dan perasan jeruk nipis (agar enzim madu tidak rusak terkena air mendidih).
+4. Aduk rata dan nikmati selagi hangat sebelum tidur.
+
+💡 KHASIAT & PRO-TIP:
+Jahe merah kaya akan gingerol aktif yang melancarkan peredaran darah dan menghangatkan lambung seketika. Minum rutin 2x seminggu untuk booster imunitas alami!
+
+Kalian di rumah biasanya kalau meriang suka minum ramuan apa nih? Tulis di kolom komentar ya! 👇
+#ResepHerbal #JamuTradisional #WedangJahe #ObatAlami #RempahIndonesia #TipsSehatAlami`,
+        captionWithoutRecipe: `Rahasia tubuh tetap bugar dan fit sepanjang hari cuma dengan rempah alami dapur! 🌿
+Rasakan sensasi hangatnya jahe merah dan sereh yang bikin peredaran darah lancar seketika.
+
+Tonton videonya sampai akhir dan jangan lupa share ke keluarga tercinta yang lagi butuh asupan herbal hangat! ✨
+#TipsSehat #HerbalAlami #HidupSehat #KesehatanAlami`
+      },
+      culinary: {
+        campaignName: "[ RE 20261014 ] - Masakan Sehari-hari Tumis Kangkung Resto",
+        titleWithRecipe: "Rahasia Kangkung Tetap Hijau & Renyah Seharian: Trik Koki! #Shorts",
+        titleWithoutRecipe: "Cara Tumis Kangkung Super Gurih Ala Resto Seafood #Shorts",
+        captionWithRecipe: `Suka sebel kalau masak kangkung warnanya menghitam dan layu lemas? 🥬✨
+Save dulu trik rahasia chef resto ini biar tumisan kangkung kamu tetap hijau cerah dan krispi krenyes! 👇
+
+🛒 BAHAN-BAHAN:
+• 2 ikat Kangkung segar (siangi dan cuci bersih)
+• 4 siung Bawang Merah & 3 siung Bawang Putih (iris tipis)
+• 5 buah Cabe Rawit Merah (iris serong)
+• 1 sdt Terasi udang bakar (haluskan)
+• 1 sdm Saus Tiram & 1/2 sdt Kaldu jamur
+• 1 sdm Minyak goreng untuk menumis
+• 50 ml Air es matang
+
+👩‍🍳 LANGKAH MEMASAK:
+1. Panaskan wajan dengan api BESAR sampai benar-benar panas berasap.
+2. Masukkan minyak, tumis bawang, cabai, dan terasi sampai wangi gurih semerbak.
+3. Masukkan batang kangkung terlebih dahulu (aduk 15 detik), baru susulkan bagian daunnya.
+4. Bumbui dengan saus tiram dan kaldu jamur.
+5. Tuang sedikit air es di pinggir wajan untuk menghasilkan uap kejut termal yang mengunci klorofil kangkung.
+6. Aduk cepat maksimal 1 menit, matikan api segera saat daun layu sedikit. Sajikan panas!
+
+💡 PRO-TIP CHEF:
+Kuncinya ada di api besar (wok-hei) dan durasi masak yang sangat singkat (di bawah 2 menit).
+
+Malam ini cocok banget disantap pakai nasi hangat dan sambal terasi! Jangan lupa recook ya! 🔥
+#ResepKangkung #MasakanRumahan #IdeMasakHarian #ResepSimple #MenuHarianEnak`,
+        captionWithoutRecipe: `Trik rahasia tumis sayur tetap hijau segar seperti di restoran seafood bintang lima! 🥬
+Tonton tips memasak cepatnya dan buktikan sendiri di dapur rumahmu.
+
+Save videonya buat contekan masak sore ini ya! 👇
+#MasakMudah #ResepKeluarga #KulinerIndonesia`
+      },
+      general: {
+        campaignName: "[ RE 20261014 ] - Lifehack Dapur & Rumah Rapi",
+        titleWithRecipe: "3 Trik Ajaib Bersihkan Kerak Wajan Gosong Cuma 5 Menit! #Shorts",
+        titleWithoutRecipe: "Jangan Beli Wajan Baru Dulu! Pakai Trik Mudah Ini #Shorts",
+        captionWithRecipe: `Kerak wajan gosong menahun bikin males masak? Jangan dibuang dulu! 🍳✨
+Save tips praktis ini biar wajan kamu kinclong lagi seperti baru beli! 👇
+
+🧪 BAHAN RACIKAN PEMBERSIH:
+• 3 sdm Baking Soda murni
+• 100 ml Cuka putih dapur
+• 1 sdm Sabun pencuci piring
+• Sabut kawat cuci piring halus
+• 500 ml Air panas mendidih
+
+🧽 LANGKAH PEMBERSIHAN:
+1. Taburkan baking soda secara merata ke seluruh permukaan wajan yang gosong.
+2. Tuangkan cuka putih perlahan hingga berbusa aktif melarutkan karbon gosong.
+3. Diamkan reaksi desis selama 15 menit agar kerak melunak.
+4. Tuang air panas dan gosok memutar dengan sabut halus.
+5. Bilas bersih dengan sabun cuci piring. Kinclong seketika!
+
+💡 PRO-TIP:
+Untuk kerak yang sangat tebal, rebus wajan berisi campuran cuka-baking soda selama 5 menit sebelum digosok.
+
+Share ke grup keluarga atau teman yang wajan di dapurnya lagi hitam gosong ya! 🙌
+#LifehackDapur #TipsRumahTangga #PembersihWajan #TrikPintar`,
+        captionWithoutRecipe: `Lifehack mudah membersihkan dapur tanpa perlu keluar banyak tenaga dan uang! ✨
+Tonton videonya sampai habis dan coba langsung di rumah.
+
+Semoga bermanfaat dan jangan lupa share ya! 🙌
+#TipsDapur #RumahRapi #Lifehack`
+      }
+    };
+
+    let currentCategory = 'herbal';
+    let isRecipeActive = true;
+
+    function renderOutput() {
+      const data = sampleData[currentCategory];
+      const isRecipe = isRecipeActive;
+
+      // Update Titles
+      const title = isRecipe ? data.titleWithRecipe : data.titleWithoutRecipe;
+      document.getElementById('ytTitlePreview').innerText = title;
+      
+      const charCount = title.length;
+      const counterEl = document.getElementById('charCounterBadge');
+      counterEl.innerText = `${charCount} / 85 Karakter (${charCount <= 85 ? 'Optimal ✅' : 'Terlalu Panjang ⚠️'})`;
+      counterEl.style.color = charCount <= 85 ? 'var(--status-success)' : 'var(--status-warning)';
+
+      // Update Captions
+      const caption = isRecipe ? data.captionWithRecipe : data.captionWithoutRecipe;
+      document.getElementById('captionPreview').innerText = caption;
+      document.getElementById('captionLabel').innerText = isRecipe 
+        ? "Teks Caption Media Sosial (Otomatis Berisi Resep & Racikan Lengkap)" 
+        : "Teks Caption Media Sosial Standar (Tanpa Resep)";
+    }
+
+    function toggleRecipe(checked) {
+      isRecipeActive = checked;
+      const badge = document.getElementById('recipeStateBadge');
+      const card = document.getElementById('toggleCard');
+      
+      if (checked) {
+        badge.className = 'badge-tag badge-success';
+        badge.innerText = 'Aktif';
+        card.classList.add('active');
+      } else {
+        badge.className = 'badge-tag badge-warning';
+        badge.innerText = 'Non-Aktif';
+        card.classList.remove('active');
+      }
+      renderOutput();
+    }
+
+    function switchSampleCategory(category) {
+      currentCategory = category;
+      document.getElementById('campaignName').value = sampleData[category].campaignName;
+      renderOutput();
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+    }
+
+    function copyCaption() {
+      const text = document.getElementById('captionPreview').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Teks caption berhasil disalin ke clipboard!');
+      });
+    }
+
+    function simulateRun() {
+      alert(`Kampanye "${document.getElementById('campaignName').value}" berhasil disimulasikan!\nOpsi Resep: ${isRecipeActive ? 'AKTIF (Herbal/Kuliner)' : 'NON-AKTIF'}\nYouTube Title High-CTR & Caption siap diproses oleh worker.`);
+    }
+
+    function resetForm() {
+      document.getElementById('recipeToggle').checked = true;
+      toggleRecipe(true);
+      document.getElementById('sampleCategory').value = 'herbal';
+      switchSampleCategory('herbal');
+    }
+
+    // Initial render
+    renderOutput();
+  </script>
+</body>
+</html>
