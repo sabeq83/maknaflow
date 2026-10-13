@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.34 — Fix Drive Staging Local Media & Needs Review Visibility (13/10/2026)
+- Dukungan streaming file fisik lokal langsung ke Google Drive di drive-uploader
+- Visibilitas status needs_review pada riwayat publikasi
+- Reschedule antrean publikasi tertahan ke 17:47-19:57 WIB
+
 ## V2.32.33 — Perbaikan Judul High CTR YouTube Shorts OPC opc_261012_lyg6eh dan opc_261012_9ibcvk (13/10/2026)
 - Pembaruan 39 judul YouTube Shorts berkualitas High CTR dan utuh tanpa terpotong
 - Pencegahan pemotongan string statis pada skrip inject YouTube Title

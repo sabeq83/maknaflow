@@ -177,6 +177,17 @@ test('Drive Staging: readinessCache is isolated per tenant and does not leak bet
   assert.ok(true);
 });
 
+test('Drive Staging: resolveMediaSourceStream handles local disk media file stream without HTTP fetch', async () => {
+  const { resolveMediaSourceStream } = await import('../lib/drive-uploader.js');
+  // Memastikan bahwa path lokal tidak memicu error 'Failed to parse URL' dari fetch, melainkan deteksi file lokal
+  await assert.rejects(
+    async () => {
+      await resolveMediaSourceStream('/temp/non_existent_opc_video.mp4');
+    },
+    /Local media file not found for path/
+  );
+});
+
 test('Cleanup and close database connections', async () => {
   const { closePgPool } = await import('../lib/db-pg.js');
   await closePgPool();

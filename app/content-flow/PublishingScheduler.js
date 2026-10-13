@@ -960,6 +960,8 @@ export default function PublishingScheduler({
         return <span style={{ background: 'var(--status-warning-soft)', color: 'var(--status-warning)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-warning)' }}></span>VERIFYING</span>;
       case 'retry_wait':
         return <span style={{ background: 'var(--status-warning-soft)', color: 'var(--status-warning)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-warning)' }}></span>RETRY WAIT</span>;
+      case 'needs_review':
+        return <span style={{ background: 'var(--status-warning-soft)', color: 'var(--status-warning)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-warning)' }}></span>NEEDS REVIEW</span>;
       case 'failed':
         return <span style={{ background: 'var(--status-danger-soft)', color: 'var(--status-danger)', padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-danger)' }}></span>FAILED</span>;
       case 'cancelled':
