@@ -44,6 +44,7 @@ const XIcon = ({ style }) => (
 
 export default function PublishingScheduler({
   initialPreloadItem = null,
+  initialPreloadItems = null, // Prop baru untuk mode bulk scheduling
   onBackToLibrary = null,
   modalOnly = false,
   controlledBrandProfileId = null,
@@ -104,17 +105,32 @@ export default function PublishingScheduler({
     return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}`;
   };
 
+  // Bulk Scheduling State & Unified Modal Setup
+  const initialItemsList = useMemo(() => {
+    if (Array.isArray(initialPreloadItems) && initialPreloadItems.length > 0) return initialPreloadItems;
+    if (initialPreloadItem) return [initialPreloadItem];
+    return [];
+  }, [initialPreloadItems, initialPreloadItem]);
+
+  const [bulkItems, setBulkItems] = useState(initialItemsList);
+  const [isBulkMode, setIsBulkMode] = useState(initialItemsList.length > 1);
+  const [bulkStrategy, setBulkStrategy] = useState('interval'); // 'interval', 'simultaneous', 'daily'
+  const [bulkIntervalMinutes, setBulkIntervalMinutes] = useState(120);
+  const [bulkDailyStep, setBulkDailyStep] = useState(1);
+  const [bulkCaptionMode, setBulkCaptionMode] = useState('original'); // 'original' | 'custom'
+  const [bulkExtraHashtags, setBulkExtraHashtags] = useState('');
+
   // Schedule Modal State
   const defaultScheduleTime = getWibNowPlusMinutes(10);
-  const [showScheduleModal, setShowScheduleModal] = useState(Boolean(initialPreloadItem));
+  const [showScheduleModal, setShowScheduleModal] = useState(Boolean(initialPreloadItem || (Array.isArray(initialPreloadItems) && initialPreloadItems.length > 0)));
   const [scheduleForm, setScheduleForm] = useState({
-    content_id: initialPreloadItem?.video_id || '',
+    content_id: initialItemsList[0]?.video_id || initialItemsList[0]?.id || '',
     account_ids: [],
     platform: 'facebook',
     publish_mode: 'live',
     media_type: 'reels',
-    caption: initialPreloadItem?.caption || '',
-    media_url: initialPreloadItem?.url_asset || initialPreloadItem?.nextcloud_url || '',
+    caption: initialItemsList[0]?.caption || '',
+    media_url: initialItemsList[0]?.url_asset || initialItemsList[0]?.nextcloud_url || '',
     scheduled_at: defaultScheduleTime,
     account_schedules: {},
     timezone: 'Asia/Jakarta',
@@ -125,6 +141,81 @@ export default function PublishingScheduler({
   const [preflightResult, setPreflightResult] = useState(null);
   const [runningPreflight, setRunningPreflight] = useState(false);
   const [reconnectDialog, setReconnectDialog] = useState({ open: false, reconnectUrl: '', message: '' });
+
+  // Sync Props perubahan initialPreloadItem / initialPreloadItems
+  useEffect(() => {
+    if (Array.isArray(initialPreloadItems) && initialPreloadItems.length > 0) {
+      setBulkItems(initialPreloadItems);
+      setIsBulkMode(true);
+      setShowScheduleModal(true);
+      const first = initialPreloadItems[0];
+      setScheduleForm(prev => ({
+        ...prev,
+        content_id: first.video_id || first.id || '',
+        caption: first.caption || '',
+        media_url: first.url_asset || first.nextcloud_url || ''
+      }));
+    } else if (initialPreloadItem) {
+      setBulkItems([initialPreloadItem]);
+      setIsBulkMode(false);
+      setShowScheduleModal(true);
+      setScheduleForm(prev => ({
+        ...prev,
+        content_id: initialPreloadItem.video_id || '',
+        caption: initialPreloadItem.caption || '',
+        media_url: initialPreloadItem.url_asset || initialPreloadItem.nextcloud_url || ''
+      }));
+      setVideoSearchQuery(initialPreloadItem.video_id || '');
+    }
+  }, [initialPreloadItem, initialPreloadItems]);
+
+  // Kalkulasi Jadwal Massal Terdistribusi (Memoized)
+  const calculatedBulkSchedules = useMemo(() => {
+    if (!bulkItems || bulkItems.length === 0) return [];
+
+    let baseDate = new Date();
+    try {
+      if (scheduleForm.scheduled_at) {
+        baseDate = new Date(scheduleForm.scheduled_at);
+        if (isNaN(baseDate.getTime())) baseDate = new Date();
+      }
+    } catch (_) {
+      baseDate = new Date();
+    }
+
+    return bulkItems.map((item, idx) => {
+      const itemDate = new Date(baseDate.getTime());
+      if (bulkStrategy === 'interval') {
+        itemDate.setMinutes(itemDate.getMinutes() + (idx * bulkIntervalMinutes));
+      } else if (bulkStrategy === 'daily') {
+        itemDate.setDate(itemDate.getDate() + (idx * bulkDailyStep));
+      }
+
+      let finalCaption = item.caption || item.hook || '';
+      if (bulkCaptionMode === 'custom' && scheduleForm.caption) {
+        finalCaption = scheduleForm.caption;
+      }
+      if (bulkExtraHashtags && bulkExtraHashtags.trim()) {
+        finalCaption = `${finalCaption.trim()} ${bulkExtraHashtags.trim()}`;
+      }
+
+      return {
+        item,
+        content_id: item.video_id || item.id,
+        scheduled_at: itemDate.toISOString(),
+        displayTime: itemDate.toLocaleString('id-ID', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: scheduleForm.timezone || 'Asia/Jakarta'
+        }),
+        caption: finalCaption,
+        media_url: item.url_asset || item.nextcloud_url || ''
+      };
+    });
+  }, [bulkItems, scheduleForm.scheduled_at, scheduleForm.timezone, scheduleForm.caption, bulkStrategy, bulkIntervalMinutes, bulkDailyStep, bulkCaptionMode, bulkExtraHashtags]);
 
   // Video Autocomplete & Settings State
   const [cloudBaseUrl, setCloudBaseUrl] = useState('');
@@ -723,13 +814,21 @@ export default function PublishingScheduler({
     }
   };
 
-  // Submit New Schedule Form
+  // Submit New Schedule Form (Unified Single & Bulk Mode)
   const handleScheduleSubmit = async (e) => {
     e.preventDefault();
-    if (!scheduleForm.content_id || !scheduleForm.account_ids.length) {
-      showToast('Pilih minimal satu akun dan ID konten ⚠️');
-      return;
+    if (isBulkMode) {
+      if (!bulkItems.length || !scheduleForm.account_ids.length) {
+        showToast('Pilih minimal satu akun dan pastikan daftar konten bulk tidak kosong ⚠️');
+        return;
+      }
+    } else {
+      if (!scheduleForm.content_id || !scheduleForm.account_ids.length) {
+        showToast('Pilih minimal satu akun dan ID konten ⚠️');
+        return;
+      }
     }
+
     const selectedAccounts = accounts.filter(account => scheduleForm.account_ids.includes(account.id));
     if (scheduleForm.publish_mode === 'draft' && selectedAccounts.some(account => account.platform === 'instagram')) {
       showToast('Instagram tidak mendukung draft pada scheduler ini. Pilih mode Live. ⚠️');
@@ -737,38 +836,66 @@ export default function PublishingScheduler({
     }
     setSubmittingSchedule(true);
     try {
-      const schedulesIso = {};
-      for (const accId of scheduleForm.account_ids) {
-        const timeVal = scheduleForm.account_schedules?.[accId] || scheduleForm.scheduled_at;
-        if (timeVal) {
-          schedulesIso[accId] = new Date(timeVal).toISOString();
+      let res;
+      if (isBulkMode) {
+        const bulkPayload = {
+          items: calculatedBulkSchedules.map(bs => ({
+            content_id: bs.content_id,
+            caption: bs.caption,
+            media_url: bs.media_url,
+            scheduled_at: bs.scheduled_at
+          })),
+          account_ids: scheduleForm.account_ids,
+          publish_mode: scheduleForm.publish_mode,
+          media_type: scheduleForm.media_type,
+          timezone: scheduleForm.timezone,
+          is_ai_generated: !!scheduleForm.is_ai_generated
+        };
+
+        res = await fetch('/api/v2/publishing/bulk-jobs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bulkPayload)
+        });
+      } else {
+        const schedulesIso = {};
+        for (const accId of scheduleForm.account_ids) {
+          const timeVal = scheduleForm.account_schedules?.[accId] || scheduleForm.scheduled_at;
+          if (timeVal) {
+            schedulesIso[accId] = new Date(timeVal).toISOString();
+          }
         }
+
+        const payload = {
+          content_id: scheduleForm.content_id,
+          account_ids: scheduleForm.account_ids,
+          publish_mode: scheduleForm.publish_mode,
+          media_type: scheduleForm.media_type,
+          caption: scheduleForm.caption,
+          media_url: scheduleForm.media_url,
+          scheduled_at: new Date(scheduleForm.scheduled_at).toISOString(),
+          schedules: schedulesIso,
+          timezone: scheduleForm.timezone,
+          is_ai_generated: !!scheduleForm.is_ai_generated
+        };
+
+        res = await fetch('/api/v2/publishing/jobs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
       }
 
-      const payload = {
-        content_id: scheduleForm.content_id,
-        account_ids: scheduleForm.account_ids,
-        publish_mode: scheduleForm.publish_mode,
-        media_type: scheduleForm.media_type,
-        caption: scheduleForm.caption,
-        media_url: scheduleForm.media_url,
-        scheduled_at: new Date(scheduleForm.scheduled_at).toISOString(),
-        schedules: schedulesIso,
-        timezone: scheduleForm.timezone,
-        is_ai_generated: !!scheduleForm.is_ai_generated
-      };
-
-      const res = await fetch('/api/v2/publishing/jobs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
       const json = await res.json();
 
       if (json.success) {
-        showToast(`Berhasil menjadwalkan konten! 🎉`);
+        showToast(isBulkMode
+          ? `Berhasil menjadwalkan ${calculatedBulkSchedules.length} konten massal! 🎉`
+          : `Berhasil menjadwalkan konten! 🎉`
+        );
         try { sessionStorage.removeItem('makna_publishing_draft'); } catch (_) {}
         setShowScheduleModal(false);
+        if (onBackToLibrary) onBackToLibrary();
         fetchJobs();
       } else if (json.code === 'REPLIZ_ACCOUNT_DISCONNECTED' || json.code === 'REPLIZ_FACEBOOK_PERMISSION_REQUIRED') {
         try { sessionStorage.setItem('makna_publishing_draft', JSON.stringify(scheduleForm)); } catch (_) {}
@@ -932,6 +1059,15 @@ export default function PublishingScheduler({
     setShowScheduleModal(true);
   };
 
+  const handleCloseModal = () => {
+    setShowScheduleModal(false);
+    if (onBackToLibrary) onBackToLibrary();
+  };
+
+  if (modalOnly && !showScheduleModal) {
+    return null;
+  }
+
   return (
     <div style={{ color: 'var(--text-primary)', fontFamily: 'Inter, system-ui, sans-serif' }}>
       {/* Toast */}
@@ -947,16 +1083,18 @@ export default function PublishingScheduler({
         </div>
       )}
 
-      {/* Top Headline & Actions */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <h2 style={{ fontSize: 22, fontWeight: 850, margin: '0 0 4px', color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>
-            Publishing Scheduler
-          </h2>
-          <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: 13 }}>
-            Jadwalkan dan pantau publikasi multi-platform (TikTok, Meta, YouTube, Threads, LinkedIn) secara aman dan terpantau.
-          </p>
-        </div>
+      {!modalOnly && (
+        <>
+          {/* Top Headline & Actions */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+            <div>
+              <h2 style={{ fontSize: 22, fontWeight: 850, margin: '0 0 4px', color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>
+                Publishing Scheduler
+              </h2>
+              <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: 13 }}>
+                Jadwalkan dan pantau publikasi multi-platform (TikTok, Meta, YouTube, Threads, LinkedIn) secara aman dan terpantau.
+              </p>
+            </div>
         <div style={{ display: 'flex', gap: 10 }}>
           {onBackToLibrary && (
             <button
@@ -2196,6 +2334,8 @@ export default function PublishingScheduler({
           </div>
         </div>
       )}
+        </>
+      )}
 
       {/* Modal: Schedule Content Dialog */}
       {showScheduleModal && (
@@ -2209,10 +2349,47 @@ export default function PublishingScheduler({
             maxHeight: '90vh', overflowY: 'auto'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Jadwalkan Publikasi Konten</h3>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>
+                    {isBulkMode ? `Jadwalkan Publikasi Konten (Bulk Mode - ${bulkItems.length} Konten)` : 'Jadwalkan Publikasi Konten (Single Mode)'}
+                  </h3>
+                  {/* Mode Switcher Pills */}
+                  <div style={{ display: 'inline-flex', background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', borderRadius: 20, padding: 2 }}>
+                    <button
+                      type="button"
+                      onClick={() => setIsBulkMode(false)}
+                      style={{
+                        background: !isBulkMode ? 'var(--action-primary)' : 'transparent',
+                        color: !isBulkMode ? 'var(--on-action-primary)' : 'var(--text-muted)',
+                        border: 'none', borderRadius: 18, padding: '3px 10px', fontSize: 10, fontWeight: 700, cursor: 'pointer'
+                      }}
+                    >
+                      🎬 Single
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsBulkMode(true)}
+                      style={{
+                        background: isBulkMode ? 'var(--action-primary)' : 'transparent',
+                        color: isBulkMode ? 'var(--on-action-primary)' : 'var(--text-muted)',
+                        border: 'none', borderRadius: 18, padding: '3px 10px', fontSize: 10, fontWeight: 700, cursor: 'pointer'
+                      }}
+                    >
+                      📦 Bulk ({bulkItems.length})
+                    </button>
+                  </div>
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                  {isBulkMode
+                    ? `Mode Bulk aktif — Preview media dinonaktifkan untuk menghemat memori & performa browser.`
+                    : `Mode Single aktif — Pratinjau video player beroperasi normal.`}
+                </div>
+              </div>
               <button
-                onClick={() => setShowScheduleModal(false)}
-                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                type="button"
+                onClick={handleCloseModal}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}
               >
                 <XIcon style={{ width: 18, height: 18 }} />
               </button>
@@ -2256,8 +2433,67 @@ export default function PublishingScheduler({
                 </select>
               </div>
 
-              {/* 1. Searchable Video ID Combobox */}
-              <div style={{ marginBottom: 12, position: 'relative', width: '100%' }}>
+              {/* 1. Selector Konten (Bulk Chips vs Single Searchable Video ID Combobox) */}
+              {isBulkMode ? (
+                <div style={{ marginBottom: 12, background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', borderRadius: 10, padding: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-primary)' }}>
+                      📦 Daftar Konten Terpilih ({bulkItems.length} Konten)
+                    </span>
+                    <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+                      Urutan konten menentukan waktu tayang bertahap
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 6 }}>
+                    {bulkItems.map((item, idx) => (
+                      <div
+                        key={item.id || item.video_id || idx}
+                        style={{
+                          position: 'relative', background: 'var(--surface)', border: '1px solid var(--border-subtle)',
+                          borderRadius: 8, padding: '8px 26px 8px 10px', minWidth: 160, maxWidth: 220, flexShrink: 0
+                        }}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updated = bulkItems.filter((_, i) => i !== idx);
+                            setBulkItems(updated);
+                            if (updated.length <= 1) {
+                              setIsBulkMode(false);
+                              if (updated.length === 1) {
+                                setScheduleForm(prev => ({
+                                  ...prev,
+                                  content_id: updated[0].video_id || updated[0].id || '',
+                                  caption: updated[0].caption || '',
+                                  media_url: updated[0].url_asset || updated[0].nextcloud_url || ''
+                                }));
+                              }
+                            }
+                          }}
+                          title="Hapus dari antrean bulk"
+                          style={{
+                            position: 'absolute', top: 4, right: 4, background: 'var(--status-danger-soft)',
+                            color: 'var(--status-danger)', border: 'none', width: 18, height: 18,
+                            borderRadius: 4, fontSize: 10, cursor: 'pointer', display: 'grid', placeItems: 'center'
+                          }}
+                        >
+                          ✕
+                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 800 }}>#{idx + 1}</span>
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 800, color: 'var(--link)' }}>
+                            {item.video_id || item.id}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: 11, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 3 }}>
+                          {item.hook || item.caption || item.title || 'Video Konten'}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ marginBottom: 12, position: 'relative', width: '100%' }}>
                 <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>
                   <span>ID Konten / Video ID <span style={{ color: 'var(--status-danger)' }}>*</span></span>
                   <span style={{ color: 'var(--link)', fontWeight: 400, fontSize: 10 }}>Ketik untuk mencari di Video Library</span>
@@ -2363,8 +2599,9 @@ export default function PublishingScheduler({
                   </div>
                 )}
               </div>
+            )}
 
-              {/* 2. Pilih Akun Publikasi */}
+            {/* 2. Pilih Akun Publikasi */}
               <div style={{ marginBottom: 12 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, flexWrap: 'wrap', gap: 6 }}>
                   <label style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700 }}>
@@ -2598,16 +2835,25 @@ export default function PublishingScheduler({
               </div>
 
               {/* 3. Mode Publikasi & Tipe Media (Locked) */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 10, marginBottom: 12 }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>Mode Publikasi</label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                    <label style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700 }}>Mode Publikasi</label>
+                    <span style={{
+                      fontSize: 10, fontWeight: 800, padding: '1px 6px', borderRadius: 4,
+                      background: scheduleForm.publish_mode === 'draft' ? 'var(--status-warning-soft)' : 'var(--status-success-soft)',
+                      color: scheduleForm.publish_mode === 'draft' ? 'var(--status-warning)' : 'var(--status-success)'
+                    }}>
+                      {scheduleForm.publish_mode === 'draft' ? '📝 DRAFT' : '🟢 LIVE'}
+                    </span>
+                  </div>
                   <select
                     value={scheduleForm.publish_mode}
                     onChange={(e) => setScheduleForm({ ...scheduleForm, publish_mode: e.target.value })}
                     style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}
                   >
-                    <option value="draft">Draft (Tidak tayang ke publik)</option>
-                    <option value="live">Live (Memerlukan Approval)</option>
+                    <option value="live">Live (Memerlukan Approval sebelum publikasi)</option>
+                    <option value="draft">Draft (Tersimpan sebagai draft platform)</option>
                   </select>
                 </div>
                 <div>
@@ -2617,61 +2863,129 @@ export default function PublishingScheduler({
                   <div style={{
                     width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-interactive)',
                     padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12, fontWeight: 700,
-                    display: 'flex', alignItems: 'center', gap: 6
+                    display: 'flex', alignItems: 'center', gap: 6, height: 38, boxSizing: 'border-box'
                   }}>
                     <span>{scheduleForm.media_type === 'image' ? '🖼️ Gambar / Foto (Auto-detected)' : '📱 Reel Vertikal (TikTok / IG / FB)'}</span>
                   </div>
                 </div>
               </div>
 
-              {/* 4. Preview Media Konten (Otomatis & Lebih Besar) */}
-              {scheduleForm.media_url && (
-                <div style={{ marginBottom: 12 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                    <label style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span>▶️</span>
-                      <span>Preview Media Konten</span>
-                      {selectedMediaFileName && (
-                        <span style={{ fontSize: 10, color: 'var(--link)', fontWeight: 600 }}>({selectedMediaFileName})</span>
-                      )}
-                    </label>
+              {/* Banner Info jika Mode Draft Dipilih */}
+              {scheduleForm.publish_mode === 'draft' && (
+                <div style={{
+                  marginBottom: 12, padding: '10px 14px', background: 'var(--status-warning-soft)',
+                  border: '1px solid var(--status-warning)', borderRadius: 8, fontSize: 11, color: 'var(--text-primary)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 800, color: 'var(--status-warning)', marginBottom: 2 }}>
+                    <span>📝 Mode Draft Dipilih:</span>
                   </div>
-                  <div style={{
-                    background: '#070b13', borderRadius: 10, border: '1px solid var(--border-subtle)',
-                    overflow: 'hidden', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center',
-                    maxHeight: 380, padding: 4
-                  }}>
-                    {scheduleForm.media_type === 'image' ? (
-                      <img
-                        src={scheduleForm.media_url}
-                        alt="Preview Media"
-                        style={{ maxHeight: 370, maxWidth: '100%', objectFit: 'contain', borderRadius: 6 }}
-                      />
-                    ) : (
-                      <video
-                        src={scheduleForm.media_url}
-                        controls
-                        playsInline
-                        style={{ maxHeight: 370, maxWidth: '100%', width: 'auto', background: '#000', borderRadius: 6 }}
-                      />
-                    )}
+                  <div style={{ color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                    Konten akan dijadwalkan dan diunggah sebagai <strong>Draft</strong> ke platform target tanpa langsung ditayangkan ke feed publik pengikut.
                   </div>
                 </div>
               )}
 
+              {/* 4. Preview Media Konten: DISABLED saat Bulk Mode, AKTIF saat Single Mode */}
+              {isBulkMode ? (
+                <div style={{
+                  marginBottom: 12, padding: '14px 16px', background: 'var(--surface-raised)',
+                  border: '1px dashed var(--border-strong)', borderRadius: 10, display: 'flex',
+                  alignItems: 'center', gap: 12
+                }}>
+                  <span style={{ fontSize: 24, color: 'var(--text-muted)' }}>🔒</span>
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>
+                      Preview Media Dinonaktifkan (Mode Bulk Scheduling)
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2, lineHeight: 1.4 }}>
+                      Pemutar video dinonaktifkan otomatis untuk {bulkItems.length} konten terpilih guna mengoptimalkan performa browser dan mencegah beban memori tinggi saat memuat banyak video.
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                scheduleForm.media_url && (
+                  <div style={{ marginBottom: 12 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                      <label style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span>▶️</span>
+                        <span>Preview Media Konten</span>
+                        {selectedMediaFileName && (
+                          <span style={{ fontSize: 10, color: 'var(--link)', fontWeight: 600 }}>({selectedMediaFileName})</span>
+                        )}
+                      </label>
+                    </div>
+                    <div style={{
+                      background: 'var(--canvas)', borderRadius: 10, border: '1px solid var(--border-subtle)',
+                      overflow: 'hidden', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center',
+                      maxHeight: 380, padding: 4
+                    }}>
+                      {scheduleForm.media_type === 'image' ? (
+                        <img
+                          src={scheduleForm.media_url}
+                          alt="Preview Media"
+                          style={{ maxHeight: 370, maxWidth: '100%', objectFit: 'contain', borderRadius: 6 }}
+                        />
+                      ) : (
+                        <video
+                          src={scheduleForm.media_url}
+                          controls
+                          playsInline
+                          style={{ maxHeight: 370, maxWidth: '100%', width: 'auto', background: '#000', borderRadius: 6 }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                )
+              )}
+
               {/* 5. Caption & Tag */}
-              <div style={{ marginBottom: 12 }}>
-                <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>
-                  Caption & Tag <span style={{ color: 'var(--link)', fontWeight: 400 }}>(Autoload dari Video)</span>
-                </label>
-                <textarea
-                  rows={4}
-                  value={scheduleForm.caption}
-                  onChange={(e) => setScheduleForm({ ...scheduleForm, caption: e.target.value })}
-                  placeholder="Tulis caption lengkap beserta hashtag..."
-                  style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12, resize: 'vertical' }}
-                />
-              </div>
+              {isBulkMode ? (
+                <div style={{ marginBottom: 12 }}>
+                  <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>
+                    <span>Penanganan Caption untuk {bulkItems.length} Konten</span>
+                    <span style={{ color: 'var(--action-primary)', fontSize: 10, fontWeight: 700 }}>Bulk Caption Strategy</span>
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 10 }}>
+                    <select
+                      value={bulkCaptionMode}
+                      onChange={(e) => setBulkCaptionMode(e.target.value)}
+                      style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}
+                    >
+                      <option value="original">Gunakan Caption Asli Masing-Masing Video</option>
+                      <option value="custom">Gunakan Caption Seragam untuk Semua Konten</option>
+                    </select>
+                    <input
+                      type="text"
+                      value={bulkExtraHashtags}
+                      onChange={(e) => setBulkExtraHashtags(e.target.value)}
+                      placeholder="#tagarbersama #fyp (Opsional Tagar)"
+                      style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}
+                    />
+                  </div>
+                  {bulkCaptionMode === 'custom' && (
+                    <textarea
+                      rows={3}
+                      value={scheduleForm.caption}
+                      onChange={(e) => setScheduleForm({ ...scheduleForm, caption: e.target.value })}
+                      placeholder="Tulis caption seragam untuk semua konten..."
+                      style={{ width: '100%', marginTop: 8, background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12, resize: 'vertical' }}
+                    />
+                  )}
+                </div>
+              ) : (
+                <div style={{ marginBottom: 12 }}>
+                  <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>
+                    Caption & Tag <span style={{ color: 'var(--link)', fontWeight: 400 }}>(Autoload dari Video)</span>
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={scheduleForm.caption}
+                    onChange={(e) => setScheduleForm({ ...scheduleForm, caption: e.target.value })}
+                    placeholder="Tulis caption lengkap beserta hashtag..."
+                    style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12, resize: 'vertical' }}
+                  />
+                </div>
+              )}
 
               {/* Option: AI Generated Content (AIGC) - Repliz */}
               {(scheduleForm.activeTabProvider || 'meta') === 'repliz' && (
@@ -2693,181 +3007,367 @@ export default function PublishingScheduler({
                 </div>
               )}
 
-              {/* 6. Waktu Tayang (Dinamis Multi-Platform) */}
-              {(() => {
-                const selectedModalAccounts = accounts.filter(acc => scheduleForm.account_ids.includes(acc.id));
-                const isMulti = selectedModalAccounts.length > 1;
+              {/* 6. Waktu Tayang & Strategi Penjadwalan */}
+              {isBulkMode ? (
+                <div style={{ marginBottom: 16 }}>
+                  {/* Base Datetime & Timezone */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 10, marginBottom: 10 }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>
+                        Waktu Mulai Tayang (Konten Pertama)
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={scheduleForm.scheduled_at}
+                        onChange={(e) => setScheduleForm(prev => ({ ...prev, scheduled_at: e.target.value }))}
+                        required
+                        style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>Zona Waktu</label>
+                      <input
+                        type="text"
+                        value={scheduleForm.timezone}
+                        readOnly
+                        style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-muted)', fontSize: 12 }}
+                      />
+                    </div>
+                  </div>
 
-                const handleSyncAllSchedules = (masterTime) => {
-                  const targetTime = masterTime || scheduleForm.scheduled_at;
-                  const updated = {};
-                  for (const acc of selectedModalAccounts) {
-                    updated[acc.id] = targetTime;
-                  }
-                  setScheduleForm(prev => ({
-                    ...prev,
-                    scheduled_at: targetTime,
-                    account_schedules: updated
-                  }));
-                };
-
-                if (!isMulti) {
-                  return (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>
-                          Waktu Tayang {selectedModalAccounts.length === 1 ? `(${selectedModalAccounts[0].display_name})` : ''}
-                        </label>
-                        <input
-                          type="datetime-local"
-                          value={
-                            (selectedModalAccounts.length === 1 && scheduleForm.account_schedules?.[selectedModalAccounts[0].id])
-                              ? scheduleForm.account_schedules[selectedModalAccounts[0].id]
-                              : scheduleForm.scheduled_at
-                          }
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            const nextSchedules = { ...(scheduleForm.account_schedules || {}) };
-                            if (selectedModalAccounts.length === 1) {
-                              nextSchedules[selectedModalAccounts[0].id] = val;
-                            }
-                            setScheduleForm(prev => ({
-                              ...prev,
-                              scheduled_at: val,
-                              account_schedules: nextSchedules
-                            }));
-                          }}
-                          required
-                          style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}
-                        />
+                  {/* Strategy Selector Pills */}
+                  <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 6 }}>
+                    Mode Distribusi Waktu Tayang Antar Konten:
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 10 }}>
+                    <div
+                      onClick={() => setBulkStrategy('interval')}
+                      style={{
+                        background: bulkStrategy === 'interval' ? 'var(--surface-interactive)' : 'var(--surface)',
+                        border: bulkStrategy === 'interval' ? '1px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                        borderRadius: 8, padding: '8px 10px', cursor: 'pointer'
+                      }}
+                    >
+                      <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)' }}>⏱️ Jeda Interval</div>
+                      <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>
+                        Jeda {Math.floor(bulkIntervalMinutes / 60) > 0 ? `${Math.floor(bulkIntervalMinutes / 60)} Jam` : `${bulkIntervalMinutes} Mnt`} antar video
                       </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>Zona Waktu</label>
-                        <input
-                          type="text"
-                          value={scheduleForm.timezone}
-                          readOnly
-                          style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-muted)', fontSize: 12 }}
-                        />
+                    </div>
+                    <div
+                      onClick={() => setBulkStrategy('simultaneous')}
+                      style={{
+                        background: bulkStrategy === 'simultaneous' ? 'var(--surface-interactive)' : 'var(--surface)',
+                        border: bulkStrategy === 'simultaneous' ? '1px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                        borderRadius: 8, padding: '8px 10px', cursor: 'pointer'
+                      }}
+                    >
+                      <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)' }}>⚡ Serentak</div>
+                      <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>Semua video tayang di jam sama</div>
+                    </div>
+                    <div
+                      onClick={() => setBulkStrategy('daily')}
+                      style={{
+                        background: bulkStrategy === 'daily' ? 'var(--surface-interactive)' : 'var(--surface)',
+                        border: bulkStrategy === 'daily' ? '1px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                        borderRadius: 8, padding: '8px 10px', cursor: 'pointer'
+                      }}
+                    >
+                      <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-primary)' }}>📅 1 Konten/Hari</div>
+                      <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>Tiap {bulkDailyStep} hari berturut-turut</div>
+                    </div>
+                  </div>
+
+                  {/* Interval Configuration Panel (Muncul jika interval aktif) */}
+                  {bulkStrategy === 'interval' && (
+                    <div style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 12px', marginBottom: 10 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>⏱️ Pilihan Durasi Jeda Antar Konten:</span>
+                        <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--action-primary)' }}>
+                          {bulkIntervalMinutes >= 60 ? `${Math.floor(bulkIntervalMinutes / 60)} Jam (${bulkIntervalMinutes} Menit)` : `${bulkIntervalMinutes} Menit`}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+                        {[30, 60, 120, 180, 240, 360].map(mins => (
+                          <button
+                            key={mins}
+                            type="button"
+                            onClick={() => setBulkIntervalMinutes(mins)}
+                            style={{
+                              background: bulkIntervalMinutes === mins ? 'var(--surface-interactive)' : 'var(--surface)',
+                              border: bulkIntervalMinutes === mins ? '1px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                              color: bulkIntervalMinutes === mins ? 'var(--action-primary)' : 'var(--text-secondary)',
+                              borderRadius: 6, padding: '5px 10px', fontSize: 11, fontWeight: bulkIntervalMinutes === mins ? 800 : 600, cursor: 'pointer'
+                            }}
+                          >
+                            {mins === 30 ? '30 Menit' : mins === 120 ? '2 Jam (Rekomendasi)' : `${mins / 60} Jam`}
+                          </button>
+                        ))}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 'auto' }}>
+                          <span style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600 }}>Kustom:</span>
+                          <input
+                            type="number"
+                            min={5}
+                            max={1440}
+                            step={5}
+                            value={bulkIntervalMinutes}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value, 10);
+                              if (!isNaN(val) && val >= 5) setBulkIntervalMinutes(val);
+                            }}
+                            style={{ width: 54, background: 'var(--surface)', border: '1px solid var(--border-subtle)', borderRadius: 6, padding: '4px 6px', color: 'var(--text-primary)', fontSize: 11, fontWeight: 700, textAlign: 'center' }}
+                          />
+                          <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Mnt</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Daily Step Panel (Muncul jika daily aktif) */}
+                  {bulkStrategy === 'daily' && (
+                    <div style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 12px', marginBottom: 10 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)' }}>📅 Pola Distribusi Harian:</span>
+                        <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--action-primary)' }}>Setiap {bulkDailyStep} Hari</span>
+                      </div>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        {[
+                          { step: 1, label: 'Setiap 1 Hari (Harian)' },
+                          { step: 2, label: 'Setiap 2 Hari (Selingan)' },
+                          { step: 3, label: 'Setiap 3 Hari' }
+                        ].map(d => (
+                          <button
+                            key={d.step}
+                            type="button"
+                            onClick={() => setBulkDailyStep(d.step)}
+                            style={{
+                              background: bulkDailyStep === d.step ? 'var(--surface-interactive)' : 'var(--surface)',
+                              border: bulkDailyStep === d.step ? '1px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                              color: bulkDailyStep === d.step ? 'var(--action-primary)' : 'var(--text-secondary)',
+                              borderRadius: 6, padding: '5px 10px', fontSize: 11, fontWeight: bulkDailyStep === d.step ? 800 : 600, cursor: 'pointer'
+                            }}
+                          >
+                            {d.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Live Simulation Table */}
+                  <div style={{ marginTop: 10 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>
+                      <span>📋 Pratinjau Jadwal Tayang ({calculatedBulkSchedules.length} Konten):</span>
+                      <span style={{ color: 'var(--action-primary)' }}>Kalkulasi Otomatis</span>
+                    </div>
+                    <div style={{ background: 'var(--surface)', border: '1px solid var(--border-subtle)', borderRadius: 8, overflow: 'hidden', maxHeight: 160, overflowY: 'auto' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+                        <thead>
+                          <tr style={{ background: 'var(--surface-interactive)', textAlign: 'left', color: 'var(--text-muted)' }}>
+                            <th style={{ padding: '6px 10px', width: 40 }}>Urutan</th>
+                            <th style={{ padding: '6px 10px' }}>Video ID</th>
+                            <th style={{ padding: '6px 10px' }}>Jadwal Tayang Terhitung (WIB)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {calculatedBulkSchedules.map((bs, idx) => (
+                            <tr key={bs.content_id || idx} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                              <td style={{ padding: '6px 10px', fontWeight: 800, color: 'var(--text-muted)' }}>#{idx + 1}</td>
+                              <td style={{ padding: '6px 10px', fontFamily: 'var(--font-mono)', color: 'var(--link)', fontWeight: 800 }}>{bs.content_id}</td>
+                              <td style={{ padding: '6px 10px' }}>
+                                <span style={{ background: 'var(--surface-interactive)', color: 'var(--text-primary)', padding: '2px 8px', borderRadius: 4, fontWeight: 600 }}>
+                                  📅 {bs.displayTime}
+                                </span>
+                                <span style={{
+                                  marginLeft: 6, fontSize: 10, fontWeight: 800, padding: '1px 6px', borderRadius: 4,
+                                  background: scheduleForm.publish_mode === 'draft' ? 'var(--status-warning-soft)' : 'var(--status-success-soft)',
+                                  color: scheduleForm.publish_mode === 'draft' ? 'var(--status-warning)' : 'var(--status-success)'
+                                }}>
+                                  {scheduleForm.publish_mode === 'draft' ? '📝 DRAFT' : '🟢 LIVE'}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                (() => {
+                  const selectedModalAccounts = accounts.filter(acc => scheduleForm.account_ids.includes(acc.id));
+                  const isMulti = selectedModalAccounts.length > 1;
+
+                  const handleSyncAllSchedules = (masterTime) => {
+                    const targetTime = masterTime || scheduleForm.scheduled_at;
+                    const updated = {};
+                    for (const acc of selectedModalAccounts) {
+                      updated[acc.id] = targetTime;
+                    }
+                    setScheduleForm(prev => ({
+                      ...prev,
+                      scheduled_at: targetTime,
+                      account_schedules: updated
+                    }));
+                  };
+
+                  if (!isMulti) {
+                    return (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>
+                            Waktu Tayang {selectedModalAccounts.length === 1 ? `(${selectedModalAccounts[0].display_name})` : ''}
+                          </label>
+                          <input
+                            type="datetime-local"
+                            value={
+                              (selectedModalAccounts.length === 1 && scheduleForm.account_schedules?.[selectedModalAccounts[0].id])
+                                ? scheduleForm.account_schedules[selectedModalAccounts[0].id]
+                                : scheduleForm.scheduled_at
+                            }
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              const nextSchedules = { ...(scheduleForm.account_schedules || {}) };
+                              if (selectedModalAccounts.length === 1) {
+                                nextSchedules[selectedModalAccounts[0].id] = val;
+                              }
+                              setScheduleForm(prev => ({
+                                ...prev,
+                                scheduled_at: val,
+                                account_schedules: nextSchedules
+                              }));
+                            }}
+                            required
+                            style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4 }}>Zona Waktu</label>
+                          <input
+                            type="text"
+                            value={scheduleForm.timezone}
+                            readOnly
+                            style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--surface-interactive)', padding: '8px 10px', borderRadius: 6, color: 'var(--text-muted)', fontSize: 12 }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div style={{
+                      marginBottom: 16,
+                      padding: '12px',
+                      background: 'rgba(255,255,255,0.02)',
+                      borderRadius: 8,
+                      border: '1px solid var(--surface-interactive)'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                        <label style={{ fontSize: 11, color: 'var(--text-primary)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span>⏱️ Waktu Tayang Tiap Platform ({selectedModalAccounts.length} Akun Terpilih)</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => handleSyncAllSchedules(scheduleForm.scheduled_at)}
+                          style={{
+                            background: 'var(--status-info-soft)',
+                            border: '1px solid var(--status-info)',
+                            color: 'var(--link)',
+                            fontSize: 10,
+                            fontWeight: 700,
+                            padding: '3px 8px',
+                            borderRadius: 4,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          ⚡ Samakan Semua Waktu
+                        </button>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {selectedModalAccounts.map(acc => {
+                          const accTime = scheduleForm.account_schedules?.[acc.id] || scheduleForm.scheduled_at;
+                          return (
+                            <div key={acc.id} style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: 12,
+                              padding: '6px 10px',
+                              background: 'var(--surface)',
+                              border: '1px solid var(--surface-interactive)',
+                              borderRadius: 6
+                            }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+                                <span style={{
+                                  fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 10, flexShrink: 0,
+                                  background: acc.platform === 'instagram' ? 'rgba(236, 72, 153, 0.2)' : 
+                                              acc.platform === 'facebook' ? 'rgba(59, 130, 246, 0.2)' :
+                                              acc.platform === 'threads' ? 'rgba(255, 255, 255, 0.1)' :
+                                              acc.platform === 'tiktok' ? 'rgba(0, 242, 254, 0.2)' :
+                                              acc.platform === 'linkedin' ? 'rgba(10, 102, 194, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                                  color: acc.platform === 'instagram' ? '#f472b6' : 
+                                         acc.platform === 'facebook' ? '#60a5fa' :
+                                         acc.platform === 'threads' ? '#ffffff' :
+                                         acc.platform === 'tiktok' ? '#00F2FE' :
+                                         acc.platform === 'linkedin' ? '#0a66c2' : '#f87171',
+                                  border: `1px solid ${
+                                    acc.platform === 'instagram' ? '#ec4899' : 
+                                    acc.platform === 'facebook' ? '#3b82f6' :
+                                    acc.platform === 'threads' ? '#ffffff' :
+                                    acc.platform === 'tiktok' ? '#00F2FE' :
+                                    acc.platform === 'linkedin' ? '#0a66c2' : '#ef4444'
+                                  }`
+                                }}>
+                                  {acc.platform ? acc.platform.toUpperCase() : ''}
+                                </span>
+                                <span style={{
+                                  fontSize: 12,
+                                  fontWeight: 600,
+                                  color: 'var(--text-primary)',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap'
+                                }}>
+                                  {acc.display_name}
+                                </span>
+                              </div>
+
+                              <input
+                                type="datetime-local"
+                                value={accTime}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setScheduleForm(prev => ({
+                                    ...prev,
+                                    account_schedules: {
+                                      ...(prev.account_schedules || {}),
+                                      [acc.id]: val
+                                    }
+                                  }));
+                                }}
+                                required
+                                style={{
+                                  width: 175,
+                                  background: 'var(--surface-interactive)',
+                                  border: '1px solid var(--border)',
+                                  padding: '6px 8px',
+                                  borderRadius: 4,
+                                  color: 'var(--text-primary)',
+                                  fontSize: 11
+                                }}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <div style={{ marginTop: 8, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--text-muted)' }}>
+                        <span>Zona Waktu: <strong>{scheduleForm.timezone} (WIB)</strong></span>
                       </div>
                     </div>
                   );
-                }
-
-                return (
-                  <div style={{
-                    marginBottom: 16,
-                    padding: '12px',
-                    background: 'rgba(255,255,255,0.02)',
-                    borderRadius: 8,
-                    border: '1px solid var(--surface-interactive)'
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                      <label style={{ fontSize: 11, color: 'var(--text-primary)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span>⏱️ Waktu Tayang Tiap Platform ({selectedModalAccounts.length} Akun Terpilih)</span>
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => handleSyncAllSchedules(scheduleForm.scheduled_at)}
-                        style={{
-                          background: 'var(--status-info-soft)',
-                          border: '1px solid var(--status-info)',
-                          color: 'var(--link)',
-                          fontSize: 10,
-                          fontWeight: 700,
-                          padding: '3px 8px',
-                          borderRadius: 4,
-                          cursor: 'pointer'
-                        }}
-                      >
-                        ⚡ Samakan Semua Waktu
-                      </button>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      {selectedModalAccounts.map(acc => {
-                        const accTime = scheduleForm.account_schedules?.[acc.id] || scheduleForm.scheduled_at;
-                        return (
-                          <div key={acc.id} style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: 12,
-                            padding: '6px 10px',
-                            background: 'var(--surface)',
-                            border: '1px solid var(--surface-interactive)',
-                            borderRadius: 6
-                          }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
-                              <span style={{
-                                fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 10, flexShrink: 0,
-                                background: acc.platform === 'instagram' ? 'rgba(236, 72, 153, 0.2)' : 
-                                            acc.platform === 'facebook' ? 'rgba(59, 130, 246, 0.2)' :
-                                            acc.platform === 'threads' ? 'rgba(255, 255, 255, 0.1)' :
-                                            acc.platform === 'tiktok' ? 'rgba(0, 242, 254, 0.2)' :
-                                            acc.platform === 'linkedin' ? 'rgba(10, 102, 194, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                                color: acc.platform === 'instagram' ? '#f472b6' : 
-                                       acc.platform === 'facebook' ? '#60a5fa' :
-                                       acc.platform === 'threads' ? '#ffffff' :
-                                       acc.platform === 'tiktok' ? '#00F2FE' :
-                                       acc.platform === 'linkedin' ? '#0a66c2' : '#f87171',
-                                border: `1px solid ${
-                                  acc.platform === 'instagram' ? '#ec4899' : 
-                                  acc.platform === 'facebook' ? '#3b82f6' :
-                                  acc.platform === 'threads' ? '#ffffff' :
-                                  acc.platform === 'tiktok' ? '#00F2FE' :
-                                  acc.platform === 'linkedin' ? '#0a66c2' : '#ef4444'
-                                }`
-                              }}>
-                                {acc.platform ? acc.platform.toUpperCase() : ''}
-                              </span>
-                              <span style={{
-                                fontSize: 12,
-                                fontWeight: 600,
-                                color: 'var(--text-primary)',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap'
-                              }}>
-                                {acc.display_name}
-                              </span>
-                            </div>
-
-                            <input
-                              type="datetime-local"
-                              value={accTime}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setScheduleForm(prev => ({
-                                  ...prev,
-                                  account_schedules: {
-                                    ...(prev.account_schedules || {}),
-                                    [acc.id]: val
-                                  }
-                                }));
-                              }}
-                              required
-                              style={{
-                                width: 175,
-                                background: 'var(--surface-interactive)',
-                                border: '1px solid var(--border)',
-                                padding: '6px 8px',
-                                borderRadius: 4,
-                                color: 'var(--text-primary)',
-                                fontSize: 11
-                              }}
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    <div style={{ marginTop: 8, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--text-muted)' }}>
-                      <span>Zona Waktu: <strong>{scheduleForm.timezone} (WIB)</strong></span>
-                    </div>
-                  </div>
-                );
-              })()}
+                })()
+              )}
 
               {/* Preflight warning summary */}
               {preflightResult && (
@@ -2877,29 +3377,63 @@ export default function PublishingScheduler({
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-                <button
-                  type="button"
-                  onClick={runPreflight}
-                  disabled={runningPreflight}
-                  style={{ padding: '9px 14px', background: 'var(--surface)', border: '1px solid #334155', color: 'var(--text-secondary)', borderRadius: 6, fontSize: 12, cursor: 'pointer', fontWeight: 700 }}
-                >
-                  {runningPreflight ? 'Memeriksa...' : '🔍 Preflight Check'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowScheduleModal(false)}
-                  style={{ padding: '9px 14px', background: 'transparent', border: '1px solid #334155', color: 'var(--text-muted)', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={submittingSchedule}
-                  style={{ padding: '9px 18px', background: 'var(--status-neutral)', border: '1px solid var(--status-neutral)', color: 'var(--text-primary)', borderRadius: 6, fontSize: 12, fontWeight: 800, cursor: 'pointer' }}
-                >
-                  {submittingSchedule ? 'Menyimpan...' : 'Simpan Jadwal'}
-                </button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                  {isBulkMode ? (
+                    <span>
+                      Ringkasan: <strong>{bulkItems.length} Konten</strong> × <strong>{scheduleForm.account_ids.length} Akun</strong> = <strong style={{ color: 'var(--action-primary)' }}>{bulkItems.length * scheduleForm.account_ids.length} Antrean Publikasi</strong>
+                    </span>
+                  ) : (
+                    <span>
+                      Target: <strong>{scheduleForm.content_id || '1 Konten'}</strong> × <strong>{scheduleForm.account_ids.length} Akun</strong>
+                    </span>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button
+                    type="button"
+                    onClick={runPreflight}
+                    disabled={runningPreflight}
+                    style={{ padding: '9px 14px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', borderRadius: 6, fontSize: 12, cursor: 'pointer', fontWeight: 700 }}
+                  >
+                    {runningPreflight ? 'Memeriksa...' : '🔍 Preflight Check'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCloseModal}
+                    style={{ padding: '9px 14px', background: 'transparent', border: '1px solid var(--border-subtle)', color: 'var(--text-muted)', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submittingSchedule}
+                    style={{
+                      padding: '9px 18px',
+                      background: 'var(--action-primary)',
+                      border: '1px solid var(--action-primary)',
+                      color: 'var(--on-action-primary)',
+                      borderRadius: 6,
+                      fontSize: 12,
+                      fontWeight: 800,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {submittingSchedule
+                      ? 'Menyimpan...'
+                      : isBulkMode
+                        ? (scheduleForm.publish_mode === 'draft'
+                            ? `Simpan Sebagai Draft Massal (${bulkItems.length * scheduleForm.account_ids.length})`
+                            : `Konfirmasi & Jadwalkan Massal (${bulkItems.length * scheduleForm.account_ids.length})`
+                          )
+                        : (scheduleForm.publish_mode === 'draft'
+                            ? `Simpan Sebagai Draft (${scheduleForm.account_ids.length || 1})`
+                            : `Jadwalkan Publikasi (${scheduleForm.account_ids.length || 1})`
+                          )
+                    }
+                  </button>
+                </div>
               </div>
             </form>
           </div>

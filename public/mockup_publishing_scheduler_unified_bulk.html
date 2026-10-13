@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAKNA Flow — Mockup Modal Penjadwalan Unified (Single & Bulk Scheduling)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================================
+       1. SEMANTIC CSS DESIGN TOKENS (UNIVERSAL LIGHT & DARK)
+       Strict adherence to app/theme.css
+       ========================================================= */
+    :root, [data-theme="dark"] {
+      color-scheme: dark;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.82);
+
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --border-color: var(--border-subtle);
+
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+
+      --link: #67e8f9;
+      --link-hover: #a5f3fc;
+
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+
+      --platform-tiktok: #00f2fe;
+      --platform-tiktok-soft: rgba(0, 242, 254, 0.14);
+      --platform-instagram: #ec4899;
+      --platform-instagram-soft: rgba(236, 72, 153, 0.14);
+      --platform-facebook: #3b82f6;
+      --platform-facebook-soft: rgba(59, 130, 246, 0.14);
+      --platform-youtube: #ef4444;
+      --platform-youtube-soft: rgba(239, 68, 68, 0.14);
+    }
+
+    [data-theme="light"] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(30, 41, 59, 0.08);
+      --overlay-backdrop: rgba(15, 23, 42, 0.6);
+
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --text-disabled: #8794a6;
+
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --border-color: var(--border-subtle);
+
+      --action-primary: #087f73;
+      --action-primary-hover: #0b9b8d;
+      --on-action-primary: #ffffff;
+
+      --link: #0284c7;
+      --link-hover: #0369a1;
+
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.12);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.12);
+      --status-neutral: #7c3aed;
+      --status-neutral-soft: rgba(124, 58, 237, 0.12);
+
+      --focus-ring: #7c3aed;
+      --shadow-card: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --shadow-modal: 0 24px 70px rgba(15, 23, 42, 0.22);
+
+      --platform-tiktok: #0891b2;
+      --platform-tiktok-soft: rgba(8, 145, 178, 0.12);
+      --platform-instagram: #db2777;
+      --platform-instagram-soft: rgba(219, 39, 119, 0.12);
+      --platform-facebook: #2563eb;
+      --platform-facebook-soft: rgba(37, 99, 235, 0.12);
+      --platform-youtube: #dc2626;
+      --platform-youtube-soft: rgba(220, 38, 38, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-sans);
+    }
+
+    body {
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* Top Navigation Simulation */
+    .top-bar {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .top-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Main Modal Simulation Box */
+    .modal-container {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 880px;
+      max-height: 90vh;
+      color: var(--text-primary);
+      box-shadow: var(--shadow-modal);
+      overflow-y: auto;
+      padding: 24px;
+      position: relative;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 14px;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 800;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Mode Switcher Banner (Single vs Bulk) */
+    .mode-switcher-wrap {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .mode-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mode-pills {
+      display: flex;
+      gap: 6px;
+      background: var(--surface);
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid var(--border-strong);
+    }
+
+    .mode-pill {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .mode-pill.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    /* Section Form Styles */
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border-strong);
+      padding: 8px 10px;
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 12px;
+      outline: none;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--focus-ring);
+    }
+
+    /* Bulk Selected Items Scroller (When in Bulk Mode) */
+    .bulk-items-panel {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+
+    .bulk-items-scroller {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-top: 8px;
+    }
+
+    .bulk-chip {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 8px 10px;
+      min-width: 160px;
+      max-width: 160px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .chip-remove-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: var(--status-danger-soft);
+      color: var(--status-danger);
+      border: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    /* Disabled Media Preview Banner */
+    .preview-disabled-banner {
+      background: var(--surface-raised);
+      border: 1px dashed var(--border-strong);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .preview-disabled-icon {
+      font-size: 24px;
+      color: var(--text-muted);
+    }
+
+    .preview-disabled-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .preview-disabled-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      max-width: 480px;
+      line-height: 1.4;
+    }
+
+    /* Active Video Player (When in Single Mode) */
+    .media-player-box {
+      background: #000000;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      max-height: 340px;
+      padding: 6px;
+      margin-bottom: 14px;
+    }
+
+    /* Strategy Selector (Bulk Mode) */
+    .strategy-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .strat-btn {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 8px 10px;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .strat-btn.active {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+      box-shadow: 0 0 0 1px var(--action-primary);
+    }
+
+    .strat-title {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .strat-sub {
+      font-size: 9.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Interval & Daily Preset Chips */
+    .interval-chip, .daily-chip {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .interval-chip:hover, .daily-chip:hover {
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+
+    .interval-chip.active, .daily-chip.active {
+      background: var(--surface-interactive);
+      border-color: var(--action-primary);
+      color: var(--action-primary);
+      font-weight: 700;
+      box-shadow: 0 0 0 1px var(--action-primary);
+    }
+
+    /* Simulation Table */
+    .sim-table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 8px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .sim-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    .sim-table th {
+      background: var(--surface-interactive);
+      padding: 6px 10px;
+      text-align: left;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .sim-table td {
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    /* Modal Footer */
+    .modal-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 16px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-summary {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+    .footer-summary strong {
+      color: var(--text-primary);
+    }
+
+    .footer-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border-strong);
+      color: var(--text-secondary);
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--action-primary);
+      border: 1px solid var(--action-primary);
+      color: var(--on-action-primary);
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .custom-checkbox {
+      accent-color: var(--action-primary);
+      cursor: pointer;
+      width: 16px;
+      height: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span style="font-weight: 800;">⚡ MAKNA FLOW</span>
+      <span class="top-badge">PublishingScheduler Modal Architecture</span>
+    </div>
+    <button class="theme-toggle-btn" onclick="toggleTheme()">
+      <span id="themeIcon">☀️</span>
+      <span id="themeLabel">Light Mode</span>
+    </button>
+  </div>
+
+  <!-- Modal Container (Simulasi Langsung dari Modal PublishingScheduler) -->
+  <div class="modal-container">
+    
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h3 class="modal-title" id="modalTitle">
+        <span>⏱️</span>
+        <span id="modalTitleText">Jadwalkan Publikasi Konten (Bulk Mode - 5 Konten)</span>
+      </h3>
+      <button style="background: transparent; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer;">✕</button>
+    </div>
+
+    <!-- Mode Switcher Pill (Interactive Switcher) -->
+    <div class="mode-switcher-wrap">
+      <div class="mode-label">
+        <span>⚙️ Mode Penjadwalan:</span>
+        <span id="modeDescription" style="font-size: 11px; color: var(--link); font-weight: 500;">
+          (Mode Bulk aktif — Preview Media dinonaktifkan untuk efisiensi performa)
+        </span>
+      </div>
+
+      <div class="mode-pills">
+        <button class="mode-pill" id="pillSingle" onclick="switchMode('single')">
+          <span>🎬 1 Konten (Single)</span>
+        </button>
+        <button class="mode-pill active" id="pillBulk" onclick="switchMode('bulk')">
+          <span>📦 Massal (Bulk 5 Video)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 0. Brand Filter -->
+    <div class="form-group">
+      <div class="form-label">
+        <span>Filter Brand Profile</span>
+        <span style="color: var(--link); font-weight: 400;">(Menyaring video & akun media sosial)</span>
+      </div>
+      <select class="form-select">
+        <option>Semua Brand Profile</option>
+        <option selected>@kuliner_viral_id</option>
+        <option>@resep_masakan_nusantara</option>
+      </select>
+    </div>
+
+    <!-- 1. Video ID Selector -->
+    <!-- Jika SINGLE: Input Pencarian Video ID -->
+    <div class="form-group" id="singleVideoSearchSection" style="display: none;">
+      <div class="form-label">
+        <span>ID Konten / Video ID <span style="color: var(--status-danger);">*</span></span>
+        <span style="color: var(--link); font-size: 10px;">Ketik untuk mencari di Video Library</span>
+      </div>
+      <input type="text" class="form-input" value="VD-RE-0892" placeholder="Cari Video ID...">
+    </div>
+
+    <!-- Jika BULK: Daftar Konten Terpilih (5 Video) -->
+    <div class="bulk-items-panel" id="bulkItemsSection">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 12px; font-weight: 800; color: var(--text-primary);">
+          📦 Daftar Konten Terpilih (5 Video)
+        </span>
+        <span style="font-size: 10px; color: var(--text-muted);">
+          Urutan video menentukan waktu tayang bertahap
+        </span>
+      </div>
+
+      <div class="bulk-items-scroller" id="bulkChipsScroller">
+        <div class="bulk-chip">
+          <button class="chip-remove-btn" title="Hapus dari batch">✕</button>
+          <span style="font-size: 10px; color: var(--text-muted); font-weight: 800;">#1</span>
+          <span style="font-family: var(--font-mono); font-size: 11px; font-weight: 800; color: var(--link);">VD-RE-0892</span>
+          <span style="font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Ayam Geprek Sambal Korek</span>
+        </div>
+        <div class="bulk-chip">
+          <button class="chip-remove-btn" title="Hapus dari batch">✕</button>
+          <span style="font-size: 10px; color: var(--text-muted); font-weight: 800;">#2</span>
+          <span style="font-family: var(--font-mono); font-size: 11px; font-weight: 800; color: var(--link);">VD-RE-0893</span>
+          <span style="font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Rahasia Kuah Bakso Gurih</span>
+        </div>
+        <div class="bulk-chip">
+          <button class="chip-remove-btn" title="Hapus dari batch">✕</button>
+          <span style="font-size: 10px; color: var(--text-muted); font-weight: 800;">#3</span>
+          <span style="font-family: var(--font-mono); font-size: 11px; font-weight: 800; color: var(--link);">VD-RE-0894</span>
+          <span style="font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Tips Sambal Terasi Awet</span>
+        </div>
+        <div class="bulk-chip">
+          <button class="chip-remove-btn" title="Hapus dari batch">✕</button>
+          <span style="font-size: 10px; color: var(--text-muted); font-weight: 800;">#4</span>
+          <span style="font-family: var(--font-mono); font-size: 11px; font-weight: 800; color: var(--link);">VD-RE-0895</span>
+          <span style="font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Telur Gulung Anti Gagal</span>
+        </div>
+        <div class="bulk-chip">
+          <button class="chip-remove-btn" title="Hapus dari batch">✕</button>
+          <span style="font-size: 10px; color: var(--text-muted); font-weight: 800;">#5</span>
+          <span style="font-family: var(--font-mono); font-size: 11px; font-weight: 800; color: var(--link);">VD-RE-0896</span>
+          <span style="font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Es Lumut Strawberry Creamy</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Akun Tujuan (Platform Selector) -->
+    <div class="form-group">
+      <div class="form-label">
+        <span>Akun Media Sosial Tujuan (Repliz Cloud & Meta)</span>
+        <span style="color: var(--status-success); font-weight: 700;">🟢 3 Akun Dipilih</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+        <label style="background: var(--surface-raised); border: 1px solid var(--action-primary); border-radius: 8px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <input type="checkbox" class="custom-checkbox" checked>
+          <div>
+            <div style="font-size: 11px; font-weight: 800; color: var(--platform-tiktok);">🎵 TikTok</div>
+            <div style="font-size: 10px; color: var(--text-muted);">@kuliner_viral_id</div>
+          </div>
+        </label>
+        <label style="background: var(--surface-raised); border: 1px solid var(--action-primary); border-radius: 8px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <input type="checkbox" class="custom-checkbox" checked>
+          <div>
+            <div style="font-size: 11px; font-weight: 800; color: var(--platform-instagram);">📸 Instagram</div>
+            <div style="font-size: 10px; color: var(--text-muted);">@resep_nusantara</div>
+          </div>
+        </label>
+        <label style="background: var(--surface-raised); border: 1px solid var(--action-primary); border-radius: 8px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <input type="checkbox" class="custom-checkbox" checked>
+          <div>
+            <div style="font-size: 11px; font-weight: 800; color: var(--platform-facebook);">📘 Facebook</div>
+            <div style="font-size: 10px; color: var(--text-muted);">Dapur Praktis ID</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- 2.5 Mode Publikasi (Live vs Draft) & Tipe Media -->
+    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px; margin-bottom: 12px;">
+      <div>
+        <div class="form-label" style="margin-bottom: 4px;">
+          <span>Mode Publikasi</span>
+          <span id="publishModeBadge" style="color: var(--status-success); font-size: 10px; font-weight: 800; background: var(--status-success-soft); padding: 1px 6px; border-radius: 4px;">🟢 LIVE (Approval)</span>
+        </div>
+        <select class="form-select" id="publishModeSelect" onchange="handlePublishModeChange()">
+          <option value="live" selected>Live (Memerlukan Approval sebelum publikasi)</option>
+          <option value="draft">Draft (Tersimpan sebagai draft di platform)</option>
+        </select>
+      </div>
+      <div>
+        <div class="form-label" style="margin-bottom: 4px;">
+          <span>Tipe Media</span>
+          <span style="color: var(--text-muted); font-size: 10px;">🔒 Terkunci</span>
+        </div>
+        <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); padding: 8px 10px; border-radius: 6px; color: var(--text-primary); font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; height: 38px; box-sizing: border-box;">
+          <span>📱 Reel Vertikal (Auto-detect)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Banner Info Khusus Jika Mode Draft Dipilih -->
+    <div id="draftModeInfoBanner" style="display: none; margin-bottom: 12px; padding: 10px 14px; background: var(--status-warning-soft); border: 1px solid var(--status-warning); border-radius: 8px; font-size: 11px; color: var(--text-primary);">
+      <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; color: var(--status-warning); margin-bottom: 3px;">
+        <span>📝 Mode Draft Dipilih:</span>
+      </div>
+      <div style="color: var(--text-secondary); line-height: 1.4;">
+        Konten akan dijadwalkan dan diunggah sebagai <strong>Draft</strong> ke platform target tanpa langsung ditayangkan ke feed publik pengikut. Anda dapat meninjau dan mempublikasikannya secara manual di aplikasi media sosial masing-masing.
+      </div>
+    </div>
+
+    <!-- 3. Preview Media Konten (PERSYARATAN UTAMA PENGGUNA) -->
+    <!-- KONDISI A: BULK MODE -> PREVIEW DISABLED -->
+    <div id="mediaPreviewDisabledSection">
+      <div class="form-label">
+        <span>▶️ Preview Media Konten</span>
+        <span style="color: var(--status-warning); font-size: 10px; font-weight: 700;">🔒 Dinonaktifkan pada Bulk Mode</span>
+      </div>
+      <div class="preview-disabled-banner">
+        <div class="preview-disabled-icon">🔒</div>
+        <div class="preview-disabled-title">Preview Media Dinonaktifkan (Disabled)</div>
+        <div class="preview-disabled-desc">
+          Pada mode penjadwalan massal, pemutar video/gambar dinonaktifkan secara otomatis untuk menghemat bandwidth dan mencegah lag browser saat memuat beberapa video berukuran besar secara bersamaan.
+        </div>
+      </div>
+    </div>
+
+    <!-- KONDISI B: SINGLE MODE -> PREVIEW AKTIF -->
+    <div id="mediaPreviewActiveSection" style="display: none;">
+      <div class="form-label">
+        <span>▶️ Preview Media Konten (Otomatis & Aktif)</span>
+        <span style="color: var(--link); font-size: 10px;">VD-RE-0892_final.mp4</span>
+      </div>
+      <div class="media-player-box">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 40px; color: var(--text-muted);">
+          <span style="font-size: 36px;">🎬</span>
+          <span style="font-size: 12px; font-weight: 600; color: var(--text-primary);">Pemutar Video Siap (Single Mode)</span>
+          <span style="font-size: 10px;">Video Player HTML5 aktif untuk memverifikasi visual satu konten.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Caption & Tag -->
+    <div class="form-group" id="captionSingleSection" style="display: none;">
+      <div class="form-label">
+        <span>Caption & Tag</span>
+        <span style="color: var(--link); font-weight: 400;">(Autoload dari Video)</span>
+      </div>
+      <textarea rows="3" class="form-textarea">Resep Ayam Geprek Sambal Korek Super Renyah dan Pedas Gurih! Bumbu meresap sampai ke tulang. #resepviral #ayamgeprek #kuliner</textarea>
+    </div>
+
+    <!-- Bulk Caption Handling -->
+    <div class="form-group" id="captionBulkSection">
+      <div class="form-label">
+        <span>Penanganan Caption untuk 5 Video</span>
+        <span style="color: var(--action-primary); font-size: 10px; font-weight: 700;">Bulk Caption Strategy</span>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <select class="form-select">
+          <option selected>Gunakan Caption Asli Masing-Masing Video</option>
+          <option>Tambahkan Tagar Bersama di Akhir Caption</option>
+        </select>
+        <input type="text" class="form-input" placeholder="#kuliner2026 #fyp #resepindonesia (Opsional Tagar)">
+      </div>
+    </div>
+
+    <!-- 5. Waktu Tayang & Strategi Penjadwalan -->
+    <div class="form-group">
+      <div class="form-label">
+        <span>Konfigurasi Tanggal & Waktu Tayang (Asia/Jakarta - WIB)</span>
+        <span style="color: var(--link); font-size: 10px;">Target Jadwal: 13 Oktober 2026</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+        <div>
+          <label style="display: block; font-size: 10px; color: var(--text-muted); font-weight: 700; margin-bottom: 3px;">Tanggal Mulai</label>
+          <input type="date" id="targetDateInput" class="form-input" value="2026-10-13" onchange="recalculateSim()">
+        </div>
+        <div>
+          <label style="display: block; font-size: 10px; color: var(--text-muted); font-weight: 700; margin-bottom: 3px;">Jam Mulai (WIB)</label>
+          <input type="time" id="targetTimeInput" class="form-input" value="10:00" onchange="recalculateSim()">
+        </div>
+      </div>
+
+      <!-- Strategi Distribusi (Hanya Tampil di Mode Bulk) -->
+      <div id="bulkStrategySection">
+        <label style="display: block; font-size: 10px; color: var(--text-muted); font-weight: 700; margin-bottom: 4px;">
+          Mode Distribusi Waktu Tayang Antar Konten:
+        </label>
+        <div class="strategy-grid">
+          <div class="strat-btn active" id="btnStratInterval" onclick="setStrategy('interval')">
+            <div class="strat-title">⏱️ Jeda Interval</div>
+            <div class="strat-sub" id="intervalCardSub">Jeda 2 Jam antar video</div>
+          </div>
+          <div class="strat-btn" id="btnStratSimultaneous" onclick="setStrategy('simultaneous')">
+            <div class="strat-title">⚡ Serentak</div>
+            <div class="strat-sub">Semua video tayang jam 10:00 WIB</div>
+          </div>
+          <div class="strat-btn" id="btnStratDaily" onclick="setStrategy('daily')">
+            <div class="strat-title">📅 1 Konten/Hari</div>
+            <div class="strat-sub" id="dailyCardSub">Mulai 13 Okt (Harian)</div>
+          </div>
+        </div>
+
+        <!-- Panel Konfigurasi Detail Interval (Muncul saat Jeda Interval aktif) -->
+        <div id="intervalConfigPanel" style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 11px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+              <span>⏱️</span>
+              <span>Pilihan Durasi Jeda Antar Konten:</span>
+            </span>
+            <span id="selectedIntervalLabel" style="font-size: 11px; font-weight: 800; color: var(--action-primary);">
+              2 Jam (120 Menit)
+            </span>
+          </div>
+          
+          <!-- Preset Chips & Custom Input -->
+          <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+            <button type="button" class="interval-chip" onclick="selectIntervalPreset(30, this)">30 Menit</button>
+            <button type="button" class="interval-chip" onclick="selectIntervalPreset(60, this)">1 Jam</button>
+            <button type="button" class="interval-chip active" onclick="selectIntervalPreset(120, this)">2 Jam (Rekomendasi)</button>
+            <button type="button" class="interval-chip" onclick="selectIntervalPreset(180, this)">3 Jam</button>
+            <button type="button" class="interval-chip" onclick="selectIntervalPreset(240, this)">4 Jam</button>
+            <button type="button" class="interval-chip" onclick="selectIntervalPreset(360, this)">6 Jam</button>
+            
+            <div style="display: flex; align-items: center; gap: 6px; margin-left: auto;">
+              <span style="font-size: 10px; color: var(--text-muted); font-weight: 600;">Kustom:</span>
+              <input type="number" id="customIntervalInput" min="5" max="1440" step="5" value="120" style="width: 54px; background: var(--input-bg); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 4px 6px; color: var(--text-primary); font-size: 11px; font-weight: 700; text-align: center;" oninput="handleCustomIntervalChange(this.value)">
+              <span style="font-size: 10px; color: var(--text-muted);">Mnt</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel Konfigurasi Detail Slot Harian (Muncul saat 1 Konten/Hari aktif) -->
+        <div id="dailyConfigPanel" style="display: none; background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 11px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+              <span>📅</span>
+              <span>Pola Distribusi Harian:</span>
+            </span>
+            <span id="selectedDailyLabel" style="font-size: 11px; font-weight: 800; color: var(--action-primary);">
+              Setiap 1 Hari (Harian Berturut-turut)
+            </span>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <button type="button" class="daily-chip active" onclick="selectDailyPreset(1, this)">Setiap 1 Hari (Harian)</button>
+            <button type="button" class="daily-chip" onclick="selectDailyPreset(2, this)">Setiap 2 Hari (Selingan)</button>
+            <button type="button" class="daily-chip" onclick="selectDailyPreset(3, this)">Setiap 3 Hari</button>
+          </div>
+        </div>
+
+        <!-- Pratinjau Tabel Simulasi -->
+        <div style="margin-top: 8px;">
+          <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); font-weight: 700;">
+            <span>📋 Pratinjau Waktu Tayang Tiap Video:</span>
+            <span style="color: var(--action-primary);">Kalkulasi Otomatis</span>
+          </div>
+          <div class="sim-table-wrap">
+            <table class="sim-table">
+              <thead>
+                <tr>
+                  <th>Urutan</th>
+                  <th>Video ID</th>
+                  <th>Jadwal Tayang Terhitung (WIB)</th>
+                </tr>
+              </thead>
+              <tbody id="simTableBody">
+                <!-- Rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Label AI-Generated Content (isAiGenerated) -->
+    <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); padding: 10px 12px; borderRadius: 8px; display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+      <input type="checkbox" id="aigcCheck" class="custom-checkbox" checked>
+      <label for="aigcCheck" style="font-size: 11px; color: var(--text-primary); cursor: pointer;">
+        <strong>Sertakan Label AI-Generated Content (AIGC)</strong>
+        <div style="font-size: 10px; color: var(--text-muted); margin-top: 1px;">
+          Berlaku universal untuk TikTok (AIGC disclosure), Meta (IG/FB), dan YouTube (Altered/Synthetic Content).
+        </div>
+      </label>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer">
+      <div class="footer-summary" id="footerSummary">
+        Ringkasan: <strong>5 Konten</strong> × <strong>3 Akun Platform</strong> = <strong style="color: var(--action-primary);">15 Antrean Publikasi</strong>
+      </div>
+      <div class="footer-btns">
+        <button class="btn-secondary">Batal</button>
+        <button class="btn-primary" onclick="alert('Simulasi submit penjadwalan berhasil diproses!')">
+          <span>🚀</span>
+          <span id="submitBtnText">Konfirmasi & Jadwalkan Massal (15)</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let currentMode = 'bulk'; // 'single' | 'bulk'
+    let currentStrategy = 'interval'; // 'interval' | 'simultaneous' | 'daily'
+    let currentPublishMode = 'live'; // 'live' | 'draft'
+
+    const sampleVideos = [
+      { id: 'VD-RE-0892', title: 'Ayam Geprek Sambal Korek' },
+      { id: 'VD-RE-0893', title: 'Rahasia Kuah Bakso Gurih' },
+      { id: 'VD-RE-0894', title: 'Tips Sambal Terasi Awet' },
+      { id: 'VD-RE-0895', title: 'Telur Gulung Anti Gagal' },
+      { id: 'VD-RE-0896', title: 'Es Lumut Strawberry Creamy' }
+    ];
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const cur = html.getAttribute('data-theme') || 'dark';
+      const next = cur === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+
+      document.getElementById('themeIcon').textContent = next === 'light' ? '🌙' : '☀️';
+      document.getElementById('themeLabel').textContent = next === 'light' ? 'Dark Mode' : 'Light Mode';
+    }
+
+    function handlePublishModeChange() {
+      const select = document.getElementById('publishModeSelect');
+      currentPublishMode = select.value;
+      const badge = document.getElementById('publishModeBadge');
+      const banner = document.getElementById('draftModeInfoBanner');
+      const submitBtnText = document.getElementById('submitBtnText');
+
+      if (currentPublishMode === 'draft') {
+        badge.textContent = '📝 DRAFT';
+        badge.style.color = 'var(--status-warning)';
+        badge.style.background = 'var(--status-warning-soft)';
+        banner.style.display = 'block';
+        if (currentMode === 'bulk') {
+          submitBtnText.textContent = 'Simpan Sebagai Draft Massal (15)';
+        } else {
+          submitBtnText.textContent = 'Simpan Sebagai Draft (3)';
+        }
+      } else {
+        badge.textContent = '🟢 LIVE (Approval)';
+        badge.style.color = 'var(--status-success)';
+        badge.style.background = 'var(--status-success-soft)';
+        banner.style.display = 'none';
+        if (currentMode === 'bulk') {
+          submitBtnText.textContent = 'Konfirmasi & Jadwalkan Massal (15)';
+        } else {
+          submitBtnText.textContent = 'Jadwalkan Publikasi (3)';
+        }
+      }
+      recalculateSim();
+    }
+
+    function switchMode(mode) {
+      currentMode = mode;
+      
+      const pillSingle = document.getElementById('pillSingle');
+      const pillBulk = document.getElementById('pillBulk');
+      const modalTitleText = document.getElementById('modalTitleText');
+      const modeDescription = document.getElementById('modeDescription');
+      const singleSearch = document.getElementById('singleVideoSearchSection');
+      const bulkSection = document.getElementById('bulkItemsSection');
+      const previewDisabled = document.getElementById('mediaPreviewDisabledSection');
+      const previewActive = document.getElementById('mediaPreviewActiveSection');
+      const captionSingle = document.getElementById('captionSingleSection');
+      const captionBulk = document.getElementById('captionBulkSection');
+      const bulkStrategy = document.getElementById('bulkStrategySection');
+      const footerSummary = document.getElementById('footerSummary');
+      const submitBtnText = document.getElementById('submitBtnText');
+
+      if (mode === 'single') {
+        pillSingle.classList.add('active');
+        pillBulk.classList.remove('active');
+        modalTitleText.textContent = 'Jadwalkan Publikasi Konten (Single Mode - 1 Konten)';
+        modeDescription.textContent = '(Mode Single aktif — Video Player preview media aktif)';
+        
+        singleSearch.style.display = 'block';
+        bulkSection.style.display = 'none';
+
+        // ENABLE MEDIA PREVIEW IN SINGLE MODE
+        previewDisabled.style.display = 'none';
+        previewActive.style.display = 'block';
+
+        captionSingle.style.display = 'block';
+        captionBulk.style.display = 'none';
+        bulkStrategy.style.display = 'none';
+
+        footerSummary.innerHTML = 'Target: <strong>1 Konten (VD-RE-0892)</strong> × <strong>3 Akun Platform</strong> = <strong>3 Jobs</strong>';
+        submitBtnText.textContent = currentPublishMode === 'draft' ? 'Simpan Sebagai Draft (3)' : 'Jadwalkan Publikasi (3)';
+      } else {
+        pillSingle.classList.remove('active');
+        pillBulk.classList.add('active');
+        modalTitleText.textContent = 'Jadwalkan Publikasi Konten (Bulk Mode - 5 Konten)';
+        modeDescription.textContent = '(Mode Bulk aktif — Preview Media dinonaktifkan untuk efisiensi performa)';
+        
+        singleSearch.style.display = 'none';
+        bulkSection.style.display = 'block';
+
+        // DISABLE MEDIA PREVIEW IN BULK MODE (USER REQUIREMENT)
+        previewDisabled.style.display = 'block';
+        previewActive.style.display = 'none';
+
+        captionSingle.style.display = 'none';
+        captionBulk.style.display = 'block';
+        bulkStrategy.style.display = 'block';
+
+        footerSummary.innerHTML = 'Ringkasan: <strong>5 Konten</strong> × <strong>3 Akun Platform</strong> = <strong style="color: var(--action-primary);">15 Antrean Publikasi</strong>';
+        submitBtnText.textContent = currentPublishMode === 'draft' ? 'Simpan Sebagai Draft Massal (15)' : 'Konfirmasi & Jadwalkan Massal (15)';
+      }
+
+      recalculateSim();
+    }
+
+    let currentIntervalMinutes = 120;
+    let currentDailyStep = 1;
+
+    function selectIntervalPreset(minutes, btn) {
+      currentIntervalMinutes = parseInt(minutes, 10);
+      document.querySelectorAll('.interval-chip').forEach(c => c.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const customInput = document.getElementById('customIntervalInput');
+      if (customInput) customInput.value = currentIntervalMinutes;
+
+      updateIntervalLabels();
+      recalculateSim();
+    }
+
+    function handleCustomIntervalChange(val) {
+      const mins = parseInt(val, 10);
+      if (isNaN(mins) || mins < 5) return;
+      currentIntervalMinutes = mins;
+
+      document.querySelectorAll('.interval-chip').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.interval-chip').forEach(c => {
+        const text = c.textContent.trim();
+        if (text.startsWith(`${mins} `) || (mins % 60 === 0 && text.startsWith(`${mins/60} Jam`))) {
+          c.classList.add('active');
+        }
+      });
+
+      updateIntervalLabels();
+      recalculateSim();
+    }
+
+    function updateIntervalLabels() {
+      const hours = Math.floor(currentIntervalMinutes / 60);
+      const remainingMins = currentIntervalMinutes % 60;
+      let labelText = '';
+      if (hours > 0 && remainingMins > 0) labelText = `${hours} Jam ${remainingMins} Menit (${currentIntervalMinutes} Mnt)`;
+      else if (hours > 0) labelText = `${hours} Jam (${currentIntervalMinutes} Menit)`;
+      else labelText = `${remainingMins} Menit`;
+
+      const selLabel = document.getElementById('selectedIntervalLabel');
+      if (selLabel) selLabel.textContent = labelText;
+      const cardSub = document.getElementById('intervalCardSub');
+      if (cardSub) cardSub.textContent = `Jeda ${hours > 0 ? (remainingMins > 0 ? hours + 'j ' + remainingMins + 'm' : hours + ' Jam') : remainingMins + ' Mnt'} antar video`;
+    }
+
+    function selectDailyPreset(step, btn) {
+      currentDailyStep = parseInt(step, 10);
+      document.querySelectorAll('.daily-chip').forEach(c => c.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      const dailyLabel = document.getElementById('selectedDailyLabel');
+      if (dailyLabel) dailyLabel.textContent = `Setiap ${currentDailyStep} Hari`;
+      const dailyCardSub = document.getElementById('dailyCardSub');
+      if (dailyCardSub) dailyCardSub.textContent = `Mulai 13 Okt (Tiap ${currentDailyStep} Hari)`;
+      recalculateSim();
+    }
+
+    function setStrategy(strat) {
+      currentStrategy = strat;
+      ['Interval', 'Simultaneous', 'Daily'].forEach(s => {
+        document.getElementById(`btnStrat${s}`).classList.remove('active');
+      });
+      document.getElementById(`btnStrat${strat.charAt(0).toUpperCase() + strat.slice(1)}`).classList.add('active');
+
+      const intervalPanel = document.getElementById('intervalConfigPanel');
+      const dailyPanel = document.getElementById('dailyConfigPanel');
+
+      if (strat === 'interval') {
+        if (intervalPanel) intervalPanel.style.display = 'block';
+        if (dailyPanel) dailyPanel.style.display = 'none';
+      } else if (strat === 'daily') {
+        if (intervalPanel) intervalPanel.style.display = 'none';
+        if (dailyPanel) dailyPanel.style.display = 'block';
+      } else {
+        if (intervalPanel) intervalPanel.style.display = 'none';
+        if (dailyPanel) dailyPanel.style.display = 'none';
+      }
+
+      recalculateSim();
+    }
+
+    function recalculateSim() {
+      const tbody = document.getElementById('simTableBody');
+      tbody.innerHTML = '';
+
+      const dateStr = document.getElementById('targetDateInput').value || '2026-10-13';
+      const timeStr = document.getElementById('targetTimeInput').value || '10:00';
+
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const [hour, min] = timeStr.split(':').map(Number);
+
+      const modeBadgeHtml = currentPublishMode === 'draft'
+        ? `<span style="background: var(--status-warning-soft); color: var(--status-warning); padding: 1px 6px; border-radius: 4px; font-weight: 800; font-size: 10px; margin-left: 6px;">📝 DRAFT</span>`
+        : `<span style="background: var(--status-success-soft); color: var(--status-success); padding: 1px 6px; border-radius: 4px; font-weight: 800; font-size: 10px; margin-left: 6px;">🟢 LIVE</span>`;
+
+      sampleVideos.forEach((vid, idx) => {
+        const itemDate = new Date(year, month - 1, day, hour, min);
+
+        if (currentStrategy === 'interval') {
+          itemDate.setMinutes(itemDate.getMinutes() + idx * currentIntervalMinutes);
+        } else if (currentStrategy === 'daily') {
+          itemDate.setDate(itemDate.getDate() + idx * currentDailyStep);
+        }
+
+        const dateFormatted = itemDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+        const hoursFormatted = String(itemDate.getHours()).padStart(2, '0');
+        const minsFormatted = String(itemDate.getMinutes()).padStart(2, '0');
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="font-weight: 700; color: var(--text-muted);">#${idx + 1}</td>
+          <td style="font-family: var(--font-mono); color: var(--link); font-weight: 700;">${vid.id}</td>
+          <td>
+            <span style="background: var(--surface-interactive); color: var(--text-primary); padding: 2px 8px; border-radius: 4px; font-weight: 600;">
+              📅 ${dateFormatted} • ⏱️ ${hoursFormatted}:${minsFormatted} WIB
+            </span>
+            ${modeBadgeHtml}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      recalculateSim();
+    });
+  </script>
+</body>
+</html>

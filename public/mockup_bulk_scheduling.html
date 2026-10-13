@@ -1,0 +1,1888 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAKNA Flow — Mockup Interaktif Penjadwalan Konten Massal (Bulk Scheduling)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================================
+       1. SEMANTIC CSS DESIGN TOKENS (UNIVERSAL LIGHT & DARK)
+       Strict adherence to app/theme.css
+       ========================================================= */
+    :root, [data-theme="dark"] {
+      color-scheme: dark;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.82);
+
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --border-color: var(--border-subtle);
+
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+
+      --link: #67e8f9;
+      --link-hover: #a5f3fc;
+
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+
+      --platform-tiktok: #00f2fe;
+      --platform-tiktok-soft: rgba(0, 242, 254, 0.14);
+      --platform-instagram: #ec4899;
+      --platform-instagram-soft: rgba(236, 72, 153, 0.14);
+      --platform-facebook: #3b82f6;
+      --platform-facebook-soft: rgba(59, 130, 246, 0.14);
+      --platform-youtube: #ef4444;
+      --platform-youtube-soft: rgba(239, 68, 68, 0.14);
+    }
+
+    [data-theme="light"] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(30, 41, 59, 0.08);
+      --overlay-backdrop: rgba(15, 23, 42, 0.6);
+
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --text-disabled: #8794a6;
+
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --border-color: var(--border-subtle);
+
+      --action-primary: #087f73;
+      --action-primary-hover: #0b9b8d;
+      --on-action-primary: #ffffff;
+
+      --link: #0284c7;
+      --link-hover: #0369a1;
+
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.12);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.12);
+      --status-neutral: #7c3aed;
+      --status-neutral-soft: rgba(124, 58, 237, 0.12);
+
+      --focus-ring: #7c3aed;
+      --shadow-card: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --shadow-modal: 0 24px 70px rgba(15, 23, 42, 0.22);
+
+      --platform-tiktok: #0891b2;
+      --platform-tiktok-soft: rgba(8, 145, 178, 0.12);
+      --platform-instagram: #db2777;
+      --platform-instagram-soft: rgba(219, 39, 119, 0.12);
+      --platform-facebook: #2563eb;
+      --platform-facebook-soft: rgba(37, 99, 235, 0.12);
+      --platform-youtube: #dc2626;
+      --platform-youtube-soft: rgba(220, 38, 38, 0.12);
+    }
+
+    /* Base Reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-sans);
+      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+
+    body {
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Top Global Navigation Bar */
+    .top-nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .theme-toggle-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    /* Layout Container */
+    .layout-container {
+      display: flex;
+      flex: 1;
+      min-height: calc(100vh - 61px);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border-subtle);
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .sidebar-item:hover {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+    .sidebar-item.active {
+      background: var(--surface-raised);
+      color: var(--action-primary);
+      border: 1px solid var(--border-strong);
+    }
+
+    /* Main View Area */
+    .main-content {
+      flex: 1;
+      padding: 24px 32px;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Header & Tabs */
+    .content-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .title-group h1 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      letter-spacing: -0.02em;
+    }
+    .title-group p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .tab-pills {
+      display: flex;
+      gap: 8px;
+      background: var(--surface);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .tab-pill {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tab-pill.active {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+    }
+
+    /* Filter & Bulk Selection Control Bar */
+    .filter-and-actions-bar {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .filters-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .filter-select, .search-box {
+      background: var(--input-bg);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      outline: none;
+    }
+    .filter-select:focus, .search-box:focus {
+      border-color: var(--focus-ring);
+    }
+
+    .bulk-selection-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 12px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .select-counter-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .count-number {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .quick-select-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-quick {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-quick:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+    .btn-quick.highlight {
+      background: var(--status-info-soft);
+      border-color: var(--status-info);
+      color: var(--status-info);
+    }
+
+    /* Content Cards Grid / List */
+    .content-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 80px; /* Space for sticky bar */
+    }
+
+    .content-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: 36px 170px 1fr 220px;
+      gap: 18px;
+      align-items: center;
+      box-shadow: 0 4px 12px var(--overlay-subtle);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    .content-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+
+    .content-card.selected {
+      border-color: var(--action-primary);
+      background: var(--surface-raised);
+      box-shadow: 0 0 0 1px var(--action-primary), var(--shadow-card);
+    }
+
+    /* Custom Checkbox */
+    .checkbox-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .custom-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border-strong);
+      border-radius: 6px;
+      background: var(--input-bg);
+      cursor: pointer;
+      display: grid;
+      place-content: center;
+      position: relative;
+    }
+
+    .custom-checkbox:checked {
+      background: var(--action-primary);
+      border-color: var(--action-primary);
+    }
+
+    .custom-checkbox:checked::after {
+      content: "✓";
+      color: var(--on-action-primary);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    /* Card Thumbnail & Info */
+    .card-thumb {
+      width: 100%;
+      height: 96px;
+      background: var(--surface-interactive);
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .video-id-badge {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      background: var(--overlay-backdrop);
+      color: var(--link);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.35;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .brand-tag {
+      background: var(--surface-interactive);
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    /* Social Platform Badges */
+    .platform-statuses {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .platform-chip {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .chip-tiktok {
+      background: var(--platform-tiktok-soft);
+      color: var(--platform-tiktok);
+      border: 1px solid var(--platform-tiktok);
+    }
+    .chip-instagram {
+      background: var(--platform-instagram-soft);
+      color: var(--platform-instagram);
+      border: 1px solid var(--platform-instagram);
+    }
+    .chip-facebook {
+      background: var(--platform-facebook-soft);
+      color: var(--platform-facebook);
+      border: 1px solid var(--platform-facebook);
+    }
+    .chip-youtube {
+      background: var(--platform-youtube-soft);
+      color: var(--platform-youtube);
+      border: 1px solid var(--platform-youtube);
+    }
+    .chip-scheduled {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+    .chip-unposted {
+      background: var(--surface-interactive);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Card Actions */
+    .card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .btn-action-single {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-strong);
+      color: var(--text-secondary);
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+    }
+    .btn-action-single:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    /* =========================================================
+       2. FLOATING BULK ACTIONS BAR (DOCK)
+       ========================================================= */
+    .bulk-dock {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(120px);
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      border-radius: 16px;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      box-shadow: var(--shadow-modal);
+      z-index: 500;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .bulk-dock.active {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .bulk-dock-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dock-pill {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+
+    .dock-text {
+      font-size: 13px;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .bulk-dock-btns {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-dock-cancel {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-dock-cancel:hover {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+
+    .btn-dock-primary {
+      background: var(--action-primary);
+      border: 1px solid var(--action-primary);
+      color: var(--on-action-primary);
+      padding: 9px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(45, 212, 191, 0.3);
+    }
+    .btn-dock-primary:hover {
+      background: var(--action-primary-hover);
+    }
+
+    /* =========================================================
+       3. INTERACTIVE BULK SCHEDULING MODAL
+       ========================================================= */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      backdrop-filter: blur(6px);
+      display: grid;
+      place-items: center;
+      z-index: 1000;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 920px;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-modal);
+      overflow: hidden;
+      transform: scale(0.96);
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .modal-overlay.open .modal-box {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      padding: 20px 28px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface-raised);
+    }
+
+    .modal-title-group h2 {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .modal-title-group p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .modal-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+    }
+    .modal-close-btn:hover {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+
+    .modal-body {
+      padding: 24px 28px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    /* Section Boxes inside Modal */
+    .modal-section {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 18px 20px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    /* Selected Items Preview Chips in Modal */
+    .selected-items-scroller {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .item-chip-card {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 10px 12px;
+      min-width: 175px;
+      max-width: 175px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .item-chip-id {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--link);
+    }
+
+    .item-chip-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-chip-remove {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: var(--status-danger-soft);
+      color: var(--status-danger);
+      border: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      display: grid;
+      place-items: center;
+    }
+
+    /* Target Platforms & Accounts */
+    .platform-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .platform-select-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px 14px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .platform-select-card.active {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+    }
+
+    .platform-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .platform-icon-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .account-badge-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Date and Time Configuration */
+    .schedule-config-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .input-control {
+      background: var(--input-bg);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+    }
+    .input-control:focus {
+      border-color: var(--focus-ring);
+    }
+
+    /* Strategy Radio Pills */
+    .strategy-pills-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .strategy-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .strategy-card.active {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+      box-shadow: 0 0 0 1px var(--action-primary);
+    }
+
+    .strategy-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .strategy-desc {
+      font-size: 10px;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    /* Schedule Live Simulation Table */
+    .schedule-preview-table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .preview-table th {
+      background: var(--surface-interactive);
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 700;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .preview-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+    }
+
+    .preview-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .sim-time-badge {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--status-success);
+      background: var(--status-success-soft);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    /* Modal Footer */
+    .modal-footer {
+      padding: 18px 28px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface-raised);
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .summary-text {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .summary-text strong {
+      color: var(--text-primary);
+    }
+
+    .modal-action-btns {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-modal-cancel {
+      background: transparent;
+      border: 1px solid var(--border-strong);
+      color: var(--text-secondary);
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-modal-cancel:hover {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+
+    .btn-modal-submit {
+      background: var(--action-primary);
+      border: 1px solid var(--action-primary);
+      color: var(--on-action-primary);
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(45, 212, 191, 0.3);
+    }
+    .btn-modal-submit:hover {
+      background: var(--action-primary-hover);
+    }
+
+    /* Toast Notification */
+    .toast-popup {
+      position: fixed;
+      bottom: 90px;
+      right: 24px;
+      background: var(--surface-raised);
+      border: 1px solid var(--status-success);
+      color: var(--text-primary);
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: var(--shadow-modal);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 2000;
+      transform: translateY(30px);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .toast-popup.visible {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .content-card { grid-template-columns: 36px 1fr; gap: 12px; }
+      .card-actions { grid-column: span 2; }
+      .schedule-config-grid { grid-template-columns: 1fr; }
+      .strategy-pills-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Global Navigation Bar -->
+  <nav class="top-nav">
+    <div class="brand-logo">
+      <span>⚡ MAKNA FLOW</span>
+      <span class="brand-badge">ContentFlow Hub</span>
+      <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">| Fitur Baru: Penjadwalan Massal (Bulk Scheduling)</span>
+    </div>
+    <div class="nav-controls">
+      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">
+        <span id="themeIcon">☀️</span>
+        <span id="themeLabel">Light Mode</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Layout Container -->
+  <div class="layout-container">
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; padding-left: 10px;">Menu Utama</div>
+      <div class="sidebar-item">📊 Dashboard</div>
+      <div class="sidebar-item active">🌊 Content Flow</div>
+      <div class="sidebar-item">🎬 Video Studio</div>
+      <div class="sidebar-item">📅 Content Planner</div>
+      <div class="sidebar-item">🛍️ Products</div>
+      <div class="sidebar-item">⚙️ Settings</div>
+    </aside>
+
+    <!-- Main View Content -->
+    <main class="main-content">
+      
+      <!-- Header -->
+      <div class="content-header">
+        <div class="title-group">
+          <h1>🌊 Content Flow & Library</h1>
+          <p>Kelola video hasil produksi, jadwal publikasi multi-platform, dan analisis performa media sosial.</p>
+        </div>
+        
+        <!-- Primary Switcher Tabs -->
+        <div class="tab-pills">
+          <button class="tab-pill active">
+            <span>▣ Content Library</span>
+          </button>
+          <button class="tab-pill" onclick="alert('Ini adalah tab Publishing Scheduler eksisting. Mockup ini mendemonstrasikan integrasi fitur penjadwalan massal langsung dari Content Library!')">
+            <span>⏱️ Publishing Scheduler</span>
+          </button>
+          <button class="tab-pill" onclick="alert('Tab Analytics & Reporting')">
+            <span>⌁ Analytics & Reporting</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter & Bulk Control Bar -->
+      <div class="filter-and-actions-bar">
+        <div class="filters-row">
+          <input type="text" class="search-box" style="flex: 1; min-width: 200px;" placeholder="🔍 Cari ID Konten, Judul, atau Hook...">
+          <select class="filter-select">
+            <option>Semua Akun Brand</option>
+            <option>@kuliner_viral_id</option>
+            <option>@resep_masakan_nusantara</option>
+            <option>@dapur_bunda_lezat</option>
+          </select>
+          <select class="filter-select">
+            <option>Status Pipeline: Completed (6)</option>
+          </select>
+          <select class="filter-select">
+            <option>TikTok: Semua Status</option>
+          </select>
+          <select class="filter-select">
+            <option>Instagram: Semua Status</option>
+          </select>
+        </div>
+
+        <!-- Bulk Selection Toolbar -->
+        <div class="bulk-selection-toolbar">
+          <div class="select-counter-badge">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" id="selectAllCheckbox" class="custom-checkbox" onchange="toggleSelectAll(this.checked)">
+              <span>Pilih Semua</span>
+            </label>
+            <span style="color: var(--text-muted);">|</span>
+            <span>Terpilih: <span class="count-number" id="selectedCountDisplay">0</span> dari 6 konten</span>
+          </div>
+
+          <div class="quick-select-actions">
+            <!-- Shortcut sesuai permintaan pengguna: Pilih 5 konten langsung! -->
+            <button class="btn-quick highlight" onclick="quickSelectFiveItems()">
+              ✨ Pilih 5 Konten Terbaru
+            </button>
+            <button class="btn-quick" onclick="clearAllSelection()">
+              Bersihkan Pilihan
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Items List -->
+      <div class="content-list" id="contentList">
+        <!-- Rendered by JS -->
+      </div>
+
+    </main>
+  </div>
+
+  <!-- FLOATING BULK ACTIONS DOCK (Muncul saat ada konten dipilih) -->
+  <div class="bulk-dock" id="bulkDock">
+    <div class="bulk-dock-info">
+      <span class="dock-pill" id="dockCountPill">5 Terpilih</span>
+      <span class="dock-text">Konten siap dijadwalkan secara serentak atau berjarak</span>
+    </div>
+    <div class="bulk-dock-btns">
+      <button class="btn-dock-cancel" onclick="clearAllSelection()">Batal</button>
+      <button class="btn-dock-primary" onclick="openBulkScheduleModal()">
+        <span>⏱️ Jadwalkan Massal</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- INTERACTIVE BULK SCHEDULING MODAL -->
+  <div class="modal-overlay" id="bulkScheduleModal">
+    <div class="modal-box">
+      
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h2>⏱️ Penjadwalan Konten Massal (Bulk Scheduling)</h2>
+          <p>Jadwalkan beberapa konten sekaligus ke berbagai akun media sosial pada tanggal & jam yang ditentukan.</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeBulkScheduleModal()">✕</button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        
+        <!-- Seksi 1: Konten Terpilih -->
+        <div class="modal-section">
+          <div class="section-title">
+            <span>1. Konten Terpilih (<span id="modalSelectedCount">5</span> Video)</span>
+            <span class="section-desc">Urutan konten dapat disesuaikan untuk waktu tayang berurutan</span>
+          </div>
+          <div class="selected-items-scroller" id="modalItemsScroller">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Seksi 2: Pemilihan Platform & Akun Tujuan -->
+        <div class="modal-section">
+          <div class="section-title">
+            <span>2. Platform & Akun Media Sosial Tujuan</span>
+            <span class="section-desc">Pilih satu atau lebih platform/akun tujuan</span>
+          </div>
+
+          <div class="platform-cards-grid">
+            
+            <!-- TikTok -->
+            <div class="platform-select-card active" id="platCardTikTok" onclick="togglePlatform('tiktok')">
+              <div class="platform-card-header">
+                <div class="platform-icon-name">
+                  <span style="color: var(--platform-tiktok);">🎵</span>
+                  <span>TikTok</span>
+                </div>
+                <input type="checkbox" id="checkPlatTikTok" class="custom-checkbox" checked onclick="event.stopPropagation(); togglePlatform('tiktok')">
+              </div>
+              <div class="account-badge-sub">@kuliner_viral_id (Repliz)</div>
+              <div style="font-size: 10px; color: var(--status-success); font-weight: 700;">🟢 Terhubung</div>
+            </div>
+
+            <!-- Instagram Reels -->
+            <div class="platform-select-card active" id="platCardInstagram" onclick="togglePlatform('instagram')">
+              <div class="platform-card-header">
+                <div class="platform-icon-name">
+                  <span style="color: var(--platform-instagram);">📸</span>
+                  <span>Instagram</span>
+                </div>
+                <input type="checkbox" id="checkPlatInstagram" class="custom-checkbox" checked onclick="event.stopPropagation(); togglePlatform('instagram')">
+              </div>
+              <div class="account-badge-sub">@resep_nusantara (Repliz)</div>
+              <div style="font-size: 10px; color: var(--status-success); font-weight: 700;">🟢 Terhubung</div>
+            </div>
+
+            <!-- Facebook Reels -->
+            <div class="platform-select-card active" id="platCardFacebook" onclick="togglePlatform('facebook')">
+              <div class="platform-card-header">
+                <div class="platform-icon-name">
+                  <span style="color: var(--platform-facebook);">📘</span>
+                  <span>Facebook</span>
+                </div>
+                <input type="checkbox" id="checkPlatFacebook" class="custom-checkbox" checked onclick="event.stopPropagation(); togglePlatform('facebook')">
+              </div>
+              <div class="account-badge-sub">Dapur Praktis ID (Meta)</div>
+              <div style="font-size: 10px; color: var(--status-success); font-weight: 700;">🟢 Terhubung</div>
+            </div>
+
+            <!-- YouTube Shorts -->
+            <div class="platform-select-card" id="platCardYouTube" onclick="togglePlatform('youtube')">
+              <div class="platform-card-header">
+                <div class="platform-icon-name">
+                  <span style="color: var(--platform-youtube);">▶️</span>
+                  <span>YouTube</span>
+                </div>
+                <input type="checkbox" id="checkPlatYouTube" class="custom-checkbox" onclick="event.stopPropagation(); togglePlatform('youtube')">
+              </div>
+              <div class="account-badge-sub">Resep Praktis Harian</div>
+              <div style="font-size: 10px; color: var(--status-success); font-weight: 700;">🟢 Terhubung</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Seksi 3: Tanggal, Waktu & Strategi Distribusi Tayang -->
+        <div class="modal-section">
+          <div class="section-title">
+            <span>3. Konfigurasi Tanggal & Waktu Tayang</span>
+            <span class="section-desc">Sesuai permintaan: 13 Oktober 2026 jam tertentu</span>
+          </div>
+
+          <!-- Base Date & Base Time Inputs -->
+          <div class="schedule-config-grid">
+            <div class="input-group">
+              <label class="input-label">
+                <span>Tanggal Mulai Tayang</span>
+                <span style="color: var(--action-primary); font-size: 11px;">Target Jadwal</span>
+              </label>
+              <!-- Default ke tanggal yang diminta user: 13 Oktober 2026 -->
+              <input type="date" id="targetDateInput" class="input-control" value="2026-10-13" onchange="recalculateSimulation()">
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">
+                <span>Jam Mulai Tayang (WIB)</span>
+                <span style="color: var(--text-muted); font-size: 11px;">Zona Waktu: Asia/Jakarta</span>
+              </label>
+              <input type="time" id="targetTimeInput" class="input-control" value="10:00" onchange="recalculateSimulation()">
+            </div>
+          </div>
+
+          <!-- Mode Distribusi Waktu (Strategi Penjadwalan) -->
+          <div style="margin-bottom: 8px;">
+            <label class="input-label" style="margin-bottom: 6px;">Mode Distribusi Waktu Antar Konten:</label>
+            <div class="strategy-pills-row">
+              
+              <!-- Opsi 1: Jeda Interval (Direkomendasikan) -->
+              <div class="strategy-card active" id="stratInterval" onclick="setDistributionStrategy('interval')">
+                <div class="strategy-title">
+                  <span>⏱️ Jeda Interval (Rekomendasi)</span>
+                </div>
+                <div class="strategy-desc">Konten tayang bertahap dengan jeda waktu agar aman dari spam filter algoritma.</div>
+              </div>
+
+              <!-- Opsi 2: Serentak -->
+              <div class="strategy-card" id="stratSimultaneous" onclick="setDistributionStrategy('simultaneous')">
+                <div class="strategy-title">
+                  <span>⚡ Serentak (Sama Persis)</span>
+                </div>
+                <div class="strategy-desc">Semua 5 konten dijadwalkan tepat pada jam yang sama (misal 10:00 WIB).</div>
+              </div>
+
+              <!-- Opsi 3: Slot Harian -->
+              <div class="strategy-card" id="stratDaily" onclick="setDistributionStrategy('daily')">
+                <div class="strategy-title">
+                  <span>📅 1 Konten Per Hari</span>
+                </div>
+                <div class="strategy-desc">Mulai 13 Okt, 14 Okt, 15 Okt, dst di jam yang sama setiap harinya.</div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Pengaturan Interval jika Mode Interval Aktif -->
+          <div id="intervalConfigWrap" style="display: flex; align-items: center; justify-content: space-between; background: var(--surface); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-subtle); margin-bottom: 12px;">
+            <span style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Jeda Waktu Antar Konten:</span>
+            <select id="intervalMinutesSelect" class="filter-select" style="padding: 6px 10px;" onchange="recalculateSimulation()">
+              <option value="30">30 Menit</option>
+              <option value="60">1 Jam</option>
+              <option value="120" selected>2 Jam (Sangat Direkomendasikan)</option>
+              <option value="180">3 Jam</option>
+              <option value="240">4 Jam</option>
+            </select>
+          </div>
+
+          <!-- Pratinjau Kalkulasi Jadwal Otomatis (Live Simulation Table) -->
+          <div style="margin-top: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">📋 Simulasi Jadwal Tayang Masing-Masing Konten:</span>
+              <span style="font-size: 11px; color: var(--action-primary); font-weight: 600;">Otomatis Dihitung Real-Time</span>
+            </div>
+            <div class="schedule-preview-table-wrap">
+              <table class="preview-table">
+                <thead>
+                  <tr>
+                    <th>Urutan</th>
+                    <th>Video ID & Judul</th>
+                    <th>Platform Tujuan</th>
+                    <th>Waktu Tayang Terjadwal (WIB)</th>
+                  </tr>
+                </thead>
+                <tbody id="simulationTableBody">
+                  <!-- Rendered by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Seksi 4: Opsi Caption & Publishing Mode -->
+        <div class="modal-section">
+          <div class="section-title">
+            <span>4. Opsi Caption & Publishing Mode</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div class="input-group">
+              <label class="input-label">Penanganan Caption:</label>
+              <select class="input-control">
+                <option>Gunakan Caption Masing-Masing Konten (Rekomendasi)</option>
+                <option>Tambahkan Tagar Bersama di Akhir Caption</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">Publishing Mode:</label>
+              <select class="input-control">
+                <option>Live Publish (Terjadwal Otomatis)</option>
+                <option>Simpan sebagai Draft Media Sosial</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-top: 12px; display: flex; align-items: center; gap: 10px; background: var(--surface); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+            <input type="checkbox" id="aigcCheck" class="custom-checkbox" checked>
+            <label for="aigcCheck" style="font-size: 12px; color: var(--text-primary); cursor: pointer;">
+              <strong>Sertakan Label AI-Generated Content (AIGC)</strong>
+              <div style="font-size: 11px; color: var(--text-muted);">Sesuai spesifikasi Repliz API (<code style="font-family: var(--font-mono); color: var(--link);">isAiGenerated</code>), label ini berlaku universal untuk TikTok (AIGC), Meta (IG/FB), dan YouTube (Altered/Synthetic Content).</div>
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <div class="summary-text" id="modalSummaryText">
+          Ringkasan: <strong>5 Konten</strong> × <strong>3 Akun Platform</strong> = <strong>15 Antrean Publikasi</strong>
+        </div>
+        <div class="modal-action-btns">
+          <button class="btn-modal-cancel" onclick="closeBulkScheduleModal()">Batal</button>
+          <button class="btn-modal-submit" id="btnExecuteBulk" onclick="simulateExecuteBulk()">
+            <span>🚀 Konfirmasi & Jadwalkan Massal</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-popup" id="toastPopup">
+    <span style="font-size: 18px;">🎉</span>
+    <span id="toastMessage">Berhasil menjadwalkan 5 konten secara massal!</span>
+  </div>
+
+  <!-- Interactive JavaScript Logic -->
+  <script>
+    // Mock Data Content Flow Items
+    const sampleItems = [
+      {
+        id: 1,
+        video_id: 'VD-RE-0892',
+        hook: 'Resep Ayam Geprek Sambal Korek Super Renyah dan Pedas Gurih',
+        account_name: 'kuliner_viral_id',
+        product_name: 'Tepung Bumbu Crispy 1kg',
+        production_date: '2026-10-10',
+        tiktok_status: 'Unposted',
+        instagram_status: 'Unposted',
+        facebook_status: 'Unposted',
+        youtube_status: 'Unposted'
+      },
+      {
+        id: 2,
+        video_id: 'VD-RE-0893',
+        hook: 'Rahasia Kuah Bakso Gurih Bening Nampol Tanpa Micin Berlebih',
+        account_name: 'kuliner_viral_id',
+        product_name: 'Bumbu Kuah Bakso Alami',
+        production_date: '2026-10-11',
+        tiktok_status: 'Unposted',
+        instagram_status: 'Unposted',
+        facebook_status: 'Unposted',
+        youtube_status: 'Unposted'
+      },
+      {
+        id: 3,
+        video_id: 'VD-RE-0894',
+        hook: 'Tips Sambal Terasi Awet 1 Bulan Tanpa Pengawet, Tetap Fresh',
+        account_name: 'resep_masakan_nusantara',
+        product_name: 'Terasi Udang Premium',
+        production_date: '2026-10-11',
+        tiktok_status: 'Unposted',
+        instagram_status: 'Unposted',
+        facebook_status: 'Unposted',
+        youtube_status: 'Unposted'
+      },
+      {
+        id: 4,
+        video_id: 'VD-RE-0895',
+        hook: 'Cara Bikin Telur Gulung Anti Gagal untuk Ide Jualan Modal Irit',
+        account_name: 'kuliner_viral_id',
+        product_name: 'Minyak Goreng Kelapa Sehat',
+        production_date: '2026-10-12',
+        tiktok_status: 'Unposted',
+        instagram_status: 'Unposted',
+        facebook_status: 'Unposted',
+        youtube_status: 'Unposted'
+      },
+      {
+        id: 5,
+        video_id: 'VD-RE-0896',
+        hook: 'Resep Es Lumut Strawberry Creamy Segar Pengusir Gerah Siang Hari',
+        account_name: 'dapur_bunda_lezat',
+        product_name: 'Sirup Strawberry Murni',
+        production_date: '2026-10-12',
+        tiktok_status: 'Unposted',
+        instagram_status: 'Unposted',
+        facebook_status: 'Unposted',
+        youtube_status: 'Unposted'
+      },
+      {
+        id: 6,
+        video_id: 'VD-RE-0897',
+        hook: 'Trik Bikin Donat Kentang Lembut Montok Tahan Seharian',
+        account_name: 'resep_masakan_nusantara',
+        product_name: 'Ragi Instan Premium',
+        production_date: '2026-10-12',
+        tiktok_status: 'Published',
+        instagram_status: 'Published',
+        facebook_status: 'Published',
+        youtube_status: 'Unposted'
+      }
+    ];
+
+    // Selected items Set
+    let selectedIds = new Set();
+
+    // Selected Platforms
+    const selectedPlatforms = {
+      tiktok: true,
+      instagram: true,
+      facebook: true,
+      youtube: false
+    };
+
+    // Distribution Strategy: 'interval' | 'simultaneous' | 'daily'
+    let currentStrategy = 'interval';
+
+    // Theme Toggle
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      
+      const icon = document.getElementById('themeIcon');
+      const label = document.getElementById('themeLabel');
+      if (next === 'light') {
+        icon.textContent = '🌙';
+        label.textContent = 'Dark Mode';
+      } else {
+        icon.textContent = '☀️';
+        label.textContent = 'Light Mode';
+      }
+    }
+
+    // Render Content Cards
+    function renderCards() {
+      const listEl = document.getElementById('contentList');
+      listEl.innerHTML = '';
+
+      sampleItems.forEach(item => {
+        const isSelected = selectedIds.has(item.id);
+        const card = document.createElement('div');
+        card.className = `content-card ${isSelected ? 'selected' : ''}`;
+        card.id = `card-${item.id}`;
+
+        card.innerHTML = `
+          <div class="checkbox-wrap">
+            <input type="checkbox" class="custom-checkbox" ${isSelected ? 'checked' : ''} onchange="toggleItemSelection(${item.id}, this.checked)">
+          </div>
+
+          <div class="card-thumb">
+            <span class="video-id-badge">${item.video_id}</span>
+            <div style="font-size: 26px;">🎬</div>
+          </div>
+
+          <div class="card-body">
+            <div class="card-title">${item.hook}</div>
+            <div class="card-meta">
+              <span class="brand-tag">@${item.account_name}</span>
+              <span>📦 ${item.product_name}</span>
+              <span>📅 Selesai: ${item.production_date}</span>
+            </div>
+            <div class="platform-statuses">
+              <span class="platform-chip ${item.tiktok_status === 'Published' ? 'chip-tiktok' : item.tiktok_status === 'Scheduled' ? 'chip-scheduled' : 'chip-unposted'}">
+                TikTok: ${item.tiktok_status}
+              </span>
+              <span class="platform-chip ${item.instagram_status === 'Published' ? 'chip-instagram' : item.instagram_status === 'Scheduled' ? 'chip-scheduled' : 'chip-unposted'}">
+                IG Reels: ${item.instagram_status}
+              </span>
+              <span class="platform-chip ${item.facebook_status === 'Published' ? 'chip-facebook' : item.facebook_status === 'Scheduled' ? 'chip-scheduled' : 'chip-unposted'}">
+                FB Reels: ${item.facebook_status}
+              </span>
+              <span class="platform-chip ${item.youtube_status === 'Published' ? 'chip-youtube' : item.youtube_status === 'Scheduled' ? 'chip-scheduled' : 'chip-unposted'}">
+                YouTube: ${item.youtube_status}
+              </span>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <button class="btn-action-single" onclick="alert('Membuka modal detail & preview video ${item.video_id}')">
+              Detail & Status
+            </button>
+            <button class="btn-action-single" style="border-color: var(--action-primary); color: var(--action-primary);" onclick="quickSelectThisOnly(${item.id})">
+              ⏱️ Jadwalkan
+            </button>
+          </div>
+        `;
+
+        listEl.appendChild(card);
+      });
+
+      updateSelectionUI();
+    }
+
+    // Toggle Single Item Selection
+    function toggleItemSelection(id, checked) {
+      if (checked) {
+        selectedIds.add(id);
+      } else {
+        selectedIds.delete(id);
+      }
+      renderCards();
+    }
+
+    // Toggle Select All
+    function toggleSelectAll(checked) {
+      if (checked) {
+        sampleItems.forEach(it => selectedIds.add(it.id));
+      } else {
+        selectedIds.clear();
+      }
+      renderCards();
+    }
+
+    // Shortcut: Pilih 5 Konten Sekaligus (Sesuai skenario prompt pengguna)
+    function quickSelectFiveItems() {
+      selectedIds.clear();
+      // Pilih 5 item pertama yang statusnya Unposted
+      sampleItems.slice(0, 5).forEach(it => selectedIds.add(it.id));
+      renderCards();
+      showToast('5 Konten terbaru berhasil dipilih untuk penjadwalan massal! ✨');
+    }
+
+    function quickSelectThisOnly(id) {
+      selectedIds.clear();
+      selectedIds.add(id);
+      renderCards();
+      openBulkScheduleModal();
+    }
+
+    // Clear All Selection
+    function clearAllSelection() {
+      selectedIds.clear();
+      renderCards();
+    }
+
+    // Update Selection Counters & Dock UI
+    function updateSelectionUI() {
+      const count = selectedIds.size;
+      document.getElementById('selectedCountDisplay').textContent = count;
+      document.getElementById('selectAllCheckbox').checked = (count === sampleItems.length && count > 0);
+
+      const dock = document.getElementById('bulkDock');
+      const dockCountPill = document.getElementById('dockCountPill');
+
+      if (count > 0) {
+        dock.classList.add('active');
+        dockCountPill.textContent = `${count} Terpilih`;
+      } else {
+        dock.classList.remove('active');
+      }
+    }
+
+    // Toggle Platform Selection in Modal
+    function togglePlatform(platKey) {
+      selectedPlatforms[platKey] = !selectedPlatforms[platKey];
+      const card = document.getElementById(`platCard${capitalize(platKey)}`);
+      const check = document.getElementById(`checkPlat${capitalize(platKey)}`);
+      
+      if (selectedPlatforms[platKey]) {
+        card.classList.add('active');
+        check.checked = true;
+      } else {
+        card.classList.remove('active');
+        check.checked = false;
+      }
+
+      recalculateSimulation();
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    // Change Distribution Strategy
+    function setDistributionStrategy(strategy) {
+      currentStrategy = strategy;
+      ['Interval', 'Simultaneous', 'Daily'].forEach(s => {
+        document.getElementById(`strat${s}`).classList.remove('active');
+      });
+
+      if (strategy === 'interval') {
+        document.getElementById('stratInterval').classList.add('active');
+        document.getElementById('intervalConfigWrap').style.display = 'flex';
+      } else if (strategy === 'simultaneous') {
+        document.getElementById('stratSimultaneous').classList.add('active');
+        document.getElementById('intervalConfigWrap').style.display = 'none';
+      } else if (strategy === 'daily') {
+        document.getElementById('stratDaily').classList.add('active');
+        document.getElementById('intervalConfigWrap').style.display = 'none';
+      }
+
+      recalculateSimulation();
+    }
+
+    // Open Bulk Schedule Modal
+    function openBulkScheduleModal() {
+      if (selectedIds.size === 0) {
+        alert('Silakan pilih minimal 1 konten terlebih dahulu!');
+        return;
+      }
+
+      document.getElementById('modalSelectedCount').textContent = selectedIds.size;
+      renderModalSelectedItems();
+      recalculateSimulation();
+      document.getElementById('bulkScheduleModal').classList.add('open');
+    }
+
+    function closeBulkScheduleModal() {
+      document.getElementById('bulkScheduleModal').classList.remove('open');
+    }
+
+    // Render Selected Chips in Modal
+    function renderModalSelectedItems() {
+      const scroller = document.getElementById('modalItemsScroller');
+      scroller.innerHTML = '';
+
+      const items = sampleItems.filter(it => selectedIds.has(it.id));
+      items.forEach(it => {
+        const chip = document.createElement('div');
+        chip.className = 'item-chip-card';
+        chip.innerHTML = `
+          <button class="item-chip-remove" title="Hapus dari batch" onclick="removeItemFromBatch(${it.id})">✕</button>
+          <span class="item-chip-id">${it.video_id}</span>
+          <span class="item-chip-title">${it.hook}</span>
+          <span style="font-size: 10px; color: var(--text-muted);">@${it.account_name}</span>
+        `;
+        scroller.appendChild(chip);
+      });
+    }
+
+    function removeItemFromBatch(id) {
+      selectedIds.delete(id);
+      renderCards();
+      renderModalSelectedItems();
+      recalculateSimulation();
+      if (selectedIds.size === 0) {
+        closeBulkScheduleModal();
+      }
+    }
+
+    // Recalculate Live Simulation Table
+    function recalculateSimulation() {
+      const tbody = document.getElementById('simulationTableBody');
+      tbody.innerHTML = '';
+
+      const dateVal = document.getElementById('targetDateInput').value || '2026-10-13';
+      const timeVal = document.getElementById('targetTimeInput').value || '10:00';
+      const intervalMinutes = parseInt(document.getElementById('intervalMinutesSelect').value, 10) || 120;
+
+      const activePlats = Object.keys(selectedPlatforms).filter(p => selectedPlatforms[p]);
+      const items = sampleItems.filter(it => selectedIds.has(it.id));
+
+      if (items.length === 0 || activePlats.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 18px;">Pilih minimal 1 konten dan 1 platform tujuan.</td></tr>`;
+        document.getElementById('modalSummaryText').innerHTML = `Pilih minimal 1 platform tujuan.`;
+        return;
+      }
+
+      // Base DateTime
+      const [year, month, day] = dateVal.split('-').map(Number);
+      const [hour, minute] = timeVal.split(':').map(Number);
+
+      items.forEach((item, index) => {
+        const itemDate = new Date(year, month - 1, day, hour, minute);
+
+        if (currentStrategy === 'interval') {
+          // Jeda interval menit per urutan video
+          itemDate.setMinutes(itemDate.getMinutes() + (index * intervalMinutes));
+        } else if (currentStrategy === 'daily') {
+          // Tambah 1 hari per urutan video
+          itemDate.setDate(itemDate.getDate() + index);
+        }
+        // Jika 'simultaneous', jam dan tanggal tetap sama
+
+        // Format Tampilan Indonesia
+        const formattedDate = itemDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+        const hoursStr = String(itemDate.getHours()).padStart(2, '0');
+        const minsStr = String(itemDate.getMinutes()).padStart(2, '0');
+        const formattedTime = `${hoursStr}:${minsStr} WIB`;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="font-weight: 700; color: var(--text-muted); width: 60px;">#${index + 1}</td>
+          <td>
+            <div style="font-weight: 700; color: var(--link); font-family: var(--font-mono);">${item.video_id}</div>
+            <div style="font-size: 11px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 280px;">${item.hook}</div>
+          </td>
+          <td>
+            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+              ${activePlats.map(p => `<span class="platform-chip chip-${p}">${p.toUpperCase()}</span>`).join('')}
+            </div>
+          </td>
+          <td>
+            <span class="sim-time-badge">📅 ${formattedDate} • ⏱️ ${formattedTime}</span>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Update Summary Text
+      const totalJobs = items.length * activePlats.length;
+      document.getElementById('modalSummaryText').innerHTML = `
+        Ringkasan: <strong>${items.length} Konten</strong> × <strong>${activePlats.length} Platform</strong> = <strong>${totalJobs} Antrean Publikasi</strong>
+      `;
+    }
+
+    // Execute Bulk Simulation
+    function simulateExecuteBulk() {
+      const btn = document.getElementById('btnExecuteBulk');
+      btn.disabled = true;
+      btn.innerHTML = `<span>⏳ Memproses Penjadwalan...</span>`;
+
+      setTimeout(() => {
+        // Update mock items status to 'Scheduled'
+        selectedIds.forEach(id => {
+          const item = sampleItems.find(it => it.id === id);
+          if (item) {
+            if (selectedPlatforms.tiktok) item.tiktok_status = 'Scheduled';
+            if (selectedPlatforms.instagram) item.instagram_status = 'Scheduled';
+            if (selectedPlatforms.facebook) item.facebook_status = 'Scheduled';
+            if (selectedPlatforms.youtube) item.youtube_status = 'Scheduled';
+          }
+        });
+
+        const targetDate = document.getElementById('targetDateInput').value;
+        const targetTime = document.getElementById('targetTimeInput').value;
+        const count = selectedIds.size;
+
+        closeBulkScheduleModal();
+        clearAllSelection();
+        btn.disabled = false;
+        btn.innerHTML = `<span>🚀 Konfirmasi & Jadwalkan Massal</span>`;
+
+        showToast(`🎉 Berhasil! ${count} konten sukses dijadwalkan untuk ${targetDate} jam ${targetTime} WIB.`);
+      }, 1200);
+    }
+
+    // Show Toast
+    function showToast(msg) {
+      const toast = document.getElementById('toastPopup');
+      document.getElementById('toastMessage').textContent = msg;
+      toast.classList.add('visible');
+      setTimeout(() => {
+        toast.classList.remove('visible');
+      }, 4000);
+    }
+
+    // Initial Init
+    window.addEventListener('DOMContentLoaded', () => {
+      // Auto pilih 5 items pertama untuk demonstrasi instan saat mockup pertama kali dibuka
+      quickSelectFiveItems();
+    });
+  </script>
+</body>
+</html>

@@ -16,7 +16,7 @@ const IDENTITIES = [
       name: 'Solusi Thermal ID Universe',
       premise: 'Edukasi sains termal, radiasi atap metal, dan teknologi insulasi bangunan penahan panas matahari.',
       tone: 'Informative, Smart, Innovative, High-Tech',
-      knowledge_domain: 'thermal_insulation_and_energy_efficiency'
+      knowledge_domain: 'home_improvement'
     },
     character: {
       id: 'ptgim_char_reno',
@@ -139,7 +139,7 @@ const IDENTITIES = [
       name: 'Ruang Akustik ID Universe',
       premise: 'Edukasi peredaman gema, akustik ruang, dan kenyamanan audio interior arsitektural.',
       tone: 'Sophisticated, Elegant, Calm, Creative, Tech-Savvy',
-      knowledge_domain: 'room_acoustics_and_soundproofing'
+      knowledge_domain: 'home_improvement'
     },
     character: {
       id: 'ptgim_char_maya',
@@ -262,7 +262,7 @@ const IDENTITIES = [
       name: 'Jasa Insulasi ID Universe',
       premise: 'Edukasi standar instalasi fisik, survei struktur, kerapian pengerjaan airtight tanpa celah, dan integritas craftsmanship konstruksi.',
       tone: 'Reliable, Practical, High-Quality, Professional, Energetic',
-      knowledge_domain: 'field_insulation_installation_and_contracting'
+      knowledge_domain: 'home_improvement'
     },
     character: {
       id: 'ptgim_char_bima',

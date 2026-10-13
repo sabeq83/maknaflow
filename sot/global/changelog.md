@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.29 — Unified Bulk Publishing Scheduler Modal & Media Preview Guard (13/10/2026)
+- Unified PublishingScheduler modal mendukung mode Single dan Bulk secara terpadu
+- Media preview dinonaktifkan otomatis saat mode bulk untuk optimasi memori dan performa browser
+- Endpoint batch POST /api/v2/publishing/bulk-jobs dengan kalkulasi interval fleksibel dan mode Live/Draft
+- Integrasi seleksi multi-konten dan floating action dock pada Content Flow Library
+
 ## V2.32.28 — Sync Visual Identity Presets untuk Tenant PT GIM Sosmed (08/10/2026)
 - Mendaftarkan preset visual identity, universe, character, location, dan brand profile ke tenant ID tnt_pt-gim-sosmed_62d0d9 di staging, dev, dan public schemas
 

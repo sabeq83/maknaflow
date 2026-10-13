@@ -1,7 +1,7 @@
 'use client';
 
 import Sidebar from '../components/Sidebar';
-import { useEffect, useState, useCallback, Suspense } from 'react';
+import { useEffect, useState, useCallback, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import PublishingScheduler from './PublishingScheduler';
 import ContentFlowAnalytics from './ContentFlowAnalytics';
@@ -103,6 +103,7 @@ function ContentFlowHubPageContent() {
 
   const [mainView, setMainView] = useState(initialView);
   const [schedulePreloadItem, setSchedulePreloadItem] = useState(null);
+  const [bulkPreloadItems, setBulkPreloadItems] = useState(null);
 
   const handleSwitchView = useCallback((newView) => {
     setMainView(newView);
@@ -120,6 +121,53 @@ function ContentFlowHubPageContent() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
+
+  // Bulk Selection States
+  const [selectedItemIds, setSelectedItemIds] = useState(new Set());
+
+  const handleToggleSelectItem = useCallback((id) => {
+    setSelectedItemIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const handleSelectAllItems = useCallback((checked) => {
+    if (checked) {
+      setSelectedItemIds(new Set(items.map(it => it.id)));
+    } else {
+      setSelectedItemIds(new Set());
+    }
+  }, [items]);
+
+  const handleQuickSelectCount = useCallback((count = 5) => {
+    const unpostedOrAll = items.filter(it => it.tiktok_status !== 'Published' || it.facebook_status !== 'Published' || it.instagram_status !== 'Published');
+    const pool = unpostedOrAll.length >= count ? unpostedOrAll : items;
+    const targetSlice = pool.slice(0, count).map(it => it.id);
+    setSelectedItemIds(new Set(targetSlice));
+    setToastMsg(`${targetSlice.length} konten siap jadwal berhasil dipilih! ✨`);
+    setTimeout(() => setToastMsg(''), 3000);
+  }, [items]);
+
+  const handleClearSelection = useCallback(() => {
+    setSelectedItemIds(new Set());
+  }, []);
+
+  const selectedItemsList = useMemo(() => {
+    return items.filter(it => selectedItemIds.has(it.id));
+  }, [items, selectedItemIds]);
+
+  const handleLaunchBulkSchedule = useCallback(() => {
+    const selected = items.filter(it => selectedItemIds.has(it.id));
+    if (selected.length === 0) {
+      setToastMsg('Pilih minimal satu konten untuk dijadwalkan massal ⚠️');
+      setTimeout(() => setToastMsg(''), 3000);
+      return;
+    }
+    setBulkPreloadItems(selected);
+  }, [items, selectedItemIds]);
 
   // Filter States
   const [searchTerm, setSearchTerm] = useState('');
@@ -848,31 +896,30 @@ function ContentFlowHubPageContent() {
           {mainView === 'publishing' ? (
             <PublishingScheduler
               initialPreloadItem={schedulePreloadItem}
-              onBackToLibrary={() => { handleSwitchView('library'); setSchedulePreloadItem(null); }}
+              initialPreloadItems={bulkPreloadItems}
+              onBackToLibrary={() => {
+                handleSwitchView('library');
+                setSchedulePreloadItem(null);
+                setBulkPreloadItems(null);
+              }}
             />
           ) : mainView === 'analytics' ? (
             <ContentFlowAnalytics accountQuery={accountQuery} />
           ) : (
             <>
-              {/* Modal Overlay Scheduler — tampil di atas library tanpa pindah tab */}
-              {schedulePreloadItem && (
-                <div style={{
-                  position: 'fixed', inset: 0, zIndex: 1000,
-                  background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)',
-                  display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-                  padding: '20px', overflowY: 'auto'
-                }}>
-                  <div style={{ width: '100%', maxWidth: '960px', position: 'relative' }}>
-                    <PublishingScheduler
-                      initialPreloadItem={schedulePreloadItem}
-                      modalOnly={true}
-                      onBackToLibrary={() => {
-                        setSchedulePreloadItem(null);
-                        loadContent();
-                      }}
-                    />
-                  </div>
-                </div>
+              {/* Modal Overlay Scheduler — tampil di atas library tanpa pindah tab (Unified Single & Bulk) */}
+              {(schedulePreloadItem || (bulkPreloadItems && bulkPreloadItems.length > 0)) && (
+                <PublishingScheduler
+                  initialPreloadItem={schedulePreloadItem}
+                  initialPreloadItems={bulkPreloadItems}
+                  modalOnly={true}
+                  onBackToLibrary={() => {
+                    setSchedulePreloadItem(null);
+                    setBulkPreloadItems(null);
+                    setSelectedItemIds(new Set());
+                    loadContent();
+                  }}
+                />
               )}
               {/* Quick Metrics Bar */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '24px' }}>
@@ -1323,6 +1370,94 @@ function ContentFlowHubPageContent() {
             </div>
           </div>
 
+          {/* Bulk Selection Toolbar */}
+          <div style={{
+            padding: '12px 18px',
+            borderRadius: '12px',
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            marginBottom: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                <input
+                  type="checkbox"
+                  checked={items.length > 0 && selectedItemIds.size === items.length}
+                  onChange={(e) => handleSelectAllItems(e.target.checked)}
+                  style={{ width: '17px', height: '17px', accentColor: 'var(--action-primary)', cursor: 'pointer' }}
+                />
+                <span>Pilih Semua</span>
+              </label>
+              <span style={{ color: 'var(--border-strong)' }}>|</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                Terpilih: <strong style={{ color: 'var(--action-primary)' }}>{selectedItemIds.size}</strong> dari {items.length} konten
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={() => handleQuickSelectCount(5)}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  background: 'var(--status-info-soft)',
+                  border: '1px solid var(--status-info)',
+                  color: 'var(--link)',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                ✨ Pilih 5 Konten Terbaru
+              </button>
+              {selectedItemIds.size > 0 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleClearSelection}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      background: 'transparent',
+                      border: '1px solid var(--border-strong)',
+                      color: 'var(--text-muted)',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Bersihkan Pilihan
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleLaunchBulkSchedule}
+                    style={{
+                      padding: '6px 14px',
+                      borderRadius: '6px',
+                      background: 'var(--action-primary)',
+                      border: '1px solid var(--action-primary)',
+                      color: 'var(--on-action-primary)',
+                      fontSize: '12px',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <span>⏱️ Jadwalkan Massal ({selectedItemIds.size})</span>
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
           {/* Content Items 1-Column Feed */}
           {loading ? (
             <div style={{ padding: '64px', textAlign: 'center', color: 'var(--text-muted)' }}>
@@ -1352,25 +1487,52 @@ function ContentFlowHubPageContent() {
                 const publishedPlatformCount = [isTkPub, isFbPub, isIgPub].filter(Boolean).length;
                 const isAll3Published = publishedPlatformCount === 3;
 
+                const isSelected = selectedItemIds.has(item.id);
                 return (
                   <div
                     key={item.id}
                     style={{
-                      background: 'var(--bg-secondary)',
-                      border: isAll3Published ? '1px solid var(--status-success)' : '1px solid var(--border)',
+                      background: isSelected ? 'var(--surface-raised)' : 'var(--bg-secondary)',
+                      border: isSelected
+                        ? '1px solid var(--action-primary)'
+                        : isAll3Published
+                        ? '1px solid var(--status-success)'
+                        : '1px solid var(--border)',
                       borderRadius: '16px',
                       padding: isAll3Published ? '22px 20px 16px' : '16px 20px',
                       display: 'grid',
-                      gridTemplateColumns: '200px 1fr 240px',
-                      gap: '20px',
+                      gridTemplateColumns: '36px 200px 1fr 240px',
+                      gap: '16px',
                       alignItems: 'center',
-                      boxShadow: isAll3Published ? '0 0 20px var(--status-success-soft)' : '0 4px 16px var(--overlay-subtle)',
+                      boxShadow: isSelected
+                        ? '0 0 0 1px var(--action-primary), 0 8px 24px var(--overlay-subtle)'
+                        : isAll3Published
+                        ? '0 0 20px var(--status-success-soft)'
+                        : '0 4px 16px var(--overlay-subtle)',
                       transition: 'all 0.2s ease',
                       position: 'relative'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.borderColor = isAll3Published ? 'var(--status-success)' : 'rgba(59, 130, 246, 0.45)'}
-                    onMouseLeave={(e) => e.currentTarget.style.borderColor = isAll3Published ? 'var(--status-success)' : 'var(--bg-secondary)'}
+                    onMouseEnter={(e) => {
+                      if (!isSelected) {
+                        e.currentTarget.style.borderColor = isAll3Published ? 'var(--status-success)' : 'var(--border-strong)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSelected) {
+                        e.currentTarget.style.borderColor = isAll3Published ? 'var(--status-success)' : 'var(--border)';
+                      }
+                    }}
                   >
+                    {/* Checkbox Multi-Seleksi */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => handleToggleSelectItem(item.id)}
+                        style={{ width: '18px', height: '18px', accentColor: 'var(--action-primary)', cursor: 'pointer' }}
+                        title="Pilih konten ini untuk aksi massal"
+                      />
+                    </div>
                     {/* Top Status Badge Banner */}
                     {isAll3Published ? (
                       <div style={{
@@ -1606,6 +1768,81 @@ function ContentFlowHubPageContent() {
                   </div>
                 );
               })}
+            </div>
+          )}
+
+          {/* Floating Bulk Actions Dock */}
+          {selectedItemIds.size > 0 && (
+            <div style={{
+              position: 'fixed',
+              bottom: '24px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: 'var(--surface-raised)',
+              border: '1px solid var(--action-primary)',
+              borderRadius: '16px',
+              padding: '12px 24px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '20px',
+              boxShadow: 'var(--shadow-modal)',
+              zIndex: 900
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{
+                  background: 'var(--action-primary)',
+                  color: 'var(--on-action-primary)',
+                  fontWeight: 800,
+                  padding: '3px 10px',
+                  borderRadius: '20px',
+                  fontSize: '12px'
+                }}>
+                  {selectedItemIds.size} Terpilih
+                </span>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Konten siap dijadwalkan massal
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={handleClearSelection}
+                  style={{
+                    background: 'transparent',
+                    border: '1px solid var(--border-strong)',
+                    color: 'var(--text-secondary)',
+                    padding: '7px 14px',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Batal
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleLaunchBulkSchedule}
+                  style={{
+                    background: 'var(--action-primary)',
+                    border: '1px solid var(--action-primary)',
+                    color: 'var(--on-action-primary)',
+                    padding: '8px 18px',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 4px 14px rgba(45, 212, 191, 0.3)'
+                  }}
+                >
+                  <span>⏱️ Jadwalkan Massal</span>
+                </button>
+              </div>
             </div>
           )}
 
