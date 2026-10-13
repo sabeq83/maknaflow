@@ -25,7 +25,7 @@ Berdasarkan kebutuhan dan arahan pengguna:
 - [ ] **Task 3: Perkaya Prompt Builder dengan Recipe Mandate (Herbal/Kuliner) & YouTube High-CTR Formula** (`lib/prompts.js`)
 - [ ] **Task 4: Implementasikan Sanitasi & Integrasi Backend di Scheduler Processors** (`lib/scheduler-processors.js`)
 - [ ] **Task 5: Buat dan Jalankan Suite Pengujian Otomatis** (`tests/re-campaign-recipe-and-titles.test.js`)
-- [ ] **Task 6: Build Produksi Lokal, Verifikasi Zero Error, Rilis Patch Non-Interaktif, dan Deploy ke Dev & Staging Mac Mini**
+- [ ] **Task 6: Build Produksi Lokal, Verifikasi Zero Error, Rilis Patch Non-Interaktif, dan Deploy ke Server Dev Mac Mini (Tanpa Staging)**
 
 ---
 
@@ -246,8 +246,23 @@ Menyuntikkan `generate_recipe: campaign.generate_recipe === 1` dan menambahkan f
 2. **Cluster Health & Ingest Test**:
    Jalankan `node scripts/test-cluster-health.js` dan pastikan database migrasi berjalan mulus tanpa mengganggu antrean kampanye lain.
 
+### Deployment Strategy (Dev First - Tanpa Staging)
+Sesuai arahan pengguna, rilis ini dideploy **eksklusif ke Server Dev Mac Mini**:
+1. **Perintah Deploy Dev**:
+   ```bash
+   npm run deploy:dev:atomic -- --ref <full-git-sha> --apply --confirm-dev
+   ```
+2. **Karakteristik Lingkungan Dev**:
+   - Host: macOS Mac Mini (`100.95.245.55`, `masbenu`)
+   - Port Layanan: Port 5020 (UI) & Port 7020 (API Server)
+   - Root Atomic: `~/maknaflow-dev-atomic`
+   - Database Schema: `dev`
+3. **Pengecualian Server Staging**:
+   - Server Staging (`5010` / `7010`) **TIDAK DIDEPLOY** pada tahap ini.
+   - Deployment ke Staging hanya akan dijalankan setelah pengujian fungsional dan estetika UI di server Dev terkonfirmasi berhasil dan atas instruksi eksplisit pengguna.
+
 ### Manual Verification by User
-1. Buka browser ke Web App MAKNA Flow -> Menu **RE Campaign** (`/re-campaigns`).
+1. Buka browser ke Web App MAKNA Flow Dev -> Menu **RE Campaign** (`http://100.95.245.55:5020/re-campaigns`).
 2. Klik tombol Buat Kampanye, buka Accordion 1, periksa kehadiran Toggle **"Hasilkan Resep / Racikan (Herbal, Rempah, Kuliner)"**.
 3. Coba buat satu kampanye uji coba dengan toggle aktif, jalankan, dan periksa bahwa naskah caption pada hasil dekonstruksi memuat teks resep/racikan lengkap dan judul YouTube Shorts bernilai High-CTR tanpa terpotong.
 4. Anda juga dapat menguji visual interaktifnya di [public/mockup_re_campaign_recipe_toggle.html](file:///Users/sabeqmmursyid/_contentflow-staging/public/mockup_re_campaign_recipe_toggle.html).
