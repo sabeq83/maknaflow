@@ -25,7 +25,7 @@ Berdasarkan kebutuhan dan arahan pengguna:
 - [x] **Task 3: Perkaya Prompt Builder dengan Recipe Mandate (Herbal/Kuliner) & YouTube High-CTR Formula** (`lib/prompts.js`)
 - [x] **Task 4: Implementasikan Sanitasi & Integrasi Backend di Scheduler Processors** (`lib/scheduler-processors.js`)
 - [x] **Task 5: Buat dan Jalankan Suite Pengujian Otomatis** (`tests/re-campaign-recipe-and-titles.test.js`)
-- [ ] **Task 6: Build Produksi Lokal, Verifikasi Zero Error, Rilis Patch Non-Interaktif, dan Deploy ke Server Dev Mac Mini (Tanpa Staging)**
+- [x] **Task 6: Build Produksi Lokal, Verifikasi Zero Error, Rilis Patch Non-Interaktif, dan Deploy ke Server Dev Mac Mini (Tanpa Staging)**
 
 ---
 
