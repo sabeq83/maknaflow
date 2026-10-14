@@ -91,6 +91,7 @@ export const POST = withTenantContext(async (request) => {
         bridging_config_json: formData.get('bridging_config_json') || '{}',
         audio_config_json: formData.get('audio_config_json') || '{}',
         enable_vo_audit: Number(formData.get('enable_vo_audit') || 1),
+        generate_recipe: Number(formData.get('generate_recipe') || 0),
         rows: formData.get('rows') ? JSON.parse(formData.get('rows')) : null,
         shared_config: formData.get('shared_config') ? JSON.parse(formData.get('shared_config')) : null,
         mode: formData.get('mode') || null
@@ -129,10 +130,13 @@ export const POST = withTenantContext(async (request) => {
       bridging_config_json,
       audio_config_json,
       enable_vo_audit = 1,
+      generate_recipe = 0,
       rows,
       shared_config,
       mode
     } = parsedBody;
+
+    const parsedGenerateRecipe = Number(generate_recipe || 0);
 
     // Support new format: rows payload in body
     if (rows && Array.isArray(rows)) {
@@ -171,7 +175,8 @@ export const POST = withTenantContext(async (request) => {
       const batch = {
         batch_id: batchId,
         shared_config: shared_config || { vso: vsoConfig, bridging: bridgingConfig, audio: audioConfig },
-        enable_vo_audit: Number(enable_vo_audit !== undefined ? enable_vo_audit : 1)
+        enable_vo_audit: Number(enable_vo_audit !== undefined ? enable_vo_audit : 1),
+        generate_recipe: parsedGenerateRecipe
       };
 
       await createMultiplierBatchWithTasks(batch, rows);
@@ -224,7 +229,8 @@ export const POST = withTenantContext(async (request) => {
         await createMultiplierBatchWithTasks({
           batch_id: batchTaskId,
           shared_config: { vso: vsoConfig, bridging: bridgingConfig, audio: audioConfig },
-          enable_vo_audit: Number(enable_vo_audit !== undefined ? enable_vo_audit : 1)
+          enable_vo_audit: Number(enable_vo_audit !== undefined ? enable_vo_audit : 1),
+          generate_recipe: parsedGenerateRecipe
         }, formattedRows);
 
         return NextResponse.json({
@@ -247,7 +253,8 @@ export const POST = withTenantContext(async (request) => {
         bridging_config_json: JSON.stringify(bridgingConfig),
         audio_config_json: JSON.stringify(audioConfig),
         status: 'pending_resolution',
-        enable_vo_audit: Number(enable_vo_audit !== undefined ? enable_vo_audit : 1)
+        enable_vo_audit: Number(enable_vo_audit !== undefined ? enable_vo_audit : 1),
+        generate_recipe: parsedGenerateRecipe
       });
       tasksCreated.push(batchTaskId);
     }

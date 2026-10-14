@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.38 — Multiplier Lab Recipe Toggle and YouTube High-CTR Titles (14/10/2026)
+- Tambah toggle Hasilkan Resep pada formulir Multiplier Lab
+- Integrasikan Recipe Mandate dan YouTube High-CTR Title pada buildMultiplierPhase2Prompt
+- Sanitasi yt_title dan simpan ke re_multiplier_tasks serta UI campaign workbench
+
 ## V2.32.37 — RE Campaign Recipe Toggle and YouTube High-CTR Anti-Cutoff Titles (14/10/2026)
 - Tambah toggle Hasilkan Resep Herbal & Kuliner pada formulir RE Campaign
 - Integrasikan Recipe & Herbal Concoction Mandate ke Prompt Builder Gemini

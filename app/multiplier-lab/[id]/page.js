@@ -47,6 +47,7 @@ function CampaignDetailPageContent() {
   // Inline editing states for expanded task workbenches
   const [editedStoryboards, setEditedStoryboards] = useState({}); // { [taskId]: [clips] }
   const [editedCaptions, setEditedCaptions] = useState({}); // { [taskId]: string }
+  const [editedYtTitles, setEditedYtTitles] = useState({}); // { [taskId]: string }
   const [editedDnas, setEditedDnas] = useState({}); // { [taskId]: dnaObj }
   const [editedAudioConfigs, setEditedAudioConfigs] = useState({}); // { [taskId]: audioConfigObj }
   
@@ -115,6 +116,9 @@ function CampaignDetailPageContent() {
           }
           if (editedCaptions[t.id] === undefined) {
             setEditedCaptions(prev => ({ ...prev, [t.id]: t.new_caption || '' }));
+          }
+          if (editedYtTitles[t.id] === undefined) {
+            setEditedYtTitles(prev => ({ ...prev, [t.id]: t.yt_title || '' }));
           }
           if (!editedDnas[t.id]) {
             let dna = {};
@@ -238,7 +242,8 @@ function CampaignDetailPageContent() {
           vsoConfig: JSON.parse(task.vso_config_json || '{}'),
           bridgingConfig: JSON.parse(task.bridging_config_json || '{}'),
           audioConfig: editedAudioConfigs[taskId] || JSON.parse(task.audio_config_json || '{}'),
-          newCaption: editedCaptions[taskId]
+          newCaption: editedCaptions[taskId],
+          ytTitle: editedYtTitles[taskId]
         })
       });
       const data = await res.json();
@@ -898,6 +903,30 @@ function CampaignDetailPageContent() {
                                           </div>
                                         </div>
                                       ))}
+                                    </div>
+
+                                    {/* YouTube Shorts High-CTR Title */}
+                                    <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 8, padding: 16 }}>
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                                        <label style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                          🔥 Judul YouTube Shorts (High-CTR Formula)
+                                          <span style={{ fontSize: '0.68rem', padding: '1px 6px', background: 'var(--status-danger-soft)', color: 'var(--status-danger)', borderRadius: 4, fontWeight: 700 }}>#Shorts</span>
+                                        </label>
+                                        <span style={{ 
+                                          fontSize: '0.72rem', 
+                                          fontWeight: 600,
+                                          color: (editedYtTitles[task.id] || '').length > 85 ? 'var(--status-danger)' : (editedYtTitles[task.id] || '').length >= 50 ? 'var(--status-success)' : 'var(--text-muted)' 
+                                        }}>
+                                          {(editedYtTitles[task.id] || '').length} / 85 karakter (Target: 50–75)
+                                        </span>
+                                      </div>
+                                      <input
+                                        type="text"
+                                        value={editedYtTitles[task.id] || ''}
+                                        onChange={(e) => setEditedYtTitles(prev => ({ ...prev, [task.id]: e.target.value }))}
+                                        placeholder="Judul click-worthy anti-terpotong diakhiri #Shorts..."
+                                        style={{ width: '100%', padding: '10px 12px', fontSize: '0.85rem', fontWeight: 600, background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
+                                      />
                                     </div>
 
                                     {/* Social Caption Packaging */}

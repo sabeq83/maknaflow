@@ -98,6 +98,7 @@ function MultiplierLabPageContent() {
   const [accountName, setAccountName] = useState('');
   const [enableAudioSegment, setEnableAudioSegment] = useState(false);
   const [sfxSetting, setSfxSetting] = useState('without_sfx');
+  const [generateRecipe, setGenerateRecipe] = useState(false);
   const [targetProductId, setTargetProductId] = useState('');
 
   const [narrativeMode, setNarrativeMode] = useState('Storytelling');
@@ -216,6 +217,7 @@ function MultiplierLabPageContent() {
       setSfxSetting(config.basic_strategy.sfx_setting || 'without_sfx');
       setEnableAudioSegment(Boolean(config.basic_strategy.enable_audio_segment));
       setEnableVoAudit(config.basic_strategy.enable_vo_audit ?? 1);
+      setGenerateRecipe(Boolean(config.basic_strategy.generate_recipe));
       setNextcloudParentFolder(config.basic_strategy.nextcloud_parent_folder || '/MAKNA_Assets');
       setPromotionStyle(config.basic_strategy.promotion_style || 'Softselling');
     }
@@ -305,6 +307,7 @@ function MultiplierLabPageContent() {
         sfx_setting: sfxSetting,
         enable_audio_segment: Boolean(enableAudioSegment),
         enable_vo_audit: enableVoAudit ? 1 : 0,
+        generate_recipe: Boolean(generateRecipe),
         nextcloud_parent_folder: nextcloudParentFolder || '/MAKNA_Assets',
         promotion_style: promotionStyle || 'Softselling'
       },
@@ -752,12 +755,14 @@ function MultiplierLabPageContent() {
               id: bid,
               brand_profile_id: t.brand_profile_id || 'default_tenant',
               brand_name: t.brand_name || brandName || 'default_tenant',
-              campaign_name: t.new_caption ? t.new_caption.slice(0, 50) : `Multiplier Campaign ${bid.slice(4, 10)}`,
+              campaign_name: t.yt_title || (t.new_caption ? t.new_caption.slice(0, 50) : `Multiplier Campaign ${bid.slice(4, 10)}`),
               created_at: t.created_at,
               status: t.status,
               tasks: [],
               stats: { total: 0, completed: 0, failed: 0, processing: 0, paused: 0 }
             };
+          } else if (t.yt_title && groups[bid].campaign_name.startsWith('Multiplier Campaign')) {
+            groups[bid].campaign_name = t.yt_title;
           }
           groups[bid].tasks.push(t);
           groups[bid].stats.total++;
@@ -868,7 +873,8 @@ function MultiplierLabPageContent() {
           productUrl: isPureStory ? '' : productUrl,
           visualMode,
           editorialTopic: editorialTopic.trim(),
-          editorialOutro: editorialOutro.trim()
+          editorialOutro: editorialOutro.trim(),
+          generate_recipe: generateRecipe ? 1 : 0
         }),
         audio_config_json: JSON.stringify({
           enableTts, voiceProvider, voicePersona, voiceSpeed, voiceVolume, ttsModelQuality,
@@ -878,6 +884,7 @@ function MultiplierLabPageContent() {
           mandatoryOutroLine: editorialOutro.trim() || mandatoryOutroLine, customInstruction
         }),
         enable_vo_audit: enableVoAudit ? 1 : 0,
+        generate_recipe: generateRecipe ? 1 : 0,
         product_ref_image_path: isPureStory ? null : (dbPhotoUrl || productRefImage)
       };
 
@@ -2013,6 +2020,26 @@ function MultiplierLabPageContent() {
                           <option value={0}>❌ No (Tanpa Audit Kepatuhan)</option>
                           <option value={1}>✅ Yes (Audit Kepatuhan & Tampilkan Dua Versi VO)</option>
                         </select>
+                      </div>
+
+                      <div className="form-group" style={{ marginBottom: 12 }}>
+                        <label className="form-label">🍳 Ekstraksi Resep / Racikan (Herbal, Rempah, Kuliner)</label>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: 'var(--surface-interactive)', borderRadius: 8, border: '1px solid var(--border-color)' }}>
+                          <label className="switch">
+                            <input
+                              type="checkbox"
+                              checked={generateRecipe}
+                              onChange={e => setGenerateRecipe(e.target.checked)}
+                            />
+                            <span className="slider"></span>
+                          </label>
+                          <div style={{ fontSize: '0.82rem', color: 'var(--text-color)' }}>
+                            <b>Hasilkan Teks Resep/Racikan Lengkap di Caption Tiap Varian Angle</b>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                              AI Gemini akan mengekstrak bahan & takaran, khasiat/manfaat, langkah pembuatan, dan tips dari video, lalu menyajikannya di caption seluruh variasi angle yang digandakan.
+                            </div>
+                          </div>
+                        </div>
                       </div>
 
                       <div className="form-group">

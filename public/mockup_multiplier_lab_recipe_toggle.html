@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup — Multiplier Lab: Toggle Resep (Herbal, Rempah & Kuliner) + High-CTR Title</title>
+  <style>
+    :root {
+      --surface: #0f172a;
+      --surface-raised: #1e293b;
+      --surface-interactive: #334155;
+      --surface-subtle: rgba(30, 41, 59, 0.7);
+      --border-color: #334155;
+      --border-subtle: #1e293b;
+      --border-strong: #475569;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --input-bg: #0f172a;
+      --focus-ring: #38bdf8;
+      --action-primary: #0284c7;
+      --action-primary-hover: #0369a1;
+      --on-action-primary: #ffffff;
+      --status-info: #38bdf8;
+      --status-info-soft: rgba(56, 189, 248, 0.15);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.15);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.15);
+      --status-danger: #f87171;
+      --status-danger-soft: rgba(248, 113, 113, 0.15);
+      --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+      --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-theme="light"] {
+      --surface: #f8fafc;
+      --surface-raised: #ffffff;
+      --surface-interactive: #f1f5f9;
+      --surface-subtle: #f8fafc;
+      --border-color: #e2e8f0;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --input-bg: #ffffff;
+      --focus-ring: #0284c7;
+      --action-primary: #0284c7;
+      --action-primary-hover: #0369a1;
+      --on-action-primary: #ffffff;
+      --status-info: #0284c7;
+      --status-info-soft: rgba(2, 132, 199, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #dc2626;
+      --status-danger-soft: rgba(220, 38, 38, 0.1);
+      --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      background: var(--surface);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1280px;
+      margin: 0 auto 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .badge-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-info { background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info); }
+    .badge-success { background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success); }
+    .badge-warning { background: var(--status-warning-soft); color: var(--status-warning); border: 1px solid var(--status-warning); }
+
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 980px) {
+      .layout-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 16px 20px;
+      background: var(--surface-subtle);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-body {
+      padding: 20px;
+    }
+
+    /* Accordion styles */
+    .accordion-header {
+      padding: 14px 18px;
+      background: var(--status-info-soft);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.92rem;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      padding: 9px 12px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: var(--focus-ring);
+      box-shadow: 0 0 0 2px var(--status-info-soft);
+    }
+
+    /* Switch Component */
+    .switch-container {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      transition: all 0.2s ease;
+    }
+
+    .switch-container.active {
+      border-color: var(--status-success);
+      background: var(--status-success-soft);
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: var(--surface-subtle);
+      border: 1px solid var(--border-strong);
+      transition: .3s;
+      border-radius: 26px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--text-muted);
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--status-success);
+      border-color: var(--status-success);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(22px);
+      background-color: #ffffff;
+    }
+
+    .preview-box {
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--text-primary);
+      max-height: 480px;
+      overflow-y: auto;
+    }
+
+    .variant-card {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .variant-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .variant-title-box {
+      background: var(--surface-interactive);
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      font-size: 0.82rem;
+      border-left: 3px solid var(--status-info);
+    }
+
+    .variant-caption-box {
+      background: var(--surface);
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      border: 1px solid var(--border-subtle);
+      white-space: pre-wrap;
+      line-height: 1.45;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn-primary { background: var(--action-primary); color: var(--on-action-primary); }
+    .btn-outline { background: transparent; border: 1px solid var(--border-strong); color: var(--text-primary); }
+  </style>
+</head>
+<body>
+
+  <div class="header-bar">
+    <div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <h1 style="margin: 0; font-size: 1.3rem;">🎛️ Multiplier Lab</h1>
+        <span class="badge-tag badge-info">Mockup Simulasi</span>
+        <span class="badge-tag badge-success">Universal Theme</span>
+      </div>
+      <p style="margin: 4px 0 0; font-size: 0.85rem; color: var(--text-secondary);">
+        Simulasi Penyematan Toggle <b>"Hasilkan Resep / Racikan"</b> & Formula <b>YouTube Shorts High-CTR</b> pada Multiplier Engine
+      </p>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button class="btn btn-outline" onclick="toggleTheme()" id="themeBtn">🌓 Ganti Tema</button>
+      <button class="btn btn-primary" onclick="window.location.reload()">🔄 Reset Simulasi</button>
+    </div>
+  </div>
+
+  <div class="layout-grid">
+
+    <!-- SISI KIRI: Formulir Multiplier Lab -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">📝 Konfigurasi Multiplier Batch</h2>
+        <span class="badge-tag badge-warning">Accordion 1</span>
+      </div>
+
+      <div class="card-body" style="padding: 0;">
+        <div class="accordion-header">
+          <span>📋 1. Basic Creative Strategy</span>
+          <span>▲</span>
+        </div>
+
+        <div style="padding: 20px;">
+          <div class="form-group">
+            <label class="form-label">🏷️ Video Referensi Dekonstruksi (Blueprint Source)</label>
+            <select class="form-select">
+              <option>RE-20261014-01 — Rebusan Rimpang Jahe Merah & Serai Anti-Masuk Angin (5 Clips)</option>
+              <option>RE-20261013-04 — Racikan Seduhan Temulawak Kunyit Madu Murni (4 Clips)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">🏷️ Nama Akun (Brand Account)</label>
+            <input type="text" class="form-input" value="Herbal Alami Nusantara" readonly>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Nama Batch Kampanye Multiplier</label>
+            <input type="text" class="form-input" value="[ MULTIPLIER ] - 3 Angles Racikan Jahe Merah Hangat">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">🎯 Target Demografi & Tone Bahasa</label>
+            <select class="form-select">
+              <option>Keluarga & Ibu Rumah Tangga (Ramah, Mengayomi "Bunda/Moms")</option>
+              <option>Gen-Z & Milenial Muda (Santai, Gaul, Akrab "Kamu/Lo")</option>
+              <option>Pekerja Lembur & Profesional (Lugas, Efisien "Anda/Kamu")</option>
+            </select>
+          </div>
+
+          <!-- FITUR USULAN: TOGGLE RESEP MULTIPLIER LAB -->
+          <div class="form-group" style="margin-top: 20px;">
+            <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>🍳 Ekstraksi Resep / Racikan (Herbal, Rempah, Kuliner)</span>
+              <span class="badge-tag badge-success" id="toggleStateBadge">NON-AKTIF</span>
+            </label>
+            <div class="switch-container" id="switchCard">
+              <label class="switch">
+                <input type="checkbox" id="recipeToggle" onchange="handleToggleChange(this.checked)">
+                <span class="slider"></span>
+              </label>
+              <div style="font-size: 0.82rem; color: var(--text-primary);">
+                <b>Hasilkan Teks Resep / Racikan Lengkap di Caption Tiap Varian Angle</b>
+                <div style="font-size: 0.73rem; color: var(--text-muted); margin-top: 2px;">
+                  AI Gemini akan mengekstrak bahan & takaran presisi, langkah racikan per adegan, khasiat kesehatan alami, serta pro-tip untuk semua varian angle yang dihasilkan.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">🎙 Audio Segment (per Klip)</label>
+            <select class="form-select">
+              <option>❌ Disabled (Default)</option>
+              <option>✅ Enabled — Embed Audio Segment per Beat</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">SFX Setting</label>
+            <select class="form-select">
+              <option>🔇 Without SFX (Default)</option>
+              <option>🔊 With SFX</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Audit Kepatuhan Voiceover (TikTok Safe)</label>
+            <select class="form-select">
+              <option>✅ Yes (Audit Kepatuhan & Tampilkan Dua Versi VO)</option>
+              <option>❌ No (Tanpa Audit Kepatuhan)</option>
+            </select>
+          </div>
+
+          <div style="margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end;">
+            <button class="btn btn-primary" onclick="simulateMultiplierRun()">⚡ Gandakan Varian Angle Sekarang</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SISI KANAN: Preview Hasil Varian Multiplier -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">✨ Preview Real-Time Hasil Multiplier Engine</h2>
+        <span class="badge-tag badge-info" id="previewBadge">Mode Standard (Tanpa Resep)</span>
+      </div>
+
+      <div class="card-body">
+        <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0;">
+          Berikut simulasi 3 varian angle konten yang dihasilkan Gemini AI dari 1 video referensi yang sama:
+        </p>
+
+        <div id="variantsContainer">
+          <!-- Varian 1 -->
+          <div class="variant-card">
+            <div class="variant-header">
+              <span style="color: var(--status-info);">Angle 1: Fast Practical Solution (Solusi Cepat Batuk & Flu)</span>
+              <span class="badge-tag badge-info">5 Scenes</span>
+            </div>
+            <div class="variant-title-box">
+              <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 2px;">YouTube Shorts High-CTR Title (62 Karakter, Anti-Cutoff):</div>
+              <b id="v1Title">Cuma Butuh 3 Rempah Dapur! Trik Alami Redakan Batuk & Flu #Shorts</b>
+            </div>
+            <div class="variant-caption-box" id="v1Caption">Jangan biarkan batuk berdahak ganggu aktivitasmu! Coba seduhan rimpang alami ini di rumah. Badan langsung hangat dan tenggorokan plong. Yuk tonton sampai habis dan bagikan video ini ke keluarga tercinta! ❤️✨
+
+#rempahindonesia #kesehatananak #jahemerah #jamutradisional #tipssehat</div>
+          </div>
+
+          <!-- Varian 2 -->
+          <div class="variant-card">
+            <div class="variant-header">
+              <span style="color: var(--status-warning);">Angle 2: Mistake Callout (Kesalahan Fatal Menyeduh)</span>
+              <span class="badge-tag badge-warning">5 Scenes</span>
+            </div>
+            <div class="variant-title-box">
+              <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 2px;">YouTube Shorts High-CTR Title (64 Karakter, Anti-Cutoff):</div>
+              <b id="v2Title">Kesalahan Fatal Rebus Jahe! Senyawa Alaminya Malah Rusak #Shorts</b>
+            </div>
+            <div class="variant-caption-box" id="v2Caption">Sering minum rebusan jahe tapi kok gak ngefek? Bisa jadi cara rebusnya salah! Jangan sampai suhu air terlalu mendidih lama karena bisa merusak khasiat alaminya. Simak tips lengkapnya di video ini ya!
+
+#kesalahankesehatan #infosehat #jahehangat #hidupsehat #resepnenek</div>
+          </div>
+
+          <!-- Varian 3 -->
+          <div class="variant-card">
+            <div class="variant-header">
+              <span style="color: var(--status-success);">Angle 3: Curiosity Gap (Ramuan Nenek Moyang)</span>
+              <span class="badge-tag badge-success">5 Scenes</span>
+            </div>
+            <div class="variant-title-box">
+              <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 2px;">YouTube Shorts High-CTR Title (65 Karakter, Anti-Cutoff):</div>
+              <b id="v3Title">Bukan Obat! Ramuan Nenek Moyang Ini Ampuh Segarkan Badan #Shorts</b>
+            </div>
+            <div class="variant-caption-box" id="v3Caption">Trik rahasia orang tua zaman dulu yang selalu bugar walau kerja keras seharian. Cuma modal tanaman obat keluarga di pekarangan. Cek langkahnya dan buktikan sendiri khasiatnya!
+
+#ramuanherbal #kebugaranalami #warisanleluhur #sehatalami #resepkuno</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; padding: 12px; background: var(--surface-interactive); border-radius: 8px; font-size: 0.75rem; color: var(--text-secondary);">
+          💡 <b>Integrasi Multiplier Lab</b>: Ketika pengguna mengaktifkan toggle, <b>seluruh varian angle yang digandakan</b> akan otomatis mewarisi formula High-CTR dan teks resep yang terperinci di dalam caption. Tidak perlu mengetik ulang resep satu per satu!
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const target = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', target);
+      document.getElementById('themeBtn').innerText = target === 'dark' ? '🌓 Mode Terang' : '🌓 Mode Gelap';
+    }
+
+    function handleToggleChange(isActive) {
+      const switchCard = document.getElementById('switchCard');
+      const stateBadge = document.getElementById('toggleStateBadge');
+      const previewBadge = document.getElementById('previewBadge');
+
+      const v1Caption = document.getElementById('v1Caption');
+      const v2Caption = document.getElementById('v2Caption');
+      const v3Caption = document.getElementById('v3Caption');
+
+      if (isActive) {
+        switchCard.classList.add('active');
+        stateBadge.innerText = 'AKTIF (RECIPE MANDATE)';
+        stateBadge.className = 'badge-tag badge-success';
+        previewBadge.innerText = 'Mode Resep & Racikan Herbal [AKTIF]';
+        previewBadge.className = 'badge-tag badge-success';
+
+        // Update Captions to Rich Recipe Format
+        v1Caption.innerText = `🍃 RACIKAN HERBAL PEREDA BATUK & FLU (WARISAN REMPAH)
+
+📌 BAHAN & TAKARAN ALAMI:
+• 2 ruas jahe merah (geprek kasar)
+• 2 batang serai (memarkan bagian putihnya)
+• 1 ruas kunyit segar (iris tipis)
+• 1 sdm madu hutan murni
+• 400 ml air bersih
+
+🥣 LANGKAH PERACIKAN:
+1. Rebus air bersama jahe merah dan serai dengan api sedang hingga aroma wangi rempah semerbak.
+2. Masukkan irisan kunyit 2 menit sebelum api dimatikan agar curcumin tetap optimal.
+3. Tuang ke dalam cangkir melalui saringan, tunggu hingga hangat kuku.
+4. Tambahkan 1 sendok makan madu murni, aduk searah jarum jam.
+
+🌿 KHASIAT & MANFAAT:
+Gingerol dan zingeron pada jahe merah secara aktif meredakan radang tenggorokan, mengencerkan lendir, dan memperkuat daya tahan tubuh alami.
+
+💡 PRO-TIP:
+Jangan campurkan madu saat air masih mendidih panas agar enzim dan antioksidan alaminya tidak rusak!
+
+Simpan resep ini dengan klik tombol Save dan bagikan ke teman yang sedang flu! ❤️✨
+#reseprahasia #minumanherbal #rempahindonesia #jahemerah #tipssehatalami`;
+
+        v2Caption.innerText = `⚠️ KESALAHAN FATAL SEDUH JAHE & CARA TEPAT RACIKNYA!
+
+📌 TAKARAN RESEP YANG BENAR:
+• 2 ruas jahe emprit tua (bakar sebentar lalu memarkan)
+• 1 lembar daun pandan wangi
+• 1 butir kapulaga jawa
+• 350 ml air hangat (suhu 80°C)
+
+🥣 CARA MENYEDUH TEPAT:
+1. Jangan merebus jahe terlalu lama sampai airnya susut habis karena minyak atsirinya menguap.
+2. Cukup seduh jahe yang telah dimemarkan dengan air panas bersuhu 80°C di wadah tertutup.
+3. Diamkan selama 7-10 menit agar senyawa aktif terekstraksi maksimal ke dalam air.
+
+🌿 KHASIAT UTAMA:
+Menjaga lambung tetap nyaman, menetralkan asam lambung, dan menghangatkan dada seketika tanpa sensasi terbakar di tenggorokan.
+
+Simpan dan ikuti cara ini untuk hasil racikan herbal yang optimal! 🌿
+#edukasiherbal #caraseduhjahe #jamusehat #polahidupsehat #resepnusantara`;
+
+        v3Caption.innerText = `☕ WEDANG REMPAH BIKIN BADAN BUGAR BEBAS MASUK ANGIN
+
+📌 BAHAN-BAHAN KELUARGA:
+• 3 ruas temulawak segar (iris melintang)
+• 2 ruas jahe merah pilihan
+• 3 butir cengkeh kering
+• 1 ruas kayu manis (3 cm)
+• 500 ml air
+
+🥣 LANGKAH PEMBUATAN:
+1. Cuci bersih seluruh rimpang tanpa mengupas kulitnya terlalu tebal (cukup disikat bersih).
+2. Rebus bersama cengkeh dan kayu manis selama 8 menit dengan api kecil.
+3. Nikmati selagi hangat di malam hari sebelum tidur untuk relaksasi otot dan tidur lebih pulas.
+
+🌿 MANFAAT KESEHATAN:
+Meningkatkan stamina, memperbaiki nafsu makan, dan mendetoksifikasi racun sisa metabolisme tubuh semalaman.
+
+Yuk sediakan bahan-bahannya di dapur sekarang juga! 🍃
+#wedangrempah #sehatalami #jamuleluhur #ramuanherbal #kebugaran`;
+
+      } else {
+        switchCard.classList.remove('active');
+        stateBadge.innerText = 'NON-AKTIF';
+        stateBadge.className = 'badge-tag badge-warning';
+        previewBadge.innerText = 'Mode Standard (Tanpa Resep)';
+        previewBadge.className = 'badge-tag badge-info';
+
+        // Revert to Standard Caption
+        v1Caption.innerText = `Jangan biarkan batuk berdahak ganggu aktivitasmu! Coba seduhan rimpang alami ini di rumah. Badan langsung hangat dan tenggorokan plong. Yuk tonton sampai habis dan bagikan video ini ke keluarga tercinta! ❤️✨\n\n#rempahindonesia #kesehatananak #jahemerah #jamutradisional #tipssehat`;
+        v2Caption.innerText = `Sering minum rebusan jahe tapi kok gak ngefek? Bisa jadi cara rebusnya salah! Jangan sampai suhu air terlalu mendidih lama karena bisa merusak khasiat alaminya. Simak tips lengkapnya di video ini ya!\n\n#kesalahankesehatan #infosehat #jahehangat #hidupsehat #resepnenek`;
+        v3Caption.innerText = `Trik rahasia orang tua zaman dulu yang selalu bugar walau kerja keras seharian. Cuma modal tanaman obat keluarga di pekarangan. Cek langkahnya dan buktikan sendiri khasiatnya!\n\n#ramuanherbal #kebugaranalami #warisanleluhur #sehatalami #resepkuno`;
+      }
+    }
+
+    function simulateMultiplierRun() {
+      alert("Simulasi Berhasil! Seluruh varian angle pada batch Multiplier Lab telah disinkronkan dengan preferensi toggle.");
+    }
+  </script>
+</body>
+</html>

@@ -7,7 +7,7 @@ export const POST = withTenantContext(async (req, { params }) => {
     const resolvedParams = await params;
     const { id } = resolvedParams;
     const body = await req.json();
-    const { storyboard, vsoConfig, bridgingConfig, audioConfig, newCaption } = body;
+    const { storyboard, vsoConfig, bridgingConfig, audioConfig, newCaption, ytTitle } = body;
 
     const task = await getMultiplierTaskById(id);
     if (!task) {
@@ -30,7 +30,8 @@ export const POST = withTenantContext(async (req, { params }) => {
           vso_config_json = ?,
           bridging_config_json = ?,
           audio_config_json = ?,
-          new_caption = ?
+          new_caption = ?,
+          yt_title = COALESCE(?, yt_title)
       WHERE id = ?
     `, [
       JSON.stringify(storyboard || []),
@@ -39,6 +40,7 @@ export const POST = withTenantContext(async (req, { params }) => {
       JSON.stringify(bridgingConfig || {}),
       JSON.stringify(audioConfig || {}),
       newCaption || '',
+      ytTitle !== undefined ? ytTitle : null,
       id
     ]);
 
