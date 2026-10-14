@@ -89,6 +89,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
         target_demographic_custom: formData.get('target_demographic_custom') || null,
         ai_directive: formData.get('ai_directive') || null,
         mandatory_outro_line: formData.get('mandatory_outro_line') || null,
+        generate_recipe: Number(formData.get('generate_recipe') || 0),
         execution_mode: formData.get('execution_mode') || 'manual_review',
       };
 
@@ -147,6 +148,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       parsedBody.narrative_mode = parsedBody.narrative_mode || 'Storytelling';
       parsedBody.ai_directive = parsedBody.ai_directive || null;
       parsedBody.mandatory_outro_line = parsedBody.mandatory_outro_line || null;
+      parsedBody.generate_recipe = parsedBody.generate_recipe ? 1 : 0;
     }
 
     const {
@@ -204,6 +206,7 @@ export const POST = withTenantContext(async (request, _context, user) => {
       target_demographic_custom,
       ai_directive,
       mandatory_outro_line,
+      generate_recipe,
       execution_mode
     } = parsedBody;
 
@@ -286,7 +289,8 @@ export const POST = withTenantContext(async (request, _context, user) => {
       target_demographic: target_demographic || null,
       target_demographic_custom: target_demographic_custom || null,
       ai_directive: ai_directive || null,
-      mandatory_outro_line: mandatory_outro_line || null
+      mandatory_outro_line: mandatory_outro_line || null,
+      generate_recipe: generate_recipe ? 1 : 0
     });
     await addReCampaignItems(id, urls);
 

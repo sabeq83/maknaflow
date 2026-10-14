@@ -62,6 +62,7 @@ export default function RECampaignsPage() {
   const [customInstruction, setCustomInstruction] = useState('akhiran skrip/voiceover : produk ori ada di keranjang ya!');
   const [aiDirective, setAiDirective] = useState('');
   const [mandatoryOutroLine, setMandatoryOutroLine] = useState('');
+  const [generateRecipe, setGenerateRecipe] = useState(false);
   const [toast, setToast] = useState(null);
   const [processingId, setProcessingId] = useState(null);
   const [brandProfiles, setBrandProfiles] = useState([]);
@@ -196,6 +197,7 @@ export default function RECampaignsPage() {
       setCustomInstruction(config.basic_strategy.custom_instruction || '');
       setAiDirective(config.basic_strategy.ai_directive || '');
       setMandatoryOutroLine(config.basic_strategy.mandatory_outro_line || '');
+      setGenerateRecipe(Boolean(config.basic_strategy.generate_recipe));
       setSfxSetting(config.basic_strategy.sfx_setting || 'without_sfx');
       setEnableAudioSegment(Boolean(config.basic_strategy.enable_audio_segment));
       setEnableVoAudit(config.basic_strategy.enable_vo_audit ?? 1);
@@ -302,6 +304,7 @@ export default function RECampaignsPage() {
         custom_instruction: customInstruction || '',
         ai_directive: aiDirective || '',
         mandatory_outro_line: mandatoryOutroLine || '',
+        generate_recipe: generateRecipe ? 1 : 0,
         sfx_setting: sfxSetting,
         enable_audio_segment: Boolean(enableAudioSegment),
         enable_vo_audit: enableVoAudit ? 1 : 0,
@@ -445,6 +448,7 @@ export default function RECampaignsPage() {
         custom_instruction: customInstruction,
         ai_directive: aiDirective,
         mandatory_outro_line: mandatoryOutroLine,
+        generate_recipe: generateRecipe ? 1 : 0,
         brand_profile_id: selectedBrandId || null,
         is_bridging_active: isBridgingActive ? 1 : 0,
         target_clips_count: targetClipsCount,
@@ -753,6 +757,7 @@ export default function RECampaignsPage() {
       formData.append('target_spreadsheet_id', '');
       formData.append('sfx_setting', sfxSetting);
       formData.append('enable_audio_segment', enableAudioSegment ? '1' : '0');
+      formData.append('generate_recipe', generateRecipe ? '1' : '0');
       formData.append('ai_directive', aiDirective);
       formData.append('mandatory_outro_line', mandatoryOutroLine);
       if (voiceCast.length > 0) formData.append('voice_cast_json', JSON.stringify({ characters: voiceCast }));
@@ -1451,6 +1456,25 @@ export default function RECampaignsPage() {
                         )}
                       </div>
                     )}
+                    <div className="form-group" style={{ marginBottom: 12 }}>
+                      <label className="form-label">🍳 Ekstraksi Resep / Racikan (Herbal, Rempah, Kuliner)</label>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: 'var(--surface-interactive)', borderRadius: 8, border: '1px solid var(--border-color)' }}>
+                        <label className="switch">
+                          <input
+                            type="checkbox"
+                            checked={generateRecipe}
+                            onChange={e => setGenerateRecipe(e.target.checked)}
+                          />
+                          <span className="slider"></span>
+                        </label>
+                        <div style={{ fontSize: '0.82rem', color: 'var(--text-color)' }}>
+                          <b>Hasilkan Teks Resep/Racikan Lengkap di Caption</b>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                            AI Gemini akan mengekstrak bahan & takaran, khasiat/manfaat, langkah pembuatan, dan tips dari video, lalu menyajikannya di caption. Cocok untuk minuman herbal, rempah, jamu, maupun kuliner.
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                     <div className="form-group" style={{ marginBottom: 12 }}>
                       <label className="form-label">AI Directive / Guardrail (Staging Override)</label>
                       <textarea

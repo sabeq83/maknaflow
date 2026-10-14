@@ -20,11 +20,11 @@ Berdasarkan kebutuhan dan arahan pengguna:
 ---
 
 ## Execution Task List
-- [ ] **Task 1: Tambahkan Dukungan Skema Database & Repositori untuk `generate_recipe`** (`lib/db.js` & `lib/db-pg.js`)
-- [ ] **Task 2: Tambahkan Toggle "Hasilkan Resep" di UI Pembuatan Kampanye RE** (`app/re-campaigns/page.js` & `app/api/v2/re-campaigns/route.js`)
-- [ ] **Task 3: Perkaya Prompt Builder dengan Recipe Mandate (Herbal/Kuliner) & YouTube High-CTR Formula** (`lib/prompts.js`)
-- [ ] **Task 4: Implementasikan Sanitasi & Integrasi Backend di Scheduler Processors** (`lib/scheduler-processors.js`)
-- [ ] **Task 5: Buat dan Jalankan Suite Pengujian Otomatis** (`tests/re-campaign-recipe-and-titles.test.js`)
+- [x] **Task 1: Tambahkan Dukungan Skema Database & Repositori untuk `generate_recipe`** (`lib/db.js` & `lib/db-pg.js`)
+- [x] **Task 2: Tambahkan Toggle "Hasilkan Resep" di UI Pembuatan Kampanye RE** (`app/re-campaigns/page.js` & `app/api/v2/re-campaigns/route.js`)
+- [x] **Task 3: Perkaya Prompt Builder dengan Recipe Mandate (Herbal/Kuliner) & YouTube High-CTR Formula** (`lib/prompts.js`)
+- [x] **Task 4: Implementasikan Sanitasi & Integrasi Backend di Scheduler Processors** (`lib/scheduler-processors.js`)
+- [x] **Task 5: Buat dan Jalankan Suite Pengujian Otomatis** (`tests/re-campaign-recipe-and-titles.test.js`)
 - [ ] **Task 6: Build Produksi Lokal, Verifikasi Zero Error, Rilis Patch Non-Interaktif, dan Deploy ke Server Dev Mac Mini (Tanpa Staging)**
 
 ---

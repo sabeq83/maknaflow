@@ -91,7 +91,8 @@ export const POST = withTenantContext(async (request) => {
       target_demographic: global_settings.target_demographic || null,
       target_demographic_custom: global_settings.target_demographic_custom || null,
       ai_directive: global_settings.ai_directive || null,
-      mandatory_outro_line: global_settings.mandatory_outro_line || null
+      mandatory_outro_line: global_settings.mandatory_outro_line || null,
+      generate_recipe: global_settings.generate_recipe ? 1 : 0
     });
 
     // 2. Map row data to database format

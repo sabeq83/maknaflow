@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.37 — RE Campaign Recipe Toggle and YouTube High-CTR Anti-Cutoff Titles (14/10/2026)
+- Tambah toggle Hasilkan Resep Herbal & Kuliner pada formulir RE Campaign
+- Integrasikan Recipe & Herbal Concoction Mandate ke Prompt Builder Gemini
+- Terapkan formula High-CTR dan cleanYoutubeTitle anti-terpotong untuk YouTube Shorts
+- Migrasi skema database kolom generate_recipe pada tabel re_campaigns
+
 ## V2.32.36 — Fix Repliz YouTube Video Title Using High-CTR Title Instead of Slug (14/10/2026)
 - Perbaiki query claimDuePublishingJob dengan join content_flow_items
 - Tambahkan title_snapshot pada publishing_jobs dan fallback di publishing-worker
