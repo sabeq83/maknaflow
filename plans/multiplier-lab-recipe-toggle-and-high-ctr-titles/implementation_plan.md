@@ -23,7 +23,7 @@ File mockup simulasi interaktif telah dibuat dan siap diuji di:
 - [x] **Task 3: Perkaya `buildMultiplierPhase2Prompt` dengan Recipe Mandate & YouTube High-CTR Mandate** (`lib/prompts.js`)
 - [x] **Task 4: Integrasikan Sanitasi `cleanYoutubeTitle()` dan Penyimpanan di Worker Multiplier** (`lib/re-multiplier-worker.js`)
 - [x] **Task 5: Buat dan Jalankan Suite Pengujian Otomatis Multiplier** (`tests/multiplier-recipe-and-titles.test.js`)
-- [ ] **Task 6: Build Produksi Lokal, Verifikasi Zero Error, Rilis Patch Non-Interaktif, dan Deploy ke Server Dev Mac Mini (Tanpa Staging)**
+- [x] **Task 6: Build Produksi Lokal, Verifikasi Zero Error, Rilis Patch Non-Interaktif, dan Deploy ke Server Dev Mac Mini (Tanpa Staging)**
 
 ---
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.39 — G-Labs Prominent Person Guardrail & Pillar Campaign Resolution (14/10/2026)
+- Tambah filter de-personalization pada sanitizeI2vPrompt untuk mencegah penolakan prominent_person oleh G-Labs Veo
+- Perbaiki dan selesaikan seluruh 18 klip kampanye pilar opc_261012_lyg6eh di staging hingga 100% completed
+
 ## V2.32.38 — Multiplier Lab Recipe Toggle and YouTube High-CTR Titles (14/10/2026)
 - Tambah toggle Hasilkan Resep pada formulir Multiplier Lab
 - Integrasikan Recipe Mandate dan YouTube High-CTR Title pada buildMultiplierPhase2Prompt
