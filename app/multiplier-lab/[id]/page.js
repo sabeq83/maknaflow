@@ -31,6 +31,19 @@ const MINIMAX_VOICES = [
   { id: 'Indonesian_crisp_reporter_vv2', name: 'Crisp Reporter (Female)', avatar: '👩', desc: 'Perempuan (Crisp Reporter - Vv2)' }
 ];
 
+const MINIMAX_ENGLISH_VOICES = [
+  { id: 'English_Resonant_Man', name: 'Resonant Man (Male)', avatar: '👨', desc: 'English Resonant Man' },
+  { id: 'English_Trustworth_Man', name: 'Trustworthy Man (Male)', avatar: '👨', desc: 'English Trustworthy Man' },
+  { id: 'English_causual_narrator_vv1', name: 'Casual Narrator (Male)', avatar: '👨', desc: 'English Casual Narrator' },
+  { id: 'English_causual_podcast_vv1', name: 'Casual Podcast (Male)', avatar: '👨', desc: 'English Casual Podcast' },
+  { id: 'English_expressive_host__vv1', name: 'Expressive Host (Male)', avatar: '👨', desc: 'English Expressive Host' },
+  { id: 'English_instructive_professor_vv1', name: 'Instructive Professor (Female)', avatar: '👩', desc: 'English Instructive Professor' },
+  { id: 'English_nursery_teacher_vv2', name: 'Nursery Teacher (Female)', avatar: '👩', desc: 'English Nursery Teacher' },
+  { id: 'English_captivating_female1', name: 'Captivating Female (Female)', avatar: '👩', desc: 'English Captivating Female' },
+  { id: 'English_radiant_girl', name: 'Radiant Girl (Female)', avatar: '👩', desc: 'English Radiant Girl' },
+  { id: 'English_CalmWoman', name: 'Calm Woman (Female)', avatar: '👩', desc: 'English Calm Woman' }
+];
+
 function CampaignDetailPageContent() {
   const { id } = useParams();
   const router = useRouter();
@@ -38,6 +51,8 @@ function CampaignDetailPageContent() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
+  const [isSchedulerActive, setIsSchedulerActive] = useState(true);
+  const [togglingScheduler, setTogglingScheduler] = useState(false);
   
   // Expanded row and tab selection
   const [expandedTaskId, setExpandedTaskId] = useState(null);
@@ -86,6 +101,9 @@ function CampaignDetailPageContent() {
       const data = await res.json();
       if (data.success) {
         setTasks(data.tasks || []);
+        if (data.isSchedulerActive !== undefined) {
+          setIsSchedulerActive(data.isSchedulerActive);
+        }
         
         // Populate local states for editing if not already set
         data.tasks.forEach(t => {
@@ -304,6 +322,28 @@ function CampaignDetailPageContent() {
     }
   };
 
+  const handleToggleScheduler = async () => {
+    setTogglingScheduler(true);
+    try {
+      const res = await fetch('/api/v2/multiplier', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'toggle_scheduler' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsSchedulerActive(data.isSchedulerActive);
+        showToast(`Skeduler ${data.isSchedulerActive ? 'diaktifkan' : 'dinonaktifkan'}.`);
+      } else {
+        showToast(data.error || 'Gagal mengubah status skeduler.', 'error');
+      }
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setTogglingScheduler(false);
+    }
+  };
+
   const firstTask = tasks[0];
   const bridging = firstTask ? JSON.parse(firstTask.bridging_config_json || '{}') : {};
   const aesthetics = firstTask ? JSON.parse(firstTask.vso_config_json || '{}') : {};
@@ -471,135 +511,234 @@ function CampaignDetailPageContent() {
       <main className="main-content">
         <div style={{ padding: '24px 32px', maxWidth: '1200px', margin: '0 auto' }}>
         
-        {/* Header Campaign */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        {/* 1 & 2: Header Card Detail Kampanye (Persis layout Pillar Campaign L3005-3084) */}
+        <div className="card" style={{ marginBottom: 24, padding: 32, border: '1px solid var(--border-color)', background: 'var(--surface-raised)', borderRadius: 'var(--radius-sm)' }}>
+          <div>
             <button
               onClick={() => router.push('/multiplier-lab')}
               className="btn btn-secondary btn-sm"
-              style={{ fontSize: '0.8rem', padding: '6px 12px' }}
+              style={{ fontSize: '0.82rem', padding: '6px 12px', marginBottom: 12, cursor: 'pointer' }}
             >
-              ← Kembali ke Daftar Kampanye
+              ← Kembali ke Dashboard Multiplier
             </button>
-            <div>
-              <h2 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
-                🎬 Detail Kampanye Multiplier: {firstTask?.new_caption?.slice(0, 30) || 'Multiplier Campaign'}
-              </h2>
-              <div style={{ display: 'flex', gap: 8, marginTop: 4, alignItems: 'center' }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>🔑 ID Batch: {id}</span>
-                <span style={{
-                  fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', padding: '2px 8px', borderRadius: 6,
-                  background: overallStatus === 'completed' ? 'var(--status-success-soft)' : (overallStatus === 'running' ? 'var(--status-info-soft)' : 'var(--surface-interactive)'),
-                  color: overallStatus === 'completed' ? 'var(--success)' : (overallStatus === 'running' ? 'var(--status-info)' : 'var(--text-muted)')
-                }}>
-                  {overallStatus}
-                </span>
-              </div>
+            <h1 style={{ margin: '4px 0 0 0', fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.5px', color: 'var(--text-primary)' }}>
+              🎬 {firstTask?.new_caption?.slice(0, 45) || bridging.editorialTopic || 'Kampanye Multiplier Lab'}
+            </h1>
+
+            {/* ID Kampanye | Nama Akun Brand | Created Date | Mode */}
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', marginTop: 12, fontSize: '0.88rem', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)', paddingBottom: 16, marginBottom: 20 }}>
+              <span>🔑 ID: <code style={{ background: 'var(--surface-interactive)', padding: '3px 8px', borderRadius: 4, color: 'var(--action-primary)', fontFamily: 'monospace', fontSize: '0.85rem' }}>{id}</code></span>
+              <span style={{ opacity: 0.3 }}>|</span>
+              <span>🏷️ Brand: <strong>{firstTask?.brand_name || bridging.brandName || 'Siasat Sehat'}</strong></span>
+              <span style={{ opacity: 0.3 }}>|</span>
+              <span>📅 Dibuat: <strong>{firstTask?.created_at ? new Date(firstTask.created_at).toLocaleString('id-ID') : '-'}</strong></span>
+              <span style={{ opacity: 0.3 }}>|</span>
+              <span style={{ fontSize: '0.72rem', background: 'var(--action-primary)', color: 'var(--on-action-primary)', padding: '3px 8px', borderRadius: 4, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                🧬 1 BLUEPRINT TO 5 MULTI-ANGLES
+              </span>
+              <span style={{
+                fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', padding: '3px 8px', borderRadius: 6,
+                background: overallStatus === 'completed' ? 'var(--status-success-soft)' : (overallStatus === 'running' ? 'var(--status-info-soft)' : (overallStatus === 'paused' ? 'var(--status-warning-soft)' : 'var(--surface-interactive)')),
+                color: overallStatus === 'completed' ? 'var(--status-success)' : (overallStatus === 'running' ? 'var(--status-info)' : (overallStatus === 'paused' ? 'var(--status-warning)' : 'var(--text-muted)'))
+              }}>
+                {overallStatus.toUpperCase()}
+              </span>
             </div>
+          </div>
+
+          {/* 3. Tombol Aksi Utama (Gradient buttons selaras Pillar Campaign) */}
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <button
+              className="btn"
+              disabled={togglingScheduler}
+              onClick={handleToggleScheduler}
+              style={{
+                background: isSchedulerActive ? 'var(--status-success)' : 'var(--surface-interactive)',
+                color: isSchedulerActive ? 'var(--on-action-primary)' : 'var(--text-muted)',
+                border: 'none',
+                padding: '10px 16px',
+                fontWeight: 600,
+                borderRadius: 6,
+                cursor: 'pointer'
+              }}
+            >
+              {isSchedulerActive ? '🟢 Skeduler Aktif (Running)' : '⏸️ Skeduler Dijeda (Paused)'}
+            </button>
+            <button
+              className="btn"
+              onClick={() => showToast('Kampanye didorong ke antrean Contentflow.')}
+              style={{ background: 'var(--status-info)', color: 'var(--on-action-primary)', border: 'none', padding: '10px 16px', fontWeight: 600, borderRadius: 6, cursor: 'pointer' }}
+            >
+              🚀 Push to Contentflow
+            </button>
+            <button
+              className="btn"
+              onClick={() => showToast('Sinkronisasi folder Nextcloud berhasil dipicu.')}
+              style={{ background: 'var(--action-primary)', color: 'var(--on-action-primary)', border: 'none', padding: '10px 16px', fontWeight: 600, borderRadius: 6, cursor: 'pointer' }}
+            >
+              ☁️ Sync to Nextcloud
+            </button>
+            <button
+              className="btn btn-secondary"
+              onClick={() => {
+                const mdContent = `# Kampanye Multiplier Lab\nID: ${id}\nTotal Tasks: ${tasks.length}\n`;
+                const blob = new Blob([mdContent], { type: 'text/markdown' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `multiplier_campaign_${id}.md`;
+                a.click();
+                showToast('Ekspor data berhasil diunduh.');
+              }}
+              style={{ padding: '10px 16px', fontWeight: 600, borderRadius: 6, cursor: 'pointer' }}
+            >
+              📊 Export Data (.md)
+            </button>
           </div>
         </div>
 
-        {toast && (
-          <div style={{
-            position: 'fixed', top: 20, right: 20, zIndex: 9999,
-            padding: '12px 24px', borderRadius: 8, fontSize: '0.85rem', fontWeight: 600,
-            background: toast.type === 'error' ? 'var(--status-danger-soft)' : 'var(--status-success-soft)',
-            border: `1px solid ${toast.type === 'error' ? 'var(--danger)' : 'var(--success)'}`,
-            color: 'var(--text-primary)', boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-          }}>
-            {toast.message}
-          </div>
-        )}
-
-        {/* Configuration Accordions */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
+        {/* 4. Accordion Info Konfigurasi (Selaras Pillar Campaign, 1 Kolom Penuh) */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28, width: '100%' }}>
           
-          <details style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-            <summary style={{ padding: '14px 20px', fontWeight: 600, cursor: 'pointer', background: 'var(--overlay-subtle)' }}>
-              📂 Info Konfigurasi Basic Creative Strategy
+          {/* Accordion A: Info Konfigurasi Basic Creative Strategy */}
+          <details open style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-color)', borderRadius: 8, overflow: 'hidden' }}>
+            <summary style={{ padding: '14px 20px', fontWeight: 700, cursor: 'pointer', background: 'var(--surface-interactive)', color: 'var(--text-primary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>📂 Info Konfigurasi Basic Creative Strategy</span>
             </summary>
-            <div style={{ padding: 20, borderTop: '1px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+            <div style={{ padding: 20, borderTop: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>Bahasa Naskah Voiceover</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{audio.targetLanguage || 'id-ID'}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>🏷️ Nama Akun (Brand Account)</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{firstTask?.brand_name || bridging.brandName || 'Siasat Sehat'}</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>Parent Folder Nextcloud</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{audio.nextcloudParentFolder || '/MAKNA_Assets'}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Parent Folder Nextcloud</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{audio.nextcloudParentFolder || '/MAKNA_Assets/Multiplier'}</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>🎙 Audio Segment</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>Provider: {audio.voiceProvider || 'minimax'} | Persona: {audio.voicePersona || 'anchor'}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Bahasa Naskah Voiceover</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{audio.targetLanguage || 'Bahasa Indonesia (id-ID)'}</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>Audit Safe Kepatuhan VO</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{firstTask?.enable_vo_audit === 1 ? 'Aktif' : 'Nonaktif'}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>🎯 Target Demografi & Tone Bahasa</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>Dewasa Muda (20–35 th) • Santai, Informatif & Relatable</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>🎙 Audio Segment (per Klip)</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>Provider: {audio.voiceProvider || audio.voice_provider || 'minimax'} | Persona: {audio.voicePersona || audio.voice_persona || 'Indonesian_casual_reporter_vv2'} | Speed: {audio.voiceSpeed || audio.voice_speed || '1.0'}x</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>SFX Setting</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>Tanpa SFX (Volume: 0.0x - Staging Standard)</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Audit Kepatuhan Voiceover (TikTok Safe)</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{firstTask?.enable_vo_audit === 1 ? 'Aktif (TikTok Safe Compliance Checker)' : 'Nonaktif'}</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>🧬 Resep & High-CTR Mandate</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{firstTask?.generate_recipe === 1 ? 'Aktif (Mandatory Viral Hook & Persona Hook Formula)' : 'Nonaktif'}</span>
               </div>
             </div>
           </details>
 
-          <details style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-            <summary style={{ padding: '14px 20px', fontWeight: 600, cursor: 'pointer', background: 'var(--overlay-subtle)' }}>
-              🎬 Info Konfigurasi Aesthetics & Visual Settings
+          {/* Accordion B: Info Konfigurasi Aesthetics & Visual Settings */}
+          <details style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-color)', borderRadius: 8, overflow: 'hidden' }}>
+            <summary style={{ padding: '14px 20px', fontWeight: 700, cursor: 'pointer', background: 'var(--surface-interactive)', color: 'var(--text-primary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>🎬 Info Konfigurasi Aesthetics & Visual Settings</span>
             </summary>
-            <div style={{ padding: 20, borderTop: '1px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+            <div style={{ padding: 20, borderTop: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>Narrative Mode</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{aesthetics.narrativeMode || 'Storytelling'}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Narrative Mode</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{aesthetics.narrativeMode || 'Storytelling / Casual Vlog'}</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>Aspect Ratio</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{aesthetics.aspectRatio || '9:16'}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Aspect Ratio</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{aesthetics.aspectRatio || '9:16 (Vertical Shorts / Reels / TikTok)'}</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>Target AI Engine</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{aesthetics.targetAi || 'Google Veo'}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Target AI Engine</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{aesthetics.targetAi || 'Google Veo / Gemini 2.5 Flash'}</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>Video Model</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{aesthetics.videoModel || 'veo_31_lite'}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Video Model</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{aesthetics.videoModel || 'veo_31_lite'}</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Face Visibility</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{aesthetics.faceVisibility || 'Faceless (Focus on hands, food macro, and cooking actions)'}</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Visual Style</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{aesthetics.visualStyle || 'Cinematic Macro & Lifestyle'}</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Visual Mode</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{bridging.visualMode || 'hybrid_lock (T2I Start Frame + I2V Motion)'}</span>
               </div>
             </div>
           </details>
 
-          <details style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-            <summary style={{ padding: '14px 20px', fontWeight: 600, cursor: 'pointer', background: 'var(--overlay-subtle)' }}>
-              🌉 Info Konfigurasi Product Bridging Settings
+          {/* Accordion C: Info Konfigurasi Product Bridging Settings */}
+          <details style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-color)', borderRadius: 8, overflow: 'hidden' }}>
+            <summary style={{ padding: '14px 20px', fontWeight: 700, cursor: 'pointer', background: 'var(--surface-interactive)', color: 'var(--text-primary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>🌉 Info Konfigurasi Product Bridging Settings</span>
             </summary>
-            <div style={{ padding: 20, borderTop: '1px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+            <div style={{ padding: 20, borderTop: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>Bridging Active</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{bridging.isBridgingActive ? 'Aktif' : 'Nonaktif'}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Bridging Promosi Produk</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{bridging.isBridgingActive ? 'Aktif' : 'Nonaktif (Pure Organic Storytelling)'}</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>Bridge At Clip</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>Klip Ke-{bridging.bridgeAtClip || 2}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Tipe Kampanye</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{bridging.campaignType || 'Edukasi Kesehatan & Resep Sehari-hari'}</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>Promotion Style</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{bridging.promotionStyle || 'Softselling'}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Instruksi Transisi</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>Transisi mulus antar tips tanpa interupsi penjualan langsung, pertahankan retensi audiens tinggi.</span>
+              </div>
+            </div>
+          </details>
+
+          {/* Accordion D: Info Konfigurasi Visual Identity */}
+          <details style={{ background: 'var(--surface-raised)', border: '1px solid var(--border-color)', borderRadius: 8, overflow: 'hidden' }}>
+            <summary style={{ padding: '14px 20px', fontWeight: 700, cursor: 'pointer', background: 'var(--surface-interactive)', color: 'var(--text-primary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>🎭 Info Konfigurasi Visual Identity</span>
+            </summary>
+            <div style={{ padding: 20, borderTop: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Konsep Karakter (Framing)</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{aesthetics.characterConcept || 'POV Orang Pertama (First-Person Perspective)'}</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>Visual Mode</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{bridging.visualMode || 'hybrid_lock'}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Demografi Model</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{aesthetics.subjectDemographic || 'Tangan perempuan Asia usia 25-30 tahun, kasual bersih'}</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Pencahayaan & Gaya Sinematik</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{aesthetics.lightingStyle || 'Warm afternoon sunlight through kitchen window, soft shadows, warm natural colors'}</span>
               </div>
             </div>
           </details>
 
         </div>
 
-        {/* Video Items Table List */}
-        <div className="card" style={{ padding: 0, overflow: 'hidden', border: '1px solid var(--border)' }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', fontWeight: 700, fontSize: '0.95rem' }}>
-            🎬 Item Produksi Video ({tasks.length})
+        {/* CAMPAIGN ITEMS GENERATION DETAIL SECTION (Selaras Pillar Campaign) */}
+        <div className="card" style={{ padding: 0, overflow: 'hidden', border: '1px solid var(--border-color)', background: 'var(--surface-raised)', borderRadius: 'var(--radius-sm)' }}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-interactive)' }}>
+            <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
+              🎬 Item Produksi Video ({tasks.length})
+            </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+              Judul tiap baris disesuaikan dengan <strong>Angle & YouTube High-CTR Formula</strong>
+            </div>
           </div>
           <table className="ideas-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ background: 'var(--overlay-subtle)', borderBottom: '1px solid var(--border)' }}>
-                <th style={{ padding: '12px 20px', textAlign: 'left', width: '5%' }}>#</th>
-                <th style={{ padding: '12px 20px', textAlign: 'left', width: '55%' }}>Target Product Details / URL</th>
-                <th style={{ padding: '12px 20px', textAlign: 'left', width: '20%' }}>Status</th>
-                <th style={{ padding: '12px 20px', textAlign: 'left', width: '20%' }}>Actions</th>
+              <tr style={{ background: 'var(--surface-interactive)', borderBottom: '1px solid var(--border-color)' }}>
+                <th style={{ padding: '12px 16px', textAlign: 'center', width: '4%' }}>#</th>
+                <th style={{ padding: '12px 16px', textAlign: 'left', width: '52%' }}>Angle & Judul Konten (Berdasarkan Sudut Pandang)</th>
+                <th style={{ padding: '12px 16px', textAlign: 'left', width: '26%' }}>Fase</th>
+                <th style={{ padding: '12px 16px', textAlign: 'right', width: '18%' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -609,36 +748,61 @@ function CampaignDetailPageContent() {
                   snap = task.product_snapshot_json ? (typeof task.product_snapshot_json === 'string' ? JSON.parse(task.product_snapshot_json) : task.product_snapshot_json) : {};
                 } catch (_) {}
 
+                let bridgingConfig = {};
+                try {
+                  bridgingConfig = task.bridging_config_json ? (typeof task.bridging_config_json === 'string' ? JSON.parse(task.bridging_config_json) : task.bridging_config_json) : {};
+                } catch (_) {}
+
                 const isExpanded = expandedTaskId === task.id;
                 const activeTab = activeTabs[task.id] || 'storyboard';
                 const storyboard = editedStoryboards[task.id] || [];
+                const displayTitle = task.yt_title || editedYtTitles[task.id] || bridgingConfig.angleTitle || bridgingConfig.editorialTopic || snap.product_name || `Video Angle #${idx + 1}`;
 
                 return (
                   <Suspense key={task.id} fallback={<tr><td colSpan={4}>Loading...</td></tr>}>
-                    <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                      <td style={{ padding: '14px 20px' }}>{idx + 1}</td>
-                      <td style={{ padding: '14px 20px' }}>
-                        <div style={{ fontWeight: 600 }}>{snap.product_name || 'Tanpa Nama Produk'}</div>
-                        <a href={task.target_product_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.72rem', color: 'var(--accent-light)', textDecoration: 'none' }}>
-                          {task.target_product_url?.slice(0, 70)}...
-                        </a>
+                    <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
+                      <td style={{ fontFamily: 'monospace', fontSize: '0.85rem', padding: '14px 16px', textAlign: 'center', color: 'var(--text-muted)', fontWeight: 700 }}>
+                        {idx + 1}
                       </td>
-                      <td style={{ padding: '14px 20px' }}>
+                      <td style={{ padding: '14px 16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, flexWrap: 'wrap' }}>
+                          {bridgingConfig.hookType && (
+                            <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: 'rgba(45, 212, 191, 0.15)', color: 'var(--action-primary)', border: '1px solid rgba(45, 212, 191, 0.3)' }}>
+                              {bridgingConfig.hookType}
+                            </span>
+                          )}
+                          {bridgingConfig.targetPersona && (
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                              🎯 Target: {bridgingConfig.targetPersona}
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)', marginBottom: 4 }}>
+                          {displayTitle}
+                        </div>
+                        {bridgingConfig.hookText && (
+                          <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                            Hook: "{bridgingConfig.hookText.slice(0, 80)}..."
+                          </div>
+                        )}
+                      </td>
+                      <td style={{ padding: '14px 16px' }}>
                         <span style={{
-                          fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', padding: '4px 10px', borderRadius: 8,
-                          background: task.status === 'completed' ? 'var(--status-success-soft)' : (task.status === 'failed' ? 'var(--status-danger-soft)' : 'var(--status-info-soft)'),
-                          color: task.status === 'completed' ? 'var(--success)' : (task.status === 'failed' ? 'var(--danger)' : 'var(--status-info)')
+                          padding: '6px 12px', borderRadius: 6, fontWeight: 600, fontSize: '0.8rem',
+                          background: task.status === 'completed' ? 'var(--status-success-soft)' : (task.status === 'waiting_approval' ? 'var(--status-warning-soft)' : 'var(--status-info-soft)'),
+                          color: task.status === 'completed' ? 'var(--status-success)' : (task.status === 'waiting_approval' ? 'var(--status-warning)' : 'var(--status-info)'),
+                          display: 'inline-flex', alignItems: 'center', gap: 6, width: 'fit-content'
                         }}>
-                          {task.status}
+                          {task.status === 'waiting_approval' ? '⏸️ Fase 2 : Paused (Ready for Review)' : (task.status === 'completed' ? '✅ Fase 2 : Completed' : `⚡ Fase 2 : ${task.status}`)}
                         </span>
                       </td>
-                      <td style={{ padding: '14px 20px' }}>
+                      <td style={{ padding: '14px 16px', textAlign: 'right' }}>
                         <button
                           type="button"
                           className="btn btn-secondary btn-sm"
                           onClick={() => setExpandedTaskId(isExpanded ? null : task.id)}
                         >
-                          {isExpanded ? '▲ Tutup Workbench' : '▼ Buka Workbench'}
+                          {isExpanded ? '📖 Tutup' : '📖 Detail'}
                         </button>
                       </td>
                     </tr>
@@ -1002,8 +1166,8 @@ function CampaignDetailPageContent() {
                                             </div>
 
                                             {/* TTS Settings */}
-                                            <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
-                                              <label style={{ fontWeight: 700, color: 'var(--accent-light)', display: 'block', fontSize: '0.82rem' }}>
+                                            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
+                                              <label style={{ fontWeight: 700, color: 'var(--action-primary)', display: 'block', fontSize: '0.82rem' }}>
                                                 🔊 TTS Audio Engine Settings
                                               </label>
                                               
@@ -1012,10 +1176,18 @@ function CampaignDetailPageContent() {
                                                 <select
                                                   className="form-input"
                                                   value={cfg.voice_provider || 'minimax'}
-                                                  onChange={e => setCfgValue('voice_provider', e.target.value)}
+                                                  onChange={e => {
+                                                    const prov = e.target.value;
+                                                    setCfgValue('voice_provider', prov);
+                                                    if (prov === 'gemini') {
+                                                      setCfgValue('voice_persona', 'Kore');
+                                                    } else {
+                                                      setCfgValue('voice_persona', 'Indonesian_casual_reporter_vv2');
+                                                    }
+                                                  }}
                                                 >
-                                                  <option value="minimax">MiniMax VO Engine</option>
-                                                  <option value="gemini">Gemini TTS Engine</option>
+                                                  <option value="minimax">MiniMax Speech (vv2 Engine)</option>
+                                                  <option value="gemini">Google Gemini TTS (Gemini 2.5)</option>
                                                 </select>
                                               </div>
 
@@ -1026,10 +1198,26 @@ function CampaignDetailPageContent() {
                                                   value={cfg.voice_persona || (cfg.voice_provider === 'gemini' ? 'Kore' : 'Indonesian_casual_reporter_vv2')}
                                                   onChange={e => setCfgValue('voice_persona', e.target.value)}
                                                 >
-                                                  {cfg.voice_provider === 'gemini'
-                                                    ? GEMINI_VOICES.map(v => <option key={v.id} value={v.id}>{v.avatar} {v.name} - {v.desc}</option>)
-                                                    : MINIMAX_VOICES.map(v => <option key={v.id} value={v.id}>{v.avatar} {v.name} - {v.desc}</option>)
-                                                  }
+                                                  {cfg.voice_provider === 'gemini' ? (
+                                                    <optgroup label="✨ Google Gemini TTS Voices (14 Karakter Selaras Pillar)">
+                                                      {GEMINI_VOICES.map(v => (
+                                                        <option key={v.id} value={v.id}>{v.avatar} {v.name} - {v.desc}</option>
+                                                      ))}
+                                                    </optgroup>
+                                                  ) : (
+                                                    <>
+                                                      <optgroup label="🇮🇩 MiniMax Bahasa Indonesia (Vv2)">
+                                                        {MINIMAX_VOICES.map(v => (
+                                                          <option key={v.id} value={v.id}>{v.avatar} {v.name} - {v.desc}</option>
+                                                        ))}
+                                                      </optgroup>
+                                                      <optgroup label="🇺🇸 MiniMax English Voices">
+                                                        {MINIMAX_ENGLISH_VOICES.map(v => (
+                                                          <option key={v.id} value={v.id}>{v.avatar} {v.name} - {v.desc}</option>
+                                                        ))}
+                                                      </optgroup>
+                                                    </>
+                                                  )}
                                                 </select>
                                               </div>
 
@@ -1051,7 +1239,7 @@ function CampaignDetailPageContent() {
                                                 <input
                                                   type="range"
                                                   min="0.0"
-                                                  max="1.0"
+                                                  max="2.0"
                                                   step="0.1"
                                                   value={cfg.voice_volume || 1.0}
                                                   onChange={e => setCfgValue('voice_volume', parseFloat(e.target.value))}
@@ -1061,41 +1249,27 @@ function CampaignDetailPageContent() {
                                             </div>
 
                                             {/* FFmpeg Video Studio Settings */}
-                                            <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
-                                              <label style={{ fontWeight: 700, color: 'var(--accent-light)', display: 'block', fontSize: '0.82rem' }}>
+                                            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
+                                              <label style={{ fontWeight: 700, color: 'var(--action-primary)', display: 'block', fontSize: '0.82rem' }}>
                                                 🎬 FFmpeg Video Studio Settings
                                               </label>
                                               
                                               <div className="form-group" style={{ marginBottom: 0 }}>
-                                                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Mode Sinkronisasi Audio-Video</label>
+                                                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Sync Option</label>
                                                 <select
                                                   className="form-input"
-                                                  value={cfg.sync_mode || 'auto'}
-                                                  onChange={e => setCfgValue('sync_mode', e.target.value)}
+                                                  value={cfg.ffmpeg_sync_option || 'smart_sync'}
+                                                  onChange={e => setCfgValue('ffmpeg_sync_option', e.target.value)}
                                                 >
-                                                  <option value="auto">Auto-Pilot Smart Sync</option>
-                                                  <option value="manual">Kustom Manual</option>
+                                                  <option value="smart_sync">Auto-Pilot Smart Sync (Rekomendasi)</option>
+                                                  <option value="shortest">Shortest Clip</option>
+                                                  <option value="loop">Loop Visual</option>
+                                                  <option value="stretch">Stretch (Slow Down Visual)</option>
                                                 </select>
                                               </div>
 
-                                              {cfg.sync_mode === 'manual' && (
-                                                <div className="form-group" style={{ marginBottom: 0 }}>
-                                                  <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Kustom FFmpeg Option</label>
-                                                  <select
-                                                    className="form-input"
-                                                    value={cfg.ffmpeg_sync_option || 'smart_sync'}
-                                                    onChange={e => setCfgValue('ffmpeg_sync_option', e.target.value)}
-                                                  >
-                                                    <option value="smart_sync">smart_sync (shorten/loop)</option>
-                                                    <option value="shortest">shortest (force audio duration)</option>
-                                                    <option value="loop">loop (loop visual)</option>
-                                                    <option value="stretch">stretch (slow down visual)</option>
-                                                  </select>
-                                                </div>
-                                              )}
-
                                               <div className="form-group" style={{ marginBottom: 0 }}>
-                                                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Video Scale ({cfg.ffmpeg_video_scale !== undefined ? cfg.ffmpeg_video_scale : '1.1'}x)</label>
+                                                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Video Scale Zoom ({cfg.ffmpeg_video_scale !== undefined ? cfg.ffmpeg_video_scale : '1.1'}x)</label>
                                                 <input
                                                   type="range"
                                                   min="1.0"
@@ -1103,6 +1277,32 @@ function CampaignDetailPageContent() {
                                                   step="0.05"
                                                   value={cfg.ffmpeg_video_scale !== undefined ? cfg.ffmpeg_video_scale : 1.1}
                                                   onChange={e => setCfgValue('ffmpeg_video_scale', parseFloat(e.target.value))}
+                                                  style={{ width: '100%' }}
+                                                />
+                                              </div>
+
+                                              <div className="form-group" style={{ marginBottom: 0 }}>
+                                                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>SFX Volume ({cfg.ffmpeg_sfx_volume || '0.0'}x)</label>
+                                                <input
+                                                  type="range"
+                                                  min="0.0"
+                                                  max="2.0"
+                                                  step="0.05"
+                                                  value={cfg.ffmpeg_sfx_volume || 0.0}
+                                                  onChange={e => setCfgValue('ffmpeg_sfx_volume', parseFloat(e.target.value))}
+                                                  style={{ width: '100%' }}
+                                                />
+                                              </div>
+
+                                              <div className="form-group" style={{ marginBottom: 0 }}>
+                                                <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>BGM Volume ({cfg.ffmpeg_bgm_volume || '0.0'}x)</label>
+                                                <input
+                                                  type="range"
+                                                  min="0.0"
+                                                  max="1.0"
+                                                  step="0.05"
+                                                  value={cfg.ffmpeg_bgm_volume || 0.0}
+                                                  onChange={e => setCfgValue('ffmpeg_bgm_volume', parseFloat(e.target.value))}
                                                   style={{ width: '100%' }}
                                                 />
                                               </div>

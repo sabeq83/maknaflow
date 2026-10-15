@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.41 — Penyelarasan UI Multiplier Lab dengan Organic Pillar Campaign & Perbaikan Skeduler Otomatis (15/10/2026)
+- Penyelarasan judul tiap baris item kampanye berbasis Angle dan High-CTR YouTube Title
+- Penyelarasan layout kartu dan halaman detail Multiplier Lab dengan Organic Pillar Campaign
+- Penyusunan 4 accordion konfigurasi dan Workflow & Production Settings Fase 2 dalam 1 kolom dengan Voice Provider & persona lengkap
+- Perbaikan evaluasi scheduler Multiplier agar otomatis aktif dan dukungan toggle API
+
 ## V2.32.40 — Fix Multiplier Lab Angle Generator Column Schema Error (15/10/2026)
 - Perbaiki kueri re_deconstructed_assets di Multiplier Lab angle generator dengan source_url dan alias kompatibilitas original_video_url
 - Hapus kolom non-existent prompt_dna_json dan dukung narration_transcript serta injeksi viral_pattern_summary pada prompt Gemini

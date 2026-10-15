@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup — Multiplier Lab (Selaras 100% dengan UI Organic Pillar Campaign)</title>
+  <style>
+    :root, [data-theme="dark"] {
+      color-scheme: dark;
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.28);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --border-color: #26354a;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme="light"] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --sidebar: #f1f5f9;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(0, 0, 0, 0.05);
+      --overlay-backdrop: rgba(15, 23, 42, 0.4);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-color: #e2e8f0;
+      --action-primary: #0f766e;
+      --action-primary-hover: #115e59;
+      --on-action-primary: #ffffff;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.1);
+      --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.06);
+      --shadow-modal: 0 20px 48px rgba(0, 0, 0, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+
+    /* Top navigation control bar */
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-title h1 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .view-switcher {
+      display: flex;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .view-btn {
+      padding: 8px 16px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .view-btn.active {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .theme-toggle-btn {
+      padding: 8px 14px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .badge-success { background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success-soft); }
+    .badge-warning { background: var(--status-warning-soft); color: var(--status-warning); border: 1px solid var(--status-warning-soft); }
+    .badge-danger { background: var(--status-danger-soft); color: var(--status-danger); border: 1px solid var(--status-danger-soft); }
+    .badge-info { background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info-soft); }
+    .badge-brand { background: var(--surface-interactive); color: var(--text-secondary); border: 1px solid var(--border-subtle); }
+    .badge-hook {
+      background: rgba(45, 212, 191, 0.15);
+      color: var(--action-primary);
+      border: 1px solid rgba(45, 212, 191, 0.3);
+      font-size: 0.68rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-hover);
+    }
+
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 0.72rem;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 8px;
+    }
+
+    table.ideas-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      text-align: left;
+    }
+
+    table.ideas-table th {
+      background: var(--surface-raised);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    table.ideas-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      vertical-align: middle;
+    }
+
+    /* Accordion Details (Pillar Campaign exact style - 1 Kolom Penuh) */
+    .accordion-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      margin-top: 24px;
+      margin-bottom: 24px;
+    }
+
+    details.pillar-accordion {
+      width: 100%;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 0;
+    }
+
+    details.pillar-accordion summary {
+      padding: 16px 20px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      cursor: pointer;
+      outline: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface-interactive);
+      user-select: none;
+    }
+
+    details.pillar-accordion .accordion-content {
+      padding: 20px;
+      border-top: 1px solid var(--border-color);
+      background: var(--overlay-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .config-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .config-field:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .config-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .config-value {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Pipeline Step Bar (Pillar exact style) */
+    .pipeline-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0;
+    }
+
+    .pipeline-chip {
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.72rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-interactive);
+      color: var(--text-muted);
+    }
+    .pipeline-chip.success {
+      background: var(--status-success-soft);
+      color: var(--text-primary);
+      border-color: rgba(74, 222, 128, 0.4);
+    }
+    .pipeline-chip.active {
+      background: var(--status-info-soft);
+      color: var(--text-primary);
+      border-color: rgba(96, 165, 250, 0.4);
+      animation: active-pulse 1.5s infinite alternate;
+    }
+
+    @keyframes active-pulse {
+      0% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+
+    /* Expanded Workbench Container */
+    .workbench-container {
+      background: var(--surface-raised);
+      padding: 24px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    /* Tab switcher inside Workbench */
+    .wb-tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+    }
+
+    .wb-tab {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+    .wb-tab.active {
+      background: var(--surface-interactive);
+      border-color: var(--border-strong);
+      color: var(--action-primary);
+    }
+
+    /* Clip Accordion Card */
+    .clip-card {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .clip-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 0.84rem;
+      color: var(--action-primary);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .clip-textarea {
+      width: 100%;
+      min-height: 50px;
+      background: var(--overlay-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      resize: vertical;
+      line-height: 1.4;
+      font-family: inherit;
+    }
+
+    /* Form switches */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 36px;
+      height: 20px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: var(--surface-interactive);
+      transition: .3s;
+      border-radius: 20px;
+      border: 1px solid var(--border-strong);
+    }
+    .slider:before {
+      position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px;
+      background-color: var(--text-primary);
+      transition: .3s;
+      border-radius: 50%;
+    }
+    input:checked + .slider { background-color: var(--action-primary); }
+    input:checked + .slider:before { transform: translateX(16px); background-color: var(--on-action-primary); }
+
+    /* Notice Banner Box */
+    .banner-box {
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      line-height: 1.5;
+      font-size: 0.82rem;
+    }
+    .banner-warning {
+      background: var(--status-warning-soft);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      color: var(--status-warning);
+    }
+    .banner-success {
+      background: var(--status-success-soft);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+      color: var(--status-success);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- Top Navigation Controls -->
+    <div class="top-nav">
+      <div class="brand-title">
+        <span style="font-size: 1.5rem;">🧬</span>
+        <div>
+          <h1>Multiplier Lab — Simulasi Mockup UI Selaras Pillar Campaign</h1>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">
+            SOP Semantic Design Tokens • Judul Baris Berbasis Angle • Struktur Selaras 100% dengan Organic Pillar Campaign
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div class="view-switcher">
+          <button id="tab-btn-main" class="view-btn" onclick="switchView('view-main')">📋 1. Halaman Utama Kampanye</button>
+          <button id="tab-btn-detail" class="view-btn active" onclick="switchView('view-detail')">🔍 2. Halaman Detail & Baris Angle</button>
+        </div>
+        <button class="theme-toggle-btn" onclick="toggleTheme()">🌓 Ganti Tema</button>
+      </div>
+    </div>
+
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 1: HALAMAN UTAMA KAMPANYE MULTIPLIER LAB (/multiplier-lab)           -->
+    <!-- ========================================================================= -->
+    <div id="view-main" style="display: none;">
+
+      <!-- Header & Action Bar -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <h2 style="margin: 0; font-size: 1.6rem; font-weight: 800;">Daftar Kampanye Multiplier Lab</h2>
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
+            Multiplikasi 1 Video Sukses menjadi 5 Sudut Pandang Naskah, Voiceover, dan High-CTR YouTube Shorts.
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 8px; background: var(--surface); padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border-color);">
+            <span style="font-size: 0.8rem; font-weight: 700; color: var(--status-success);">🟢 SKEDULER AKTIF</span>
+            <button class="btn btn-secondary btn-sm" onclick="alert('Toggle scheduler aktif/nonaktif berhasil!')">⏸ Pause</button>
+          </div>
+          <button class="btn btn-primary" onclick="alert('Membuka modal kampanye baru')">
+            + Buat Kampanye Multiplier Baru
+          </button>
+        </div>
+      </div>
+
+      <!-- KARTU KAMPANYE SELARAS PILLAR CAMPAIGN -->
+      <div class="card" style="padding: 24px; border: 1px solid var(--border-color); border-radius: 12px;">
+        <!-- Header Kartu -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; margin-bottom: 18px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+              <span class="badge badge-brand">🏷️ Brand: Siasat Sehat</span>
+              <span class="badge badge-info">waiting_approval</span>
+              <span style="font-size: 0.72rem; background: var(--action-primary); color: var(--on-action-primary); padding: 3px 8px; border-radius: 4px; font-weight: 700;">
+                🧬 MULTI-ANGLE STORYTELLING
+              </span>
+            </div>
+            <h3 style="margin: 0; font-size: 1.35rem; font-weight: 800; color: var(--text-primary);">
+              🎬 Tantangan Diet 7 Hari Tanpa Tepung & Gula Pasir
+            </h3>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">
+              🔑 ID Batch: <code>mtb_df60f17a012440f9</code> &bull; 📅 Dibuat: 15/10/2026, 08:30:00 &bull; 🎯 Mode: 5 Variasi Angle Otomatis
+            </div>
+          </div>
+
+          <!-- Tombol Aksi Rata Kanan / Atas -->
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-primary" onclick="switchView('view-detail')">
+              🔍 Detail Kampanye ➔
+            </button>
+          </div>
+        </div>
+
+        <!-- Metric Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 18px;">
+          <div style="background: var(--surface-interactive); padding: 14px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+            <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Total Angle</span>
+            <div style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); margin-top: 4px;">5 Video</div>
+            <span style="font-size: 0.72rem; color: var(--status-success);">100% Naskah & VO Selesai</span>
+          </div>
+
+          <div style="background: var(--surface-interactive); padding: 14px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+            <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Status Produksi</span>
+            <div style="font-size: 1.1rem; font-weight: 700; color: var(--status-warning); margin-top: 6px;">Menunggu Approval</div>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Siap Render Fase 2</span>
+          </div>
+
+          <div style="background: var(--surface-interactive); padding: 14px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+            <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Audit Kepatuhan VO</span>
+            <div style="font-size: 1.1rem; font-weight: 700; color: var(--status-success); margin-top: 6px;">3 Pass &bull; 2 Revise</div>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Safe Mode TikTok Aktif</span>
+          </div>
+
+          <div style="background: var(--surface-interactive); padding: 14px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+            <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Resep & YouTube Title</span>
+            <div style="font-size: 1.1rem; font-weight: 700; color: var(--action-primary); margin-top: 6px;">Mandate High-CTR</div>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">5 Judul CTR Tinggi Ready</span>
+          </div>
+        </div>
+
+        <!-- Pipeline Status Chips -->
+        <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Pipeline:</span>
+            <span class="pipeline-chip success">✓ Remake Storyboard (100%)</span>
+            <span style="color: var(--text-muted); font-size: 0.7rem;">➜</span>
+            <span class="pipeline-chip success">✓ TTS Audio & Voiceover (100%)</span>
+            <span style="color: var(--text-muted); font-size: 0.7rem;">➜</span>
+            <span class="pipeline-chip">⏳ AI Visual (Menunggu Review)</span>
+            <span style="color: var(--text-muted); font-size: 0.7rem;">➜</span>
+            <span class="pipeline-chip">⏳ FFmpeg Muxing</span>
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" onclick="alert('Export Metadata')">📤 Export</button>
+            <button class="btn btn-secondary btn-sm" onclick="alert('Hapus batch')" style="color: var(--status-danger);">🗑 Hapus</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 2: HALAMAN DETAIL KAMPANYE MULTIPLIER LAB (/multiplier-lab/[id])     -->
+    <!-- SELARAS 100% DENGAN STRUKTUR app/pillar-campaigns/[id]/page.js           -->
+    <!-- ========================================================================= -->
+    <div id="view-detail">
+
+      <!-- Breadcrumbs Link -->
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+        <a href="#" onclick="switchView('view-main'); return false;" style="color: var(--text-muted); text-decoration: none; font-size: 0.85rem;">
+          ← Kembali ke Dashboard
+        </a>
+      </div>
+
+      <!-- 1 & 2: Header Card Detail Kampanye (Persis layout Pillar Campaign L3005-3084) -->
+      <div class="card" style="margin-bottom: 24px; padding: 32px;">
+        <div>
+          <a href="#" onclick="switchView('view-main'); return false;" style="color: var(--text-muted); font-size: 0.85rem; text-decoration: none; display: inline-block; margin-bottom: 8px;">
+            ← Kembali ke Dashboard
+          </a>
+          <h1 style="margin: 4px 0 0 0; font-size: 2.2rem; font-weight: 800; letter-spacing: -0.5px;">
+            🎬 Tantangan Diet 7 Hari Tanpa Tepung & Gula Pasir
+          </h1>
+
+          <!-- ID Kampanye | Nama Akun Brand | Created Date | Mode -->
+          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 12px; font-size: 0.9rem; color: var(--text-muted); border-bottom: 1px solid var(--border-color); padding-bottom: 16px; margin-bottom: 20px;">
+            <span>🔑 ID: <code style="background: var(--surface-interactive); padding: 3px 8px; border-radius: 4px; color: var(--action-primary); font-family: monospace; font-size: 0.85rem;">mtb_df60f17a012440f9</code></span>
+            <span style="opacity: 0.3;">|</span>
+            <span>🏷️ Brand: <strong>Siasat Sehat</strong></span>
+            <span style="opacity: 0.3;">|</span>
+            <span>📅 Dibuat: <strong>15/10/2026, 08:30:00</strong></span>
+            <span style="opacity: 0.3;">|</span>
+            <span style="font-size: 0.72rem; background: var(--action-primary); color: var(--on-action-primary); padding: 3px 8px; border-radius: 4px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+              🧬 1 BLUEPRINT TO 5 MULTI-ANGLES
+            </span>
+          </div>
+        </div>
+
+        <!-- 3. Tombol Aksi Utama (Gradient buttons selaras Pillar Campaign) -->
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button class="btn" style="background: var(--status-success); color: var(--on-action-primary); border: none; padding: 10px 16px; font-weight: 600; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 12px var(--status-success-soft);" onclick="alert('Skeduler berjalan otomatis')">
+            🟢 Skeduler Aktif (Running)
+          </button>
+          <button class="btn" style="background: var(--status-info); color: var(--on-action-primary); border: none; padding: 10px 16px; font-weight: 600; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 12px var(--status-info-soft);" onclick="alert('Push ke Contentflow queue')">
+            🚀 Push to Contentflow
+          </button>
+          <button class="btn" style="background: var(--action-primary); color: var(--on-action-primary); border: none; padding: 10px 16px; font-weight: 600; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(45, 212, 191, 0.25);" onclick="alert('Sync ke Nextcloud Cloud Storage')">
+            ☁️ Sync to Nextcloud
+          </button>
+          <button class="btn btn-secondary" style="padding: 10px 16px; font-weight: 600; border-radius: 6px; cursor: pointer;" onclick="alert('Export Markdown & CSV')">
+            📊 Export Data (.md)
+          </button>
+        </div>
+      </div>
+
+
+      <!-- 4. Accordion Info Konfigurasi (Selaras Pillar Campaign, 1 Kolom Penuh) -->
+      <div class="accordion-list">
+
+        <!-- Accordion A: Info Konfigurasi Basic Creative Strategy -->
+        <details class="pillar-accordion" open>
+          <summary>
+            <span>📂 Info Konfigurasi Basic Creative Strategy</span>
+          </summary>
+          <div class="accordion-content">
+            <div class="config-field">
+              <span class="config-label">🏷️ Nama Akun (Brand Account)</span>
+              <span class="config-value">Siasat Sehat</span>
+            </div>
+            <div class="config-field">
+              <span class="config-label">Parent Folder Nextcloud</span>
+              <span class="config-value">/MAKNA_Assets/Multiplier/Diet_7Hari</span>
+            </div>
+            <div class="config-field">
+              <span class="config-label">Bahasa Naskah Voiceover</span>
+              <span class="config-value">Bahasa Indonesia (id-ID)</span>
+            </div>
+            <div class="config-field">
+              <span class="config-label">🎯 Target Demografi & Tone Bahasa</span>
+              <span class="config-value">Dewasa Muda (20–35 th) • Santai, Informatif & Relatable</span>
+            </div>
+            <div class="config-field">
+              <span class="config-label">🎙 Audio Segment (per Klip)</span>
+              <span class="config-value">Provider: minimax | Persona: Indonesian_casual_reporter_vv2 | Speed: 1.0x</span>
+            </div>
+            <div class="config-field">
+              <span class="config-label">SFX Setting</span>
+              <span class="config-value">Tanpa SFX (Volume: 0.0x - Staging Standard)</span>
+            </div>
+            <div class="config-field">
+              <span class="config-label">Audit Kepatuhan Voiceover (TikTok Safe)</span>
+              <span class="config-value">Aktif (TikTok Safe Compliance Checker)</span>
+            </div>
+            <div class="config-field">
+              <span class="config-label">🧬 Resep & High-CTR Mandate</span>
+              <span class="config-value">Aktif (Mandatory Viral Hook & Persona Hook Formula)</span>
+            </div>
+          </div>
+        </details>
+
+        <!-- Accordion B: Info Konfigurasi Aesthetics & Visual Settings -->
+        <details class="pillar-accordion">
+          <summary>
+            <span>🎬 Info Konfigurasi Aesthetics & Visual Settings</span>
+          </summary>
+          <div class="accordion-content">
+            <div class="config-field">
+              <span class="config-label">Narrative Mode</span>
+              <span class="config-value">Storytelling / Casual Vlog</span>
+            </div>
+            <div class="config-field">
+              <span class="config-label">Aspect Ratio</span>
+              <span class="config-value">9:16 (Vertical Shorts / Reels / TikTok)</span>
+            </div>
+            <div class="config-field">
+              <span class="config-label">Target AI Engine</span>
+              <span class="config-value">Google Veo / Gemini 2.5 Flash</span>
+            </div>
+            <div class="config-field">
+              <span class="config-label">Video Model</span>
+              <span class="config-value">Veo 3.1 Lite</span>
+            </div>
+            <div class="config-field">
+              <span class="config-label">Face Visibility</span>
+              <span class="config-value">Faceless (Focus on hands, food macro, and cooking actions)</span>
+            </div>
+            <div class="config-field">
+              <span class="config-label">Jumlah Klip Video</span>
+              <span class="config-value">6 - 8 Klip per Video</span>
+            </div>
+            <div class="config-field">
+              <span class="config-label">Visual Style</span>
+              <span class="config-value">Cinematic Food & Lifestyle Macro</span>
+            </div>
+            <div class="config-field">
+              <span class="config-label">Visual Mode</span>
+              <span class="config-value">Hybrid Lock (T2I Start Frame + I2V Motion)</span>
+            </div>
+          </div>
+        </details>
+
+        <!-- Accordion C: Info Konfigurasi Product Bridging Settings -->
+        <details class="pillar-accordion">
+          <summary>
+            <span>🌉 Info Konfigurasi Product Bridging Settings</span>
+          </summary>
+          <div class="accordion-content">
+            <div class="config-field">
+              <span class="config-label">Bridging Promosi Produk</span>
+              <span class="config-value">Nonaktif (Pure Organic Storytelling)</span>
+            </div>
+            <div class="config-field">
+              <span class="config-label">Tipe Kampanye</span>
+              <span class="config-value">Edukasi Kesehatan & Resep Sehari-hari</span>
+            </div>
+            <div class="config-field">
+              <span class="config-label">Instruksi Transisi</span>
+              <span class="config-value">Transisi mulus antar tips tanpa interupsi penjualan langsung, pertahankan retensi audiens tinggi.</span>
+            </div>
+          </div>
+        </details>
+
+        <!-- Accordion D: Info Konfigurasi Visual Identity -->
+        <details class="pillar-accordion">
+          <summary>
+            <span>🎭 Info Konfigurasi Visual Identity</span>
+          </summary>
+          <div class="accordion-content">
+            <div class="config-field">
+              <span class="config-label">Konsep Karakter (Framing)</span>
+              <span class="config-value">POV Orang Pertama (First-Person Perspective)</span>
+            </div>
+            <div class="config-field">
+              <span class="config-label">Demografi Model</span>
+              <span class="config-value">Tangan perempuan Asia usia 25-30 tahun, kasual bersih</span>
+            </div>
+            <div class="config-field">
+              <span class="config-label">Pencahayaan & Gaya Sinematik</span>
+              <span class="config-value">Warm afternoon sunlight through kitchen window, soft shadows, warm natural colors</span>
+            </div>
+          </div>
+        </details>
+
+      </div>
+
+
+      <!-- CAMPAIGN ITEMS GENERATION DETAIL SECTION (Selaras Pillar Campaign L3259-3426) -->
+      <h2 style="font-size: 1.25rem; font-weight: 600; margin: 32px 0 16px 0;">📦 Item Produksi Video</h2>
+
+      <div class="card" style="padding: 0; overflow: hidden;">
+        <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--surface-raised);">
+          <div class="card-title" style="margin-bottom: 0;">
+            <span class="icon">📋</span> Daftar Video Item (5 Sudut Pandang)
+          </div>
+          <div style="font-size: 0.78rem; color: var(--text-muted);">
+            Judul baris di bawah ini telah diselaraskan dengan <strong>Angle & YouTube High-CTR Formula</strong>
+          </div>
+        </div>
+
+        <table class="ideas-table">
+          <thead>
+            <tr>
+              <th style="width: 4%; text-align: center;">#</th>
+              <th style="width: 52%;">Angle & Judul Konten (Berdasarkan Sudut Pandang)</th>
+              <th style="width: 26%;">Fase</th>
+              <th style="width: 18%; text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <!-- ==================== ITEM 1 ==================== -->
+            <tr>
+              <td style="font-family: monospace; font-size: 0.85rem; padding: 14px 16px; text-align: center; color: var(--text-muted); font-weight: 700;">1</td>
+              <td style="padding: 14px 16px;">
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap;">
+                  <span class="badge-hook">Cozy ASMR & Relaxation</span>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">🎯 Target: Pekerja Lembur / Burnout</span>
+                </div>
+                <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 4px;">
+                  Penat Habis Lembur? Bikin Camilan Sehat Pelepas Stres Ini #Shorts
+                </div>
+                <div style="font-size: 0.78rem; color: var(--text-secondary); font-style: italic;">
+                  Hook: "Jam segini masih pusing kerjaan? Bikin ramuan seduhan hangat ini..."
+                </div>
+              </td>
+              <td style="padding: 14px 16px;">
+                <span style="padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; color: var(--status-warning); background: var(--status-warning-soft); display: inline-flex; align-items: center; gap: 6px; width: fit-content;">
+                  ⏸️ Fase 2 : Paused (Ready for Review)
+                </span>
+              </td>
+              <td style="padding: 14px 16px; text-align: right;">
+                <button type="button" id="btn-toggle-1" class="btn btn-secondary btn-sm" onclick="toggleDetail('item-detail-1', 'btn-toggle-1')">
+                  📖 Detail
+                </button>
+              </td>
+            </tr>
+
+            <!-- EXPANDED WORKBENCH ITEM 1 (Selaras 100% dengan renderV2Workbench L1495-2969) -->
+            <tr id="item-detail-1" style="display: table-row;">
+              <td colspan="4" style="background: var(--surface-raised); padding: 24px; border-bottom: 1px solid var(--border-color);">
+                <div>
+
+                  <!-- Item Header Bar -->
+                  <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 14px;">
+                    <div>
+                      <strong style="font-size: 1.1rem; color: var(--text-primary);">Video Item #1 Workspace</strong>
+                      <span style="font-size: 0.8rem; color: var(--text-muted); margin-left: 8px;">
+                        (ID: #mtk_c7f18bdf477d44b3) | Angle: Cozy ASMR & Relaxation
+                      </span>
+                    </div>
+                    <span class="badge badge-warning">READY_FOR_REVIEW</span>
+                  </div>
+
+                  <!-- Pipeline Step Progress Bar (Pillar renderPipelineProgressBar L652-754) -->
+                  <div class="pipeline-bar">
+                    <span class="pipeline-chip success">✓ Generate Storyboard</span>
+                    <span style="color: var(--border-strong); font-weight: bold;">➜</span>
+                    <span class="pipeline-chip success">✓ TTS Synthesize</span>
+                    <span style="color: var(--border-strong); font-weight: bold;">➜</span>
+                    <span class="pipeline-chip success">✓ T2I Start Frame (8 Klip)</span>
+                    <span style="color: var(--border-strong); font-weight: bold;">➜</span>
+                    <span class="pipeline-chip active">⏳ GLabs Video</span>
+                    <button class="btn btn-secondary btn-sm" style="padding: 2px 6px;" title="Retry visual step">🔄</button>
+                    <span style="color: var(--border-strong); font-weight: bold;">➜</span>
+                    <span class="pipeline-chip">FFmpeg Muxing</span>
+                    <span style="color: var(--border-strong); font-weight: bold;">➜</span>
+                    <span class="pipeline-chip">Nextcloud Storage</span>
+                  </div>
+
+                  <!-- Human-in-the-Loop Status Banner (L1911-1919) -->
+                  <div class="banner-box banner-warning">
+                    <span style="font-size: 1.4rem;">⏳</span>
+                    <div>
+                      <strong style="display: block; margin-bottom: 2px; color: var(--text-primary);">Menunggu Review Kreatif (Human-in-the-Loop)</strong>
+                      Gemini AI telah merancang konsep sudut pandang dan storyboard 8 klip di bawah ini. Harap tinjau naskah voiceover, prompt klip, dan sesuaikan judul YouTube sebelum klik <strong>"Approve & Proceed to Production"</strong>.
+                    </div>
+                  </div>
+
+                  <!-- TikTok Safe Compliance Report & VO Selector (L1952-2102) -->
+                  <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 18px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.2rem;">🛡️</span>
+                        <span style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">TikTok Shop Compliance Audit</span>
+                      </div>
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Status:</span>
+                        <span class="badge badge-success">PASS</span>
+                        <span style="font-size: 0.7rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; background: var(--surface-interactive); border: 1px solid var(--border-subtle); color: var(--status-success);">
+                          Skor Risiko: 14/100 (Safe)
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- VO Version Switcher Cards (L2046-2100) -->
+                    <div style="display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--border-subtle); padding-top: 12px;">
+                      <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">
+                        Pilih Versi Voiceover (Mempengaruhi Teks Naskah):
+                      </span>
+                      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button type="button" class="btn btn-secondary" style="flex: 1; padding: 10px 14px; border: 1px solid var(--action-primary); background: rgba(45, 212, 191, 0.1); color: var(--text-primary); text-align: left; display: flex; gap: 8px; align-items: center;">
+                          <span>🎨</span>
+                          <div>
+                            <strong style="display: block; font-size: 0.82rem;">Versi Orisinal (Dipilih)</strong>
+                            <span style="font-size: 0.68rem; color: var(--text-muted);">Naskah asli AI yang lebih persuasif & ekspresif</span>
+                          </div>
+                        </button>
+                        <button type="button" class="btn btn-secondary" style="flex: 1; padding: 10px 14px; border: 1px solid var(--border-subtle); color: var(--text-muted); text-align: left; display: flex; gap: 8px; align-items: center;">
+                          <span>🛡️</span>
+                          <div>
+                            <strong style="display: block; font-size: 0.82rem;">Versi Audit (TikTok Safe)</strong>
+                            <span style="font-size: 0.68rem; color: var(--text-muted);">Naskah tersanitasi bebas dari overclaim medis</span>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Tab Headers (L2106-2134) -->
+                  <div class="wb-tabs">
+                    <button class="wb-tab" onclick="switchWbTab('item1', 'tab-concept', this)">💡 Tab 1: Konsep & Sudut Pandang</button>
+                    <button class="wb-tab active" onclick="switchWbTab('item1', 'tab-storyboard', this)">📖 Tab 2: Storyboard & Rencana Visual</button>
+                    <button class="wb-tab" onclick="switchWbTab('item1', 'tab-assets', this)">☁️ Tab 3: Aset & Recovery</button>
+                    <button class="wb-tab" onclick="switchWbTab('item1', 'tab-dna', this)">🧬 Tab 4: Video DNA</button>
+                    <button class="wb-tab" onclick="switchWbTab('item1', 'tab-logs', this)">🖥 Tab 5: System Log</button>
+                  </div>
+
+                  <!-- Tab 2 Content: Storyboard & Rencana Visual Baru -->
+                  <div id="item1-tab-storyboard" style="display: flex; flex-direction: column; gap: 20px;">
+                    
+                    <!-- Start Frame Grid (L2144-2252) -->
+                    <div style="background: var(--surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 18px; display: flex; flex-direction: column; gap: 12px;">
+                      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+                        <span style="font-weight: 700; font-size: 0.82rem; color: var(--text-muted);">
+                          🖼️ Grid Preview Start Frame Gambar (T2I)
+                        </span>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="alert('Regenerate All T2I')" style="background: rgba(45, 212, 191, 0.15); border-color: rgba(45, 212, 191, 0.3); color: var(--action-primary);">
+                          🎨 Generate T2I Start Frames
+                        </button>
+                      </div>
+
+                      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; margin-top: 6px;">
+                        <!-- Klip 1 Thumb -->
+                        <div style="display: flex; flex-direction: column; gap: 6px; align-items: center; background: var(--surface-interactive); padding: 8px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                          <span style="font-weight: 700; font-size: 0.72rem; color: var(--action-primary);">Klip #1 (Hook)</span>
+                          <div style="width: 100%; height: 140px; background: var(--canvas); border-radius: 4px; border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: var(--text-muted); text-align: center; padding: 4px;">
+                            Jahe Segar Parut (Macro)
+                          </div>
+                          <div style="display: flex; gap: 4px; width: 100%;">
+                            <button class="btn btn-secondary btn-sm" style="flex: 1; padding: 2px; font-size: 0.65rem;" onclick="alert('Regenerate Start Frame Klip 1')">🔄 Regen</button>
+                            <button class="btn btn-secondary btn-sm" style="flex: 1; padding: 2px; font-size: 0.65rem;" onclick="alert('Ganti Gambar Klip 1')">📤 Replace</button>
+                          </div>
+                        </div>
+
+                        <!-- Klip 2 Thumb -->
+                        <div style="display: flex; flex-direction: column; gap: 6px; align-items: center; background: var(--surface-interactive); padding: 8px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                          <span style="font-weight: 700; font-size: 0.72rem; color: var(--action-primary);">Klip #2 (Solusi)</span>
+                          <div style="width: 100%; height: 140px; background: var(--canvas); border-radius: 4px; border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: var(--text-muted); text-align: center; padding: 4px;">
+                            Seduhan Hangat Cangkir
+                          </div>
+                          <div style="display: flex; gap: 4px; width: 100%;">
+                            <button class="btn btn-secondary btn-sm" style="flex: 1; padding: 2px; font-size: 0.65rem;" onclick="alert('Regenerate Start Frame Klip 2')">🔄 Regen</button>
+                            <button class="btn btn-secondary btn-sm" style="flex: 1; padding: 2px; font-size: 0.65rem;" onclick="alert('Ganti Gambar Klip 2')">📤 Replace</button>
+                          </div>
+                        </div>
+
+                        <!-- Klip 3 Thumb -->
+                        <div style="display: flex; flex-direction: column; gap: 6px; align-items: center; background: var(--surface-interactive); padding: 8px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                          <span style="font-weight: 700; font-size: 0.72rem; color: var(--action-primary);">Klip #3 (CTA)</span>
+                          <div style="width: 100%; height: 140px; background: var(--canvas); border-radius: 4px; border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: var(--text-muted); text-align: center; padding: 4px;">
+                            Senyum Relaks di Meja
+                          </div>
+                          <div style="display: flex; gap: 4px; width: 100%;">
+                            <button class="btn btn-secondary btn-sm" style="flex: 1; padding: 2px; font-size: 0.65rem;" onclick="alert('Regenerate Start Frame Klip 3')">🔄 Regen</button>
+                            <button class="btn btn-secondary btn-sm" style="flex: 1; padding: 2px; font-size: 0.65rem;" onclick="alert('Ganti Gambar Klip 3')">📤 Replace</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Accordion Creative Clips List (L2255-2426) -->
+                    <div>
+                      <h4 style="margin: 0 0 12px 0; font-size: 0.88rem; font-weight: 700; color: var(--text-primary);">
+                        🎬 Naskah Adegan & Prompt Klip
+                      </h4>
+
+                      <!-- Klip 1 Accordion Card -->
+                      <div class="clip-card">
+                        <div class="clip-header" onclick="toggleClip('clip-item1-1')">
+                          <span>▼ Aset Klip #1 (Hook 0–3 Detik)</span>
+                          <span style="font-size: 0.72rem; color: var(--text-muted);">Tutup / Buka Adegan</span>
+                        </div>
+                        <div id="clip-item1-1" style="display: flex; flex-direction: column; gap: 10px;">
+                          <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                              <label style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700;">Naskah Voiceover (VO)</label>
+                              <button class="btn btn-secondary btn-sm" style="padding: 2px 6px; font-size: 0.68rem;" onclick="alert('VO disalin!')">📋 Salin</button>
+                            </div>
+                            <textarea class="clip-textarea">Jam segini masih pusing kerjaan lembur? Bikin ramuan seduhan hangat ini buat rilis stres.</textarea>
+                          </div>
+                          <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                              <label style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700;">Aksi Visual (Deskripsi Scene)</label>
+                              <button class="btn btn-secondary btn-sm" style="padding: 2px 6px; font-size: 0.68rem;" onclick="alert('Visual disalin!')">📋 Salin</button>
+                            </div>
+                            <textarea class="clip-textarea">Extreme close up tangan memarut jahe segar di atas cangkir keramik, uap air hangat mengepul tenang.</textarea>
+                          </div>
+                          <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                              <label style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700;">Prompt T2I Start Frame (Pixel Lock)</label>
+                              <button class="btn btn-secondary btn-sm" style="padding: 2px 6px; font-size: 0.68rem;" onclick="alert('Prompt disalin!')">📋 Salin</button>
+                            </div>
+                            <textarea class="clip-textarea" style="font-family: monospace; font-size: 0.72rem;">cinematic macro photography, hands grating fresh ginger root into artisanal ceramic mug, warm ambient kitchen lighting, soft steam, 8k vertical.</textarea>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Klip 2 Accordion Card -->
+                      <div class="clip-card">
+                        <div class="clip-header" onclick="toggleClip('clip-item1-2')">
+                          <span>▼ Aset Klip #2 (Solusi & Cara Buat)</span>
+                          <span style="font-size: 0.72rem; color: var(--text-muted);">Tutup / Buka Adegan</span>
+                        </div>
+                        <div id="clip-item1-2" style="display: flex; flex-direction: column; gap: 10px;">
+                          <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                              <label style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700;">Naskah Voiceover (VO)</label>
+                              <button class="btn btn-secondary btn-sm" style="padding: 2px 6px; font-size: 0.68rem;" onclick="alert('VO disalin!')">📋 Salin</button>
+                            </div>
+                            <textarea class="clip-textarea">Cukup seduh serai dan jahe dengan air mendidih, lalu tambahkan perasan lemon alami tanpa gula pasir.</textarea>
+                          </div>
+                          <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                              <label style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700;">Aksi Visual</label>
+                              <button class="btn btn-secondary btn-sm" style="padding: 2px 6px; font-size: 0.68rem;" onclick="alert('Visual disalin!')">📋 Salin</button>
+                            </div>
+                            <textarea class="clip-textarea">Tangan memeras sepotong lemon segar ke dalam cangkir herbal beruap dengan latar belakang buku catatan kerja.</textarea>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Unified Social Caption & YouTube Title Editor (L2428-2500) -->
+                    <div style="background: var(--surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+                      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px;">
+                        <span style="font-weight: 700; font-size: 0.88rem; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                          <span>📲</span> Social Media Package & Distribution
+                        </span>
+                        <span style="font-size: 0.72rem; color: var(--text-muted); background: var(--surface-raised); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border-subtle);">
+                          Multi-Platform Ready
+                        </span>
+                      </div>
+
+                      <!-- YouTube Title Field with Counter (L2440-2487) -->
+                      <div style="background: var(--surface-interactive); padding: 14px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                          <label style="font-size: 0.78rem; color: var(--text-primary); font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                            <span style="color: var(--status-danger); font-weight: 800;">▶</span>
+                            <span>Judul YouTube Video / Shorts (High-CTR Formula)</span>
+                          </label>
+                          <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 0.72rem; font-family: monospace; color: var(--status-success); font-weight: 700;">
+                              65/100 (Optimal)
+                            </span>
+                            <button type="button" class="btn btn-secondary btn-sm" style="padding: 2px 8px;" onclick="alert('Judul YouTube disalin!')">
+                              Salin Judul
+                            </button>
+                          </div>
+                        </div>
+                        <input
+                          type="text"
+                          value="Penat Habis Lembur? Bikin Camilan Sehat Pelepas Stres Ini #Shorts"
+                          style="width: 100%; background: var(--input-bg); border: 1px solid var(--border-strong); border-radius: 6px; padding: 10px 12px; color: var(--text-primary); font-size: 0.85rem; font-weight: 600;"
+                        />
+                      </div>
+
+                      <!-- Caption Draft -->
+                      <div>
+                        <label style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 6px;">
+                          📱 Caption TikTok & Instagram (Draft)
+                        </label>
+                        <textarea class="clip-textarea" style="min-height: 70px;">Capek lembur jangan langsung pelarian ke boba atau camilan tepung tinggi gula! Coba seduhan herbal 3 bahan ini. Badan anget, pikiran rileks, tidur lebih nyenyak ☕✨ #tipsdiet #resepsehat #relaksasi #hidupsehat #dietantiribet</textarea>
+                      </div>
+                    </div>
+
+                    <!-- Workflow & Production Settings (Fase 2) (Selaras Pillar Campaign L2680-2858, 1 Kolom Penuh) -->
+                    <div style="background: var(--surface-interactive); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+                      <div style="font-weight: 700; font-size: 0.85rem; color: var(--action-primary); display: flex; align-items: center; gap: 8px;">
+                        ⚙️ Workflow & Production Settings (Fase 2)
+                      </div>
+
+                      <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <!-- 1. Generate TTS (Audio Voiceover) -->
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                          <div style="display: flex; align-items: center; gap: 10px;">
+                            <label class="switch">
+                              <input type="checkbox" id="fase2-enable-tts" checked onchange="document.getElementById('tts-settings-box').style.display = this.checked ? 'flex' : 'none';">
+                              <span class="slider"></span>
+                            </label>
+                            <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">Generate TTS (Audio Voiceover)</span>
+                          </div>
+
+                          <div id="tts-settings-box" style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 14px; display: flex; flex-direction: column; gap: 12px;">
+                            <!-- Voice Provider -->
+                            <div>
+                              <label style="display: block; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">
+                                Voice Provider
+                              </label>
+                              <select id="mock-voice-provider" onchange="updateMockVoices(this.value)" style="width: 100%; padding: 8px 10px; background: var(--input-bg); border: 1px solid var(--border-subtle); color: var(--text-primary); border-radius: 6px; font-size: 0.78rem;">
+                                <option value="minimax" selected>MiniMax Speech (vv2 Engine)</option>
+                                <option value="gemini">Google Gemini TTS (Gemini 2.5)</option>
+                              </select>
+                            </div>
+
+                            <!-- Voice Persona -->
+                            <div>
+                              <label style="display: block; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">
+                                Voice Persona
+                              </label>
+                              <select id="mock-voice-persona" style="width: 100%; padding: 8px 10px; background: var(--input-bg); border: 1px solid var(--border-subtle); color: var(--text-primary); border-radius: 6px; font-size: 0.78rem;">
+                                <optgroup label="🇮🇩 MiniMax Bahasa Indonesia (Vv2)">
+                                  <option value="Indonesian_casual_reporter_vv2" selected>👨 Casual Reporter (Male) - Laki-laki (Casual Reporter - Vv2)</option>
+                                  <option value="Indonesian_compelling_storyteller_vv2">👨 Compelling Storyteller (Male) - Laki-laki (Storyteller - Vv2)</option>
+                                  <option value="Indonesian_expressive_podcaster_vv2">👨 Expressive Podcaster (Male) - Laki-laki (Podcaster - Vv2)</option>
+                                  <option value="Indonesian_energetic_streamer_vv2">👨 Energetic Streamer (Male) - Laki-laki (Streamer - Vv2)</option>
+                                  <option value="Indonesian_intellectual_commentator_vv2">👩 Intellectual Commentator (Female) - Perempuan (Commentator - Vv2)</option>
+                                  <option value="Indonesian_professional_anchor_vv2">👩 Professional Anchor (Female) - Perempuan (Anchor - Vv2)</option>
+                                  <option value="Indonesian_crisp_reporter_vv2">👩 Crisp Reporter (Female) - Perempuan (Crisp Reporter - Vv2)</option>
+                                </optgroup>
+                                <optgroup label="🇺🇸 MiniMax English Voices">
+                                  <option value="English_Resonant_Man">👨 Resonant Man (Male) - English Resonant Man</option>
+                                  <option value="English_Trustworth_Man">👨 Trustworthy Man (Male) - English Trustworthy Man</option>
+                                  <option value="English_causual_narrator_vv1">👨 Casual Narrator (Male) - English Casual Narrator</option>
+                                  <option value="English_causual_podcast_vv1">👨 Casual Podcast (Male) - English Casual Podcast</option>
+                                  <option value="English_expressive_host__vv1">👨 Expressive Host (Male) - English Expressive Host</option>
+                                  <option value="English_instructive_professor_vv1">👩 Instructive Professor (Female) - English Instructive Professor</option>
+                                  <option value="English_nursery_teacher_vv2">👩 Nursery Teacher (Female) - English Nursery Teacher</option>
+                                  <option value="English_captivating_female1">👩 Captivating Female (Female) - English Captivating Female</option>
+                                  <option value="English_radiant_girl">👩 Radiant Girl (Female) - English Radiant Girl</option>
+                                  <option value="English_CalmWoman">👩 Calm Woman (Female) - English Calm Woman</option>
+                                </optgroup>
+                              </select>
+                            </div>
+
+                            <!-- Voice Speed -->
+                            <div>
+                              <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">
+                                <span>Voice Speed</span>
+                                <span id="speed-val" style="color: var(--action-primary); font-weight: 700;">1.0x</span>
+                              </div>
+                              <input type="range" min="0.5" max="2.0" step="0.1" value="1.0" oninput="document.getElementById('speed-val').innerText = this.value + 'x'" style="width: 100%;">
+                            </div>
+
+                            <!-- Voice Volume -->
+                            <div>
+                              <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">
+                                <span>Voice Volume</span>
+                                <span id="volume-val" style="color: var(--action-primary); font-weight: 700;">1.0x</span>
+                              </div>
+                              <input type="range" min="0.0" max="2.0" step="0.1" value="1.0" oninput="document.getElementById('volume-val').innerText = this.value + 'x'" style="width: 100%;">
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- 2. Generate Video (G-Labs AI Video) -->
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                          <div style="display: flex; align-items: center; gap: 10px;">
+                            <label class="switch">
+                              <input type="checkbox" id="fase2-enable-glabs" checked onchange="document.getElementById('glabs-note-box').style.display = this.checked ? 'block' : 'none';">
+                              <span class="slider"></span>
+                            </label>
+                            <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">Generate Video (G-Labs AI Video)</span>
+                          </div>
+                          <div id="glabs-note-box" style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 12px 14px; font-size: 0.74rem; color: var(--text-muted); line-height: 1.5;">
+                            ℹ️ Menggunakan model video kustom Veo/Kling. Klip bridge yang menggunakan start frame akan dijalankan dengan I2V (Image-to-Video), klip lain dijalankan dengan T2V (Text-to-Video).
+                          </div>
+                        </div>
+
+                        <!-- 3. FFmpeg Muxing & Compiling -->
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                          <div style="display: flex; align-items: center; gap: 10px;">
+                            <label class="switch">
+                              <input type="checkbox" id="fase2-enable-ffmpeg" checked onchange="document.getElementById('ffmpeg-settings-box').style.display = this.checked ? 'flex' : 'none';">
+                              <span class="slider"></span>
+                            </label>
+                            <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">FFmpeg Muxing & Compiling</span>
+                          </div>
+
+                          <div id="ffmpeg-settings-box" style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 14px; display: flex; flex-direction: column; gap: 12px;">
+                            <div>
+                              <label style="display: block; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">
+                                Sync Option
+                              </label>
+                              <select style="width: 100%; padding: 8px 10px; background: var(--input-bg); border: 1px solid var(--border-subtle); color: var(--text-primary); border-radius: 6px; font-size: 0.78rem;">
+                                <option value="smart_sync">Auto-Pilot Smart Sync (Rekomendasi)</option>
+                                <option value="shortest">Shortest Clip</option>
+                              </select>
+                            </div>
+
+                            <div>
+                              <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">
+                                <span>Video Scale Zoom</span>
+                                <span id="zoom-val" style="color: var(--action-primary); font-weight: 700;">1.1x</span>
+                              </div>
+                              <input type="range" min="1.0" max="2.0" step="0.05" value="1.1" oninput="document.getElementById('zoom-val').innerText = this.value + 'x'" style="width: 100%;">
+                            </div>
+
+                            <div>
+                              <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">
+                                <span>SFX Volume</span>
+                                <span id="sfx-val" style="color: var(--action-primary); font-weight: 700;">0.0x (Disabled)</span>
+                              </div>
+                              <input type="range" min="0.0" max="2.0" step="0.05" value="0.0" oninput="document.getElementById('sfx-val').innerText = this.value + 'x'" style="width: 100%;">
+                            </div>
+
+                            <div>
+                              <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600;">
+                                <span>BGM Volume</span>
+                                <span id="bgm-val" style="color: var(--action-primary); font-weight: 700;">0.0x (Disabled)</span>
+                              </div>
+                              <input type="range" min="0.0" max="1.0" step="0.05" value="0.0" oninput="document.getElementById('bgm-val').innerText = this.value + 'x'" style="width: 100%;">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Bottom Action Buttons (L2860-2879) -->
+                    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
+                      <button type="button" class="btn btn-secondary" onclick="alert('Draf perubahan berhasil disimpan!')">
+                        💾 Simpan Perubahan (Save Draft)
+                      </button>
+                      <button type="button" class="btn" style="background: var(--status-success); color: var(--on-action-primary); padding: 10px 20px; font-weight: 700; border-radius: 6px; border: none; cursor: pointer;" onclick="alert('Video Angle #1 disetujui dan antrean produksi dilanjutkan!')">
+                        🚀 Approve & Proceed to Production
+                      </button>
+                    </div>
+
+                  </div>
+
+                  <!-- Tab 1: Konsep & Sudut Pandang (1 Kolom Vertikal) -->
+                  <div id="item1-tab-concept" style="display: none; background: var(--surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px;">
+                    <h4 style="margin: 0 0 12px 0; font-size: 0.9rem; color: var(--action-primary);">💡 Detail Sudut Pandang (Angle Formulation)</h4>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                      <div class="config-field">
+                        <span class="config-label">Tipe Hook & Sudut Pandang</span>
+                        <span class="config-value">Cozy ASMR & Relaxation / Stres Release</span>
+                      </div>
+                      <div class="config-field">
+                        <span class="config-label">Target Segmen Persona</span>
+                        <span class="config-value">Karyawan lembur, mahasiswa skripsi, overthinker malam</span>
+                      </div>
+                      <div class="config-field">
+                        <span class="config-label">Alasan Angle Ini Dipilih</span>
+                        <span class="config-value">Menjawab resistensi diet umum: orang sering gagal diet karena stres di malam hari dan butuh rasa tenang, bukan sekadar larangan makan.</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Tab 3: Aset & Recovery -->
+                  <div id="item1-tab-assets" style="display: none; background: var(--surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px;">
+                    <h4 style="margin: 0 0 12px 0; font-size: 0.9rem;">☁️ Kesiapan Berkas & Nextcloud Storage</h4>
+                    <div style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6;">
+                      Semua aset naskah, audio sintetis, prompt T2I, dan video render akan tersinkronisasi otomatis ke folder:
+                      <code style="background: var(--surface-interactive); padding: 4px 8px; border-radius: 4px; color: var(--action-primary); display: block; margin-top: 6px;">
+                        /MAKNA_Assets/Multiplier/Diet_7Hari/Angle_1_Cozy_ASMR
+                      </code>
+                    </div>
+                  </div>
+
+                  <!-- Tab 4: Video DNA (1 Kolom Vertikal) -->
+                  <div id="item1-tab-dna" style="display: none; background: var(--surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px;">
+                    <h4 style="margin: 0 0 12px 0; font-size: 0.9rem;">🧬 10 Parameter Video DNA</h4>
+                    <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.8rem;">
+                      <div class="config-field"><strong>Visual Style:</strong> Macro Cinematic</div>
+                      <div class="config-field"><strong>Pacing:</strong> Slow & Relaxing (3.5s per scene)</div>
+                      <div class="config-field"><strong>Audio Mood:</strong> Calming acoustic with rain ASMR</div>
+                      <div class="config-field"><strong>Color Grade:</strong> Warm Amber (2800K)</div>
+                    </div>
+                  </div>
+
+                  <!-- Tab 5: System Log -->
+                  <div id="item1-tab-logs" style="display: none; background: var(--surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px;">
+                    <h4 style="margin: 0 0 12px 0; font-size: 0.9rem;">🖥 System Log & Sub-tasks</h4>
+                    <pre style="background: var(--canvas); padding: 12px; border-radius: 6px; font-size: 0.74rem; color: var(--status-success); overflow-x: auto; margin: 0;">
+[2026-10-15 08:31:02] [MultiplierLab] Task #mtk_c7f18bdf477d44b3 initialized for angle 'Cozy ASMR'.
+[2026-10-15 08:31:14] [RemakeEngine] Single-Pass Gemini prompt completed (8 clips generated).
+[2026-10-15 08:31:25] [TTS] Voiceover synthesize finished via MiniMax Engine (Duration: 28.4s).
+[2026-10-15 08:31:30] [Compliance] TikTok Safe audit passed with score 14/100.
+[2026-10-15 08:31:31] [Status] Moved to waiting_approval for creative review.
+                    </pre>
+                  </div>
+
+                </div>
+              </td>
+            </tr>
+
+
+            <!-- ==================== ITEM 2 ==================== -->
+            <tr>
+              <td style="font-family: monospace; font-size: 0.85rem; padding: 14px 16px; text-align: center; color: var(--text-muted); font-weight: 700;">2</td>
+              <td style="padding: 14px 16px;">
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap;">
+                  <span class="badge-hook">Contrarian & Mitos Populer</span>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">🎯 Target: Pemula Diet Frustasi</span>
+                </div>
+                <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 4px;">
+                  Mitos Diet Tanpa Nasi: Kenapa Badan Malah Makin Lemas? #Shorts
+                </div>
+                <div style="font-size: 0.78rem; color: var(--text-secondary); font-style: italic;">
+                  Hook: "Stop siksa badan ga makan nasi kalau belum ngerti trik karbo kompleks ini!"
+                </div>
+              </td>
+              <td style="padding: 14px 16px;">
+                <span style="padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; color: var(--status-warning); background: var(--status-warning-soft); display: inline-flex; align-items: center; gap: 6px; width: fit-content;">
+                  ⏸️ Fase 2 : Paused (Ready for Review)
+                </span>
+              </td>
+              <td style="padding: 14px 16px; text-align: right;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="alert('Buka workbench item 2')">
+                  📖 Detail
+                </button>
+              </td>
+            </tr>
+
+            <!-- ==================== ITEM 3 ==================== -->
+            <tr>
+              <td style="font-family: monospace; font-size: 0.85rem; padding: 14px 16px; text-align: center; color: var(--text-muted); font-weight: 700;">3</td>
+              <td style="padding: 14px 16px;">
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap;">
+                  <span class="badge-hook">Problem/Solution Efisiensi</span>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">🎯 Target: Ibu Bekerja / Sibuk</span>
+                </div>
+                <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 4px;">
+                  Menu 10 Menit: Sarapan Tinggi Protein Tanpa Minyak Goreng #Shorts
+                </div>
+                <div style="font-size: 0.78rem; color: var(--text-secondary); font-style: italic;">
+                  Hook: "Ga sempet masak sehat tiap pagi? Cuma butuh 1 wajan dan 10 menit!"
+                </div>
+              </td>
+              <td style="padding: 14px 16px;">
+                <span style="padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; color: var(--status-warning); background: var(--status-warning-soft); display: inline-flex; align-items: center; gap: 6px; width: fit-content;">
+                  ⏸️ Fase 2 : Paused (Ready for Review)
+                </span>
+              </td>
+              <td style="padding: 14px 16px; text-align: right;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="alert('Buka workbench item 3')">
+                  📖 Detail
+                </button>
+              </td>
+            </tr>
+
+            <!-- ==================== ITEM 4 ==================== -->
+            <tr>
+              <td style="font-family: monospace; font-size: 0.85rem; padding: 14px 16px; text-align: center; color: var(--text-muted); font-weight: 700;">4</td>
+              <td style="padding: 14px 16px;">
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap;">
+                  <span class="badge-hook">Curiosity Gap & Rahasia</span>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">🎯 Target: Pencari Hasil Cepat</span>
+                </div>
+                <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 4px;">
+                  Rahasia Berat Badan Turun 3 Kg Tanpa Nyiksa Diri Sendiri #Shorts
+                </div>
+                <div style="font-size: 0.78rem; color: var(--text-secondary); font-style: italic;">
+                  Hook: "Ternyata kunci perut rata bukan kardio gila-gilaan, tapi jam makan ini..."
+                </div>
+              </td>
+              <td style="padding: 14px 16px;">
+                <span style="padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; color: var(--status-warning); background: var(--status-warning-soft); display: inline-flex; align-items: center; gap: 6px; width: fit-content;">
+                  ⏸️ Fase 2 : Paused (Ready for Review)
+                </span>
+              </td>
+              <td style="padding: 14px 16px; text-align: right;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="alert('Buka workbench item 4')">
+                  📖 Detail
+                </button>
+              </td>
+            </tr>
+
+            <!-- ==================== ITEM 5 (Contoh Completed) ==================== -->
+            <tr>
+              <td style="font-family: monospace; font-size: 0.85rem; padding: 14px 16px; text-align: center; color: var(--text-muted); font-weight: 700;">5</td>
+              <td style="padding: 14px 16px;">
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap;">
+                  <span class="badge-hook">Transformation & Daily Energy</span>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">🎯 Target: Pekerja Sering Ngantuk</span>
+                </div>
+                <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 4px;">
+                  Transformasi 7 Hari: Dari Gampang Ngantuk Jadi Segar Bertenaga #Shorts
+                </div>
+                <div style="font-size: 0.78rem; color: var(--text-secondary); font-style: italic;">
+                  Hook: "Baru jam 2 siang udah lemes ga karuan? Coba ganti makan siangmu dengan ini!"
+                </div>
+              </td>
+              <td style="padding: 14px 16px;">
+                <span style="padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 0.8rem; color: var(--status-success); background: var(--status-success-soft); display: inline-flex; align-items: center; gap: 6px; width: fit-content;">
+                  ✅ Fase 2 : Completed
+                </span>
+              </td>
+              <td style="padding: 14px 16px; text-align: right;">
+                <button type="button" id="btn-toggle-5" class="btn btn-secondary btn-sm" onclick="toggleDetail('item-detail-5', 'btn-toggle-5')">
+                  📖 Detail
+                </button>
+              </td>
+            </tr>
+
+            <!-- EXPANDED WORKBENCH ITEM 5 (Tampilan Produksi Selesai L2883-2965) -->
+            <tr id="item-detail-5" style="display: none;">
+              <td colspan="4" style="background: var(--surface-raised); padding: 24px; border-bottom: 1px solid var(--border-color);">
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 14px;">
+                    <div>
+                      <strong style="font-size: 1.1rem; color: var(--text-primary);">Video Item #5 Workspace (Produksi Selesai)</strong>
+                      <span style="font-size: 0.8rem; color: var(--text-muted); margin-left: 8px;">
+                        (ID: #mtk_e491fa02c11) | Transformation & Energy
+                      </span>
+                    </div>
+                    <span class="badge badge-success">COMPLETED</span>
+                  </div>
+
+                  <!-- Banner Selesai -->
+                  <div class="banner-box banner-success">
+                    <span style="font-size: 1.4rem;">✅</span>
+                    <div>
+                      <strong style="display: block; margin-bottom: 2px; color: var(--text-primary);">Produksi Selesai</strong>
+                      Tahapan produksi (TTS, Video G-Labs Veo, dan Muxing FFmpeg) telah dieksekusi sepenuhnya! Video akhir siap diunduh atau diposting.
+                    </div>
+                  </div>
+
+                  <!-- Box Final Output Video Player (L2883-2965) -->
+                  <div style="background: var(--surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; display: grid; grid-template-columns: 280px 1fr; gap: 20px; align-items: center;">
+                    <div style="height: 360px; background: var(--canvas); border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-subtle);">
+                      <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem;">
+                        <span style="font-size: 2.5rem; display: block; margin-bottom: 8px;">▶️</span>
+                        Video Player Preview (.mp4)<br>
+                        <small>9:16 Vertical Video</small>
+                      </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                      <div style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6;">
+                        Video selesai dirender dengan resolusi 1080x1920, audio jernih tanpa distorsi (0.0x SFX / 0.0x BGM), dan sinkronisasi Auto-Pilot Smart Sync.
+                      </div>
+
+                      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="alert('Download MP4 dimulai')">
+                          ⬇️ Unduh Video (.mp4)
+                        </button>
+                        <button class="btn btn-secondary" onclick="alert('Render ulang FFmpeg')">
+                          🔄 Re-FFMPEG
+                        </button>
+                        <button class="btn btn-secondary" onclick="alert('Regenerasi audio TTS dan remux ulang')">
+                          🎙️ Regenerate TTS & Re-mux
+                        </button>
+                        <button class="btn btn-secondary" onclick="alert('Buka folder Nextcloud')">
+                          ☁️ Buka di Nextcloud
+                        </button>
+                      </div>
+
+                      <div style="background: var(--surface-interactive); padding: 12px; border-radius: 6px; border: 1px solid var(--border-subtle); font-size: 0.75rem;">
+                        <strong style="color: var(--text-primary); display: block; margin-bottom: 2px;">Tautan Distribusi YouTube:</strong>
+                        <span style="color: var(--action-primary); word-break: break-all;">
+                          Judul: Transformasi 7 Hari: Dari Gampang Ngantuk Jadi Segar Bertenaga #Shorts
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // Tab & View Switcher
+    function switchView(viewId) {
+      document.getElementById('view-main').style.display = viewId === 'view-main' ? 'block' : 'none';
+      document.getElementById('view-detail').style.display = viewId === 'view-detail' ? 'block' : 'none';
+      document.getElementById('tab-btn-main').classList.toggle('active', viewId === 'view-main');
+      document.getElementById('tab-btn-detail').classList.toggle('active', viewId === 'view-detail');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Toggle Detail Row
+    function toggleDetail(rowId, btnId) {
+      const row = document.getElementById(rowId);
+      const btn = document.getElementById(btnId);
+      if (!row) return;
+      const isOpen = row.style.display !== 'none';
+      row.style.display = isOpen ? 'none' : 'table-row';
+      if (btn) btn.innerText = isOpen ? '📖 Detail' : '📖 Tutup';
+    }
+
+    // Toggle Clip Accordion
+    function toggleClip(clipId) {
+      const clip = document.getElementById(clipId);
+      if (!clip) return;
+      clip.style.display = clip.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    // Switch Workbench internal tabs
+    function switchWbTab(itemId, tabKey, btnElement) {
+      // Hide all tabs for this item
+      const tabs = ['tab-concept', 'tab-storyboard', 'tab-assets', 'tab-dna', 'tab-logs'];
+      tabs.forEach(t => {
+        const el = document.getElementById(`${itemId}-${t}`);
+        if (el) el.style.display = t === tabKey ? 'flex' : 'none';
+      });
+
+      // Update button classes
+      const parent = btnElement.parentElement;
+      const btns = parent.querySelectorAll('.wb-tab');
+      btns.forEach(b => b.classList.remove('active'));
+      btnElement.classList.add('active');
+    }
+
+    // Update Mock Voices based on Voice Provider selection (Lengkap seperti Pillar Campaign L66-104)
+    function updateMockVoices(provider) {
+      const select = document.getElementById('mock-voice-persona');
+      if (!select) return;
+      if (provider === 'gemini') {
+        select.innerHTML = `
+          <optgroup label="✨ Google Gemini TTS Voices (14 Karakter Selaras Pillar)">
+            <option value="Kore" selected>👩 Kore (Female) - Standard Female (Skincare/Cosmetic)</option>
+            <option value="Fenrir">🧔 Fenrir (Male) - Deep/Heavy Male (Otomotif/High-End)</option>
+            <option value="Puck">👦 Puck (Male) - Ceria, Playful (Makanan/Promo Kilat)</option>
+            <option value="Charon">👨 Charon (Male) - Formal, News Style (Review Tech/Finansial)</option>
+            <option value="Leda">👵 Leda (Female) - Hangat, Ramah (Edukasi/Ibu Anak)</option>
+            <option value="Zephyr">🎙️ Zephyr (Male) - Kasual, Santai (Storytelling/Daily Vlog)</option>
+            <option value="Orus">🧔 Orus (Male) - Tegas, Optimis (Motivasi/Online Course)</option>
+            <option value="Aoede">👩‍🎨 Aoede (Female) - Artistik, Ekspresif (Fashion/Seni)</option>
+            <option value="Callirrhoe">👩‍💼 Callirrhoe (Female) - Berenergi, Dinamis (Olahraga/Lifestyle)</option>
+            <option value="Autonoe">👩‍🎓 Autonoe (Female) - Dewasa, Profesional (Bisnis/Corporate)</option>
+            <option value="Enceladus">👨‍🎤 Enceladus (Male) - Misterius, Berat (Teaser/Trailer)</option>
+            <option value="Iapetus">👴 Iapetus (Male) - Bijaksana, Ramah (Mentor/Tips Hidup)</option>
+            <option value="Umbriel">👨‍🔬 Umbriel (Male) - Dingin, Fokus (Dokumenter/Sains)</option>
+            <option value="Despina">👧 Despina (Female) - Cepat, Riang (TikTok/Tips Singkat)</option>
+          </optgroup>
+        `;
+      } else {
+        select.innerHTML = `
+          <optgroup label="🇮🇩 MiniMax Bahasa Indonesia (Vv2)">
+            <option value="Indonesian_casual_reporter_vv2" selected>👨 Casual Reporter (Male) - Laki-laki (Casual Reporter - Vv2)</option>
+            <option value="Indonesian_compelling_storyteller_vv2">👨 Compelling Storyteller (Male) - Laki-laki (Storyteller - Vv2)</option>
+            <option value="Indonesian_expressive_podcaster_vv2">👨 Expressive Podcaster (Male) - Laki-laki (Podcaster - Vv2)</option>
+            <option value="Indonesian_energetic_streamer_vv2">👨 Energetic Streamer (Male) - Laki-laki (Streamer - Vv2)</option>
+            <option value="Indonesian_intellectual_commentator_vv2">👩 Intellectual Commentator (Female) - Perempuan (Commentator - Vv2)</option>
+            <option value="Indonesian_professional_anchor_vv2">👩 Professional Anchor (Female) - Perempuan (Anchor - Vv2)</option>
+            <option value="Indonesian_crisp_reporter_vv2">👩 Crisp Reporter (Female) - Perempuan (Crisp Reporter - Vv2)</option>
+          </optgroup>
+          <optgroup label="🇺🇸 MiniMax English Voices">
+            <option value="English_Resonant_Man">👨 Resonant Man (Male) - English Resonant Man</option>
+            <option value="English_Trustworth_Man">👨 Trustworthy Man (Male) - English Trustworthy Man</option>
+            <option value="English_causual_narrator_vv1">👨 Casual Narrator (Male) - English Casual Narrator</option>
+            <option value="English_causual_podcast_vv1">👨 Casual Podcast (Male) - English Casual Podcast</option>
+            <option value="English_expressive_host__vv1">👨 Expressive Host (Male) - English Expressive Host</option>
+            <option value="English_instructive_professor_vv1">👩 Instructive Professor (Female) - English Instructive Professor</option>
+            <option value="English_nursery_teacher_vv2">👩 Nursery Teacher (Female) - English Nursery Teacher</option>
+            <option value="English_captivating_female1">👩 Captivating Female (Female) - English Captivating Female</option>
+            <option value="English_radiant_girl">👩 Radiant Girl (Female) - English Radiant Girl</option>
+            <option value="English_CalmWoman">👩 Calm Woman (Female) - English Calm Woman</option>
+          </optgroup>
+        `;
+      }
+    }
+
+    // Theme Switcher
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+    }
+  </script>
+</body>
+</html>

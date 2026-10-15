@@ -2450,13 +2450,13 @@ function MultiplierLabPageContent() {
               let statusColor = 'var(--text-muted)';
               let statusBg = 'var(--surface-interactive)';
               let statusBorder = 'var(--border-subtle)';
-              if (c.status === 'completed') { statusColor = 'var(--success)'; statusBg = 'var(--status-success-soft)'; statusBorder = 'var(--status-success-soft)'; }
+              if (c.status === 'completed') { statusColor = 'var(--status-success)'; statusBg = 'var(--status-success-soft)'; statusBorder = 'var(--status-success-soft)'; }
               else if (c.status === 'running') { statusColor = 'var(--status-info)'; statusBg = 'var(--status-info-soft)'; statusBorder = 'var(--status-info-soft)'; }
-              else if (c.status === 'paused') { statusColor = 'var(--status-warning)'; statusBg = 'rgba(253,203,110,0.15)'; statusBorder = 'rgba(253,203,110,0.3)'; }
-              else if (c.status === 'failed') { statusColor = 'var(--danger)'; statusBg = 'var(--status-danger-soft)'; statusBorder = 'var(--status-danger-soft)'; }
+              else if (c.status === 'paused') { statusColor = 'var(--status-warning)'; statusBg = 'var(--status-warning-soft)'; statusBorder = 'var(--status-warning-soft)'; }
+              else if (c.status === 'failed') { statusColor = 'var(--status-danger)'; statusBg = 'var(--status-danger-soft)'; statusBorder = 'var(--status-danger-soft)'; }
 
               return (
-                <div key={c.id} className="card" style={{ border: '1px solid var(--border)', background: 'var(--bg-card)', padding: '20px', borderRadius: 'var(--radius-sm)' }}>
+                <div key={c.id} className="card" style={{ border: '1px solid var(--border-color)', background: 'var(--surface-raised)', padding: '20px', borderRadius: 'var(--radius-sm)' }}>
                   {/* Card Header */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -2464,9 +2464,9 @@ function MultiplierLabPageContent() {
                         <span style={{
                           fontSize: '0.68rem',
                           fontWeight: 700,
-                          background: c.brand_name ? 'rgba(168, 85, 247, 0.15)' : 'var(--surface-interactive)',
-                          border: c.brand_name ? '1px solid rgba(168, 85, 247, 0.3)' : '1px solid var(--border-subtle)',
-                          color: c.brand_name ? '#d8b4fe' : 'var(--text-muted)',
+                          background: 'var(--surface-interactive)',
+                          border: '1px solid var(--border-subtle)',
+                          color: 'var(--action-primary)',
                           padding: '2px 8px',
                           borderRadius: '4px',
                           textTransform: 'uppercase',
@@ -2478,6 +2478,16 @@ function MultiplierLabPageContent() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                         <span style={{ fontSize: '1.1rem' }}>🎬</span>
                         <strong style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>{c.campaign_name}</strong>
+                        <span style={{
+                          fontSize: '0.65rem',
+                          background: 'var(--action-primary)',
+                          color: 'var(--on-action-primary)',
+                          padding: '2px 6px',
+                          borderRadius: 4,
+                          fontWeight: 700
+                        }}>
+                          🧬 1 BLUEPRINT TO 5 MULTI-ANGLES
+                        </span>
                         <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', padding: '3px 8px', borderRadius: 8, background: statusBg, color: statusColor, border: `1px solid ${statusBorder}` }}>
                           {c.status}
                         </span>
@@ -2489,23 +2499,47 @@ function MultiplierLabPageContent() {
                   </div>
 
                   {/* Stats */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10, fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: 12 }}>
-                    <div><strong>Total Item:</strong> <span style={{ color: 'var(--text-primary)' }}>{c.stats.total}</span></div>
-                    <div><strong>Selesai Render:</strong> <span style={{ color: 'var(--success)' }}>{c.stats.completed}</span></div>
-                    <div><strong>Gagal:</strong> <span style={{ color: 'var(--danger)' }}>{c.stats.failed}</span></div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: 12 }}>
+                    <div><strong>Total Sudut Pandang:</strong> <span style={{ color: 'var(--text-primary)' }}>{c.stats.total} Angles</span></div>
+                    <div><strong>Selesai Render:</strong> <span style={{ color: 'var(--status-success)' }}>{c.stats.completed}</span></div>
+                    <div><strong>Gagal:</strong> <span style={{ color: 'var(--status-danger)' }}>{c.stats.failed}</span></div>
                     <div><strong>Dalam Antrean:</strong> <span style={{ color: 'var(--status-info)' }}>{c.stats.processing}</span></div>
+                  </div>
+
+                  {/* Pipeline Status Chips */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
+                    <span style={{
+                      padding: '3px 8px', borderRadius: 4, fontSize: '0.68rem', fontWeight: 600,
+                      background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success-soft)'
+                    }}>
+                      ✓ Storyboard ({c.stats.total}/{c.stats.total})
+                    </span>
+                    <span style={{
+                      padding: '3px 8px', borderRadius: 4, fontSize: '0.68rem', fontWeight: 600,
+                      background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success-soft)'
+                    }}>
+                      ✓ TTS Audio ({c.stats.total}/{c.stats.total})
+                    </span>
+                    <span style={{
+                      padding: '3px 8px', borderRadius: 4, fontSize: '0.68rem', fontWeight: 600,
+                      background: c.stats.completed > 0 ? 'var(--status-success-soft)' : 'var(--surface-interactive)',
+                      color: c.stats.completed > 0 ? 'var(--status-success)' : 'var(--text-muted)',
+                      border: `1px solid ${c.stats.completed > 0 ? 'var(--status-success-soft)' : 'var(--border-subtle)'}`
+                    }}>
+                      {c.stats.completed > 0 ? '✓ ' : '⏳ '}Video Render ({c.stats.completed}/{c.stats.total})
+                    </span>
                   </div>
 
                   {/* Progress Bar */}
                   <div style={{ marginBottom: 12 }}>
-                    <div style={{ background: 'var(--bg-secondary)', borderRadius: 4, height: 5, overflow: 'hidden' }}>
-                      <div style={{ width: `${pct}%`, height: '100%', background: 'var(--accent)', transition: 'width 0.4s' }} />
+                    <div style={{ background: 'var(--surface-interactive)', borderRadius: 4, height: 6, overflow: 'hidden' }}>
+                      <div style={{ width: `${pct}%`, height: '100%', background: 'var(--action-primary)', transition: 'width 0.4s' }} />
                     </div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 4 }}>{pct}% complete</div>
                   </div>
 
                   {/* Action Buttons */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--surface-interactive)', paddingTop: 12, flexWrap: 'wrap', gap: 10 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)', paddingTop: 12, flexWrap: 'wrap', gap: 10 }}>
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-start' }}>
                       <button type="button" className="btn btn-primary btn-sm" onClick={() => router.push(`/multiplier-lab/${c.id}`)} style={{ fontSize: '0.75rem', padding: '6px 12px' }}>
                         🔍 Detail Kampanye
@@ -2528,7 +2562,7 @@ function MultiplierLabPageContent() {
                     </div>
 
                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--text-muted)', background: 'var(--surface-interactive)', padding: '2px 8px', borderRadius: '4px' }}>
-                      🔑 ID Batch: {c.id}
+                      🔑 ID: {c.id}
                     </div>
                   </div>
                 </div>

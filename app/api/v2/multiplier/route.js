@@ -41,9 +41,20 @@ export const PATCH = withTenantContext(async (request) => {
     const body = await request.json();
     const { schedulerActive, action, batchId } = body;
 
-    if (schedulerActive !== undefined) {
-      await setSetting('multiplier_scheduler_active', schedulerActive ? 'true' : 'false');
-      return NextResponse.json({ success: true, isSchedulerActive: schedulerActive });
+    if (schedulerActive !== undefined || action === 'toggle_scheduler') {
+      let nextState;
+      if (schedulerActive !== undefined) {
+        nextState = Boolean(schedulerActive);
+      } else {
+        const current = (await getSetting('multiplier_scheduler_active')) !== 'false';
+        nextState = !current;
+      }
+      await setSetting('multiplier_scheduler_active', nextState ? 'true' : 'false');
+      return NextResponse.json({ 
+        success: true, 
+        isSchedulerActive: nextState, 
+        isActive: nextState 
+      });
     }
 
     if (action && batchId) {
