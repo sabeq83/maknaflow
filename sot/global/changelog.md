@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.44 — Penyelarasan Visual Generation Fase 2 Multiplier Lab dengan Pillar Campaign & Per-Clip Recovery (15/10/2026)
+- Perbaikan type error bigint pada insertGlabsTask di lib/db.js
+- Integrasi start frame t2i_images_json ke I2V start_image mode
+- Penambahan micro-pacing delay 10s antar pengiriman klip video
+- Per-clip recovery untuk me-reuse klip completed dan hanya me-regenerasi klip failed
+
 ## V2.32.43 — Perbaikan Sinkronisasi Voice Persona & Video Scale Zoom pada Multiplier Lab (15/10/2026)
 - Normalisasi dual-casing camelCase dan snake_case pada audio_config_json
 - Perbaikan mutator setCfgValue agar tidak mereset voice_persona saat video scale digeser
