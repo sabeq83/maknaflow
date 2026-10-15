@@ -46,7 +46,7 @@ export async function POST(req) {
       blueprintId: blueprint_id,
       blueprintIds: blueprint_ids,
       mode: mode || '1_to_multi',
-      nicheKbName: niche_kb_name || 'HERBAL_CONTENT_KB.md',
+      nicheKbName: niche_kb_name || null,
       angleCount: angle_count || 5,
       customTheme: custom_theme || '',
       tenantId

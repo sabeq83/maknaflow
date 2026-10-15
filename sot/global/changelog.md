@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.53 — Dynamic Blueprint-Driven Niche & Recipe Continuity Engine (16/10/2026)
+- Ekstraksi DNA Blueprint Anchor otomatis mengunci niche Health, Dessert, Herbal, atau Kuliner tanpa bias hardcoded
+- Mandat ketat kesinambungan niche & entitas pada generator sudut pandang Gemini AI
+- Pengikatan bahan baku visual blueprint pada teks resep caption dan voiceover di Phase 2 Multiplier
+- Mockup interaktif dan unit test multi-niche verifikasi Blueprint #947017c1 dan #f467f5a1
+
 ## V2.32.52 — Multiplier Tab Numbering, Real-Time Phase Tracking, Final Video Card & Nextcloud Standardization (16/10/2026)
 - Penomoran Tab 1 s/d Tab 6 dan Tab 3 khusus Resep Kuliner & Paket Medsos pada Multiplier Lab
 - Pelacakan status kejadian Fase secara real-time pada kolom tabel baris konten (Generasi T2I, I2V, TTS, FFMPEG, Uploading Asset, Completed)

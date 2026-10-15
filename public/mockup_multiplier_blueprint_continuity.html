@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Blueprint & Niche Continuity Engine - Multiplier Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --font-sans: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme='light'] {
+      --canvas: #f8fafc;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border-subtle: #cbd5e1;
+      --border-strong: #94a3b8;
+      --action-primary: #0d9488;
+      --action-primary-hover: #0f766e;
+      --on-action-primary: #ffffff;
+      --link: #0284c7;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.1);
+      --status-neutral: #7c3aed;
+      --status-neutral-soft: rgba(124, 58, 237, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      padding: 30px;
+      line-height: 1.5;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .btn-primary { background: var(--action-primary); color: var(--on-action-primary); }
+    .btn-secondary { background: var(--surface-interactive); color: var(--text-primary); border-color: var(--border-subtle); }
+    .btn-secondary:hover { background: var(--surface-hover); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .selector-pill {
+      padding: 10px 18px;
+      border-radius: 8px;
+      border: 2px solid var(--border-subtle);
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s ease;
+    }
+    .selector-pill.active {
+      border-color: var(--action-primary);
+      background: rgba(45, 212, 191, 0.12);
+      color: var(--action-primary);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+    }
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.85rem;
+    }
+    th {
+      background: var(--surface-raised);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      display: none;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <div>
+        <div style="font-size: 0.78rem; color: var(--action-primary); font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;">
+          Interactive Simulation & Architectural Prototype
+        </div>
+        <h1 style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary); margin-top: 4px;">
+          🧬 Multiplier Lab: Blueprint-Driven Dynamic Niche & Continuity Engine
+        </h1>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">
+          Membuktikan bahwa sistem <strong>tidak terkunci pada satu niche saja (tidak terkunci pada baking, dan tidak terkunci pada herbal)</strong>, melainkan 100% dinamis mengikuti subjek dan bahan baku dari Blueprint yang dipilih pengguna.
+        </p>
+      </div>
+      <button class="btn btn-secondary" onclick="toggleTheme()">🌓 Toggle Mode</button>
+    </div>
+
+    <!-- Blueprint Selector -->
+    <div class="card" style="background: var(--surface-raised); border-color: var(--border-strong);">
+      <label style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary); display: block; margin-bottom: 12px;">
+        PILIH SIMULASI BLUEPRINT (UJI COBA DINAMIS):
+      </label>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <!-- Option 1: Health Nutrition Pudding -->
+        <div class="selector-pill active" id="btn-bp-health" onclick="selectBlueprint('health')">
+          <span style="font-size: 1.4rem;">🍫🥣</span>
+          <div>
+            <div>Blueprint #947017c1 (Niche: Health & Nutrition)</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 400;">Puding Chia Cokelat Selai Kacang Tinggi Protein (Diet & Ngidam Manis)</div>
+          </div>
+        </div>
+        <!-- Option 2: Kuliner Dessert Ice Cream -->
+        <div class="selector-pill" id="btn-bp-culinary" onclick="selectBlueprint('culinary')">
+          <span style="font-size: 1.4rem;">🥑🍨</span>
+          <div>
+            <div>Blueprint #f467f5a1 (Niche: Kuliner & Dessert Sehat)</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 400;">Es Krim Alpukat Pisang Creamy Alami (Bebas Gula Pasir)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Blueprint Reality DNA Card -->
+    <div class="card" id="dna-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 14px; margin-bottom: 16px;">
+        <div>
+          <span class="badge" id="dna-badge-niche" style="background: var(--status-success-soft); color: var(--status-success); margin-bottom: 4px;">
+            💪 NICHE TERDETEKSI: HEALTH & FITNESS NUTRITION
+          </span>
+          <h2 style="font-size: 1.2rem; font-weight: 800; color: var(--text-primary);" id="dna-title">
+            📄 Blueprint #947017c1-431a-43b6-9e9d-0a45c50548bb
+          </h2>
+        </div>
+        <div style="text-align: right;">
+          <span class="badge" style="background: var(--surface-interactive); color: var(--action-primary); font-family: var(--font-mono);">
+            4 Visual Clips Detected
+          </span>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 16px;">
+        <div style="background: var(--surface-interactive); padding: 16px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+          <strong style="font-size: 0.8rem; color: var(--action-primary); display: block; margin-bottom: 6px;">
+            🔒 BAHAN BAKU VISUAL TERKUNCI (CORE INGREDIENTS ANCHOR):
+          </strong>
+          <ul style="font-size: 0.82rem; color: var(--text-secondary); padding-left: 20px; line-height: 1.6;" id="dna-ingredients">
+            <li>Chia seed murni</li>
+            <li>Susu almond / santan encer</li>
+            <li>Selai kacang (peanut butter)</li>
+            <li>Bubuk kakao asli (cocoa powder)</li>
+            <li>Madu murni & sejumput garam</li>
+            <li>Topping: chocochip & kacang cincang</li>
+          </ul>
+        </div>
+
+        <div style="background: var(--surface-interactive); padding: 16px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+          <strong style="font-size: 0.8rem; color: var(--action-primary); display: block; margin-bottom: 6px;">
+            🎬 ALUR PROSES VISUAL TERKUNCI (VISUAL PROCESS ANCHOR):
+          </strong>
+          <ol style="font-size: 0.82rem; color: var(--text-secondary); padding-left: 20px; line-height: 1.6;" id="dna-process">
+            <li>Scene 1: Menuangkan chia seed, selai kacang, kakao, susu, madu ke mangkuk.</li>
+            <li>Scene 2: Mengaduk adonan pudding cokelat hingga kental merata.</li>
+            <li>Scene 3: Menyusun toples-toples kaca rapi di dalam kulkas (dinginkan 2 jam).</li>
+            <li>Scene 4: Toples dibuka, tabur chocochip & kacang, lalu disendok kental.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div style="background: rgba(45, 212, 191, 0.08); border: 1px solid rgba(45, 212, 191, 0.2); padding: 14px; border-radius: 8px; font-size: 0.82rem; color: var(--text-secondary);">
+        <strong style="color: var(--action-primary);">🛡️ Mandat Kesinambungan (Continuity Guardrail):</strong>
+        <span id="dna-mandate">
+          Seluruh angle dan resep yang dihasilkan WAJIB 100% berada dalam koridor puding chia cokelat tinggi protein. Dilarang keras berpindah menghasilkan resep kue panggang oven, dan dilarang berpindah menghasilkan jamu/wedang jahe.
+        </span>
+      </div>
+    </div>
+
+    <!-- Generated Angles Table -->
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div>
+          <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary);">
+            🎯 Hasil 5 Sudut Pandang (Angles) yang Berkorelasi 100%
+          </h3>
+          <p style="font-size: 0.78rem; color: var(--text-muted);">
+            Setiap angle menyasar audiens dan emosi berbeda, namun tetap menggunakan bahan dan video visual yang sama persis.
+          </p>
+        </div>
+        <button class="btn btn-primary" onclick="showToast('Regenerasi angle dengan parameter DNA!')">
+          ⚡ Re-Generate Angles
+        </button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 5%;">#</th>
+            <th style="width: 45%;">Judul YouTube Shorts (Click-Worthy)</th>
+            <th style="width: 25%;">Target Persona & Trigger</th>
+            <th style="width: 25%;">Keselarasan Resep & Visual</th>
+          </tr>
+        </thead>
+        <tbody id="angles-tbody">
+          <!-- Dynamically Populated -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Recipe Preview of Active Row -->
+    <div class="card" style="border: 2px solid var(--border-strong);">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px; margin-bottom: 16px;">
+        <div>
+          <span class="badge" style="background: var(--status-success-soft); color: var(--status-success);">
+            🍳 RESEP TERSTRUKTUR HASIL SINKRONISASI
+          </span>
+          <h3 style="font-size: 1rem; font-weight: 800; color: var(--text-primary); margin-top: 4px;" id="recipe-preview-title">
+            Resep Baris #1: Solusi Ngidam Manis Jam 10 Malam Bebas Gula Darah Spike #Shorts
+          </h3>
+        </div>
+        <button class="btn btn-secondary" onclick="showToast('Resep disalin ke clipboard!')">
+          📋 Salin Resep
+        </button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;" id="recipe-content-grid">
+        <!-- Dynamically Populated -->
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Notifikasi</div>
+
+  <script>
+    const DATA = {
+      health: {
+        nicheBadge: '💪 NICHE TERDETEKSI: HEALTH & FITNESS NUTRITION',
+        nicheBadgeColor: 'var(--status-success)',
+        nicheBadgeBg: 'var(--status-success-soft)',
+        title: '📄 Blueprint #947017c1-431a-43b6-9e9d-0a45c50548bb (Health & Diet)',
+        ingredients: [
+          'Chia seed murni (2 sdm)',
+          'Susu almond tawar / santan encer (150 ml)',
+          'Selai kacang murni / peanut butter (1 sdm)',
+          'Bubuk kakao asli tanpa gula / cocoa powder (1 sdm)',
+          'Madu murni alami (1 sdm) & sejumput garam',
+          'Topping: Dark chocochip & kacang almond cincang'
+        ],
+        process: [
+          'Scene 1: Menuangkan chia seed, selai kacang, kakao, susu, madu ke mangkuk.',
+          'Scene 2: Mengaduk adonan pudding cokelat hingga kental merata.',
+          'Scene 3: Menyusun toples-toples kaca rapi di dalam kulkas (dinginkan 2 jam).',
+          'Scene 4: Toples dibuka, tabur chocochip & kacang, lalu disendok kental.'
+        ],
+        mandate: 'Seluruh angle dan resep yang dihasilkan WAJIB 100% berada dalam koridor puding chia cokelat tinggi protein. Dilarang keras berpindah menghasilkan resep kue panggang oven, dan dilarang berpindah menghasilkan jamu/wedang jahe.',
+        angles: [
+          {
+            title: 'Solusi Ngidam Manis Jam 10 Malam Bebas Gula Darah Spike #Shorts',
+            persona: 'Pejuang Diet & Diabetes Concern',
+            trigger: 'Craving malam hari tanpa takut gula darah melonjak',
+            recipeNote: '✓ 100% bahan chia + kakao + almond milk (Indeks glikemik rendah)'
+          },
+          {
+            title: 'Camilan Tinggi Protein Pembakar Lemak Pasca Olahraga #Shorts',
+            persona: 'Fitness & Gym Enthusiast',
+            trigger: 'Kebutuhan protein cepat saji pasca workout',
+            recipeNote: '✓ Peanut butter + chia seed menyuplai 14g protein alami'
+          },
+          {
+            title: 'Trik Sarapan Kenyang 6 Jam Cuma Modal Toples & Kulkas #Shorts',
+            persona: 'Pekerja Sibuk / Meal Prep Habit',
+            trigger: 'Hemat waktu pagi hari tanpa skip sarapan',
+            recipeNote: '✓ Serat gel chia seed mengembang memberi rasa kenyang awet'
+          },
+          {
+            title: 'Puding Cokelat Ramah Lambung & Pelancar Pencernaan #Shorts',
+            persona: 'Penderita Gerd & Sembelit',
+            trigger: 'Ingin cokelat tapi takut asam lambung naik',
+            recipeNote: '✓ Susu almond nabati + chia seed kaya serat larut air'
+          },
+          {
+            title: 'Dessert Anti-Buncit Pengganti Kue Cokelat Kalori Tinggi #Shorts',
+            persona: 'Wanita 25–40th / Calorie Deficit',
+            trigger: 'Substitusi dessert tinggi lemak jenuh',
+            recipeNote: '✓ Kakao murni tinggi antioksidan tanpa pemanis buatan'
+          }
+        ],
+        recipe: {
+          title: 'Resep Baris #1: Puding Chia Cokelat Peanut Butter Bebas Spike Gula',
+          bahan: [
+            '2 sdm chia seed kualitas premium',
+            '150 ml susu almond tawar (plain unflavoured)',
+            '1 sdm selai kacang murni (100% roasted peanut)',
+            '1 sdm bubuk kakao murni (pure unsweetened cocoa)',
+            '1 sdm madu hutan mentah (raw honey)',
+            'Sejumput garam laut (sea salt) & 1/4 sdt ekstrak vanila'
+          ],
+          langkah: [
+            'Tuangkan chia seed, bubuk kakao, dan susu almond ke mangkuk.',
+            'Tambahkan selai kacang, madu, vanila, dan garam.',
+            'Aduk merata dengan sendok sampai tidak ada gumpalan kakao.',
+            'Pindahkan ke toples kaca kedap udara, simpan di kulkas minimal 2 jam.',
+            'Sajikan dingin dengan taburan dark choco nibs di atasnya.'
+          ],
+          khasiat: 'Tinggi serat larut air dan lemak tak jenuh ganda. Memperlambat penyerapan karbohidrat sehingga energi stabil tanpa rasa kantuk atau lonjakan insulin.'
+        }
+      },
+
+      culinary: {
+        nicheBadge: '🥑 NICHE TERDETEKSI: KULINER & HEALTHY DESSERT',
+        nicheBadgeColor: 'var(--status-neutral)',
+        nicheBadgeBg: 'var(--status-neutral-soft)',
+        title: '📄 Blueprint #f467f5a1-1d5a-4da9-aa3f-ee24540d226f (Dessert Kuliner)',
+        ingredients: [
+          '2 buah pisang ambon matang (bekukan minimal 4 jam)',
+          '1 buah alpukat mentega segar matang',
+          '3 sdm Greek yogurt tawar (plain)',
+          '1-2 sdm madu murni alami',
+          '1 sdt perasan air lemon segar',
+          'Topping: Kacang pistachio cincang'
+        ],
+        process: [
+          'Scene 1: Potongan pisang beku dan alpukat dimasukkan ke blender.',
+          'Scene 2: Menuangkan Greek yogurt di atas alpukat.',
+          'Scene 3: Menambahkan madu, vanila, dan perasan air lemon segar.',
+          'Scene 4: Memblender hingga tekstur berubah menjadi krim hijau lembut.',
+          'Scene 5: Mengambil wadah es krim dari freezer.',
+          'Scene 6: Sendok satu scoop es krim mewah dengan taburan pistachio.'
+        ],
+        mandate: 'Seluruh angle dan resep yang dihasilkan WAJIB 100% berada dalam koridor es krim alpukat sehat bebas gula pasir. Dilarang keras berpindah ke jamu rebusan herbal rempah, dan dilarang membuat masakan berkuah.',
+        angles: [
+          {
+            title: 'Lapar Tengah Malam? Resep Es Krim Alpukat Anti Bikin Gemuk #Shorts',
+            persona: 'Dewasa Muda / Pejuang Diet Malam',
+            trigger: 'Solusi craving camilan dingin tanpa rasa bersalah',
+            recipeNote: '✓ Lemak nabati alpukat + manis pisang beku pengganti whipped cream'
+          },
+          {
+            title: 'Anak Sering Alergi Susu? Trik Es Krim Lembut Tanpa Susu Sapi #Shorts',
+            persona: 'Ibu dengan Balita Alergi Susu',
+            trigger: 'Anak ingin es krim tetapi intoleran laktosa',
+            recipeNote: '✓ Greek yogurt diganti coconut yogurt (100% dairy-free)'
+          },
+          {
+            title: 'Tantangan 7 Hari Stop Gula Pasir! Manis Alami 2 Buah Ini #Shorts',
+            persona: 'Komunitas Hidup Sehat & Kebugaran',
+            trigger: 'Gamifikasi hidup sehat bebas gula rafinasi',
+            recipeNote: '✓ Mengandalkan fruktosa alami pisang beku + madu mentah'
+          },
+          {
+            title: 'Jangan Dibuang! Trik Buah Kematangan Jadi Gelato Mewah #Shorts',
+            persona: 'Ibu Rumah Tangga / Anti Food-Waste',
+            trigger: 'Menyelamatkan pisang & alpukat kematangan di kulkas',
+            recipeNote: '✓ Buah kematangan memiliki kadar gula alami & kelembutan tertinggi'
+          },
+          {
+            title: 'Bikin Es Krim Tanpa Mixer & Santan, Kok Bisa Secreamy Ini? #Shorts',
+            persona: 'Pemula Masak / Anak Kos',
+            trigger: 'Penasaran teknik kitchen hacks tanpa alat mahal',
+            recipeNote: '✓ Perasan lemon menjaga pigmen klorofil tetap hijau cerah tanpa pahit'
+          }
+        ],
+        recipe: {
+          title: 'Resep Baris #1: Es Krim Alpukat Lembut Solusi Manis Bebas Gula Pasir',
+          bahan: [
+            '2 buah pisang ambon matang (potong & bekukan 4 jam)',
+            '1 buah alpukat mentega matang (keruk dagingnya)',
+            '3 sdm Greek yogurt tawar (plain)',
+            '1-2 sdm madu murni alami',
+            '1 sdt air perasan lemon segar (kunci anti-oksidasi)',
+            'Topping: Kacang pistachio panggang cincang'
+          ],
+          langkah: [
+            'Masukkan potongan pisang beku dan daging alpukat ke blender.',
+            'Tambahkan greek yogurt, madu, dan perasan air lemon segar.',
+            'Blender dengan kecepatan bertahap sampai tekstur selembut soft-serve gelato.',
+            'Tuangkan ke wadah kaca, simpan di freezer 45-60 menit agar mudah di-scoop.',
+            'Scoop ke mangkuk saji dan taburkan kacang pistachio cincang.'
+          ],
+          khasiat: 'Kaya asam folat, kalium, dan lemak tak jenuh tunggal. Air lemon menjaga warna es krim tetap hijau neon segar tanpa menghitam.'
+        }
+      }
+    };
+
+    function selectBlueprint(type) {
+      document.getElementById('btn-bp-health').classList.toggle('active', type === 'health');
+      document.getElementById('btn-bp-culinary').classList.toggle('active', type === 'culinary');
+
+      const d = DATA[type];
+      const badge = document.getElementById('dna-badge-niche');
+      badge.textContent = d.nicheBadge;
+      badge.style.color = d.nicheBadgeColor;
+      badge.style.background = d.nicheBadgeBg;
+
+      document.getElementById('dna-title').textContent = d.title;
+      document.getElementById('dna-mandate').textContent = d.mandate;
+
+      // Ingredients
+      const ingUl = document.getElementById('dna-ingredients');
+      ingUl.innerHTML = d.ingredients.map(i => `<li>${i}</li>`).join('');
+
+      // Process
+      const procOl = document.getElementById('dna-process');
+      procOl.innerHTML = d.process.map(p => `<li>${p}</li>`).join('');
+
+      // Angles Table
+      const tbody = document.getElementById('angles-tbody');
+      tbody.innerHTML = d.angles.map((a, idx) => `
+        <tr>
+          <td style="font-family: var(--font-mono); font-weight: 700; color: var(--text-muted);">${idx + 1}</td>
+          <td>
+            <div style="font-weight: 700; color: var(--text-primary); font-size: 0.92rem;">${a.title}</div>
+          </td>
+          <td>
+            <div style="font-weight: 600; font-size: 0.8rem; color: var(--text-primary);">${a.persona}</div>
+            <div style="font-size: 0.72rem; color: var(--text-muted);">${a.trigger}</div>
+          </td>
+          <td>
+            <span style="font-size: 0.75rem; color: var(--status-success); font-weight: 600;">
+              ${a.recipeNote}
+            </span>
+          </td>
+        </tr>
+      `).join('');
+
+      // Recipe Preview
+      document.getElementById('recipe-preview-title').textContent = d.recipe.title;
+      const rGrid = document.getElementById('recipe-content-grid');
+      rGrid.innerHTML = `
+        <div style="background: var(--surface-interactive); padding: 16px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+          <strong style="font-size: 0.8rem; color: var(--action-primary); display: block; margin-bottom: 8px;">
+            📋 Bahan-Bahan Alami (Sesuai Visual Blueprint):
+          </strong>
+          <ul style="font-size: 0.8rem; color: var(--text-secondary); padding-left: 18px; line-height: 1.7;">
+            ${d.recipe.bahan.map(b => `<li>${b}</li>`).join('')}
+          </ul>
+        </div>
+        <div style="background: var(--surface-interactive); padding: 16px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+          <strong style="font-size: 0.8rem; color: var(--action-primary); display: block; margin-bottom: 8px;">
+            👩‍🍳 Langkah Pembuatan Runtut:
+          </strong>
+          <ol style="font-size: 0.8rem; color: var(--text-secondary); padding-left: 18px; line-height: 1.7;">
+            ${d.recipe.langkah.map(l => `<li>${l}</li>`).join('')}
+          </ol>
+          <div style="margin-top: 12px; padding: 10px; background: var(--status-success-soft); border-radius: 6px; font-size: 0.75rem; color: var(--text-secondary);">
+            <strong style="color: var(--status-success);">✨ Khasiat & Pro-Tip:</strong> ${d.recipe.khasiat}
+          </div>
+        </div>
+      `;
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2500);
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
+    }
+
+    // Initialize with Health Blueprint
+    selectBlueprint('health');
+  </script>
+</body>
+</html>
