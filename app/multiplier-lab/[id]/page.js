@@ -67,6 +67,7 @@ function CampaignDetailPageContent() {
   const [editedAudioConfigs, setEditedAudioConfigs] = useState({}); // { [taskId]: audioConfigObj }
   
   // Regeneration and replacement loadings
+  const [batchRegeneratingSF, setBatchRegeneratingSF] = useState({}); // { [taskId]: boolean }
   const [regeneratingT2I, setRegeneratingT2I] = useState({}); // { [`${taskId}_${clipIndex}`]: boolean }
   const [replacingSF, setReplacingSF] = useState({}); // { [`${taskId}_${clipIndex}`]: boolean }
   const [actionLoading, setActionLoading] = useState({}); // { [taskId]: boolean }
@@ -177,6 +178,7 @@ function CampaignDetailPageContent() {
 
   const handleGenerateAllT2I = async (taskId) => {
     if (!confirm('Apakah Anda yakin ingin meregenerasi semua start frame T2I untuk adegan ini di latar belakang?')) return;
+    setBatchRegeneratingSF(prev => ({ ...prev, [taskId]: true }));
     try {
       const res = await fetch(`/api/v2/multiplier/${taskId}/regenerate-start-frames`, {
         method: 'POST'
@@ -184,12 +186,14 @@ function CampaignDetailPageContent() {
       const data = await res.json();
       if (data.success) {
         showToast('Proses regenerasi semua start frame telah dimulai di latar belakang.');
-        fetchTasks();
+        fetchTasks(true);
       } else {
         showToast(data.error || 'Gagal memulai regenerasi massal.', 'error');
       }
     } catch (err) {
       showToast(err.message, 'error');
+    } finally {
+      setBatchRegeneratingSF(prev => ({ ...prev, [taskId]: false }));
     }
   };
 
@@ -930,22 +934,30 @@ function CampaignDetailPageContent() {
                                            <span style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                                              🖼️ Grid Preview Start Frame Gambar (T2I)
                                            </span>
-                                           <button
-                                             type="button"
-                                             onClick={() => handleGenerateAllT2I(task.id)}
-                                             style={{
-                                               background: 'var(--accent)',
-                                               color: 'var(--text-primary)',
-                                               border: 'none',
-                                               borderRadius: 4,
-                                               padding: '4px 10px',
-                                               fontSize: '0.72rem',
-                                               fontWeight: 700,
-                                               cursor: 'pointer'
-                                             }}
-                                           >
-                                             ⚡ Generate All T2I
-                                           </button>
+                                           {(() => {
+                                             const isBatchRunning = task.regenerate_start_frames_status === 'running' || !!batchRegeneratingSF[task.id];
+                                             return (
+                                               <button
+                                                 type="button"
+                                                 onClick={() => handleGenerateAllT2I(task.id)}
+                                                 disabled={isBatchRunning}
+                                                 className="btn btn-secondary btn-sm"
+                                                 style={{
+                                                   fontSize: '0.72rem',
+                                                   padding: '4px 10px',
+                                                   background: isBatchRunning ? 'rgba(155, 89, 182, 0.4)' : 'rgba(155, 89, 182, 0.15)',
+                                                   borderColor: 'rgba(155, 89, 182, 0.3)',
+                                                   color: 'var(--text-primary)',
+                                                   cursor: isBatchRunning ? 'not-allowed' : 'pointer'
+                                                 }}
+                                               >
+                                                 {task.regenerate_start_frames_status === 'running'
+                                                   ? `⏳ Regenerating (${task.regenerate_start_frames_progress || '0%'})`
+                                                   : (batchRegeneratingSF[task.id] ? '⏳ Memulai...' : '🎨 Generate T2I Start Frames')
+                                                 }
+                                               </button>
+                                             );
+                                           })()}
                                          </div>
                                         
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 16, marginTop: 12 }}>
@@ -955,6 +967,7 @@ function CampaignDetailPageContent() {
                                             const taskKey = `${task.id}_${cidx + 1}`;
                                             const isRegening = regeneratingT2I[taskKey];
                                             const isReplacing = replacingSF[taskKey];
+                                            const isBatchRunning = task.regenerate_start_frames_status === 'running' || !!batchRegeneratingSF[task.id];
 
                                             return (
                                               <div key={cidx} style={{ display: 'flex', flexDirection: 'column', gap: 8, background: 'var(--overlay-subtle)', padding: 10, borderRadius: 6, border: '1px solid var(--border)' }}>
@@ -982,17 +995,27 @@ function CampaignDetailPageContent() {
                                                 <div style={{ display: 'flex', gap: 4 }}>
                                                   <button
                                                     type="button"
-                                                    disabled={isRegening}
+                                                    disabled={isRegening || isBatchRunning}
                                                     onClick={() => handleRegenerateT2I(task.id, cidx + 1, clip.t2i_prompt)}
-                                                    style={{ flex: 1, fontSize: '0.62rem', padding: '4px', cursor: 'pointer', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: 4 }}
+                                                    style={{
+                                                      flex: 1, fontSize: '0.62rem', padding: '4px',
+                                                      cursor: (isRegening || isBatchRunning) ? 'not-allowed' : 'pointer',
+                                                      opacity: (isRegening || isBatchRunning) ? 0.6 : 1,
+                                                      background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: 4
+                                                    }}
                                                   >
                                                     {isRegening ? '⏳' : '🔄 Regen'}
                                                   </button>
                                                   <button
                                                     type="button"
-                                                    disabled={isReplacing}
+                                                    disabled={isReplacing || isBatchRunning}
                                                     onClick={() => document.getElementById(`replace-startframe-${task.id}-${cidx + 1}`).click()}
-                                                    style={{ flex: 1, fontSize: '0.62rem', padding: '4px', cursor: 'pointer', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: 4 }}
+                                                    style={{
+                                                      flex: 1, fontSize: '0.62rem', padding: '4px',
+                                                      cursor: (isReplacing || isBatchRunning) ? 'not-allowed' : 'pointer',
+                                                      opacity: (isReplacing || isBatchRunning) ? 0.6 : 1,
+                                                      background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', borderRadius: 4
+                                                    }}
                                                   >
                                                     {isReplacing ? '⏳' : '📤 Replace'}
                                                   </button>

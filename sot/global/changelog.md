@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.42 — Penguncian & Progress Real-Time Tombol Generate All T2I Multiplier Lab (15/10/2026)
+- Penyelarasan status penguncian disabled pada tombol Generate All T2I selaras Organic Pillar Campaign
+- Penambahan kolom regenerate_start_frames_status dan progress pada tabel re_multiplier_tasks
+- Pembaruan backend API regenerate-start-frames dengan pengecekan idempotensi dan pelaporan progres real-time
+- Pembaruan simulasi mockup HTML interaktif dengan visualisasi penguncian dan kenaikan progres
+
 ## V2.32.41 — Penyelarasan UI Multiplier Lab dengan Organic Pillar Campaign & Perbaikan Skeduler Otomatis (15/10/2026)
 - Penyelarasan judul tiap baris item kampanye berbasis Angle dan High-CTR YouTube Title
 - Penyelarasan layout kartu dan halaman detail Multiplier Lab dengan Organic Pillar Campaign

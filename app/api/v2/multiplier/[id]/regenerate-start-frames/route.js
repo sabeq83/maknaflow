@@ -24,6 +24,18 @@ export const POST = withTenantContext(async (req, { params }) => {
       return NextResponse.json({ success: false, error: "Tidak ada prompt T2I ditemukan pada task ini." }, { status: 400 });
     }
 
+    if (task.regenerate_start_frames_status === 'running') {
+      return NextResponse.json({ success: false, error: "Regenerasi start frame untuk task ini sedang berjalan." }, { status: 400 });
+    }
+
+    // Set status running and initial progress
+    await dbRun(`
+      UPDATE re_multiplier_tasks
+      SET regenerate_start_frames_status = 'running',
+          regenerate_start_frames_progress = ?
+      WHERE id = ?
+    `, [`0/${prompts.length}`, id]);
+
     // Start background process
     runTaskRegenerateStartFramesBackground(id, task, prompts);
 
@@ -154,6 +166,13 @@ async function runTaskRegenerateStartFramesBackground(taskId, task, prompts) {
         }
       }
 
+      // Update progress in database
+      await dbRun(`
+        UPDATE re_multiplier_tasks
+        SET regenerate_start_frames_progress = ?
+        WHERE id = ?
+      `, [`${i + 1}/${totalCount}`, taskId]).catch(() => {});
+
       // Safety Delay (5-10 seconds) before sending next prompt
       if (i < totalCount - 1) {
         const delayMs = 5000 + Math.floor(Math.random() * 5000);
@@ -161,7 +180,20 @@ async function runTaskRegenerateStartFramesBackground(taskId, task, prompts) {
       }
     }
 
+    // Reset status after completion
+    await dbRun(`
+      UPDATE re_multiplier_tasks
+      SET regenerate_start_frames_status = NULL,
+          regenerate_start_frames_progress = NULL
+      WHERE id = ?
+    `, [taskId]).catch(() => {});
+
   } catch (err) {
     console.error(`[Multiplier SF Batch] Error:`, err.message);
+    await dbRun(`
+      UPDATE re_multiplier_tasks
+      SET regenerate_start_frames_status = 'failed'
+      WHERE id = ?
+    `, [taskId]).catch(() => {});
   }
 }
