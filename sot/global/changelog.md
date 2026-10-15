@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.32.52 — Multiplier Tab Numbering, Real-Time Phase Tracking, Final Video Card & Nextcloud Standardization (16/10/2026)
+- Penomoran Tab 1 s/d Tab 6 dan Tab 3 khusus Resep Kuliner & Paket Medsos pada Multiplier Lab
+- Pelacakan status kejadian Fase secara real-time pada kolom tabel baris konten (Generasi T2I, I2V, TTS, FFMPEG, Uploading Asset, Completed)
+- Card interaktif Hasil Render Video Akhir (Final Output) pada Tab 2 dengan pemutar video dan tombol download
+- Standarisasi penamaan output video (_final.mp4) dan sinkronisasi aset Nextcloud selaras Kampanye Pilar
+- Perbaikan stale state React agar caption dan judul YouTube hasil generate langsung tampil di form
+
 ## V2.32.51 — Multiplier Worker Sekuensial, Save as Draft & Badge Visual Dinamis (15/10/2026)
 - Eksekusi sekuensial antrean Multiplier baris demi baris via getEligibleSequentialMultiplierTasks
 - Penghapusan Promise.all serentak di Multiplier Worker guna mencegah timeout 180s Gemini AI

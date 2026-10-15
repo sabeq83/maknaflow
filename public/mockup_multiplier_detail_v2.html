@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Multiplier Lab: Tab Numbering, Fase Detail & Final Video Card</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --font-sans: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme='light'] {
+      --canvas: #f8fafc;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border-subtle: #cbd5e1;
+      --border-strong: #94a3b8;
+      --action-primary: #0d9488;
+      --action-primary-hover: #0f766e;
+      --on-action-primary: #ffffff;
+      --link: #0284c7;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.1);
+      --status-neutral: #7c3aed;
+      --status-neutral-soft: rgba(124, 58, 237, 0.1);
+      --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      padding: 30px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header-banner {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 24px 30px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .btn {
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+    .btn-secondary {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-hover);
+    }
+
+    .badge-fase {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.78rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .pulse-animation {
+      animation: pulse 1.8s infinite ease-in-out;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.82; transform: scale(0.98); }
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    th {
+      background: var(--surface-interactive);
+      padding: 14px 18px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-subtle);
+      text-align: left;
+    }
+    td {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: middle;
+      font-size: 0.86rem;
+    }
+
+    /* Tabs Styling */
+    .tab-nav {
+      display: flex;
+      gap: 6px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+    .tab-btn {
+      padding: 9px 16px;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      border-bottom: 2px solid transparent;
+      border-radius: 6px 6px 0 0;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      border-color: var(--border-subtle);
+      border-bottom: 2px solid var(--action-primary);
+    }
+
+    /* Final Video Output Card */
+    .final-video-card {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 22px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .video-grid {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+    @media (max-width: 768px) {
+      .video-grid { grid-template-columns: 1fr; }
+    }
+
+    .video-wrapper {
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+      aspect-ratio: 9/16;
+      max-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .video-wrapper video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Recipe Section */
+    .recipe-box {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .recipe-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 10px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      display: none;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Top Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <div>
+        <div style="font-size: 0.78rem; color: var(--action-primary); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">
+          Interactive Prototype & Proposal Simulation
+        </div>
+        <h1 style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary); margin-top: 4px;">
+          🎬 Kampanye Multiplier: mul_261015_lg4ad4
+        </h1>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <button class="btn btn-secondary" onclick="toggleTheme()">🌓 Toggle Mode (Dark/Light)</button>
+        <button class="btn btn-primary" onclick="showToast('Data tersinkronisasi!')">🔄 Refresh Data</button>
+      </div>
+    </div>
+
+    <!-- Info Banner -->
+    <div class="header-banner">
+      <div>
+        <div style="display: flex; gap: 10px; align-items: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">
+          <span>🔑 ID: <code style="font-family: var(--font-mono); color: var(--action-primary);">mul_261015_lg4ad4</code></span>
+          <span>|</span>
+          <span>🏷️ Brand: <strong style="color: var(--text-primary);">nutribake</strong></span>
+          <span>|</span>
+          <span>📅 Dibuat: <strong>15/10/2026, 20.40</strong></span>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <span style="background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info-soft); padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700;">
+            🧬 1 BLUEPRINT TO 7 ANGLES
+          </span>
+          <span style="background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success-soft); padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700;">
+            🍳 RESEP KULINER: AKTIF (7 DRAFT RESEP SIAP)
+          </span>
+          <span style="background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info); padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700;">
+            RUNNING (SEKUENSIAL)
+          </span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn" style="background: var(--status-info); color: #fff;" onclick="showToast('Mendorong 7 video ke ContentFlow...')">
+          🚀 Push to Contentflow
+        </button>
+        <button class="btn btn-secondary" onclick="showToast('Sinkronisasi Nextcloud dipicu!')">
+          ☁️ Sync to Nextcloud
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Items Table -->
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 4%; text-align: center;">#</th>
+          <th style="width: 50%;">Angle & Judul Konten (Berdasarkan Sudut Pandang)</th>
+          <th style="width: 32%;">Fase (Real-time Event Tracker)</th>
+          <th style="width: 14%; text-align: right;">Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        <!-- Row 1: Completed with Final Video Available -->
+        <tr>
+          <td style="text-align: center; font-family: var(--font-mono); font-weight: 700; color: var(--text-muted);">1</td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap;">
+              <span style="font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; background: var(--surface-interactive); color: var(--action-primary); padding: 2px 6px; border-radius: 4px;">
+                mul_261015_lg4ad4_01
+              </span>
+              <span style="background: var(--status-success-soft); color: var(--status-success); font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                📝 Caption (2.042 kar)
+              </span>
+              <span style="background: var(--status-neutral-soft); color: var(--status-neutral); font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                🍳 Resep Lengkap
+              </span>
+            </div>
+            <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 2px;">
+              Cuma Butuh Buah Ini! Trik Manis Alami Bebas Gula Pasir #Shorts
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">
+              🎯 Target: Dewasa Muda (20–35 th) • Tantangan 7 Hari Kurangi Gula
+            </div>
+          </td>
+          <td>
+            <span class="badge-fase" style="background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success-soft);">
+              ✅ Fase 2 : Completed
+            </span>
+          </td>
+          <td style="text-align: right;">
+            <button class="btn btn-secondary" onclick="toggleDetail('row1')">
+              📖 <span id="btn-text-row1">Detail (Buka)</span>
+            </button>
+          </td>
+        </tr>
+
+        <!-- Expanded Workbench Row 1 -->
+        <tr id="row1-detail" style="display: table-row; background: var(--surface);">
+          <td colspan="4" style="padding: 24px 28px;">
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+              
+              <!-- 6 Numbered Tab Headers -->
+              <div class="tab-nav">
+                <button class="tab-btn" onclick="switchTab('row1', 'tab1')">🔍 Tab 1: Dekonstruksi Asli</button>
+                <button class="tab-btn active" id="tab-btn-row1-tab2" onclick="switchTab('row1', 'tab2')">📖 Tab 2: Storyboard & Visual Baru</button>
+                <button class="tab-btn" id="tab-btn-row1-tab3" onclick="switchTab('row1', 'tab3')">🍳 Tab 3: Resep Kuliner & Paket Medsos</button>
+                <button class="tab-btn" onclick="switchTab('row1', 'tab4')">🗄️ Tab 4: Asset Vault Status</button>
+                <button class="tab-btn" onclick="switchTab('row1', 'tab5')">🧬 Tab 5: Video DNA Metadata</button>
+                <button class="tab-btn" onclick="switchTab('row1', 'tab6')">💻 Tab 6: Terminal Log & Queue</button>
+              </div>
+
+              <!-- Tab 2 Content: Storyboard & Final Video Output Card -->
+              <div id="row1-tab2" style="display: block;">
+                
+                <!-- CARD HASIL RENDER VIDEO AKHIR (FINAL OUTPUT) -->
+                <div class="final-video-card">
+                  <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="font-size: 1.1rem;">🎬</span>
+                      <strong style="font-size: 0.95rem; color: var(--text-primary);">Hasil Render Video Akhir (Final Output)</strong>
+                      <span style="font-size: 0.7rem; font-weight: 700; background: var(--status-success-soft); color: var(--status-success); padding: 2px 8px; border-radius: 4px;">
+                        1080x1920 (9:16) • MP4
+                      </span>
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">
+                      File: /temp/mul_261015_lg4ad4_01_final.mp4 (Cloud: /nutribake/mul_261015_lg4ad4/mul_261015_lg4ad4_01_final.mp4)
+                    </div>
+                  </div>
+
+                  <div class="video-grid">
+                    <!-- Video Player (Simulated) -->
+                    <div class="video-wrapper">
+                      <div style="text-align: center; padding: 20px;">
+                        <div style="font-size: 2.4rem; margin-bottom: 8px;">🥑🍨</div>
+                        <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 4px;">
+                          Video Preview Siap
+                        </div>
+                        <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 12px;">
+                          Durasi: 38s • Audio: Minimax TTS
+                        </div>
+                        <button class="btn btn-primary" onclick="showToast('Memutar video...')">▶ Putar Video</button>
+                      </div>
+                    </div>
+
+                    <!-- Video Actions & Distribution -->
+                    <div style="display: flex; flexDirection: column; gap: 14px;">
+                      <div style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6;">
+                        Video final telah selesai digabungkan melalui <strong>FFmpeg Smart Sync Studio</strong> (Audio Voiceover Minimax + Klip Video G-Labs). Anda dapat mengunduh file video mentah atau menyinkronkannya ke Nextcloud & ContentFlow.
+                      </div>
+
+                      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn" style="background: var(--status-success); color: #042f2e; font-weight: 700;" onclick="showToast('Memulai pengunduhan video .mp4...')">
+                          ⬇️ Unduh Video (.mp4)
+                        </button>
+                        <button class="btn btn-secondary" onclick="showToast('Menjadwalkan ulang FFMPEG...')">
+                          🔄 Re-FFMPEG Muxing
+                        </button>
+                        <button class="btn btn-secondary" onclick="showToast('Tautan video disalin ke clipboard!')">
+                          📋 Salin Tautan Video
+                        </button>
+                        <a href="#" class="btn btn-secondary" onclick="showToast('Membuka folder Nextcloud...'); return false;">
+                          ☁️ Buka di Nextcloud
+                        </a>
+                      </div>
+
+                      <!-- Social & YouTube Title Quick Peek -->
+                      <div style="background: var(--surface); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 14px; margin-top: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                          <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);">
+                            🔥 Judul YouTube Terpaut
+                          </span>
+                          <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.7rem;" onclick="copyText('Cuma Butuh Buah Ini! Trik Manis Alami Bebas Gula Pasir #Shorts')">
+                            📋 Salin
+                          </button>
+                        </div>
+                        <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary);">
+                          Cuma Butuh Buah Ini! Trik Manis Alami Bebas Gula Pasir #Shorts
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Storyboard Clips Table Preview -->
+                <div style="background: var(--surface-interactive); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 16px;">
+                  <h4 style="font-size: 0.85rem; font-weight: 700; margin-bottom: 12px; color: var(--text-primary);">
+                    🎬 Daftar Klip Storyboard (8 Klip)
+                  </h4>
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;">
+                    <div style="background: var(--surface); padding: 12px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                      <div style="font-weight: 700; font-size: 0.75rem; color: var(--action-primary); margin-bottom: 4px;">Klip #1 (0-3s Hook)</div>
+                      <div style="font-size: 0.75rem; color: var(--text-secondary);">"Lagi ikutan tantangan kurangi gula tapi sering kangen manis dingin sehabis makan?"</div>
+                    </div>
+                    <div style="background: var(--surface); padding: 12px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                      <div style="font-weight: 700; font-size: 0.75rem; color: var(--action-primary); margin-bottom: 4px;">Klip #2 (Bridge Promosi)</div>
+                      <div style="font-size: 0.75rem; color: var(--text-secondary);">"Jangan tergoda es krim kemasan ya! Cukup sulap pisang beku & alpukat mentega ini."</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tab 3 Content: Dedicated Resep Kuliner & Paket Medsos -->
+              <div id="row1-tab3" style="display: none;">
+                <div class="recipe-box">
+                  <div class="recipe-header">
+                    <div>
+                      <span style="font-size: 0.72rem; font-weight: 700; color: var(--status-success); text-transform: uppercase;">
+                        ✓ Paket Naskah Kuliner Siap Publikasi
+                      </span>
+                      <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin-top: 2px;">
+                        🍳 Resep & Social Media Package (Baris #1)
+                      </h3>
+                    </div>
+                    <button class="btn btn-primary" onclick="copyFullCaption()">
+                      📋 Salin Seluruh Naskah Resep & Medsos
+                    </button>
+                  </div>
+
+                  <!-- 1. Judul YouTube -->
+                  <div style="background: var(--surface-interactive); padding: 14px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                      <span style="font-size: 0.75rem; font-weight: 700; color: var(--platform-youtube, #ef4444);">
+                        ▶ Judul YouTube Shorts Click-Worthy
+                      </span>
+                      <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.7rem;" onclick="copyText('Cuma Butuh Buah Ini! Trik Manis Alami Bebas Gula Pasir #Shorts')">
+                        Salin Judul
+                      </button>
+                    </div>
+                    <p style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">
+                      Cuma Butuh Buah Ini! Trik Manis Alami Bebas Gula Pasir #Shorts
+                    </p>
+                  </div>
+
+                  <!-- 2. Naskah Resep Terstruktur -->
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <!-- Bahan-Bahan -->
+                    <div style="background: var(--surface-interactive); padding: 14px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                      <div style="font-weight: 700; font-size: 0.8rem; color: var(--action-primary); margin-bottom: 8px;">
+                        📋 Bahan-Bahan Alami:
+                      </div>
+                      <ul style="font-size: 0.8rem; color: var(--text-secondary); padding-left: 18px; line-height: 1.7;">
+                        <li>2 buah pisang ambon matang (bekukan minimal 4 jam)</li>
+                        <li>1 buah alpukat mentega matang (keruk dagingnya)</li>
+                        <li>3 sdm greek yogurt tawar (plain)</li>
+                        <li>1-2 sdm madu murni alami</li>
+                        <li>1 sdt perasan air lemon segar</li>
+                        <li>Topping: Kacang pistachio atau almond cincang</li>
+                      </ul>
+                    </div>
+
+                    <!-- Langkah Pembuatan -->
+                    <div style="background: var(--surface-interactive); padding: 14px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                      <div style="font-weight: 700; font-size: 0.8rem; color: var(--action-primary); margin-bottom: 8px;">
+                        👩‍🍳 Cara Membuat:
+                      </div>
+                      <ol style="font-size: 0.8rem; color: var(--text-secondary); padding-left: 18px; line-height: 1.7;">
+                        <li>Masukkan potongan pisang beku & alpukat mentega ke blender.</li>
+                        <li>Tambahkan greek yogurt, madu murni, dan perasan lemon.</li>
+                        <li>Blender bertahap sampai lumat kental seperti soft-serve ice cream.</li>
+                        <li>Simpan di freezer 45 menit jika ingin tekstur scoop gelato.</li>
+                        <li>Sajikan dengan taburan kacang pistachio di atasnya.</li>
+                      </ol>
+                    </div>
+                  </div>
+
+                  <!-- 3. Khasiat & Pro-Tip -->
+                  <div style="background: var(--status-success-soft); border: 1px solid rgba(74, 222, 128, 0.2); padding: 14px; border-radius: 8px; font-size: 0.82rem; color: var(--text-secondary);">
+                    <strong style="color: var(--status-success);">✨ Khasiat & Pro-Tip Bunda:</strong>
+                    <div style="margin-top: 4px;">
+                      Kunci warna es krim tetap hijau cerah tanpa menghitam adalah perasan air lemon. Pisang beku berfungsi sebagai pengganti whipped cream dan pemanis alami tanpa gula pasir!
+                    </div>
+                  </div>
+
+                  <!-- 4. Textarea Raw Edit -->
+                  <div>
+                    <label style="font-weight: 700; font-size: 0.78rem; color: var(--text-secondary); display: block; margin-bottom: 6px;">
+                      ✏️ Edit Teks Caption / Resep Lengkap:
+                    </label>
+                    <textarea style="width: 100%; height: 120px; background: var(--surface-interactive); color: var(--text-primary); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px; font-family: var(--font-mono); font-size: 0.78rem; line-height: 1.6;" id="raw-caption-input">🥑🍨 ICE CREAM ALPUKAT CREAMY: SOLUSI MANIS BEBAS GULA PASIR!
+
+Lagi ikutan tantangan kurangi gula tapi lidah sering kangen camilan manis dingin sehabis makan, Moms? Cukup sulap buah di kulkas jadi es krim mewah super lembut ini!
+
+📋 BAHAN-BAHAN ALAMI:
+• 2 buah pisang ambon matang (bekukan)
+• 1 buah alpukat mentega matang
+• 3 sdm greek yogurt tawar
+• 1-2 sdm madu murni
+
+#ResepSehatBunda #EsKrimAlpukat #DietSehatAlami #Shorts</textarea>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </td>
+        </tr>
+
+        <!-- Row 2: Paused (Ready for Review) -->
+        <tr>
+          <td style="text-align: center; font-family: var(--font-mono); font-weight: 700; color: var(--text-muted);">2</td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap;">
+              <span style="font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; background: var(--surface-interactive); color: var(--action-primary); padding: 2px 6px; border-radius: 4px;">
+                mul_261015_lg4ad4_02
+              </span>
+              <span style="background: var(--status-success-soft); color: var(--status-success); font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                📝 Caption (1.720 kar)
+              </span>
+              <span style="background: var(--status-neutral-soft); color: var(--status-neutral); font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                🍳 Resep Lengkap
+              </span>
+            </div>
+            <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 2px;">
+              Lapar Tengah Malam? Resep Es Krim Alpukat Anti Bikin Gemuk #Shorts
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">
+              🎯 Target: Dewasa Muda • Solusi Craving Malam Bebas Lemak Jenuh
+            </div>
+          </td>
+          <td>
+            <span class="badge-fase" style="background: var(--status-warning-soft); color: var(--status-warning); border: 1px solid var(--status-warning-soft);">
+              ⏸️ Fase 2 : Paused (Ready for Review)
+            </span>
+          </td>
+          <td style="text-align: right;">
+            <button class="btn btn-secondary" onclick="showToast('Membuka detail baris 2...')">📖 Detail</button>
+          </td>
+        </tr>
+
+        <!-- Row 3: Generating I2V Video (G-Labs) -->
+        <tr>
+          <td style="text-align: center; font-family: var(--font-mono); font-weight: 700; color: var(--text-muted);">3</td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap;">
+              <span style="font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; background: var(--surface-interactive); color: var(--action-primary); padding: 2px 6px; border-radius: 4px;">
+                mul_261015_lg4ad4_03
+              </span>
+              <span style="background: var(--status-success-soft); color: var(--status-success); font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                📝 Caption (2.009 kar)
+              </span>
+              <span style="background: var(--status-neutral-soft); color: var(--status-neutral); font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                🍳 Resep Lengkap
+              </span>
+            </div>
+            <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 2px;">
+              Rahasia Bikin Es Krim Lembut Tanpa Susu Sapi Bikin Anak Lahap #Shorts
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">
+              🎯 Target: Ibu & Anak • Dairy-Free & Alergi Susu Sapi
+            </div>
+          </td>
+          <td>
+            <span class="badge-fase pulse-animation" style="background: rgba(167, 139, 250, 0.15); color: var(--status-neutral); border: 1px solid var(--status-neutral-soft);">
+              ⚡ Fase 2 : Generasi I2V Video (G-Labs)
+            </span>
+          </td>
+          <td style="text-align: right;">
+            <button class="btn btn-secondary" onclick="showToast('Membuka detail baris 3...')">📖 Detail</button>
+          </td>
+        </tr>
+
+        <!-- Row 4: Generating TTS Audio -->
+        <tr>
+          <td style="text-align: center; font-family: var(--font-mono); font-weight: 700; color: var(--text-muted);">4</td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap;">
+              <span style="font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; background: var(--surface-interactive); color: var(--action-primary); padding: 2px 6px; border-radius: 4px;">
+                mul_261015_lg4ad4_04
+              </span>
+              <span style="background: var(--status-success-soft); color: var(--status-success); font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                📝 Caption (1.440 kar)
+              </span>
+              <span style="background: var(--status-neutral-soft); color: var(--status-neutral); font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                🍳 Resep Lengkap
+              </span>
+            </div>
+            <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 2px;">
+              Cuma Butuh 3 Bahan Dapur! Ramuan Pembilas Lemak Santan #Shorts
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">
+              🎯 Target: Keluarga • Minuman Rempah Penawar Enek Santan
+            </div>
+          </td>
+          <td>
+            <span class="badge-fase pulse-animation" style="background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info);">
+              ⚡ Fase 2 : Generasi TTS Audio
+            </span>
+          </td>
+          <td style="text-align: right;">
+            <button class="btn btn-secondary" onclick="showToast('Membuka detail baris 4...')">📖 Detail</button>
+          </td>
+        </tr>
+
+        <!-- Row 5: FFMPEG Process & Assembly -->
+        <tr>
+          <td style="text-align: center; font-family: var(--font-mono); font-weight: 700; color: var(--text-muted);">5</td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap;">
+              <span style="font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; background: var(--surface-interactive); color: var(--action-primary); padding: 2px 6px; border-radius: 4px;">
+                mul_261015_lg4ad4_05
+              </span>
+              <span style="background: var(--status-success-soft); color: var(--status-success); font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                📝 Caption (1.546 kar)
+              </span>
+              <span style="background: var(--status-neutral-soft); color: var(--status-neutral); font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                🍳 Resep Lengkap
+              </span>
+            </div>
+            <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 2px;">
+              Cuma 3 Bahan Alami! Trik Sejuk Redakan Radang Tenggorokan #Shorts
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">
+              🎯 Target: Bunda • Sajian Pendingin Pereda Radang & Panas
+            </div>
+          </td>
+          <td>
+            <span class="badge-fase pulse-animation" style="background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info);">
+              ⚡ Fase 2 : FFMPEG Process & Muxing
+            </span>
+          </td>
+          <td style="text-align: right;">
+            <button class="btn btn-secondary" onclick="showToast('Membuka detail baris 5...')">📖 Detail</button>
+          </td>
+        </tr>
+
+        <!-- Row 6: Uploading Assets to Nextcloud -->
+        <tr>
+          <td style="text-align: center; font-family: var(--font-mono); font-weight: 700; color: var(--text-muted);">6</td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap;">
+              <span style="font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; background: var(--surface-interactive); color: var(--action-primary); padding: 2px 6px; border-radius: 4px;">
+                mul_261015_lg4ad4_06
+              </span>
+              <span style="background: var(--status-success-soft); color: var(--status-success); font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                📝 Caption (1.807 kar)
+              </span>
+              <span style="background: var(--status-neutral-soft); color: var(--status-neutral); font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                🍳 Resep Lengkap
+              </span>
+            </div>
+            <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 2px;">
+              Cuma Butuh 3 Rempah Dapur! Rahasia Badan Bugar Bebas Masuk Angin #Shorts
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">
+              🎯 Target: Pria/Suami • Minuman Rempah Hangat Pengusir Angin Malam
+            </div>
+          </td>
+          <td>
+            <span class="badge-fase pulse-animation" style="background: rgba(45, 212, 191, 0.15); color: var(--action-primary); border: 1px solid var(--action-primary);">
+              ⚡ Fase 2 : Uploading Assets (Nextcloud)
+            </span>
+          </td>
+          <td style="text-align: right;">
+            <button class="btn btn-secondary" onclick="showToast('Membuka detail baris 6...')">📖 Detail</button>
+          </td>
+        </tr>
+
+        <!-- Row 7: AI Storyboard Remake / Generasi T2I -->
+        <tr>
+          <td style="text-align: center; font-family: var(--font-mono); font-weight: 700; color: var(--text-muted);">7</td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap;">
+              <span style="font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; background: var(--surface-interactive); color: var(--action-primary); padding: 2px 6px; border-radius: 4px;">
+                mul_261015_lg4ad4_07
+              </span>
+              <span style="background: var(--status-success-soft); color: var(--status-success); font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                📝 Caption (1.757 kar)
+              </span>
+              <span style="background: var(--status-neutral-soft); color: var(--status-neutral); font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                🍳 Resep Lengkap
+              </span>
+            </div>
+            <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 2px;">
+              Jangan Dibuang! Sulap Buah Kematangan Jadi Dessert Mewah #Shorts
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">
+              🎯 Target: Ibu Rumah Tangga • Trik Buah Kematangan Tanpa Limbah
+            </div>
+          </td>
+          <td>
+            <span class="badge-fase" style="background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info);">
+              ⚡ Fase 1 : AI Storyboard Remake
+            </span>
+          </td>
+          <td style="text-align: right;">
+            <button class="btn btn-secondary" onclick="showToast('Membuka detail baris 7...')">📖 Detail</button>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+
+  </div>
+
+  <div id="toast" class="toast">Notifikasi</div>
+
+  <script>
+    function toggleTheme() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      document.documentElement.setAttribute('data-theme', isLight ? 'dark' : 'light');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+
+    function copyText(text) {
+      navigator.clipboard.writeText(text);
+      showToast('Teks berhasil disalin!');
+    }
+
+    function copyFullCaption() {
+      const text = document.getElementById('raw-caption-input').value;
+      navigator.clipboard.writeText(text);
+      showToast('Seluruh naskah resep & caption berhasil disalin!');
+    }
+
+    function toggleDetail(rowId) {
+      const detailRow = document.getElementById(rowId + '-detail');
+      const btnText = document.getElementById('btn-text-' + rowId);
+      if (detailRow.style.display === 'none') {
+        detailRow.style.display = 'table-row';
+        btnText.innerText = 'Detail (Tutup)';
+      } else {
+        detailRow.style.display = 'none';
+        btnText.innerText = 'Detail (Buka)';
+      }
+    }
+
+    function switchTab(rowId, tabId) {
+      // Hide all tabs for row
+      ['tab1', 'tab2', 'tab3', 'tab4', 'tab5', 'tab6'].forEach(t => {
+        const el = document.getElementById(rowId + '-' + t);
+        if (el) el.style.display = 'none';
+        const btn = document.getElementById('tab-btn-' + rowId + '-' + t);
+        if (btn) btn.classList.remove('active');
+      });
+
+      // Show selected tab
+      const target = document.getElementById(rowId + '-' + tabId);
+      if (target) target.style.display = 'block';
+      const targetBtn = document.getElementById('tab-btn-' + rowId + '-' + tabId);
+      if (targetBtn) targetBtn.classList.add('active');
+    }
+  </script>
+</body>
+</html>

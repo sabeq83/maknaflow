@@ -45,6 +45,117 @@ const MINIMAX_ENGLISH_VOICES = [
   { id: 'English_CalmWoman', name: 'Calm Woman (Female)', avatar: '👩', desc: 'English Calm Woman' }
 ];
 
+function renderPhaseBadge(task) {
+  let text = '⚡ Fase 1 : Pending';
+  let color = 'var(--text-muted)';
+  let bg = 'var(--surface-interactive)';
+  let border = 'var(--border-subtle)';
+  let isPulse = false;
+
+  switch (task.status) {
+    case 'draft':
+      text = '📝 Fase 1 : Draft (Belum Dimulai)';
+      color = 'var(--text-muted)';
+      bg = 'var(--surface-interactive)';
+      break;
+    case 'pending_resolution':
+      text = '⏳ Fase 1 : Queue for Generation';
+      color = 'var(--text-muted)';
+      bg = 'var(--surface-interactive)';
+      break;
+    case 'resolving_product':
+      text = '⚡ Fase 1 : Resolving Product DNA';
+      color = 'var(--status-neutral)';
+      bg = 'var(--status-neutral-soft)';
+      border = 'var(--status-neutral-soft)';
+      isPulse = true;
+      break;
+    case 'remaking':
+      text = '⚡ Fase 1 : AI Storyboard Remake';
+      color = 'var(--status-info)';
+      bg = 'var(--status-info-soft)';
+      border = 'var(--status-info-soft)';
+      isPulse = true;
+      break;
+    case 'generating_t2i':
+      text = '⚡ Fase 1 : Generasi T2I Start Frames';
+      color = 'var(--status-info)';
+      bg = 'var(--status-info-soft)';
+      border = 'var(--status-info-soft)';
+      isPulse = true;
+      break;
+    case 'waiting_approval':
+      text = '⏸️ Fase 2 : Paused (Ready for Review)';
+      color = 'var(--status-warning)';
+      bg = 'var(--status-warning-soft)';
+      border = 'var(--status-warning-soft)';
+      break;
+    case 'generating_audio':
+      text = '⚡ Fase 2 : Generasi TTS Audio';
+      color = 'var(--status-info)';
+      bg = 'var(--status-info-soft)';
+      border = 'var(--status-info-soft)';
+      isPulse = true;
+      break;
+    case 'generating_visuals':
+      text = '⚡ Fase 2 : Generasi I2V Video (G-Labs)';
+      color = 'var(--status-neutral)';
+      bg = 'var(--status-neutral-soft)';
+      border = 'var(--status-neutral-soft)';
+      isPulse = true;
+      break;
+    case 'ffmpeg_muxing':
+      text = '⚡ Fase 2 : FFMPEG Process & Assembly';
+      color = 'var(--status-info)';
+      bg = 'var(--status-info-soft)';
+      border = 'var(--status-info-soft)';
+      isPulse = true;
+      break;
+    case 'uploading_assets':
+      text = '⚡ Fase 2 : Uploading Assets (Nextcloud)';
+      color = 'var(--action-primary)';
+      bg = 'rgba(45, 212, 191, 0.15)';
+      border = 'rgba(45, 212, 191, 0.3)';
+      isPulse = true;
+      break;
+    case 'completed':
+      text = '✅ Fase 2 : Completed';
+      color = 'var(--status-success)';
+      bg = 'var(--status-success-soft)';
+      border = 'var(--status-success-soft)';
+      break;
+    case 'failed':
+      text = `⚠️ Error: ${task.error_message ? task.error_message.slice(0, 35) + '...' : 'Gagal'}`;
+      color = 'var(--status-danger)';
+      bg = 'var(--status-danger-soft)';
+      border = 'var(--status-danger-soft)';
+      break;
+    default:
+      text = `⚡ ${task.status}`;
+      color = 'var(--text-secondary)';
+      bg = 'var(--surface-interactive)';
+  }
+
+  return (
+    <span style={{
+      padding: '6px 12px',
+      borderRadius: 6,
+      fontWeight: 600,
+      fontSize: '0.8rem',
+      color: color,
+      background: bg,
+      border: `1px solid ${border}`,
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 6,
+      whiteSpace: 'nowrap',
+      animation: isPulse ? 'pulse 2s infinite ease-in-out' : 'none'
+    }}>
+      {text}
+    </span>
+  );
+}
+
 function CampaignDetailPageContent() {
   const { id } = useParams();
   const router = useRouter();
@@ -137,12 +248,12 @@ function CampaignDetailPageContent() {
           });
 
           setEditedCaptions(prev => {
-            if (prev[t.id] !== undefined) return prev;
+            if (prev[t.id] !== undefined && prev[t.id] !== '') return prev;
             return { ...prev, [t.id]: t.new_caption || '' };
           });
 
           setEditedYtTitles(prev => {
-            if (prev[t.id] !== undefined) return prev;
+            if (prev[t.id] !== undefined && prev[t.id] !== '') return prev;
             return { ...prev, [t.id]: t.yt_title || '' };
           });
 
@@ -871,6 +982,16 @@ function CampaignDetailPageContent() {
                               🎯 Target: {bridgingConfig.targetPersona}
                             </span>
                           )}
+                          {task.new_caption && (
+                            <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success-soft)' }}>
+                              📝 Caption ({task.new_caption.length} kar)
+                            </span>
+                          )}
+                          {Number(task.generate_recipe) === 1 && (
+                            <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: 'var(--status-neutral-soft)', color: 'var(--status-neutral)', border: '1px solid var(--status-neutral-soft)' }}>
+                              🍳 Resep Lengkap
+                            </span>
+                          )}
                         </div>
                         <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)', marginBottom: 4 }}>
                           {displayTitle}
@@ -882,15 +1003,7 @@ function CampaignDetailPageContent() {
                         )}
                       </td>
                       <td style={{ padding: '14px 16px' }}>
-                        <span style={{
-                          padding: '6px 12px', borderRadius: 6, fontWeight: 600, fontSize: '0.8rem',
-                          background: task.status === 'completed' ? 'var(--status-success-soft)' : (task.status === 'failed' ? 'var(--status-danger-soft)' : (task.status === 'waiting_approval' ? 'var(--status-warning-soft)' : (task.status === 'draft' ? 'var(--surface-interactive)' : 'var(--status-info-soft)'))),
-                          color: task.status === 'completed' ? 'var(--status-success)' : (task.status === 'failed' ? 'var(--status-danger)' : (task.status === 'waiting_approval' ? 'var(--status-warning)' : (task.status === 'draft' ? 'var(--text-muted)' : 'var(--status-info)'))),
-                          border: `1px solid ${task.status === 'failed' ? 'var(--status-danger-soft)' : 'var(--border-subtle)'}`,
-                          display: 'inline-flex', alignItems: 'center', gap: 6, width: 'fit-content'
-                        }}>
-                          {task.status === 'draft' ? '📝 Fase 1 : Draft' : (task.status === 'failed' ? `❌ Gagal: ${task.error_message ? task.error_message.slice(0, 45) + '...' : 'Error'}` : (task.status === 'waiting_approval' ? '⏸️ Fase 2 : Paused (Ready for Review)' : (task.status === 'completed' ? '✅ Fase 2 : Completed' : `⚡ Fase 2 : ${task.status}`)))}
-                        </span>
+                        {renderPhaseBadge(task)}
                       </td>
                       <td style={{ padding: '14px 16px', textAlign: 'right' }}>
                         <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', alignItems: 'center' }}>
@@ -942,11 +1055,12 @@ function CampaignDetailPageContent() {
                             {/* Horizontal Tabs Navigation */}
                             <div style={{ display: 'flex', borderBottom: '1px solid var(--border-subtle)', marginBottom: '14px', gap: '6px', flexWrap: 'wrap', overflowX: 'auto' }}>
                               {[
-                                { id: 'deconstruct', label: '🔍 Dekonstruksi Asli' },
-                                { id: 'storyboard', label: '📖 Storyboard & Visual Baru' },
-                                { id: 'vault', label: '🗄️ Asset Vault Status' },
-                                { id: 'dna', label: '🧬 DNA Metadata parameters' },
-                                { id: 'logs', label: '💻 Terminal Log & Queue' }
+                                { id: 'deconstruct', label: '🔍 Tab 1: Dekonstruksi Asli' },
+                                { id: 'storyboard', label: '📖 Tab 2: Storyboard & Visual Baru' },
+                                { id: 'recipe', label: '🍳 Tab 3: Resep Kuliner & Paket Medsos' },
+                                { id: 'vault', label: '🗄️ Tab 4: Asset Vault Status' },
+                                { id: 'dna', label: '🧬 Tab 5: Video DNA Metadata' },
+                                { id: 'logs', label: '💻 Tab 6: Terminal Log & Queue' }
                               ].map(tab => {
                                 const isActive = activeTab === tab.id;
                                 return (
@@ -1041,6 +1155,80 @@ function CampaignDetailPageContent() {
                                 {activeTab === 'storyboard' && (
                                   <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                                     
+                                    {/* CARD HASIL RENDER VIDEO AKHIR (FINAL OUTPUT) */}
+                                    {(task.ffmpeg_output_path || task.status === 'completed') && (
+                                      <div style={{
+                                        background: 'var(--surface-interactive)',
+                                        border: '1px solid var(--border-strong)',
+                                        borderRadius: 8,
+                                        padding: 20,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: 16
+                                      }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-subtle)', paddingBottom: 10, flexWrap: 'wrap', gap: 8 }}>
+                                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <span style={{ fontSize: '1.1rem' }}>🎬</span>
+                                            <strong style={{ fontSize: '0.92rem', color: 'var(--text-primary)' }}>
+                                              Hasil Render Video Akhir (Final Output)
+                                            </strong>
+                                            <span style={{ fontSize: '0.7rem', fontWeight: 700, background: 'var(--status-success-soft)', color: 'var(--status-success)', padding: '2px 8px', borderRadius: 4 }}>
+                                              1080x1920 (9:16) • MP4
+                                            </span>
+                                          </div>
+                                          {task.ffmpeg_output_path && (
+                                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                                              File: {task.ffmpeg_output_path}
+                                            </div>
+                                          )}
+                                        </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: task.ffmpeg_output_path ? '220px 1fr' : '1fr', gap: 20, alignItems: 'start' }}>
+                                          {task.ffmpeg_output_path ? (
+                                            <div style={{ display: 'flex', justifyContent: 'center', background: '#000', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border-subtle)', maxHeight: 380 }}>
+                                              <video src={task.ffmpeg_output_path} controls preload="metadata" style={{ width: '100%', maxHeight: 380, display: 'block', objectFit: 'contain' }} />
+                                            </div>
+                                          ) : (
+                                            <div style={{ background: 'var(--surface)', border: '1px dashed var(--border-subtle)', padding: 30, textAlign: 'center', color: 'var(--text-muted)', borderRadius: 6 }}>
+                                              🎥 File video belum dikompilasi / langkah FFmpeg sedang diproses.
+                                            </div>
+                                          )}
+
+                                          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                                            <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                                              Video final telah selesai digabungkan melalui <strong>FFmpeg Smart Sync Studio</strong> (Audio Voiceover + Visual Klip). Anda dapat meninjau video langsung di pemutar sebelah kiri, mengunduh file mentah, atau menyinkronkannya ke Nextcloud & ContentFlow.
+                                            </div>
+
+                                            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                                              {task.ffmpeg_output_path && (
+                                                <a href={task.ffmpeg_output_path} download className="btn btn-primary" style={{ padding: '8px 16px', background: 'var(--status-success)', color: '#042f2e', fontWeight: 700, textDecoration: 'none' }}>
+                                                  ⬇️ Unduh Video (.mp4)
+                                                </a>
+                                              )}
+                                              {task.nextcloud_video_url && (
+                                                <a href={task.nextcloud_video_url} target="_blank" rel="noreferrer" className="btn btn-secondary" style={{ padding: '8px 16px', textDecoration: 'none' }}>
+                                                  ☁️ Buka di Nextcloud
+                                                </a>
+                                              )}
+                                              {task.ffmpeg_output_path && (
+                                                <button
+                                                  type="button"
+                                                  className="btn btn-secondary"
+                                                  onClick={() => {
+                                                    navigator.clipboard.writeText(window.location.origin + task.ffmpeg_output_path);
+                                                    showToast('Tautan video berhasil disalin ke clipboard!');
+                                                  }}
+                                                  style={{ padding: '8px 16px' }}
+                                                >
+                                                  📋 Salin Tautan Video
+                                                </button>
+                                              )}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+
                                     {/* Start Frame Grid Preview */}
                                     {bridging.visualMode === 'hybrid_lock' && (
                                       <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border)', borderRadius: 8, padding: 20 }}>
@@ -1472,7 +1660,90 @@ function CampaignDetailPageContent() {
                                   </div>
                                 )}
 
-                                {/* Tab 3: Asset Vault */}
+                                {/* Tab 3: Resep Kuliner & Paket Medsos */}
+                                {activeTab === 'recipe' && (
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-subtle)', paddingBottom: 10, flexWrap: 'wrap', gap: 8 }}>
+                                      <div>
+                                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--status-success)', textTransform: 'uppercase' }}>
+                                          ✓ Paket Naskah Kuliner Siap Publikasi
+                                        </span>
+                                        <h4 style={{ margin: '2px 0 0', fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                                          🍳 Resep & Social Media Package (Baris #{idx + 1})
+                                        </h4>
+                                      </div>
+                                      <div style={{ display: 'flex', gap: 8 }}>
+                                        <button
+                                          type="button"
+                                          className="btn btn-secondary btn-sm"
+                                          onClick={() => {
+                                            const fullText = `${editedYtTitles[task.id] || task.yt_title || ''}\n\n${editedCaptions[task.id] || task.new_caption || ''}`;
+                                            navigator.clipboard.writeText(fullText.trim());
+                                            showToast('Seluruh naskah & judul berhasil disalin!');
+                                          }}
+                                        >
+                                          📋 Salin Seluruh Naskah
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="btn btn-primary btn-sm"
+                                          disabled={actionLoading[task.id]}
+                                          onClick={() => handleSaveChanges(task.id)}
+                                        >
+                                          💾 Simpan Resep
+                                        </button>
+                                      </div>
+                                    </div>
+
+                                    {/* Judul YouTube */}
+                                    <div style={{ background: 'var(--surface-interactive)', padding: 14, borderRadius: 8, border: '1px solid var(--border-subtle)' }}>
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--status-danger)' }}>
+                                          ▶ Judul YouTube Shorts Click-Worthy (Anti-Terpotong)
+                                        </label>
+                                        <button
+                                          type="button"
+                                          className="btn btn-secondary btn-sm"
+                                          style={{ padding: '2px 8px', fontSize: '0.7rem' }}
+                                          onClick={() => {
+                                            navigator.clipboard.writeText(editedYtTitles[task.id] || task.yt_title || '');
+                                            showToast('Judul YouTube disalin!');
+                                          }}
+                                        >
+                                          Salin Judul
+                                        </button>
+                                      </div>
+                                      <input
+                                        type="text"
+                                        value={editedYtTitles[task.id] || ''}
+                                        onChange={(e) => setEditedYtTitles(prev => ({ ...prev, [task.id]: e.target.value }))}
+                                        placeholder="Judul click-worthy anti-terpotong diakhiri #Shorts..."
+                                        style={{ width: '100%', padding: '10px 12px', fontSize: '0.85rem', fontWeight: 600, background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
+                                      />
+                                    </div>
+
+                                    {/* Textarea Caption & Resep Lengkap */}
+                                    <div style={{ background: 'var(--surface-interactive)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: 16 }}>
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                                        <label style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                                          📝 Naskah Caption / Resep Lengkap (Bahan, Langkah & Medsos)
+                                        </label>
+                                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                                          {(editedCaptions[task.id] || '').length} karakter
+                                        </span>
+                                      </div>
+                                      <textarea
+                                        value={editedCaptions[task.id] || ''}
+                                        onChange={(e) => setEditedCaptions(prev => ({ ...prev, [task.id]: e.target.value }))}
+                                        rows={12}
+                                        placeholder="Naskah resep & caption..."
+                                        style={{ width: '100%', padding: 12, fontSize: '0.82rem', fontFamily: 'monospace', lineHeight: 1.6, background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
+                                      />
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Tab 4: Asset Vault */}
                                 {activeTab === 'vault' && (
                                   <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                                     <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 700 }}>🗄️ Asset Vault Kesiapan Render</h4>
