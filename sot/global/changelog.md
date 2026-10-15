@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.48 — Fix ContentFlow unique video constraint collision resolution and safePush (15/10/2026)
+- Safely resolve duplicate video_ids across all campaigns using takenVideoIds set
+- Gracefully update existing row on constraint collision in upsertContentFlowItem
+- Add safePush to prevent uncaught ingestion errors
+
 ## V2.32.47 — Fix ContentFlow Multiplier Sync idempotency with existing video ID map (15/10/2026)
 - Pre-fetch existing video IDs to prevent unique constraint conflicts
 - Use Promise.allSettled for robust campaign ingestion
