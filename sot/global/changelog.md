@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.45 — Fix Multiplier Lab visual clip download and auto-recovery in FFmpeg muxing (15/10/2026)
+- Ganti downloader yt-dlp ke direct HTTP fetch untuk klip video visual
+- Tambahkan auto-recovery download klip dari glabs_tasks pada tahap handleFFmpegMuxing jika file lokal belum tersedia
+
 ## V2.32.44 — Penyelarasan Visual Generation Fase 2 Multiplier Lab dengan Pillar Campaign & Per-Clip Recovery (15/10/2026)
 - Perbaikan type error bigint pada insertGlabsTask di lib/db.js
 - Integrasi start frame t2i_images_json ke I2V start_image mode
