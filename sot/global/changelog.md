@@ -1,5 +1,13 @@
 # Changelog
 
+## V2.32.51 — Multiplier Worker Sekuensial, Save as Draft & Badge Visual Dinamis (15/10/2026)
+- Eksekusi sekuensial antrean Multiplier baris demi baris via getEligibleSequentialMultiplierTasks
+- Penghapusan Promise.all serentak di Multiplier Worker guna mencegah timeout 180s Gemini AI
+- Fitur Simpan sebagai Draft dan Jalankan Kampanye pada Multiplier Lab
+- Fitur Retry Baris pada task baris yang gagal di tampilan detail kampanye
+- Badge status Storyboard, TTS Audio, dan Visual 100% dinamis tanpa status TTS palsu
+- Penggantian istilah Video Render menjadi Visual di seluruh UI antarmuka Multiplier Lab
+
 ## V2.32.50 — Fix Runtime Error isPureStory is not defined di Multiplier Lab (15/10/2026)
 - Deklarasi isPureStory pada submit handler pembuatan kampanye Multiplier Lab
 - Dukungan penentuan otomatis mode Pure Storytelling vs Product Campaign

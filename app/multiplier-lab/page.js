@@ -78,6 +78,7 @@ function MultiplierLabPageContent() {
   const [productionMode, setProductionMode] = useState('single');
   const [activeAccordion, setActiveAccordion] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [submitMode, setSubmitMode] = useState('running'); // 'draft' | 'running'
   const [toast, setToast] = useState(null);
   const pollingRef = useRef(null);
   const terminalRef = useRef(null);
@@ -766,7 +767,10 @@ function MultiplierLabPageContent() {
               created_at: t.created_at,
               status: t.status,
               tasks: [],
-              stats: { total: 0, completed: 0, failed: 0, processing: 0, paused: 0 }
+              stats: { 
+                total: 0, completed: 0, failed: 0, processing: 0, paused: 0, draft: 0,
+                storyboard_done: 0, tts_done: 0, visuals_done: 0
+              }
             };
           } else if (t.campaign_name && groups[bid].campaign_name.startsWith('Multiplier Campaign')) {
             groups[bid].campaign_name = t.campaign_name;
@@ -775,7 +779,9 @@ function MultiplierLabPageContent() {
           }
           groups[bid].tasks.push(t);
           groups[bid].stats.total++;
-          if (t.status === 'completed') {
+          if (t.status === 'draft') {
+            groups[bid].stats.draft++;
+          } else if (t.status === 'completed') {
             groups[bid].stats.completed++;
           } else if (t.status === 'failed') {
             groups[bid].stats.failed++;
@@ -784,12 +790,29 @@ function MultiplierLabPageContent() {
           } else {
             groups[bid].stats.processing++;
           }
+
+          // 1. Progres Riil Storyboard (Naskah & Storyboard selesai dibuat)
+          const hasStoryboard = !!(t.remake_storyboard_json && t.remake_storyboard_json !== '[]') ||
+            ['waiting_approval', 'generating_audio', 'generating_visuals', 'ffmpeg_muxing', 'completed'].includes(t.status);
+          if (hasStoryboard) groups[bid].stats.storyboard_done++;
+
+          // 2. Progres Riil TTS Audio (Voiceover selesai di-generate)
+          const hasAudio = !!(t.audio_path || t.final_audio_path) ||
+            ['generating_visuals', 'ffmpeg_muxing', 'completed'].includes(t.status);
+          if (hasAudio) groups[bid].stats.tts_done++;
+
+          // 3. Progres Riil Visual (Klip video AI selesai dibuat)
+          const hasVisuals = !!(t.video_paths_json && t.video_paths_json !== '[]') ||
+            ['ffmpeg_muxing', 'completed'].includes(t.status);
+          if (hasVisuals) groups[bid].stats.visuals_done++;
         });
 
         // Determine aggregated campaign status
         const campaignList = Object.values(groups).map(g => {
           let overallStatus = 'running';
-          if (g.stats.completed === g.stats.total) {
+          if (g.stats.draft === g.stats.total && g.stats.total > 0) {
+            overallStatus = 'draft';
+          } else if (g.stats.completed === g.stats.total && g.stats.total > 0) {
             overallStatus = 'completed';
           } else if (g.stats.processing > 0) {
             overallStatus = 'running';
@@ -861,12 +884,15 @@ function MultiplierLabPageContent() {
       const dbPhotoUrl = dbProduct ? (dbProduct.cleaned_photo_url || dbProduct.clean_photo_url || dbProduct.raw_photo_url) : null;
 
       const cleanCampaignName = campaignName.trim() || `[ MULTIPLIER ] - ${accountName ? accountName + ' - ' : ''}${editorialTopic.trim() || 'Kampanye Multiplier'}`;
+      const targetInitialStatus = submitMode === 'draft' ? 'draft' : 'pending_resolution';
 
       const payload = {
         mode: workflowMode,
         campaign_name: cleanCampaignName,
         brand_profile_id: selectedBrandId || null,
         account_name: accountName || null,
+        initial_status: targetInitialStatus,
+        status: targetInitialStatus,
         rows: combinationRows.map(row => ({
           deconstruct_asset_id: row.deconstruct_asset_id,
           target_product_id: row.target_product_id,
@@ -876,6 +902,7 @@ function MultiplierLabPageContent() {
           brand_profile_id: selectedBrandId || null,
           account_name: accountName || null,
           campaign_type: row.campaign_type || (isPureStory ? 'pure_storytelling' : 'product_campaign'),
+          status: targetInitialStatus,
           editorial_topic: row.editorial_topic || editorialTopic.trim(),
           editorial_outro: row.editorial_outro || editorialOutro.trim()
         })),
@@ -927,7 +954,7 @@ function MultiplierLabPageContent() {
       });
       const data = await res.json();
       if (data.success) {
-        showToast(data.message || 'Kampanye Multiplier baru berhasil didaftarkan!');
+        showToast(data.message || (submitMode === 'draft' ? 'Kampanye Multiplier berhasil disimpan sebagai Draft!' : 'Kampanye Multiplier baru berhasil didaftarkan!'));
         setShowConfigForm(false);
         setProductUrl('');
         setAffiliateUrl('');
@@ -985,6 +1012,25 @@ function MultiplierLabPageContent() {
           : (action === 'retry_failed' ? 'Berhasil memicu ulang tugas yang gagal' : 'Berhasil melanjutkan kampanye');
         showToast(msg);
         fetchTasks();
+      }
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  const handleStartCampaign = async (batchId) => {
+    try {
+      const res = await fetch('/api/v2/multiplier', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'start_campaign', batchId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message || 'Kampanye berhasil dijalankan secara sekuensial!');
+        fetchTasks();
+      } else {
+        showToast(data.error || 'Gagal menjalankan kampanye.', 'error');
       }
     } catch (err) {
       showToast(err.message, 'error');
@@ -2370,10 +2416,24 @@ function MultiplierLabPageContent() {
               </div>
 
               {/* Action Form Footer */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, borderTop: '1px solid var(--border)', padding: 24 }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, borderTop: '1px solid var(--border)', padding: 24, flexWrap: 'wrap' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setShowConfigForm(false)}>Batal</button>
-                <button type="submit" className="btn btn-primary" disabled={submitting}>
-                  {submitting ? '⏳ Mendaftarkan...' : '🚀 Daftarkan Kampanye'}
+                <button
+                  type="submit"
+                  className="btn btn-secondary"
+                  style={{ background: 'var(--surface-interactive)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+                  disabled={submitting}
+                  onClick={() => setSubmitMode('draft')}
+                >
+                  {submitting && submitMode === 'draft' ? '⏳ Menyimpan Draft...' : '💾 Simpan sebagai Draft'}
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={submitting}
+                  onClick={() => setSubmitMode('running')}
+                >
+                  {submitting && submitMode === 'running' ? '⏳ Mendaftarkan...' : '🚀 Buat & Jalankan Kampanye'}
                 </button>
               </div>
 
@@ -2533,32 +2593,47 @@ function MultiplierLabPageContent() {
                   {/* Stats */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: 12 }}>
                     <div><strong>Total Sudut Pandang:</strong> <span style={{ color: 'var(--text-primary)' }}>{c.stats.total} Angles</span></div>
-                    <div><strong>Selesai Render:</strong> <span style={{ color: 'var(--status-success)' }}>{c.stats.completed}</span></div>
+                    <div><strong>Visual Selesai:</strong> <span style={{ color: 'var(--status-success)' }}>{c.stats.visuals_done || c.stats.completed}</span></div>
                     <div><strong>Gagal:</strong> <span style={{ color: 'var(--status-danger)' }}>{c.stats.failed}</span></div>
                     <div><strong>Dalam Antrean:</strong> <span style={{ color: 'var(--status-info)' }}>{c.stats.processing}</span></div>
                   </div>
 
-                  {/* Pipeline Status Chips */}
+                  {/* Pipeline Status Chips - 100% Dinamis untuk Storyboard, TTS, dan Visual */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
+                    {/* Storyboard Chip */}
                     <span style={{
                       padding: '3px 8px', borderRadius: 4, fontSize: '0.68rem', fontWeight: 600,
-                      background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success-soft)'
+                      background: c.stats.storyboard_done === c.stats.total && c.stats.total > 0
+                        ? 'var(--status-success-soft)' : (c.stats.storyboard_done > 0 ? 'var(--status-info-soft)' : 'var(--surface-interactive)'),
+                      color: c.stats.storyboard_done === c.stats.total && c.stats.total > 0
+                        ? 'var(--status-success)' : (c.stats.storyboard_done > 0 ? 'var(--status-info)' : 'var(--text-muted)'),
+                      border: `1px solid ${c.stats.storyboard_done === c.stats.total && c.stats.total > 0 ? 'var(--status-success-soft)' : 'var(--border-subtle)'}`
                     }}>
-                      ✓ Storyboard ({c.stats.total}/{c.stats.total})
+                      {c.stats.storyboard_done === c.stats.total && c.stats.total > 0 ? '✓' : '⏳'} Storyboard ({c.stats.storyboard_done || 0}/{c.stats.total})
                     </span>
+
+                    {/* TTS Audio Chip - TIDAK MENAMPILKAN 100% JIKA BELUM DIEKSEKUSI */}
                     <span style={{
                       padding: '3px 8px', borderRadius: 4, fontSize: '0.68rem', fontWeight: 600,
-                      background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success-soft)'
+                      background: c.stats.tts_done === c.stats.total && c.stats.total > 0
+                        ? 'var(--status-success-soft)' : (c.stats.tts_done > 0 ? 'var(--status-info-soft)' : 'var(--surface-interactive)'),
+                      color: c.stats.tts_done === c.stats.total && c.stats.total > 0
+                        ? 'var(--status-success)' : (c.stats.tts_done > 0 ? 'var(--status-info)' : 'var(--text-muted)'),
+                      border: `1px solid ${c.stats.tts_done === c.stats.total && c.stats.total > 0 ? 'var(--status-success-soft)' : 'var(--border-subtle)'}`
                     }}>
-                      ✓ TTS Audio ({c.stats.total}/{c.stats.total})
+                      {c.stats.tts_done === c.stats.total && c.stats.total > 0 ? '✓' : '⏳'} TTS Audio ({c.stats.tts_done || 0}/{c.stats.total})
                     </span>
+
+                    {/* Visual Chip (Menggantikan Video Render) */}
                     <span style={{
                       padding: '3px 8px', borderRadius: 4, fontSize: '0.68rem', fontWeight: 600,
-                      background: c.stats.completed > 0 ? 'var(--status-success-soft)' : 'var(--surface-interactive)',
-                      color: c.stats.completed > 0 ? 'var(--status-success)' : 'var(--text-muted)',
-                      border: `1px solid ${c.stats.completed > 0 ? 'var(--status-success-soft)' : 'var(--border-subtle)'}`
+                      background: c.stats.visuals_done === c.stats.total && c.stats.total > 0
+                        ? 'var(--status-success-soft)' : (c.stats.visuals_done > 0 ? 'var(--status-info-soft)' : 'var(--surface-interactive)'),
+                      color: c.stats.visuals_done === c.stats.total && c.stats.total > 0
+                        ? 'var(--status-success)' : (c.stats.visuals_done > 0 ? 'var(--status-info)' : 'var(--text-muted)'),
+                      border: `1px solid ${c.stats.visuals_done === c.stats.total && c.stats.total > 0 ? 'var(--status-success-soft)' : 'var(--border-subtle)'}`
                     }}>
-                      {c.stats.completed > 0 ? '✓ ' : '⏳ '}Video Render ({c.stats.completed}/{c.stats.total})
+                      {c.stats.visuals_done === c.stats.total && c.stats.total > 0 ? '✓' : '⏳'} Visual ({c.stats.visuals_done || 0}/{c.stats.total})
                     </span>
                   </div>
 
@@ -2580,11 +2655,17 @@ function MultiplierLabPageContent() {
                       {c.status !== 'completed' && (
                         <button
                           type="button"
-                          className={`btn btn-sm ${c.status === 'running' ? 'btn-danger' : (c.status === 'failed' ? 'btn-warning' : 'btn-success')}`}
-                          onClick={() => toggleStatus(c)}
+                          className={`btn btn-sm ${c.status === 'running' ? 'btn-danger' : (c.status === 'failed' ? 'btn-warning' : (c.status === 'draft' ? 'btn-primary' : 'btn-success'))}`}
+                          onClick={() => {
+                            if (c.status === 'draft') {
+                              handleStartCampaign(c.id);
+                            } else {
+                              toggleStatus(c);
+                            }
+                          }}
                           style={{ fontSize: '0.75rem', padding: '6px 12px' }}
                         >
-                          {c.status === 'running' ? '⏸ Pause' : (c.status === 'failed' ? '🔄 Retry Failed' : '▶ Resume')}
+                          {c.status === 'draft' ? '▶ Jalankan' : (c.status === 'running' ? '⏸ Pause' : (c.status === 'failed' ? '🔄 Retry Failed' : '▶ Resume'))}
                         </button>
                       )}
 

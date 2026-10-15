@@ -40,7 +40,7 @@ export const GET = withTenantContext(async (request) => {
 export const PATCH = withTenantContext(async (request) => {
   try {
     const body = await request.json();
-    const { schedulerActive, action, batchId } = body;
+    const { schedulerActive, action, batchId, taskId, id } = body;
 
     if (schedulerActive !== undefined || action === 'toggle_scheduler') {
       let nextState;
@@ -58,9 +58,38 @@ export const PATCH = withTenantContext(async (request) => {
       });
     }
 
+    if (action === 'retry_task') {
+      const { dbRun } = await import('@/lib/db');
+      const targetTaskId = taskId || id;
+      if (!targetTaskId) {
+        return NextResponse.json({ success: false, error: 'taskId wajib disertakan untuk aksi retry_task' }, { status: 400 });
+      }
+      const result = await dbRun(`
+        UPDATE re_multiplier_tasks 
+        SET status = 'pending_resolution', error_message = NULL 
+        WHERE id = ? AND status = 'failed'
+      `, [targetTaskId]);
+      return NextResponse.json({ 
+        success: true, 
+        message: `Task ${targetTaskId} berhasil dimasukkan kembali ke antrean pemrosesan.`,
+        affected: result.changes || result.rowCount || 0
+      });
+    }
+
     if (action && batchId) {
       const { dbRun } = await import('@/lib/db');
-      if (action === 'pause') {
+      if (action === 'start_campaign') {
+        const result = await dbRun(`
+          UPDATE re_multiplier_tasks 
+          SET status = 'pending_resolution', error_message = NULL 
+          WHERE batch_id = ? AND status = 'draft'
+        `, [batchId]);
+        return NextResponse.json({ 
+          success: true, 
+          message: `Kampanye ${batchId} berhasil dimulai (${result.changes || result.rowCount || 0} tugas diaktifkan).`,
+          affected: result.changes || result.rowCount || 0
+        });
+      } else if (action === 'pause') {
         await dbRun(`
           UPDATE re_multiplier_tasks 
           SET paused_previous_status = status, status = 'paused' 
@@ -77,7 +106,7 @@ export const PATCH = withTenantContext(async (request) => {
       }
     }
 
-    return NextResponse.json({ success: false, error: 'Field "schedulerActive" atau "action" + "batchId" wajib diisi' }, { status: 400 });
+    return NextResponse.json({ success: false, error: 'Field "schedulerActive" atau "action" + "batchId" / "taskId" tidak valid' }, { status: 400 });
   } catch (error) {
     console.error('[Multiplier API] PATCH error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -112,7 +141,9 @@ export const POST = withTenantContext(async (request) => {
         brand_profile_id: formData.get('brand_profile_id') || null,
         selectedBrandId: formData.get('selectedBrandId') || null,
         account_name: formData.get('account_name') || null,
-        accountName: formData.get('accountName') || null
+        accountName: formData.get('accountName') || null,
+        initial_status: formData.get('initial_status') || formData.get('status') || null,
+        status: formData.get('status') || formData.get('initial_status') || null
       };
 
       // Handle product media file upload
@@ -157,10 +188,13 @@ export const POST = withTenantContext(async (request) => {
       brand_profile_id,
       selectedBrandId,
       account_name,
-      accountName
+      accountName,
+      initial_status,
+      status
     } = parsedBody;
 
     const parsedGenerateRecipe = Number(generate_recipe || 0);
+    const targetInitialStatus = (initial_status === 'draft' || status === 'draft') ? 'draft' : 'pending_resolution';
 
     // Support new format: rows payload in body
     if (rows && Array.isArray(rows)) {
@@ -209,15 +243,20 @@ export const POST = withTenantContext(async (request) => {
         account_name: effectiveAccountName,
         shared_config: shared_config || { vso: vsoConfig, bridging: bridgingConfig, audio: audioConfig },
         enable_vo_audit: Number(enable_vo_audit !== undefined ? enable_vo_audit : 1),
-        generate_recipe: parsedGenerateRecipe
+        generate_recipe: parsedGenerateRecipe,
+        initial_status: targetInitialStatus,
+        status: targetInitialStatus
       };
 
       await createMultiplierBatchWithTasks(batch, rows);
 
       return NextResponse.json({
         success: true,
-        message: `Berhasil mendaftarkan batch ${batchId} dengan ${rows.length} tugas.`,
-        batch_id: batchId
+        message: targetInitialStatus === 'draft'
+          ? `Berhasil menyimpan draft kampanye ${batchId} dengan ${rows.length} tugas.`
+          : `Berhasil mendaftarkan batch ${batchId} dengan ${rows.length} tugas.`,
+        batch_id: batchId,
+        status: targetInitialStatus
       });
     }
 
@@ -285,7 +324,7 @@ export const POST = withTenantContext(async (request) => {
         vso_config_json: JSON.stringify(vsoConfig),
         bridging_config_json: JSON.stringify(bridgingConfig),
         audio_config_json: JSON.stringify(audioConfig),
-        status: 'pending_resolution',
+        status: targetInitialStatus,
         enable_vo_audit: Number(enable_vo_audit !== undefined ? enable_vo_audit : 1),
         generate_recipe: parsedGenerateRecipe
       });

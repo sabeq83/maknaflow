@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Multiplier Lab - Save as Draft, Eksekusi Sekuensial & Row Retry</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --surface: #111827;
+      --surface-raised: #1f2937;
+      --surface-interactive: #374151;
+      --surface-subtle: rgba(255, 255, 255, 0.03);
+      --border: #374151;
+      --border-color: #374151;
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --text-primary: #f9fafb;
+      --text-secondary: #d1d5db;
+      --text-muted: #9ca3af;
+      --action-primary: #3b82f6;
+      --action-primary-hover: #2563eb;
+      --on-action-primary: #ffffff;
+      --status-success: #10b981;
+      --status-success-soft: rgba(16, 185, 129, 0.15);
+      --status-info: #06b6d4;
+      --status-info-soft: rgba(6, 182, 212, 0.15);
+      --status-warning: #f59e0b;
+      --status-warning-soft: rgba(245, 158, 11, 0.15);
+      --status-danger: #ef4444;
+      --status-danger-soft: rgba(239, 68, 68, 0.15);
+      --status-neutral: #9ca3af;
+      --status-neutral-soft: rgba(156, 163, 175, 0.15);
+      --link: #60a5fa;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 24px;
+      line-height: 1.5;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+    }
+    .header-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+    .header-sub { font-size: 0.88rem; color: var(--text-muted); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-draft { background: var(--status-neutral-soft); color: var(--status-neutral); border: 1px solid var(--border-subtle); }
+    .badge-running { background: var(--status-info-soft); color: var(--status-info); border: 1px solid rgba(6, 182, 212, 0.3); }
+    .badge-success { background: var(--status-success-soft); color: var(--status-success); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-danger { background: var(--status-danger-soft); color: var(--status-danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+    .badge-warning { background: var(--status-warning-soft); color: var(--status-warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .btn-primary { background: var(--action-primary); color: var(--on-action-primary); }
+    .btn-primary:hover { background: var(--action-primary-hover); }
+    .btn-draft { background: var(--status-neutral-soft); color: var(--text-primary); border-color: var(--border); }
+    .btn-draft:hover { background: var(--surface-interactive); }
+    .btn-success { background: var(--status-success); color: #fff; }
+    .btn-retry { background: var(--status-warning-soft); color: var(--status-warning); border-color: rgba(245, 158, 11, 0.4); }
+    .btn-retry:hover { background: rgba(245, 158, 11, 0.25); }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th { text-align: left; padding: 10px 12px; background: var(--surface-raised); border-bottom: 1px solid var(--border); color: var(--text-secondary); font-weight: 600; }
+    td { padding: 12px; border-bottom: 1px solid var(--border-subtle); color: var(--text-primary); }
+    tr:hover td { background: var(--surface-subtle); }
+
+    .log-box {
+      background: #000;
+      color: #38bdf8;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      max-height: 220px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <div class="card">
+    <div class="header-title">
+      <span>🔬 Multiplier Lab: Arsitektur Eksekusi Sekuensial & Save as Draft</span>
+    </div>
+    <p class="header-sub">
+      Simulasi interaktif pembuatan kampanye dengan tombol <strong>"💾 Save as Draft"</strong> vs <strong>"🚀 Create & Run"</strong>, 
+      eksekusi sekuensial baris demi baris (mencegah Gemini AI rate limit/timeout), serta tombol <strong>"🔄 Retry Baris"</strong> tanpa mengulang seluruh kampanye.
+    </p>
+  </div>
+
+  <!-- Skenario 1: Form Pembuatan Kampanye dengan 2 Tombol Aksi -->
+  <div class="card">
+    <h3 style="margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+      <span>📝 Form Pembuatan Kampanye Multiplier</span>
+      <span style="font-size: 0.8rem; color: var(--text-muted);">SOP Form Submission</span>
+    </h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+      <div>
+        <label style="font-size: 0.82rem; color: var(--text-secondary); display: block; margin-bottom: 4px;">Nama Kampanye</label>
+        <input id="campName" type="text" value="[ MULTIPLIER ] - nutribake - Pola Makan Sehat 7 Hari" style="width: 100%; padding: 8px 12px; background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-sm); color: #fff;" />
+      </div>
+      <div>
+        <label style="font-size: 0.82rem; color: var(--text-secondary); display: block; margin-bottom: 4px;">Brand Profile</label>
+        <select style="width: 100%; padding: 8px 12px; background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-sm); color: #fff;">
+          <option>nutribake (Nutribake Official)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Tombol Aksi di Bawah Form -->
+    <div style="display: flex; gap: 12px; justify-content: flex-end; padding-top: 12px; border-top: 1px solid var(--border-subtle);">
+      <button class="btn btn-draft" onclick="simulasiSubmit('draft')">
+        💾 Simpan sebagai Draft (Save as Draft)
+      </button>
+      <button class="btn btn-primary" onclick="simulasiSubmit('running')">
+        🚀 Buat & Jalankan Kampanye (Create & Run)
+      </button>
+    </div>
+  </div>
+
+  <!-- Skenario 2: Status Kampanye & Kontrol Eksekusi -->
+  <div class="card">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+      <div>
+        <h3 style="display: flex; align-items: center; gap: 10px;">
+          <span id="currentCampTitle">[ MULTIPLIER ] - nutribake - Pola Makan Sehat 7 Hari</span>
+          <span id="campBadge" class="badge badge-draft">DRAFT</span>
+        </h3>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Batch ID: <code id="batchId">mul_261015_lg4ad4</code> | 7 Baris Tugas</p>
+        <!-- Pipeline Status Chips (Akurat - TIDAK menampilkan 100% jika belum dieksekusi) -->
+        <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;" id="pipelineChipsContainer">
+          <span id="chipStoryboard" class="badge badge-draft">⏳ Storyboard (0/7)</span>
+          <span id="chipTts" class="badge badge-draft">⏳ TTS Audio (0/7)</span>
+          <span id="chipVisual" class="badge badge-draft">⏳ Visual (0/7)</span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button id="btnStartCamp" class="btn btn-primary" onclick="startCampaign()">
+          ▶️ Jalankan Kampanye (Start Campaign)
+        </button>
+        <button class="btn btn-draft" onclick="resetDemo()">
+          🔄 Reset Demo
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabel Baris Tugas -->
+    <table>
+      <thead>
+        <tr>
+          <th>Baris #</th>
+          <th>Task ID</th>
+          <th>Topik Video</th>
+          <th>Status Produksi</th>
+          <th>Lineage Video ID</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="taskTableBody">
+        <!-- Generated by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Terminal Live Log Multiplier Worker -->
+  <div class="card">
+    <h3 style="margin-bottom: 10px; font-size: 0.95rem;">📜 Simulasi Terminal Log Multiplier Worker (Sekuensial Baris Demi Baris)</h3>
+    <div id="workerLogs" class="log-box">
+[20.45.00] [Multiplier Worker] Sistem siap. Menunggu kampanye berstatus running...
+    </div>
+  </div>
+</div>
+
+<script>
+  let tasks = [
+    { row: 1, id: 'mul_261015_lg4ad4_01', topic: 'Hari 1: Gula Tersembunyi', status: 'draft', video_id: 'nutribake_mul_lg4ad4_01', err: null },
+    { row: 2, id: 'mul_261015_lg4ad4_02', topic: 'Hari 2: Kenapa Selalu Lemas', status: 'draft', video_id: 'nutribake_mul_lg4ad4_02', err: null },
+    { row: 3, id: 'mul_261015_lg4ad4_03', topic: 'Hari 3: Pengganti Nasi Putih', status: 'draft', video_id: 'nutribake_mul_lg4ad4_03', err: null },
+    { row: 4, id: 'mul_261015_lg4ad4_04', topic: 'Hari 4: Menahan Craving Sore', status: 'draft', video_id: 'nutribake_mul_lg4ad4_04', err: null },
+    { row: 5, id: 'mul_261015_lg4ad4_05', topic: 'Hari 5: Menu Sarapan Instan', status: 'draft', video_id: 'nutribake_mul_lg4ad4_05', err: null },
+    { row: 6, id: 'mul_261015_lg4ad4_06', topic: 'Hari 6: Rahasia Roti Tanpa Tepung', status: 'draft', video_id: 'nutribake_mul_lg4ad4_06', err: null },
+    { row: 7, id: 'mul_261015_lg4ad4_07', topic: 'Hari 7: Evaluasi & Hasil Tubuh', status: 'draft', video_id: 'nutribake_mul_lg4ad4_07', err: null }
+  ];
+
+  let campaignStatus = 'draft';
+  let activeRowIndex = -1;
+
+  function addLog(msg) {
+    const box = document.getElementById('workerLogs');
+    const time = new Date().toLocaleTimeString('id-ID', { hour12: false });
+    box.innerHTML += `[${time}] ${msg}\n`;
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('taskTableBody');
+    tbody.innerHTML = '';
+
+    const campBadge = document.getElementById('campBadge');
+    const btnStart = document.getElementById('btnStartCamp');
+
+    if (campaignStatus === 'draft') {
+      campBadge.className = 'badge badge-draft';
+      campBadge.textContent = 'DRAFT';
+      btnStart.style.display = 'inline-flex';
+    } else if (campaignStatus === 'running') {
+      campBadge.className = 'badge badge-running';
+      campBadge.textContent = 'RUNNING (SEKUENSIAL)';
+      btnStart.style.display = 'none';
+    } else if (campaignStatus === 'completed') {
+      campBadge.className = 'badge badge-success';
+      campBadge.textContent = 'COMPLETED';
+      btnStart.style.display = 'none';
+    }
+
+    const storyboardDone = tasks.filter(t => t.status === 'waiting_approval' || t.status === 'completed').length;
+    const ttsDone = tasks.filter(t => t.status === 'completed').length;
+    const videoDone = tasks.filter(t => t.status === 'completed').length;
+
+    const chipSb = document.getElementById('chipStoryboard');
+    if (chipSb) {
+      chipSb.textContent = `${storyboardDone === tasks.length ? '✓' : '⏳'} Storyboard (${storyboardDone}/${tasks.length})`;
+      chipSb.className = `badge ${storyboardDone === tasks.length ? 'badge-success' : (storyboardDone > 0 ? 'badge-running' : 'badge-draft')}`;
+    }
+
+    const chipTts = document.getElementById('chipTts');
+    if (chipTts) {
+      chipTts.textContent = `${ttsDone === tasks.length && ttsDone > 0 ? '✓' : '⏳'} TTS Audio (${ttsDone}/${tasks.length})`;
+      chipTts.className = `badge ${ttsDone === tasks.length && ttsDone > 0 ? 'badge-success' : (ttsDone > 0 ? 'badge-running' : 'badge-draft')}`;
+    }
+
+    const chipVisual = document.getElementById('chipVisual');
+    if (chipVisual) {
+      chipVisual.textContent = `${videoDone === tasks.length && videoDone > 0 ? '✓' : '⏳'} Visual (${videoDone}/${tasks.length})`;
+      chipVisual.className = `badge ${videoDone === tasks.length && videoDone > 0 ? 'badge-success' : (videoDone > 0 ? 'badge-running' : 'badge-draft')}`;
+    }
+
+    tasks.forEach(t => {
+      let badgeClass = 'badge-draft';
+      let statusLabel = t.status.toUpperCase();
+      if (t.status === 'running') { badgeClass = 'badge-running'; statusLabel = '⏳ MEMPROSES NASKAH...'; }
+      if (t.status === 'waiting_approval') { badgeClass = 'badge-warning'; statusLabel = '⏸️ WAITING APPROVAL'; }
+      if (t.status === 'completed') { badgeClass = 'badge-success'; statusLabel = '✅ SELESAI'; }
+      if (t.status === 'failed') { badgeClass = 'badge-danger'; statusLabel = '❌ GAGAL (TIMEOUT)'; }
+      if (t.status === 'queued') { badgeClass = 'badge-draft'; statusLabel = '🕒 MENUNGGU GILIRAN'; }
+
+      let actionBtn = '-';
+      if (t.status === 'failed') {
+        actionBtn = `<button class="btn btn-retry" onclick="retryRow('${t.id}')">🔄 Retry Baris Ini</button>`;
+      } else if (t.status === 'waiting_approval') {
+        actionBtn = `<button class="btn btn-primary" style="font-size:0.75rem; padding: 4px 8px;" onclick="approveRow('${t.id}')">✅ Approve ke Fase 2</button>`;
+      }
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong style="color: var(--action-primary);">#${t.row}</strong></td>
+        <td><code>${t.id}</code></td>
+        <td>${t.topic}</td>
+        <td><span class="badge ${badgeClass}">${statusLabel}</span> ${t.err ? `<div style="font-size:0.72rem; color:var(--status-danger); margin-top:2px;">${t.err}</div>` : ''}</td>
+        <td><span style="font-size:0.8rem; font-family:var(--font-mono); color:var(--text-secondary);">${t.video_id}</span></td>
+        <td>${actionBtn}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function simulasiSubmit(mode) {
+    campaignStatus = mode;
+    if (mode === 'draft') {
+      tasks.forEach(t => { t.status = 'draft'; t.err = null; });
+      addLog(`💾 Kampanye disimpan sebagai DRAFT. Tidak ada worker yang berjalan otomatis.`);
+    } else {
+      tasks.forEach((t, i) => { t.status = i === 0 ? 'queued' : 'queued'; t.err = null; });
+      addLog(`🚀 Kampanye dibuat langsung RUNNING. Memulai eksekusi sekuensial baris demi baris...`);
+      runNextSequentialTask();
+    }
+    renderTable();
+  }
+
+  function startCampaign() {
+    campaignStatus = 'running';
+    addLog(`▶️ Pengguna menekan 'Jalankan Kampanye'. Memulai baris #1 secara sekuensial...`);
+    tasks.forEach(t => { if (t.status === 'draft') t.status = 'queued'; });
+    runNextSequentialTask();
+    renderTable();
+  }
+
+  function runNextSequentialTask() {
+    const nextTask = tasks.find(t => t.status === 'queued' || t.status === 'pending_resolution');
+    if (!nextTask) {
+      if (tasks.every(t => t.status === 'completed' || t.status === 'waiting_approval')) {
+        addLog(`🎉 Seluruh baris dalam batch selesai diproses!`);
+      }
+      return;
+    }
+
+    addLog(`[Sequential Queue] Mengambil Baris #${nextTask.row} (${nextTask.id}). Baris lain diantrekan menunggu.`);
+    nextTask.status = 'running';
+    renderTable();
+
+    setTimeout(() => {
+      // Baris 2 disimulasikan timeout jika belum diperbaiki
+      if (nextTask.row === 2 && !nextTask.retried) {
+        nextTask.status = 'failed';
+        nextTask.err = 'Generative AI request timed out after 180s';
+        addLog(`[Sequential Queue] ❌ Baris #${nextTask.row} gagal timeout. Scheduler berhenti menunggu tindakan retry.`);
+      } else {
+        nextTask.status = 'waiting_approval';
+        nextTask.err = null;
+        addLog(`[Sequential Queue] ✅ Baris #${nextTask.row} naskah & storyboard berhasil dibuat (Waiting Approval)!`);
+        addLog(`[Sequential Queue] Melanjutkan ke baris berikutnya secara otomatis...`);
+        runNextSequentialTask();
+      }
+      renderTable();
+    }, 1800);
+  }
+
+  function retryRow(taskId) {
+    const t = tasks.find(x => x.id === taskId);
+    if (!t) return;
+    addLog(`🔄 Retry diaktifkan untuk Baris #${t.row} (${t.id}). Mereset status ke antrean tanpa mengulang baris lain.`);
+    t.status = 'queued';
+    t.err = null;
+    t.retried = true;
+    renderTable();
+    runNextSequentialTask();
+  }
+
+  function approveRow(taskId) {
+    const t = tasks.find(x => x.id === taskId);
+    if (!t) return;
+    t.status = 'completed';
+    addLog(`✅ Baris #${t.row} disetujui user dan klip video di-render.`);
+    renderTable();
+  }
+
+  function resetDemo() {
+    campaignStatus = 'draft';
+    tasks = [
+      { row: 1, id: 'mul_261015_lg4ad4_01', topic: 'Hari 1: Gula Tersembunyi', status: 'draft', video_id: 'nutribake_mul_lg4ad4_01', err: null },
+      { row: 2, id: 'mul_261015_lg4ad4_02', topic: 'Hari 2: Kenapa Selalu Lemas', status: 'draft', video_id: 'nutribake_mul_lg4ad4_02', err: null },
+      { row: 3, id: 'mul_261015_lg4ad4_03', topic: 'Hari 3: Pengganti Nasi Putih', status: 'draft', video_id: 'nutribake_mul_lg4ad4_03', err: null },
+      { row: 4, id: 'mul_261015_lg4ad4_04', topic: 'Hari 4: Menahan Craving Sore', status: 'draft', video_id: 'nutribake_mul_lg4ad4_04', err: null },
+      { row: 5, id: 'mul_261015_lg4ad4_05', topic: 'Hari 5: Menu Sarapan Instan', status: 'draft', video_id: 'nutribake_mul_lg4ad4_05', err: null },
+      { row: 6, id: 'mul_261015_lg4ad4_06', topic: 'Hari 6: Rahasia Roti Tanpa Tepung', status: 'draft', video_id: 'nutribake_mul_lg4ad4_06', err: null },
+      { row: 7, id: 'mul_261015_lg4ad4_07', topic: 'Hari 7: Evaluasi & Hasil Tubuh', status: 'draft', video_id: 'nutribake_mul_lg4ad4_07', err: null }
+    ];
+    document.getElementById('workerLogs').innerHTML = `[${new Date().toLocaleTimeString('id-ID', { hour12: false })}] Demo di-reset ke status Draft.\n`;
+    renderTable();
+  }
+
+  // Init
+  renderTable();
+</script>
+
+</body>
+</html>

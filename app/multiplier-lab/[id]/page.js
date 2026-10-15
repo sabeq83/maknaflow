@@ -55,6 +55,8 @@ function CampaignDetailPageContent() {
   const [isSchedulerActive, setIsSchedulerActive] = useState(true);
   const [togglingScheduler, setTogglingScheduler] = useState(false);
   const [syncingContentFlow, setSyncingContentFlow] = useState(false);
+  const [startingCampaign, setStartingCampaign] = useState(false);
+  const [retryingTask, setRetryingTask] = useState({}); // { [taskId]: boolean }
   
   // Expanded row and tab selection
   const [expandedTaskId, setExpandedTaskId] = useState(null);
@@ -350,6 +352,51 @@ function CampaignDetailPageContent() {
     }
   };
 
+  const handleStartCampaign = async () => {
+    if (!confirm('Apakah Anda yakin ingin menjalankan kampanye Multiplier ini sekarang? Pemrosesan akan dieksekusi sekuensial baris demi baris.')) return;
+    setStartingCampaign(true);
+    try {
+      const res = await fetch('/api/v2/multiplier', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'start_campaign', batchId: id })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message || 'Kampanye berhasil dijalankan secara sekuensial!');
+        fetchTasks(true);
+      } else {
+        showToast(data.error || 'Gagal menjalankan kampanye.', 'error');
+      }
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setStartingCampaign(false);
+    }
+  };
+
+  const handleRetryTask = async (taskId) => {
+    setRetryingTask(prev => ({ ...prev, [taskId]: true }));
+    try {
+      const res = await fetch('/api/v2/multiplier', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'retry_task', taskId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message || `Baris ${taskId} berhasil dimasukkan kembali ke antrean sekuensial!`);
+        fetchTasks(true);
+      } else {
+        showToast(data.error || 'Gagal me-retry baris ini.', 'error');
+      }
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setRetryingTask(prev => ({ ...prev, [taskId]: false }));
+    }
+  };
+
   const firstTask = tasks[0];
   const bridging = firstTask ? JSON.parse(firstTask.bridging_config_json || '{}') : {};
   const aesthetics = firstTask ? JSON.parse(firstTask.vso_config_json || '{}') : {};
@@ -357,15 +404,18 @@ function CampaignDetailPageContent() {
 
   // Calculate campaign status
   let overallStatus = 'draft';
+  const isDraftCampaign = tasks.length > 0 && tasks.every(t => t.status === 'draft');
   if (tasks.length > 0) {
     const completedCount = tasks.filter(t => t.status === 'completed').length;
     const failedCount = tasks.filter(t => t.status === 'failed').length;
-    const processingCount = tasks.filter(t => t.status && ['remaking', 'generating_audio', 'generating_visuals', 'ffmpeg_muxing'].includes(t.status)).length;
+    const processingCount = tasks.filter(t => t.status && ['pending_resolution', 'resolving_product', 'remaking', 'generating_t2i', 'generating_audio', 'generating_visuals', 'ffmpeg_muxing'].includes(t.status)).length;
     
-    if (completedCount === tasks.length) overallStatus = 'completed';
+    if (isDraftCampaign) overallStatus = 'draft';
+    else if (completedCount === tasks.length) overallStatus = 'completed';
     else if (failedCount > 0) overallStatus = 'failed';
     else if (processingCount > 0) overallStatus = 'running';
     else if (tasks.some(t => t.status === 'paused')) overallStatus = 'paused';
+    else if (tasks.some(t => t.status === 'waiting_approval')) overallStatus = 'waiting_approval';
   }
 
   const getStageStatus = (task, stageName) => {
@@ -544,8 +594,9 @@ function CampaignDetailPageContent() {
               </span>
               <span style={{
                 fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', padding: '3px 8px', borderRadius: 6,
-                background: overallStatus === 'completed' ? 'var(--status-success-soft)' : (overallStatus === 'running' ? 'var(--status-info-soft)' : (overallStatus === 'paused' ? 'var(--status-warning-soft)' : 'var(--surface-interactive)')),
-                color: overallStatus === 'completed' ? 'var(--status-success)' : (overallStatus === 'running' ? 'var(--status-info)' : (overallStatus === 'paused' ? 'var(--status-warning)' : 'var(--text-muted)'))
+                background: overallStatus === 'completed' ? 'var(--status-success-soft)' : (overallStatus === 'running' ? 'var(--status-info-soft)' : (overallStatus === 'failed' ? 'var(--status-danger-soft)' : (overallStatus === 'paused' ? 'var(--status-warning-soft)' : (overallStatus === 'waiting_approval' ? 'var(--status-warning-soft)' : 'var(--surface-interactive)')))),
+                color: overallStatus === 'completed' ? 'var(--status-success)' : (overallStatus === 'running' ? 'var(--status-info)' : (overallStatus === 'failed' ? 'var(--status-danger)' : (overallStatus === 'paused' ? 'var(--status-warning)' : (overallStatus === 'waiting_approval' ? 'var(--status-warning)' : 'var(--text-muted)')))),
+                border: '1px solid var(--border-subtle)'
               }}>
                 {overallStatus.toUpperCase()}
               </span>
@@ -553,7 +604,26 @@ function CampaignDetailPageContent() {
           </div>
 
           {/* 3. Tombol Aksi Utama (Gradient buttons selaras Pillar Campaign) */}
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+            {isDraftCampaign && (
+              <button
+                className="btn"
+                disabled={startingCampaign}
+                onClick={handleStartCampaign}
+                style={{
+                  background: 'linear-gradient(135deg, var(--action-primary), var(--status-info))',
+                  color: 'var(--on-action-primary)',
+                  border: 'none',
+                  padding: '10px 18px',
+                  fontWeight: 700,
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  boxShadow: 'var(--shadow-card)'
+                }}
+              >
+                {startingCampaign ? '⏳ Memulai Kampanye...' : '▶️ Jalankan Kampanye'}
+              </button>
+            )}
             <button
               className="btn"
               disabled={togglingScheduler}
@@ -814,21 +884,44 @@ function CampaignDetailPageContent() {
                       <td style={{ padding: '14px 16px' }}>
                         <span style={{
                           padding: '6px 12px', borderRadius: 6, fontWeight: 600, fontSize: '0.8rem',
-                          background: task.status === 'completed' ? 'var(--status-success-soft)' : (task.status === 'waiting_approval' ? 'var(--status-warning-soft)' : 'var(--status-info-soft)'),
-                          color: task.status === 'completed' ? 'var(--status-success)' : (task.status === 'waiting_approval' ? 'var(--status-warning)' : 'var(--status-info)'),
+                          background: task.status === 'completed' ? 'var(--status-success-soft)' : (task.status === 'failed' ? 'var(--status-danger-soft)' : (task.status === 'waiting_approval' ? 'var(--status-warning-soft)' : (task.status === 'draft' ? 'var(--surface-interactive)' : 'var(--status-info-soft)'))),
+                          color: task.status === 'completed' ? 'var(--status-success)' : (task.status === 'failed' ? 'var(--status-danger)' : (task.status === 'waiting_approval' ? 'var(--status-warning)' : (task.status === 'draft' ? 'var(--text-muted)' : 'var(--status-info)'))),
+                          border: `1px solid ${task.status === 'failed' ? 'var(--status-danger-soft)' : 'var(--border-subtle)'}`,
                           display: 'inline-flex', alignItems: 'center', gap: 6, width: 'fit-content'
                         }}>
-                          {task.status === 'waiting_approval' ? '⏸️ Fase 2 : Paused (Ready for Review)' : (task.status === 'completed' ? '✅ Fase 2 : Completed' : `⚡ Fase 2 : ${task.status}`)}
+                          {task.status === 'draft' ? '📝 Fase 1 : Draft' : (task.status === 'failed' ? `❌ Gagal: ${task.error_message ? task.error_message.slice(0, 45) + '...' : 'Error'}` : (task.status === 'waiting_approval' ? '⏸️ Fase 2 : Paused (Ready for Review)' : (task.status === 'completed' ? '✅ Fase 2 : Completed' : `⚡ Fase 2 : ${task.status}`)))}
                         </span>
                       </td>
                       <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                        <button
-                          type="button"
-                          className="btn btn-secondary btn-sm"
-                          onClick={() => setExpandedTaskId(isExpanded ? null : task.id)}
-                        >
-                          {isExpanded ? '📖 Tutup' : '📖 Detail'}
-                        </button>
+                        <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', alignItems: 'center' }}>
+                          {task.status === 'failed' && (
+                            <button
+                              type="button"
+                              className="btn btn-sm"
+                              disabled={retryingTask[task.id]}
+                              onClick={() => handleRetryTask(task.id)}
+                              style={{
+                                background: 'var(--status-warning-soft)',
+                                color: 'var(--status-warning)',
+                                border: '1px solid rgba(245, 158, 11, 0.3)',
+                                padding: '4px 8px',
+                                fontSize: '0.75rem',
+                                fontWeight: 600,
+                                borderRadius: 4,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              {retryingTask[task.id] ? '⏳...' : '🔄 Retry Baris'}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => setExpandedTaskId(isExpanded ? null : task.id)}
+                          >
+                            {isExpanded ? '📖 Tutup' : '📖 Detail'}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                     
@@ -1173,7 +1266,7 @@ function CampaignDetailPageContent() {
                                             {/* Stage Checklists */}
                                             <div>
                                               <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600, marginBottom: 10, display: 'block' }}>
-                                                Tahapan Workflow Aktif untuk Video Rendering
+                                                Tahapan Workflow Aktif untuk Visual / Produksi Video
                                               </label>
                                               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-interactive)', padding: '10px 14px', borderRadius: 6, border: '1px solid var(--border)' }}>
