@@ -54,6 +54,7 @@ function CampaignDetailPageContent() {
   const [toast, setToast] = useState(null);
   const [isSchedulerActive, setIsSchedulerActive] = useState(true);
   const [togglingScheduler, setTogglingScheduler] = useState(false);
+  const [syncingContentFlow, setSyncingContentFlow] = useState(false);
   
   // Expanded row and tab selection
   const [expandedTaskId, setExpandedTaskId] = useState(null);
@@ -527,19 +528,19 @@ function CampaignDetailPageContent() {
               ← Kembali ke Dashboard Multiplier
             </button>
             <h1 style={{ margin: '4px 0 0 0', fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.5px', color: 'var(--text-primary)' }}>
-              🎬 {firstTask?.new_caption?.slice(0, 45) || bridging.editorialTopic || 'Kampanye Multiplier Lab'}
+              🎬 {firstTask?.campaign_name || bridging.campaign_name || audio.campaignName || firstTask?.new_caption?.slice(0, 45) || bridging.editorialTopic || 'Kampanye Multiplier Lab'}
             </h1>
 
             {/* ID Kampanye | Nama Akun Brand | Created Date | Mode */}
             <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', marginTop: 12, fontSize: '0.88rem', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-color)', paddingBottom: 16, marginBottom: 20 }}>
               <span>🔑 ID: <code style={{ background: 'var(--surface-interactive)', padding: '3px 8px', borderRadius: 4, color: 'var(--action-primary)', fontFamily: 'monospace', fontSize: '0.85rem' }}>{id}</code></span>
               <span style={{ opacity: 0.3 }}>|</span>
-              <span>🏷️ Brand: <strong>{firstTask?.brand_name || bridging.brandName || 'Siasat Sehat'}</strong></span>
+              <span>🏷️ Brand: <strong>{firstTask?.account_name || firstTask?.brand_name || bridging.account_name || bridging.brandName || audio.accountName || 'Tanpa Akun'}</strong></span>
               <span style={{ opacity: 0.3 }}>|</span>
               <span>📅 Dibuat: <strong>{firstTask?.created_at ? new Date(firstTask.created_at).toLocaleString('id-ID') : '-'}</strong></span>
               <span style={{ opacity: 0.3 }}>|</span>
               <span style={{ fontSize: '0.72rem', background: 'var(--action-primary)', color: 'var(--on-action-primary)', padding: '3px 8px', borderRadius: 4, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                🧬 1 BLUEPRINT TO 5 MULTI-ANGLES
+                🧬 1 BLUEPRINT TO {tasks.length} MULTI-ANGLES
               </span>
               <span style={{
                 fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', padding: '3px 8px', borderRadius: 6,
@@ -571,10 +572,26 @@ function CampaignDetailPageContent() {
             </button>
             <button
               className="btn"
-              onClick={() => showToast('Kampanye didorong ke antrean Contentflow.')}
+              disabled={syncingContentFlow}
+              onClick={async () => {
+                setSyncingContentFlow(true);
+                try {
+                  const res = await fetch('/api/content-flow/sync', { method: 'POST' });
+                  const data = await res.json();
+                  if (data.success) {
+                    showToast(`Berhasil mendorong ${data.synced_count} video ke ContentFlow!`);
+                  } else {
+                    showToast(data.error || 'Gagal sinkron ke ContentFlow', 'error');
+                  }
+                } catch (err) {
+                  showToast(err.message, 'error');
+                } finally {
+                  setSyncingContentFlow(false);
+                }
+              }}
               style={{ background: 'var(--status-info)', color: 'var(--on-action-primary)', border: 'none', padding: '10px 16px', fontWeight: 600, borderRadius: 6, cursor: 'pointer' }}
             >
-              🚀 Push to Contentflow
+              {syncingContentFlow ? '⏳ Mendorong ke ContentFlow...' : '🚀 Push to Contentflow'}
             </button>
             <button
               className="btn"
@@ -613,7 +630,7 @@ function CampaignDetailPageContent() {
             <div style={{ padding: 20, borderTop: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>🏷️ Nama Akun (Brand Account)</span>
-                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{firstTask?.brand_name || bridging.brandName || 'Siasat Sehat'}</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{firstTask?.account_name || firstTask?.brand_name || bridging.account_name || bridging.brandName || audio.accountName || 'Tanpa Akun'}</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>Parent Folder Nextcloud</span>
@@ -625,7 +642,7 @@ function CampaignDetailPageContent() {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>🎯 Target Demografi & Tone Bahasa</span>
-                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>Dewasa Muda (20–35 th) • Santai, Informatif & Relatable</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>{audio.targetDemographic || aesthetics.targetDemographic || 'Dewasa Muda (20–35 th) • Santai, Informatif & Relatable'}</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>🎙 Audio Segment (per Klip)</span>
@@ -771,6 +788,9 @@ function CampaignDetailPageContent() {
                       </td>
                       <td style={{ padding: '14px 16px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '0.68rem', fontFamily: 'monospace', fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: 'var(--surface-interactive)', color: 'var(--action-primary)', border: '1px solid var(--border-subtle)' }}>
+                            Baris #{idx + 1} ({task.id})
+                          </span>
                           {bridgingConfig.hookType && (
                             <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: 'rgba(45, 212, 191, 0.15)', color: 'var(--action-primary)', border: '1px solid rgba(45, 212, 191, 0.3)' }}>
                               {bridgingConfig.hookType}

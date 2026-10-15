@@ -745,22 +745,31 @@ function MultiplierLabPageContent() {
           const bid = t.batch_id || `single_${t.id}`;
           if (!groups[bid]) {
             let brandName = '';
-            let productTitle = '';
+            let bridgingObj = {};
+            let audioObj = {};
             try {
               const snap = t.product_snapshot_json ? (typeof t.product_snapshot_json === 'string' ? JSON.parse(t.product_snapshot_json) : t.product_snapshot_json) : null;
               brandName = snap?.product_name || '';
             } catch (_) {}
+            try { bridgingObj = typeof t.bridging_config_json === 'string' ? JSON.parse(t.bridging_config_json) : (t.bridging_config_json || {}); } catch(_) {}
+            try { audioObj = typeof t.audio_config_json === 'string' ? JSON.parse(t.audio_config_json) : (t.audio_config_json || {}); } catch(_) {}
+
+            const resolvedCampaignName = t.campaign_name || bridgingObj.campaign_name || audioObj.campaignName || t.yt_title || (t.new_caption ? t.new_caption.slice(0, 50) : `Multiplier Campaign ${bid.slice(-6)}`);
+            const resolvedBrandId = t.brand_profile_id || bridgingObj.brand_profile_id || audioObj.brandProfileId || 'default_tenant';
+            const resolvedBrandName = t.account_name || t.brand_name || bridgingObj.brandName || bridgingObj.account_name || audioObj.accountName || brandName || 'Tanpa Akun';
 
             groups[bid] = {
               id: bid,
-              brand_profile_id: t.brand_profile_id || 'default_tenant',
-              brand_name: t.brand_name || brandName || 'default_tenant',
-              campaign_name: t.yt_title || (t.new_caption ? t.new_caption.slice(0, 50) : `Multiplier Campaign ${bid.slice(4, 10)}`),
+              brand_profile_id: resolvedBrandId,
+              brand_name: resolvedBrandName,
+              campaign_name: resolvedCampaignName,
               created_at: t.created_at,
               status: t.status,
               tasks: [],
               stats: { total: 0, completed: 0, failed: 0, processing: 0, paused: 0 }
             };
+          } else if (t.campaign_name && groups[bid].campaign_name.startsWith('Multiplier Campaign')) {
+            groups[bid].campaign_name = t.campaign_name;
           } else if (t.yt_title && groups[bid].campaign_name.startsWith('Multiplier Campaign')) {
             groups[bid].campaign_name = t.yt_title;
           }
@@ -846,24 +855,38 @@ function MultiplierLabPageContent() {
       const dbProduct = targetProductId ? products.find(p => p.id === targetProductId) : null;
       const dbPhotoUrl = dbProduct ? (dbProduct.cleaned_photo_url || dbProduct.clean_photo_url || dbProduct.raw_photo_url) : null;
 
-      const isPureStory = campaignType === 'editorial';
+      const cleanCampaignName = campaignName.trim() || `[ MULTIPLIER ] - ${accountName ? accountName + ' - ' : ''}${editorialTopic.trim() || 'Kampanye Multiplier'}`;
 
       const payload = {
         mode: workflowMode,
+        campaign_name: cleanCampaignName,
+        brand_profile_id: selectedBrandId || null,
+        account_name: accountName || null,
         rows: combinationRows.map(row => ({
           deconstruct_asset_id: row.deconstruct_asset_id,
           target_product_id: row.target_product_id,
           target_product_url: row.target_product_url,
           affiliate_url: row.affiliate_url,
+          campaign_name: cleanCampaignName,
+          brand_profile_id: selectedBrandId || null,
+          account_name: accountName || null,
           campaign_type: row.campaign_type || (isPureStory ? 'pure_storytelling' : 'product_campaign'),
           editorial_topic: row.editorial_topic || editorialTopic.trim(),
           editorial_outro: row.editorial_outro || editorialOutro.trim()
         })),
         vso_config_json: JSON.stringify({
           narrativeMode, visualStyle, targetAi, videoModel, clipDuration, aspectRatio, faceVisibility, wordsPerClip,
-          isVsoActive, characterConcept, subjectDemographic, wardrobeStyle, wardrobeStyleCustom, lightingStyle, lightingStyleCustom
+          isVsoActive, characterConcept, subjectDemographic, wardrobeStyle, wardrobeStyleCustom, lightingStyle, lightingStyleCustom,
+          visualIdentity,
+          visual_identity_preset_id: isVsoActive ? visualIdentity?.preset_id : null,
+          visual_identity_inline_config: isVsoActive && visualIdentity?.preset_id === 'inline' ? visualIdentity.inline_config : null,
+          visual_overrides_json: isVsoActive && visualIdentity?.preset_id === 'custom' ? visualIdentity.visual_overrides_json : null
         }),
         bridging_config_json: JSON.stringify({
+          campaign_name: cleanCampaignName,
+          account_name: accountName || null,
+          brandName: accountName || null,
+          brand_profile_id: selectedBrandId || null,
           campaign_type: isPureStory ? 'pure_storytelling' : 'product_campaign',
           isBridgingActive: isPureStory ? false : isBridgingActive,
           targetClipsCount, bridgeAtClip, bridgeDurationClips, promotionStyle, bridgingMode,
@@ -877,11 +900,15 @@ function MultiplierLabPageContent() {
           generate_recipe: generateRecipe ? 1 : 0
         }),
         audio_config_json: JSON.stringify({
+          campaignName: cleanCampaignName,
+          accountName: accountName || null,
+          brandProfileId: selectedBrandId || null,
           enableTts, voiceProvider, voicePersona, voiceSpeed, voiceVolume, ttsModelQuality,
           enableGlabs, enableFfmpeg, targetLanguage, ffmpegSyncOption, syncMode,
           ffmpegVideoScale, ffmpegSfxVolume, ffmpegBgmVolume, enableSocialPost,
           nextcloudParentFolder, targetDemographic, targetDemographicCustom, aiDirective,
-          mandatoryOutroLine: editorialOutro.trim() || mandatoryOutroLine, customInstruction
+          mandatoryOutroLine: editorialOutro.trim() || mandatoryOutroLine, customInstruction,
+          enableAudioSegment, sfxSetting
         }),
         enable_vo_audit: enableVoAudit ? 1 : 0,
         generate_recipe: generateRecipe ? 1 : 0,

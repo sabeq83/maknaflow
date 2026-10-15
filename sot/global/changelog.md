@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.49 — Standardisasi ID Multiplier mul_YYMMDD, Lineage ContentFlow & Retensi 4 Accordion (15/10/2026)
+- Standardisasi Campaign ID Multiplier mul_YYMMDD_6hex dan Task ID Baris N
+- Lineage Video ID ContentFlow account_mul_hash_sequence yang traceable ke baris kampanye
+- Retensi 100% seluruh konfigurasi 4 accordion dan injeksi ke prompt Gemini AI
+- Patch database kampanye mtb_df60f17a012440f9 ke nutribake dan sinkronisasi Video ID
+
 ## V2.32.48 — Fix ContentFlow unique video constraint collision resolution and safePush (15/10/2026)
 - Safely resolve duplicate video_ids across all campaigns using takenVideoIds set
 - Gracefully update existing row on constraint collision in upsertContentFlowItem

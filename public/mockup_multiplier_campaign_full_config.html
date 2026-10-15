@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Multiplier Lab - Full 4 Accordions Config & Brand Retention</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --surface: #111827;
+      --surface-raised: #1f2937;
+      --surface-interactive: #374151;
+      --surface-subtle: rgba(255, 255, 255, 0.03);
+      --border: #374151;
+      --border-color: #374151;
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --text-primary: #f9fafb;
+      --text-secondary: #d1d5db;
+      --text-muted: #9ca3af;
+      --action-primary: #3b82f6;
+      --action-primary-hover: #2563eb;
+      --on-action-primary: #ffffff;
+      --status-success: #10b981;
+      --status-success-soft: rgba(16, 185, 129, 0.15);
+      --status-info: #06b6d4;
+      --status-info-soft: rgba(6, 182, 212, 0.15);
+      --status-warning: #f59e0b;
+      --status-warning-soft: rgba(245, 158, 11, 0.15);
+      --status-danger: #ef4444;
+      --status-danger-soft: rgba(239, 68, 68, 0.15);
+      --link: #60a5fa;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 24px;
+      line-height: 1.5;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+    }
+    .header-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+    .header-sub { font-size: 0.88rem; color: var(--text-muted); }
+
+    /* Accordion styles */
+    .accordion-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 12px;
+      overflow: hidden;
+      background: var(--surface-raised);
+    }
+    .accordion-header {
+      padding: 14px 20px;
+      background: var(--surface-raised);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      font-size: 0.95rem;
+      user-select: none;
+      transition: background 0.2s;
+    }
+    .accordion-header:hover { background: var(--surface-interactive); }
+    .accordion-header.active { background: var(--status-info-soft); border-bottom: 1px solid var(--border); }
+    .accordion-body { padding: 20px; display: none; }
+    .accordion-body.open { display: block; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-full { grid-column: span 2; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); display: flex; justify-content: space-between; }
+    .form-label .badge-saved { font-size: 0.7rem; color: var(--status-success); background: var(--status-success-soft); padding: 2px 6px; border-radius: 4px; }
+    .form-input {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--action-primary); }
+
+    /* Buttons */
+    .btn {
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary { background: var(--action-primary); color: var(--on-action-primary); }
+    .btn-primary:hover { background: var(--action-primary-hover); }
+    .btn-success { background: var(--status-success); color: #fff; }
+
+    /* Json viewer */
+    pre.payload-box {
+      background: #090e1a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: #38bdf8;
+      max-height: 380px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .badge-pill {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Top Banner -->
+  <div class="card" style="border-left: 4px solid var(--status-success);">
+    <div class="header-title">
+      <span>🔬 Multiplier Lab - Simulasi Konfigurasi Penuh (4 Accordions)</span>
+      <span class="badge-pill" style="background: var(--status-success-soft); color: var(--status-success);">Fix: Zero Config Loss</span>
+    </div>
+    <p class="header-sub">
+      Memastikan 100% parameter dari <strong>Basic Strategy</strong>, <strong>Visual Style & Output</strong>, <strong>Product Bridging</strong>, dan <strong>Visual Identity</strong> tersimpan utuh di tabel database dan dipakai pada seluruh pipeline (Gemini Script, AI TTS, Glabs Visuals, Nextcloud Upload, & ContentFlow).
+    </p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px;">
+
+    <!-- Left: 4-Accordion Form -->
+    <div class="card">
+      <h3 style="font-size: 1.1rem; margin-bottom: 16px;">📝 Form Pembuatan Kampanye Multiplier</h3>
+
+      <!-- Accordion 1: Basic Creative Strategy -->
+      <div class="accordion-item">
+        <div class="accordion-header active" onclick="toggleAcc(this, 'acc1')">
+          <span>📋 1. Basic Creative Strategy & Brand Profile</span>
+          <span class="acc-arrow">▲</span>
+        </div>
+        <div id="acc1" class="accordion-body open">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">
+                <span>🏷️ Nama Akun (Brand Account)</span>
+                <span class="badge-saved">Disimpan di DB & Config</span>
+              </label>
+              <select id="brandSelect" class="form-input" onchange="handleBrandChange(this.value)">
+                <option value="940e766b-76d0-49b7-b6d5-01dfb0041d40" data-name="nutribake" data-folder="/MAKNA_Assets/ASET_NUTRIBAKE" selected>nutribake (Nutribake Official)</option>
+                <option value="da3a5987-af0b-49c4-ac17-2c965aa9f2fe" data-name="umum" data-folder="/MAKNA_Assets/Umum">umum (General)</option>
+                <option value="df382ce8-2145-4464-ae63-79375ff3aff2" data-name="dapurbotani" data-folder="/MAKNA_Assets/DapurBotani">dapurbotani</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <span>Nama Kampanye</span>
+                <span class="badge-saved">Disimpan di Kolom DB</span>
+              </label>
+              <input id="campaignNameInput" type="text" class="form-input" value="[ MULTIPLIER 20261015 ] - nutribake - Tantangan Diet 7 Hari Tanpa Tepung & Gula" oninput="updatePreview()" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Parent Folder Nextcloud</label>
+              <input id="ncFolderInput" type="text" class="form-input" value="/MAKNA_Assets/ASET_NUTRIBAKE" oninput="updatePreview()" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Bahasa Naskah Voiceover</label>
+              <select id="langSelect" class="form-input" onchange="updatePreview()">
+                <option value="id-ID" selected>🇮🇩 Bahasa Indonesia (Lokal)</option>
+                <option value="en-US">🇺🇸 English (Global / US Market)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Voice Provider</label>
+              <select id="voiceProviderSelect" class="form-input" onchange="updatePreview()">
+                <option value="minimax" selected>MiniMax Speech-2.8</option>
+                <option value="gemini">Google Gemini Multi-Speaker</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Voice Persona</label>
+              <select id="voicePersonaSelect" class="form-input" onchange="updatePreview()">
+                <option value="Indonesian_professional_anchor_vv2" selected>👩 Professional Anchor (Female)</option>
+                <option value="Indonesian_casual_reporter_vv2">👨 Casual Reporter (Male)</option>
+                <option value="Indonesian_compelling_storyteller_vv2">👨 Compelling Storyteller</option>
+                <option value="Indonesian_crisp_reporter_vv2">👩 Crisp Reporter</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">🎯 Target Demografi & Tone Bahasa</label>
+              <select id="demographicSelect" class="form-input" onchange="updatePreview()">
+                <option value="ibu_rumah_tangga" selected>Ibu Rumah Tangga & Keluarga ("Bunda/Moms")</option>
+                <option value="genz_casual">Gen-Z & Milenial Muda ("Kamu/Lo")</option>
+                <option value="professional_executive">Profesional & Eksekutif ("Anda")</option>
+                <option value="fitness_health_enthusiast">Penggiat Olahraga & Sehat</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">🎙 Audio Segment & SFX Setting</label>
+              <div style="display: flex; gap: 8px;">
+                <select id="audioSegmentSelect" class="form-input" style="flex: 1;" onchange="updatePreview()">
+                  <option value="false" selected>Segment: Off</option>
+                  <option value="true">Segment: On</option>
+                </select>
+                <select id="sfxSelect" class="form-input" style="flex: 1;" onchange="updatePreview()">
+                  <option value="without_sfx" selected>SFX: Without SFX</option>
+                  <option value="with_sfx">SFX: With SFX</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group form-full">
+              <label class="form-label">
+                <span>Mandatory Outro Line (Wajib di Klip Terakhir)</span>
+                <span class="badge-saved">Dipatuhi Gemini AI</span>
+              </label>
+              <input id="outroInput" type="text" class="form-input" value="Komen 'IKUTAN' di bawah ya, nanti aku share panduan menu lengkapnya!" oninput="updatePreview()" />
+            </div>
+
+            <div class="form-group form-full">
+              <label class="form-label">
+                <span>AI Directive / Guardrail</span>
+                <span class="badge-saved">Dipatuhi Gemini AI</span>
+              </label>
+              <textarea id="directiveInput" class="form-input" rows="2" oninput="updatePreview()">Fokus pada solusi no-sugar crash, jangan sebut merek obat kimia, tekankan bahan alami.</textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accordion 2: Aesthetics & Visual Settings (VSO) -->
+      <div class="accordion-item">
+        <div class="accordion-header" onclick="toggleAcc(this, 'acc2')">
+          <span>🎨 2. Aesthetics & Visual Settings (VSO)</span>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div id="acc2" class="accordion-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Narrative Mode</label>
+              <select id="narrativeSelect" class="form-input" onchange="updatePreview()">
+                <option value="Storytelling" selected>Storytelling (Daily-Life)</option>
+                <option value="Problem-Solution">Problem-Solution</option>
+                <option value="Educational">Educational</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Aspect Ratio & Model</label>
+              <div style="display: flex; gap: 8px;">
+                <select id="ratioSelect" class="form-input" style="flex: 1;" onchange="updatePreview()">
+                  <option value="9:16" selected>9:16 (Vertical)</option>
+                  <option value="16:9">16:9 (Horizontal)</option>
+                </select>
+                <select id="modelSelect" class="form-input" style="flex: 1;" onchange="updatePreview()">
+                  <option value="omni_flash" selected>Omni Flash</option>
+                  <option value="veo_31_lite">Veo 3.1 Lite</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Jumlah Klip (N) & Durasi</label>
+              <div style="display: flex; gap: 8px;">
+                <input id="clipsCountInput" type="number" class="form-input" style="flex: 1;" value="8" min="3" max="10" oninput="updatePreview()" />
+                <select id="durationSelect" class="form-input" style="flex: 1;" onchange="updatePreview()">
+                  <option value="4" selected>4s per klip</option>
+                  <option value="6">6s per klip</option>
+                  <option value="8">8s per klip</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Face Visibility & Visual Style</label>
+              <div style="display: flex; gap: 8px;">
+                <select id="faceSelect" class="form-input" style="flex: 1;" onchange="updatePreview()">
+                  <option value="Faceless" selected>Faceless (Aksi Tangan)</option>
+                  <option value="POV">POV</option>
+                </select>
+                <select id="styleSelect" class="form-input" style="flex: 1;" onchange="updatePreview()">
+                  <option value="Macrophotography" selected>Macrophotography</option>
+                  <option value="Cinematic">Cinematic</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accordion 3: Product Bridging Settings -->
+      <div class="accordion-item">
+        <div class="accordion-header" onclick="toggleAcc(this, 'acc3')">
+          <span>🔌 3. Product Bridging Settings (Sandwich Protocol)</span>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div id="acc3" class="accordion-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Sisipkan Transisi Promosi pada Klip Ke-</label>
+              <input id="bridgeAtInput" type="number" class="form-input" value="6" min="1" max="10" oninput="updatePreview()" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Durasi Bridging Produk</label>
+              <select id="bridgeDurSelect" class="form-input" onchange="updatePreview()">
+                <option value="1" selected>1 Klip</option>
+                <option value="2">2 Klip</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Gaya Promosi</label>
+              <select id="promoStyleSelect" class="form-input" onchange="updatePreview()">
+                <option value="Softselling" selected>Softselling (Menyatu Alami)</option>
+                <option value="Hardsell">Hardsell (Direct CTA)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Visual Mode</label>
+              <select id="visualModeSelect" class="form-input" onchange="updatePreview()">
+                <option value="hybrid_lock" selected>Double-Pass Pixel Lock (T2I ➔ Veo I2V)</option>
+                <option value="pure_t2v">Pure Text-To-Video</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accordion 4: Visual Identity -->
+      <div class="accordion-item">
+        <div class="accordion-header" onclick="toggleAcc(this, 'acc4')">
+          <span>🎭 4. Visual Identity Mandate</span>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div id="acc4" class="accordion-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Character Concept</label>
+              <select id="conceptSelect" class="form-input" onchange="updatePreview()">
+                <option value="faceless" selected>Faceless Studio Tabletop</option>
+                <option value="character">Consistent Model</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Subject Demographic</label>
+              <select id="subjectDemoSelect" class="form-input" onchange="updatePreview()">
+                <option value="syari_classic" selected>Syari Classic Muslimah</option>
+                <option value="modern_casual">Modern Casual</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Lighting Ambiance</label>
+              <select id="lightingSelect" class="form-input" onchange="updatePreview()">
+                <option value="window_daylight" selected>Soft Window Daylight</option>
+                <option value="warm_kitchen">Warm Kitchen Glow</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Wardrobe Style</label>
+              <select id="wardrobeSelect" class="form-input" onchange="updatePreview()">
+                <option value="sequential" selected>Sequential Clean Apron</option>
+                <option value="pastel_linen">Pastel Linen</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+        <button class="btn btn-primary" onclick="alert('Simulasi Submit Berhasil! Data tersimpan di kolom DB dan dipakai di seluruh pipeline.')">
+          🚀 Daftarkan Kampanye (Simulasi)
+        </button>
+      </div>
+    </div>
+
+    <!-- Right: Stored Data & Pipeline Consumption Preview -->
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+
+      <!-- Verification Status -->
+      <div class="card" style="border: 1px solid var(--border-color);">
+        <h4 style="font-size: 0.95rem; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+          <span>🔍 Verifikasi Konsumsi Pipeline</span>
+          <span class="badge-pill" style="background: var(--status-success-soft); color: var(--status-success);">100% Retained</span>
+        </h4>
+        <div style="font-size: 0.82rem; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 6px;">
+            <span style="color: var(--text-muted);">🏷️ Brand Profile:</span>
+            <strong id="vBrand" style="color: var(--status-success);">nutribake (940e766b...)</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 6px;">
+            <span style="color: var(--text-muted);">🎬 Campaign Name:</span>
+            <strong id="vCampaign" style="color: var(--link);">[ MULTIPLIER 20261015 ] - nutribake...</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 6px;">
+            <span style="color: var(--text-muted);">🤖 Gemini Phase 1 Prompt:</span>
+            <span style="color: var(--status-info);">Baca Tone Demografi & Outro Contract</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 6px;">
+            <span style="color: var(--text-muted);">🎙️ AI TTS Studio:</span>
+            <span style="color: var(--status-info);">MiniMax / Professional Anchor</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 6px;">
+            <span style="color: var(--text-muted);">📁 Nextcloud Target:</span>
+            <span id="vFolder" style="font-family: var(--font-mono); font-size: 0.75rem;">/MAKNA_Assets/ASET_NUTRIBAKE</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-muted);">📊 ContentFlow Menu:</span>
+            <span style="color: var(--status-success);">Muncul di Brand @nutribake & Filter Multiplier</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Payload Preview -->
+      <div class="card">
+        <h4 style="font-size: 0.95rem; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <span>📦 Payload JSON & DB Columns</span>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">Real-time Synced</span>
+        </h4>
+        <pre id="payloadPreview" class="payload-box"></pre>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  function toggleAcc(header, bodyId) {
+    const body = document.getElementById(bodyId);
+    const isOpen = body.classList.contains('open');
+    const arrow = header.querySelector('.acc-arrow');
+
+    if (isOpen) {
+      body.classList.remove('open');
+      header.classList.remove('active');
+      arrow.textContent = '▼';
+    } else {
+      body.classList.add('open');
+      header.classList.add('active');
+      arrow.textContent = '▲';
+    }
+  }
+
+  function handleBrandChange(brandId) {
+    const sel = document.getElementById('brandSelect');
+    const opt = sel.options[sel.selectedIndex];
+    const brandName = opt.getAttribute('data-name');
+    const folder = opt.getAttribute('data-folder');
+
+    document.getElementById('ncFolderInput').value = folder;
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+    document.getElementById('campaignNameInput').value = `[ MULTIPLIER ${dateStr} ] - ${brandName} - Tantangan Diet 7 Hari Tanpa Tepung & Gula`;
+
+    updatePreview();
+  }
+
+  function updatePreview() {
+    const brandSel = document.getElementById('brandSelect');
+    const brandOpt = brandSel.options[brandSel.selectedIndex];
+    const brandProfileId = brandOpt.value;
+    const brandName = brandOpt.getAttribute('data-name');
+    const campaignName = document.getElementById('campaignNameInput').value;
+    const ncFolder = document.getElementById('ncFolderInput').value;
+    const targetLang = document.getElementById('langSelect').value;
+    const voiceProv = document.getElementById('voiceProviderSelect').value;
+    const voicePersona = document.getElementById('voicePersonaSelect').value;
+    const demographic = document.getElementById('demographicSelect').value;
+    const audioSegment = document.getElementById('audioSegmentSelect').value === 'true';
+    const sfx = document.getElementById('sfxSelect').value;
+    const outro = document.getElementById('outroInput').value;
+    const directive = document.getElementById('directiveInput').value;
+
+    const narrative = document.getElementById('narrativeSelect').value;
+    const ratio = document.getElementById('ratioSelect').value;
+    const model = document.getElementById('modelSelect').value;
+    const clipsCount = Number(document.getElementById('clipsCountInput').value);
+    const duration = Number(document.getElementById('durationSelect').value);
+    const face = document.getElementById('faceSelect').value;
+    const style = document.getElementById('styleSelect').value;
+
+    const bridgeAt = Number(document.getElementById('bridgeAtInput').value);
+    const bridgeDur = Number(document.getElementById('bridgeDurSelect').value);
+    const promoStyle = document.getElementById('promoStyleSelect').value;
+    const visualMode = document.getElementById('visualModeSelect').value;
+
+    const concept = document.getElementById('conceptSelect').value;
+    const subjectDemo = document.getElementById('subjectDemoSelect').value;
+    const lighting = document.getElementById('lightingSelect').value;
+    const wardrobe = document.getElementById('wardrobeSelect').value;
+
+    document.getElementById('vBrand').textContent = `${brandName} (${brandProfileId.slice(0, 8)}...)`;
+    document.getElementById('vCampaign').textContent = campaignName.slice(0, 35) + '...';
+    document.getElementById('vFolder').textContent = ncFolder;
+
+    const fullPayload = {
+      // Direct Table Columns in re_multiplier_tasks
+      table_columns: {
+        campaign_name: campaignName,
+        brand_profile_id: brandProfileId,
+        account_name: brandName,
+        generate_recipe: 1,
+        enable_vo_audit: 1
+      },
+      // Accordion 1 & 2 Config Objects
+      bridging_config_json: {
+        campaign_name: campaignName,
+        brand_profile_id: brandProfileId,
+        account_name: brandName,
+        targetClipsCount: clipsCount,
+        bridgeAtClip: bridgeAt,
+        bridgeDurationClips: bridgeDur,
+        promotionStyle: promoStyle,
+        visualMode: visualMode,
+        editorialOutro: outro,
+        generate_recipe: 1
+      },
+      audio_config_json: {
+        campaign_name: campaignName,
+        brand_profile_id: brandProfileId,
+        account_name: brandName,
+        nextcloudParentFolder: ncFolder,
+        targetLanguage: targetLang,
+        voiceProvider: voiceProv,
+        voicePersona: voicePersona,
+        targetDemographic: demographic,
+        enableAudioSegment: audioSegment,
+        sfxSetting: sfx,
+        mandatoryOutroLine: outro,
+        aiDirective: directive
+      },
+      vso_config_json: {
+        narrativeMode: narrative,
+        aspectRatio: ratio,
+        videoModel: model,
+        clipDuration: duration,
+        faceVisibility: face,
+        visualStyle: style,
+        isVsoActive: true,
+        characterConcept: concept,
+        subjectDemographic: subjectDemo,
+        lightingStyle: lighting,
+        wardrobeStyle: wardrobe
+      }
+    };
+
+    document.getElementById('payloadPreview').textContent = JSON.stringify(fullPayload, null, 2);
+  }
+
+  // Init
+  updatePreview();
+</script>
+
+</body>
+</html>

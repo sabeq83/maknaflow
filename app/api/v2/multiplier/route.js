@@ -9,6 +9,7 @@ import {
   setSetting,
   dbAll
 } from '@/lib/db';
+import { generateCampaignId } from '@/lib/id-generator';
 
 import { withTenantContext } from '@/lib/auth';
 
@@ -88,7 +89,7 @@ export const POST = withTenantContext(async (request) => {
     const contentType = request.headers.get('content-type') || '';
     let parsedBody = {};
     let productRefImagePath = null;
-    const batchTaskId = uuidv4();
+    const batchTaskId = generateCampaignId('mul');
 
     if (contentType.includes('multipart/form-data')) {
       const formData = await request.formData();
@@ -105,7 +106,13 @@ export const POST = withTenantContext(async (request) => {
         generate_recipe: Number(formData.get('generate_recipe') || 0),
         rows: formData.get('rows') ? JSON.parse(formData.get('rows')) : null,
         shared_config: formData.get('shared_config') ? JSON.parse(formData.get('shared_config')) : null,
-        mode: formData.get('mode') || null
+        mode: formData.get('mode') || null,
+        campaign_name: formData.get('campaign_name') || null,
+        campaignName: formData.get('campaignName') || null,
+        brand_profile_id: formData.get('brand_profile_id') || null,
+        selectedBrandId: formData.get('selectedBrandId') || null,
+        account_name: formData.get('account_name') || null,
+        accountName: formData.get('accountName') || null
       };
 
       // Handle product media file upload
@@ -144,7 +151,13 @@ export const POST = withTenantContext(async (request) => {
       generate_recipe = 0,
       rows,
       shared_config,
-      mode
+      mode,
+      campaign_name,
+      campaignName,
+      brand_profile_id,
+      selectedBrandId,
+      account_name,
+      accountName
     } = parsedBody;
 
     const parsedGenerateRecipe = Number(generate_recipe || 0);
@@ -182,9 +195,18 @@ export const POST = withTenantContext(async (request) => {
         bridgingConfig.product_ref_image_path = productRefImagePath;
       }
 
-      const batchId = `mtb_${uuidv4().replaceAll('-', '').slice(0, 16)}`;
+      // Standardisasi ID Kampanye Multiplier selaras Pillar ('opc') dan RE ('re'): mul_YYMMDD_6hex
+      const batchId = generateCampaignId('mul');
+
+      const effectiveCampaignName = campaign_name || campaignName || bridgingConfig.campaign_name || bridgingConfig.campaignName || audioConfig.campaignName || null;
+      const effectiveBrandProfileId = brand_profile_id || selectedBrandId || bridgingConfig.brand_profile_id || audioConfig.brandProfileId || null;
+      const effectiveAccountName = account_name || accountName || bridgingConfig.brandName || bridgingConfig.account_name || audioConfig.accountName || null;
+
       const batch = {
         batch_id: batchId,
+        campaign_name: effectiveCampaignName,
+        brand_profile_id: effectiveBrandProfileId,
+        account_name: effectiveAccountName,
         shared_config: shared_config || { vso: vsoConfig, bridging: bridgingConfig, audio: audioConfig },
         enable_vo_audit: Number(enable_vo_audit !== undefined ? enable_vo_audit : 1),
         generate_recipe: parsedGenerateRecipe
