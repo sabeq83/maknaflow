@@ -852,6 +852,11 @@ function MultiplierLabPageContent() {
 
     setSubmitting(true);
     try {
+      const isPureStory = campaignType === 'editorial' || 
+                          workflowMode === 'one_blueprint_multi_angle' || 
+                          workflowMode === 'multi_blueprint_one_angle' ||
+                          (combinationRows.length > 0 && combinationRows.every(r => r.campaign_type === 'pure_storytelling'));
+
       const dbProduct = targetProductId ? products.find(p => p.id === targetProductId) : null;
       const dbPhotoUrl = dbProduct ? (dbProduct.cleaned_photo_url || dbProduct.clean_photo_url || dbProduct.raw_photo_url) : null;
 

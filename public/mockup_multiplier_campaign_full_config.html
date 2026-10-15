@@ -178,6 +178,17 @@
 
             <div class="form-group">
               <label class="form-label">
+                <span>Tipe Kampanye (Campaign Mode)</span>
+                <span class="badge-saved">Penentu isPureStory</span>
+              </label>
+              <select id="campaignTypeSelect" class="form-input" onchange="updatePreview()">
+                <option value="editorial" selected>✨ Tanpa Produk (Pure Storytelling / Editorial)</option>
+                <option value="product">📦 Promosi Produk (Product Bridging Campaign)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
                 <span>Nama Kampanye</span>
                 <span class="badge-saved">Disimpan di Kolom DB</span>
               </label>
@@ -496,6 +507,7 @@
     const brandOpt = brandSel.options[brandSel.selectedIndex];
     const brandProfileId = brandOpt.value;
     const brandName = brandOpt.getAttribute('data-name');
+    const campaignType = document.getElementById('campaignTypeSelect').value;
     const campaignName = document.getElementById('campaignNameInput').value;
     const ncFolder = document.getElementById('ncFolderInput').value;
     const targetLang = document.getElementById('langSelect').value;
@@ -529,7 +541,12 @@
     document.getElementById('vCampaign').textContent = campaignName.slice(0, 35) + '...';
     document.getElementById('vFolder').textContent = ncFolder;
 
+    // Evaluasi penentu Pure Storytelling vs Product Campaign
+    const isPureStory = campaignType === 'editorial';
+
     const fullPayload = {
+      evaluated_mode: isPureStory ? '✨ pure_storytelling (Tanpa Produk)' : '📦 product_campaign (Promosi Produk)',
+      is_pure_story: isPureStory,
       // Direct Table Columns in re_multiplier_tasks
       table_columns: {
         campaign_name: campaignName,
@@ -543,10 +560,12 @@
         campaign_name: campaignName,
         brand_profile_id: brandProfileId,
         account_name: brandName,
+        campaign_type: isPureStory ? 'pure_storytelling' : 'product_campaign',
+        isBridgingActive: isPureStory ? false : true,
         targetClipsCount: clipsCount,
-        bridgeAtClip: bridgeAt,
-        bridgeDurationClips: bridgeDur,
-        promotionStyle: promoStyle,
+        bridgeAtClip: isPureStory ? null : bridgeAt,
+        bridgeDurationClips: isPureStory ? null : bridgeDur,
+        promotionStyle: isPureStory ? null : promoStyle,
         visualMode: visualMode,
         editorialOutro: outro,
         generate_recipe: 1

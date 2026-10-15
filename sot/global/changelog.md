@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.50 — Fix Runtime Error isPureStory is not defined di Multiplier Lab (15/10/2026)
+- Deklarasi isPureStory pada submit handler pembuatan kampanye Multiplier Lab
+- Dukungan penentuan otomatis mode Pure Storytelling vs Product Campaign
+- Pembaruan mockup simulasi interaktif pilihan tipe kampanye
+
 ## V2.32.49 — Standardisasi ID Multiplier mul_YYMMDD, Lineage ContentFlow & Retensi 4 Accordion (15/10/2026)
 - Standardisasi Campaign ID Multiplier mul_YYMMDD_6hex dan Task ID Baris N
 - Lineage Video ID ContentFlow account_mul_hash_sequence yang traceable ke baris kampanye
