@@ -76,6 +76,14 @@ const getBrandBadgeStyle = (accountName) => {
       boxShadow: '0 2px 10px var(--brand-green-glow)'
     };
   }
+  if (acc === 'nutribake' || acc.includes('nutri') || acc.includes('bake')) {
+    return {
+      background: 'var(--status-warning-soft)',
+      border: '1px solid var(--status-warning)',
+      color: 'var(--status-warning)',
+      boxShadow: '0 2px 10px var(--status-warning-soft)'
+    };
+  }
   // Fallback Option D (Sleek Emerald Green)
   return {
     background: 'var(--brand-green-bg)',
@@ -755,7 +763,8 @@ function ContentFlowHubPageContent() {
       re: { label: 'Reverse Eng (RE)', bg: 'var(--status-warning-soft)', color: 'var(--status-warning)', border: 'var(--status-warning-soft)' },
       instant: { label: 'Instant Factory', bg: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', border: 'rgba(236, 72, 153, 0.3)' },
       recipe: { label: 'Recipe Labs', bg: 'rgba(139, 92, 246, 0.15)', color: '#a78bfa', border: 'rgba(139, 92, 246, 0.3)' },
-      bridge: { label: 'Bridge Injector', bg: 'rgba(6, 182, 212, 0.15)', color: 'var(--link)', border: 'rgba(6, 182, 212, 0.3)' }
+      bridge: { label: 'Bridge Injector', bg: 'rgba(6, 182, 212, 0.15)', color: 'var(--link)', border: 'rgba(6, 182, 212, 0.3)' },
+      multiplier: { label: 'Multiplier Lab', bg: 'var(--status-info-soft)', color: 'var(--link)', border: 'var(--border-subtle)' }
     };
     const b = badges[sourceType] || badges.opc;
     return (
@@ -1266,6 +1275,7 @@ function ContentFlowHubPageContent() {
                   style={{ width: '100%', padding: '9px 12px', borderRadius: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)', fontSize: '12px', outline: 'none' }}
                 >
                   <option value="all">Semua Sumber Kampanye (All)</option>
+                  <option value="multiplier">🔬 Multiplier Lab</option>
                   <option value="opc">🌱 OPC (Organic Pillar)</option>
                   <option value="strategic">🎯 Strategic Campaign</option>
                   <option value="re">🔄 Reverse Engineering</option>
@@ -1664,6 +1674,7 @@ function ContentFlowHubPageContent() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0 }}>
                       {/* 1. Nama Produk SKU & Link */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        {item.source_type && getSourceBadge(item.source_type)}
                         <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--status-success)', background: 'var(--status-success-soft)', padding: '3px 10px', borderRadius: '8px', border: '1px solid var(--status-success-soft)' }}>
                           📦 {item.nama_produk || 'Umum'}
                         </span>

@@ -17,7 +17,7 @@ export const GET = withTenantContext(async (request, _context, user) => {
     const page = searchParams.get('page') || '1';
     const limit = searchParams.get('limit') || '50';
 
-    const allowedAccounts = user.role === 'admin' ? undefined : user.assignedBrandNames;
+    const allowedAccounts = (user.role === 'admin' || user.role === 'superadmin') ? undefined : user.assignedBrandNames;
     const result = await listContentFlowItems({ sourceType, accountName, productName, pipelineStatus, youtubeStatus, tiktokStatus, facebookStatus, instagramStatus, q, page, limit, allowedAccounts });
     return NextResponse.json({ success: true, ...result });
   } catch (err) {

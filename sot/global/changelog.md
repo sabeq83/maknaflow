@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.46 — Integrasi Multiplier Lab sebagai sumber kampanye di ContentFlow (15/10/2026)
+- Tambahkan Multiplier Lab ke dropdown filter sumber kampanye dan badge kartu video ContentFlow
+- Deteksi brand profile otomatis dari folder Nextcloud dan teruskan YouTube title serta resep ke content_flow_items
+- Bypass allowedAccounts filtering untuk role superadmin di API ContentFlow
+
 ## V2.32.45 — Fix Multiplier Lab visual clip download and auto-recovery in FFmpeg muxing (15/10/2026)
 - Ganti downloader yt-dlp ke direct HTTP fetch untuk klip video visual
 - Tambahkan auto-recovery download klip dari glabs_tasks pada tahap handleFFmpegMuxing jika file lokal belum tersedia
