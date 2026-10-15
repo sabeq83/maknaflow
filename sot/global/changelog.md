@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.40 — Fix Multiplier Lab Angle Generator Column Schema Error (15/10/2026)
+- Perbaiki kueri re_deconstructed_assets di Multiplier Lab angle generator dengan source_url dan alias kompatibilitas original_video_url
+- Hapus kolom non-existent prompt_dna_json dan dukung narration_transcript serta injeksi viral_pattern_summary pada prompt Gemini
+
 ## V2.32.39 — G-Labs Prominent Person Guardrail & Pillar Campaign Resolution (14/10/2026)
 - Tambah filter de-personalization pada sanitizeI2vPrompt untuk mencegah penolakan prominent_person oleh G-Labs Veo
 - Perbaiki dan selesaikan seluruh 18 klip kampanye pilar opc_261012_lyg6eh di staging hingga 100% completed
