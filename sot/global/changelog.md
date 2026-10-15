@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.47 — Fix ContentFlow Multiplier Sync idempotency with existing video ID map (15/10/2026)
+- Pre-fetch existing video IDs to prevent unique constraint conflicts
+- Use Promise.allSettled for robust campaign ingestion
+
 ## V2.32.46 — Integrasi Multiplier Lab sebagai sumber kampanye di ContentFlow (15/10/2026)
 - Tambahkan Multiplier Lab ke dropdown filter sumber kampanye dan badge kartu video ContentFlow
 - Deteksi brand profile otomatis dari folder Nextcloud dan teruskan YouTube title serta resep ke content_flow_items
