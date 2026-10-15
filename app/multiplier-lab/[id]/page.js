@@ -3,6 +3,7 @@
 import Sidebar from '../../components/Sidebar';
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { normalizeAudioConfig, syncAudioConfigKeyValue } from '@/lib/multiplier-audio-config';
 
 const GEMINI_VOICES = [
   { id: 'Kore', name: 'Kore (Female)', avatar: '👩', desc: 'Standard Female (Skincare/Cosmetic)' },
@@ -106,10 +107,10 @@ function CampaignDetailPageContent() {
           setIsSchedulerActive(data.isSchedulerActive);
         }
         
-        // Populate local states for editing if not already set
+        // Populate local states for editing if not already set (functional updater prevents stale closure overwrites)
         data.tasks.forEach(t => {
-          const currentStoryboard = editedStoryboards[t.id] || [];
-          if (currentStoryboard.length === 0) {
+          setEditedStoryboards(prev => {
+            if (prev[t.id] && prev[t.id].length > 0) return prev;
             let storyboard = [];
             try {
               storyboard = JSON.parse(t.remake_storyboard_json || '[]');
@@ -129,36 +130,32 @@ function CampaignDetailPageContent() {
                 i2v_prompt: p.i2v_prompt || p.t2v_prompt || ''
               };
             });
-            if (combined.length > 0) {
-              setEditedStoryboards(prev => ({ ...prev, [t.id]: combined }));
-            }
-          }
-          if (editedCaptions[t.id] === undefined) {
-            setEditedCaptions(prev => ({ ...prev, [t.id]: t.new_caption || '' }));
-          }
-          if (editedYtTitles[t.id] === undefined) {
-            setEditedYtTitles(prev => ({ ...prev, [t.id]: t.yt_title || '' }));
-          }
-          if (!editedDnas[t.id]) {
+            return combined.length > 0 ? { ...prev, [t.id]: combined } : prev;
+          });
+
+          setEditedCaptions(prev => {
+            if (prev[t.id] !== undefined) return prev;
+            return { ...prev, [t.id]: t.new_caption || '' };
+          });
+
+          setEditedYtTitles(prev => {
+            if (prev[t.id] !== undefined) return prev;
+            return { ...prev, [t.id]: t.yt_title || '' };
+          });
+
+          setEditedDnas(prev => {
+            if (prev[t.id]) return prev;
             let dna = {};
             try {
               dna = JSON.parse(t.vso_config_json || '{}');
             } catch (_) {}
-            setEditedDnas(prev => ({ ...prev, [t.id]: dna }));
-          }
-          if (!editedAudioConfigs[t.id]) {
-            let audioConfig = {};
-            try {
-              audioConfig = JSON.parse(t.audio_config_json || '{}');
-            } catch (_) {}
-            // Enforce staging requirements
-            audioConfig.ffmpeg_sfx_volume = 0.00;
-            audioConfig.ffmpeg_bgm_volume = 0.00;
-            if (audioConfig.ffmpeg_video_scale === undefined) {
-              audioConfig.ffmpeg_video_scale = 1.1;
-            }
-            setEditedAudioConfigs(prev => ({ ...prev, [t.id]: audioConfig }));
-          }
+            return { ...prev, [t.id]: dna };
+          });
+
+          setEditedAudioConfigs(prev => {
+            if (prev[t.id]) return prev;
+            return { ...prev, [t.id]: normalizeAudioConfig(t.audio_config_json) };
+          });
         });
       }
     } catch (err) {
@@ -256,6 +253,7 @@ function CampaignDetailPageContent() {
     setActionLoading(prev => ({ ...prev, [taskId]: true }));
     try {
       const task = tasks.find(t => t.id === taskId);
+      const currentAudio = normalizeAudioConfig(editedAudioConfigs[taskId] || task.audio_config_json);
       const res = await fetch(`/api/v2/multiplier/${taskId}/update-creative`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -263,7 +261,7 @@ function CampaignDetailPageContent() {
           storyboard: editedStoryboards[taskId],
           vsoConfig: JSON.parse(task.vso_config_json || '{}'),
           bridgingConfig: JSON.parse(task.bridging_config_json || '{}'),
-          audioConfig: editedAudioConfigs[taskId] || JSON.parse(task.audio_config_json || '{}'),
+          audioConfig: currentAudio,
           newCaption: editedCaptions[taskId],
           ytTitle: editedYtTitles[taskId]
         })
@@ -271,6 +269,7 @@ function CampaignDetailPageContent() {
       const data = await res.json();
       if (data.success) {
         showToast('Perubahan kreatif berhasil disimpan.');
+        setEditedAudioConfigs(prev => ({ ...prev, [taskId]: currentAudio }));
         fetchTasks();
       } else {
         showToast(data.error || 'Gagal menyimpan perubahan.', 'error');
@@ -286,16 +285,18 @@ function CampaignDetailPageContent() {
     if (!confirm('Apakah Anda yakin ingin menyetujui kreatif ini dan melanjutkan ke produksi video?')) return;
     setActionLoading(prev => ({ ...prev, [taskId]: true }));
     try {
+      const currentAudio = normalizeAudioConfig(editedAudioConfigs[taskId] || tasks.find(t => t.id === taskId)?.audio_config_json);
       const res = await fetch(`/api/v2/multiplier/${taskId}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          audio_config_json: JSON.stringify(editedAudioConfigs[taskId] || {})
+          audio_config_json: JSON.stringify(currentAudio)
         })
       });
       const data = await res.json();
       if (data.success) {
         showToast('Kreatif disetujui! Memulai produksi video...');
+        setEditedAudioConfigs(prev => ({ ...prev, [taskId]: currentAudio }));
         fetchTasks();
       } else {
         showToast(data.error || 'Gagal memproses persetujuan.', 'error');
@@ -1131,15 +1132,12 @@ function CampaignDetailPageContent() {
 
                                     {/* 5. Workflow & Audio Settings (1 Column Layout) */}
                                     {(() => {
-                                      const cfg = editedAudioConfigs[task.id] || {};
+                                      const cfg = normalizeAudioConfig(editedAudioConfigs[task.id] || task.audio_config_json);
                                       const setCfgValue = (key, value) => {
-                                        setEditedAudioConfigs(prev => ({
-                                          ...prev,
-                                          [task.id]: {
-                                            ...prev[task.id],
-                                            [key]: value
-                                          }
-                                        }));
+                                        setEditedAudioConfigs(prev => {
+                                          const updated = syncAudioConfigKeyValue(prev[task.id] || task.audio_config_json, key, value);
+                                          return { ...prev, [task.id]: updated };
+                                        });
                                       };
 
                                       return (
@@ -1198,15 +1196,15 @@ function CampaignDetailPageContent() {
                                                 <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Voice Provider</label>
                                                 <select
                                                   className="form-input"
-                                                  value={cfg.voice_provider || 'minimax'}
+                                                  value={cfg.voice_provider || cfg.voiceProvider || 'minimax'}
                                                   onChange={e => {
                                                     const prov = e.target.value;
-                                                    setCfgValue('voice_provider', prov);
-                                                    if (prov === 'gemini') {
-                                                      setCfgValue('voice_persona', 'Kore');
-                                                    } else {
-                                                      setCfgValue('voice_persona', 'Indonesian_casual_reporter_vv2');
-                                                    }
+                                                    setEditedAudioConfigs(prev => {
+                                                      let updated = syncAudioConfigKeyValue(prev[task.id] || task.audio_config_json, 'voice_provider', prov);
+                                                      const defaultPersona = prov === 'gemini' ? 'Kore' : 'Indonesian_casual_reporter_vv2';
+                                                      updated = syncAudioConfigKeyValue(updated, 'voice_persona', defaultPersona);
+                                                      return { ...prev, [task.id]: updated };
+                                                    });
                                                   }}
                                                 >
                                                   <option value="minimax">MiniMax Speech (vv2 Engine)</option>
@@ -1218,7 +1216,7 @@ function CampaignDetailPageContent() {
                                                 <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Voice Persona</label>
                                                 <select
                                                   className="form-input"
-                                                  value={cfg.voice_persona || (cfg.voice_provider === 'gemini' ? 'Kore' : 'Indonesian_casual_reporter_vv2')}
+                                                  value={cfg.voice_persona || cfg.voicePersona || (cfg.voice_provider === 'gemini' ? 'Kore' : 'Indonesian_casual_reporter_vv2')}
                                                   onChange={e => setCfgValue('voice_persona', e.target.value)}
                                                 >
                                                   {cfg.voice_provider === 'gemini' ? (

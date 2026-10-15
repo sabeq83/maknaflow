@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { dbRun, getMultiplierTaskById } from '@/lib/db';
 import { withTenantContext } from '@/lib/auth';
+import { normalizeAudioConfig } from '@/lib/multiplier-audio-config';
 
 export const POST = withTenantContext(async (req, { params }) => {
   try {
@@ -15,11 +16,12 @@ export const POST = withTenantContext(async (req, { params }) => {
     }
 
     if (audio_config_json) {
+      const normalizedAudio = normalizeAudioConfig(audio_config_json);
       await dbRun(`
         UPDATE re_multiplier_tasks 
         SET status = 'generating_audio', audio_config_json = ?, error_message = NULL 
         WHERE id = ?
-      `, [audio_config_json, id]);
+      `, [JSON.stringify(normalizedAudio), id]);
     } else {
       await dbRun("UPDATE re_multiplier_tasks SET status = 'generating_audio', error_message = NULL WHERE id = ?", [id]);
     }

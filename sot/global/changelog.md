@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.43 — Perbaikan Sinkronisasi Voice Persona & Video Scale Zoom pada Multiplier Lab (15/10/2026)
+- Normalisasi dual-casing camelCase dan snake_case pada audio_config_json
+- Perbaikan mutator setCfgValue agar tidak mereset voice_persona saat video scale digeser
+- Pencegahan penimpaan state lokal oleh polling interval fetchTasks
+
 ## V2.32.42 — Penguncian & Progress Real-Time Tombol Generate All T2I Multiplier Lab (15/10/2026)
 - Penyelarasan status penguncian disabled pada tombol Generate All T2I selaras Organic Pillar Campaign
 - Penambahan kolom regenerate_start_frames_status dan progress pada tabel re_multiplier_tasks

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { dbRun, getMultiplierTaskById } from '@/lib/db';
 import { withTenantContext } from '@/lib/auth';
+import { normalizeAudioConfig } from '@/lib/multiplier-audio-config';
 
 export const POST = withTenantContext(async (req, { params }) => {
   try {
@@ -23,6 +24,8 @@ export const POST = withTenantContext(async (req, { params }) => {
       prompt: s.i2v_prompt || ''
     }));
 
+    const normalizedAudio = normalizeAudioConfig(audioConfig || {});
+
     await dbRun(`
       UPDATE re_multiplier_tasks
       SET remake_storyboard_json = ?,
@@ -38,7 +41,7 @@ export const POST = withTenantContext(async (req, { params }) => {
       JSON.stringify(prompts),
       JSON.stringify(vsoConfig || {}),
       JSON.stringify(bridgingConfig || {}),
-      JSON.stringify(audioConfig || {}),
+      JSON.stringify(normalizedAudio),
       newCaption || '',
       ytTitle !== undefined ? ytTitle : null,
       id
