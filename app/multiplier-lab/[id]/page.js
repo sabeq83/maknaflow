@@ -216,7 +216,13 @@ function CampaignDetailPageContent() {
       const res = await fetch(`/api/v2/multiplier?batchId=${id}`);
       const data = await res.json();
       if (data.success) {
-        setTasks(data.tasks || []);
+        const sorted = (data.tasks || []).sort((a, b) => {
+          const aIdx = (a.row_index !== null && a.row_index !== undefined) ? Number(a.row_index) : 0;
+          const bIdx = (b.row_index !== null && b.row_index !== undefined) ? Number(b.row_index) : 0;
+          if (aIdx !== bIdx) return aIdx - bIdx;
+          return (a.id || '').localeCompare(b.id || '', undefined, { numeric: true });
+        });
+        setTasks(sorted);
         if (data.isSchedulerActive !== undefined) {
           setIsSchedulerActive(data.isSchedulerActive);
         }
@@ -959,18 +965,19 @@ function CampaignDetailPageContent() {
                 const isExpanded = expandedTaskId === task.id;
                 const activeTab = activeTabs[task.id] || 'storyboard';
                 const storyboard = editedStoryboards[task.id] || [];
-                const displayTitle = task.yt_title || editedYtTitles[task.id] || bridgingConfig.angleTitle || bridgingConfig.editorialTopic || snap.product_name || `Video Angle #${idx + 1}`;
+                const rowNumber = (task.row_index !== null && task.row_index !== undefined) ? Number(task.row_index) + 1 : idx + 1;
+                const displayTitle = task.yt_title || editedYtTitles[task.id] || bridgingConfig.angleTitle || bridgingConfig.editorialTopic || snap.product_name || `Video Angle #${rowNumber}`;
 
                 return (
                   <Suspense key={task.id} fallback={<tr><td colSpan={4}>Loading...</td></tr>}>
                     <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                       <td style={{ fontFamily: 'monospace', fontSize: '0.85rem', padding: '14px 16px', textAlign: 'center', color: 'var(--text-muted)', fontWeight: 700 }}>
-                        {idx + 1}
+                        {rowNumber}
                       </td>
                       <td style={{ padding: '14px 16px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, flexWrap: 'wrap' }}>
                           <span style={{ fontSize: '0.68rem', fontFamily: 'monospace', fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: 'var(--surface-interactive)', color: 'var(--action-primary)', border: '1px solid var(--border-subtle)' }}>
-                            Baris #{idx + 1} ({task.id})
+                            Baris #{rowNumber} ({task.id})
                           </span>
                           {bridgingConfig.hookType && (
                             <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: 'rgba(45, 212, 191, 0.15)', color: 'var(--action-primary)', border: '1px solid rgba(45, 212, 191, 0.3)' }}>

@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { 
   getMultiplierTasks, 
+  getMultiplierTasksByBatchId,
   createMultiplierTask,
   getSetting,
   setSetting,
@@ -17,10 +18,20 @@ export const GET = withTenantContext(async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     const batchId = searchParams.get('batchId');
-    let tasks = await getMultiplierTasks();
+    let tasks = [];
     if (batchId) {
-      tasks = tasks.filter(t => t.batch_id === batchId);
+      tasks = await getMultiplierTasksByBatchId(batchId);
+    } else {
+      tasks = await getMultiplierTasks();
     }
+
+    // Deterministic steady ascending sorting (Baris 1 s/d N)
+    tasks.sort((a, b) => {
+      const aIdx = (a.row_index !== null && a.row_index !== undefined) ? Number(a.row_index) : 0;
+      const bIdx = (b.row_index !== null && b.row_index !== undefined) ? Number(b.row_index) : 0;
+      if (aIdx !== bIdx) return aIdx - bIdx;
+      return (a.id || '').localeCompare(b.id || '', undefined, { numeric: true });
+    });
     for (const task of tasks) {
       const glabsTasks = await dbAll('SELECT * FROM glabs_tasks WHERE campaign_id = ? ORDER BY item_id ASC', [task.id]);
       task.glabs_tasks = glabsTasks.map(gt => ({

@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.55 — Steady Ascending Ordering (1..N) for Multiplier Lab Campaign Detail (16/10/2026)
+- Penambahan getMultiplierTasksByBatchId dengan SQL ORDER BY row_index ASC dan id ASC pada lib/db.js
+- Pengurutan deterministik ascending pada API GET /api/v2/multiplier?batchId=...
+- Pengurutan state tasks dan pengikatan nomor urut label berbasis row_index permanen pada app/multiplier-lab/[id]/page.js
+- Mockup interaktif public/mockup_multiplier_steady_order.html dan unit test tests/multiplier-steady-order.test.js
+
 ## V2.32.54 — Fix Undefined generateRecipe in Multiplier Batch Task Creation (16/10/2026)
 - Deklarasi variabel generateRecipe sebelum rowBridging pada fungsi createMultiplierBatchWithTasks di lib/db.js
 - Pencegahan ReferenceError saat insert baris re_multiplier_tasks

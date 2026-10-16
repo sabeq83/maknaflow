@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Urutan Baris Steady Ascending (1..N) - Multiplier Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --border-color: #26354a;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --font-sans: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme='light'] {
+      --canvas: #f8fafc;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border-subtle: #cbd5e1;
+      --border-strong: #94a3b8;
+      --border-color: #cbd5e1;
+      --action-primary: #0d9488;
+      --action-primary-hover: #0f766e;
+      --on-action-primary: #ffffff;
+      --link: #0284c7;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.1);
+      --status-neutral: #7c3aed;
+      --status-neutral-soft: rgba(124, 58, 237, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      padding: 24px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .title-area h1 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge-sub {
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      background: var(--surface-interactive);
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: var(--action-primary);
+      border: 1px solid var(--border-subtle);
+    }
+    .theme-toggle {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    /* Comparison Box */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 860px) {
+      .compare-grid { grid-template-columns: 1fr; }
+    }
+    .compare-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+    .compare-card.bad {
+      border-color: var(--status-danger);
+      background: linear-gradient(180deg, var(--status-danger-soft) 0%, var(--surface) 100%);
+    }
+    .compare-card.good {
+      border-color: var(--status-success);
+      background: linear-gradient(180deg, var(--status-success-soft) 0%, var(--surface) 100%);
+    }
+    .compare-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .compare-card p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    /* Simulation Control Toolbar */
+    .sim-bar {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .sim-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.86rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+    .btn-outline {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+    }
+    .btn-outline:hover {
+      background: var(--surface-hover);
+    }
+    .mode-pill-group {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 4px;
+    }
+    .mode-pill {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      transition: all 0.15s ease;
+    }
+    .mode-pill.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+
+    /* Table Component */
+    .table-container {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    th {
+      background: var(--surface-interactive);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 16px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: middle;
+      transition: all 0.3s ease;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    .row-jitter-flash {
+      animation: flashRow 0.8s ease;
+    }
+    @keyframes flashRow {
+      0% { background: rgba(251, 113, 133, 0.25); }
+      100% { background: transparent; }
+    }
+    .row-steady-flash {
+      animation: flashSteady 0.8s ease;
+    }
+    @keyframes flashSteady {
+      0% { background: rgba(74, 222, 128, 0.2); }
+      100% { background: transparent; }
+    }
+
+    .badge-baris {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      border: 1px solid var(--border-subtle);
+    }
+    .badge-hook {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(45, 212, 191, 0.15);
+      color: var(--action-primary);
+      border: 1px solid rgba(45, 212, 191, 0.3);
+    }
+    .badge-persona {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+
+    .phase-badge {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      whiteSpace: nowrap;
+    }
+    .pulse-anim {
+      animation: pulse 2s infinite ease-in-out;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(0.98); }
+    }
+
+    /* Architecture Explainer */
+    .arch-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .arch-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--action-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .layer-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .layer-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      font-size: 0.88rem;
+      background: var(--surface);
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+    }
+    .layer-pill {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="title-area">
+      <h1>
+        <span>📐 Simulasi Urutan Baris Kampanye Multiplier</span>
+        <span class="badge-sub">Steady Ascending (1..N)</span>
+      </h1>
+      <p style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 4px;">
+        Memastikan baris kampanye dari Baris #1 hingga Baris #N selalu berurutan permanen seperti pada Kampanye Pilar.
+      </p>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Mode</button>
+  </header>
+
+  <div class="compare-grid">
+    <div class="compare-card bad">
+      <h3>❌ Perilaku Sebelum (Unsorted / Jittery)</h3>
+      <p>
+        Database mengeksekusi <code>ORDER BY t.created_at DESC</code> tanpa tie-breaker. Saat status salah satu baris diupdate oleh worker, baris tersebut melompat posisi di heap PostgreSQL. Setiap polling 5 detik, urutan baris tertukar secara acak.
+      </p>
+    </div>
+    <div class="compare-card good">
+      <h3>✅ Perilaku Sesudah (3-Layer Steady Ascending)</h3>
+      <p>
+        Urutan dikunci permanen: Database <code>ORDER BY t.row_index ASC, t.id ASC</code>, API melakukan numeric sort, dan Frontend mempertahankan posisi Baris 1 s/d N. Baris tidak akan pernah bergeser meskipun status fase terus berprogres.
+      </p>
+    </div>
+  </div>
+
+  <div class="sim-bar">
+    <div class="sim-left">
+      <span style="font-size: 0.86rem; font-weight: 700; color: var(--text-secondary);">Mode Tampilan:</span>
+      <div class="mode-pill-group">
+        <button class="mode-pill" id="pillBefore" onclick="setMode('before')">❌ Sebelum (Acak/Jittery)</button>
+        <button class="mode-pill active" id="pillAfter" onclick="setMode('after')">✅ Sesudah (Steady Ascending 1..N)</button>
+      </div>
+    </div>
+    <div>
+      <button class="btn btn-primary" onclick="simulateWorkerTick()">
+        ⚡ Simulasikan Worker Update / 5s Poll (<span id="tickCount">0</span>x)
+      </button>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 5%; text-align: center;">#</th>
+          <th style="width: 52%; text-align: left;">Angle & Judul Konten (Berdasarkan Sudut Pandang)</th>
+          <th style="width: 25%; text-align: left;">Fase Eksekusi</th>
+          <th style="width: 18%; text-align: right;">Status Baris</th>
+        </tr>
+      </thead>
+      <tbody id="taskTableBody">
+        <!-- Rendered by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <div class="arch-card">
+    <h3>🏛️ 3-Layer Steady Ordering Architecture</h3>
+    <div class="layer-list">
+      <div class="layer-item">
+        <span class="layer-pill">LAPIS 1 (DB)</span>
+        <div>
+          <strong>Query Khusus Batch di <code>lib/db.js</code></strong>: Fungsi <code>getMultiplierTasksByBatchId(batchId)</code> mengunci urutan dengan <code>ORDER BY t.row_index ASC, t.id ASC</code> (sama seperti <code>listPillarCampaignItems</code> pada Kampanye Pilar).
+        </div>
+      </div>
+      <div class="layer-item">
+        <span class="layer-pill">LAPIS 2 (API)</span>
+        <div>
+          <strong>Deterministic Sort di <code>app/api/v2/multiplier/route.js</code></strong>: Endpoint <code>GET ?batchId=...</code> melakukan numeric sorting ascending pada <code>row_index</code> dan <code>task.id</code> sebelum mengembalikan JSON.
+        </div>
+      </div>
+      <div class="layer-item">
+        <span class="layer-pill">LAPIS 3 (UI)</span>
+        <div>
+          <strong>Stable Sequence di <code>app/multiplier-lab/[id]/page.js</code></strong>: State <code>tasks</code> mengurutkan data saat di-fetch dan kolom nomor urut mengikat nomor asli <code>row_index + 1</code>, menjamin Baris #1 selalu Baris #1.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentMode = 'after'; // 'before' | 'after'
+  let ticks = 0;
+
+  // Master initial tasks data
+  const baseTasks = [
+    {
+      id: 'mul_261016_0stna8_01',
+      row_index: 0,
+      title: 'Solusi Ngidam Manis Jam 10 Malam Bebas Gula Darah Spike #Shorts',
+      hookType: 'Problem-Agitation',
+      targetPersona: 'Pejuang Diet Rendah Gula',
+      status: 'generating_t2i',
+      phaseText: '⚡ Fase 1 : Generasi T2I Start Frames',
+      color: 'var(--status-info)',
+      bg: 'var(--status-info-soft)',
+      border: 'var(--status-info-soft)',
+      pulse: true
+    },
+    {
+      id: 'mul_261016_0stna8_02',
+      row_index: 1,
+      title: 'Camilan Tinggi Protein Pembakar Lemak Pasca Olahraga #Shorts',
+      hookType: 'Challenge 7 Hari',
+      targetPersona: 'Fitness & Workout Enthusiast',
+      status: 'waiting_approval',
+      phaseText: '⏸️ Fase 2 : Paused (Ready for Review)',
+      color: 'var(--status-warning)',
+      bg: 'var(--status-warning-soft)',
+      border: 'var(--status-warning-soft)',
+      pulse: false
+    },
+    {
+      id: 'mul_261016_0stna8_03',
+      row_index: 2,
+      title: 'Trik Sarapan Kenyang 6 Jam Cuma Modal Toples & Kulkas #Shorts',
+      hookType: 'Direct Habit',
+      targetPersona: 'Pekerja Kantoran Sibuk / Meal Prep',
+      status: 'completed',
+      phaseText: '✅ Fase 2 : Completed',
+      color: 'var(--status-success)',
+      bg: 'var(--status-success-soft)',
+      border: 'var(--status-success-soft)',
+      pulse: false
+    },
+    {
+      id: 'mul_261016_0stna8_04',
+      row_index: 3,
+      title: 'Puding Cokelat Ramah Lambung & Pelancar Pencernaan #Shorts',
+      hookType: 'Curiosity Secret',
+      targetPersona: 'Penderita Gerd & Masalah Lambung',
+      status: 'ffmpeg_muxing',
+      phaseText: '⚡ Fase 2 : FFMPEG Process & Assembly',
+      color: 'var(--status-info)',
+      bg: 'var(--status-info-soft)',
+      border: 'var(--status-info-soft)',
+      pulse: true
+    },
+    {
+      id: 'mul_261016_0stna8_05',
+      row_index: 4,
+      title: 'Dessert Anti-Buncit Pengganti Kue Cokelat Kalori Tinggi #Shorts',
+      hookType: 'ASMR Visual',
+      targetPersona: 'Wanita Karir Pecinta Manis',
+      status: 'uploading_assets',
+      phaseText: '⚡ Fase 2 : Uploading Assets (Nextcloud)',
+      color: 'var(--action-primary)',
+      bg: 'rgba(45, 212, 191, 0.15)',
+      border: 'rgba(45, 212, 191, 0.3)',
+      pulse: true
+    }
+  ];
+
+  let currentTasks = JSON.parse(JSON.stringify(baseTasks));
+
+  function setMode(mode) {
+    currentMode = mode;
+    document.getElementById('pillBefore').classList.toggle('active', mode === 'before');
+    document.getElementById('pillAfter').classList.toggle('active', mode === 'after');
+    
+    if (mode === 'after') {
+      currentTasks.sort((a, b) => a.row_index - b.row_index);
+    } else {
+      // shuffle randomly to demonstrate jitter
+      shuffle(currentTasks);
+    }
+    renderTable();
+  }
+
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  const phaseList = [
+    { status: 'generating_t2i', phaseText: '⚡ Fase 1 : Generasi T2I Start Frames', color: 'var(--status-info)', bg: 'var(--status-info-soft)', border: 'var(--status-info-soft)', pulse: true },
+    { status: 'waiting_approval', phaseText: '⏸️ Fase 2 : Paused (Ready for Review)', color: 'var(--status-warning)', bg: 'var(--status-warning-soft)', border: 'var(--status-warning-soft)', pulse: false },
+    { status: 'generating_audio', phaseText: '⚡ Fase 2 : Generasi TTS Audio', color: 'var(--status-info)', bg: 'var(--status-info-soft)', border: 'var(--status-info-soft)', pulse: true },
+    { status: 'generating_visuals', phaseText: '⚡ Fase 2 : Generasi I2V Video (G-Labs)', color: 'var(--status-neutral)', bg: 'var(--status-neutral-soft)', border: 'var(--status-neutral-soft)', pulse: true },
+    { status: 'ffmpeg_muxing', phaseText: '⚡ Fase 2 : FFMPEG Process & Assembly', color: 'var(--status-info)', bg: 'var(--status-info-soft)', border: 'var(--status-info-soft)', pulse: true },
+    { status: 'completed', phaseText: '✅ Fase 2 : Completed', color: 'var(--status-success)', bg: 'var(--status-success-soft)', border: 'var(--status-success-soft)', pulse: false }
+  ];
+
+  function simulateWorkerTick() {
+    ticks++;
+    document.getElementById('tickCount').innerText = ticks;
+
+    // Mutate random task status
+    const targetIdx = Math.floor(Math.random() * currentTasks.length);
+    const newPhase = phaseList[Math.floor(Math.random() * phaseList.length)];
+    currentTasks[targetIdx] = {
+      ...currentTasks[targetIdx],
+      ...newPhase
+    };
+
+    if (currentMode === 'before') {
+      // In before mode: heap mutation moves the updated item to arbitrary position!
+      const updatedItem = currentTasks.splice(targetIdx, 1)[0];
+      const newPos = Math.random() > 0.5 ? 0 : currentTasks.length;
+      currentTasks.splice(newPos, 0, updatedItem);
+    } else {
+      // In after mode: strict ascending sort ensures row order never changes!
+      currentTasks.sort((a, b) => a.row_index - b.row_index);
+    }
+
+    renderTable(currentMode === 'before' ? 'row-jitter-flash' : 'row-steady-flash');
+  }
+
+  function renderTable(flashClass = '') {
+    const tbody = document.getElementById('taskTableBody');
+    tbody.innerHTML = '';
+
+    currentTasks.forEach((task, idx) => {
+      const displayRowNum = currentMode === 'after' ? (task.row_index + 1) : (idx + 1);
+      const tr = document.createElement('tr');
+      if (flashClass) tr.className = flashClass;
+
+      tr.innerHTML = `
+        <td style="font-family: var(--font-mono); font-size: 0.85rem; text-align: center; color: var(--text-muted); font-weight: 700;">
+          ${displayRowNum}
+        </td>
+        <td>
+          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap;">
+            <span class="badge-baris">Baris #${displayRowNum} (${task.id})</span>
+            <span class="badge-hook">${task.hookType}</span>
+            <span class="badge-persona">🎯 Target: ${task.targetPersona}</span>
+          </div>
+          <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">
+            ${task.title}
+          </div>
+        </td>
+        <td>
+          <span class="phase-badge ${task.pulse ? 'pulse-anim' : ''}" style="color: ${task.color}; background: ${task.bg}; border: 1px solid ${task.border};">
+            ${task.phaseText}
+          </span>
+        </td>
+        <td style="text-align: right;">
+          <span style="font-family: var(--font-mono); font-size: 0.78rem; color: ${task.status === 'completed' ? 'var(--status-success)' : 'var(--text-muted)'}; font-weight: 600;">
+            ${task.status === 'completed' ? '✓ Final Ready' : 'In Pipeline'}
+          </span>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const target = current === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', target);
+  }
+
+  // Initial render
+  renderTable();
+</script>
+
+</body>
+</html>
