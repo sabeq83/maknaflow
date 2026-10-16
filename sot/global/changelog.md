@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.54 — Fix Undefined generateRecipe in Multiplier Batch Task Creation (16/10/2026)
+- Deklarasi variabel generateRecipe sebelum rowBridging pada fungsi createMultiplierBatchWithTasks di lib/db.js
+- Pencegahan ReferenceError saat insert baris re_multiplier_tasks
+- Unit test otomatis validasi pembuatan batch kampanye Multiplier Lab
+
 ## V2.32.53 — Dynamic Blueprint-Driven Niche & Recipe Continuity Engine (16/10/2026)
 - Ekstraksi DNA Blueprint Anchor otomatis mengunci niche Health, Dessert, Herbal, atau Kuliner tanpa bias hardcoded
 - Mandat ketat kesinambungan niche & entitas pada generator sudut pandang Gemini AI
