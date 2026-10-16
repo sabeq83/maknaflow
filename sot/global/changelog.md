@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.32.57 — Penyelarasan Cloud Upload & ContentFlow Sync Multiplier Lab (16/10/2026)
+- Dukungan targetParentFolder pada getCloudFolderPath untuk hierarki folder brand di Nextcloud
+- Penyimpanan nextcloud_folder_url dan file naskah ganda .md pada re_multiplier_tasks
+- Filter ketat ContentFlow ingest hanya untuk video status completed
+- Endpoint dedicated POST /api/v2/multiplier-lab/[id]/sync-contentflow dan sync-nextcloud
+- Pembaruan UI Multiplier Lab detail dengan tombol Buka Folder Aset dan badge Synced to ContentFlow
+
 ## V2.32.56 — Perbaikan FFMPEG Muxing Multiplier Lab & Penyelarasan Smart Sync Pilar Campaign (16/10/2026)
 - Perbaikan percabangan if-else pada handleVisualGeneration agar task beralih ke ffmpeg_muxing
 - Penyelarasan pemanggilan engine processTtsStudioMuxing dengan audio VO MiniMax

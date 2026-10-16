@@ -166,6 +166,7 @@ function CampaignDetailPageContent() {
   const [isSchedulerActive, setIsSchedulerActive] = useState(true);
   const [togglingScheduler, setTogglingScheduler] = useState(false);
   const [syncingContentFlow, setSyncingContentFlow] = useState(false);
+  const [syncingNextcloud, setSyncingNextcloud] = useState(false);
   const [startingCampaign, setStartingCampaign] = useState(false);
   const [retryingTask, setRetryingTask] = useState({}); // { [taskId]: boolean }
   
@@ -763,10 +764,10 @@ function CampaignDetailPageContent() {
               onClick={async () => {
                 setSyncingContentFlow(true);
                 try {
-                  const res = await fetch('/api/content-flow/sync', { method: 'POST' });
+                  const res = await fetch(`/api/v2/multiplier-lab/${id}/sync-contentflow`, { method: 'POST' });
                   const data = await res.json();
                   if (data.success) {
-                    showToast(`Berhasil mendorong ${data.synced_count} video ke ContentFlow!`);
+                    showToast(`Berhasil mendorong ${data.synced_count || 0} video selesai ke ContentFlow!`);
                   } else {
                     showToast(data.error || 'Gagal sinkron ke ContentFlow', 'error');
                   }
@@ -782,10 +783,27 @@ function CampaignDetailPageContent() {
             </button>
             <button
               className="btn"
-              onClick={() => showToast('Sinkronisasi folder Nextcloud berhasil dipicu.')}
+              disabled={syncingNextcloud}
+              onClick={async () => {
+                setSyncingNextcloud(true);
+                try {
+                  const res = await fetch(`/api/v2/multiplier-lab/${id}/sync-nextcloud`, { method: 'POST' });
+                  const data = await res.json();
+                  if (data.success) {
+                    showToast(`Berhasil menyinkronkan aset folder Nextcloud (${data.synced_count || 0} video)!`);
+                    fetchTasks();
+                  } else {
+                    showToast(data.error || 'Gagal sinkron ke Nextcloud', 'error');
+                  }
+                } catch (err) {
+                  showToast(err.message, 'error');
+                } finally {
+                  setSyncingNextcloud(false);
+                }
+              }}
               style={{ background: 'var(--action-primary)', color: 'var(--on-action-primary)', border: 'none', padding: '10px 16px', fontWeight: 600, borderRadius: 6, cursor: 'pointer' }}
             >
-              ☁️ Sync to Nextcloud
+              {syncingNextcloud ? '⏳ Menyinkronkan ke Nextcloud...' : '☁️ Sync to Nextcloud'}
             </button>
             <button
               className="btn btn-secondary"
@@ -999,6 +1017,23 @@ function CampaignDetailPageContent() {
                               🍳 Resep Lengkap
                             </span>
                           )}
+                          {task.status === 'completed' && (
+                            <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: 'var(--status-info-soft)', color: 'var(--status-info)', border: '1px solid var(--status-info-soft)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                              🔗 Synced to ContentFlow
+                            </span>
+                          )}
+                          {task.nextcloud_folder_url && (
+                            <a
+                              href={task.nextcloud_folder_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{ textDecoration: 'none' }}
+                            >
+                              <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: 'var(--surface-interactive)', color: 'var(--action-primary)', border: '1px solid var(--border-subtle)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                📁 Cloud Folder
+                              </span>
+                            </a>
+                          )}
                         </div>
                         <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)', marginBottom: 4 }}>
                           {displayTitle}
@@ -1208,13 +1243,18 @@ function CampaignDetailPageContent() {
 
                                             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                                               {task.ffmpeg_output_path && (
-                                                <a href={task.ffmpeg_output_path} download className="btn btn-primary" style={{ padding: '8px 16px', background: 'var(--status-success)', color: '#042f2e', fontWeight: 700, textDecoration: 'none' }}>
+                                                <a href={task.ffmpeg_output_path} download className="btn btn-primary" style={{ padding: '8px 16px', background: 'var(--status-success)', color: 'var(--on-action-primary)', fontWeight: 700, textDecoration: 'none' }}>
                                                   ⬇️ Unduh Video (.mp4)
                                                 </a>
                                               )}
-                                              {task.nextcloud_video_url && (
+                                              {(task.nextcloud_folder_url || task.nextcloud_video_url) && (
+                                                <a href={task.nextcloud_folder_url || task.nextcloud_video_url} target="_blank" rel="noreferrer" className="btn btn-secondary" style={{ padding: '8px 16px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                                                  📁 Buka Folder Aset
+                                                </a>
+                                              )}
+                                              {task.nextcloud_video_url && task.nextcloud_folder_url && task.nextcloud_video_url !== task.nextcloud_folder_url && (
                                                 <a href={task.nextcloud_video_url} target="_blank" rel="noreferrer" className="btn btn-secondary" style={{ padding: '8px 16px', textDecoration: 'none' }}>
-                                                  ☁️ Buka di Nextcloud
+                                                  ☁️ Buka Video Nextcloud
                                                 </a>
                                               )}
                                               {task.ffmpeg_output_path && (

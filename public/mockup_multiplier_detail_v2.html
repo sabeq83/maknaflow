@@ -346,6 +346,9 @@
               <span style="background: var(--status-neutral-soft); color: var(--status-neutral); font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
                 🍳 Resep Lengkap
               </span>
+              <span style="background: var(--status-info-soft); color: var(--status-info); font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
+                🔗 Synced to ContentFlow
+              </span>
             </div>
             <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 2px;">
               Cuma Butuh Buah Ini! Trik Manis Alami Bebas Gula Pasir #Shorts
@@ -421,18 +424,18 @@
                       </div>
 
                       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button class="btn" style="background: var(--status-success); color: #042f2e; font-weight: 700;" onclick="showToast('Memulai pengunduhan video .mp4...')">
+                        <button class="btn" style="background: var(--status-success); color: var(--on-action-primary); font-weight: 700;" onclick="showToast('Memulai pengunduhan video .mp4...')">
                           ⬇️ Unduh Video (.mp4)
                         </button>
+                        <a href="http://100.78.186.123/index.php/s/mockup_folder" target="_blank" rel="noreferrer" class="btn btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                          📁 Buka Folder Aset
+                        </a>
                         <button class="btn btn-secondary" onclick="showToast('Menjadwalkan ulang FFMPEG...')">
                           🔄 Re-FFMPEG Muxing
                         </button>
                         <button class="btn btn-secondary" onclick="showToast('Tautan video disalin ke clipboard!')">
                           📋 Salin Tautan Video
                         </button>
-                        <a href="#" class="btn btn-secondary" onclick="showToast('Membuka folder Nextcloud...'); return false;">
-                          ☁️ Buka di Nextcloud
-                        </a>
                       </div>
 
                       <!-- Social & YouTube Title Quick Peek -->
