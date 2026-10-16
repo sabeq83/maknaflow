@@ -1,5 +1,9 @@
 # Changelog
 
+## V2.32.58 — Migrasi Database nextcloud_folder_url & Resolusi Path Aset Multiplier (16/10/2026)
+- Penambahan kolom nextcloud_folder_url pada tabel re_multiplier_tasks
+- Resolusi path absolut dan relatif publik untuk video, audio, dan thumbnail pada upload Nextcloud
+
 ## V2.32.57 — Penyelarasan Cloud Upload & ContentFlow Sync Multiplier Lab (16/10/2026)
 - Dukungan targetParentFolder pada getCloudFolderPath untuk hierarki folder brand di Nextcloud
 - Penyimpanan nextcloud_folder_url dan file naskah ganda .md pada re_multiplier_tasks
