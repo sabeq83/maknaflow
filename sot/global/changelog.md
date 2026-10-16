@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.56 — Perbaikan FFMPEG Muxing Multiplier Lab & Penyelarasan Smart Sync Pilar Campaign (16/10/2026)
+- Perbaikan percabangan if-else pada handleVisualGeneration agar task beralih ke ffmpeg_muxing
+- Penyelarasan pemanggilan engine processTtsStudioMuxing dengan audio VO MiniMax
+- Kelengkapan upload aset master VO dan klip adegan visual individual ke Nextcloud
+- Re-muxing dan re-upload video Baris 1 kampanye mul_261016_mv3ivz
+
 ## V2.32.55 — Steady Ascending Ordering (1..N) for Multiplier Lab Campaign Detail (16/10/2026)
 - Penambahan getMultiplierTasksByBatchId dengan SQL ORDER BY row_index ASC dan id ASC pada lib/db.js
 - Pengurutan deterministik ascending pada API GET /api/v2/multiplier?batchId=...
