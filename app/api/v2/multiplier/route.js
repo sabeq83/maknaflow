@@ -32,6 +32,19 @@ export const GET = withTenantContext(async (request) => {
       if (aIdx !== bIdx) return aIdx - bIdx;
       return (a.id || '').localeCompare(b.id || '', undefined, { numeric: true });
     });
+    const taskIds = tasks.map(t => t.id);
+    let syncedMap = {};
+    if (taskIds.length > 0) {
+      const placeholders = taskIds.map(() => '?').join(',');
+      const cfRows = await dbAll(
+        `SELECT id, source_item_id, video_id, pipeline_status FROM content_flow_items WHERE source_item_id IN (${placeholders}) OR id IN (${taskIds.map(() => '?').join(',')})`,
+        [...taskIds, ...taskIds.map(tid => `multiplier_${tid}`)]
+      );
+      for (const cf of cfRows) {
+        if (cf.source_item_id) syncedMap[cf.source_item_id] = cf;
+        if (cf.id) syncedMap[cf.id] = cf;
+      }
+    }
     for (const task of tasks) {
       const glabsTasks = await dbAll('SELECT * FROM glabs_tasks WHERE campaign_id = ? ORDER BY item_id ASC', [task.id]);
       task.glabs_tasks = glabsTasks.map(gt => ({
@@ -39,6 +52,10 @@ export const GET = withTenantContext(async (request) => {
         clip_index: Number(gt.item_id),
         prompt: gt.clip_index
       }));
+      const matchedCf = syncedMap[task.id] || syncedMap[`multiplier_${task.id}`];
+      task.is_synced_to_contentflow = Boolean(matchedCf);
+      task.content_flow_item_id = matchedCf ? matchedCf.id : null;
+      task.content_flow_video_id = matchedCf ? matchedCf.video_id : null;
     }
     const isSchedulerActive = await getSetting('multiplier_scheduler_active') !== 'false';
     return NextResponse.json({ success: true, tasks, isSchedulerActive });

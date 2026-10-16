@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.59 — Perbaikan Pengurutan Feed ContentFlow, Navigasi Langsung Multiplier & Rebind SiasatSehat (17/10/2026)
+- Ubah pengurutan feed ContentFlow menjadi ORDER BY created_at DESC
+- Integrasi tombol Buka di ContentFlow dan badge dinamis pada Multiplier Lab
+- Rebind kampanye mul_261016_hdai8r ke brand siasatsehat
+
 ## V2.32.58 — Migrasi Database nextcloud_folder_url & Resolusi Path Aset Multiplier (16/10/2026)
 - Penambahan kolom nextcloud_folder_url pada tabel re_multiplier_tasks
 - Resolusi path absolut dan relatif publik untuk video, audio, dan thumbnail pada upload Nextcloud

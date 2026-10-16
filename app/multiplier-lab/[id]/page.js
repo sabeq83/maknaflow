@@ -768,6 +768,7 @@ function CampaignDetailPageContent() {
                   const data = await res.json();
                   if (data.success) {
                     showToast(`Berhasil mendorong ${data.synced_count || 0} video selesai ke ContentFlow!`);
+                    fetchTasks();
                   } else {
                     showToast(data.error || 'Gagal sinkron ke ContentFlow', 'error');
                   }
@@ -1017,10 +1018,17 @@ function CampaignDetailPageContent() {
                               🍳 Resep Lengkap
                             </span>
                           )}
-                          {task.status === 'completed' && (
-                            <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: 'var(--status-info-soft)', color: 'var(--status-info)', border: '1px solid var(--status-info-soft)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                              🔗 Synced to ContentFlow
-                            </span>
+                          {(task.is_synced_to_contentflow || task.status === 'completed') && (
+                            <a
+                              href={`/content-flow?q=${encodeURIComponent(task.content_flow_video_id || task.id.replace('mul_', ''))}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{ textDecoration: 'none' }}
+                            >
+                              <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: 'var(--status-info-soft)', color: 'var(--status-info)', border: '1px solid var(--status-info-soft)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                🔗 Synced to ContentFlow ({task.content_flow_video_id || 'Lihat ➔'})
+                              </span>
+                            </a>
                           )}
                           {task.nextcloud_folder_url && (
                             <a
@@ -1255,6 +1263,17 @@ function CampaignDetailPageContent() {
                                               {task.nextcloud_video_url && task.nextcloud_folder_url && task.nextcloud_video_url !== task.nextcloud_folder_url && (
                                                 <a href={task.nextcloud_video_url} target="_blank" rel="noreferrer" className="btn btn-secondary" style={{ padding: '8px 16px', textDecoration: 'none' }}>
                                                   ☁️ Buka Video Nextcloud
+                                                </a>
+                                              )}
+                                              {(task.is_synced_to_contentflow || task.status === 'completed') && (
+                                                <a
+                                                  href={`/content-flow?q=${encodeURIComponent(task.content_flow_video_id || task.id.replace('mul_', ''))}`}
+                                                  target="_blank"
+                                                  rel="noreferrer"
+                                                  className="btn btn-secondary"
+                                                  style={{ padding: '8px 16px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--status-info)' }}
+                                                >
+                                                  🚀 Buka di ContentFlow ➔
                                                 </a>
                                               )}
                                               {task.ffmpeg_output_path && (
