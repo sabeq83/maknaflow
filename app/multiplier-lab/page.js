@@ -541,11 +541,15 @@ function MultiplierLabPageContent() {
           editorial_topic: ang.title,
           editorial_outro: ang.cta_type || editorialOutro.trim(),
           angle_title: ang.title,
-          hook_type: ang.hook_type,
-          hook_text: ang.hook_text,
-          target_persona: ang.target_persona,
-          emotional_trigger: ang.emotional_trigger,
-          cta_type: ang.cta_type,
+          hook_type: ang.hook_type || ang.strategic_archetype || '',
+          hook_text: ang.hook_text || '',
+          target_persona: ang.target_persona || '',
+          emotional_trigger: ang.emotional_trigger || '',
+          cta_type: ang.cta_type || '',
+          category_cep: ang.category_cep || '',
+          ws_matrix: ang.ws_matrix || '',
+          strategic_archetype: ang.strategic_archetype || '',
+          core_problem: ang.core_problem || bp.core_problem || '',
           niche_kb_name: selectedNicheKb
         });
       }
@@ -904,7 +908,18 @@ function MultiplierLabPageContent() {
           campaign_type: row.campaign_type || (isPureStory ? 'pure_storytelling' : 'product_campaign'),
           status: targetInitialStatus,
           editorial_topic: row.editorial_topic || editorialTopic.trim(),
-          editorial_outro: row.editorial_outro || editorialOutro.trim()
+          editorial_outro: row.editorial_outro || editorialOutro.trim(),
+          angle_title: row.angle_title || row.editorial_topic || '',
+          hook_type: row.hook_type || '',
+          hook_text: row.hook_text || '',
+          target_persona: row.target_persona || '',
+          emotional_trigger: row.emotional_trigger || '',
+          cta_type: row.cta_type || '',
+          category_cep: row.category_cep || '',
+          ws_matrix: row.ws_matrix || '',
+          strategic_archetype: row.strategic_archetype || '',
+          core_problem: row.core_problem || '',
+          niche_kb_name: row.niche_kb_name || selectedNicheKb || ''
         })),
         vso_config_json: JSON.stringify({
           narrativeMode, visualStyle, targetAi, videoModel, clipDuration, aspectRatio, faceVisibility, wordsPerClip,
@@ -1458,7 +1473,7 @@ function MultiplierLabPageContent() {
 
                       {workflowMode !== 'multi_blueprint_one_angle' && (
                         <div className="form-group" style={{ margin: 0 }}>
-                          <label className="form-label" style={{ fontSize: '0.76rem', fontWeight: 600 }}>🔢 Jumlah Angle yang Dibuat (3 – 10):</label>
+                          <label className="form-label" style={{ fontSize: '0.76rem', fontWeight: 600 }}>🔢 Jumlah Angle Dinamis (3 – 20):</label>
                           <select
                             className="form-input"
                             value={angleCount}
@@ -1469,10 +1484,40 @@ function MultiplierLabPageContent() {
                             <option value={5}>5 Sudut Pandang (Standard Viral Pack)</option>
                             <option value={7}>7 Sudut Pandang (Deep Matrix)</option>
                             <option value={10}>10 Sudut Pandang (Full Saturation)</option>
+                            <option value={12}>12 Sudut Pandang (Content Planner 12-Pack)</option>
+                            <option value={15}>15 Sudut Pandang (Mega Campaign Pack)</option>
+                            <option value={20}>20 Sudut Pandang (Ultra Matrix Pack)</option>
                           </select>
                         </div>
                       )}
                     </div>
+
+                    {/* Core Problem Anchor Banner */}
+                    {selectedAssetId && (() => {
+                      const bp = assets.find(a => a.id === selectedAssetId);
+                      const coreProb = bp?.core_problem || (bp?.viral_pattern_summary ? (bp.viral_pattern_summary.match(/(?:terkait|membahas|solusi|masalah|fokus)\s+([^,.]+)/i)?.[1] || bp.viral_pattern_summary.split('.')[0]) : null);
+                      return coreProb ? (
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 10,
+                          background: 'rgba(45, 212, 191, 0.08)',
+                          border: '1px solid var(--action-primary)',
+                          borderRadius: 6,
+                          padding: '10px 14px'
+                        }}>
+                          <span style={{ fontSize: '1.2rem' }}>🎯</span>
+                          <div>
+                            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--action-primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                              Masalah Utama Blueprint (Strict Problem Anchor)
+                            </div>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: 2 }}>
+                              {coreProb}
+                            </div>
+                          </div>
+                        </div>
+                      ) : null;
+                    })()}
 
                     {/* Custom Topic Direction / Theme */}
                     <div className="form-group" style={{ margin: 0 }}>

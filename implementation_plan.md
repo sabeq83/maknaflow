@@ -1,431 +1,446 @@
-# Usulan & Implementation Plan — Unified Modal Penjadwalan Konten (Single & Bulk Scheduling)
+# Implementation Plan: Multiplier Lab Core Problem & Content Planner Matrix Continuity Engine
 
-Dokumen rencana kerja dan arsitektur untuk modifikasi modal penjadwalan konten (`app/content-flow/PublishingScheduler.js`) agar dapat mengakomodasi **Penjadwalan Konten Massal (Bulk Scheduling)** sekaligus **Penjadwalan Konten Tunggal (Single Scheduling)** dalam satu modal terpadu (*Unified Modal Architecture*).
-
----
-
-## 1. Analisis Kebutuhan & Desain Arsitektur Terpadu
-
-1. **Alur Kerja & Modal Eksisting (`PublishingScheduler.js`)**:
-   - Modal saat ini menerima prop `initialPreloadItem` untuk menjadwalkan 1 konten.
-   - Modal sudah memiliki pipeline autentikasi lengkap (Meta Graph API & Repliz Cloud), filter Brand Profile (`modalBrandFilter`), pemilihan platform (TikTok, Instagram Reels, Facebook, YouTube Shorts), input caption, timezone switcher (`Asia/Jakarta`), dan penanda konten AI (`is_ai_generated`).
-   - Pada baris 2627–2660 terdapat section **Preview Media Konten** yang merender pemutar video `<video>` atau `<img>`.
-   - Pada baris 2603–2612 terdapat pemilih **Mode Publikasi** (`live` vs `draft`).
-
-2. **Kebutuhan Fitur Baru (User Requirements)**:
-   - **Unified Modal**: Memodifikasi `PublishingScheduler.js` agar mendukung prop `initialPreloadItems` (array konten) dan switcher mode (`[ 🎬 Single ]` vs `[ 📦 Bulk ]`).
-   - **Preview Media DISABLED pada Bulk Mode**:
-     - *Rasional*: Memuat player video untuk 5–20 konten resolusi tinggi (Nextcloud/S3) secara bersamaan akan membebani memori RAM browser, menyebabkan bottleneck jaringan, dan berisiko membuat browser *freeze*.
-     - *Solusi*: Section preview media **dinonaktifkan (unmounted/hidden)** secara total saat bulk mode aktif dan digantikan dengan panel informasi efisiensi performa serta chips daftar ringkas konten terpilih.
-   - **Mode Publikasi (Live vs Draft)**:
-     - Tetap tersedia pada kedua mode (Single maupun Bulk).
-     - Mode `Live`: Menjadwalkan konten untuk tayang otomatis ke publik (memerlukan approval).
-     - Mode `Draft`: Mengunggah konten sebagai draft di platform (misal TikTok draft) tanpa langsung rilis ke feed pengikut.
-   - **Fleksibilitas Jeda Interval & Waktu**:
-     - Input tanggal mulai (misal `2026-10-13`) & jam mulai (misal `10:00 WIB`).
-     - Tiga opsi strategi distribusi waktu:
-       1. **⏱️ Jeda Interval**: Dilengkapi pilihan preset cepat (**30 Menit, 1 Jam, 2 Jam Rekomendasi, 3 Jam, 4 Jam, 6 Jam**) dan **Input Kustom Menit Bebas**.
-       2. **⚡ Serentak**: Seluruh video tayang serentak pada jam yang sama.
-       3. **📅 1 Konten/Hari (Slot Harian)**: Pilihan pola distribusi harian (**Tiap 1 Hari, Tiap 2 Hari, Tiap 3 Hari**).
-     - **Tabel Simulasi Langsung (Live Simulation Table)**: Menampilkan kalkulasi tanggal/jam tayang dan status (LIVE / DRAFT) untuk tiap-tiap video secara real-time.
-   - **Seleksi Massal di Content Library (`app/content-flow/page.js`)**:
-     - Checkbox seleksi per kartu konten, tombol *Quick Select 5 Konten Terbaru*, dan *Floating Bulk Action Dock*.
-     - Menghubungkan tombol aksi massal ke `PublishingScheduler` dengan meneruskan array `initialPreloadItems`.
+Rencana implementasi ini bertujuan untuk memastikan setiap sudut pandang (angles) dan hook baru yang dihasilkan di Multiplier Lab **mengadopsi Mesin Strategi Content Planner (CEP × W's Matrix × 30 Strategic Archetypes × HARM)**, **bersifat 100% dinamis tanpa batasan hardcoded 7 angle (mendukung 3, 5, 7, 10, 12, 15, s/d 20 angles)**, dan **selalu mengunci serta mempertahankan Masalah Utama (Core Problem / Pain Point)** dari narasi Blueprint aslinya agar AI tidak berhalusinasi melenceng ke masalah lain (seperti kasus pada kampanye `mul_261016_hdai8r` dari Blueprint `#0b3ef9bb`).
 
 ---
 
-## 2. Mockup HTML Interaktif (Standalone Simulation)
+## 📋 Execution Task List
 
-Simulasi visual dan interaksi lengkap telah dibuat dan diperbarui sesuai seluruh kriteria pengguna:
-👉 **[`public/mockup_publishing_scheduler_unified_bulk.html`](file:///Users/sabeqmmursyid/_contentflow-staging/public/mockup_publishing_scheduler_unified_bulk.html)**
-
-Fitur dalam mockup:
-- **100% Semantic CSS Tokens** (`app/theme.css`) dengan switcher Dark Mode & Light Mode.
-- **Peralihan Mode Single & Bulk**:
-  - Di mode *Single*: Video ID search aktif, Video player preview **AKTIF**.
-  - Di mode *Bulk*: Video ID digantikan oleh Chips 5 Konten, Video player preview **DINONAKTIFKAN (DISABLED)**.
-- **Mode Publikasi (Live vs Draft)**: Dropdown interaktif lengkap dengan banner info draft dan status badge di tabel simulasi.
-- **Konfigurasi Interval Fleksibel**: Preset 30m, 1h, 2h, 3h, 4h, 6h, kotak input custom menit, serta preset harian (1, 2, 3 hari).
-- **Tabel Simulasi Real-Time**: Perhitungan jadwal tayang dinamis untuk 13 Oktober 2026 mulai jam 10:00 WIB.
-
----
-
-## 3. Execution Task List
-
-- [x] **Task 1: Analisis Codebase & Mockup Interaktif HTML**
-  - [x] Analisis kelayakan modifikasi `PublishingScheduler.js` dan rasional penonaktifan preview media.
-  - [x] Pembuatan file mockup interaktif [`public/mockup_publishing_scheduler_unified_bulk.html`](file:///Users/sabeqmmursyid/_contentflow-staging/public/mockup_publishing_scheduler_unified_bulk.html) dengan Semantic CSS Tokens.
-  - [x] Penambahan selector Mode Publikasi (`Live` vs `Draft`) pada mockup.
-  - [x] Penambahan panel pilihan durasi jeda interval (preset 30m–6h, input kustom, slot harian).
-  - [x] Penyusunan `implementation_plan.md` dengan Before & After code snippets.
-- [x] **Task 2: Backend API Batch `POST /api/v2/publishing/bulk-jobs`**
-  - [x] Membuat endpoint di `app/api/v2/publishing/bulk-jobs/route.js`.
-  - [x] Validasi payload batch (`items`, `account_ids`, `publish_mode`, `is_ai_generated`, `timezone`).
-  - [x] Pembuatan publishing jobs di database PostgreSQL dan sinkronisasi status ke `content_flow_items`.
-  - [x] Pembuatan dan eksekusi integration test `tests/bulk-publishing-jobs.test.js` (berhasil 100%).
-- [x] **Task 3: Modifikasi State & Props pada `PublishingScheduler.js`**
-  - [x] Menambahkan prop `initialPreloadItems` pada `PublishingScheduler({ initialPreloadItem, initialPreloadItems, ... })`.
-  - [x] Menginisialisasi state `bulkItems`, `isBulkMode`, `bulkStrategy`, `bulkIntervalMinutes`, `bulkDailyStep`, `bulkTargetDate`, `bulkTargetTime`.
-- [x] **Task 4: Implementasi UI Bulk Mode di `PublishingScheduler.js`**
-  - [x] Menambahkan toggle switcher mode di header modal: `[ 🎬 Single ]` vs `[ 📦 Bulk Mode (X Konten) ]`.
-  - [x] Merender scroller chips konten terpilih (dengan tombol hapus `✕`) menggantikan combobox video ID pada Bulk Mode.
-  - [x] **Menonaktifkan (Disable/Hide) Media Preview Player** pada Bulk Mode dan menampilkan banner optimasi performa ramah pengguna.
-  - [x] Menambahkan panel konfigurasi durasi jeda interval (preset 30m, 1h, 2h, 3h, 4h, 6h, custom minutes input, dan slot harian).
-  - [x] Menampilkan Live Simulation Table untuk pratinjau kalkulasi jadwal tayang tiap konten sebelum submit.
-- [x] **Task 5: Implementasi Submit Handler Terpadu di `PublishingScheduler.js`**
-  - [x] Jika Single Mode: Kirim ke `POST /api/v2/publishing/jobs`.
-  - [x] Jika Bulk Mode: Hitung ISO timestamp tiap item berdasarkan strategi dan interval, lalu kirim ke `POST /api/v2/publishing/bulk-jobs`.
-- [x] **Task 6: Integrasi Pemanggilan dari `app/content-flow/page.js`**
-  - [x] Menambahkan state `selectedItemIds` dan handler seleksi multi-konten pada kartu Content Library.
-  - [x] Menambahkan tombol cepat *Quick Select 5 Konten Terbaru* dan *Select All*.
-  - [x] Menambahkan Floating Bulk Action Dock di bagian bawah layar saat $\ge 1$ konten dipilih.
-  - [x] Menghubungkan tombol "⏱️ Jadwalkan Massal" ke modal overlay `PublishingScheduler` dengan meneruskan `initialPreloadItems={selectedItemsList}`.
-- [x] **Task 7: Pengujian, Validasi Build & Regression Test**
-  - [x] Uji coba penjadwalan Single Mode (memastikan player video tetap muncul normal dan alur tidak regresi).
-  - [x] Uji coba penjadwalan Bulk Mode (memastikan video player dinonaktifkan, interval dihitung tepat, dan batch jobs tersimpan di database).
-  - [x] Verifikasi build Next.js (`npm run build` atau lint check) bebas error (Passed exit code 0).
+- [x] **Task 1: Skema Database & Migrasi Kolom Masalah Utama**
+  - [x] Tambahkan kolom `core_problem`, `core_solution`, dan `target_audience_pain_point` pada tabel `re_deconstructed_assets` di [lib/db-pg.js](file:///Users/sabeqmmursyid/_contentflow-staging/lib/db-pg.js).
+  - [x] Perbarui daftar `allowed` fields pada `updateDeconstructAsset` di [lib/db.js](file:///Users/sabeqmmursyid/_contentflow-staging/lib/db.js).
+  - [x] Pastikan fungsi `createMultiplierBatch` di [lib/db.js](file:///Users/sabeqmmursyid/_contentflow-staging/lib/db.js) menyimpan `core_problem`, `hook_type`, `hook_text`, `target_persona`, `emotional_trigger`, `category_cep`, `ws_matrix`, `strategic_archetype`, dan `cta_type` ke dalam `rowBridging`.
+- [x] **Task 2: Integrasi Strategi Content Planner ke Multiplier Angle Generator**
+  - [x] Tambahkan fungsi ekstraksi `extractBlueprintCoreProblem` pada [lib/multiplier-angle-generator.js](file:///Users/sabeqmmursyid/_contentflow-staging/lib/multiplier-angle-generator.js) (membaca kolom atau fallback cerdas dari `viral_pattern_summary` & narasi adegan 1).
+  - [x] Perluas batas `angleCount` di [lib/multiplier-angle-generator.js](file:///Users/sabeqmmursyid/_contentflow-staging/lib/multiplier-angle-generator.js) dari batas lama (maks 10) menjadi dinamis hingga 20 angles (`Math.min(Math.max(parseInt(angleCount, 10) || 5, 3), 20)`).
+  - [x] Integrasikan Matriks Permutasi Content Planner ke dalam Prompt Gemini:
+    - 6 Kategori CEP (Problem-Solution, Routine, Commitment, Aspirational, Opportunistic, Emotional).
+    - W's Matrix (When, Where, With/For Whom, How Feeling, While, With What, Why).
+    - The Infinite Strategic Angle Matrix (30 Archetypes dari `STRATEGIC_FRAMEWORKS_v47.9.md` Section XII).
+    - Historical Anti-Repetition Memory (HARM) via `getExcludedAnglesHistory(blueprintId)`.
+  - [x] Tambahkan aturan tegas **MANDAT KONSISTENSI MASALAH UTAMA (STRICT PROBLEM CONTINUITY)** pada prompt Gemini: Permutasi CEP dan W's Matrix bebas bervariasi, namun seluruh angle WAJIB tetap menyelesaikan masalah utama yang sama dari Blueprint.
+  - [x] Pastikan output JSON array menyertakan `core_problem`, `category_cep`, `ws_matrix`, dan `strategic_archetype` pada setiap item sudut pandang.
+- [x] **Task 3: Perbaikan Payload UI & Fleksibilitas Jumlah Angle di Multiplier Lab**
+  - [x] Perluas opsi dropdown jumlah angle di [app/multiplier-lab/page.js](file:///Users/sabeqmmursyid/_contentflow-staging/app/multiplier-lab/page.js) (3, 5, 7, 10, 12, 15, 20 Sudut Pandang).
+  - [x] Perbaiki pemetaan `rows` pada fungsi `handleStartCampaign` di [app/multiplier-lab/page.js](file:///Users/sabeqmmursyid/_contentflow-staging/app/multiplier-lab/page.js) agar `angle_title`, `hook_type`, `hook_text`, `target_persona`, `emotional_trigger`, `cta_type`, `category_cep`, `ws_matrix`, `strategic_archetype`, dan `core_problem` tidak terhapus.
+  - [x] Perbarui `generateCombinationRows` di [app/multiplier-lab/page.js](file:///Users/sabeqmmursyid/_contentflow-staging/app/multiplier-lab/page.js) untuk menyertakan `core_problem` dan atribut matriks Content Planner.
+  - [x] Tampilkan informasi "Masalah Utama Terdeteksi" dan badge "Content Planner Matrix Engine" pada panel konfigurasi Multiplier Lab.
+- [x] **Task 4: Penguncian Masalah Utama pada Phase 2 Storyboard Remake Prompt**
+  - [x] Perbarui `buildMultiplierPhase2Prompt` pada [lib/prompts.js](file:///Users/sabeqmmursyid/_contentflow-staging/lib/prompts.js) agar menyuntikkan `coreProblem` dan metadata angle ke dalam naskah voiceover dan resep, memastikan voiceover adegan 1 s/d selesai tetap menyelesaikan masalah utama tersebut.
+- [x] **Task 5: Upgrade Engine Dekonstruksi V2 (Ekstraksi Otomatis Sejak Awal)**
+  - [x] Perbarui `buildDeconstructPhase1Prompt` pada [lib/prompts.js](file:///Users/sabeqmmursyid/_contentflow-staging/lib/prompts.js) agar Gemini secara eksplisit merumuskan `core_problem`, `core_solution`, dan `target_audience_pain_point`.
+  - [x] Perbarui handler dekonstruksi pada [lib/scheduler-processors.js](file:///Users/sabeqmmursyid/_contentflow-staging/lib/scheduler-processors.js) untuk menyimpan field baru tersebut ke `re_deconstructed_assets`.
+- [x] **Task 6: Skrip Backfill Masalah Utama pada Seluruh Blueprint Eksisting**
+  - [x] Buat skrip [scripts/backfill-blueprint-core-problems.mjs](file:///Users/sabeqmmursyid/_contentflow-staging/scripts/backfill-blueprint-core-problems.mjs) untuk membaca `viral_pattern_summary` dan narasi asli dari 148 aset di Staging / 20 aset di Dev, lalu mengisi kolom `core_problem`, `core_solution`, dan `target_audience_pain_point`.
+- [x] **Task 7: Unit Testing & Verifikasi End-to-End**
+  - [x] Buat file pengujian otomatis `tests/multiplier-core-problem.test.js` untuk memverifikasi kesinambungan masalah utama, variasi Content Planner matrix (CEP & W's Matrix), dukungan jumlah angle fleksibel (3-20), dan persistence database.
+  - [x] Jalankan test suite dan verifikasi seluruh skenario berhasil tanpa regresi.
 
 ---
 
-## 4. Code Before & After Snippets
+## 🔍 Before & After Code Snippets
 
-### File 1: `app/content-flow/PublishingScheduler.js`
+### 1. `lib/db-pg.js` (Migrasi Kolom `core_problem` pada `re_deconstructed_assets`)
 
-#### Code Sebelum (Current/Before)
+#### Code Sebelum (Current/Before):
 ```javascript
-// app/content-flow/PublishingScheduler.js (Props & State awal)
-export default function PublishingScheduler({
-  initialPreloadItem = null,
-  onBackToLibrary = null,
-  modalOnly = false,
-  controlledBrandProfileId = null,
-  controlledAccountName = null,
-  controlledContentRunIds = null,
-  controlledProgramId = null
-}) {
-  const defaultScheduleTime = getWibNowPlusMinutes(10);
-  const [showScheduleModal, setShowScheduleModal] = useState(Boolean(initialPreloadItem));
-  const [scheduleForm, setScheduleForm] = useState({
-    content_id: initialPreloadItem?.video_id || '',
-    account_ids: [],
-    platform: 'facebook',
-    publish_mode: 'live',
-    media_type: 'reels',
-    caption: initialPreloadItem?.caption || '',
-    media_url: initialPreloadItem?.url_asset || initialPreloadItem?.nextcloud_url || '',
-    scheduled_at: defaultScheduleTime,
-    account_schedules: {},
-    timezone: 'Asia/Jakarta',
-    activeTabProvider: 'repliz',
-    is_ai_generated: false
-  });
-
-// app/content-flow/PublishingScheduler.js (Media Preview baris 2627-2660)
-  {/* 4. Preview Media Konten (Otomatis & Lebih Besar) */}
-  {scheduleForm.media_url && (
-    <div style={{ marginBottom: 12 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-        <label style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span>▶️</span>
-          <span>Preview Media Konten</span>
-          {selectedMediaFileName && (
-            <span style={{ fontSize: 10, color: 'var(--link)', fontWeight: 600 }}>({selectedMediaFileName})</span>
-          )}
-        </label>
-      </div>
-      <div style={{
-        background: '#070b13', borderRadius: 10, border: '1px solid var(--border-subtle)',
-        overflow: 'hidden', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center',
-        maxHeight: 380, padding: 4
-      }}>
-        {scheduleForm.media_type === 'image' ? (
-          <img
-            src={scheduleForm.media_url}
-            alt="Preview Media"
-            style={{ maxHeight: 370, maxWidth: '100%', objectFit: 'contain', borderRadius: 6 }}
-          />
-        ) : (
-          <video
-            src={scheduleForm.media_url}
-            controls
-            playsInline
-            style={{ maxHeight: 370, maxWidth: '100%', width: 'auto', background: '#000', borderRadius: 6 }}
-          />
-        )}
-      </div>
-    </div>
-  )}
-```
-
-#### Code Sesudah (Proposed/After)
-```javascript
-// app/content-flow/PublishingScheduler.js (Menerima initialPreloadItems & state Bulk Mode)
-export default function PublishingScheduler({
-  initialPreloadItem = null,
-  initialPreloadItems = null, // Prop baru untuk Bulk Scheduling
-  onBackToLibrary = null,
-  modalOnly = false,
-  controlledBrandProfileId = null,
-  controlledAccountName = null,
-  controlledContentRunIds = null,
-  controlledProgramId = null
-}) {
-  const initialItemsList = useMemo(() => {
-    if (Array.isArray(initialPreloadItems) && initialPreloadItems.length > 0) return initialPreloadItems;
-    if (initialPreloadItem) return [initialPreloadItem];
-    return [];
-  }, [initialPreloadItems, initialPreloadItem]);
-
-  const [bulkItems, setBulkItems] = useState(initialItemsList);
-  const [isBulkMode, setIsBulkMode] = useState(initialItemsList.length > 1);
-  const [bulkStrategy, setBulkStrategy] = useState('interval'); // 'interval', 'simultaneous', 'daily'
-  const [bulkIntervalMinutes, setBulkIntervalMinutes] = useState(120);
-  const [bulkDailyStep, setBulkDailyStep] = useState(1);
-  const [bulkTargetDate, setBulkTargetDate] = useState('2026-10-13');
-  const [bulkTargetTime, setBulkTargetTime] = useState('10:00');
-
-// app/content-flow/PublishingScheduler.js (Media Preview DISABLED pada Bulk Mode)
-  {/* 4. Preview Media Konten (DISABLED pada Bulk Mode sesuai instruksi) */}
-  {isBulkMode ? (
-    <div style={{
-      marginBottom: 12, padding: '14px 16px', background: 'var(--surface-raised)',
-      border: '1px dashed var(--border-strong)', borderRadius: 10, display: 'flex',
-      alignItems: 'center', gap: 12
-    }}>
-      <span style={{ fontSize: 24, color: 'var(--text-muted)' }}>🔒</span>
-      <div>
-        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>
-          Preview Media Dinonaktifkan (Mode Bulk Scheduling)
-        </div>
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2, lineHeight: 1.4 }}>
-          Pemutar video dinonaktifkan otomatis untuk {bulkItems.length} konten agar menghemat memori browser dan mencegah lag saat memuat video berukuran besar secara bersamaan.
-        </div>
-      </div>
-    </div>
-  ) : (
-    scheduleForm.media_url && (
-      <div style={{ marginBottom: 12 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-          <label style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span>▶️</span>
-            <span>Preview Media Konten</span>
-            {selectedMediaFileName && (
-              <span style={{ fontSize: 10, color: 'var(--link)', fontWeight: 600 }}>({selectedMediaFileName})</span>
-            )}
-          </label>
-        </div>
-        <div style={{
-          background: 'var(--canvas)', borderRadius: 10, border: '1px solid var(--border-subtle)',
-          overflow: 'hidden', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center',
-          maxHeight: 380, padding: 4
-        }}>
-          {scheduleForm.media_type === 'image' ? (
-            <img src={scheduleForm.media_url} alt="Preview Media" style={{ maxHeight: 370, maxWidth: '100%', objectFit: 'contain', borderRadius: 6 }} />
-          ) : (
-            <video src={scheduleForm.media_url} controls playsInline style={{ maxHeight: 370, maxWidth: '100%', width: 'auto', background: '#000', borderRadius: 6 }} />
-          )}
-        </div>
-      </div>
-    )
-  )}
-```
-
----
-
-### File 2: `app/content-flow/page.js`
-
-#### Code Sebelum (Current/Before)
-```javascript
-// app/content-flow/page.js (State pembuka scheduler)
-  const [schedulePreloadItem, setSchedulePreloadItem] = useState(null);
-
-// app/content-flow/page.js (Modal scheduler overlay)
-  {schedulePreloadItem && (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 1000,
-      background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)',
-      display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-      padding: '20px', overflowY: 'auto'
-    }}>
-      <div style={{ width: '100%', maxWidth: '960px', position: 'relative' }}>
-        <PublishingScheduler
-          initialPreloadItem={schedulePreloadItem}
-          modalOnly={true}
-          onBackToLibrary={() => {
-            setSchedulePreloadItem(null);
-            loadContent();
-          }}
-        />
-      </div>
-    </div>
-  )}
-```
-
-#### Code Sesudah (Proposed/After)
-```javascript
-// app/content-flow/page.js (Menambahkan state multi-seleksi dan bulk preload)
-  const [schedulePreloadItem, setSchedulePreloadItem] = useState(null);
-  const [bulkPreloadItems, setBulkPreloadItems] = useState(null); // Array item untuk bulk scheduler
-  const [selectedIds, setSelectedIds] = useState(new Set());
-
-  const handleToggleSelect = (itemId) => {
-    setSelectedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(itemId)) next.delete(itemId);
-      else next.add(itemId);
-      return next;
-    });
-  };
-
-  const handleQuickSelect5 = () => {
-    const top5 = items.slice(0, 5).map(it => it.id);
-    setSelectedIds(new Set(top5));
-    showToast(`${top5.length} konten terbaru berhasil dipilih.`);
-  };
-
-  const handleLaunchBulkSchedule = () => {
-    const selectedItems = items.filter(it => selectedIds.has(it.id));
-    if (selectedItems.length === 0) return;
-    setBulkPreloadItems(selectedItems);
-  };
-
-// app/content-flow/page.js (Modal scheduler overlay mendukung Single & Bulk)
-  {(schedulePreloadItem || (bulkPreloadItems && bulkPreloadItems.length > 0)) && (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 1000,
-      background: 'var(--overlay-backdrop)', backdropFilter: 'blur(4px)',
-      display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-      padding: '20px', overflowY: 'auto'
-    }}>
-      <div style={{ width: '100%', maxWidth: '960px', position: 'relative' }}>
-        <PublishingScheduler
-          initialPreloadItem={schedulePreloadItem}
-          initialPreloadItems={bulkPreloadItems}
-          modalOnly={true}
-          onBackToLibrary={() => {
-            setSchedulePreloadItem(null);
-            setBulkPreloadItems(null);
-            setSelectedIds(new Set());
-            loadContent();
-          }}
-        />
-      </div>
-    </div>
-  )}
-```
-
----
-
-### File 3: `app/api/v2/publishing/bulk-jobs/route.js`
-
-#### Code Sesudah (Telah Diimplementasikan & Lulus Uji)
-```javascript
-import { NextResponse } from 'next/server';
-import { withTenantContext } from '@/lib/auth';
-import { getActiveTenantId } from '@/lib/tenant-context';
-import { createPublishingJobs } from '@/lib/publishing-repository';
-import { pgQuery } from '@/lib/db-pg';
-
-export const dynamic = 'force-dynamic';
-
-export const POST = withTenantContext(async (request, user) => {
-  try {
-    const tenantId = getActiveTenantId();
-    const body = await request.json();
-
-    const {
-      items = [],
-      account_ids = [],
-      publish_mode = 'live',
-      media_type = 'reels',
-      is_ai_generated = true,
-      timezone = 'Asia/Jakarta'
-    } = body;
-
-    if (!Array.isArray(items) || items.length === 0) {
-      return NextResponse.json(
-        { success: false, error: 'Daftar konten (items) wajib disertakan dan tidak boleh kosong.' },
-        { status: 400 }
-      );
-    }
-
-    if (!Array.isArray(account_ids) || account_ids.length === 0) {
-      return NextResponse.json(
-        { success: false, error: 'Pilih minimal satu akun media sosial tujuan.' },
-        { status: 400 }
-      );
-    }
-
-    const allCreatedJobs = [];
-    const scheduledContentIds = [];
-
-    for (const rawItem of items) {
-      const contentId = rawItem.content_id || rawItem.video_id;
-      if (!contentId) continue;
-
-      let caption = rawItem.caption || '';
-      let mediaUrl = rawItem.media_url || '';
-      const scheduledAt = rawItem.scheduled_at || new Date().toISOString();
-
-      if (!caption || !mediaUrl) {
-        try {
-          const dbItemRes = await pgQuery(
-            `SELECT hook, caption, url_asset, nextcloud_url 
-             FROM content_flow_items 
-             WHERE (video_id = $1 OR id::text = $1) AND tenant_id = $2
-             LIMIT 1`,
-            [contentId, tenantId]
+// lib/db-pg.js
+          CREATE TABLE IF NOT EXISTS re_deconstructed_assets (
+            id TEXT PRIMARY KEY,
+            batch_id TEXT,
+            source_url TEXT,
+            original_caption TEXT,
+            local_video_path TEXT,
+            gemini_file_uri TEXT,
+            original_storyboard_json TEXT,
+            product_ideas_json TEXT,
+            viral_pattern_summary TEXT,
+            status TEXT DEFAULT 'pending',
+            error_message TEXT,
+            tags TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            tenant_id TEXT NOT NULL DEFAULT 'default_tenant',
+            niche TEXT,
+            queued_at TIMESTAMP,
+            deconstructed_at TIMESTAMP,
+            updated_at TIMESTAMP,
+            page_source TEXT
           );
-          if (dbItemRes.rowCount > 0) {
-            const dbRow = dbItemRes.rows[0];
-            if (!caption) caption = dbRow.caption || dbRow.hook || '';
-            if (!mediaUrl) mediaUrl = dbRow.url_asset || dbRow.nextcloud_url || '';
-          }
-        } catch (_) {}
-      }
+```
 
-      const targets = account_ids.map(accId => ({
-        accountId: accId,
-        publishMode: publish_mode,
-        mediaType: media_type,
-        caption: caption,
-        mediaUrl: mediaUrl,
-        scheduledAt: scheduledAt,
-        approvalStatus: publish_mode === 'live' ? 'pending_approval' : 'not_required',
-        isAiGenerated: !!is_ai_generated
-      }));
+#### Code Sesudah (Proposed/After):
+```javascript
+// lib/db-pg.js
+          CREATE TABLE IF NOT EXISTS re_deconstructed_assets (
+            id TEXT PRIMARY KEY,
+            batch_id TEXT,
+            source_url TEXT,
+            original_caption TEXT,
+            local_video_path TEXT,
+            gemini_file_uri TEXT,
+            original_storyboard_json TEXT,
+            product_ideas_json TEXT,
+            viral_pattern_summary TEXT,
+            status TEXT DEFAULT 'pending',
+            error_message TEXT,
+            tags TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            tenant_id TEXT NOT NULL DEFAULT 'default_tenant',
+            niche TEXT,
+            queued_at TIMESTAMP,
+            deconstructed_at TIMESTAMP,
+            updated_at TIMESTAMP,
+            page_source TEXT,
+            core_problem TEXT,
+            core_solution TEXT,
+            target_audience_pain_point TEXT
+          );
 
-      const created = await createPublishingJobs({
-        tenantId,
-        userId: user?.id || null,
-        contentId,
-        targets
-      });
-
-      allCreatedJobs.push(...created);
-      scheduledContentIds.push(contentId);
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: `Berhasil menjadwalkan ${scheduledContentIds.length} konten massal (${allCreatedJobs.length} antrean publikasi).`,
-      total_items: scheduledContentIds.length,
-      total_jobs: allCreatedJobs.length,
-      jobs: allCreatedJobs
-    }, { status: 201 });
-  } catch (error) {
-    console.error('[Bulk Publishing Jobs API Error]:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-  }
-});
+          // Kolom migrasi aman IF NOT EXISTS:
+          await client.query(`ALTER TABLE re_deconstructed_assets ADD COLUMN IF NOT EXISTS core_problem TEXT;`);
+          await client.query(`ALTER TABLE re_deconstructed_assets ADD COLUMN IF NOT EXISTS core_solution TEXT;`);
+          await client.query(`ALTER TABLE re_deconstructed_assets ADD COLUMN IF NOT EXISTS target_audience_pain_point TEXT;`);
 ```
 
 ---
 
-## 5. Ringkasan Evaluasi & Rekomendasi Arsitektur
+### 2. `lib/db.js` (`updateDeconstructAsset` & `createMultiplierBatch`)
 
-1. **Kelayakan Modifikasi Modal**: **100% Layak dan Sangat Direkomendasikan**. Modifikasi `PublishingScheduler.js` jauh lebih efisien karena mendaur ulang seluruh pipeline autentikasi Repliz & Meta, validasi preflight, dan manajemen state akun yang sudah teruji.
-2. **Media Preview Disabled**: Sangat tepat secara teknis. Browser Chromium/WebKit mengalami lonjakan konsumsi memori dan degradasi rendering ketika 5-10 HTML5 `<video>` dimuat bersamaan. Menampilkan chips ringkas dan tabel kalkulasi waktu jauh lebih cepat, responsif, dan hemat memori.
-3. **Mode Publikasi (Live vs Draft)**: Tetap diakomodasi penuh baik pada Single Mode maupun Bulk Mode. Pengguna dapat memilih apakah antrean massal akan dijadwalkan sebagai `Live` (otomatis tayang saat tiba waktunya setelah approval) atau disimpan sebagai `Draft` di platform target.
-4. **Fleksibilitas Jeda Waktu Interval**: Menyediakan preset durasi (30 Menit, 1 Jam, 2 Jam, 3 Jam, 4 Jam, 6 Jam) serta input manual menit kustom agar pengguna bebas menentukan jarak publikasi sesuai strategi engagement media sosial mereka.
-5. **Mockup Interaktif**: Pengguna dapat langsung menguji alur kerja di [`public/mockup_publishing_scheduler_unified_bulk.html`](file:///Users/sabeqmmursyid/_contentflow-staging/public/mockup_publishing_scheduler_unified_bulk.html).
+#### Code Sebelum (Current/Before):
+```javascript
+// lib/db.js:L3023
+  const allowed = [
+    'batch_id', 'source_url', 'page_source', 'original_caption', 'local_video_path',
+    'gemini_file_uri', 'original_storyboard_json', 'product_ideas_json',
+    'viral_pattern_summary', 'status', 'error_message', 'tags', 'niche',
+    'queued_at', 'deconstructed_at', 'updated_at'
+  ];
+```
+
+#### Code Sesudah (Proposed/After):
+```javascript
+// lib/db.js:L3023
+  const allowed = [
+    'batch_id', 'source_url', 'page_source', 'original_caption', 'local_video_path',
+    'gemini_file_uri', 'original_storyboard_json', 'product_ideas_json',
+    'viral_pattern_summary', 'status', 'error_message', 'tags', 'niche',
+    'queued_at', 'deconstructed_at', 'updated_at',
+    'core_problem', 'core_solution', 'target_audience_pain_point'
+  ];
+```
+
+Dan pada `createMultiplierBatch`:
+#### Code Sebelum (Current/Before):
+```javascript
+// lib/db.js:L3191
+      const rowBridging = {
+        ...(batch.shared_config?.bridging || {}),
+        ...(row.bridging || {}),
+        campaign_name: campaignName,
+        brand_profile_id: brandProfileId,
+        account_name: accountName,
+        brandName: accountName,
+        campaign_type: row.campaign_type || batch.shared_config?.bridging?.campaign_type || 'product_campaign',
+        editorialTopic: row.editorial_topic || row.angle_title || batch.shared_config?.bridging?.editorialTopic || '',
+        editorialOutro: row.editorial_outro || batch.shared_config?.bridging?.editorialOutro || '',
+        angleTitle: row.angle_title || row.editorial_topic || '',
+        hookType: row.hook_type || '',
+        hookText: row.hook_text || '',
+        targetPersona: row.target_persona || '',
+        emotionalTrigger: row.emotional_trigger || '',
+        ctaType: row.cta_type || '',
+        nicheKbName: row.niche_kb_name || batch.shared_config?.bridging?.nicheKbName || '',
+        generate_recipe: generateRecipe
+      };
+```
+
+#### Code Sesudah (Proposed/After):
+```javascript
+// lib/db.js:L3191
+      const rowBridging = {
+        ...(batch.shared_config?.bridging || {}),
+        ...(row.bridging || {}),
+        campaign_name: campaignName,
+        brand_profile_id: brandProfileId,
+        account_name: accountName,
+        brandName: accountName,
+        campaign_type: row.campaign_type || batch.shared_config?.bridging?.campaign_type || 'product_campaign',
+        editorialTopic: row.editorial_topic || row.angle_title || batch.shared_config?.bridging?.editorialTopic || '',
+        editorialOutro: row.editorial_outro || batch.shared_config?.bridging?.editorialOutro || '',
+        angleTitle: row.angle_title || row.editorial_topic || '',
+        hookType: row.hook_type || row.hookType || '',
+        hookText: row.hook_text || row.hookText || '',
+        targetPersona: row.target_persona || row.targetPersona || '',
+        emotionalTrigger: row.emotional_trigger || row.emotionalTrigger || '',
+        ctaType: row.cta_type || row.ctaType || '',
+        category_cep: row.category_cep || row.categoryCep || '',
+        ws_matrix: row.ws_matrix || row.wsMatrix || '',
+        strategic_archetype: row.strategic_archetype || row.strategicArchetype || '',
+        core_problem: row.core_problem || row.coreProblem || batch.shared_config?.bridging?.core_problem || '',
+        nicheKbName: row.niche_kb_name || batch.shared_config?.bridging?.nicheKbName || '',
+        generate_recipe: generateRecipe
+      };
+```
+
+---
+
+### 3. `lib/multiplier-angle-generator.js` (Integrasi Content Planner Matrix Engine)
+
+#### Code Sebelum (Current/Before):
+```javascript
+// lib/multiplier-angle-generator.js:L268
+  const requestedCount = Math.min(Math.max(parseInt(angleCount, 10) || 5, 3), 10);
+
+  const prompt = `
+Anda adalah Chief Viral Strategist & Retention Algorithm Expert kelas dunia untuk Facebook Content Monetization (Reels & In-Stream Ads) di MAKNA Flow.
+...
+## 📐 MATRIKS 5-SUMBU PERMUTASI (WAJIB DIVERSIFIKASI SESUAI TOPIK):
+Setiap angle yang Anda ciptakan WAJIB mengambil kombinasi sumbu yang berbeda sesuai niche "${anchorDNA.nicheLabel}":
+1. Sumbu Persona
+2. Sumbu Momen/Waktu
+3. Sumbu Format Hook
+4. Sumbu Emosi
+5. Sumbu CTA Bait
+```
+
+#### Code Sesudah (Proposed/After):
+```javascript
+// lib/multiplier-angle-generator.js:L268
+  // Mendukung pembuatan sudut pandang dinamis dari 3 hingga 20 angles
+  const requestedCount = Math.min(Math.max(parseInt(angleCount, 10) || 5, 3), 20);
+
+  const prompt = `
+Anda adalah Chief Viral Strategist & Retention Algorithm Expert kelas dunia di MAKNA Flow.
+
+TUGAS ANDA:
+Menganalisis aset Visual Blueprint referensi dan menghasilkan **${requestedCount} SUDUT PANDANG (EDITORIAL ANGLES) YANG 100% UNIK, SEGAR, DAN VIRAL-OPTIMIZED** dengan menerapkan **CONTENT PLANNER STRATEGIC MATRIX (CEP × W'S MATRIX × 30 STRATEGIC ARCHETYPES)**.
+
+---
+
+## 🎯 DATA VISUAL BLUEPRINT REFERENSI & MASALAH UTAMA (CORE ANCHOR):
+- Blueprint ID: ${primaryBp.id}
+- Niche Terdeteksi: ${anchorDNA.nicheLabel} (${anchorDNA.detectedNiche})
+- Masalah Utama Pokok (LOCKED): "${primaryBp.core_problem || anchorDNA.coreProblem}"
+${anchorDNA.coreSolution ? `- Solusi Inti Pokok (LOCKED): "${anchorDNA.coreSolution}"\n` : ''}${anchorDNA.extractedIngredients.length > 0 ? `- Bahan Baku Pokok Visual (LOCKED): ${anchorDNA.extractedIngredients.join(', ')}\n` : ''}- Rincian Adegan Visual & Voiceover Asli:
+${sceneSummaries}
+
+---
+
+## 🔒 MANDAT KESINAMBUNGAN MASALAH UTAMA (STRICT CORE PROBLEM CONTINUITY):
+1. **KUNCI MASALAH UTAMA (DILARANG KERAS MENGGANTI MASALAH)**:
+   - Seluruh ${requestedCount} sudut pandang yang Anda hasilkan WAJIB 100% berakar dan menyelesaikan MASALAH UTAMA di atas ("${primaryBp.core_problem || anchorDNA.coreProblem}")!
+   - JIKA Blueprint membahas [Membakar Lemak Perut Alami], maka SELURUH ${requestedCount} angle WAJIB tetap seputar membakar lemak perut alami tersebut! DILARANG KERAS berhalusinasi mengganti masalah menjadi perut begah, kecanduan kopi, stamina keluarga, susah tidur, atau hemat biaya kost!
+2. **DIVERSIFIKASI HANYA PADA PERSPEKTIF AUDIENS (BUKAN MENGGANTI MASALAH POKOK)**:
+   - Variasi dilakukan melalui permutasi Matriks Content Planner di bawah ini, sehingga audiens yang berbeda merasakan kedekatan emosional terhadap solusi masalah utama tersebut.
+
+---
+
+## 🧬 MATRIKS STRATEGI CONTENT PLANNER (PANDUAN PERMUTASI DINAMIS):
+Setiap angle dari ${requestedCount} angle yang Anda ciptakan WAJIB mengombinasikan 3 dimensi strategi berikut:
+
+### 1. Kategori CEP (Category Entry Points - Pilih 1 per Baris):
+- Problem-Solution Based: Mengatasi keluhan fisik/kesehatan mendesak
+- Routine-Based: Rutinitas harian (pagi sebelum ngantor, sarapan praktis)
+- Commitment-Based: Disiplin & dedikasi (defisit kalori, tantangan 7 hari)
+- Aspirational-Based: Menuju lingkar tubuh ideal & perbaikan kualitas hidup
+- Opportunistic-Based: Solusi cerdas, modal murah bahan dapur
+- Emotional-Based: Meredakan stres, rasa bersalah makan banyak, ngidam malam
+
+### 2. W's Matrix (Pilih & Gabungkan Minimal 2 Variabel per Baris):
+- When? (Pagi hari sebelum ngantor, malam jam 10 sebelum tidur, sore saat energi drop)
+- Where? (Dapur kost, meja kantor, gym, ruang makan keluarga)
+- With/For Whom? (Sendiri, ibu pasca melahirkan, pasangan, lansia)
+- How Feeling? (Frustrasi timbangan stuck, kancing celana sesak, bersalah makan gorengan)
+- While? (Sambil lembur kerja, sambil bersiap pagi, sehabis olahraga ringan)
+- With What? (Panci kost sederhana, modal 5 ribu perak, 2 rempah dapur)
+- Why? (Detoksifikasi alami, susut lingkar pinggang, hilangkan lemak visceral)
+
+### 3. The Infinite Strategic Angle Matrix (30 Archetypes dari KB):
+Gunakan variasi archetype yang berbeda tajam antar baris (Life Hack, Cost of Inaction, Myth Buster, 7-Day Challenge, Scientific Proof, Pure Relief, Ancient Wisdom, Second Chance, Sensory ASMR, Secret Club, Minimalist, dll).
+
+---
+
+## 🛡️ ATURAN ANTI-DUPLIKASI (HISTORICAL ANTI-REPETITION MEMORY):
+DILARANG KERAS mengulangi sudut pandang yang mirip dengan riwayat sebelumnya:
+${excludedAngles.length > 0 ? excludedAngles.map((ex, i) => `${i + 1}. "${ex}"`).join('\n') : '(Belum ada riwayat sebelumnya. Pastikan semua variasi saling berbeda tajam).'}
+
+---
+
+## 📤 FORMAT OUTPUT (WAJIB STRICT VALID JSON ARRAY):
+[
+  {
+    "angle_id": "ang_1",
+    "title": "Judul Angle Singkat & Menarik (Maks 10 Kata)",
+    "category_cep": "Problem-Solution | Routine | Commitment | Aspirational | Opportunistic | Emotional",
+    "ws_matrix": "When (Pagi) + While (Sebelum Ngantor)",
+    "strategic_archetype": "The Habit Replacement | The Cost of Inaction | The 7-Day Challenge | ...",
+    "target_persona": "Target Audiens Spesifik",
+    "emotional_trigger": "Emosi & Masalah Utama yang Disentuh",
+    "hook_text": "Naskah Hook 0 - 3 Detik Pertama (Wajib sangat kuat & memikat)",
+    "vo_preview": "Draft kelanjutan naskah Voice-Over Scene 2 & 3 yang sinkron dengan visual blueprint",
+    "recommended_voice": "Warm Mentor | Cozy ASMR Whisper | Energetic Inspiring | Wise Storyteller",
+    "cta_type": "Komen 'IKUTAN' | Share ke teman | Simpan video ini",
+    "core_problem": "${primaryBp.core_problem || anchorDNA.coreProblem}"
+  }
+]
+`;
+```
+
+---
+
+### 4. `app/multiplier-lab/page.js` (Pilihan Jumlah Angle & Payload Lengkap)
+
+#### Code Sebelum (Current/Before):
+```jsx
+// app/multiplier-lab/page.js:L1468
+<select className="form-input" value={angleCount} onChange={e => setAngleCount(Number(e.target.value))}>
+  <option value={3}>3 Sudut Pandang (Quick Test)</option>
+  <option value={5}>5 Sudut Pandang (Standard Viral Pack)</option>
+  <option value={7}>7 Sudut Pandang (Deep Matrix)</option>
+  <option value={10}>10 Sudut Pandang (Full Saturation)</option>
+</select>
+```
+
+#### Code Sesudah (Proposed/After):
+```jsx
+// app/multiplier-lab/page.js:L1468
+<select className="form-input" value={angleCount} onChange={e => setAngleCount(Number(e.target.value))}>
+  <option value={3}>3 Sudut Pandang (Quick Test)</option>
+  <option value={5}>5 Sudut Pandang (Standard Viral Pack)</option>
+  <option value={7}>7 Sudut Pandang (Deep Matrix)</option>
+  <option value={10}>10 Sudut Pandang (Full Saturation)</option>
+  <option value={12}>12 Sudut Pandang (Content Planner 12-Pack)</option>
+  <option value={15}>15 Sudut Pandang (Mega Campaign Pack)</option>
+  <option value={20}>20 Sudut Pandang (Ultra Matrix Pack)</option>
+</select>
+```
+
+Dan pada mapping payload `handleStartCampaign`:
+#### Code Sebelum (Current/Before):
+```javascript
+// app/multiplier-lab/page.js:L896
+        rows: combinationRows.map(row => ({
+          deconstruct_asset_id: row.deconstruct_asset_id,
+          target_product_id: row.target_product_id,
+          target_product_url: row.target_product_url,
+          affiliate_url: row.affiliate_url,
+          campaign_name: cleanCampaignName,
+          brand_profile_id: selectedBrandId || null,
+          account_name: accountName || null,
+          campaign_type: row.campaign_type || (isPureStory ? 'pure_storytelling' : 'product_campaign'),
+          status: targetInitialStatus,
+          editorial_topic: row.editorial_topic || editorialTopic.trim(),
+          editorial_outro: row.editorial_outro || editorialOutro.trim()
+        })),
+```
+
+#### Code Sesudah (Proposed/After):
+```javascript
+// app/multiplier-lab/page.js:L896
+        rows: combinationRows.map(row => ({
+          deconstruct_asset_id: row.deconstruct_asset_id,
+          target_product_id: row.target_product_id,
+          target_product_url: row.target_product_url,
+          affiliate_url: row.affiliate_url,
+          campaign_name: cleanCampaignName,
+          brand_profile_id: selectedBrandId || null,
+          account_name: accountName || null,
+          campaign_type: row.campaign_type || (isPureStory ? 'pure_storytelling' : 'product_campaign'),
+          status: targetInitialStatus,
+          editorial_topic: row.editorial_topic || editorialTopic.trim(),
+          editorial_outro: row.editorial_outro || editorialOutro.trim(),
+          angle_title: row.angle_title || row.editorial_topic || '',
+          hook_type: row.hook_type || '',
+          hook_text: row.hook_text || '',
+          target_persona: row.target_persona || '',
+          emotional_trigger: row.emotional_trigger || '',
+          cta_type: row.cta_type || '',
+          category_cep: row.category_cep || '',
+          ws_matrix: row.ws_matrix || '',
+          strategic_archetype: row.strategic_archetype || '',
+          core_problem: row.core_problem || '',
+          niche_kb_name: row.niche_kb_name || selectedNicheKb || ''
+        })),
+```
+
+---
+
+### 5. `lib/prompts.js` (`buildMultiplierPhase2Prompt`)
+
+#### Code Sebelum (Current/Before):
+```javascript
+// lib/prompts.js:L2810
+  const dataSection = isPureStorytelling
+    ? `---
+### TOPIK & SUDUT PANDANG CERITA (ORGANIC MONETIZATION - NON-PRODUK):
+- Judul / Angle Spesifik: "${angleTitle || productDesc || 'Refleksi mendalam & pesan bernilai tinggi'}"
+${targetPersona ? `- Target Persona / Audiens: "${targetPersona}"\n` : ''}${hookType ? `- Tipe Hook Pembuka: "${hookType}"\n` : ''}${hookText ? `- Panduan Hook 0-3s: "${hookText}" (Gunakan atau variasikan hook ini untuk Scene 1)\n` : ''}${emotionalTrigger ? `- Trigger Emosi Utama: "${emotionalTrigger}"\n` : ''}${ctaType ? `- Rekomendasi CTA Interaksi: "${ctaType}"\n` : ''}- Pesan Penutup / Outro: "${productUsp || mandatoryOutroLine || 'Pesan moral penutup / CTA interaksi'}"
+${nicheKbSnippet ? `\n### PANDUAN DOMAIN KHUSUS (NICHE KB):\n${nicheKbSnippet}\n` : ''}`
+```
+
+#### Code Sesudah (Proposed/After):
+```javascript
+// lib/prompts.js:L2810
+  const coreProblem = bridging?.core_problem || bridging?.coreProblem || '';
+  const categoryCep = bridging?.category_cep || bridging?.categoryCep || '';
+  const wsMatrix = bridging?.ws_matrix || bridging?.wsMatrix || '';
+  const strategicArchetype = bridging?.strategic_archetype || bridging?.strategicArchetype || '';
+
+  const dataSection = isPureStorytelling
+    ? `---
+### TOPIK & SUDUT PANDANG CERITA (ORGANIC MONETIZATION - NON-PRODUK):
+- Judul / Angle Spesifik: "${angleTitle || productDesc || 'Refleksi mendalam & pesan bernilai tinggi'}"
+${coreProblem ? `- Masalah Utama Blueprint (Wajib Diselesaikan Konten): "${coreProblem}"\n` : ''}${strategicArchetype ? `- Strategic Archetype: "${strategicArchetype}"\n` : ''}${categoryCep ? `- Category CEP: "${categoryCep}"\n` : ''}${wsMatrix ? `- W's Matrix Context: "${wsMatrix}"\n` : ''}${targetPersona ? `- Target Persona / Audiens: "${targetPersona}"\n` : ''}${hookType ? `- Tipe Hook Pembuka: "${hookType}"\n` : ''}${hookText ? `- Panduan Hook 0-3s: "${hookText}" (Gunakan atau variasikan hook ini untuk Scene 1)\n` : ''}${emotionalTrigger ? `- Trigger Emosi Utama: "${emotionalTrigger}"\n` : ''}${ctaType ? `- Rekomendasi CTA Interaksi: "${ctaType}"\n` : ''}- Pesan Penutup / Outro: "${productUsp || mandatoryOutroLine || 'Pesan moral penutup / CTA interaksi'}"
+${nicheKbSnippet ? `\n### PANDUAN DOMAIN KHUSUS (NICHE KB):\n${nicheKbSnippet}\n` : ''}`
+```
+
+---
+
+### 6. `lib/prompts.js` (`buildDeconstructPhase1Prompt`)
+
+#### Code Sebelum (Current/Before):
+```javascript
+// lib/prompts.js:L2580
+### C. VIRAL PATTERN SUMMARY
+Rangkuman 3-5 kalimat tentang POLA VIRAL apa yang digunakan video ini:
+- Teknik hook apa yang digunakan?
+- Emosi apa yang mendominasi?
+- Mengapa format ini efektif untuk engagement?
+- Saran adaptasi untuk produk lain.
+
+### D. AUTO-DETECT NICHE & KEYWORDS (TAGS)
+1. **niche**: ${nicheInstruction}
+2. **tags**: Tentukan 5-10 kata kunci (keywords) terbaik dan paling relevan dengan isi dan visual video tersebut...
+```
+
+#### Code Sesudah (Proposed/After):
+```javascript
+// lib/prompts.js:L2580
+### C. RUMUSAN MASALAH UTAMA & SOLUSI POKOK (CORE PROBLEM & SOLUTION)
+Rumuskan secara jelas dan padat akar masalah dan solusi yang diangkat narasi video:
+1. **core_problem**: Masalah utama / keluhan terbesar yang ingin diselesaikan oleh narasi video (contoh: "Membakar dan merontokkan lemak perut secara alami tanpa obat pelangsing kimia berbahaya").
+2. **core_solution**: Solusi inti atau racikan utama yang diajarkan (contoh: "Rebusan kayu manis cengkeh 8 menit dengan perasan lemon segar").
+3. **target_audience_pain_point**: Penderitaan / kekhawatiran spesifik audiens sasaran (contoh: "Frustrasi dengan lemak perut membandel yang tak kunjung susut dan takut efek samping pil diet").
+
+### D. VIRAL PATTERN SUMMARY
+Rangkuman 3-5 kalimat tentang POLA VIRAL apa yang digunakan video ini...
+
+### E. AUTO-DETECT NICHE & KEYWORDS (TAGS)
+1. **niche**: ${nicheInstruction}
+2. **tags**: Tentukan 5-10 kata kunci...
+```
+
+---
+
+## 🚀 Prosedur Verifikasi & Pengujian
+
+1. **Simulasi Visual Interaktif (Mockup HTML)**:
+   - File mockup telah diperbarui di [public/mockup_multiplier_core_problem.html](file:///Users/sabeqmmursyid/_contentflow-staging/public/mockup_multiplier_core_problem.html).
+   - Pengguna dapat menguji dropdown jumlah angle dinamis (3, 5, 7, 10, 12, 15, 20), melihat kolom permutasi **Category CEP**, **W's Matrix**, dan **Strategic Archetype**, serta menguji toggle penguncian masalah utama.
+2. **Automated Unit Testing (`tests/multiplier-core-problem.test.js`)**:
+   - Memastikan `extractBlueprintAnchorDNA` mengekstrak `coreProblem`.
+   - Memastikan `generateDynamicMultiplierAngles` menghasilkan array dinamis dengan jumlah sesuai request (3 s/d 20) di mana setiap item membawa `core_problem`, `category_cep`, `ws_matrix`, dan `strategic_archetype`.
+   - Memastikan payload `re_multiplier_tasks` menyimpan seluruh atribut strategi tanpa ada field yang hilang.
+3. **Verifikasi Database & Skrip Backfill**:
+   - Menjalankan migrasi kolom PostgreSQL secara aman (`core_problem`, `core_solution`, `target_audience_pain_point`).
+   - Menjalankan skrip `backfill-blueprint-core-problems.mjs` untuk mengisi data `core_problem` pada Blueprint eksisting di Staging (`148` item) dan Dev (`20` item).

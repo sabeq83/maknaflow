@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.60 — Integrasi Mesin Content Planner & Core Problem Continuity Multiplier Lab (17/10/2026)
+- Penguncian Masalah Utama Blueprint pada Seluruh Sudut Pandang dan Remake
+- Integrasi Matriks Content Planner CEP x Ws Matrix x 30 Strategic Archetypes (Fleksibel 3-20 Angles)
+- Perbaikan Data Loss Payload Multiplier Lab saat Start Campaign
+- Upgrade Engine Dekonstruksi V2 dan Backfill 169 Blueprint Eksisting
+
 ## V2.32.59 — Perbaikan Pengurutan Feed ContentFlow, Navigasi Langsung Multiplier & Rebind SiasatSehat (17/10/2026)
 - Ubah pengurutan feed ContentFlow menjadi ORDER BY created_at DESC
 - Integrasi tombol Buka di ContentFlow dan badge dinamis pada Multiplier Lab

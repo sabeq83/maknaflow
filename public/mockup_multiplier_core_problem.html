@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Multiplier Core Problem & Content Planner Matrix - MAKNA Flow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --font-sans: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+    }
+
+    [data-theme='light'] {
+      --canvas: #f8fafc;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border-subtle: #cbd5e1;
+      --border-strong: #94a3b8;
+      --action-primary: #0d9488;
+      --action-primary-hover: #0f766e;
+      --on-action-primary: #ffffff;
+      --link: #0284c7;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.1);
+      --status-neutral: #7c3aed;
+      --status-neutral-soft: rgba(124, 58, 237, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      padding: 24px;
+      line-height: 1.5;
+    }
+
+    .container { max-width: 1300px; margin: 0 auto; }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .header-title h1 { font-size: 20px; font-weight: 700; color: var(--text-primary); }
+    .header-title p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+    .theme-toggle {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-info { background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info); }
+    .badge-success { background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success); }
+    .badge-warning { background: var(--status-warning-soft); color: var(--status-warning); border: 1px solid var(--status-warning); }
+    .badge-danger { background: var(--status-danger-soft); color: var(--status-danger); border: 1px solid var(--status-danger); }
+    .badge-neutral { background: var(--status-neutral-soft); color: var(--status-neutral); border: 1px solid var(--status-neutral); }
+
+    .dna-field { margin-bottom: 12px; }
+    .dna-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .dna-value {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+    .dna-value.highlight {
+      border-color: var(--action-primary);
+      background: rgba(45, 212, 191, 0.08);
+      font-weight: 600;
+    }
+
+    .toggle-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      padding: 14px;
+      border-radius: var(--radius-md);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .controls-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .select-input {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      padding: 9px 16px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn:hover { background: var(--action-primary-hover); }
+
+    .btn-secondary {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+    }
+    .btn-secondary:hover { background: var(--surface-hover); }
+
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      margin-top: 14px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 12.5px;
+    }
+    th {
+      background: var(--surface-raised);
+      color: var(--text-muted);
+      padding: 12px 14px;
+      font-size: 11.5px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface-hover); }
+
+    .status-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .pill-green { background: var(--status-success-soft); color: var(--status-success); }
+    .pill-red { background: var(--status-danger-soft); color: var(--status-danger); }
+
+    .matrix-pill {
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 3px;
+      background: var(--surface-interactive);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .hook-preview {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--link);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-title">
+        <h1>Simulasi Multiplier Core Problem & Content Planner Matrix</h1>
+        <p>Integrasi Mesin Permutasi Dinamis Content Planner (CEP × W's Matrix × 30 Strategic Archetypes) dengan Strict Problem Anchor</p>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()">🌓 Ganti Tema</button>
+    </div>
+
+    <div class="grid-2">
+      <!-- Card Kiri: Blueprint Aset Asli -->
+      <div class="card">
+        <div class="card-title">
+          <span>📄 Data Blueprint Referensi (Locked Anchors)</span>
+          <span class="badge badge-info">#0b3ef9bb-c84e-4887-9167-f8a9277e924d</span>
+        </div>
+
+        <div class="dna-field">
+          <div class="dna-label">Niche & Bahan Baku Pokok Visual (LOCKED)</div>
+          <div class="dna-value">🌿 Herbal Rempah Tradisional: Batang Kayu Manis, Butiran Cengkeh, Panci Air Mendidih, Perasan Lemon Segar</div>
+        </div>
+
+        <div class="dna-field">
+          <div class="dna-label">🎯 Masalah Utama Blueprint (CORE PROBLEM - LOCKED)</div>
+          <div class="dna-value highlight">🔥 Membakar & merontokkan lemak perut secara alami tanpa obat pelangsing kimia</div>
+        </div>
+
+        <div class="dna-field">
+          <div class="dna-label">🥣 Solusi Inti Pokok (CORE SOLUTION - LOCKED)</div>
+          <div class="dna-value">Seduhan rebusan 8 menit kayu manis + cengkeh dipadukan perasan lemon segar kaya antioksidan</div>
+        </div>
+
+        <div class="dna-field">
+          <div class="dna-label">Naskah Asli Scene 1 (Hook Pembuka)</div>
+          <div class="dna-value"><em>"Minuman kayu manis lemon ini bantu rontokkan lemak perut dengan cepat tanpa perlu obat pelangsing kimia..."</em></div>
+        </div>
+      </div>
+
+      <!-- Card Kanan: Pengaturan Generator Multiplier -->
+      <div class="card">
+        <div class="card-title">
+          <span>⚙️ Mesin Permutasi Content Planner</span>
+          <span class="badge badge-neutral">Infinite Strategy Engine</span>
+        </div>
+
+        <div class="toggle-box">
+          <div>
+            <div style="font-weight: 700; font-size: 14px;">Mode Penguncian Masalah Utama</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+              Kunci seluruh variasi angle agar 100% menyelesaikan masalah utama blueprint
+            </div>
+          </div>
+          <div>
+            <input type="checkbox" id="lockProblemToggle" checked onchange="handleModeChange()" style="transform: scale(1.4); cursor: pointer;">
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <div>
+            <label class="dna-label">🔢 Jumlah Sudut Pandang (Dinamis):</label>
+            <select id="angleCountSelect" class="select-input" onchange="handleCountChange()">
+              <option value="3">3 Sudut Pandang (Quick Test)</option>
+              <option value="5">5 Sudut Pandang (Standard Pack)</option>
+              <option value="7">7 Sudut Pandang (Deep Matrix)</option>
+              <option value="10">10 Sudut Pandang (Saturation Pack)</option>
+              <option value="12" selected>12 Sudut Pandang (Content Planner Pack)</option>
+              <option value="15">15 Sudut Pandang (Mega Matrix)</option>
+            </select>
+          </div>
+          <div style="flex: 1; display: flex; gap: 8px; align-items: flex-end;">
+            <button class="btn" style="flex: 1;" onclick="handleRegenerate()">⚡ Generate Angles Baru</button>
+            <button class="btn btn-secondary" onclick="loadFailedRealCase()">Kasus Gagal Lama</button>
+          </div>
+        </div>
+
+        <div style="font-size: 12.5px; color: var(--text-secondary);">
+          <p id="modeExplanation" style="background: var(--surface-raised); padding: 12px; border-radius: var(--radius-sm); border-left: 3px solid var(--status-success);">
+            ✅ <strong>Content Planner Matrix: AKTIF & TERKUNCI</strong><br>
+            AI memutar permutasi <strong>6 Kategori CEP × W's Matrix (When/Where/Feeling/While) × 30 Strategic Archetypes</strong>. Jumlah sudut pandang bebas dipilih (tidak dibatasi 7) dan setiap sudut pandang membawa perspektif segar tanpa pernah melenceng dari masalah membakar lemak perut alami.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabel Hasil Komparasi -->
+    <div style="margin-top: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <h2 style="font-size: 16px; font-weight: 700;">
+          Daftar Sudut Pandang Hasil Generator (<span id="outputCountLabel">12</span> Baris, <span id="outputModeTitle">Content Planner Matrix: AKTIF</span>)
+        </h2>
+        <span id="retentionScore" class="status-pill pill-green">Konsistensi Masalah: 100% (Semua Membakar Lemak)</span>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 35px;">No</th>
+              <th style="width: 220px;">Category CEP & Strategic Archetype</th>
+              <th style="width: 180px;">W's Matrix & Persona</th>
+              <th style="width: 260px;">Angle Title & Naskah Hook (0-3s)</th>
+              <th style="width: 190px;">Masalah yang Diselesaikan</th>
+              <th style="width: 110px; text-align: center;">Status Relevansi</th>
+            </tr>
+          </thead>
+          <tbody id="anglesTableBody">
+            <!-- Diisi via JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Pool 15 Dinamis Angles berbasis Content Planner Framework
+    const dynamicMatrixAngles = [
+      {
+        cep: "Routine-Based",
+        archetype: "Habit Replacement",
+        ws: "When (Pagi) + While (Sebelum Ngantor)",
+        persona: "Pekerja Kantor Sibuk",
+        title: "Ganti Kopi Susu Pagimu dengan Racikan Pembakar Lemak Ini",
+        hook: "Mau perut buncit susut tapi tiap pagi masih minum kopi sachet tinggi gula? Ganti dengan seduhan rempah hangat ini...",
+        problem: "Lemak perut akibat kebiasaan gula pagi hari",
+        valid: true
+      },
+      {
+        cep: "Problem-Solution",
+        archetype: "The Cost of Inaction",
+        ws: "Where (Meja Kantor) + How Feeling (Perut Buncit)",
+        persona: "Pekerja Duduk Lama",
+        title: "Bahaya Lemak Duduk 8 Jam di Kantor & Cara Merontokkannya",
+        hook: "Duduk 8 jam sehari bikin lemak visceral perut menumpuk diam-diam. Jangan tunggu kancing celana gak muat lagi...",
+        problem: "Lemak visceral akibat sedentary desk job",
+        valid: true
+      },
+      {
+        cep: "Emotional-Based",
+        archetype: "The Myth Buster",
+        ws: "How Feeling (Frustrasi) + Why (Diet Gagal)",
+        persona: "Pejuang Defisit Kalori",
+        title: "Mitos: Bakar Lemak Harus Lapar & Olahraga Menyiksa",
+        hook: "Siapa bilang rontokkan lemak perut harus nyiksa diri gak makan? Rahasia herbal 2 bahan ini bantu bakar lemak alami...",
+        problem: "Frustrasi lemak perut tak kunjung susut",
+        valid: true
+      },
+      {
+        cep: "Commitment-Based",
+        archetype: "The Pure Relief",
+        ws: "When (Malam) + While (Jelang Tidur)",
+        persona: "Momen Malam Hari / Bedtime",
+        title: "Bakar Lemak Saat Tidur: Seduhan Hangat 30 Menit Jelang Terlelap",
+        hook: "Optimalkan pembakaran lemak saat tubuh Anda tidur lelap dengan segelas racikan hangat kayu manis lemon ini...",
+        problem: "Pembakaran lemak visceral malam hari",
+        valid: true
+      },
+      {
+        cep: "Aspirational-Based",
+        archetype: "The Second Chance",
+        ws: "With/For Whom (Ibu Pasca Melahirkan)",
+        persona: "Bunda Pasca Melahirkan",
+        title: "Rahasia Pinggang Ramping Alami Pasca Melahirkan",
+        hook: "Buat para bunda yang frustrasi sama lemak perut bawah sehabis lahiran, racik bahan dapur ini tanpa takut ganggu ASI...",
+        problem: "Lemak perut membandel pasca persalinan",
+        valid: true
+      },
+      {
+        cep: "Opportunistic-Based",
+        archetype: "The Life Hack / Math Whiz",
+        ws: "With What (Panci Kost) + Why (Bujet Murah)",
+        persona: "Mahasiswa / Anak Kost",
+        title: "Basmi Perut Buncit Modal 5 Ribu & Panci Kost",
+        hook: "Gak perlu suplemen pelangsing jutaan rupiah. Modal panci kost dan lemon warung, lemak perut perlahan rontok...",
+        problem: "Bakar lemak perut ekonomis & praktis",
+        valid: true
+      },
+      {
+        cep: "Commitment-Based",
+        archetype: "The 7-Day Challenge",
+        ws: "Why (Detoks Lemak) + When (7 Hari)",
+        persona: "Pencari Hasil Terukur",
+        title: "Tantangan 7 Hari: Susut Lingkar Pinggang dengan Rebusan Herbal",
+        hook: "Coba rutinkan minum air rebusan kayu manis lemon ini selama 7 hari berturut-turut, lihat perubahan lingkar perutmu...",
+        problem: "Tantangan rontokkan lingkar perut terukur",
+        valid: true
+      },
+      {
+        cep: "Emotional-Based",
+        archetype: "The Guilty Pleasure Substitute",
+        ws: "When (Jam 10 Malam) + How Feeling (Ngidam)",
+        persona: "Pencinta Camilan Malam",
+        title: "Solusi Ngidam Manis Malam Hari Tanpa Takut Timbangan Naik",
+        hook: "Tiap jam 10 malam tersiksa pengen yang manis-manis tapi takut lemak perut makin tebal? Seduh racikan manis alami ini...",
+        problem: "Cegah akumulasi lemak akibat ngidam manis",
+        valid: true
+      },
+      {
+        cep: "Status / Identity",
+        archetype: "Ancient Wisdom / Heritage",
+        ws: "Who (Resep Orang Tua Kuno)",
+        persona: "Pemerhati Kesehatan Tradisional",
+        title: "Resep Nenek Moyang: Cara Alami Meluruhkan Lemak Membandel",
+        hook: "Zaman dulu sebelum ada pil diet kimia, orang tua kita pakai 2 rempah dapur ini untuk basmi tumpukan lemak...",
+        problem: "Peluruh lemak alami resep tradisional",
+        valid: true
+      },
+      {
+        cep: "Aspirational-Based",
+        archetype: "The Multiplier / Accelerator",
+        ws: "When (Pasca Olahraga) + Why (Double Burn)",
+        persona: "Pegiat Olahraga / Workout",
+        title: "Double Burn: Maksimalkan Pembakaran Lemak Sehabis Jalan Pagi",
+        hook: "Sudah jalan pagi 30 menit? Lipatgandakan pembakaran lemaknya dengan perasan lemon hangat kaya polifenol ini...",
+        problem: "Akselerasi pembakaran lemak sehabis cardio",
+        valid: true
+      },
+      {
+        cep: "Problem-Solution",
+        archetype: "The Scientific Proof",
+        ws: "With What (Asam Sitrat & Cinnamaldehyde)",
+        persona: "Audiens Logis / Skeptis",
+        title: "Rahasia Medis di Balik Kayu Manis & Lemon untuk Gula Darah",
+        hook: "Secara biologis, kayu manis menahan lonjakan insulin sehingga tubuh dipaksa membakar cadangan lemak di perut...",
+        problem: "Regulasi insulin pencegah penumpukan lemak",
+        valid: true
+      },
+      {
+        cep: "Emotional-Based",
+        archetype: "The Sensory ASMR",
+        ws: "How Feeling (Relaksasi) + Sensory Action",
+        persona: "Pencari Ketenangan Visual",
+        title: "Ritual Seduhan Aromaterapi Peluruh Lemak & Penenang Pikiran",
+        hook: "Dengarkan suara air mendidih dan aroma wangi kayu manis yang menenangkan, sambil meluruhkan tumpukan lemak tubuh...",
+        problem: "Meredakan hormon kortisol pemicu lemak perut",
+        valid: true
+      },
+      {
+        cep: "Opportunistic-Based",
+        archetype: "The Secret Club",
+        ws: "Where (Dapur Sendiri) + With What (Bahan Sederhana)",
+        persona: "Pencari Rahasia Alami",
+        title: "Rahasia Dapur yang Jarang Diungkap untuk Tubuh Ramping",
+        hook: "Ternyata bahan dapur sederhana ini punya kekuatan melarutkan lemak lebih efektif dibanding produk mahal di pasaran...",
+        problem: "Pelarutan lemak alami dengan bahan dapur",
+        valid: true
+      },
+      {
+        cep: "Commitment-Based",
+        archetype: "The Contrast Shock",
+        ws: "Why (Perbandingan Ekstrem)",
+        persona: "Pencari Fakta Diet",
+        title: "Kontras Nyata: Minum Air Dingin vs Rebusan Herbal Pembakar Lemak",
+        hook: "Banyak yang mengira air es bikin gemuk, padahal yang bikin lemak perut menumpuk adalah metabolisme yang melambat...",
+        problem: "Optimalisasi metabolisme peluruh lemak",
+        valid: true
+      },
+      {
+        cep: "Routine-Based",
+        archetype: "The Minimalist",
+        ws: "With What (Hanya 2 Bahan) + When (Tiap Pagi)",
+        persona: "Penyuka Kepraktisan",
+        title: "Minimalis 2 Bahan Dapur: Solusi Perut Rata Tanpa Ribet",
+        hook: "Cukup rebus 2 bahan dapur ini selama 8 menit tiap pagi untuk bantu mengikis lemak perut yang mengganggu...",
+        problem: "Solusi ringkas basmi lemak perut harian",
+        valid: true
+      }
+    ];
+
+    const brokenAngles = [
+      {
+        cep: "Acak (Tanpa Pola)",
+        archetype: "Improvisasi Bebas",
+        ws: "Lembur Kantor",
+        persona: "Pekerja Lembur",
+        title: "Atasi Perut Begah Lembur Tanpa Minuman Kemasan",
+        hook: "Pernahkah Anda merasa perut sesak, kembung, dan begah setelah jam kerja panjang di kantor?",
+        problem: "Perut kembung & begah lembur (Bukan Lemak)",
+        valid: false
+      },
+      {
+        cep: "Acak (Tanpa Pola)",
+        archetype: "Improvisasi Bebas",
+        ws: "Pagi Hari",
+        persona: "Pecinta Kopi",
+        title: "Tantangan 7 Hari Ganti Kopi Pagi Minuman Herbal",
+        hook: "Tantangan 7 hari ganti kopi pagi dengan seduhan herbal alami untuk kesegaran tubuh Anda.",
+        problem: "Kecanduan kopi pagi hari (Bukan Lemak)",
+        valid: false
+      },
+      {
+        cep: "Acak (Tanpa Pola)",
+        archetype: "Improvisasi Bebas",
+        ws: "Keluarga",
+        persona: "Keluarga",
+        title: "Rahasia Dapur Nenek untuk Stamina Keluarga",
+        hook: "Rahasia turun-temurun resep dapur nenek untuk menjaga stamina seluruh anggota keluarga.",
+        problem: "Kebugaran dan stamina keluarga (Bukan Lemak)",
+        valid: false
+      },
+      {
+        cep: "Acak (Tanpa Pola)",
+        archetype: "Improvisasi Bebas",
+        ws: "Pasca Olahraga",
+        persona: "Pegiat Olahraga",
+        title: "Kesegaran Alami Pembakar Semangat Pasca Workout",
+        hook: "Segarkan kembali energi dan semangat Anda yang terkuras sehabis sesi latihan berat.",
+        problem: "Kelelahan & drop energi (Bukan Lemak)",
+        valid: false
+      },
+      {
+        cep: "Acak (Tanpa Pola)",
+        archetype: "Improvisasi Bebas",
+        ws: "Malam Hari",
+        persona: "Penderita Insomnia",
+        title: "ASMR Ritual Herbal Penenang Sebelum Tidur",
+        hook: "Dengarkan suara air mendidih yang menenangkan sebelum Anda merebahkan tubuh untuk istirahat...",
+        problem: "Relaksasi dan insomnia (Bukan Lemak)",
+        valid: false
+      },
+      {
+        cep: "Acak (Tanpa Pola)",
+        archetype: "Improvisasi Bebas",
+        ws: "Kerja Panjang",
+        persona: "Pekerja Sibuk",
+        title: "Solusi Badan Ringan Alami Bebas Bahan Kimia",
+        hook: "Sering merasa tubuh gampang lemas, begah, atau terasa berat sehabis jam kerja panjang?",
+        problem: "Badan pegal linu & lemas (Bukan Lemak)",
+        valid: false
+      },
+      {
+        cep: "Acak (Tanpa Pola)",
+        archetype: "Improvisasi Bebas",
+        ws: "Kost",
+        persona: "Anak Kost",
+        title: "Racikan Herbal Hemat Panci Kost Sehat Seharian",
+        hook: "Trik hemat anak kost menjaga tubuh tetap fit hanya dengan modal kompor induksi kecil...",
+        problem: "Hemat uang belanja kost (Bukan Lemak)",
+        valid: false
+      }
+    ];
+
+    function renderTable(count, isLocked) {
+      const tbody = document.getElementById('anglesTableBody');
+      tbody.innerHTML = '';
+
+      let list = [];
+      if (isLocked) {
+        list = dynamicMatrixAngles.slice(0, count);
+      } else {
+        list = brokenAngles.slice(0, Math.min(count, brokenAngles.length));
+      }
+
+      list.forEach((item, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="font-weight: 700;">${idx + 1}</td>
+          <td>
+            <div style="font-weight: 700; color: var(--text-primary); font-size: 12px;">${item.cep}</div>
+            <div class="matrix-pill">📌 Archetype: ${item.archetype}</div>
+          </td>
+          <td>
+            <div style="font-weight: 600; font-size: 12px; color: var(--text-secondary);">${item.persona}</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${item.ws}</div>
+          </td>
+          <td>
+            <div style="font-weight: 700; color: var(--text-primary);">${item.title}</div>
+            <div class="hook-preview">"${item.hook}"</div>
+          </td>
+          <td>
+            <div style="font-weight: 600; font-size: 11.5px; color: ${item.valid ? 'var(--status-success)' : 'var(--status-danger)'};">
+              ${item.problem}
+            </div>
+          </td>
+          <td style="text-align: center;">
+            <span class="status-pill ${item.valid ? 'pill-green' : 'pill-red'}">
+              ${item.valid ? '✅ Membakar Lemak' : '❌ Melenceng'}
+            </span>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('outputCountLabel').textContent = list.length;
+      const titleEl = document.getElementById('outputModeTitle');
+      const scoreEl = document.getElementById('retentionScore');
+      if (isLocked) {
+        titleEl.textContent = 'Content Planner Matrix: AKTIF & TERKUNCI';
+        scoreEl.className = 'status-pill pill-green';
+        scoreEl.textContent = `Konsistensi Masalah: 100% (${list.length}/${list.length} Membakar Lemak)`;
+      } else {
+        titleEl.textContent = 'Tanpa Penguncian Masalah (Kasus Gagal Lama)';
+        scoreEl.className = 'status-pill pill-red';
+        scoreEl.textContent = 'Konsistensi Masalah: 0% (Melenceng ke Topik Lain)';
+      }
+    }
+
+    function handleCountChange() {
+      const count = parseInt(document.getElementById('angleCountSelect').value, 10);
+      const isLocked = document.getElementById('lockProblemToggle').checked;
+      renderTable(count, isLocked);
+    }
+
+    function handleModeChange() {
+      const isLocked = document.getElementById('lockProblemToggle').checked;
+      const count = parseInt(document.getElementById('angleCountSelect').value, 10);
+      const expl = document.getElementById('modeExplanation');
+      if (isLocked) {
+        expl.style.borderLeftColor = 'var(--status-success)';
+        expl.innerHTML = `✅ <strong>Content Planner Matrix: AKTIF & TERKUNCI</strong><br>AI memutar permutasi <strong>6 Kategori CEP × W's Matrix × 30 Strategic Archetypes</strong>. Jumlah sudut pandang bebas dipilih (3 s/d 20) dan setiap baris membawa perspektif segar tanpa pernah melenceng dari masalah membakar lemak perut alami.`;
+        renderTable(count, true);
+      } else {
+        expl.style.borderLeftColor = 'var(--status-danger)';
+        expl.innerHTML = `⚠️ <strong>Tanpa Penguncian Masalah (Strict Problem: NONAKTIF)</strong><br>AI dibebaskan berimprovisasi tanpa mengunci masalah utama. AI berhalusinasi mengganti masalah menjadi perut begah, kecanduan kopi, stamina, dan susah tidur (seperti pada mul_261016_hdai8r).`;
+        renderTable(count, false);
+      }
+    }
+
+    function handleRegenerate() {
+      document.getElementById('lockProblemToggle').checked = true;
+      handleModeChange();
+    }
+
+    function loadFailedRealCase() {
+      document.getElementById('lockProblemToggle').checked = false;
+      document.getElementById('angleCountSelect').value = "7";
+      handleModeChange();
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+
+    // Init
+    renderTable(12, true);
+  </script>
+</body>
+</html>
