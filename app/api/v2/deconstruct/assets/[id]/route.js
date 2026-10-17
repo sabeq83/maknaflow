@@ -49,6 +49,9 @@ export const PUT = withTenantContext(async (request, { params }) => {
     if (body.tags !== undefined) updates.tags = body.tags;
     if (body.niche !== undefined) updates.niche = body.niche;
     if (body.page_source !== undefined) updates.page_source = body.page_source;
+    if (body.core_problem !== undefined) updates.core_problem = body.core_problem;
+    if (body.core_solution !== undefined) updates.core_solution = body.core_solution;
+    if (body.target_audience_pain_point !== undefined) updates.target_audience_pain_point = body.target_audience_pain_point;
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ success: false, error: 'Metadata update tidak valid' }, { status: 400 });

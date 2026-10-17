@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup UI: Deconstruction Lab Core Problem & Solution Intelligence — MAKNA Flow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* MAKNA Flow Universal Semantic Theme System */
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --radius: 12px;
+      --radius-xs: 6px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --overlay-backdrop: rgba(2, 6, 14, 0.76);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --focus-ring: #a78bfa;
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.52);
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f8fafc;
+      --sidebar: #f1f5f9;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #ffffff;
+      --overlay-subtle: rgba(0, 0, 0, 0.04);
+      --overlay-backdrop: rgba(15, 23, 42, 0.6);
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --action-primary: #0d9488;
+      --action-primary-hover: #0f766e;
+      --on-action-primary: #ffffff;
+      --link: #0284c7;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.1);
+      --status-neutral: #7c3aed;
+      --status-neutral-soft: rgba(124, 58, 237, 0.1);
+      --focus-ring: #7c3aed;
+      --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      --shadow-modal: 0 20px 40px -10px rgba(0, 0, 0, 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header Nav */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(12px);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+    }
+    .brand-badge {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: var(--radius-xs);
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--border-subtle);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Buttons & Inputs */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+      box-shadow: 0 4px 14px rgba(45, 212, 191, 0.25);
+    }
+    .btn-secondary {
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 0.75rem;
+    }
+    .btn-theme {
+      background: var(--surface-interactive);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Container Layout */
+    .container {
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 28px 24px;
+      flex: 1;
+    }
+
+    /* View Switcher Tabs */
+    .view-tabs {
+      display: flex;
+      gap: 8px;
+      background: var(--surface);
+      padding: 6px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      margin-bottom: 24px;
+      width: fit-content;
+    }
+    .tab-btn {
+      padding: 8px 18px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+    .tab-btn.active {
+      background: var(--surface-raised);
+      color: var(--action-primary);
+      box-shadow: 0 2px 8px var(--overlay-subtle);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Banner Info */
+    .banner-continuity {
+      background: linear-gradient(135deg, rgba(45, 212, 191, 0.08) 0%, rgba(96, 165, 250, 0.04) 100%);
+      border: 1px solid rgba(45, 212, 191, 0.3);
+      border-left: 4px solid var(--action-primary);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .banner-text h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .banner-text p {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .card-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface-raised);
+    }
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-body {
+      padding: 24px;
+    }
+
+    /* Core Problem Intelligence Triad Grid */
+    .triad-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    .triad-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      position: relative;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .triad-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px var(--overlay-subtle);
+    }
+    .triad-card.problem {
+      border-top: 4px solid var(--status-danger);
+    }
+    .triad-card.solution {
+      border-top: 4px solid var(--status-success);
+    }
+    .triad-card.audience {
+      border-top: 4px solid var(--status-info);
+    }
+    .triad-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .triad-label {
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .triad-card.problem .triad-label { color: var(--status-danger); }
+    .triad-card.solution .triad-label { color: var(--status-success); }
+    .triad-card.audience .triad-label { color: var(--status-info); }
+
+    .triad-content {
+      font-size: 0.95rem;
+      font-weight: 600;
+      line-height: 1.55;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      min-height: 52px;
+    }
+    .triad-edit-textarea {
+      width: 100%;
+      min-height: 72px;
+      padding: 10px 12px;
+      background: var(--input-bg);
+      border: 1px solid var(--focus-ring);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      resize: vertical;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .triad-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 12px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* AI Viral Pattern Insights Block */
+    .insights-block {
+      background: linear-gradient(135deg, rgba(167, 139, 250, 0.08) 0%, rgba(167, 139, 250, 0.02) 100%);
+      border: 1px solid rgba(167, 139, 250, 0.25);
+      border-left: 4px solid var(--status-neutral);
+      border-radius: var(--radius-sm);
+      padding: 18px 22px;
+      margin-bottom: 24px;
+    }
+    .insights-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--status-neutral);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .insights-text {
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* Table Styles */
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.82rem;
+    }
+    th {
+      background: var(--surface-raised);
+      color: var(--text-muted);
+      font-weight: 700;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      vertical-align: middle;
+    }
+    tr:hover td {
+      background: var(--surface-hover);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: var(--radius-xs);
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .badge-success { background: var(--status-success-soft); color: var(--status-success); }
+    .badge-danger { background: var(--status-danger-soft); color: var(--status-danger); }
+    .badge-info { background: var(--status-info-soft); color: var(--status-info); }
+    .badge-warning { background: var(--status-warning-soft); color: var(--status-warning); }
+    .badge-neutral { background: var(--status-neutral-soft); color: var(--status-neutral); }
+
+    /* Scene Timeline Mini */
+    .scene-strip {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .scene-pill {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      white-space: nowrap;
+      color: var(--text-secondary);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      border: 1px solid var(--action-primary);
+      border-left: 4px solid var(--action-primary);
+      padding: 14px 20px;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-modal);
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateY(120%);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 999;
+    }
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+    <div class="brand">
+      <span style="font-size: 1.4rem;">🧬</span>
+      <span>MAKNA Flow</span>
+      <span class="brand-badge">Deconstruction Lab V2</span>
+    </div>
+
+    <div class="header-actions">
+      <!-- Blueprint Selector Simulation -->
+      <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Pilih Blueprint Simulasi:</label>
+      <select id="blueprintSelector" onchange="switchBlueprint(this.value)" style="padding: 6px 12px; background: var(--input-bg); color: var(--text-primary); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 600;">
+        <option value="bp_0b3ef9bb">#0b3ef9bb — Minuman Lemon Kayu Manis (Bakar Lemak Perut)</option>
+        <option value="bp_f607d626">#f607d626 — Secret Joint Remedy (Nyeri Lutut & Sendi)</option>
+        <option value="bp_52946f2f">#52946f2f — Memory Boost Elixir (Ketajaman Daya Ingat)</option>
+        <option value="bp_62dc4234">#62dc4234 — Sugar-Free Chocolate Mousse (Camilan Sehat)</option>
+      </select>
+
+      <!-- Theme Switcher -->
+      <button class="btn-theme" onclick="toggleTheme()" id="themeBtn">☀️ Mode Terang</button>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- View Mode Switcher -->
+    <div class="view-tabs">
+      <button class="tab-btn active" id="tabDetail" onclick="switchView('detail')">
+        <span>🔍 Detail Blueprint</span>
+        <span class="badge badge-info">Aktif</span>
+      </button>
+      <button class="tab-btn" id="tabList" onclick="switchView('list')">
+        <span>📋 Tabel Ringkasan Library (List View)</span>
+        <span class="badge badge-neutral">169 Assets</span>
+      </button>
+    </div>
+
+    <!-- Continuity Banner -->
+    <div class="banner-continuity">
+      <div class="banner-text">
+        <h3>🎯 DNA Masalah Utama & Solusi Pokok (Strict Continuity Anchor)</h3>
+        <p>Setiap video dekonstruksi kini otomatis merumuskan akar masalah, solusi resep, dan sasaran audiens secara terstruktur. Nilai ini menjadi <strong>Jangkar Mutlak</strong> saat diexpand ke Multiplier Lab agar tidak melenceng.</p>
+      </div>
+      <div>
+        <a href="mockup_multiplier_core_problem.html" target="_blank" class="btn btn-primary btn-sm">
+          🚀 Buka Multiplier Lab (Kunci Masalah Ini)
+        </a>
+      </div>
+    </div>
+
+    <!-- VIEW 1: DETAIL BLUEPRINT VIEW -->
+    <div id="viewDetail">
+      
+      <!-- Blueprint Overview Header Card -->
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 1.2rem;">🎬</span>
+            <div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);" id="bpIdText">ID: 0b3ef9bb-c84e-4887-9167-f8a9277e924d</div>
+              <h2 style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary);" id="bpTitleText">Minuman Lemon Kayu Manis Pembakar Lemak Alami</h2>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="badge badge-success">● Deconstructed</span>
+            <span class="badge badge-neutral" id="bpNicheBadge">Niche: Herbal & Diet</span>
+            <button class="btn btn-secondary btn-sm" onclick="toggleEditMode()" id="editToggleBtn">
+              ✏️ Edit Rumusan Masalah
+            </button>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <!-- TRIAD INTELLIGENCE CARDS -->
+          <div class="triad-grid">
+            
+            <!-- 1. CORE PROBLEM -->
+            <div class="triad-card problem">
+              <div>
+                <div class="triad-header">
+                  <span class="triad-label">🎯 Masalah Utama (Core Problem)</span>
+                  <span class="badge badge-danger">Keluhan Pokok</span>
+                </div>
+                <div class="triad-content" id="coreProblemDisplay">
+                  Rontokkan lemak perut dengan cepat tanpa perlu obat pelangsing kimia berbahaya
+                </div>
+                <textarea class="triad-edit-textarea" id="coreProblemInput"></textarea>
+              </div>
+              <div class="triad-footer">
+                <span>Diwariskan ke Multiplier & Script Remake</span>
+                <span id="probStatus" style="color: var(--status-success); font-weight: 700;">✓ Terkunci</span>
+              </div>
+            </div>
+
+            <!-- 2. CORE SOLUTION -->
+            <div class="triad-card solution">
+              <div>
+                <div class="triad-header">
+                  <span class="triad-label">💡 Solusi Pokok (Core Solution)</span>
+                  <span class="badge badge-success">Solusi / Ramuan</span>
+                </div>
+                <div class="triad-content" id="coreSolutionDisplay">
+                  Rebusan kayu manis cengkeh 8 menit dengan perasan lemon segar sebelum tidur
+                </div>
+                <textarea class="triad-edit-textarea" id="coreSolutionInput"></textarea>
+              </div>
+              <div class="triad-footer">
+                <span>Formula & Bahan Baku Visual Blueprint</span>
+                <span id="solStatus" style="color: var(--status-success); font-weight: 700;">✓ Terkunci</span>
+              </div>
+            </div>
+
+            <!-- 3. TARGET AUDIENCE & PAIN POINT -->
+            <div class="triad-card audience">
+              <div>
+                <div class="triad-header">
+                  <span class="triad-label">👥 Target Audiens & Pain Point</span>
+                  <span class="badge badge-info">Profil Emosional</span>
+                </div>
+                <div class="triad-content" id="targetAudienceDisplay">
+                  Audiens usia 25-45 tahun yang ingin mengecilkan perut buncit tapi takut efek samping pil diet kimia
+                </div>
+                <textarea class="triad-edit-textarea" id="targetAudienceInput"></textarea>
+              </div>
+              <div class="triad-footer">
+                <span>Sasaran Persona Content Planner Matrix</span>
+                <span id="audStatus" style="color: var(--status-success); font-weight: 700;">✓ Terkunci</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Action bar during edit mode -->
+          <div id="editActionRow" style="display: none; justify-content: flex-end; gap: 10px; margin-bottom: 24px; padding: 12px; background: var(--surface-raised); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+            <button class="btn btn-secondary btn-sm" onclick="cancelEditMode()">Batal</button>
+            <button class="btn btn-primary btn-sm" onclick="saveCoreProblemChanges()">💾 Simpan & Kunci Rumusan Baru</button>
+          </div>
+
+          <!-- AI Viral Pattern Summary Insights -->
+          <div class="insights-block">
+            <div class="insights-title">
+              <span>🧠 AI Viral Pattern & Insights</span>
+              <span class="badge badge-neutral" style="font-size: 0.68rem;">Gemini Pro Vision Analysis</span>
+            </div>
+            <p class="insights-text" id="viralPatternText">
+              Video ini menggunakan hook masalah-solusi yang kuat terkait pembakaran lemak perut tanpa obat kimia, menargetkan audiens yang ingin kurus secara alami. Visual gaya warm aesthetic, uap air mendidih, serta adegan memeras buah lemon segar membangkitkan rasa kepercayaan dan keinginan mencoba. Diakhiri dengan Call to Action (CTA) spesifik yaitu 'komen mau' yang terbukti efektif menaikkan angka komentar dan engagement algoritma.
+            </p>
+          </div>
+
+          <!-- Narasi Scene 1 & Timeline Mini -->
+          <div style="background: var(--surface-raised); padding: 16px 20px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+                🎙️ Transkrip Voiceover Adegan 1 (Hook Pembuka)
+              </span>
+              <span class="badge badge-warning">00:00 - 00:03</span>
+            </div>
+            <p style="font-size: 0.9rem; font-weight: 600; color: var(--text-primary); font-style: italic; margin-bottom: 12px;" id="scene1VoText">
+              "Minuman kayu manis lemon ini bantu rontokkan lemak perut dengan cepat tanpa perlu obat pelangsing kimia..."
+            </p>
+            <div class="scene-strip" id="sceneStrip">
+              <span class="scene-pill">Scene 1: Uap Panci & Kayu Manis (00:00)</span>
+              <span class="scene-pill">Scene 2: Menuang Air Mendidih (00:03)</span>
+              <span class="scene-pill">Scene 3: Peras Lemon Segar (00:08)</span>
+              <span class="scene-pill">Scene 4: Minum di Cangkir Hangat (00:15)</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- VIEW 2: LIST TABLE VIEW (TABEL DAFTAR BLUEPRINT) -->
+    <div id="viewList" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📚 Library Blueprint Dekonstruksi</span>
+            <span class="badge badge-info">169 Aset Ter-backfill</span>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" placeholder="Cari masalah utama / kata kunci..." style="padding: 6px 12px; background: var(--input-bg); color: var(--text-primary); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 0.8rem; width: 260px;">
+            <button class="btn btn-secondary btn-sm">Filter Niche</button>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 140px;">Blueprint ID</th>
+                <th style="width: 110px;">Status</th>
+                <th style="width: 130px;">Niche</th>
+                <th style="width: 280px;">🎯 Masalah Utama (Core Problem)</th>
+                <th style="width: 240px;">💡 Solusi Pokok (Core Solution)</th>
+                <th>👥 Target Audiens</th>
+                <th style="width: 90px; text-align: center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span style="font-family: var(--font-mono); font-weight: 700; color: var(--action-primary);">0b3ef9bb</span></td>
+                <td><span class="badge badge-success">Deconstructed</span></td>
+                <td><span class="badge badge-neutral">Herbal & Diet</span></td>
+                <td>
+                  <div style="font-weight: 700; color: var(--text-primary); line-height: 1.4;">
+                    Rontokkan lemak perut dengan cepat tanpa perlu obat kimia
+                  </div>
+                </td>
+                <td><span style="color: var(--text-secondary);">Rebusan kayu manis cengkeh & lemon segar</span></td>
+                <td><span style="font-size: 0.75rem; color: var(--text-muted);">Audiens ingin kurus alami tanpa efek samping</span></td>
+                <td style="text-align: center;">
+                  <button class="btn btn-secondary btn-sm" onclick="selectFromList('bp_0b3ef9bb')">Detail</button>
+                </td>
+              </tr>
+
+              <tr>
+                <td><span style="font-family: var(--font-mono); font-weight: 700; color: var(--action-primary);">f607d626</span></td>
+                <td><span class="badge badge-success">Deconstructed</span></td>
+                <td><span class="badge badge-neutral">Health & Joints</span></td>
+                <td>
+                  <div style="font-weight: 700; color: var(--text-primary); line-height: 1.4;">
+                    Nyeri lutut, radang sendi, dan kaku berjalan
+                  </div>
+                </td>
+                <td><span style="color: var(--text-secondary);">Minyak biji chia oles & kompres hangat</span></td>
+                <td><span style="font-size: 0.75rem; color: var(--text-muted);">Lansia & penderita osteoarthritis sendi</span></td>
+                <td style="text-align: center;">
+                  <button class="btn btn-secondary btn-sm" onclick="selectFromList('bp_f607d626')">Detail</button>
+                </td>
+              </tr>
+
+              <tr>
+                <td><span style="font-family: var(--font-mono); font-weight: 700; color: var(--action-primary);">52946f2f</span></td>
+                <td><span class="badge badge-success">Deconstructed</span></td>
+                <td><span class="badge badge-neutral">Brain & Mind</span></td>
+                <td>
+                  <div style="font-weight: 700; color: var(--text-primary); line-height: 1.4;">
+                    Penurunan daya ingat, otak berkabut (brain fog), dan sulit fokus
+                  </div>
+                </td>
+                <td><span style="color: var(--text-secondary);">Jus sari wortel, pisang, dan perasan jeruk segar</span></td>
+                <td><span style="font-size: 0.75rem; color: var(--text-muted);">Pekerja kreatif & pelajar yang sering lembur</span></td>
+                <td style="text-align: center;">
+                  <button class="btn btn-secondary btn-sm" onclick="selectFromList('bp_52946f2f')">Detail</button>
+                </td>
+              </tr>
+
+              <tr>
+                <td><span style="font-family: var(--font-mono); font-weight: 700; color: var(--action-primary);">62dc4234</span></td>
+                <td><span class="badge badge-success">Deconstructed</span></td>
+                <td><span class="badge badge-neutral">Healthy Culinary</span></td>
+                <td>
+                  <div style="font-weight: 700; color: var(--text-primary); line-height: 1.4;">
+                    Ketergantungan camilan manis berkalori tinggi & lonjakan gula darah
+                  </div>
+                </td>
+                <td><span style="color: var(--text-secondary);">Mousse cokelat alpukat tanpa tepung & gula rafinasi</span></td>
+                <td><span style="font-size: 0.75rem; color: var(--text-muted);">Pecinta dessert yang sedang menjaga berat badan</span></td>
+                <td style="text-align: center;">
+                  <button class="btn btn-secondary btn-sm" onclick="selectFromList('bp_62dc4234')">Detail</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Toast Notification Element -->
+  <div class="toast" id="toastBox">
+    <span>✅</span>
+    <span id="toastMsg">Rumusan Masalah Utama berhasil diperbarui dan dikunci!</span>
+  </div>
+
+  <script>
+    // Blueprint Database Mockup
+    const mockBlueprints = {
+      bp_0b3ef9bb: {
+        id: "0b3ef9bb-c84e-4887-9167-f8a9277e924d",
+        title: "Minuman Lemon Kayu Manis Pembakar Lemak Alami",
+        niche: "Herbal & Diet",
+        coreProblem: "Rontokkan lemak perut dengan cepat tanpa perlu obat pelangsing kimia berbahaya",
+        coreSolution: "Rebusan kayu manis cengkeh 8 menit dengan perasan lemon segar sebelum tidur",
+        targetAudience: "Audiens usia 25-45 tahun yang ingin mengecilkan perut buncit tapi takut efek samping pil diet kimia",
+        viralPattern: "Video ini menggunakan hook masalah-solusi yang kuat terkait pembakaran lemak perut tanpa obat kimia, menargetkan audiens yang ingin kurus secara alami. Visual gaya warm aesthetic, uap air mendidih, serta adegan memeras buah lemon segar membangkitkan rasa kepercayaan dan keinginan mencoba.",
+        scene1Vo: "Minuman kayu manis lemon ini bantu rontokkan lemak perut dengan cepat tanpa perlu obat pelangsing kimia...",
+        scenes: [
+          "Scene 1: Uap Panci & Kayu Manis (00:00)",
+          "Scene 2: Menuang Air Mendidih (00:03)",
+          "Scene 3: Peras Lemon Segar (00:08)",
+          "Scene 4: Minum di Cangkir Hangat (00:15)"
+        ]
+      },
+      bp_f607d626: {
+        id: "f607d626-9021-488b-a456-cc31818290ba",
+        title: "Secret Joint Relief Recipe (Nyeri Lutut Alami)",
+        niche: "Health & Joints",
+        coreProblem: "Nyeri sendi lutut menahun, peradangan kaku, dan sulit jongkok beribadah",
+        coreSolution: "Minyak biji chia oles dengan pijatan kompres air jahe hangat",
+        targetAudience: "Lansia dan penderita osteoarthritis sendi yang enggan bergantung pada obat pereda nyeri",
+        viralPattern: "Menggunakan reverse-psychology hook ('Never use this until you want joint relief'). Menampilkan visual pijatan sendi lutut dan ramuan dapur herbal terbukti efektif menaikkan retensi audiens usia lanjut.",
+        scene1Vo: "Never use this secret remedy until you want to help with knee and joint pain naturally...",
+        scenes: [
+          "Scene 1: Memegang Lutut Kaku (00:00)",
+          "Scene 2: Merendam Biji Chia (00:03)",
+          "Scene 3: Mengoles Minyak Herbal (00:07)",
+          "Scene 4: Berjalan Ringan & Senyum (00:14)"
+        ]
+      },
+      bp_52946f2f: {
+        id: "52946f2f-11ab-4dca-8321-dfa5277e9231",
+        title: "Brain Focus & Memory Booster Drink",
+        niche: "Brain & Mind",
+        coreProblem: "Penurunan daya ingat, otak berkabut (brain fog), dan penurunan konsentrasi saat bekerja",
+        coreSolution: "Jus sari wortel, pisang, dan perasan jeruk segar kaya antioksidan",
+        targetAudience: "Pekerja kreatif dan profesional usia 20-40 tahun yang sering lembur dan mudah lupa",
+        viralPattern: "Memadukan visual surreal internal body simulation (aliran neuron otak) dengan resep jus segar warna oranye cerah untuk menciptakan hook pattern interrupt yang kuat.",
+        scene1Vo: "I'm going to show you how to improve your memory and brain focus in just 7 days...",
+        scenes: [
+          "Scene 1: Simulasi Neuron Otak (00:00)",
+          "Scene 2: Memotong Wortel & Jeruk (00:04)",
+          "Scene 3: Blender Berputar Halus (00:08)",
+          "Scene 4: Minum Gelas Pertama (00:16)"
+        ]
+      },
+      bp_62dc4234: {
+        id: "62dc4234-dd12-4211-9a71-897b665c4123",
+        title: "Guilt-Free Rich Chocolate Dessert",
+        niche: "Healthy Culinary",
+        coreProblem: "Ketergantungan camilan manis berkalori tinggi & lonjakan gula darah saat ngidam dessert",
+        coreSolution: "Mousse cokelat alpukat lembut tanpa tepung dan tanpa gula pasir rafinasi",
+        targetAudience: "Pecinta dessert manis yang sedang defisit kalori atau diet diabetes",
+        viralPattern: "Menampilkan extreme close-up sendok menyendok tekstur cokelat lumer yang menggugah selera (ASMR food styling) diikuti hook kontradiksi 'Stop buying chocolate desserts'.",
+        scene1Vo: "Stop buying chocolate desserts, make this rich creamy one on your stove in minutes...",
+        scenes: [
+          "Scene 1: Sendok Menyendok Mousse (00:00)",
+          "Scene 2: Menghaluskan Alpukat & Kakao (00:04)",
+          "Scene 3: Mengaduk di Wadah Kaca (00:09)",
+          "Scene 4: Taburan Cacao Nibs (00:15)"
+        ]
+      }
+    };
+
+    let currentBpKey = "bp_0b3ef9bb";
+    let isEditMode = false;
+
+    function renderBlueprint(key) {
+      const bp = mockBlueprints[key];
+      if (!bp) return;
+
+      document.getElementById('bpIdText').textContent = "ID: " + bp.id;
+      document.getElementById('bpTitleText').textContent = bp.title;
+      document.getElementById('bpNicheBadge').textContent = "Niche: " + bp.niche;
+
+      document.getElementById('coreProblemDisplay').textContent = bp.coreProblem;
+      document.getElementById('coreSolutionDisplay').textContent = bp.coreSolution;
+      document.getElementById('targetAudienceDisplay').textContent = bp.targetAudience;
+
+      document.getElementById('coreProblemInput').value = bp.coreProblem;
+      document.getElementById('coreSolutionInput').value = bp.coreSolution;
+      document.getElementById('targetAudienceInput').value = bp.targetAudience;
+
+      document.getElementById('viralPatternText').textContent = bp.viralPattern;
+      document.getElementById('scene1VoText').textContent = `"${bp.scene1Vo}"`;
+
+      const strip = document.getElementById('sceneStrip');
+      strip.innerHTML = bp.scenes.map(s => `<span class="scene-pill">${s}</span>`).join('');
+    }
+
+    function switchBlueprint(key) {
+      currentBpKey = key;
+      cancelEditMode();
+      renderBlueprint(key);
+      showToast("Berhasil memuat Blueprint #" + mockBlueprints[key].id.slice(0, 8));
+    }
+
+    function selectFromList(key) {
+      switchView('detail');
+      document.getElementById('blueprintSelector').value = key;
+      switchBlueprint(key);
+    }
+
+    function switchView(mode) {
+      const vDetail = document.getElementById('viewDetail');
+      const vList = document.getElementById('viewList');
+      const tDetail = document.getElementById('tabDetail');
+      const tList = document.getElementById('tabList');
+
+      if (mode === 'detail') {
+        vDetail.style.display = 'block';
+        vList.style.display = 'none';
+        tDetail.classList.add('active');
+        tList.classList.remove('active');
+      } else {
+        vDetail.style.display = 'none';
+        vList.style.display = 'block';
+        tList.classList.add('active');
+        tDetail.classList.remove('active');
+      }
+    }
+
+    function toggleEditMode() {
+      isEditMode = !isEditMode;
+      const displayEls = ['coreProblemDisplay', 'coreSolutionDisplay', 'targetAudienceDisplay'];
+      const inputEls = ['coreProblemInput', 'coreSolutionInput', 'targetAudienceInput'];
+      const actionRow = document.getElementById('editActionRow');
+      const toggleBtn = document.getElementById('editToggleBtn');
+
+      if (isEditMode) {
+        displayEls.forEach(id => document.getElementById(id).style.display = 'none');
+        inputEls.forEach(id => document.getElementById(id).style.display = 'block');
+        actionRow.style.display = 'flex';
+        toggleBtn.textContent = '❌ Batal Edit';
+      } else {
+        cancelEditMode();
+      }
+    }
+
+    function cancelEditMode() {
+      isEditMode = false;
+      const displayEls = ['coreProblemDisplay', 'coreSolutionDisplay', 'targetAudienceDisplay'];
+      const inputEls = ['coreProblemInput', 'coreSolutionInput', 'targetAudienceInput'];
+      const actionRow = document.getElementById('editActionRow');
+      const toggleBtn = document.getElementById('editToggleBtn');
+
+      displayEls.forEach(id => document.getElementById(id).style.display = 'block');
+      inputEls.forEach(id => document.getElementById(id).style.display = 'none');
+      actionRow.style.display = 'none';
+      toggleBtn.textContent = '✏️ Edit Rumusan Masalah';
+    }
+
+    function saveCoreProblemChanges() {
+      const bp = mockBlueprints[currentBpKey];
+      bp.coreProblem = document.getElementById('coreProblemInput').value.trim();
+      bp.coreSolution = document.getElementById('coreSolutionInput').value.trim();
+      bp.targetAudience = document.getElementById('targetAudienceInput').value.trim();
+
+      document.getElementById('coreProblemDisplay').textContent = bp.coreProblem;
+      document.getElementById('coreSolutionDisplay').textContent = bp.coreSolution;
+      document.getElementById('targetAudienceDisplay').textContent = bp.targetAudience;
+
+      cancelEditMode();
+      showToast("✅ Berhasil menyimpan dan mengunci rumusan Masalah Utama baru!");
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme') || 'dark';
+      const target = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', target);
+      document.getElementById('themeBtn').textContent = target === 'dark' ? '☀️ Mode Terang' : '🌙 Mode Gelap';
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastBox');
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3500);
+    }
+
+    // Inisialisasi awal
+    renderBlueprint("bp_0b3ef9bb");
+  </script>
+</body>
+</html>

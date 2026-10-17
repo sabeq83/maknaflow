@@ -21,6 +21,13 @@ export default function AssetDetailPage({ params }) {
   const [tagsInput, setTagsInput] = useState('');
   const [savingMeta, setSavingMeta] = useState(false);
 
+  // Core Problem Intelligence State
+  const [editingProblem, setEditingProblem] = useState(false);
+  const [coreProblemInput, setCoreProblemInput] = useState('');
+  const [coreSolutionInput, setCoreSolutionInput] = useState('');
+  const [targetAudienceInput, setTargetAudienceInput] = useState('');
+  const [savingProblem, setSavingProblem] = useState(false);
+
   // Clipboard copies
   const [copiedQuery, setCopiedQuery] = useState(null);
   
@@ -44,6 +51,9 @@ export default function AssetDetailPage({ params }) {
         setPageSourceInput(data.asset.page_source || 'Siasat Sehat');
         setNicheInput(data.asset.niche || '');
         setTagsInput(data.asset.tags || '');
+        setCoreProblemInput(data.asset.core_problem || '');
+        setCoreSolutionInput(data.asset.core_solution || '');
+        setTargetAudienceInput(data.asset.target_audience_pain_point || '');
         setError(null);
       } else {
         setError(data.error || 'Gagal memuat detail aset');
@@ -113,6 +123,41 @@ export default function AssetDetailPage({ params }) {
       showToast('Gagal terhubung ke server', 'error');
     } finally {
       setSavingMeta(false);
+    }
+  }
+
+  // --- Core Problem Save Handler ---
+  async function handleSaveCoreProblem(e) {
+    if (e) e.preventDefault();
+    setSavingProblem(true);
+    try {
+      const payload = {
+        core_problem: coreProblemInput.trim(),
+        core_solution: coreSolutionInput.trim(),
+        target_audience_pain_point: targetAudienceInput.trim()
+      };
+      const res = await fetch(`/api/v2/deconstruct/assets/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Rumusan Masalah Utama berhasil diperbarui');
+        setAsset(prev => ({
+          ...prev,
+          core_problem: payload.core_problem,
+          core_solution: payload.core_solution,
+          target_audience_pain_point: payload.target_audience_pain_point
+        }));
+        setEditingProblem(false);
+      } else {
+        showToast(data.error || 'Gagal memperbarui rumusan masalah', 'error');
+      }
+    } catch {
+      showToast('Gagal terhubung ke server', 'error');
+    } finally {
+      setSavingProblem(false);
     }
   }
 
@@ -417,6 +462,192 @@ export default function AssetDetailPage({ params }) {
         {/* Content Results Section (Only if status is deconstructed) */}
         {asset.status === 'deconstructed' && (
           <>
+            {/* Triad Intelligence Cards (Core Problem, Solution, Target Audience) */}
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 10 }}>
+                <h3 style={{ fontSize: '0.95rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  🎯 DNA Masalah & Solusi Utama Blueprint
+                  <span style={{ background: 'var(--status-info-soft)', color: 'var(--status-info)', fontSize: '0.72rem', padding: '2px 8px', borderRadius: 4, fontWeight: 700 }}>
+                    Strict Continuity Anchor
+                  </span>
+                </h3>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  {!editingProblem ? (
+                    <button
+                      type="button"
+                      onClick={() => setEditingProblem(true)}
+                      className="btn btn-secondary"
+                      style={{ padding: '4px 12px', fontSize: '0.75rem', height: 28 }}
+                    >
+                      ✏️ Edit Rumusan Masalah
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingProblem(false);
+                          setCoreProblemInput(asset.core_problem || '');
+                          setCoreSolutionInput(asset.core_solution || '');
+                          setTargetAudienceInput(asset.target_audience_pain_point || '');
+                        }}
+                        className="btn btn-secondary"
+                        style={{ padding: '4px 10px', fontSize: '0.75rem', height: 28 }}
+                        disabled={savingProblem}
+                      >
+                        Batal
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSaveCoreProblem}
+                        className="btn btn-primary"
+                        style={{ padding: '4px 12px', fontSize: '0.75rem', height: 28 }}
+                        disabled={savingProblem}
+                      >
+                        {savingProblem ? 'Menyimpan...' : '💾 Simpan Rumusan'}
+                      </button>
+                    </>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/multiplier-lab?blueprint_id=${asset.id}`)}
+                    className="btn btn-primary"
+                    style={{ padding: '4px 12px', fontSize: '0.75rem', height: 28 }}
+                  >
+                    🚀 Buka di Multiplier Lab
+                  </button>
+                </div>
+              </div>
+
+              {/* 3 Grid Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+                
+                {/* 1. Core Problem Card */}
+                <div style={{
+                  background: 'var(--surface-raised)',
+                  border: '1px solid var(--border-subtle)',
+                  borderTop: '4px solid var(--status-danger)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: 18,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  boxShadow: '0 2px 10px var(--overlay-subtle)'
+                }}>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                      <span style={{ fontSize: '0.74rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--status-danger)' }}>
+                        🎯 Masalah Utama (Core Problem)
+                      </span>
+                      <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: 4, background: 'var(--status-danger-soft)', color: 'var(--status-danger)', fontWeight: 700 }}>
+                        Keluhan Pokok
+                      </span>
+                    </div>
+                    {!editingProblem ? (
+                      <p style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.55, margin: 0 }}>
+                        {asset.core_problem || '(Belum dirumuskan)'}
+                      </p>
+                    ) : (
+                      <textarea
+                        className="form-input"
+                        rows={3}
+                        value={coreProblemInput}
+                        onChange={e => setCoreProblemInput(e.target.value)}
+                        placeholder="Contoh: Membakar dan merontokkan lemak perut secara alami tanpa obat pelangsing..."
+                        style={{ width: '100%', fontSize: '0.84rem' }}
+                      />
+                    )}
+                  </div>
+                  <div style={{ marginTop: 12, paddingTop: 8, borderTop: '1px solid var(--border-subtle)', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                    Diwariskan ke Multiplier & Voiceover Remake
+                  </div>
+                </div>
+
+                {/* 2. Core Solution Card */}
+                <div style={{
+                  background: 'var(--surface-raised)',
+                  border: '1px solid var(--border-subtle)',
+                  borderTop: '4px solid var(--status-success)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: 18,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  boxShadow: '0 2px 10px var(--overlay-subtle)'
+                }}>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                      <span style={{ fontSize: '0.74rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--status-success)' }}>
+                        💡 Solusi Pokok (Core Solution)
+                      </span>
+                      <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: 4, background: 'var(--status-success-soft)', color: 'var(--status-success)', fontWeight: 700 }}>
+                        Resep / Ramuan
+                      </span>
+                    </div>
+                    {!editingProblem ? (
+                      <p style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.55, margin: 0 }}>
+                        {asset.core_solution || '(Belum dirumuskan)'}
+                      </p>
+                    ) : (
+                      <textarea
+                        className="form-input"
+                        rows={3}
+                        value={coreSolutionInput}
+                        onChange={e => setCoreSolutionInput(e.target.value)}
+                        placeholder="Contoh: Rebusan kayu manis cengkeh 8 menit dengan perasan lemon segar..."
+                        style={{ width: '100%', fontSize: '0.84rem' }}
+                      />
+                    )}
+                  </div>
+                  <div style={{ marginTop: 12, paddingTop: 8, borderTop: '1px solid var(--border-subtle)', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                    Formula & Bahan Baku Visual Asli
+                  </div>
+                </div>
+
+                {/* 3. Target Audience Card */}
+                <div style={{
+                  background: 'var(--surface-raised)',
+                  border: '1px solid var(--border-subtle)',
+                  borderTop: '4px solid var(--status-info)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: 18,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  boxShadow: '0 2px 10px var(--overlay-subtle)'
+                }}>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                      <span style={{ fontSize: '0.74rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--status-info)' }}>
+                        👥 Target Audiens & Pain Point
+                      </span>
+                      <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: 4, background: 'var(--status-info-soft)', color: 'var(--status-info)', fontWeight: 700 }}>
+                        Profil Audiens
+                      </span>
+                    </div>
+                    {!editingProblem ? (
+                      <p style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.55, margin: 0 }}>
+                        {asset.target_audience_pain_point || '(Belum dirumuskan)'}
+                      </p>
+                    ) : (
+                      <textarea
+                        className="form-input"
+                        rows={3}
+                        value={targetAudienceInput}
+                        onChange={e => setTargetAudienceInput(e.target.value)}
+                        placeholder="Contoh: Audiens usia 25-45 tahun yang frustrasi lingkar pinggang sesak..."
+                        style={{ width: '100%', fontSize: '0.84rem' }}
+                      />
+                    )}
+                  </div>
+                  <div style={{ marginTop: 12, paddingTop: 8, borderTop: '1px solid var(--border-subtle)', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                    Sasaran Persona Content Planner
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
             {/* Viral Pattern Summary Insights */}
             {asset.viral_pattern_summary && (
               <div style={{

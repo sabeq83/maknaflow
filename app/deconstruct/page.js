@@ -600,7 +600,7 @@ export default function DeconstructPage() {
                     <th>URL</th>
                     <th style={{ width: 130 }}>Niche</th>
                     <th style={{ width: 110 }}>Proses</th>
-                    <th style={{ width: 220 }}>Keterangan</th>
+                    <th style={{ width: 260 }}>Masalah Utama & Solusi</th>
                     <th style={{ width: 140 }}>Tgl Input</th>
                     <th style={{ width: 140 }}>Tgl Analisis</th>
                     <th style={{ width: 100, textAlign: 'center' }}>Aksi</th>
@@ -676,14 +676,31 @@ export default function DeconstructPage() {
                           </span>
                         </td>
                         <td>
-                          <div style={{
-                            maxWidth: 220,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                            color: 'var(--text-secondary)'
-                          }}>
-                            {asset.viral_pattern_summary || asset.original_caption || '—'}
+                          <div style={{ maxWidth: 260 }}>
+                            {asset.core_problem ? (
+                              <div style={{
+                                fontWeight: 700,
+                                color: 'var(--text-primary)',
+                                fontSize: '0.78rem',
+                                lineHeight: 1.4,
+                                marginBottom: 3,
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden'
+                              }} title={`🎯 Masalah: ${asset.core_problem}\n💡 Solusi: ${asset.core_solution || '-'}\n👥 Audiens: ${asset.target_audience_pain_point || '-'}`}>
+                                🎯 {asset.core_problem}
+                              </div>
+                            ) : null}
+                            <div style={{
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              color: 'var(--text-muted)',
+                              fontSize: '0.73rem'
+                            }} title={asset.core_solution || asset.viral_pattern_summary || asset.original_caption || ''}>
+                              {asset.core_solution ? `💡 ${asset.core_solution}` : (asset.viral_pattern_summary || asset.original_caption || '—')}
+                            </div>
                           </div>
                         </td>
                         <td style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
@@ -693,13 +710,25 @@ export default function DeconstructPage() {
                           {asset.deconstructed_at ? new Date(asset.deconstructed_at).toLocaleDateString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '—'}
                         </td>
                         <td style={{ textAlign: 'center' }}>
-                          <button
-                            onClick={() => router.push(`/deconstruct/${asset.id}`)}
-                            className="btn btn-secondary"
-                            style={{ padding: '4px 10px', fontSize: '0.75rem', height: 28 }}
-                          >
-                            Detail
-                          </button>
+                          <div style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+                            <button
+                              onClick={() => router.push(`/deconstruct/${asset.id}`)}
+                              className="btn btn-secondary"
+                              style={{ padding: '4px 10px', fontSize: '0.75rem', height: 28 }}
+                            >
+                              Detail
+                            </button>
+                            {asset.status === 'deconstructed' && (
+                              <button
+                                onClick={() => router.push(`/multiplier-lab?blueprint_id=${asset.id}`)}
+                                className="btn btn-primary"
+                                style={{ padding: '4px 8px', fontSize: '0.75rem', height: 28 }}
+                                title="Buka di Multiplier Lab (Kunci Masalah Ini)"
+                              >
+                                🚀
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );

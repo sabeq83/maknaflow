@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.61 — Integrasi UI & API Triad Intelligence Deconstruction Lab (17/10/2026)
+- Triad Intelligence Cards Masalah dan Solusi Utama pada Detail Blueprint
+- Dukungan Inline Editing Rumusan Masalah pada Deconstruction Lab
+- Penampilan Badge Masalah Utama pada Tabel Daftar Library Dekonstruksi
+- Shortcut Peluncuran Kampanye Multiplier Lab dari Blueprint
+
 ## V2.32.60 — Integrasi Mesin Content Planner & Core Problem Continuity Multiplier Lab (17/10/2026)
 - Penguncian Masalah Utama Blueprint pada Seluruh Sudut Pandang dan Remake
 - Integrasi Matriks Content Planner CEP x Ws Matrix x 30 Strategic Archetypes (Fleksibel 3-20 Angles)

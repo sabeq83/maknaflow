@@ -21,7 +21,7 @@ export const GET = withTenantContext(async (request) => {
       const limit = Number(searchParams.get('limit') || 20);
 
       const db = getDb();
-      let query = "SELECT id, batch_id, source_url, original_caption, niche, tags, created_at, viral_pattern_summary, product_ideas_json, original_storyboard_json FROM re_deconstructed_assets WHERE status = 'deconstructed' AND tenant_id = ?";
+      let query = "SELECT id, batch_id, source_url, original_caption, niche, tags, created_at, viral_pattern_summary, product_ideas_json, original_storyboard_json, core_problem, core_solution, target_audience_pain_point FROM re_deconstructed_assets WHERE status = 'deconstructed' AND tenant_id = ?";
       const params = [tenantId];
 
       if (niche) {
@@ -30,9 +30,9 @@ export const GET = withTenantContext(async (request) => {
       }
 
       if (q) {
-        query += " AND (source_url ILIKE ? OR niche ILIKE ? OR tags ILIKE ? OR original_caption ILIKE ? OR viral_pattern_summary ILIKE ? OR product_ideas_json ILIKE ?)";
+        query += " AND (source_url ILIKE ? OR niche ILIKE ? OR tags ILIKE ? OR original_caption ILIKE ? OR viral_pattern_summary ILIKE ? OR product_ideas_json ILIKE ? OR core_problem ILIKE ? OR core_solution ILIKE ?)";
         const likeQ = `%${q}%`;
-        params.push(likeQ, likeQ, likeQ, likeQ, likeQ, likeQ);
+        params.push(likeQ, likeQ, likeQ, likeQ, likeQ, likeQ, likeQ, likeQ);
       }
 
       query += " ORDER BY created_at DESC LIMIT ?";
@@ -63,6 +63,9 @@ export const GET = withTenantContext(async (request) => {
           viral_pattern_summary: row.viral_pattern_summary,
           original_storyboard_json: row.original_storyboard_json,
           product_ideas_json: row.product_ideas_json,
+          core_problem: row.core_problem || '',
+          core_solution: row.core_solution || '',
+          target_audience_pain_point: row.target_audience_pain_point || '',
           scene_count,
           recommended_products
         };
