@@ -1,123 +1,40 @@
-# Implementation Plan: Penyelarasan Skeduler Multiplier Campaign dengan Pillar Campaign
+# Implementation Plan: Arsitektur Skeduler Multi-Task & Non-Blocking Multiplier Lab (Selaras Pillar Campaign)
 
-Rencana ini bertujuan menyelaraskan arsitektur skeduler dan alur kerja kampanye **Multiplier Campaign** agar secepat, se-responsif, dan se-modular **Pillar Campaign**:
-1. **Fase 1 Super Cepat (Text-First Architecture)**:
-   - Menghentikan eksekusi otomatis T2I Start Frame di tengah-tengah Fase 1.
-   - Begitu AI (Gemini Single-Pass) selesai menghasilkan naskah remake, video DNA, prompt T2I/I2V, dan caption, status baris langsung berpindah ke **`waiting_approval`** (Fase 2 : Paused / Ready for Review) dalam waktu **~10–15 detik per baris**.
-   - 10 baris kampanye Multiplier dapat selesai dibuat dalam waktu **~1,5 – 2,5 menit** (sebelumnya butuh ~25 menit).
-2. **Pelonggaran Kunci Sekuensial Antar Baris (`getEligibleSequentialMultiplierTasks`)**:
-   - Menghapus `'generating_t2i'` dari syarat blocking antar baris.
-   - Baris berikutnya tidak lagi terhambat oleh proses render gambar atau visual baris sebelumnya.
-3. **Penyelarasan Fase 2 & Eliminasi Double Delay**:
-   - Menghapus jeda manual hardcoded `setTimeout(10000)` di loop pengiriman video `handleVisualGeneration`.
-   - Mengandalkan satu sumber kebenaran terpusat untuk safety pacing yaitu `applyRandomDelay()` di `lib/webhook-client.js`.
-4. **Optimasi Start Frame On-Demand**:
-   - Menghapus double safety delay di `app/api/v2/multiplier/[id]/regenerate-start-frames/route.js`.
-   - Memastikan tombol *"Generate All Start Frame"* bekerja cepat dan independen saat pengguna memutuskan untuk melihat/membuat visual adegan.
+Rencana ini bertujuan mengeliminasi bottleneck **serial blocking** pada **Multiplier Lab** dengan mengadopsi model antrean multi-task seperti pada **Organic Pillar Campaign (OPC)**:
+1. **Fase 1 (AI Storyboard / Gemini Generation)**: Tetap berjalan **sekuensial per baris** (Baris 1 selesai -> Baris 2 -> Baris 3 dst) untuk menjaga rate limit Gemini AI dan mencegah benturan prompt.
+2. **Fase 2 (Audio TTS, Visuals G-Labs, FFmpeg Muxing)**: Menjadi **asinkron dan independen antar-baris**. Jika Baris 1 dan Baris 2 sama-sama disetujui (approved), **Baris 2 TIDAK PERLU MENUNGGU TTS Baris 1 selesai**. Keduanya dapat memproses TTS secara bersamaan.
+3. **Eliminasi Global Mutex Lock**: Menghapus flag global `state.isMultiplierSyncRunning` yang selama ini membekukan seluruh scheduler, dan menggantinya dengan pelacakan per task ID di `state.activeTasks` (`multiplier_${task.id}`) seperti arsitektur `pillar_${item.id}`.
 
 ---
 
 ## 📋 Execution Task List
 
-- [x] **Task 1: Penyelarasan Fase 1 Multiplier Worker (`lib/re-multiplier-worker.js`)**
-  - [x] Di fungsi `handleStoryboardRemake`, ubah `nextStatus` menjadi langsung `'waiting_approval'` setelah Gemini remake & audit naskah selesai (lewati transisi otomatis ke `generating_t2i`).
-  - [x] Pastikan seluruh metadata naskah, video DNA, dan prompt tersimpan dengan aman sebelum masuk ke status review.
+- [x] **Task 1: Pemisahan Query Database Task Fase 1 & Fase 2 (`lib/db.js`)**
+  - [x] Tambahkan query `getEligibleFase1MultiplierTasks(limit)` khusus untuk task pembuatan naskah (`pending_resolution`, `resolving_product`, `remaking`) dengan aturan sekuensial per baris.
+  - [x] Tambahkan query `getEligibleFase2MultiplierTasks(limit)` khusus untuk task produksi (`generating_audio`, `generating_visuals`, `ffmpeg_muxing`) tanpa blocking antar-baris.
 
-- [x] **Task 2: Pelonggaran Kunci Antar Baris di Database (`lib/db.js`)**
-  - [x] Perbarui query di `getEligibleSequentialMultiplierTasks` dengan menghapus status `'generating_t2i'` dari daftar `prev.status IN (...)`.
-  - [x] Pastikan baris-baris berikutnya dapat memproses naskah secara paralel/cepat tanpa menunggu gambar visual baris sebelumnya.
+- [x] **Task 2: Refactoring Worker Multiplier Menjadi Task Processor Tunggal (`lib/re-multiplier-worker.js`)**
+  - [x] Buat fungsi `processSingleMultiplierTask(task)` yang memproses state machine per baris/task secara terisolasi tanpa loop `for..await` monolitik.
+  - [x] Pastikan logging tetap rapi dan transisi status (`generating_audio` -> `generating_visuals` -> `ffmpeg_muxing` -> `completed`) terisolasi pada task tersebut.
 
-- [x] **Task 3: Eliminasi Double Delay pada Fase 2 Visual Generation (`lib/re-multiplier-worker.js`)**
-  - [x] Selaraskan pacing delay di `handleVisualGeneration` dengan tetap mematuhi micro-pacing safety guardrail.
-  - [x] Pastikan pengiriman request ke G-Labs tetap aman karena telah dilindungi oleh `applyRandomDelay('video')` di `lib/webhook-client.js`.
+- [x] **Task 3: Refactoring Skeduler Multiplier Lab di `lib/campaign-scheduler.js`**
+  - [x] Hapus global mutex `state.isMultiplierSyncRunning` yang membekukan scheduler.
+  - [x] Implementasikan multi-task loop menggunakan `state.activeTasks` dengan taskKey `multiplier_${task.id}`.
+  - [x] Terapkan batas concurrency yang aman (misal max 3-4 task Fase 2 berjalan paralel) untuk mencegah lonjakan pemakaian resource lokal.
 
-- [x] **Task 4: Optimasi Rute Regenerasi Start Frame On-Demand (`app/api/v2/multiplier/[id]/regenerate-start-frames/route.js`)**
-  - [x] Hapus double delay manual (baris 178–180) agar pengiriman prompt start frame tidak tertahan dua kali jeda.
-  - [x] Pastikan penanganan progres real-time (`regenerate_start_frames_progress`) tetap terlaporkan ke UI dengan akurat.
-
-- [x] **Task 5: Pengujian, Verifikasi & Validasi**
-  - [x] Jalankan unit test skeduler & Multiplier (`tests/multiplier-*.test.js`).
-  - [x] Uji build Next.js (`npm run build`) untuk memastikan integritas rute dan kompilasi bundle.
-  - [x] Pastikan alur transisi Fase 1 langsung menuju `waiting_approval` (Fase 2 : Paused / Ready for Review).
+- [x] **Task 4: Pengujian & Verifikasi**
+  - [x] Uji unit test dan skrip simulasi concurrency untuk membuktikan Baris 1 dan Baris 2 dapat memproses TTS secara bersamaan.
+  - [x] Uji build Next.js (`npm run build`) untuk memastikan integritas bundle.
 
 ---
 
 ## 🔍 Before & After Code Snippets
 
-### 1. `lib/re-multiplier-worker.js` — Penyelarasan Fase 1 (Langsung ke `waiting_approval`)
+### 1. `lib/db.js` — Pemisahan Query Fase 1 (Sekuensial) dan Fase 2 (Independen)
 
 #### Code Sebelum (Current/Before):
 ```javascript
-// lib/re-multiplier-worker.js:L439-L442
-  const hasGlabs = audio.enableGlabs === 1 || audio.enableGlabs === true;
-  const visualMode = bridging.visualMode || 'pure_t2v';
-  const hasT2i = (hasGlabs && bridging.isBridgingActive && visualMode === 'hybrid_lock');
-  const nextStatus = hasT2i ? 'generating_t2i' : 'waiting_approval';
-
-  await updateMultiplierTask(task.id, {
-    remake_storyboard_json: JSON.stringify(safeVoiceover),
-    original_voiceover: JSON.stringify(voiceover),
-    tiktok_safe_voiceover: JSON.stringify(safeVoiceover),
-    compliance_status: complianceStatus,
-    compliance_score: complianceScore,
-    compliance_log_json: complianceLog ? JSON.stringify(complianceLog) : null,
-    selected_vo_version: 'original',
-    t2i_i2v_prompts_json: JSON.stringify(parsed.prompts || []),
-    new_caption: parsed.caption || '',
-    yt_title: sanitizedYtTitle,
-    status: nextStatus
-  });
-```
-
-#### Code Sesudah (Proposed/After):
-```javascript
-// lib/re-multiplier-worker.js:L439-L442
-  // Selaras dengan Organic Pillar Campaign (Mode Storyboard Approval):
-  // Fase 1 selesai begitu naskah, video DNA, dan prompt selesai digenerate oleh Gemini.
-  // Start Frame T2I tidak dipaksakan jalan otomatis, melainkan on-demand saat user review di Fase 2.
-  const nextStatus = 'waiting_approval';
-
-  await updateMultiplierTask(task.id, {
-    remake_storyboard_json: JSON.stringify(safeVoiceover),
-    original_voiceover: JSON.stringify(voiceover),
-    tiktok_safe_voiceover: JSON.stringify(safeVoiceover),
-    compliance_status: complianceStatus,
-    compliance_score: complianceScore,
-    compliance_log_json: complianceLog ? JSON.stringify(complianceLog) : null,
-    selected_vo_version: 'original',
-    t2i_i2v_prompts_json: JSON.stringify(parsed.prompts || []),
-    new_caption: parsed.caption || '',
-    yt_title: sanitizedYtTitle,
-    status: nextStatus
-  });
-```
-
----
-
-### 2. `lib/db.js` — Pelonggaran Kunci Antar Baris (`getEligibleSequentialMultiplierTasks`)
-
-#### Code Sebelum (Current/Before):
-```javascript
-// lib/db.js:L3335-L3347
-export async function getEligibleSequentialMultiplierTasks(limit = 4) {
-  return await dbAll(`
-    SELECT t.* FROM re_multiplier_tasks t
-    WHERE t.status IN ('pending_resolution', 'resolving_product', 'remaking', 'generating_t2i', 'generating_audio', 'generating_visuals', 'ffmpeg_muxing')
-      AND NOT EXISTS (
-        SELECT 1 FROM re_multiplier_tasks prev
-        WHERE prev.batch_id = t.batch_id
-          AND prev.row_index < t.row_index
-          AND prev.status IN ('draft', 'pending_resolution', 'resolving_product', 'remaking', 'generating_t2i')
-      )
-    ORDER BY t.created_at ASC, t.row_index ASC
-    LIMIT ?
-  `, [limit]);
-}
-```
-
-#### Code Sesudah (Proposed/After):
-```javascript
-// lib/db.js:L3335-L3347
+// lib/db.js:L3335-L3348
 export async function getEligibleSequentialMultiplierTasks(limit = 4) {
   return await dbAll(`
     SELECT t.* FROM re_multiplier_tasks t
@@ -134,76 +51,195 @@ export async function getEligibleSequentialMultiplierTasks(limit = 4) {
 }
 ```
 
----
-
-### 3. `lib/re-multiplier-worker.js` — Penghapusan Double Delay pada Fase 2 Visual
-
-#### Code Sebelum (Current/Before):
-```javascript
-// lib/re-multiplier-worker.js:L810-L823
-      await updateMultiplierTask(task.id, {
-        glabs_task_ids: JSON.stringify(submittedTaskIds)
-      });
-
-      // Micro-pacing pacing delay: jeda 10s antar pengiriman klip baru (selaras Pillar Campaign)
-      if (c < prompts.length) {
-        logToMultiplier(`[Multiplier Worker] ⏳ Micro-pacing delay: menunggu 10 detik sebelum klip ${c + 1}...`);
-        await new Promise(resolve => setTimeout(resolve, 10000));
-      }
-    }
-
-    await updateMultiplierTask(task.id, {
-      glabs_task_ids: JSON.stringify(submittedTaskIds)
-    });
-```
-
 #### Code Sesudah (Proposed/After):
 ```javascript
-// lib/re-multiplier-worker.js:L810-L823
-      await updateMultiplierTask(task.id, {
-        glabs_task_ids: JSON.stringify(submittedTaskIds)
-      });
+// lib/db.js
+// Query khusus Fase 1: Sekuensial per baris (Gemini AI Storyboard)
+export async function getEligibleFase1MultiplierTasks(limit = 2) {
+  return await dbAll(`
+    SELECT t.* FROM re_multiplier_tasks t
+    WHERE t.status IN ('pending_resolution', 'resolving_product', 'remaking')
+      AND NOT EXISTS (
+        SELECT 1 FROM re_multiplier_tasks prev
+        WHERE prev.batch_id = t.batch_id
+          AND prev.row_index < t.row_index
+          AND prev.status IN ('draft', 'pending_resolution', 'resolving_product', 'remaking')
+      )
+    ORDER BY t.created_at ASC, t.row_index ASC
+    LIMIT ?
+  `, [limit]);
+}
 
-      // Note: Pacing safety delay 10-20s sudah ditangani secara terpusat oleh applyRandomDelay('video') di webhook-client.js
-    }
-
-    await updateMultiplierTask(task.id, {
-      glabs_task_ids: JSON.stringify(submittedTaskIds)
-    });
+// Query khusus Fase 2: Independen antar-baris (TTS, Visuals, FFmpeg)
+export async function getEligibleFase2MultiplierTasks(limit = 6) {
+  return await dbAll(`
+    SELECT t.* FROM re_multiplier_tasks t
+    WHERE t.status IN ('generating_audio', 'generating_visuals', 'ffmpeg_muxing')
+    ORDER BY t.created_at ASC, t.row_index ASC
+    LIMIT ?
+  `, [limit]);
+}
 ```
 
 ---
 
-### 4. `app/api/v2/multiplier/[id]/regenerate-start-frames/route.js` — Eliminasi Double Delay Start Frame
+### 2. `lib/re-multiplier-worker.js` — Isolasi Eksekusi per Task Tunggal
 
 #### Code Sebelum (Current/Before):
 ```javascript
-// app/api/v2/multiplier/[id]/regenerate-start-frames/route.js:L170-L182
-      // Update progress in database
-      await dbRun(`
-        UPDATE re_multiplier_tasks
-        SET regenerate_start_frames_progress = ?
-        WHERE id = ?
-      `, [`${i + 1}/${totalCount}`, taskId]).catch(() => {});
+// lib/re-multiplier-worker.js:L86-L146
+export async function processNextMultiplierTask() {
+  const tasks = await getEligibleSequentialMultiplierTasks(2);
+  if (!tasks || tasks.length === 0) return;
 
-      // Safety Delay (5-10 seconds) before sending next prompt
-      if (i < totalCount - 1) {
-        const delayMs = 5000 + Math.floor(Math.random() * 5000);
-        await new Promise(resolve => setTimeout(resolve, delayMs));
+  logToMultiplier(`[Multiplier Worker] Ditemukan ${tasks.length} task eligible untuk dieksekusi sekuensial.`);
+
+  const { tenantContext } = await import('./tenant-context.js');
+  const db = getDb();
+
+  for (const task of tasks) {
+    const tenantId = task.tenant_id || 'default_tenant';
+    await tenantContext.run(tenantId, async () => {
+      // Loop serial memblokir task berikutnya sampai task ini selesai
+      let currentStatus = task.status;
+      let activeTask = task;
+      let maxIterations = 5;
+      while (maxIterations > 0) {
+        if (currentStatus === 'generating_audio') {
+          await handleAudioGeneration(activeTask);
+        } else if (currentStatus === 'generating_visuals') {
+          await handleVisualGeneration(activeTask);
+        }
+        ...
       }
-    }
+    });
+  }
+}
 ```
 
 #### Code Sesudah (Proposed/After):
 ```javascript
-// app/api/v2/multiplier/[id]/regenerate-start-frames/route.js:L170-L182
-      // Update progress in database
-      await dbRun(`
-        UPDATE re_multiplier_tasks
-        SET regenerate_start_frames_progress = ?
-        WHERE id = ?
-      `, [`${i + 1}/${totalCount}`, taskId]).catch(() => {});
+// lib/re-multiplier-worker.js
+export async function processSingleMultiplierTask(task) {
+  const { tenantContext } = await import('./tenant-context.js');
+  const db = getDb();
+  const tenantId = task.tenant_id || 'default_tenant';
 
-      // Safety delay terpusat telah ditangani otomatis oleh applyRandomDelay('image') di webhook-client.js
+  await tenantContext.run(tenantId, async () => {
+    const rowNum = (task.row_index !== undefined && task.row_index !== null) ? Number(task.row_index) + 1 : '?';
+    logToMultiplier(`[Multiplier Worker] [Task ${task.id}] Baris ${rowNum} executing stage: ${task.status}`);
+
+    try {
+      let currentStatus = task.status;
+      let activeTask = task;
+      let maxIterations = 3;
+
+      while (maxIterations > 0) {
+        if (currentStatus === 'pending_resolution' || currentStatus === 'resolving_product') {
+          await handleProductResolution(activeTask);
+        } else if (currentStatus === 'remaking') {
+          await handleStoryboardRemake(activeTask);
+        } else if (currentStatus === 'generating_t2i') {
+          await handleT2iGeneration(activeTask);
+        } else if (currentStatus === 'generating_audio') {
+          await handleAudioGeneration(activeTask);
+        } else if (currentStatus === 'generating_visuals') {
+          await handleVisualGeneration(activeTask);
+        } else if (currentStatus === 'ffmpeg_muxing') {
+          await handleFFmpegMuxing(activeTask);
+        } else {
+          break; // Terminal state (completed, failed, waiting_approval)
+        }
+
+        const nextTask = await db.prepare('SELECT * FROM re_multiplier_tasks WHERE id = ?').get(activeTask.id);
+        if (!nextTask || nextTask.status === currentStatus) break;
+        if (nextTask.status === 'generating_visuals' && nextTask.glabs_task_ids) break;
+
+        currentStatus = nextTask.status;
+        activeTask = nextTask;
+        maxIterations--;
+      }
+    } catch (error) {
+      console.error(`[Multiplier Worker] Error processing task ${task.id}:`, error.message);
+      await updateMultiplierTask(task.id, { status: 'failed', error_message: error.message });
     }
+  });
+}
+```
+
+---
+
+### 3. `lib/campaign-scheduler.js` — Non-Blocking Multi-Task Scheduler Tick
+
+#### Code Sebelum (Current/Before):
+```javascript
+// lib/campaign-scheduler.js:L956-L978
+  // --- MULTIPLIER LAB SCHEDULER TICK ---
+  if (!state.lastMultiplierSyncTime) state.lastMultiplierSyncTime = 0;
+  if (state.isMultiplierSyncRunning === undefined) state.isMultiplierSyncRunning = false;
+
+  const isMultiplierActive = await getSetting('multiplier_scheduler_active') !== 'false';
+
+  if (now - state.lastMultiplierSyncTime >= 10_000 && !state.isMultiplierSyncRunning && isMultiplierActive) {
+    state.isMultiplierSyncRunning = true;
+    const { processNextMultiplierTask, logToMultiplier } = await import('./re-multiplier-worker.js');
+    
+    logToMultiplier('=== MESIN MULTIPLIER SINKRONISASI MULAI ===');
+    processNextMultiplierTask()
+      .then(() => {
+        state.lastMultiplierSyncTime = Date.now();
+        logToMultiplier('=== MESIN MULTIPLIER SINKRONISASI SELESAI ===');
+      })
+      .catch(err => {
+        logToMultiplier(`[Scheduler Error] Multiplier task failed: ${err.message}`);
+      })
+      .finally(() => {
+        state.isMultiplierSyncRunning = false;
+      });
+  }
+```
+
+#### Code Sesudah (Proposed/After):
+```javascript
+// lib/campaign-scheduler.js:L956-L978
+  // --- MULTIPLIER LAB SCHEDULER TICK (v8.6 Non-Blocking Multi-Task Queue) ---
+  const isMultiplierActive = await getSetting('multiplier_scheduler_active') !== 'false';
+
+  if (isMultiplierActive) {
+    const { 
+      getEligibleFase1MultiplierTasks, 
+      getEligibleFase2MultiplierTasks 
+    } = await import('./db.js');
+    const { processSingleMultiplierTask } = await import('./re-multiplier-worker.js');
+
+    // 1. Eksekusi Fase 1 (Sourcing & Storyboard AI) — Tetap Sekuensial per Baris
+    const fase1Tasks = await getEligibleFase1MultiplierTasks(1);
+    for (const task of fase1Tasks) {
+      const taskKey = `multiplier_${task.id}`;
+      if (!state.activeTasks.has(taskKey)) {
+        state.activeTasks.add(taskKey);
+        processSingleMultiplierTask(task)
+          .catch(err => console.error(`[Multiplier Scheduler] Fase 1 Task #${task.id} error:`, err.message))
+          .finally(() => state.activeTasks.delete(taskKey));
+      }
+    }
+
+    // 2. Eksekusi Fase 2 (Audio TTS, Visuals, FFmpeg) — Konkuren & Independen Antar-Baris
+    const MAX_PARALLEL_FASE2 = 3;
+    const currentActiveFase2 = Array.from(state.activeTasks).filter(k => k.startsWith('multiplier_')).length;
+    const availableSlots = Math.max(0, MAX_PARALLEL_FASE2 - currentActiveFase2);
+
+    if (availableSlots > 0) {
+      const fase2Tasks = await getEligibleFase2MultiplierTasks(availableSlots);
+      for (const task of fase2Tasks) {
+        const taskKey = `multiplier_${task.id}`;
+        if (!state.activeTasks.has(taskKey)) {
+          state.activeTasks.add(taskKey);
+          processSingleMultiplierTask(task)
+            .catch(err => console.error(`[Multiplier Scheduler] Fase 2 Task #${task.id} error:`, err.message))
+            .finally(() => state.activeTasks.delete(taskKey));
+        }
+      }
+    }
+  }
 ```

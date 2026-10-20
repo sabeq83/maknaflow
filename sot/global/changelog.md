@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.66 — Arsitektur Skeduler Multi-Task & Non-Blocking Multiplier Lab (21/10/2026)
+- Pemisahan query antrean Fase 1 (sekuensial naskah) dan Fase 2 (konkuren produksi)
+- Refactor Multiplier worker processSingleMultiplierTask terisolasi per task
+- Implementasi non-blocking multi-task queue di campaign-scheduler berbasis state.activeTasks
+- Eliminasi bottleneck serial Fase 2 sehingga baris-baris dapat memproses TTS secara bersamaan
+
 ## V2.32.65 — Penyelarasan Skeduler Multiplier Campaign dengan Pillar Campaign (20/10/2026)
 - Fase 1 Multiplier beralih langsung ke waiting_approval tanpa auto-render T2I
 - Pelonggaran kunci sekuensial antar baris pada getEligibleSequentialMultiplierTasks
