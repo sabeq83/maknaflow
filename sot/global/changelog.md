@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.65 — Penyelarasan Skeduler Multiplier Campaign dengan Pillar Campaign (20/10/2026)
+- Fase 1 Multiplier beralih langsung ke waiting_approval tanpa auto-render T2I
+- Pelonggaran kunci sekuensial antar baris pada getEligibleSequentialMultiplierTasks
+- Eliminasi double delay pengiriman start frame dan visual video
+
 ## V2.32.64 — Accordion dan Quick Jump Klip Multiplier dan Pillar (20/10/2026)
 - Implementasi accordion klip storyboard pada Multiplier Lab dengan Klip 1 default terbuka
 - Membuka klip lain otomatis menutup klip aktif sebelumnya

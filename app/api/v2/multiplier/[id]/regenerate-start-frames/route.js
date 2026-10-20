@@ -174,11 +174,7 @@ async function runTaskRegenerateStartFramesBackground(taskId, task, prompts) {
         WHERE id = ?
       `, [`${i + 1}/${totalCount}`, taskId]).catch(() => {});
 
-      // Safety Delay (5-10 seconds) before sending next prompt
-      if (i < totalCount - 1) {
-        const delayMs = 5000 + Math.floor(Math.random() * 5000);
-        await new Promise(resolve => setTimeout(resolve, delayMs));
-      }
+      // Note: Safety delay terpusat telah ditangani otomatis oleh applyRandomDelay('image') di webhook-client.js
     }
 
     // Reset status after completion back to waiting_approval
