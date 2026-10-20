@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.62 — Fitur Tombol Copy Aset VO, T2I, dan I2V Multiplier Lab (20/10/2026)
+- Tombol salin mandiri untuk Naskah VO, Prompt T2I Start Frame, dan Prompt I2V Motion pada detail kampanye Multiplier Lab
+- Toolbar Bulk Copy untuk menyalin seluruh alur adegan sekaligus
+- Simulasi mockup interaktif di public/mockup_multiplier_copy_assets.html
+
 ## V2.32.61 — Integrasi UI & API Triad Intelligence Deconstruction Lab (17/10/2026)
 - Triad Intelligence Cards Masalah dan Solusi Utama pada Detail Blueprint
 - Dukungan Inline Editing Rumusan Masalah pada Deconstruction Lab

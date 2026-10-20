@@ -187,6 +187,7 @@ function CampaignDetailPageContent() {
   const [regeneratingT2I, setRegeneratingT2I] = useState({}); // { [`${taskId}_${clipIndex}`]: boolean }
   const [replacingSF, setReplacingSF] = useState({}); // { [`${taskId}_${clipIndex}`]: boolean }
   const [actionLoading, setActionLoading] = useState({}); // { [taskId]: boolean }
+  const [copySuccess, setCopySuccess] = useState({}); // { [key]: boolean }
 
   const pollingRef = useRef(null);
 
@@ -209,6 +210,47 @@ function CampaignDetailPageContent() {
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 4000);
+  };
+
+  const handleCopy = (text, key, label = 'Aset') => {
+    if (!text || !text.trim()) {
+      showToast(`${label} masih kosong atau belum tersedia.`, 'error');
+      return;
+    }
+    const applySuccess = () => {
+      setCopySuccess(prev => ({ ...prev, [key]: true }));
+      showToast(`${label} berhasil disalin!`);
+      setTimeout(() => {
+        setCopySuccess(prev => ({ ...prev, [key]: false }));
+      }, 2000);
+    };
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(applySuccess).catch(() => fallbackCopy(text, key, label));
+    } else {
+      fallbackCopy(text, key, label);
+    }
+  };
+
+  const fallbackCopy = (text, key, label) => {
+    try {
+      const el = document.createElement('textarea');
+      el.value = text;
+      el.setAttribute('readonly', '');
+      el.style.position = 'absolute';
+      el.style.left = '-9999px';
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      setCopySuccess(prev => ({ ...prev, [key]: true }));
+      showToast(`${label} berhasil disalin!`);
+      setTimeout(() => {
+        setCopySuccess(prev => ({ ...prev, [key]: false }));
+      }, 2000);
+    } catch (_) {
+      showToast('Gagal menyalin ke clipboard', 'error');
+    }
   };
 
   const fetchTasks = async (isPoll = false) => {
@@ -1395,6 +1437,76 @@ function CampaignDetailPageContent() {
                                       </div>
                                     )}
 
+                                    {/* Bulk Copy Toolbar */}
+                                    <div style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'space-between',
+                                      flexWrap: 'wrap',
+                                      gap: 10,
+                                      background: 'var(--surface-interactive)',
+                                      border: '1px solid var(--border)',
+                                      borderRadius: 8,
+                                      padding: '10px 14px'
+                                    }}>
+                                      <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+                                        ⚡ Salin Cepat Seluruh Alur:
+                                      </span>
+                                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                        <button
+                                          type="button"
+                                          className="btn btn-secondary"
+                                          style={{
+                                            padding: '3px 8px',
+                                            fontSize: '0.7rem',
+                                            background: copySuccess[`bulk_vo_${task.id}`] ? 'var(--status-success-soft)' : undefined,
+                                            borderColor: copySuccess[`bulk_vo_${task.id}`] ? 'var(--status-success)' : undefined,
+                                            color: copySuccess[`bulk_vo_${task.id}`] ? 'var(--status-success)' : undefined
+                                          }}
+                                          onClick={() => {
+                                            const bulkVo = storyboard.map((c, i) => `[Klip ${i + 1} VO]\n${c.narration || ''}`).join('\n\n');
+                                            handleCopy(bulkVo, `bulk_vo_${task.id}`, 'Seluruh Naskah VO');
+                                          }}
+                                        >
+                                          {copySuccess[`bulk_vo_${task.id}`] ? 'Tersalin ✓' : '🎙️ Salin Semua VO'}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="btn btn-secondary"
+                                          style={{
+                                            padding: '3px 8px',
+                                            fontSize: '0.7rem',
+                                            background: copySuccess[`bulk_t2i_${task.id}`] ? 'var(--status-success-soft)' : undefined,
+                                            borderColor: copySuccess[`bulk_t2i_${task.id}`] ? 'var(--status-success)' : undefined,
+                                            color: copySuccess[`bulk_t2i_${task.id}`] ? 'var(--status-success)' : undefined
+                                          }}
+                                          onClick={() => {
+                                            const bulkT2i = storyboard.map((c, i) => `--- Klip ${i + 1} T2I Start Frame ---\n${c.t2i_prompt || ''}`).join('\n\n');
+                                            handleCopy(bulkT2i, `bulk_t2i_${task.id}`, 'Semua Prompt T2I');
+                                          }}
+                                        >
+                                          {copySuccess[`bulk_t2i_${task.id}`] ? 'Tersalin ✓' : '🖼️ Salin Semua Prompt T2I'}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="btn btn-secondary"
+                                          style={{
+                                            padding: '3px 8px',
+                                            fontSize: '0.7rem',
+                                            background: copySuccess[`bulk_i2v_${task.id}`] ? 'var(--status-success-soft)' : undefined,
+                                            borderColor: copySuccess[`bulk_i2v_${task.id}`] ? 'var(--status-success)' : undefined,
+                                            color: copySuccess[`bulk_i2v_${task.id}`] ? 'var(--status-success)' : undefined
+                                          }}
+                                          onClick={() => {
+                                            const bulkI2v = storyboard.map((c, i) => `--- Klip ${i + 1} I2V Motion ---\n${c.i2v_prompt || ''}`).join('\n\n');
+                                            handleCopy(bulkI2v, `bulk_i2v_${task.id}`, 'Semua Prompt I2V');
+                                          }}
+                                        >
+                                          {copySuccess[`bulk_i2v_${task.id}`] ? 'Tersalin ✓' : '🎬 Salin Semua Prompt I2V'}
+                                        </button>
+                                      </div>
+                                    </div>
+
                                     {/* Clips edit rows */}
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                                       {storyboard.map((clip, cidx) => (
@@ -1403,8 +1515,26 @@ function CampaignDetailPageContent() {
                                             🎬 Klip #{cidx + 1}
                                           </div>
                                           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                            {/* Naskah Voiceover (VO) */}
                                             <div>
-                                              <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4, fontWeight: 600 }}>Naskah Voiceover (VO)</label>
+                                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                                                <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>🎙️ Naskah Voiceover (VO)</label>
+                                                <button
+                                                  type="button"
+                                                  className="btn btn-secondary"
+                                                  style={{
+                                                    padding: '2px 8px',
+                                                    fontSize: '0.68rem',
+                                                    fontWeight: 600,
+                                                    background: copySuccess[`vo_${task.id}_${cidx}`] ? 'var(--status-success-soft)' : 'var(--surface)',
+                                                    borderColor: copySuccess[`vo_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--border-strong)',
+                                                    color: copySuccess[`vo_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--text-secondary)'
+                                                  }}
+                                                  onClick={() => handleCopy(clip.narration || '', `vo_${task.id}_${cidx}`, `VO Klip #${cidx + 1}`)}
+                                                >
+                                                  {copySuccess[`vo_${task.id}_${cidx}`] ? 'Tersalin ✓' : '📋 Salin VO'}
+                                                </button>
+                                              </div>
                                               <textarea
                                                 value={clip.narration || ''}
                                                 onChange={(e) => {
@@ -1416,8 +1546,27 @@ function CampaignDetailPageContent() {
                                                 style={{ width: '100%', padding: 10, fontSize: '0.82rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
                                               />
                                             </div>
+
+                                            {/* Aksi Visual */}
                                             <div>
-                                              <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4, fontWeight: 600 }}>Aksi Visual</label>
+                                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                                                <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>👁️ Aksi Visual</label>
+                                                <button
+                                                  type="button"
+                                                  className="btn btn-secondary"
+                                                  style={{
+                                                    padding: '2px 8px',
+                                                    fontSize: '0.68rem',
+                                                    fontWeight: 600,
+                                                    background: copySuccess[`vis_${task.id}_${cidx}`] ? 'var(--status-success-soft)' : 'var(--surface)',
+                                                    borderColor: copySuccess[`vis_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--border-strong)',
+                                                    color: copySuccess[`vis_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--text-secondary)'
+                                                  }}
+                                                  onClick={() => handleCopy(clip.visual_description || '', `vis_${task.id}_${cidx}`, `Aksi Visual Klip #${cidx + 1}`)}
+                                                >
+                                                  {copySuccess[`vis_${task.id}_${cidx}`] ? 'Tersalin ✓' : '📋 Salin Visual'}
+                                                </button>
+                                              </div>
                                               <textarea
                                                 value={clip.visual_description || ''}
                                                 onChange={(e) => {
@@ -1429,8 +1578,27 @@ function CampaignDetailPageContent() {
                                                 style={{ width: '100%', padding: 10, fontSize: '0.82rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
                                               />
                                             </div>
+
+                                            {/* Prompt T2I Start Frame (Pixel Lock) */}
                                             <div>
-                                              <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4, fontWeight: 600 }}>Prompt T2I</label>
+                                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                                                <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>🖼️ Prompt T2I Start Frame (Pixel Lock)</label>
+                                                <button
+                                                  type="button"
+                                                  className="btn btn-secondary"
+                                                  style={{
+                                                    padding: '2px 8px',
+                                                    fontSize: '0.68rem',
+                                                    fontWeight: 600,
+                                                    background: copySuccess[`t2i_${task.id}_${cidx}`] ? 'var(--status-success-soft)' : 'var(--surface)',
+                                                    borderColor: copySuccess[`t2i_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--border-strong)',
+                                                    color: copySuccess[`t2i_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--text-secondary)'
+                                                  }}
+                                                  onClick={() => handleCopy(clip.t2i_prompt || '', `t2i_${task.id}_${cidx}`, `Prompt T2I Klip #${cidx + 1}`)}
+                                                >
+                                                  {copySuccess[`t2i_${task.id}_${cidx}`] ? 'Tersalin ✓' : '📋 Salin Prompt T2I'}
+                                                </button>
+                                              </div>
                                               <textarea
                                                 value={clip.t2i_prompt || ''}
                                                 onChange={(e) => {
@@ -1442,8 +1610,27 @@ function CampaignDetailPageContent() {
                                                 style={{ width: '100%', padding: 10, fontSize: '0.8rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
                                               />
                                             </div>
+
+                                            {/* Prompt I2V (Motion Prompt) */}
                                             <div>
-                                              <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4, fontWeight: 600 }}>Prompt I2V</label>
+                                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                                                <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>🎬 Prompt I2V (Motion Prompt)</label>
+                                                <button
+                                                  type="button"
+                                                  className="btn btn-secondary"
+                                                  style={{
+                                                    padding: '2px 8px',
+                                                    fontSize: '0.68rem',
+                                                    fontWeight: 600,
+                                                    background: copySuccess[`i2v_${task.id}_${cidx}`] ? 'var(--status-success-soft)' : 'var(--surface)',
+                                                    borderColor: copySuccess[`i2v_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--border-strong)',
+                                                    color: copySuccess[`i2v_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--text-secondary)'
+                                                  }}
+                                                  onClick={() => handleCopy(clip.i2v_prompt || '', `i2v_${task.id}_${cidx}`, `Prompt I2V Klip #${cidx + 1}`)}
+                                                >
+                                                  {copySuccess[`i2v_${task.id}_${cidx}`] ? 'Tersalin ✓' : '📋 Salin Prompt I2V'}
+                                                </button>
+                                              </div>
                                               <textarea
                                                 value={clip.i2v_prompt || ''}
                                                 onChange={(e) => {

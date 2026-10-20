@@ -1,404 +1,390 @@
-# Implementation Plan: Deconstruction Lab Core Problem Intelligence UI & API (PR 3 Completion)
+# Implementation Plan: Penambahan Tombol Copy Aset pada Halaman Detil Multiplier Lab
 
-Rencana implementasi ini bertujuan untuk menyelesaikan **PR 3** secara tuntas (end-to-end), yaitu menghadirkan antarmuka visual dan API pendukung pada **Deconstruction Lab** agar pengguna dapat:
-1. Melihat rumusan **Masalah Utama (Core Problem)**, **Solusi Pokok (Core Solution)**, dan **Target Audiens & Pain Point (Target Audience)** secara elegan melalui *Triad Intelligence Cards*.
-2. Melakukan **Inline Editing** secara langsung pada halaman detail dekonstruksi jika ingin mengoreksi atau mempertajam kalimat rumusan AI, lalu menyimpannya secara instan ke database PostgreSQL.
-3. Melihat cuplikan Masalah Utama (`core_problem`) pada tabel daftar library dekonstruksi (`List View`).
-4. Mengakses tombol jalan pintas (shortcut) untuk langsung meluncurkan kampanye di **Multiplier Lab** dengan masalah utama yang telah terkunci.
-5. Memastikan seluruh implementasi mematuhi SOP Design Tokens Semantic (`app/theme.css`), kompatibel sempurna di Light & Dark Mode, serta diverifikasi dengan tes unit otomatis.
+Usulan ini merespons kebutuhan pengguna untuk menambahkan tombol **Salin (Copy)** pada 3 aset utama kampanye di **Multiplier Lab** (halaman detil `/multiplier-lab/[id]`):
+1. **Naskah Voiceover (VO)**
+2. **Prompt T2I Start Frame (Pixel Lock)**
+3. **Prompt I2V (Motion Prompt)**
+
+Implementasi ini diselaraskan dengan pola antarmuka pada menu **Pilar Campaign** (`/pillar-campaigns/[id]`), menggunakan feedback visual interaktif (`Tersalin ✓`), semantic CSS design tokens dari `app/theme.css`, serta penambahan bar aksi **Bulk Copy** untuk menyalin seluruh alur dalam 1 klik.
+
+---
+
+## 🎨 Mockup HTML Standalone untuk Simulasi & Review
+
+Sesuai SOP, simulasi interaktif standalone HTML telah dibuat dan dapat langsung diuji secara lokal:
+- **File Mockup:** [public/mockup_multiplier_copy_assets.html](file:///Users/sabeqmmursyid/_contentflow-staging/public/mockup_multiplier_copy_assets.html)
+- **URL Akses Lokal:** `http://localhost:5020/mockup_multiplier_copy_assets.html` (atau port dev yang sedang aktif)
+- **Fitur Simulasi di Mockup:**
+  - Tombol Salin per Klip pada VO, Aksi Visual, T2I, dan I2V.
+  - Efek transisi warna hijau lembut (`var(--status-success-soft)`) dan teks berubah menjadi `✓ Tersalin` selama 2 detik.
+  - Floating Toast Notification konfirmasi penyalinan.
+  - Toolbar **Salin Cepat Seluruh Alur (Bulk Copy Toolbar)** untuk menyalin gabungan seluruh scene ke clipboard.
+  - Tombol toggle Dark Mode & Light Mode universal.
 
 ---
 
 ## 📋 Execution Task List
 
-- [x] **Task 1: Dukungan API Penyimpanan & Pencarian Masalah Utama**
-  - [x] Perbarui method `PUT` pada [app/api/v2/deconstruct/assets/[id]/route.js](file:///Users/sabeqmmursyid/_contentflow-staging/app/api/v2/deconstruct/assets/[id]/route.js) agar menerima pembaruan field `core_problem`, `core_solution`, dan `target_audience_pain_point`.
-  - [x] Perbarui query pencarian `q` pada `listDeconstructAssets` di [lib/db.js](file:///Users/sabeqmmursyid/_contentflow-staging/lib/db.js) agar mencakup pencarian berbasis `core_problem` dan `core_solution`.
-  - [x] Pastikan query legacy asset list (`searchParams.get('assets') === 'true'`) pada [app/api/v2/deconstruct/route.js](file:///Users/sabeqmmursyid/_contentflow-staging/app/api/v2/deconstruct/route.js) menyertakan `core_problem`, `core_solution`, dan `target_audience_pain_point`.
-- [x] **Task 2: Integrasi Triad Intelligence Cards & Inline Edit pada Detail Blueprint UI**
-  - [x] Tambahkan state `editingProblem`, `coreProblemInput`, `coreSolutionInput`, `targetAudienceInput`, dan `savingProblem` pada [app/deconstruct/[id]/page.js](file:///Users/sabeqmmursyid/_contentflow-staging/app/deconstruct/[id]/page.js).
-  - [x] Buat handler `handleSaveCoreProblem` untuk memanggil API `PUT /api/v2/deconstruct/assets/[id]`.
-  - [x] Tampilkan komponen *Triad Intelligence Cards* (Masalah Utama, Solusi Pokok, Target Audiens) dengan styling semantic tokens (`var(--status-danger)`, `var(--status-success)`, `var(--status-info)`, `var(--surface-raised)`).
-  - [x] Sediakan tombol interaktif "✏️ Edit Rumusan Masalah", form textarea inline saat mode edit aktif, serta tombol "Simpan & Kunci Rumusan Baru".
-  - [x] Tambahkan tombol shortcut aksi "🚀 Buat Kampanye di Multiplier Lab (Kunci Masalah Ini)" yang mengarahkan pengguna ke `/multiplier-lab?blueprint_id=${asset.id}`.
-- [x] **Task 3: Penampilan Kolom Masalah Utama pada Tabel Library Dekonstruksi**
-  - [x] Perbarui tabel list pada [app/deconstruct/page.js](file:///Users/sabeqmmursyid/_contentflow-staging/app/deconstruct/page.js) agar kolom ringkasan menampilkan indikator/badge Masalah Utama (`🎯 ${asset.core_problem}`) yang tajam dan mudah dibaca sekilas.
-  - [x] Sediakan tooltip/hover yang menampilkan `core_solution` dan `target_audience_pain_point`.
-- [x] **Task 4: Unit Testing Otomatis & Verifikasi End-to-End**
-  - [x] Buat file pengujian otomatis `tests/deconstruct-core-problem-ui.test.js` untuk memverifikasi:
-    - Update `PUT /api/v2/deconstruct/assets/[id]` menyimpan field `core_problem`, `core_solution`, dan `target_audience_pain_point`.
-    - Query `listDeconstructAssets` mengembalikan field tersebut dan mendukung filter pencarian berbasis kata kunci masalah.
-  - [x] Jalankan test runner `node --test tests/deconstruct-core-problem-ui.test.js` dan pastikan seluruh tes lolos 100%.
-- [x] **Task 5: SOP Rilis Non-Interaktif & Auto Git Sync**
-  - [x] Jalankan perintah rilis non-interaktif `npm run release-non-interactive` sesuai SOP untuk commit, tag, changelog, dan push ke GitHub.
+- [x] **Task 1: Penambahan State & Helper Clipboard pada Detail Multiplier Lab**
+  - [x] Tambahkan state `copySuccess` (`{ [key]: boolean }`) pada [app/multiplier-lab/[id]/page.js](file:///Users/sabeqmmursyid/_contentflow-staging/app/multiplier-lab/[id]/page.js).
+  - [x] Implementasikan helper `handleCopy(text, key, label)` dengan dukungan `navigator.clipboard.writeText` dan fallback `document.execCommand('copy')` jika clipboard API tidak diizinkan.
+  - [x] Tambahkan feedback visual reset otomatis setelah 2000ms dan integrasi dengan `showToast`.
+
+- [x] **Task 2: Penambahan Tombol Salin Per Klip (VO, T2I Start Frame, I2V Motion)**
+  - [x] Perbarui baris label **Naskah Voiceover (VO)** pada [app/multiplier-lab/[id]/page.js](file:///Users/sabeqmmursyid/_contentflow-staging/app/multiplier-lab/[id]/page.js) menjadi header fleksibel dengan tombol `[📋 Salin VO]`.
+  - [x] Perbarui label "Prompt T2I" menjadi **Prompt T2I Start Frame (Pixel Lock)** dengan tombol `[📋 Salin Prompt T2I]`.
+  - [x] Perbarui label "Prompt I2V" menjadi **Prompt I2V (Motion Prompt)** dengan tombol `[📋 Salin Prompt I2V]`.
+  - [x] Pastikan seluruh tombol menggunakan semantic tokens (`var(--surface)`, `var(--status-success-soft)`, `var(--border-strong)`).
+
+- [x] **Task 3: Penambahan Toolbar Salin Cepat Seluruh Alur (Bulk Copy Toolbar)**
+  - [x] Tambahkan bar ringkas di atas daftar klip storyboard pada [app/multiplier-lab/[id]/page.js](file:///Users/sabeqmmursyid/_contentflow-staging/app/multiplier-lab/[id]/page.js).
+  - [x] Sediakan 3 tombol aksi cepat:
+    1. `🎙️ Salin Seluruh Naskah VO`: Menggabungkan naskah VO klip 1 s.d. N terformat rapi.
+    2. `🖼️ Salin Semua Prompt T2I`: Menggabungkan prompt T2I start frame seluruh klip.
+    3. `🎬 Salin Semua Prompt I2V`: Menggabungkan motion prompt I2V seluruh klip.
+
+- [x] **Task 4: Pengujian & Verifikasi Kompatibilitas UI**
+  - [x] Verifikasi fungsi penyalinan clipboard teks tunggal maupun bulk.
+  - [x] Pastikan tidak ada regresi pada fungsi inline-editing storyboard textarea yang sudah ada.
+  - [x] Verifikasi tampilan di mode Dark dan Light.
 
 ---
 
 ## 🔍 Before & After Code Snippets
 
-### 1. `app/api/v2/deconstruct/assets/[id]/route.js` (Dukungan Simpan `core_problem`)
+### File: `app/multiplier-lab/[id]/page.js`
 
-#### Code Sebelum (Current/Before):
+#### 1. Penambahan State & Clipboard Handler
+##### Code Sebelum (Current/Before):
 ```javascript
-// app/api/v2/deconstruct/assets/[id]/route.js:L48-L56
-    const updates = {};
-    if (body.tags !== undefined) updates.tags = body.tags;
-    if (body.niche !== undefined) updates.niche = body.niche;
-    if (body.page_source !== undefined) updates.page_source = body.page_source;
+// app/multiplier-lab/[id]/page.js:L186-L191
+  // Regeneration and replacement loadings
+  const [batchRegeneratingSF, setBatchRegeneratingSF] = useState({}); // { [taskId]: boolean }
+  const [regeneratingT2I, setRegeneratingT2I] = useState({}); // { [`${taskId}_${clipIndex}`]: boolean }
+  const [replacingSF, setReplacingSF] = useState({}); // { [`${taskId}_${clipIndex}`]: boolean }
+  const [actionLoading, setActionLoading] = useState({}); // { [taskId]: boolean }
 
-    if (Object.keys(updates).length === 0) {
-      return NextResponse.json({ success: false, error: 'Metadata update tidak valid' }, { status: 400 });
+  const pollingRef = useRef(null);
+```
+
+##### Code Sesudah (Proposed/After):
+```javascript
+// app/multiplier-lab/[id]/page.js:L186-L230
+  // Regeneration and replacement loadings
+  const [batchRegeneratingSF, setBatchRegeneratingSF] = useState({}); // { [taskId]: boolean }
+  const [regeneratingT2I, setRegeneratingT2I] = useState({}); // { [`${taskId}_${clipIndex}`]: boolean }
+  const [replacingSF, setReplacingSF] = useState({}); // { [`${taskId}_${clipIndex}`]: boolean }
+  const [actionLoading, setActionLoading] = useState({}); // { [taskId]: boolean }
+  const [copySuccess, setCopySuccess] = useState({}); // { [key]: boolean }
+
+  const handleCopy = (text, key, label = 'Aset') => {
+    if (!text || !text.trim()) {
+      showToast(`${label} masih kosong atau belum tersedia.`, 'error');
+      return;
     }
+    const applySuccess = () => {
+      setCopySuccess(prev => ({ ...prev, [key]: true }));
+      showToast(`${label} berhasil disalin!`);
+      setTimeout(() => {
+        setCopySuccess(prev => ({ ...prev, [key]: false }));
+      }, 2000);
+    };
 
-    await updateDeconstructAsset(id, updates);
-```
-
-#### Code Sesudah (Proposed/After):
-```javascript
-// app/api/v2/deconstruct/assets/[id]/route.js:L48-L62
-    const updates = {};
-    if (body.tags !== undefined) updates.tags = body.tags;
-    if (body.niche !== undefined) updates.niche = body.niche;
-    if (body.page_source !== undefined) updates.page_source = body.page_source;
-    if (body.core_problem !== undefined) updates.core_problem = body.core_problem;
-    if (body.core_solution !== undefined) updates.core_solution = body.core_solution;
-    if (body.target_audience_pain_point !== undefined) updates.target_audience_pain_point = body.target_audience_pain_point;
-
-    if (Object.keys(updates).length === 0) {
-      return NextResponse.json({ success: false, error: 'Metadata update tidak valid' }, { status: 400 });
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(applySuccess).catch(() => fallbackCopy(text, key, label));
+    } else {
+      fallbackCopy(text, key, label);
     }
+  };
 
-    await updateDeconstructAsset(id, updates);
+  const fallbackCopy = (text, key, label) => {
+    try {
+      const el = document.createElement('textarea');
+      el.value = text;
+      el.setAttribute('readonly', '');
+      el.style.position = 'absolute';
+      el.style.left = '-9999px';
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      setCopySuccess(prev => ({ ...prev, [key]: true }));
+      showToast(`${label} berhasil disalin!`);
+      setTimeout(() => {
+        setCopySuccess(prev => ({ ...prev, [key]: false }));
+      }, 2000);
+    } catch (_) {
+      showToast('Gagal menyalin ke clipboard', 'error');
+    }
+  };
+
+  const pollingRef = useRef(null);
 ```
 
 ---
 
-### 2. `lib/db.js` (Pencarian `core_problem` & `core_solution` pada `listDeconstructAssets`)
-
-#### Code Sebelum (Current/Before):
+#### 2. Penambahan Toolbar Salin Cepat & Tombol Copy pada Baris Klip Storyboard
+##### Code Sebelum (Current/Before):
 ```javascript
-// lib/db.js:L2931-L2935
-  if (q) {
-    query += ' AND (source_url LIKE ? OR page_source LIKE ? OR original_caption LIKE ? OR viral_pattern_summary LIKE ?)';
-    const likeVal = `%${q}%`;
-    params.push(likeVal, likeVal, likeVal, likeVal);
-  }
+// app/multiplier-lab/[id]/page.js:L1399-L1458
+  {/* Clips edit rows */}
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    {storyboard.map((clip, cidx) => (
+      <div key={cidx} style={{ display: 'flex', flexDirection: 'column', gap: 12, background: 'var(--surface-interactive)', padding: 16, borderRadius: 8, border: '1px solid var(--border)' }}>
+        <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--accent-light)', borderBottom: '1px solid var(--border)', paddingBottom: 6 }}>
+          🎬 Klip #{cidx + 1}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div>
+            <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4, fontWeight: 600 }}>Naskah Voiceover (VO)</label>
+            <textarea
+              value={clip.narration || ''}
+              onChange={(e) => {
+                const updated = [...storyboard];
+                updated[cidx].narration = e.target.value;
+                setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
+              }}
+              rows={2}
+              style={{ width: '100%', padding: 10, fontSize: '0.82rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
+            />
+          </div>
+          <div>
+            <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4, fontWeight: 600 }}>Aksi Visual</label>
+            <textarea
+              value={clip.visual_description || ''}
+              onChange={(e) => {
+                const updated = [...storyboard];
+                updated[cidx].visual_description = e.target.value;
+                setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
+              }}
+              rows={2}
+              style={{ width: '100%', padding: 10, fontSize: '0.82rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
+            />
+          </div>
+          <div>
+            <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4, fontWeight: 600 }}>Prompt T2I</label>
+            <textarea
+              value={clip.t2i_prompt || ''}
+              onChange={(e) => {
+                const updated = [...storyboard];
+                updated[cidx].t2i_prompt = e.target.value;
+                setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
+              }}
+              rows={2}
+              style={{ width: '100%', padding: 10, fontSize: '0.8rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
+            />
+          </div>
+          <div>
+            <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4, fontWeight: 600 }}>Prompt I2V</label>
+            <textarea
+              value={clip.i2v_prompt || ''}
+              onChange={(e) => {
+                const updated = [...storyboard];
+                updated[cidx].i2v_prompt = e.target.value;
+                setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
+              }}
+              rows={2}
+              style={{ width: '100%', padding: 10, fontSize: '0.8rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
+            />
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
 ```
 
-#### Code Sesudah (Proposed/After):
+##### Code Sesudah (Proposed/After):
 ```javascript
-// lib/db.js:L2931-L2935
-  if (q) {
-    query += ' AND (source_url LIKE ? OR page_source LIKE ? OR original_caption LIKE ? OR viral_pattern_summary LIKE ? OR core_problem LIKE ? OR core_solution LIKE ?)';
-    const likeVal = `%${q}%`;
-    params.push(likeVal, likeVal, likeVal, likeVal, likeVal, likeVal);
-  }
-```
+// app/multiplier-lab/[id]/page.js:L1399-L1535
+  {/* Bulk Copy Toolbar */}
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: 10,
+    background: 'var(--surface-interactive)',
+    border: '1px solid var(--border)',
+    borderRadius: 8,
+    padding: '10px 14px'
+  }}>
+    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+      ⚡ Salin Cepat Seluruh Alur:
+    </span>
+    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <button
+        type="button"
+        className="btn btn-secondary"
+        style={{ padding: '3px 8px', fontSize: '0.7rem' }}
+        onClick={() => {
+          const bulkVo = storyboard.map((c, i) => `[Klip ${i + 1} VO]\n${c.narration || ''}`).join('\n\n');
+          handleCopy(bulkVo, `bulk_vo_${task.id}`, 'Seluruh Naskah VO');
+        }}
+      >
+        {copySuccess[`bulk_vo_${task.id}`] ? 'Tersalin ✓' : '🎙️ Salin Semua VO'}
+      </button>
+      <button
+        type="button"
+        className="btn btn-secondary"
+        style={{ padding: '3px 8px', fontSize: '0.7rem' }}
+        onClick={() => {
+          const bulkT2i = storyboard.map((c, i) => `--- Klip ${i + 1} T2I Start Frame ---\n${c.t2i_prompt || ''}`).join('\n\n');
+          handleCopy(bulkT2i, `bulk_t2i_${task.id}`, 'Semua Prompt T2I');
+        }}
+      >
+        {copySuccess[`bulk_t2i_${task.id}`] ? 'Tersalin ✓' : '🖼️ Salin Semua Prompt T2I'}
+      </button>
+      <button
+        type="button"
+        className="btn btn-secondary"
+        style={{ padding: '3px 8px', fontSize: '0.7rem' }}
+        onClick={() => {
+          const bulkI2v = storyboard.map((c, i) => `--- Klip ${i + 1} I2V Motion ---\n${c.i2v_prompt || ''}`).join('\n\n');
+          handleCopy(bulkI2v, `bulk_i2v_${task.id}`, 'Semua Prompt I2V');
+        }}
+      >
+        {copySuccess[`bulk_i2v_${task.id}`] ? 'Tersalin ✓' : '🎬 Salin Semua Prompt I2V'}
+      </button>
+    </div>
+  </div>
 
----
-
-### 3. `app/api/v2/deconstruct/route.js` (Legacy Asset Ingest Select Extension)
-
-#### Code Sebelum (Current/Before):
-```javascript
-// app/api/v2/deconstruct/route.js:L24
-      let query = "SELECT id, batch_id, source_url, original_caption, niche, tags, created_at, viral_pattern_summary, product_ideas_json, original_storyboard_json FROM re_deconstructed_assets WHERE status = 'deconstructed' AND tenant_id = ?";
-```
-
-#### Code Sesudah (Proposed/After):
-```javascript
-// app/api/v2/deconstruct/route.js:L24
-      let query = "SELECT id, batch_id, source_url, original_caption, niche, tags, created_at, viral_pattern_summary, product_ideas_json, original_storyboard_json, core_problem, core_solution, target_audience_pain_point FROM re_deconstructed_assets WHERE status = 'deconstructed' AND tenant_id = ?";
-```
-
----
-
-### 4. `app/deconstruct/[id]/page.js` (State & Triad Intelligence UI)
-
-#### Code Sebelum (Current/Before):
-```javascript
-// app/deconstruct/[id]/page.js:L420-L438
-            {/* Viral Pattern Summary Insights */}
-            {asset.viral_pattern_summary && (
-              <div style={{
-                marginBottom: 24,
-                padding: '20px 24px',
-                borderRadius: 'var(--radius-sm)',
-                background: 'linear-gradient(135deg, rgba(108,92,231,0.08) 0%, rgba(108,92,231,0.02) 100%)',
-                border: '1px solid rgba(108,92,231,0.25)',
-                borderLeft: '4px solid var(--accent)',
-                boxShadow: '0 4px 20px var(--overlay-subtle)'
-              }}>
-                <h4 style={{ fontSize: '0.9rem', fontWeight: 800, margin: '0 0 10px 0', color: 'var(--accent-light)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  🧠 AI Viral Pattern & Insights
-                </h4>
-                <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0 }}>
-                  {asset.viral_pattern_summary}
-                </p>
-              </div>
-            )}
-```
-
-#### Code Sesudah (Proposed/After):
-```jsx
-// app/deconstruct/[id]/page.js:L420-L540
-            {/* Triad Intelligence Cards (Core Problem, Solution, Audience) */}
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                <h3 style={{ fontSize: '0.95rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  🎯 DNA Masalah & Solusi Utama Blueprint
-                  <span className="badge" style={{ background: 'var(--status-info-soft)', color: 'var(--status-info)', fontSize: '0.72rem', padding: '2px 8px', borderRadius: 4 }}>
-                    Strict Continuity Anchor
-                  </span>
-                </h3>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  {!editingProblem ? (
-                    <button
-                      type="button"
-                      onClick={() => setEditingProblem(true)}
-                      className="btn btn-secondary"
-                      style={{ padding: '4px 12px', fontSize: '0.75rem', height: 28 }}
-                    >
-                      ✏️ Edit Rumusan Masalah
-                    </button>
-                  ) : (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingProblem(false);
-                          setCoreProblemInput(asset.core_problem || '');
-                          setCoreSolutionInput(asset.core_solution || '');
-                          setTargetAudienceInput(asset.target_audience_pain_point || '');
-                        }}
-                        className="btn btn-secondary"
-                        style={{ padding: '4px 10px', fontSize: '0.75rem', height: 28 }}
-                        disabled={savingProblem}
-                      >
-                        Batal
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleSaveCoreProblem}
-                        className="btn btn-primary"
-                        style={{ padding: '4px 12px', fontSize: '0.75rem', height: 28 }}
-                        disabled={savingProblem}
-                      >
-                        {savingProblem ? 'Menyimpan...' : '💾 Simpan Rumusan'}
-                      </button>
-                    </>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => router.push(`/multiplier-lab?blueprint_id=${asset.id}`)}
-                    className="btn btn-primary"
-                    style={{ padding: '4px 12px', fontSize: '0.75rem', height: 28 }}
-                  >
-                    🚀 Buka di Multiplier Lab
-                  </button>
-                </div>
-              </div>
-
-              {/* 3 Grid Cards */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-                
-                {/* 1. Core Problem Card */}
-                <div style={{
-                  background: 'var(--surface-raised)',
-                  border: '1px solid var(--border-subtle)',
-                  borderTop: '4px solid var(--status-danger)',
-                  borderRadius: 'var(--radius-sm)',
-                  padding: 18,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between'
-                }}>
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                      <span style={{ fontSize: '0.74rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--status-danger)' }}>
-                        🎯 Masalah Utama (Core Problem)
-                      </span>
-                      <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: 4, background: 'var(--status-danger-soft)', color: 'var(--status-danger)', fontWeight: 700 }}>
-                        Keluhan Pokok
-                      </span>
-                    </div>
-                    {!editingProblem ? (
-                      <p style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.55, margin: 0 }}>
-                        {asset.core_problem || '(Belum dirumuskan)'}
-                      </p>
-                    ) : (
-                      <textarea
-                        className="form-input"
-                        rows={3}
-                        value={coreProblemInput}
-                        onChange={e => setCoreProblemInput(e.target.value)}
-                        placeholder="Contoh: Membakar dan merontokkan lemak perut secara alami tanpa obat pelangsing..."
-                        style={{ width: '100%', fontSize: '0.84rem' }}
-                      />
-                    )}
-                  </div>
-                  <div style={{ marginTop: 12, paddingTop: 8, borderTop: '1px solid var(--border-subtle)', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                    Diwariskan ke Multiplier & Voiceover Remake
-                  </div>
-                </div>
-
-                {/* 2. Core Solution Card */}
-                <div style={{
-                  background: 'var(--surface-raised)',
-                  border: '1px solid var(--border-subtle)',
-                  borderTop: '4px solid var(--status-success)',
-                  borderRadius: 'var(--radius-sm)',
-                  padding: 18,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between'
-                }}>
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                      <span style={{ fontSize: '0.74rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--status-success)' }}>
-                        💡 Solusi Pokok (Core Solution)
-                      </span>
-                      <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: 4, background: 'var(--status-success-soft)', color: 'var(--status-success)', fontWeight: 700 }}>
-                        Resep / Ramuan
-                      </span>
-                    </div>
-                    {!editingProblem ? (
-                      <p style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.55, margin: 0 }}>
-                        {asset.core_solution || '(Belum dirumuskan)'}
-                      </p>
-                    ) : (
-                      <textarea
-                        className="form-input"
-                        rows={3}
-                        value={coreSolutionInput}
-                        onChange={e => setCoreSolutionInput(e.target.value)}
-                        placeholder="Contoh: Rebusan kayu manis cengkeh 8 menit dengan perasan lemon segar..."
-                        style={{ width: '100%', fontSize: '0.84rem' }}
-                      />
-                    )}
-                  </div>
-                  <div style={{ marginTop: 12, paddingTop: 8, borderTop: '1px solid var(--border-subtle)', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                    Formula & Bahan Baku Visual Asli
-                  </div>
-                </div>
-
-                {/* 3. Target Audience Card */}
-                <div style={{
-                  background: 'var(--surface-raised)',
-                  border: '1px solid var(--border-subtle)',
-                  borderTop: '4px solid var(--status-info)',
-                  borderRadius: 'var(--radius-sm)',
-                  padding: 18,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between'
-                }}>
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                      <span style={{ fontSize: '0.74rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--status-info)' }}>
-                        👥 Target Audiens & Pain Point
-                      </span>
-                      <span style={{ fontSize: '0.7rem', padding: '2px 6px', borderRadius: 4, background: 'var(--status-info-soft)', color: 'var(--status-info)', fontWeight: 700 }}>
-                        Profil Audiens
-                      </span>
-                    </div>
-                    {!editingProblem ? (
-                      <p style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.55, margin: 0 }}>
-                        {asset.target_audience_pain_point || '(Belum dirumuskan)'}
-                      </p>
-                    ) : (
-                      <textarea
-                        className="form-input"
-                        rows={3}
-                        value={targetAudienceInput}
-                        onChange={e => setTargetAudienceInput(e.target.value)}
-                        placeholder="Contoh: Audiens usia 25-45 tahun yang frustrasi lingkar pinggang sesak..."
-                        style={{ width: '100%', fontSize: '0.84rem' }}
-                      />
-                    )}
-                  </div>
-                  <div style={{ marginTop: 12, paddingTop: 8, borderTop: '1px solid var(--border-subtle)', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                    Sasaran Persona Content Planner
-                  </div>
-                </div>
-
-              </div>
+  {/* Clips edit rows */}
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    {storyboard.map((clip, cidx) => (
+      <div key={cidx} style={{ display: 'flex', flexDirection: 'column', gap: 12, background: 'var(--surface-interactive)', padding: 16, borderRadius: 8, border: '1px solid var(--border)' }}>
+        <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--accent-light)', borderBottom: '1px solid var(--border)', paddingBottom: 6 }}>
+          🎬 Klip #{cidx + 1}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {/* Naskah Voiceover (VO) */}
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>🎙️ Naskah Voiceover (VO)</label>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{
+                  padding: '2px 8px',
+                  fontSize: '0.68rem',
+                  fontWeight: 600,
+                  background: copySuccess[`vo_${task.id}_${cidx}`] ? 'var(--status-success-soft)' : 'var(--surface)',
+                  borderColor: copySuccess[`vo_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--border-strong)',
+                  color: copySuccess[`vo_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--text-secondary)'
+                }}
+                onClick={() => handleCopy(clip.narration || '', `vo_${task.id}_${cidx}`, `VO Klip #${cidx + 1}`)}
+              >
+                {copySuccess[`vo_${task.id}_${cidx}`] ? 'Tersalin ✓' : '📋 Salin VO'}
+              </button>
             </div>
+            <textarea
+              value={clip.narration || ''}
+              onChange={(e) => {
+                const updated = [...storyboard];
+                updated[cidx].narration = e.target.value;
+                setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
+              }}
+              rows={2}
+              style={{ width: '100%', padding: 10, fontSize: '0.82rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
+            />
+          </div>
 
-            {/* AI Viral Pattern Summary Insights */}
-            {asset.viral_pattern_summary && (
-              <div style={{
-                marginBottom: 24,
-                padding: '20px 24px',
-                borderRadius: 'var(--radius-sm)',
-                background: 'linear-gradient(135deg, rgba(108,92,231,0.08) 0%, rgba(108,92,231,0.02) 100%)',
-                border: '1px solid rgba(108,92,231,0.25)',
-                borderLeft: '4px solid var(--accent)',
-                boxShadow: '0 4px 20px var(--overlay-subtle)'
-              }}>
-                <h4 style={{ fontSize: '0.9rem', fontWeight: 800, margin: '0 0 10px 0', color: 'var(--accent-light)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  🧠 AI Viral Pattern & Insights
-                </h4>
-                <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0 }}>
-                  {asset.viral_pattern_summary}
-                </p>
-              </div>
-            )}
+          {/* Aksi Visual */}
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>👁️ Aksi Visual</label>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{
+                  padding: '2px 8px',
+                  fontSize: '0.68rem',
+                  fontWeight: 600,
+                  background: copySuccess[`vis_${task.id}_${cidx}`] ? 'var(--status-success-soft)' : 'var(--surface)',
+                  borderColor: copySuccess[`vis_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--border-strong)',
+                  color: copySuccess[`vis_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--text-secondary)'
+                }}
+                onClick={() => handleCopy(clip.visual_description || '', `vis_${task.id}_${cidx}`, `Aksi Visual Klip #${cidx + 1}`)}
+              >
+                {copySuccess[`vis_${task.id}_${cidx}`] ? 'Tersalin ✓' : '📋 Salin Visual'}
+              </button>
+            </div>
+            <textarea
+              value={clip.visual_description || ''}
+              onChange={(e) => {
+                const updated = [...storyboard];
+                updated[cidx].visual_description = e.target.value;
+                setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
+              }}
+              rows={2}
+              style={{ width: '100%', padding: 10, fontSize: '0.82rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
+            />
+          </div>
+
+          {/* Prompt T2I Start Frame (Pixel Lock) */}
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>🖼️ Prompt T2I Start Frame (Pixel Lock)</label>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{
+                  padding: '2px 8px',
+                  fontSize: '0.68rem',
+                  fontWeight: 600,
+                  background: copySuccess[`t2i_${task.id}_${cidx}`] ? 'var(--status-success-soft)' : 'var(--surface)',
+                  borderColor: copySuccess[`t2i_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--border-strong)',
+                  color: copySuccess[`t2i_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--text-secondary)'
+                }}
+                onClick={() => handleCopy(clip.t2i_prompt || '', `t2i_${task.id}_${cidx}`, `Prompt T2I Klip #${cidx + 1}`)}
+              >
+                {copySuccess[`t2i_${task.id}_${cidx}`] ? 'Tersalin ✓' : '📋 Salin Prompt T2I'}
+              </button>
+            </div>
+            <textarea
+              value={clip.t2i_prompt || ''}
+              onChange={(e) => {
+                const updated = [...storyboard];
+                updated[cidx].t2i_prompt = e.target.value;
+                setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
+              }}
+              rows={2}
+              style={{ width: '100%', padding: 10, fontSize: '0.8rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
+            />
+          </div>
+
+          {/* Prompt I2V (Motion Prompt) */}
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+              <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>🎬 Prompt I2V (Motion Prompt)</label>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{
+                  padding: '2px 8px',
+                  fontSize: '0.68rem',
+                  fontWeight: 600,
+                  background: copySuccess[`i2v_${task.id}_${cidx}`] ? 'var(--status-success-soft)' : 'var(--surface)',
+                  borderColor: copySuccess[`i2v_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--border-strong)',
+                  color: copySuccess[`i2v_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--text-secondary)'
+                }}
+                onClick={() => handleCopy(clip.i2v_prompt || '', `i2v_${task.id}_${cidx}`, `Prompt I2V Klip #${cidx + 1}`)}
+              >
+                {copySuccess[`i2v_${task.id}_${cidx}`] ? 'Tersalin ✓' : '📋 Salin Prompt I2V'}
+              </button>
+            </div>
+            <textarea
+              value={clip.i2v_prompt || ''}
+              onChange={(e) => {
+                const updated = [...storyboard];
+                updated[cidx].i2v_prompt = e.target.value;
+                setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
+              }}
+              rows={2}
+              style={{ width: '100%', padding: 10, fontSize: '0.8rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
+            />
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
 ```
-
----
-
-### 5. `app/deconstruct/page.js` (Kolom Masalah Utama pada Tabel List)
-
-#### Code Sebelum (Current/Before):
-```jsx
-// app/deconstruct/page.js:L678-L688
-                        <td>
-                          <div style={{
-                            maxWidth: 220,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                            color: 'var(--text-secondary)'
-                          }}>
-                            {asset.viral_pattern_summary || asset.original_caption || '—'}
-                          </div>
-                        </td>
-```
-
-#### Code Sesudah (Proposed/After):
-```jsx
-// app/deconstruct/page.js:L678-L695
-                        <td>
-                          <div style={{ maxWidth: 260 }}>
-                            {asset.core_problem ? (
-                              <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.78rem', lineHeight: 1.4, marginBottom: 2 }}>
-                                🎯 {asset.core_problem}
-                              </div>
-                            ) : null}
-                            <div style={{
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                              color: 'var(--text-muted)',
-                              fontSize: '0.74rem'
-                            }}>
-                              {asset.core_solution ? `💡 ${asset.core_solution}` : (asset.viral_pattern_summary || asset.original_caption || '—')}
-                            </div>
-                          </div>
-                        </td>
-```
-
----
-
-## 🚀 Prosedur Verifikasi & Pengujian
-
-1. **Automated Unit Testing (`tests/deconstruct-core-problem-ui.test.js`)**:
-   - Memverifikasi endpoint API `PUT /api/v2/deconstruct/assets/[id]` berhasil menyimpan pembaruan `core_problem`, `core_solution`, dan `target_audience_pain_point`.
-   - Memverifikasi endpoint API `GET /api/v2/deconstruct/assets/[id]` mengembalikan data yang diperbarui.
-   - Memverifikasi query `listDeconstructAssets` dapat mencari aset berdasarkan kata kunci yang ada pada `core_problem` (misal kata kunci "lemak").
-2. **Review Mockup HTML & Manual Verification**:
-   - Membuka mockup di [public/mockup_deconstruct_core_problem.html](file:///Users/sabeqmmursyid/_contentflow-staging/public/mockup_deconstruct_core_problem.html) untuk memastikan keselarasan visual, kontras warna, dan adaptasi tema Light/Dark.
-   - Menguji interaksi simpan inline pada detail aset dan memeriksa respon toast visual.
-3. **SOP Rilis Non-Interaktif**:
-   - Menjalankan `npm run release-non-interactive` setelah seluruh tes lolos.
