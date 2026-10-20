@@ -28,10 +28,11 @@ export const POST = withTenantContext(async (req, { params }) => {
       return NextResponse.json({ success: false, error: "Regenerasi start frame untuk task ini sedang berjalan." }, { status: 400 });
     }
 
-    // Set status running and initial progress
+    // Set status running, status generating_t2i, and initial progress
     await dbRun(`
       UPDATE re_multiplier_tasks
       SET regenerate_start_frames_status = 'running',
+          status = 'generating_t2i',
           regenerate_start_frames_progress = ?
       WHERE id = ?
     `, [`0/${prompts.length}`, id]);
@@ -180,10 +181,11 @@ async function runTaskRegenerateStartFramesBackground(taskId, task, prompts) {
       }
     }
 
-    // Reset status after completion
+    // Reset status after completion back to waiting_approval
     await dbRun(`
       UPDATE re_multiplier_tasks
       SET regenerate_start_frames_status = NULL,
+          status = 'waiting_approval',
           regenerate_start_frames_progress = NULL
       WHERE id = ?
     `, [taskId]).catch(() => {});
@@ -192,7 +194,8 @@ async function runTaskRegenerateStartFramesBackground(taskId, task, prompts) {
     console.error(`[Multiplier SF Batch] Error:`, err.message);
     await dbRun(`
       UPDATE re_multiplier_tasks
-      SET regenerate_start_frames_status = 'failed'
+      SET status = 'waiting_approval',
+          regenerate_start_frames_status = 'failed'
       WHERE id = ?
     `, [taskId]).catch(() => {});
   }

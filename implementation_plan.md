@@ -1,390 +1,364 @@
-# Implementation Plan: Penambahan Tombol Copy Aset pada Halaman Detil Multiplier Lab
+# Implementation Plan: Penyelarasan Alur & Notifikasi "Generate All Start Frame" (Multiplier & Pillar Campaign)
 
-Usulan ini merespons kebutuhan pengguna untuk menambahkan tombol **Salin (Copy)** pada 3 aset utama kampanye di **Multiplier Lab** (halaman detil `/multiplier-lab/[id]`):
-1. **Naskah Voiceover (VO)**
-2. **Prompt T2I Start Frame (Pixel Lock)**
-3. **Prompt I2V (Motion Prompt)**
-
-Implementasi ini diselaraskan dengan pola antarmuka pada menu **Pilar Campaign** (`/pillar-campaigns/[id]`), menggunakan feedback visual interaktif (`Tersalin ✓`), semantic CSS design tokens dari `app/theme.css`, serta penambahan bar aksi **Bulk Copy** untuk menyalin seluruh alur dalam 1 klik.
+Rencana ini merespons kebutuhan penyelarasan pengalaman pengguna (UX) pada saat memicu tombol **Generate All Start Frame** di **Multiplier Campaign** dan **Pillar Campaign**:
+1. **Multiplier Campaign**: Menghapus popup dialog konfirmasi bawaan browser (`confirm(...)`), cukup notifikasi toast di pojok kanan bawah selama sekira **10 detik** (sama seperti Pillar Campaign).
+2. **Multiplier Campaign**: Saat tombol diklik, status `⏸️ Fase 2 : Paused (Ready for Review)` otomatis berubah menjadi **`⚡ Fase 1 : Generate Start Frame`** dengan warna **hijau** (`var(--status-success)`).
+3. **Pillar Campaign**: Saat tombol diklik, status `⏸️ Fase 2 : Paused (Ready for Review)` otomatis berubah menjadi **`⚡ Fase 1 : Generate Start Frame`** dengan warna **hijau** (`var(--status-success)`).
 
 ---
 
 ## 🎨 Mockup HTML Standalone untuk Simulasi & Review
 
-Sesuai SOP, simulasi interaktif standalone HTML telah dibuat dan dapat langsung diuji secara lokal:
-- **File Mockup:** [public/mockup_multiplier_copy_assets.html](file:///Users/sabeqmmursyid/_contentflow-staging/public/mockup_multiplier_copy_assets.html)
-- **URL Akses Lokal:** `http://localhost:5020/mockup_multiplier_copy_assets.html` (atau port dev yang sedang aktif)
+Sesuai SOP Makna Flow, simulasi visual dan alur interaktif standalone telah dibuat agar dapat diuji langsung oleh pengguna sebelum penulisan kode di komponen React utama:
+- **File Mockup:** [public/mockup_generate_start_frame_flow.html](file:///Users/sabeqmmursyid/_contentflow-staging/public/mockup_generate_start_frame_flow.html)
 - **Fitur Simulasi di Mockup:**
-  - Tombol Salin per Klip pada VO, Aksi Visual, T2I, dan I2V.
-  - Efek transisi warna hijau lembut (`var(--status-success-soft)`) dan teks berubah menjadi `✓ Tersalin` selama 2 detik.
-  - Floating Toast Notification konfirmasi penyalinan.
-  - Toolbar **Salin Cepat Seluruh Alur (Bulk Copy Toolbar)** untuk menyalin gabungan seluruh scene ke clipboard.
-  - Tombol toggle Dark Mode & Light Mode universal.
+  - Simulasi **Multiplier Campaign**: Klik tombol "Generate T2I Start Frames" langsung berjalan tanpa popup, badge langsung berubah dari `⏸️ Fase 2 : Paused (Ready for Review)` (oranye) menjadi `⚡ Fase 1 : Generate Start Frame (1/4)` (hijau berkedip/pulse), dan toast notifikasi 10 detik muncul di pojok kanan bawah dengan progress bar countdown.
+  - Simulasi **Pillar Campaign**: Klik tombol "Generate T2I Start Frames", badge langsung bertransisi menjadi `⚡ Fase 1 : Generate Start Frame` (hijau), dan toast notifikasi 10 detik muncul di pojok kanan bawah.
+  - Reset simulasi dan toggle Dark/Light mode berbasis 100% semantic CSS tokens.
 
 ---
 
 ## 📋 Execution Task List
 
-- [x] **Task 1: Penambahan State & Helper Clipboard pada Detail Multiplier Lab**
-  - [x] Tambahkan state `copySuccess` (`{ [key]: boolean }`) pada [app/multiplier-lab/[id]/page.js](file:///Users/sabeqmmursyid/_contentflow-staging/app/multiplier-lab/[id]/page.js).
-  - [x] Implementasikan helper `handleCopy(text, key, label)` dengan dukungan `navigator.clipboard.writeText` dan fallback `document.execCommand('copy')` jika clipboard API tidak diizinkan.
-  - [x] Tambahkan feedback visual reset otomatis setelah 2000ms dan integrasi dengan `showToast`.
+- [x] **Task 1: Perbaikan Multiplier Campaign UI (`app/multiplier-lab/[id]/page.js`)**
+  - [x] Hapus `confirm(...)` pada `handleGenerateAllT2I`.
+  - [x] Pasang elemen DOM toast `{toast && <div className={`toast ${toast.type === 'error' ? 'toast-error' : 'toast-success'}`}>{toast.message || toast.msg}</div>}` di JSX halaman.
+  - [x] Perbarui helper `showToast` agar mendukung parameter durasi kustom (default 4000ms, kirim 10000ms untuk notifikasi start frame).
+  - [x] Update `renderPhaseBadge` agar saat status `generating_t2i` atau `regenerate_start_frames_status === 'running'`, menampilkan label `⚡ Fase 1 : Generate Start Frame` dengan warna hijau (`var(--status-success)` dan `var(--status-success-soft)`).
+  - [x] Berikan update optimis di `handleGenerateAllT2I` agar badge langsung berubah saat tombol diklik.
 
-- [x] **Task 2: Penambahan Tombol Salin Per Klip (VO, T2I Start Frame, I2V Motion)**
-  - [x] Perbarui baris label **Naskah Voiceover (VO)** pada [app/multiplier-lab/[id]/page.js](file:///Users/sabeqmmursyid/_contentflow-staging/app/multiplier-lab/[id]/page.js) menjadi header fleksibel dengan tombol `[📋 Salin VO]`.
-  - [x] Perbarui label "Prompt T2I" menjadi **Prompt T2I Start Frame (Pixel Lock)** dengan tombol `[📋 Salin Prompt T2I]`.
-  - [x] Perbarui label "Prompt I2V" menjadi **Prompt I2V (Motion Prompt)** dengan tombol `[📋 Salin Prompt I2V]`.
-  - [x] Pastikan seluruh tombol menggunakan semantic tokens (`var(--surface)`, `var(--status-success-soft)`, `var(--border-strong)`).
+- [x] **Task 2: Penyelarasan Backend Multiplier API (`app/api/v2/multiplier/[id]/regenerate-start-frames/route.js`)**
+  - [x] Update DB saat regenerasi dimulai: set `status = 'generating_t2i'`, `regenerate_start_frames_status = 'running'`.
+  - [x] Saat regenerasi seluruh start frame selesai di latar belakang: kembalikan `status = 'waiting_approval'`, `regenerate_start_frames_status = NULL`.
 
-- [x] **Task 3: Penambahan Toolbar Salin Cepat Seluruh Alur (Bulk Copy Toolbar)**
-  - [x] Tambahkan bar ringkas di atas daftar klip storyboard pada [app/multiplier-lab/[id]/page.js](file:///Users/sabeqmmursyid/_contentflow-staging/app/multiplier-lab/[id]/page.js).
-  - [x] Sediakan 3 tombol aksi cepat:
-    1. `🎙️ Salin Seluruh Naskah VO`: Menggabungkan naskah VO klip 1 s.d. N terformat rapi.
-    2. `🖼️ Salin Semua Prompt T2I`: Menggabungkan prompt T2I start frame seluruh klip.
-    3. `🎬 Salin Semua Prompt I2V`: Menggabungkan motion prompt I2V seluruh klip.
+- [x] **Task 3: Perbaikan Pillar Campaign UI (`app/pillar-campaigns/[id]/page.js`)**
+  - [x] Update `showToast` agar mendukung parameter durasi kustom (kirim 10000ms untuk regenerasi start frame).
+  - [x] Update fungsi `renderItemStatus(item, campaign)` untuk menangani `workflow_status === 'start_frames_processing'`, `item.start_frame_status === 'processing'`, dan `item.regenerate_start_frames_status`: menampilkan badge `⚡ Fase 1 : Generate Start Frame` berwarna hijau (`var(--status-success)` dan `var(--status-success-soft)`).
+  - [x] Berikan update optimis di `handleRegenerateAllSF` agar status item langsung berubah di UI sebelum respon server tiba.
 
-- [x] **Task 4: Pengujian & Verifikasi Kompatibilitas UI**
-  - [x] Verifikasi fungsi penyalinan clipboard teks tunggal maupun bulk.
-  - [x] Pastikan tidak ada regresi pada fungsi inline-editing storyboard textarea yang sudah ada.
-  - [x] Verifikasi tampilan di mode Dark dan Light.
+- [x] **Task 4: Sinkronisasi Unit Tests & Pengujian Fungsional**
+  - [x] Jalankan dan sesuaikan unit test pada `tests/multiplier-phase-recipe-card.test.js` atau test suite terkait.
+  - [x] Verifikasi kestabilan build via linter / build check.
 
 ---
 
 ## 🔍 Before & After Code Snippets
 
-### File: `app/multiplier-lab/[id]/page.js`
+### 1. `app/multiplier-lab/[id]/page.js`
 
-#### 1. Penambahan State & Clipboard Handler
+#### A. Penghapusan Popup `confirm` & Toast 10 Detik
 ##### Code Sebelum (Current/Before):
 ```javascript
-// app/multiplier-lab/[id]/page.js:L186-L191
-  // Regeneration and replacement loadings
-  const [batchRegeneratingSF, setBatchRegeneratingSF] = useState({}); // { [taskId]: boolean }
-  const [regeneratingT2I, setRegeneratingT2I] = useState({}); // { [`${taskId}_${clipIndex}`]: boolean }
-  const [replacingSF, setReplacingSF] = useState({}); // { [`${taskId}_${clipIndex}`]: boolean }
-  const [actionLoading, setActionLoading] = useState({}); // { [taskId]: boolean }
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  };
 
-  const pollingRef = useRef(null);
+  const handleGenerateAllT2I = async (taskId) => {
+    if (!confirm('Apakah Anda yakin ingin meregenerasi semua start frame T2I untuk adegan ini di latar belakang?')) return;
+    setBatchRegeneratingSF(prev => ({ ...prev, [taskId]: true }));
+    try {
+      const res = await fetch(`/api/v2/multiplier/${taskId}/regenerate-start-frames`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Proses regenerasi semua start frame telah dimulai di latar belakang.');
+        fetchTasks(true);
+      } else {
+        showToast(data.error || 'Gagal memulai regenerasi massal.', 'error');
+      }
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setBatchRegeneratingSF(prev => ({ ...prev, [taskId]: false }));
+    }
+  };
 ```
 
 ##### Code Sesudah (Proposed/After):
 ```javascript
-// app/multiplier-lab/[id]/page.js:L186-L230
-  // Regeneration and replacement loadings
-  const [batchRegeneratingSF, setBatchRegeneratingSF] = useState({}); // { [taskId]: boolean }
-  const [regeneratingT2I, setRegeneratingT2I] = useState({}); // { [`${taskId}_${clipIndex}`]: boolean }
-  const [replacingSF, setReplacingSF] = useState({}); // { [`${taskId}_${clipIndex}`]: boolean }
-  const [actionLoading, setActionLoading] = useState({}); // { [taskId]: boolean }
-  const [copySuccess, setCopySuccess] = useState({}); // { [key]: boolean }
-
-  const handleCopy = (text, key, label = 'Aset') => {
-    if (!text || !text.trim()) {
-      showToast(`${label} masih kosong atau belum tersedia.`, 'error');
-      return;
-    }
-    const applySuccess = () => {
-      setCopySuccess(prev => ({ ...prev, [key]: true }));
-      showToast(`${label} berhasil disalin!`);
-      setTimeout(() => {
-        setCopySuccess(prev => ({ ...prev, [key]: false }));
-      }, 2000);
-    };
-
-    if (navigator?.clipboard?.writeText) {
-      navigator.clipboard.writeText(text).then(applySuccess).catch(() => fallbackCopy(text, key, label));
-    } else {
-      fallbackCopy(text, key, label);
-    }
+  const toastTimeoutRef = useRef(null);
+  const showToast = (message, type = 'success', duration = 4000) => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    setToast({ message, type });
+    toastTimeoutRef.current = setTimeout(() => setToast(null), duration);
   };
 
-  const fallbackCopy = (text, key, label) => {
+  const handleGenerateAllT2I = async (taskId) => {
+    // 1. Tanpa confirm() popup, langsung eksekusi di latar belakang
+    setBatchRegeneratingSF(prev => ({ ...prev, [taskId]: true }));
+    // Optimistic UI: langsung ubah status task di state lokal menjadi Fase 1: Generate Start Frame
+    setTasks(prev => prev.map(t => t.id === taskId ? {
+      ...t,
+      status: 'generating_t2i',
+      regenerate_start_frames_status: 'running',
+      regenerate_start_frames_progress: 'Memulai...'
+    } : t));
+
     try {
-      const el = document.createElement('textarea');
-      el.value = text;
-      el.setAttribute('readonly', '');
-      el.style.position = 'absolute';
-      el.style.left = '-9999px';
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand('copy');
-      document.body.removeChild(el);
-      setCopySuccess(prev => ({ ...prev, [key]: true }));
-      showToast(`${label} berhasil disalin!`);
-      setTimeout(() => {
-        setCopySuccess(prev => ({ ...prev, [key]: false }));
-      }, 2000);
-    } catch (_) {
-      showToast('Gagal menyalin ke clipboard', 'error');
+      const res = await fetch(`/api/v2/multiplier/${taskId}/regenerate-start-frames`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      if (data.success) {
+        // Notifikasi toast di pojok kanan bawah selama 10 detik (10000ms)
+        showToast('Proses regenerasi semua start frame telah dimulai di latar belakang.', 'success', 10000);
+        fetchTasks(true);
+      } else {
+        showToast(data.error || 'Gagal memulai regenerasi massal.', 'error');
+        fetchTasks(true);
+      }
+    } catch (err) {
+      showToast(err.message, 'error');
+      fetchTasks(true);
+    } finally {
+      setBatchRegeneratingSF(prev => ({ ...prev, [taskId]: false }));
     }
   };
+```
 
-  const pollingRef = useRef(null);
+#### B. Perubahan Badge Status Menjadi "Fase 1 : Generate Start Frame" Warna Hijau
+##### Code Sebelum (Current/Before):
+```javascript
+    case 'generating_t2i':
+      text = '⚡ Fase 1 : Generasi T2I Start Frames';
+      color = 'var(--status-info)';
+      bg = 'var(--status-info-soft)';
+      border = 'var(--status-info-soft)';
+      isPulse = true;
+      break;
+    case 'waiting_approval':
+      text = '⏸️ Fase 2 : Paused (Ready for Review)';
+      color = 'var(--status-warning)';
+      bg = 'var(--status-warning-soft)';
+      border = 'var(--status-warning-soft)';
+      break;
+```
+
+##### Code Sesudah (Proposed/After):
+```javascript
+    case 'generating_t2i':
+      text = task.regenerate_start_frames_progress
+        ? `⚡ Fase 1 : Generate Start Frame (${task.regenerate_start_frames_progress})`
+        : '⚡ Fase 1 : Generate Start Frame';
+      color = 'var(--status-success)';
+      bg = 'var(--status-success-soft)';
+      border = 'var(--status-success-soft)';
+      isPulse = true;
+      break;
+    case 'waiting_approval':
+      if (task.regenerate_start_frames_status === 'running' || batchRegeneratingSF[task.id]) {
+        text = task.regenerate_start_frames_progress
+          ? `⚡ Fase 1 : Generate Start Frame (${task.regenerate_start_frames_progress})`
+          : '⚡ Fase 1 : Generate Start Frame';
+        color = 'var(--status-success)';
+        bg = 'var(--status-success-soft)';
+        border = 'var(--status-success-soft)';
+        isPulse = true;
+      } else {
+        text = '⏸️ Fase 2 : Paused (Ready for Review)';
+        color = 'var(--status-warning)';
+        bg = 'var(--status-warning-soft)';
+        border = 'var(--status-warning-soft)';
+      }
+      break;
+```
+
+#### C. Render Elemen Toast di JSX Multiplier Lab
+##### Code Sebelum (Current/Before):
+```jsx
+// Di return JSX app/multiplier-lab/[id]/page.js belum ada elemen toast
+```
+
+##### Code Sesudah (Proposed/After):
+```jsx
+      {toast && (
+        <div className={`toast ${toast.type === 'error' ? 'toast-error' : 'toast-success'}`}>
+          {toast.message || toast.msg}
+        </div>
+      )}
 ```
 
 ---
 
-#### 2. Penambahan Toolbar Salin Cepat & Tombol Copy pada Baris Klip Storyboard
+### 2. `app/api/v2/multiplier/[id]/regenerate-start-frames/route.js`
+
+#### Perubahan Status Database saat Memulai dan Selesai
 ##### Code Sebelum (Current/Before):
 ```javascript
-// app/multiplier-lab/[id]/page.js:L1399-L1458
-  {/* Clips edit rows */}
-  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-    {storyboard.map((clip, cidx) => (
-      <div key={cidx} style={{ display: 'flex', flexDirection: 'column', gap: 12, background: 'var(--surface-interactive)', padding: 16, borderRadius: 8, border: '1px solid var(--border)' }}>
-        <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--accent-light)', borderBottom: '1px solid var(--border)', paddingBottom: 6 }}>
-          🎬 Klip #{cidx + 1}
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div>
-            <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4, fontWeight: 600 }}>Naskah Voiceover (VO)</label>
-            <textarea
-              value={clip.narration || ''}
-              onChange={(e) => {
-                const updated = [...storyboard];
-                updated[cidx].narration = e.target.value;
-                setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
-              }}
-              rows={2}
-              style={{ width: '100%', padding: 10, fontSize: '0.82rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
-            />
-          </div>
-          <div>
-            <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4, fontWeight: 600 }}>Aksi Visual</label>
-            <textarea
-              value={clip.visual_description || ''}
-              onChange={(e) => {
-                const updated = [...storyboard];
-                updated[cidx].visual_description = e.target.value;
-                setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
-              }}
-              rows={2}
-              style={{ width: '100%', padding: 10, fontSize: '0.82rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
-            />
-          </div>
-          <div>
-            <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4, fontWeight: 600 }}>Prompt T2I</label>
-            <textarea
-              value={clip.t2i_prompt || ''}
-              onChange={(e) => {
-                const updated = [...storyboard];
-                updated[cidx].t2i_prompt = e.target.value;
-                setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
-              }}
-              rows={2}
-              style={{ width: '100%', padding: 10, fontSize: '0.8rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
-            />
-          </div>
-          <div>
-            <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: 4, fontWeight: 600 }}>Prompt I2V</label>
-            <textarea
-              value={clip.i2v_prompt || ''}
-              onChange={(e) => {
-                const updated = [...storyboard];
-                updated[cidx].i2v_prompt = e.target.value;
-                setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
-              }}
-              rows={2}
-              style={{ width: '100%', padding: 10, fontSize: '0.8rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
-            />
-          </div>
-        </div>
-      </div>
-    ))}
-  </div>
+    // Set status running and initial progress
+    await dbRun(`
+      UPDATE re_multiplier_tasks
+      SET regenerate_start_frames_status = 'running',
+          regenerate_start_frames_progress = ?
+      WHERE id = ?
+    `, [`0/${prompts.length}`, id]);
 ```
 
 ##### Code Sesudah (Proposed/After):
 ```javascript
-// app/multiplier-lab/[id]/page.js:L1399-L1535
-  {/* Bulk Copy Toolbar */}
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    gap: 10,
-    background: 'var(--surface-interactive)',
-    border: '1px solid var(--border)',
-    borderRadius: 8,
-    padding: '10px 14px'
-  }}>
-    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>
-      ⚡ Salin Cepat Seluruh Alur:
-    </span>
-    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-      <button
-        type="button"
-        className="btn btn-secondary"
-        style={{ padding: '3px 8px', fontSize: '0.7rem' }}
-        onClick={() => {
-          const bulkVo = storyboard.map((c, i) => `[Klip ${i + 1} VO]\n${c.narration || ''}`).join('\n\n');
-          handleCopy(bulkVo, `bulk_vo_${task.id}`, 'Seluruh Naskah VO');
-        }}
-      >
-        {copySuccess[`bulk_vo_${task.id}`] ? 'Tersalin ✓' : '🎙️ Salin Semua VO'}
-      </button>
-      <button
-        type="button"
-        className="btn btn-secondary"
-        style={{ padding: '3px 8px', fontSize: '0.7rem' }}
-        onClick={() => {
-          const bulkT2i = storyboard.map((c, i) => `--- Klip ${i + 1} T2I Start Frame ---\n${c.t2i_prompt || ''}`).join('\n\n');
-          handleCopy(bulkT2i, `bulk_t2i_${task.id}`, 'Semua Prompt T2I');
-        }}
-      >
-        {copySuccess[`bulk_t2i_${task.id}`] ? 'Tersalin ✓' : '🖼️ Salin Semua Prompt T2I'}
-      </button>
-      <button
-        type="button"
-        className="btn btn-secondary"
-        style={{ padding: '3px 8px', fontSize: '0.7rem' }}
-        onClick={() => {
-          const bulkI2v = storyboard.map((c, i) => `--- Klip ${i + 1} I2V Motion ---\n${c.i2v_prompt || ''}`).join('\n\n');
-          handleCopy(bulkI2v, `bulk_i2v_${task.id}`, 'Semua Prompt I2V');
-        }}
-      >
-        {copySuccess[`bulk_i2v_${task.id}`] ? 'Tersalin ✓' : '🎬 Salin Semua Prompt I2V'}
-      </button>
-    </div>
-  </div>
+    // Set status running, status = generating_t2i, and initial progress
+    await dbRun(`
+      UPDATE re_multiplier_tasks
+      SET status = 'generating_t2i',
+          regenerate_start_frames_status = 'running',
+          regenerate_start_frames_progress = ?
+      WHERE id = ?
+    `, [`0/${prompts.length}`, id]);
+```
 
-  {/* Clips edit rows */}
-  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-    {storyboard.map((clip, cidx) => (
-      <div key={cidx} style={{ display: 'flex', flexDirection: 'column', gap: 12, background: 'var(--surface-interactive)', padding: 16, borderRadius: 8, border: '1px solid var(--border)' }}>
-        <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--accent-light)', borderBottom: '1px solid var(--border)', paddingBottom: 6 }}>
-          🎬 Klip #{cidx + 1}
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {/* Naskah Voiceover (VO) */}
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-              <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>🎙️ Naskah Voiceover (VO)</label>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                style={{
-                  padding: '2px 8px',
-                  fontSize: '0.68rem',
-                  fontWeight: 600,
-                  background: copySuccess[`vo_${task.id}_${cidx}`] ? 'var(--status-success-soft)' : 'var(--surface)',
-                  borderColor: copySuccess[`vo_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--border-strong)',
-                  color: copySuccess[`vo_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--text-secondary)'
-                }}
-                onClick={() => handleCopy(clip.narration || '', `vo_${task.id}_${cidx}`, `VO Klip #${cidx + 1}`)}
-              >
-                {copySuccess[`vo_${task.id}_${cidx}`] ? 'Tersalin ✓' : '📋 Salin VO'}
-              </button>
-            </div>
-            <textarea
-              value={clip.narration || ''}
-              onChange={(e) => {
-                const updated = [...storyboard];
-                updated[cidx].narration = e.target.value;
-                setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
-              }}
-              rows={2}
-              style={{ width: '100%', padding: 10, fontSize: '0.82rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
-            />
-          </div>
+Dan saat background task selesai di `runTaskRegenerateStartFramesBackground`:
+##### Code Sebelum (Current/Before):
+```javascript
+    // Reset status after completion
+    await dbRun(`
+      UPDATE re_multiplier_tasks
+      SET regenerate_start_frames_status = NULL,
+          regenerate_start_frames_progress = NULL
+      WHERE id = ?
+    `, [taskId]).catch(() => {});
+```
 
-          {/* Aksi Visual */}
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-              <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>👁️ Aksi Visual</label>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                style={{
-                  padding: '2px 8px',
-                  fontSize: '0.68rem',
-                  fontWeight: 600,
-                  background: copySuccess[`vis_${task.id}_${cidx}`] ? 'var(--status-success-soft)' : 'var(--surface)',
-                  borderColor: copySuccess[`vis_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--border-strong)',
-                  color: copySuccess[`vis_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--text-secondary)'
-                }}
-                onClick={() => handleCopy(clip.visual_description || '', `vis_${task.id}_${cidx}`, `Aksi Visual Klip #${cidx + 1}`)}
-              >
-                {copySuccess[`vis_${task.id}_${cidx}`] ? 'Tersalin ✓' : '📋 Salin Visual'}
-              </button>
-            </div>
-            <textarea
-              value={clip.visual_description || ''}
-              onChange={(e) => {
-                const updated = [...storyboard];
-                updated[cidx].visual_description = e.target.value;
-                setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
-              }}
-              rows={2}
-              style={{ width: '100%', padding: 10, fontSize: '0.82rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
-            />
-          </div>
+##### Code Sesudah (Proposed/After):
+```javascript
+    // Kembalikan ke waiting_approval (Paused Ready for Review) setelah selesai
+    await dbRun(`
+      UPDATE re_multiplier_tasks
+      SET status = 'waiting_approval',
+          regenerate_start_frames_status = NULL,
+          regenerate_start_frames_progress = NULL
+      WHERE id = ?
+    `, [taskId]).catch(() => {});
+```
 
-          {/* Prompt T2I Start Frame (Pixel Lock) */}
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-              <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>🖼️ Prompt T2I Start Frame (Pixel Lock)</label>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                style={{
-                  padding: '2px 8px',
-                  fontSize: '0.68rem',
-                  fontWeight: 600,
-                  background: copySuccess[`t2i_${task.id}_${cidx}`] ? 'var(--status-success-soft)' : 'var(--surface)',
-                  borderColor: copySuccess[`t2i_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--border-strong)',
-                  color: copySuccess[`t2i_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--text-secondary)'
-                }}
-                onClick={() => handleCopy(clip.t2i_prompt || '', `t2i_${task.id}_${cidx}`, `Prompt T2I Klip #${cidx + 1}`)}
-              >
-                {copySuccess[`t2i_${task.id}_${cidx}`] ? 'Tersalin ✓' : '📋 Salin Prompt T2I'}
-              </button>
-            </div>
-            <textarea
-              value={clip.t2i_prompt || ''}
-              onChange={(e) => {
-                const updated = [...storyboard];
-                updated[cidx].t2i_prompt = e.target.value;
-                setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
-              }}
-              rows={2}
-              style={{ width: '100%', padding: 10, fontSize: '0.8rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
-            />
-          </div>
+---
 
-          {/* Prompt I2V (Motion Prompt) */}
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-              <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>🎬 Prompt I2V (Motion Prompt)</label>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                style={{
-                  padding: '2px 8px',
-                  fontSize: '0.68rem',
-                  fontWeight: 600,
-                  background: copySuccess[`i2v_${task.id}_${cidx}`] ? 'var(--status-success-soft)' : 'var(--surface)',
-                  borderColor: copySuccess[`i2v_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--border-strong)',
-                  color: copySuccess[`i2v_${task.id}_${cidx}`] ? 'var(--status-success)' : 'var(--text-secondary)'
-                }}
-                onClick={() => handleCopy(clip.i2v_prompt || '', `i2v_${task.id}_${cidx}`, `Prompt I2V Klip #${cidx + 1}`)}
-              >
-                {copySuccess[`i2v_${task.id}_${cidx}`] ? 'Tersalin ✓' : '📋 Salin Prompt I2V'}
-              </button>
-            </div>
-            <textarea
-              value={clip.i2v_prompt || ''}
-              onChange={(e) => {
-                const updated = [...storyboard];
-                updated[cidx].i2v_prompt = e.target.value;
-                setEditedStoryboards(prev => ({ ...prev, [task.id]: updated }));
-              }}
-              rows={2}
-              style={{ width: '100%', padding: 10, fontSize: '0.8rem', background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}
-            />
-          </div>
-        </div>
-      </div>
-    ))}
-  </div>
+### 3. `app/pillar-campaigns/[id]/page.js`
+
+#### A. Dukungan Durasi Toast 10 Detik
+##### Code Sebelum (Current/Before):
+```javascript
+  function showToast(msg, type = 'success') {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  }
+```
+
+##### Code Sesudah (Proposed/After):
+```javascript
+  const toastTimeoutRef = useRef(null);
+  function showToast(msg, type = 'success', duration = 3500) {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    setToast({ msg, type });
+    toastTimeoutRef.current = setTimeout(() => setToast(null), duration);
+  }
+```
+
+#### B. Handler `handleRegenerateAllSF` dengan Durasi Toast 10 Detik & Optimistic Update
+##### Code Sebelum (Current/Before):
+```javascript
+    const handleRegenerateAllSF = async () => {
+      setBatchRegeneratingSF(prev => ({ ...prev, [item.id]: true }));
+      try {
+        const res = await fetch(`/api/v2/pillar-campaigns/items/${item.id}/regenerate-start-frames`, {
+          method: 'POST'
+        });
+        const resData = await res.json();
+        if (resData.success) {
+          showToast("Regenerasi semua start frame telah dimulai di latar belakang.");
+          fetchDetail();
+        } else {
+          showToast(resData.error || 'Gagal memulai regenerasi start frame.', 'error');
+        }
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        setBatchRegeneratingSF(prev => ({ ...prev, [item.id]: false }));
+      }
+    };
+```
+
+##### Code Sesudah (Proposed/After):
+```javascript
+    const handleRegenerateAllSF = async () => {
+      setBatchRegeneratingSF(prev => ({ ...prev, [item.id]: true }));
+      // Optimistic update agar badge langsung bertransisi menjadi Fase 1: Generate Start Frame
+      setItems(prev => prev.map(it => it.id === item.id ? {
+        ...it,
+        workflow_status: 'start_frames_processing',
+        start_frame_status: 'processing',
+        regenerate_start_frames_status: 'running'
+      } : it));
+
+      try {
+        const res = await fetch(`/api/v2/pillar-campaigns/items/${item.id}/regenerate-start-frames`, {
+          method: 'POST'
+        });
+        const resData = await res.json();
+        if (resData.success) {
+          showToast("Regenerasi semua start frame telah dimulai di latar belakang.", "success", 10000);
+          fetchDetail();
+        } else {
+          showToast(resData.error || 'Gagal memulai regenerasi start frame.', 'error');
+          fetchDetail();
+        }
+      } catch (err) {
+        showToast(err.message, 'error');
+        fetchDetail();
+      } finally {
+        setBatchRegeneratingSF(prev => ({ ...prev, [item.id]: false }));
+      }
+    };
+```
+
+#### C. Render Item Status Badge Menjadi "Fase 1 : Generate Start Frame" Warna Hijau
+##### Code Sebelum (Current/Before):
+```javascript
+    // 3. Active processing states
+    else if (item.generation_status === 'processing') {
+      text = item.generation_progress ? `⚡ Fase 1 : ${item.generation_progress}` : '⚡ Fase 1 : AI Generation';
+      color = 'var(--accent-light)';
+      bg = 'var(--status-info-soft)';
+      pulse = true;
+    }
+    ...
+    // 3.5 Paused Review
+    else if (item.workflow_status === 'ready_for_review') {
+      text = '⏸️ Fase 2 : Paused (Ready for Review)';
+      color = 'var(--status-warning)';
+      bg = 'rgba(243, 156, 18, 0.1)';
+    }
+```
+
+##### Code Sesudah (Proposed/After):
+```javascript
+    // Start Frame Generation (Batch / Single)
+    else if (
+      item.workflow_status === 'start_frames_processing' ||
+      item.start_frame_status === 'processing' ||
+      ['queued', 'running'].includes(item.regenerate_start_frames_status) ||
+      batchRegeneratingSF[item.id]
+    ) {
+      text = item.regenerate_start_frames_progress
+        ? `⚡ Fase 1 : Generate Start Frame (${item.regenerate_start_frames_progress})`
+        : '⚡ Fase 1 : Generate Start Frame';
+      color = 'var(--status-success)';
+      bg = 'var(--status-success-soft)';
+      pulse = true;
+    }
+    // 3. Active processing states
+    else if (item.generation_status === 'processing') {
+      text = item.generation_progress ? `⚡ Fase 1 : ${item.generation_progress}` : '⚡ Fase 1 : AI Generation';
+      color = 'var(--accent-light)';
+      bg = 'var(--status-info-soft)';
+      pulse = true;
+    }
+    ...
+    // 3.5 Paused Review
+    else if (item.workflow_status === 'ready_for_review') {
+      text = '⏸️ Fase 2 : Paused (Ready for Review)';
+      color = 'var(--status-warning)';
+      bg = 'rgba(243, 156, 18, 0.1)';
+    }
 ```

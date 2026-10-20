@@ -2,7 +2,7 @@
 
 import Sidebar from '../../components/Sidebar';
 import Link from 'next/link';
-import { useEffect, useState, Fragment } from 'react';
+import { useEffect, useState, useRef, Fragment } from 'react';
 import { useParams } from 'next/navigation';
 import { getDemographicLabel, getVisualOverrideLabel, parseVisualOverrides } from '../../../lib/campaign-config-labels';
 
@@ -214,9 +214,12 @@ export default function PillarCampaignDetailPage() {
     return () => clearInterval(interval);
   }, [id]);
 
-  function showToast(msg, type = 'success') {
+  const toastTimeoutRef = useRef(null);
+
+  function showToast(msg, type = 'success', duration = 3500) {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     setToast({ msg, type });
-    setTimeout(() => setToast(null), 3500);
+    toastTimeoutRef.current = setTimeout(() => setToast(null), duration);
   }
 
   async function fetchDetail() {
@@ -564,6 +567,20 @@ export default function PillarCampaignDetailPage() {
       text = '⏸️ Fase 2 : Paused (Ready to Post)';
       color = 'var(--status-warning)';
       bg = 'rgba(243, 156, 18, 0.1)';
+    }
+    // 2.5 Start Frame Generation (Batch / Single)
+    else if (
+      item.workflow_status === 'start_frames_processing' ||
+      item.start_frame_status === 'processing' ||
+      ['queued', 'running'].includes(item.regenerate_start_frames_status) ||
+      batchRegeneratingSF[item.id]
+    ) {
+      text = item.regenerate_start_frames_progress
+        ? `⚡ Fase 1 : Generate Start Frame (${item.regenerate_start_frames_progress})`
+        : '⚡ Fase 1 : Generate Start Frame';
+      color = 'var(--status-success)';
+      bg = 'var(--status-success-soft)';
+      pulse = true;
     }
     // 3. Active processing states
     else if (item.generation_status === 'processing') {
@@ -1700,19 +1717,29 @@ export default function PillarCampaignDetailPage() {
 
     const handleRegenerateAllSF = async () => {
       setBatchRegeneratingSF(prev => ({ ...prev, [item.id]: true }));
+      // Optimistic update agar status item langsung berubah di UI menjadi Fase 1 : Generate Start Frame
+      setItems(prev => prev.map(it => it.id === item.id ? {
+        ...it,
+        workflow_status: 'start_frames_processing',
+        start_frame_status: 'processing',
+        regenerate_start_frames_status: 'running'
+      } : it));
+
       try {
         const res = await fetch(`/api/v2/pillar-campaigns/items/${item.id}/regenerate-start-frames`, {
           method: 'POST'
         });
         const resData = await res.json();
         if (resData.success) {
-          showToast("Regenerasi semua start frame telah dimulai di latar belakang.");
+          showToast("Regenerasi semua start frame telah dimulai di latar belakang.", "success", 10000);
           fetchDetail();
         } else {
           showToast(resData.error || 'Gagal memulai regenerasi start frame.', 'error');
+          fetchDetail();
         }
       } catch (err) {
         showToast(err.message, 'error');
+        fetchDetail();
       } finally {
         setBatchRegeneratingSF(prev => ({ ...prev, [item.id]: false }));
       }

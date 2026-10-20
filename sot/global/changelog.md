@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.63 — Penyelarasan Generate All Start Frame Multiplier dan Pillar (20/10/2026)
+- Hapus modal confirm popup pada generate all start frame di Multiplier Lab
+- Tampilkan notifikasi toast 10 detik di pojok kanan bawah
+- Transisi status Paused Ready for Review ke Fase 1 Generate Start Frame warna hijau pada Multiplier dan Pillar Campaign
+
 ## V2.32.62 — Fitur Tombol Copy Aset VO, T2I, dan I2V Multiplier Lab (20/10/2026)
 - Tombol salin mandiri untuk Naskah VO, Prompt T2I Start Frame, dan Prompt I2V Motion pada detail kampanye Multiplier Lab
 - Toolbar Bulk Copy untuk menyalin seluruh alur adegan sekaligus

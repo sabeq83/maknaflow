@@ -78,17 +78,29 @@ function renderPhaseBadge(task) {
       isPulse = true;
       break;
     case 'generating_t2i':
-      text = '⚡ Fase 1 : Generasi T2I Start Frames';
-      color = 'var(--status-info)';
-      bg = 'var(--status-info-soft)';
-      border = 'var(--status-info-soft)';
+      text = task.regenerate_start_frames_progress
+        ? `⚡ Fase 1 : Generate Start Frame (${task.regenerate_start_frames_progress})`
+        : '⚡ Fase 1 : Generate Start Frame';
+      color = 'var(--status-success)';
+      bg = 'var(--status-success-soft)';
+      border = 'var(--status-success-soft)';
       isPulse = true;
       break;
     case 'waiting_approval':
-      text = '⏸️ Fase 2 : Paused (Ready for Review)';
-      color = 'var(--status-warning)';
-      bg = 'var(--status-warning-soft)';
-      border = 'var(--status-warning-soft)';
+      if (task.regenerate_start_frames_status === 'running') {
+        text = task.regenerate_start_frames_progress
+          ? `⚡ Fase 1 : Generate Start Frame (${task.regenerate_start_frames_progress})`
+          : '⚡ Fase 1 : Generate Start Frame';
+        color = 'var(--status-success)';
+        bg = 'var(--status-success-soft)';
+        border = 'var(--status-success-soft)';
+        isPulse = true;
+      } else {
+        text = '⏸️ Fase 2 : Paused (Ready for Review)';
+        color = 'var(--status-warning)';
+        bg = 'var(--status-warning-soft)';
+        border = 'var(--status-warning-soft)';
+      }
       break;
     case 'generating_audio':
       text = '⚡ Fase 2 : Generasi TTS Audio';
@@ -207,9 +219,12 @@ function CampaignDetailPageContent() {
     };
   }, [id]);
 
-  const showToast = (message, type = 'success') => {
+  const toastTimeoutRef = useRef(null);
+
+  const showToast = (message, type = 'success', duration = 4000) => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
+    toastTimeoutRef.current = setTimeout(() => setToast(null), duration);
   };
 
   const handleCopy = (text, key, label = 'Aset') => {
@@ -337,21 +352,30 @@ function CampaignDetailPageContent() {
   };
 
   const handleGenerateAllT2I = async (taskId) => {
-    if (!confirm('Apakah Anda yakin ingin meregenerasi semua start frame T2I untuk adegan ini di latar belakang?')) return;
     setBatchRegeneratingSF(prev => ({ ...prev, [taskId]: true }));
+    // Optimistic UI: langsung ubah status task menjadi Fase 1: Generate Start Frame
+    setTasks(prev => prev.map(t => t.id === taskId ? {
+      ...t,
+      status: 'generating_t2i',
+      regenerate_start_frames_status: 'running',
+      regenerate_start_frames_progress: '0/...'
+    } : t));
+
     try {
       const res = await fetch(`/api/v2/multiplier/${taskId}/regenerate-start-frames`, {
         method: 'POST'
       });
       const data = await res.json();
       if (data.success) {
-        showToast('Proses regenerasi semua start frame telah dimulai di latar belakang.');
+        showToast('Proses regenerasi semua start frame telah dimulai di latar belakang.', 'success', 10000);
         fetchTasks(true);
       } else {
         showToast(data.error || 'Gagal memulai regenerasi massal.', 'error');
+        fetchTasks(true);
       }
     } catch (err) {
       showToast(err.message, 'error');
+      fetchTasks(true);
     } finally {
       setBatchRegeneratingSF(prev => ({ ...prev, [taskId]: false }));
     }
@@ -727,6 +751,12 @@ function CampaignDetailPageContent() {
       <main className="main-content">
         <div style={{ padding: '24px 32px', maxWidth: '1200px', margin: '0 auto' }}>
         
+        {toast && (
+          <div className={`toast ${toast.type === 'error' ? 'toast-error' : 'toast-success'}`}>
+            {toast.message || toast.msg}
+          </div>
+        )}
+
         {/* 1 & 2: Header Card Detail Kampanye (Persis layout Pillar Campaign L3005-3084) */}
         <div className="card" style={{ marginBottom: 24, padding: 32, border: '1px solid var(--border-color)', background: 'var(--surface-raised)', borderRadius: 'var(--radius-sm)' }}>
           <div>
