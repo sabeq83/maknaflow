@@ -186,6 +186,18 @@ function CampaignDetailPageContent() {
   const [expandedTaskId, setExpandedTaskId] = useState(null);
   const [activeTabs, setActiveTabs] = useState({}); // { [taskId]: 'storyboard' | 'deconstruct' | 'vault' | 'dna' | 'logs' }
   const [terminalLogs, setTerminalLogs] = useState('');
+
+  // Accordion Clip state per Task: { [taskId]: number } (selaras dengan Pillar Campaign)
+  const [activeClipIndex, setActiveClipIndex] = useState({});
+  const toggleClip = (taskId, idx) => {
+    setActiveClipIndex(prev => {
+      const currentActive = prev[taskId] !== undefined ? prev[taskId] : 0;
+      return {
+        ...prev,
+        [taskId]: currentActive === idx ? -1 : idx
+      };
+    });
+  };
   
   // Inline editing states for expanded task workbenches
   const [editedStoryboards, setEditedStoryboards] = useState({}); // { [taskId]: [clips] }
@@ -1537,14 +1549,103 @@ function CampaignDetailPageContent() {
                                       </div>
                                     </div>
 
-                                    {/* Clips edit rows */}
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                                      {storyboard.map((clip, cidx) => (
-                                        <div key={cidx} style={{ display: 'flex', flexDirection: 'column', gap: 12, background: 'var(--surface-interactive)', padding: 16, borderRadius: 8, border: '1px solid var(--border)' }}>
-                                          <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--accent-light)', borderBottom: '1px solid var(--border)', paddingBottom: 6 }}>
-                                            🎬 Klip #{cidx + 1}
-                                          </div>
-                                          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                    {/* Quick Jump Bar Klip Storyboard */}
+                                    {storyboard.length > 1 && (
+                                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', padding: '10px 14px', background: 'var(--surface-interactive)', border: '1px solid var(--border-subtle)', borderRadius: 8, marginBottom: 12 }}>
+                                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', marginRight: 4 }}>⚡ Lompat Cepat:</span>
+                                        {storyboard.map((_, sidx) => {
+                                          const isActive = (activeClipIndex[task.id] !== undefined ? activeClipIndex[task.id] : 0) === sidx;
+                                          const isBridge = (bridging.isBridgingActive !== false) &&
+                                            Number(sidx + 1) >= Number(bridging.bridgeAtClip || 0) &&
+                                            Number(sidx + 1) < (Number(bridging.bridgeAtClip || 0) + Number(bridging.bridgeDurationClips || 1));
+                                          return (
+                                            <button
+                                              key={sidx}
+                                              type="button"
+                                              onClick={() => {
+                                                setActiveClipIndex(prev => ({ ...prev, [task.id]: sidx }));
+                                                const el = document.getElementById(`mult-clip-${task.id}-${sidx}`);
+                                                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                              }}
+                                              style={{
+                                                padding: '4px 10px',
+                                                fontSize: '0.72rem',
+                                                fontWeight: isActive ? 700 : 500,
+                                                borderRadius: 4,
+                                                border: isActive ? '1px solid var(--accent)' : '1px solid var(--border-subtle)',
+                                                background: isActive ? 'var(--accent)' : 'var(--surface)',
+                                                color: isActive ? 'var(--on-action-primary, #042f2e)' : 'var(--text-primary)',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.15s ease'
+                                              }}
+                                            >
+                                              Klip #{sidx + 1} {isBridge ? '🌉' : ''}
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+                                    )}
+
+                                    {/* Clips edit rows dengan Accordion (Klip 1 default terbuka) */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                      {storyboard.map((clip, cidx) => {
+                                        const isExpanded = (activeClipIndex[task.id] !== undefined ? activeClipIndex[task.id] : 0) === cidx;
+                                        const isBridge = (bridging.isBridgingActive !== false) &&
+                                          Number(cidx + 1) >= Number(bridging.bridgeAtClip || 0) &&
+                                          Number(cidx + 1) < (Number(bridging.bridgeAtClip || 0) + Number(bridging.bridgeDurationClips || 1));
+
+                                        return (
+                                          <div
+                                            key={cidx}
+                                            id={`mult-clip-${task.id}-${cidx}`}
+                                            style={{
+                                              display: 'flex',
+                                              flexDirection: 'column',
+                                              gap: isExpanded ? 12 : 0,
+                                              background: isExpanded ? 'var(--surface-raised)' : 'var(--surface-interactive)',
+                                              padding: 16,
+                                              borderRadius: 8,
+                                              border: isExpanded ? '1px solid var(--accent)' : '1px solid var(--border)',
+                                              borderLeft: isBridge ? '3px solid var(--status-info)' : undefined,
+                                              transition: 'all 0.2s ease'
+                                            }}
+                                          >
+                                            {/* Header Klip Interaktif (Toggle Accordion) */}
+                                            <div
+                                              onClick={() => toggleClip(task.id, cidx)}
+                                              style={{
+                                                fontWeight: 700,
+                                                fontSize: '0.85rem',
+                                                color: isBridge ? 'var(--status-info)' : 'var(--accent-light)',
+                                                borderBottom: isExpanded ? '1px solid var(--border-subtle)' : 'none',
+                                                paddingBottom: isExpanded ? 8 : 0,
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                cursor: 'pointer',
+                                                userSelect: 'none'
+                                              }}
+                                            >
+                                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                                                <span>{isExpanded ? '▼' : '▶'} 🎬 Klip #{cidx + 1}</span>
+                                                {isBridge && (
+                                                   <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--status-info)', background: 'var(--status-info-soft)', padding: '2px 6px', borderRadius: 4 }}>
+                                                     🌉 BRIDGE TRANSISI PRODUK
+                                                   </span>
+                                                )}
+                                                {!isExpanded && clip.narration && (
+                                                  <span style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '380px', fontStyle: 'italic' }}>
+                                                    "{clip.narration.slice(0, 50)}..."
+                                                  </span>
+                                                )}
+                                              </div>
+                                              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                                                {isExpanded ? 'Tutup Klip' : 'Buka Klip'}
+                                              </span>
+                                            </div>
+
+                                            {isExpanded && (
+                                              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 4 }}>
                                             {/* Naskah Voiceover (VO) */}
                                             <div>
                                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
@@ -1673,8 +1774,10 @@ function CampaignDetailPageContent() {
                                               />
                                             </div>
                                           </div>
+                                          )}
                                         </div>
-                                      ))}
+                                      );
+                                    })}
                                     </div>
 
                                     {/* YouTube Shorts High-CTR Title */}

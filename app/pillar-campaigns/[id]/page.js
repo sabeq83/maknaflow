@@ -2278,13 +2278,48 @@ export default function PillarCampaignDetailPage() {
               </div>
             )}
 
+            {/* Quick Jump Bar Klip Storyboard */}
+            {plan.length > 1 && (
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', padding: '10px 14px', background: 'var(--surface-interactive)', border: '1px solid var(--border-subtle)', borderRadius: 8, marginBottom: 12 }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', marginRight: 4 }}>⚡ Lompat Cepat:</span>
+                {plan.map((p, pidx) => {
+                  const isActive = (activeClipIndex[item.id] !== undefined ? activeClipIndex[item.id] : 0) === pidx;
+                  const isBridgeClip = campaign?.visual_mode === 'hybrid_lock' && campaign?.is_bridging_active && Number(p.clip_index) === Number(campaign.bridge_at_clip);
+                  return (
+                    <button
+                      key={pidx}
+                      type="button"
+                      onClick={() => {
+                        setActiveClipIndex(prev => ({ ...prev, [item.id]: pidx }));
+                        const el = document.getElementById(`pillar-clip-${item.id}-${pidx}`);
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                      }}
+                      style={{
+                        padding: '4px 10px',
+                        fontSize: '0.72rem',
+                        fontWeight: isActive ? 700 : 500,
+                        borderRadius: 4,
+                        border: isActive ? '1px solid var(--accent)' : '1px solid var(--border-subtle)',
+                        background: isActive ? 'var(--accent)' : 'var(--surface)',
+                        color: isActive ? 'var(--on-action-primary, #042f2e)' : 'var(--text-primary)',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      Klip #{p.clip_index || (pidx + 1)} {isBridgeClip ? '🌉' : ''}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
             {/* Creative Clip Plans list */}
             {plan.map((p, idx) => {
               const isBridge = campaign?.visual_mode === 'hybrid_lock' && campaign?.is_bridging_active && Number(p.clip_index) === Number(campaign.bridge_at_clip);
               const isExpanded = (activeClipIndex[item.id] !== undefined ? activeClipIndex[item.id] : 0) === idx;
 
               return (
-                <div key={idx} style={{ background: isBridge ? 'rgba(59, 130, 246, 0.03)' : 'var(--surface-interactive)', borderRadius: '8px', border: isBridge ? '1px solid var(--status-info-soft)' : '1px solid var(--surface-interactive)', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div key={idx} id={`pillar-clip-${item.id}-${idx}`} style={{ background: isBridge ? 'rgba(59, 130, 246, 0.03)' : 'var(--surface-interactive)', borderRadius: '8px', border: isBridge ? '1px solid var(--status-info-soft)' : '1px solid var(--surface-interactive)', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   <div
                     onClick={() => toggleClip(item.id, idx)}
                     style={{

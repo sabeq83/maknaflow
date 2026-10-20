@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi UI: Accordion & Quick Jump Klip Storyboard (Multiplier & Pillar)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --border: #26354a;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --accent: #38bdf8;
+      --accent-light: #7dd3fc;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --font-sans: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme='light'] {
+      --canvas: #f8fafc;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border-subtle: #cbd5e1;
+      --border-strong: #94a3b8;
+      --border: #cbd5e1;
+      --action-primary: #0d9488;
+      --action-primary-hover: #0f766e;
+      --on-action-primary: #ffffff;
+      --accent: #0284c7;
+      --accent-light: #0369a1;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --shadow-card: 0 10px 25px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      padding: 32px 24px 100px;
+      line-height: 1.5;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .brand-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-sim {
+      font-size: 0.72rem;
+      background: var(--surface-interactive);
+      color: var(--action-primary);
+      border: 1px solid var(--border-subtle);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn {
+      font-family: var(--font-sans);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-secondary {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    .btn-sm {
+      padding: 3px 8px;
+      font-size: 0.7rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 28px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Comparison info */
+    .comparison-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 768px) {
+      .comparison-box { grid-template-columns: 1fr; }
+    }
+
+    .info-pane {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 0.82rem;
+    }
+    .info-pane.before { border-left: 4px solid var(--status-warning); }
+    .info-pane.after { border-left: 4px solid var(--status-success); }
+    .info-pane h4 { font-size: 0.85rem; margin-bottom: 6px; }
+
+    /* Clip Accordion Container */
+    .clip-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .clip-card {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+    .clip-card.active {
+      border-color: var(--accent);
+      background: var(--surface-raised);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+    .clip-card.is-bridge {
+      border-left: 3px solid var(--status-info);
+    }
+
+    /* Clip Header / Toggle Bar */
+    .clip-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s ease;
+    }
+    .clip-header:hover {
+      background: var(--surface-hover);
+    }
+    .clip-card.active .clip-header {
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-interactive);
+    }
+
+    .clip-title-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .clip-indicator {
+      font-size: 0.75rem;
+      color: var(--accent-light);
+      font-family: var(--font-mono);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+    }
+
+    .clip-name {
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: var(--text-primary);
+    }
+
+    .clip-badge-bridge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+    }
+
+    .clip-preview-snippet {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      max-width: 420px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-style: italic;
+    }
+
+    .clip-toggle-btn {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+    }
+
+    /* Clip Details (Body) */
+    .clip-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .field-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .field-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .field-textarea {
+      width: 100%;
+      padding: 8px 10px;
+      font-size: 0.8rem;
+      background: var(--surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: var(--font-sans);
+      resize: vertical;
+      line-height: 1.4;
+    }
+    .field-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    /* Quick jump buttons bar */
+    .clip-jump-bar {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+      padding: 10px 14px;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      align-items: center;
+    }
+    .jump-chip {
+      padding: 4px 10px;
+      font-size: 0.72rem;
+      border-radius: 4px;
+      background: var(--surface);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+    .jump-chip:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+    .jump-chip.active {
+      background: var(--accent);
+      color: #042f2e;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div>
+        <div class="brand-title">
+          <span>🧬 MAKNA Flow — Accordion & Quick Jump Klip</span>
+          <span class="badge-sim">Mockup Interaktif</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">
+          Simulasi Card Klip Storyboard (Klip 1 s.d. N) dengan tombol <strong>Quick Jump</strong> dan perilaku single active accordion pada <strong>Multiplier</strong> & <strong>Pillar Campaign</strong>
+        </p>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="toggleTheme()" id="themeBtn">
+          ☀️ Light Mode
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="resetAll()">
+          🔄 Reset (Klip 1 Saja)
+        </button>
+      </div>
+    </div>
+
+    <!-- Perbandingan & Aturan Usulan -->
+    <div class="comparison-box">
+      <div class="info-pane before">
+        <h4 style="color: var(--status-warning);">⚠️ Tampilan Sebelumnya (Current)</h4>
+        <p style="color: var(--text-secondary); line-height: 1.5;">
+          • <strong>Multiplier</strong>: Seluruh card klip (1 s.d. 8) terbuka sekaligus tanpa accordion. Halaman memanjang ke bawah berlebihan.<br>
+          • <strong>Pillar</strong>: Sudah memakai accordion, tapi belum memiliki toolbar <strong>Quick Jump</strong> untuk melompat langsung ke adegan tertentu.
+        </p>
+      </div>
+      <div class="info-pane after">
+        <h4 style="color: var(--status-success);">✨ Usulan Solusi Baru (Proposed)</h4>
+        <p style="color: var(--text-secondary); line-height: 1.5;">
+          • <strong>Single Active Clip</strong>: Secara default, hanya Klip #1 yang terbuka. Membuka Klip #2 menutup Klip #1 otomatis.<br>
+          • <strong>⚡ Tombol Quick Jump</strong>: Hadir di atas daftar klip pada <em>Multiplier</em> dan <em>Pillar</em> untuk navigasi instan antar klip tanpa harus scroll manual.
+        </p>
+      </div>
+    </div>
+
+    <!-- SIMULASI 1: MULTIPLIER CAMPAIGN (8 KLIP) -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">
+            <span>🧬 1. Multiplier Campaign (Multiplier Lab — 8 Klip Storyboard)</span>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+            Halaman <code>app/multiplier-lab/[id]/page.js</code> (Tab 2: Storyboard). Klik tombol Quick Jump atau klik header kartu.
+          </p>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted);" id="multActiveIndicator">
+          Klip Aktif: <strong style="color: var(--accent-light);">Klip #1</strong>
+        </div>
+      </div>
+
+      <!-- Quick Jump Toolbar Multiplier -->
+      <div class="clip-jump-bar">
+        <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); margin-right: 4px;">⚡ Lompat Cepat:</span>
+        <div id="multChips" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
+      </div>
+
+      <!-- Clip List Multiplier -->
+      <div class="clip-list" id="multClipContainer"></div>
+    </div>
+
+    <!-- SIMULASI 2: PILLAR CAMPAIGN (4 KLIP) -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">
+            <span>🎬 2. Pillar Campaign (OPC Workbench V2 — 4 Klip Storyboard)</span>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+            Halaman <code>app/pillar-campaigns/[id]/page.js</code>. Dilengkapi tombol Quick Jump baru di atas daftar klip.
+          </p>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted);" id="pillarActiveIndicator">
+          Klip Aktif: <strong style="color: var(--accent-light);">Klip #1</strong>
+        </div>
+      </div>
+
+      <!-- Quick Jump Toolbar Pillar -->
+      <div class="clip-jump-bar">
+        <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); margin-right: 4px;">⚡ Lompat Cepat:</span>
+        <div id="pillarChips" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
+      </div>
+
+      <!-- Clip List Pillar -->
+      <div class="clip-list" id="pillarClipContainer"></div>
+    </div>
+
+  </div>
+
+  <script>
+    const MULT_CLIPS = [
+      { idx: 1, isBridge: false, vo: "Bosan sarapan yang itu-itu aja dan bikin lemas seharian?", visual: "Extreme macro shot sendok kayu mengangkat alpukat.", t2i: "Wooden spoon lifting ripe avocado, morning sunlight, 9:16.", i2v: "Slow zoom in on avocado." },
+      { idx: 2, isBridge: false, vo: "Cobain protein bowl salad ini, bikin kenyang awet sampai sore!", visual: "Overhead table view of vibrant salad bowl with grilled chicken.", t2i: "Top-down ceramic bowl filled with chicken and spinach, 9:16.", i2v: "Slight rotational camera spin." },
+      { idx: 3, isBridge: true, vo: "Rahasia segarnya ada di olive oil dressing Nutribake yang kaya antioksidan.", visual: "Dressing bottle drizzled over greens with golden drops.", t2i: "Bottle of Nutribake dressing drizzling golden drops, 9:16.", i2v: "Slow motion oil drizzle with lens flare." },
+      { idx: 4, isBridge: false, vo: "Cara buatnya cuma butuh waktu 5 menit aja di pagi hari.", visual: "Hands chopping cherry tomatoes briskly on board.", t2i: "Chef hands slicing red cherry tomatoes on teak board, 9:16.", i2v: "Dynamic knife chopping motion." },
+      { idx: 5, isBridge: false, vo: "Campur semua sayuran segar, lalu tuang dressing secukupnya.", visual: "Tossing ingredients with wooden servers in glass bowl.", t2i: "Salad servers tossing mixed crisp lettuce, 9:16.", i2v: "Gentle tumbling motion of salad." },
+      { idx: 6, isBridge: false, vo: "Nutrisinya seimbang, tinggi serat, dan pastinya rendah kalori.", visual: "Clean portioned food plate with natural steam.", t2i: "Portioned food plate with minimalist aesthetic, 9:16.", i2v: "Smooth crane shot pulling back." },
+      { idx: 7, isBridge: false, vo: "Cocok banget buat menu diet sehat atau meal prep seminggu penuh.", visual: "Three glass meal prep containers in clean refrigerator.", t2i: "Glass meal prep containers stacked inside fridge, 9:16.", i2v: "Door slowly closing." },
+      { idx: 8, isBridge: false, vo: "Simpan resep ini sekarang dan tag teman kamu yang lagi diet!", visual: "Glamour hero beauty shot of finished salad bowl with CTA.", t2i: "Hero macro photo of completed salad bowl with fork, 9:16.", i2v: "Slow orbital glide to CTA." }
+    ];
+
+    const PILLAR_CLIPS = [
+      { idx: 1, isBridge: false, vo: "Pernah gak ngerasa berat badan susah turun padahal porsi makan udah dikurangi?", visual: "Timbangan badan digital dengan kaki berdiri di atasnya.", t2i: "Feet on digital weight scale, clean bathroom floor, 9:16.", i2v: "Slow tilt down to digital scale numbers." },
+      { idx: 2, isBridge: true, vo: "Kuncinya ada pada pemilihan serat larut air Nutribake sebelum makan berat.", visual: "Gelas bening dengan air diaduk serbuk serat alami.", t2i: "Clear glass of water with stirring natural fiber spoon, 9:16.", i2v: "Whirlpool water stirring motion." },
+      { idx: 3, isBridge: false, vo: "Serat ini bantu menahan rasa lapar hingga 6 jam lebih lama.", visual: "Grafik infografis lambung kenyang terproteksi serat.", t2i: "Clean animated style gut health graphic overlay, 9:16.", i2v: "Smooth graphic slide-in motion." },
+      { idx: 4, isBridge: false, vo: "Klik link di bio sekarang untuk klaim diskon promo minggu ini!", visual: "Tangan memegang smartphone membuka halaman katalog produk.", t2i: "Hands holding modern smartphone showing checkout page, 9:16.", i2v: "Slow push in on phone screen CTA." }
+    ];
+
+    let multActiveIdx = 0;
+    let pillarActiveIdx = 0;
+
+    function renderMultClips() {
+      const container = document.getElementById('multClipContainer');
+      const chips = document.getElementById('multChips');
+      container.innerHTML = '';
+      chips.innerHTML = '';
+
+      MULT_CLIPS.forEach((clip, index) => {
+        const isExpanded = multActiveIdx === index;
+
+        // Chip
+        const chip = document.createElement('button');
+        chip.className = `jump-chip ${isExpanded ? 'active' : ''}`;
+        chip.innerHTML = `Klip #${clip.idx} ${clip.isBridge ? '🌉' : ''}`;
+        chip.onclick = () => selectMultClip(index);
+        chips.appendChild(chip);
+
+        // Card
+        const card = document.createElement('div');
+        card.className = `clip-card ${isExpanded ? 'active' : ''} ${clip.isBridge ? 'is-bridge' : ''}`;
+        card.id = `mult-card-${index}`;
+        card.innerHTML = `
+          <div class="clip-header" onclick="toggleMultClip(${index})">
+            <div class="clip-title-area">
+              <span class="clip-indicator">${isExpanded ? '▼' : '▶'}</span>
+              <span class="clip-name">🎬 Klip #${clip.idx}</span>
+              ${clip.isBridge ? '<span class="clip-badge-bridge">🌉 BRIDGE TRANSISI PRODUK</span>' : ''}
+              ${!isExpanded ? `<span class="clip-preview-snippet">"${clip.vo}"</span>` : ''}
+            </div>
+            <div class="clip-toggle-btn">
+              <span>${isExpanded ? 'Tutup Klip' : 'Buka Klip'}</span>
+            </div>
+          </div>
+          ${isExpanded ? `
+            <div class="clip-body">
+              <div class="field-row">
+                <div class="field-header"><label class="field-label">🎙️ Naskah Voiceover (VO)</label></div>
+                <textarea class="field-textarea" rows="2">${clip.vo}</textarea>
+              </div>
+              <div class="field-row">
+                <div class="field-header"><label class="field-label">👁️ Aksi Visual</label></div>
+                <textarea class="field-textarea" rows="2">${clip.visual}</textarea>
+              </div>
+              <div class="field-row">
+                <div class="field-header"><label class="field-label">🖼️ Prompt T2I Start Frame (Pixel Lock)</label></div>
+                <textarea class="field-textarea" rows="2">${clip.t2i}</textarea>
+              </div>
+              <div class="field-row">
+                <div class="field-header"><label class="field-label">🎬 Prompt I2V (Motion Prompt)</label></div>
+                <textarea class="field-textarea" rows="2">${clip.i2v}</textarea>
+              </div>
+            </div>
+          ` : ''}
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById('multActiveIndicator').innerHTML = multActiveIdx === -1
+        ? 'Semua Klip: <strong style="color: var(--text-muted);">Tertutup</strong>'
+        : `Klip Aktif: <strong style="color: var(--accent-light);">Klip #${multActiveIdx + 1}</strong>`;
+    }
+
+    function toggleMultClip(index) {
+      multActiveIdx = (multActiveIdx === index) ? -1 : index;
+      renderMultClips();
+    }
+
+    function selectMultClip(index) {
+      multActiveIdx = index;
+      renderMultClips();
+      const el = document.getElementById(`mult-card-${index}`);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Pillar Campaign Logic
+    function renderPillarClips() {
+      const container = document.getElementById('pillarClipContainer');
+      const chips = document.getElementById('pillarChips');
+      container.innerHTML = '';
+      chips.innerHTML = '';
+
+      PILLAR_CLIPS.forEach((clip, index) => {
+        const isExpanded = pillarActiveIdx === index;
+
+        // Chip
+        const chip = document.createElement('button');
+        chip.className = `jump-chip ${isExpanded ? 'active' : ''}`;
+        chip.innerHTML = `Klip #${clip.idx} ${clip.isBridge ? '🌉' : ''}`;
+        chip.onclick = () => selectPillarClip(index);
+        chips.appendChild(chip);
+
+        // Card
+        const card = document.createElement('div');
+        card.className = `clip-card ${isExpanded ? 'active' : ''} ${clip.isBridge ? 'is-bridge' : ''}`;
+        card.id = `pillar-card-${index}`;
+        card.innerHTML = `
+          <div class="clip-header" onclick="togglePillarClip(${index})">
+            <div class="clip-title-area">
+              <span class="clip-indicator">${isExpanded ? '▼' : '▶'}</span>
+              <span class="clip-name">🎬 Aset Klip #${clip.idx}</span>
+              ${clip.isBridge ? '<span class="clip-badge-bridge">🌉 BRIDGE TRANSISI PRODUK</span>' : ''}
+              ${!isExpanded ? `<span class="clip-preview-snippet">"${clip.vo}"</span>` : ''}
+            </div>
+            <div class="clip-toggle-btn">
+              <span>${isExpanded ? 'Tutup Klip' : 'Buka Klip'}</span>
+            </div>
+          </div>
+          ${isExpanded ? `
+            <div class="clip-body">
+              <div class="field-row">
+                <div class="field-header"><label class="field-label">🎙️ Naskah Voiceover (VO)</label></div>
+                <textarea class="field-textarea" rows="2">${clip.vo}</textarea>
+              </div>
+              <div class="field-row">
+                <div class="field-header"><label class="field-label">👁️ Aksi Visual (Deskripsi Scene)</label></div>
+                <textarea class="field-textarea" rows="2">${clip.visual}</textarea>
+              </div>
+              <div class="field-row">
+                <div class="field-header"><label class="field-label">🖼️ Prompt T2I Start Frame (Pixel Lock)</label></div>
+                <textarea class="field-textarea" rows="2">${clip.t2i}</textarea>
+              </div>
+              <div class="field-row">
+                <div class="field-header"><label class="field-label">🎬 Prompt I2V (Motion Prompt)</label></div>
+                <textarea class="field-textarea" rows="2">${clip.i2v}</textarea>
+              </div>
+            </div>
+          ` : ''}
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById('pillarActiveIndicator').innerHTML = pillarActiveIdx === -1
+        ? 'Semua Klip: <strong style="color: var(--text-muted);">Tertutup</strong>'
+        : `Klip Aktif: <strong style="color: var(--accent-light);">Klip #${pillarActiveIdx + 1}</strong>`;
+    }
+
+    function togglePillarClip(index) {
+      pillarActiveIdx = (pillarActiveIdx === index) ? -1 : index;
+      renderPillarClips();
+    }
+
+    function selectPillarClip(index) {
+      pillarActiveIdx = index;
+      renderPillarClips();
+      const el = document.getElementById(`pillar-card-${index}`);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function resetAll() {
+      multActiveIdx = 0;
+      pillarActiveIdx = 0;
+      renderMultClips();
+      renderPillarClips();
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      document.getElementById('themeBtn').innerText = next === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode';
+    }
+
+    renderMultClips();
+    renderPillarClips();
+  </script>
+</body>
+</html>

@@ -1,44 +1,51 @@
-# Implementation Plan: Penyelarasan Alur & Notifikasi "Generate All Start Frame" (Multiplier & Pillar Campaign)
+# Implementation Plan: Accordion & Quick Jump Klip Storyboard (Multiplier & Pillar Campaign)
 
-Rencana ini merespons kebutuhan penyelarasan pengalaman pengguna (UX) pada saat memicu tombol **Generate All Start Frame** di **Multiplier Campaign** dan **Pillar Campaign**:
-1. **Multiplier Campaign**: Menghapus popup dialog konfirmasi bawaan browser (`confirm(...)`), cukup notifikasi toast di pojok kanan bawah selama sekira **10 detik** (sama seperti Pillar Campaign).
-2. **Multiplier Campaign**: Saat tombol diklik, status `⏸️ Fase 2 : Paused (Ready for Review)` otomatis berubah menjadi **`⚡ Fase 1 : Generate Start Frame`** dengan warna **hijau** (`var(--status-success)`).
-3. **Pillar Campaign**: Saat tombol diklik, status `⏸️ Fase 2 : Paused (Ready for Review)` otomatis berubah menjadi **`⚡ Fase 1 : Generate Start Frame`** dengan warna **hijau** (`var(--status-success)`).
+Rencana ini merespons kebutuhan penataan antarmuka detil klip storyboard pada setiap baris kampanye di **Multiplier Lab** (`app/multiplier-lab/[id]/page.js`) dan penambahan navigasi cepat di **Pillar Campaign** (`app/pillar-campaigns/[id]/page.js`):
+1. **Multiplier Campaign — Default State**: Jika satu baris memiliki banyak klip (misal 8 klip), secara default **hanya card Klip #1** yang terbuka detilnya (`isExpanded = true`).
+2. **Multiplier Campaign — Perilaku Akordion (Single Active Clip)**: Jika pengguna mengklik untuk membuka card **Klip #2**, maka card **Klip #1 otomatis tertutup**, sehingga fokus layar tetap ringkas dan teratur (sama seperti pola antarmuka pada menu **Pillar Campaign**).
+3. **Multiplier Campaign — Header Preview Ringkas**: Saat kartu klip dalam kondisi tertutup, header klip menampilkan indikator panah (`▼` / `▶`), badge Bridge (jika klip transisi produk), serta cuplikan naskah VO singkat agar pengguna mudah mengenali adegan.
+4. **Multiplier & Pillar Campaign — Toolbar Quick Jump (Lompat Cepat Klip #1 s.d. #N)**:
+   - Menyediakan bar tombol chip *Lompat Cepat* di atas daftar klip pada kedua menu.
+   - Mengklik chip klip tertentu langsung membuka kartu klip tersebut (sekaligus menutup klip lain) dan melakukan smooth scrolling ke posisi kartu klip.
+   - Klip yang sedang aktif ditandai dengan sorotan warna aksen (`var(--accent)`).
 
 ---
 
 ## 🎨 Mockup HTML Standalone untuk Simulasi & Review
 
-Sesuai SOP Makna Flow, simulasi visual dan alur interaktif standalone telah dibuat agar dapat diuji langsung oleh pengguna sebelum penulisan kode di komponen React utama:
-- **File Mockup:** [public/mockup_generate_start_frame_flow.html](file:///Users/sabeqmmursyid/_contentflow-staging/public/mockup_generate_start_frame_flow.html)
+Sesuai SOP Makna Flow, simulasi visual dan interaktif standalone telah diperbarui dan siap diuji:
+- **File Mockup:** [public/mockup_multiplier_clip_accordion.html](file:///Users/sabeqmmursyid/_contentflow-staging/public/mockup_multiplier_clip_accordion.html)
 - **Fitur Simulasi di Mockup:**
-  - Simulasi **Multiplier Campaign**: Klik tombol "Generate T2I Start Frames" langsung berjalan tanpa popup, badge langsung berubah dari `⏸️ Fase 2 : Paused (Ready for Review)` (oranye) menjadi `⚡ Fase 1 : Generate Start Frame (1/4)` (hijau berkedip/pulse), dan toast notifikasi 10 detik muncul di pojok kanan bawah dengan progress bar countdown.
-  - Simulasi **Pillar Campaign**: Klik tombol "Generate T2I Start Frames", badge langsung bertransisi menjadi `⚡ Fase 1 : Generate Start Frame` (hijau), dan toast notifikasi 10 detik muncul di pojok kanan bawah.
-  - Reset simulasi dan toggle Dark/Light mode berbasis 100% semantic CSS tokens.
+  - **Simulasi 1 (Multiplier Lab — 8 Klip)**:
+    - Default: Hanya Klip #1 yang terbuka, Klip #2 s.d. #8 tertutup.
+    - Klik header kartu klip lain: Klip aktif sebelumnya menutup otomatis.
+    - Toolbar **Quick Jump (Klip #1 s.d. #8)** dengan penanda badge bridge `🌉`.
+  - **Simulasi 2 (Pillar Campaign — 4 Klip)**:
+    - Integrasi toolbar **Quick Jump (Klip #1 s.d. #4)** di atas daftar klip.
+    - Navigasi chip langsung sinkron dengan status buka/tutup accordion klip.
+  - Dukungan toggle Dark Mode & Light Mode (100% semantic CSS design tokens).
 
 ---
 
 ## 📋 Execution Task List
 
-- [x] **Task 1: Perbaikan Multiplier Campaign UI (`app/multiplier-lab/[id]/page.js`)**
-  - [x] Hapus `confirm(...)` pada `handleGenerateAllT2I`.
-  - [x] Pasang elemen DOM toast `{toast && <div className={`toast ${toast.type === 'error' ? 'toast-error' : 'toast-success'}`}>{toast.message || toast.msg}</div>}` di JSX halaman.
-  - [x] Perbarui helper `showToast` agar mendukung parameter durasi kustom (default 4000ms, kirim 10000ms untuk notifikasi start frame).
-  - [x] Update `renderPhaseBadge` agar saat status `generating_t2i` atau `regenerate_start_frames_status === 'running'`, menampilkan label `⚡ Fase 1 : Generate Start Frame` dengan warna hijau (`var(--status-success)` dan `var(--status-success-soft)`).
-  - [x] Berikan update optimis di `handleGenerateAllT2I` agar badge langsung berubah saat tombol diklik.
+- [x] **Task 1: Implementasi Accordion & Quick Jump pada Multiplier Lab (`app/multiplier-lab/[id]/page.js`)**
+  - [x] Tambahkan state `activeClipIndex` per task (`{ [taskId]: number }`) di komponen `CampaignDetailPageContent`.
+  - [x] Implementasikan helper `toggleClip(taskId, idx)` yang secara default menganggap Klip #1 (index 0) aktif bila belum diatur, dan menutup klip lain ketika klip baru dibuka.
+  - [x] Tambahkan bar navigasi **Quick Jump Klip** di atas daftar storyboard dengan chip interaktif `Klip #1` s.d. `Klip #N`.
+  - [x] Restrukturisasi card klip menjadi accordion dengan header interaktif (indikator panah `▼`/`▶`, cuplikan naskah VO saat tertutup, dan badge bridge transisi).
+  - [x] Bungkus isi detail klip (VO, Visual, T2I, I2V) dalam blok `{isExpanded && ( ... )}` dan sematkan anchor ID untuk scrolling.
 
-- [x] **Task 2: Penyelarasan Backend Multiplier API (`app/api/v2/multiplier/[id]/regenerate-start-frames/route.js`)**
-  - [x] Update DB saat regenerasi dimulai: set `status = 'generating_t2i'`, `regenerate_start_frames_status = 'running'`.
-  - [x] Saat regenerasi seluruh start frame selesai di latar belakang: kembalikan `status = 'waiting_approval'`, `regenerate_start_frames_status = NULL`.
+- [x] **Task 2: Penambahan Toolbar Quick Jump pada Pillar Campaign (`app/pillar-campaigns/[id]/page.js`)**
+  - [x] Tambahkan bar navigasi **Quick Jump Klip** di atas daftar `plan.map` pada Workbench V2 Storyboard item.
+  - [x] Hubungkan chip Quick Jump dengan state `activeClipIndex[item.id]` yang sudah ada di Pillar Campaign.
+  - [x] Tambahkan anchor ID pada kartu klip Pillar (`id={`pillar-clip-${item.id}-${idx}`}`) agar tombol chip melakukan smooth scroll ke adegan yang dituju.
 
-- [x] **Task 3: Perbaikan Pillar Campaign UI (`app/pillar-campaigns/[id]/page.js`)**
-  - [x] Update `showToast` agar mendukung parameter durasi kustom (kirim 10000ms untuk regenerasi start frame).
-  - [x] Update fungsi `renderItemStatus(item, campaign)` untuk menangani `workflow_status === 'start_frames_processing'`, `item.start_frame_status === 'processing'`, dan `item.regenerate_start_frames_status`: menampilkan badge `⚡ Fase 1 : Generate Start Frame` berwarna hijau (`var(--status-success)` dan `var(--status-success-soft)`).
-  - [x] Berikan update optimis di `handleRegenerateAllSF` agar status item langsung berubah di UI sebelum respon server tiba.
-
-- [x] **Task 4: Sinkronisasi Unit Tests & Pengujian Fungsional**
-  - [x] Jalankan dan sesuaikan unit test pada `tests/multiplier-phase-recipe-card.test.js` atau test suite terkait.
-  - [x] Verifikasi kestabilan build via linter / build check.
+- [x] **Task 3: Pengujian & Verifikasi Kompatibilitas UI**
+  - [x] Uji navigasi accordion dan tombol Quick Jump pada Multiplier Lab (4 klip, 6 klip, hingga 8 klip).
+  - [x] Uji navigasi Quick Jump pada Pillar Campaign.
+  - [x] Pastikan fungsi edit textarea (VO, Visual, T2I, I2V) dan tombol copy aset tetap bekerja normal tanpa regresi.
+  - [x] Jalankan unit test `tests/multiplier-phase-recipe-card.test.js` dan pastikan build bersih.
 
 ---
 
@@ -46,319 +53,225 @@ Sesuai SOP Makna Flow, simulasi visual dan alur interaktif standalone telah dibu
 
 ### 1. `app/multiplier-lab/[id]/page.js`
 
-#### A. Penghapusan Popup `confirm` & Toast 10 Detik
+#### A. Penambahan State & Helper `toggleClip`
 ##### Code Sebelum (Current/Before):
 ```javascript
-  const showToast = (message, type = 'success') => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
-  };
-
-  const handleGenerateAllT2I = async (taskId) => {
-    if (!confirm('Apakah Anda yakin ingin meregenerasi semua start frame T2I untuk adegan ini di latar belakang?')) return;
-    setBatchRegeneratingSF(prev => ({ ...prev, [taskId]: true }));
-    try {
-      const res = await fetch(`/api/v2/multiplier/${taskId}/regenerate-start-frames`, {
-        method: 'POST'
-      });
-      const data = await res.json();
-      if (data.success) {
-        showToast('Proses regenerasi semua start frame telah dimulai di latar belakang.');
-        fetchTasks(true);
-      } else {
-        showToast(data.error || 'Gagal memulai regenerasi massal.', 'error');
-      }
-    } catch (err) {
-      showToast(err.message, 'error');
-    } finally {
-      setBatchRegeneratingSF(prev => ({ ...prev, [taskId]: false }));
-    }
-  };
+  const [editedStoryboards, setEditedStoryboards] = useState({});
+  const [editedCaptions, setEditedCaptions] = useState({});
+  const [editedYtTitles, setEditedYtTitles] = useState({});
+  const [retryingTask, setRetryingTask] = useState({});
 ```
 
 ##### Code Sesudah (Proposed/After):
 ```javascript
-  const toastTimeoutRef = useRef(null);
-  const showToast = (message, type = 'success', duration = 4000) => {
-    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-    setToast({ message, type });
-    toastTimeoutRef.current = setTimeout(() => setToast(null), duration);
-  };
+  const [editedStoryboards, setEditedStoryboards] = useState({});
+  const [editedCaptions, setEditedCaptions] = useState({});
+  const [editedYtTitles, setEditedYtTitles] = useState({});
+  const [retryingTask, setRetryingTask] = useState({});
 
-  const handleGenerateAllT2I = async (taskId) => {
-    // 1. Tanpa confirm() popup, langsung eksekusi di latar belakang
-    setBatchRegeneratingSF(prev => ({ ...prev, [taskId]: true }));
-    // Optimistic UI: langsung ubah status task di state lokal menjadi Fase 1: Generate Start Frame
-    setTasks(prev => prev.map(t => t.id === taskId ? {
-      ...t,
-      status: 'generating_t2i',
-      regenerate_start_frames_status: 'running',
-      regenerate_start_frames_progress: 'Memulai...'
-    } : t));
-
-    try {
-      const res = await fetch(`/api/v2/multiplier/${taskId}/regenerate-start-frames`, {
-        method: 'POST'
-      });
-      const data = await res.json();
-      if (data.success) {
-        // Notifikasi toast di pojok kanan bawah selama 10 detik (10000ms)
-        showToast('Proses regenerasi semua start frame telah dimulai di latar belakang.', 'success', 10000);
-        fetchTasks(true);
-      } else {
-        showToast(data.error || 'Gagal memulai regenerasi massal.', 'error');
-        fetchTasks(true);
-      }
-    } catch (err) {
-      showToast(err.message, 'error');
-      fetchTasks(true);
-    } finally {
-      setBatchRegeneratingSF(prev => ({ ...prev, [taskId]: false }));
-    }
+  // Accordion Clip State per Task: { [taskId]: number }
+  const [activeClipIndex, setActiveClipIndex] = useState({});
+  const toggleClip = (taskId, idx) => {
+    setActiveClipIndex(prev => {
+      const currentActive = prev[taskId] !== undefined ? prev[taskId] : 0;
+      return {
+        ...prev,
+        [taskId]: currentActive === idx ? -1 : idx
+      };
+    });
   };
 ```
 
-#### B. Perubahan Badge Status Menjadi "Fase 1 : Generate Start Frame" Warna Hijau
-##### Code Sebelum (Current/Before):
-```javascript
-    case 'generating_t2i':
-      text = '⚡ Fase 1 : Generasi T2I Start Frames';
-      color = 'var(--status-info)';
-      bg = 'var(--status-info-soft)';
-      border = 'var(--status-info-soft)';
-      isPulse = true;
-      break;
-    case 'waiting_approval':
-      text = '⏸️ Fase 2 : Paused (Ready for Review)';
-      color = 'var(--status-warning)';
-      bg = 'var(--status-warning-soft)';
-      border = 'var(--status-warning-soft)';
-      break;
-```
-
-##### Code Sesudah (Proposed/After):
-```javascript
-    case 'generating_t2i':
-      text = task.regenerate_start_frames_progress
-        ? `⚡ Fase 1 : Generate Start Frame (${task.regenerate_start_frames_progress})`
-        : '⚡ Fase 1 : Generate Start Frame';
-      color = 'var(--status-success)';
-      bg = 'var(--status-success-soft)';
-      border = 'var(--status-success-soft)';
-      isPulse = true;
-      break;
-    case 'waiting_approval':
-      if (task.regenerate_start_frames_status === 'running' || batchRegeneratingSF[task.id]) {
-        text = task.regenerate_start_frames_progress
-          ? `⚡ Fase 1 : Generate Start Frame (${task.regenerate_start_frames_progress})`
-          : '⚡ Fase 1 : Generate Start Frame';
-        color = 'var(--status-success)';
-        bg = 'var(--status-success-soft)';
-        border = 'var(--status-success-soft)';
-        isPulse = true;
-      } else {
-        text = '⏸️ Fase 2 : Paused (Ready for Review)';
-        color = 'var(--status-warning)';
-        bg = 'var(--status-warning-soft)';
-        border = 'var(--status-warning-soft)';
-      }
-      break;
-```
-
-#### C. Render Elemen Toast di JSX Multiplier Lab
+#### B. Penambahan Toolbar Quick Jump & Restrukturisasi Card Klip ke Accordion
 ##### Code Sebelum (Current/Before):
 ```jsx
-// Di return JSX app/multiplier-lab/[id]/page.js belum ada elemen toast
+// app/multiplier-lab/[id]/page.js:L1541-L1547
+                                     {/* Clips edit rows */}
+                                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                       {storyboard.map((clip, cidx) => (
+                                         <div key={cidx} style={{ display: 'flex', flexDirection: 'column', gap: 12, background: 'var(--surface-interactive)', padding: 16, borderRadius: 8, border: '1px solid var(--border)' }}>
+                                           <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--accent-light)', borderBottom: '1px solid var(--border)', paddingBottom: 6 }}>
+                                             🎬 Klip #{cidx + 1}
+                                           </div>
+                                           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
 ```
 
 ##### Code Sesudah (Proposed/After):
 ```jsx
-      {toast && (
-        <div className={`toast ${toast.type === 'error' ? 'toast-error' : 'toast-success'}`}>
-          {toast.message || toast.msg}
-        </div>
-      )}
+// app/multiplier-lab/[id]/page.js:L1541-L1547
+                                     {/* Quick Jump Bar Klip Storyboard */}
+                                     {storyboard.length > 1 && (
+                                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', padding: '10px 14px', background: 'var(--surface-interactive)', border: '1px solid var(--border-subtle)', borderRadius: 8 }}>
+                                         <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', marginRight: 4 }}>⚡ Lompat Cepat:</span>
+                                         {storyboard.map((_, sidx) => {
+                                           const isActive = (activeClipIndex[task.id] !== undefined ? activeClipIndex[task.id] : 0) === sidx;
+                                           const isBridge = (bridging.isBridgingActive !== false) &&
+                                             Number(sidx + 1) >= Number(bridging.bridgeAtClip || 0) &&
+                                             Number(sidx + 1) < (Number(bridging.bridgeAtClip || 0) + Number(bridging.bridgeDurationClips || 1));
+                                           return (
+                                             <button
+                                               key={sidx}
+                                               type="button"
+                                               onClick={() => {
+                                                 setActiveClipIndex(prev => ({ ...prev, [task.id]: sidx }));
+                                                 const el = document.getElementById(`mult-clip-${task.id}-${sidx}`);
+                                                 if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                               }}
+                                               style={{
+                                                 padding: '4px 10px',
+                                                 fontSize: '0.72rem',
+                                                 fontWeight: isActive ? 700 : 500,
+                                                 borderRadius: 4,
+                                                 border: isActive ? '1px solid var(--accent)' : '1px solid var(--border-subtle)',
+                                                 background: isActive ? 'var(--accent)' : 'var(--surface)',
+                                                 color: isActive ? 'var(--on-action-primary, #042f2e)' : 'var(--text-primary)',
+                                                 cursor: 'pointer'
+                                               }}
+                                             >
+                                               Klip #{sidx + 1} {isBridge ? '🌉' : ''}
+                                             </button>
+                                           );
+                                         })}
+                                       </div>
+                                     )}
+
+                                     {/* Clips edit rows dengan Accordion (Klip 1 default terbuka) */}
+                                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                       {storyboard.map((clip, cidx) => {
+                                         const isExpanded = (activeClipIndex[task.id] !== undefined ? activeClipIndex[task.id] : 0) === cidx;
+                                         const isBridge = (bridging.isBridgingActive !== false) &&
+                                           Number(cidx + 1) >= Number(bridging.bridgeAtClip || 0) &&
+                                           Number(cidx + 1) < (Number(bridging.bridgeAtClip || 0) + Number(bridging.bridgeDurationClips || 1));
+
+                                         return (
+                                           <div
+                                             key={cidx}
+                                             id={`mult-clip-${task.id}-${cidx}`}
+                                             style={{
+                                               display: 'flex',
+                                               flexDirection: 'column',
+                                               gap: isExpanded ? 12 : 0,
+                                               background: isExpanded ? 'var(--surface-raised)' : 'var(--surface-interactive)',
+                                               padding: 16,
+                                               borderRadius: 8,
+                                               border: isExpanded ? '1px solid var(--accent)' : '1px solid var(--border)',
+                                               borderLeft: isBridge ? '3px solid var(--status-info)' : undefined,
+                                               transition: 'all 0.2s ease'
+                                             }}
+                                           >
+                                             {/* Header Klip Interaktif (Toggle Accordion) */}
+                                             <div
+                                               onClick={() => toggleClip(task.id, cidx)}
+                                               style={{
+                                                 fontWeight: 700,
+                                                 fontSize: '0.85rem',
+                                                 color: isBridge ? 'var(--status-info)' : 'var(--accent-light)',
+                                                 borderBottom: isExpanded ? '1px solid var(--border-subtle)' : 'none',
+                                                 paddingBottom: isExpanded ? 8 : 0,
+                                                 display: 'flex',
+                                                 justifyContent: 'space-between',
+                                                 alignItems: 'center',
+                                                 cursor: 'pointer',
+                                                 userSelect: 'none'
+                                               }}
+                                             >
+                                               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                                                 <span>{isExpanded ? '▼' : '▶'} 🎬 Klip #{cidx + 1}</span>
+                                                 {isBridge && (
+                                                   <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--status-info)', background: 'var(--status-info-soft)', padding: '2px 6px', borderRadius: 4 }}>
+                                                     🌉 BRIDGE TRANSISI PRODUK
+                                                   </span>
+                                                 )}
+                                                 {!isExpanded && clip.narration && (
+                                                   <span style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '380px', fontStyle: 'italic' }}>
+                                                     "{clip.narration.slice(0, 50)}..."
+                                                   </span>
+                                                 )}
+                                               </div>
+                                               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                                                 {isExpanded ? 'Tutup Klip' : 'Buka Klip'}
+                                               </span>
+                                             </div>
+
+                                             {isExpanded && (
+                                               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 4 }}>
+                                                 {/* Naskah Voiceover (VO), Aksi Visual, Prompt T2I, Prompt I2V */}
+                                                 ...
+                                               </div>
+                                             )}
+                                           </div>
+                                         );
+                                       })}
+                                     </div>
 ```
 
 ---
 
-### 2. `app/api/v2/multiplier/[id]/regenerate-start-frames/route.js`
+### 2. `app/pillar-campaigns/[id]/page.js`
 
-#### Perubahan Status Database saat Memulai dan Selesai
+#### Penambahan Toolbar Quick Jump Klip di Atas Daftar Storyboard
 ##### Code Sebelum (Current/Before):
-```javascript
-    // Set status running and initial progress
-    await dbRun(`
-      UPDATE re_multiplier_tasks
-      SET regenerate_start_frames_status = 'running',
-          regenerate_start_frames_progress = ?
-      WHERE id = ?
-    `, [`0/${prompts.length}`, id]);
+```jsx
+// app/pillar-campaigns/[id]/page.js:L2278-L2286
+                </div>
+              </div>
+            )}
+
+            {/* Creative Clip Plans list */}
+            {plan.map((p, idx) => {
+              const isBridge = campaign?.visual_mode === 'hybrid_lock' && campaign?.is_bridging_active && Number(p.clip_index) === Number(campaign.bridge_at_clip);
+              const isExpanded = (activeClipIndex[item.id] !== undefined ? activeClipIndex[item.id] : 0) === idx;
+
+              return (
+                <div key={idx} ...>
 ```
 
 ##### Code Sesudah (Proposed/After):
-```javascript
-    // Set status running, status = generating_t2i, and initial progress
-    await dbRun(`
-      UPDATE re_multiplier_tasks
-      SET status = 'generating_t2i',
-          regenerate_start_frames_status = 'running',
-          regenerate_start_frames_progress = ?
-      WHERE id = ?
-    `, [`0/${prompts.length}`, id]);
-```
+```jsx
+// app/pillar-campaigns/[id]/page.js:L2278-L2286
+                </div>
+              </div>
+            )}
 
-Dan saat background task selesai di `runTaskRegenerateStartFramesBackground`:
-##### Code Sebelum (Current/Before):
-```javascript
-    // Reset status after completion
-    await dbRun(`
-      UPDATE re_multiplier_tasks
-      SET regenerate_start_frames_status = NULL,
-          regenerate_start_frames_progress = NULL
-      WHERE id = ?
-    `, [taskId]).catch(() => {});
-```
+            {/* Quick Jump Bar Klip Storyboard */}
+            {plan.length > 1 && (
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', padding: '10px 14px', background: 'var(--surface-interactive)', border: '1px solid var(--border-subtle)', borderRadius: 8, marginBottom: 12 }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', marginRight: 4 }}>⚡ Lompat Cepat:</span>
+                {plan.map((p, pidx) => {
+                  const isActive = (activeClipIndex[item.id] !== undefined ? activeClipIndex[item.id] : 0) === pidx;
+                  const isBridgeClip = campaign?.visual_mode === 'hybrid_lock' && campaign?.is_bridging_active && Number(p.clip_index) === Number(campaign.bridge_at_clip);
+                  return (
+                    <button
+                      key={pidx}
+                      type="button"
+                      onClick={() => {
+                        setActiveClipIndex(prev => ({ ...prev, [item.id]: pidx }));
+                        const el = document.getElementById(`pillar-clip-${item.id}-${pidx}`);
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                      }}
+                      style={{
+                        padding: '4px 10px',
+                        fontSize: '0.72rem',
+                        fontWeight: isActive ? 700 : 500,
+                        borderRadius: 4,
+                        border: isActive ? '1px solid var(--accent)' : '1px solid var(--border-subtle)',
+                        background: isActive ? 'var(--accent)' : 'var(--surface)',
+                        color: isActive ? 'var(--on-action-primary, #042f2e)' : 'var(--text-primary)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Klip #{p.clip_index || (pidx + 1)} {isBridgeClip ? '🌉' : ''}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
-##### Code Sesudah (Proposed/After):
-```javascript
-    // Kembalikan ke waiting_approval (Paused Ready for Review) setelah selesai
-    await dbRun(`
-      UPDATE re_multiplier_tasks
-      SET status = 'waiting_approval',
-          regenerate_start_frames_status = NULL,
-          regenerate_start_frames_progress = NULL
-      WHERE id = ?
-    `, [taskId]).catch(() => {});
-```
+            {/* Creative Clip Plans list */}
+            {plan.map((p, idx) => {
+              const isBridge = campaign?.visual_mode === 'hybrid_lock' && campaign?.is_bridging_active && Number(p.clip_index) === Number(campaign.bridge_at_clip);
+              const isExpanded = (activeClipIndex[item.id] !== undefined ? activeClipIndex[item.id] : 0) === idx;
 
----
-
-### 3. `app/pillar-campaigns/[id]/page.js`
-
-#### A. Dukungan Durasi Toast 10 Detik
-##### Code Sebelum (Current/Before):
-```javascript
-  function showToast(msg, type = 'success') {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3500);
-  }
-```
-
-##### Code Sesudah (Proposed/After):
-```javascript
-  const toastTimeoutRef = useRef(null);
-  function showToast(msg, type = 'success', duration = 3500) {
-    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-    setToast({ msg, type });
-    toastTimeoutRef.current = setTimeout(() => setToast(null), duration);
-  }
-```
-
-#### B. Handler `handleRegenerateAllSF` dengan Durasi Toast 10 Detik & Optimistic Update
-##### Code Sebelum (Current/Before):
-```javascript
-    const handleRegenerateAllSF = async () => {
-      setBatchRegeneratingSF(prev => ({ ...prev, [item.id]: true }));
-      try {
-        const res = await fetch(`/api/v2/pillar-campaigns/items/${item.id}/regenerate-start-frames`, {
-          method: 'POST'
-        });
-        const resData = await res.json();
-        if (resData.success) {
-          showToast("Regenerasi semua start frame telah dimulai di latar belakang.");
-          fetchDetail();
-        } else {
-          showToast(resData.error || 'Gagal memulai regenerasi start frame.', 'error');
-        }
-      } catch (err) {
-        showToast(err.message, 'error');
-      } finally {
-        setBatchRegeneratingSF(prev => ({ ...prev, [item.id]: false }));
-      }
-    };
-```
-
-##### Code Sesudah (Proposed/After):
-```javascript
-    const handleRegenerateAllSF = async () => {
-      setBatchRegeneratingSF(prev => ({ ...prev, [item.id]: true }));
-      // Optimistic update agar badge langsung bertransisi menjadi Fase 1: Generate Start Frame
-      setItems(prev => prev.map(it => it.id === item.id ? {
-        ...it,
-        workflow_status: 'start_frames_processing',
-        start_frame_status: 'processing',
-        regenerate_start_frames_status: 'running'
-      } : it));
-
-      try {
-        const res = await fetch(`/api/v2/pillar-campaigns/items/${item.id}/regenerate-start-frames`, {
-          method: 'POST'
-        });
-        const resData = await res.json();
-        if (resData.success) {
-          showToast("Regenerasi semua start frame telah dimulai di latar belakang.", "success", 10000);
-          fetchDetail();
-        } else {
-          showToast(resData.error || 'Gagal memulai regenerasi start frame.', 'error');
-          fetchDetail();
-        }
-      } catch (err) {
-        showToast(err.message, 'error');
-        fetchDetail();
-      } finally {
-        setBatchRegeneratingSF(prev => ({ ...prev, [item.id]: false }));
-      }
-    };
-```
-
-#### C. Render Item Status Badge Menjadi "Fase 1 : Generate Start Frame" Warna Hijau
-##### Code Sebelum (Current/Before):
-```javascript
-    // 3. Active processing states
-    else if (item.generation_status === 'processing') {
-      text = item.generation_progress ? `⚡ Fase 1 : ${item.generation_progress}` : '⚡ Fase 1 : AI Generation';
-      color = 'var(--accent-light)';
-      bg = 'var(--status-info-soft)';
-      pulse = true;
-    }
-    ...
-    // 3.5 Paused Review
-    else if (item.workflow_status === 'ready_for_review') {
-      text = '⏸️ Fase 2 : Paused (Ready for Review)';
-      color = 'var(--status-warning)';
-      bg = 'rgba(243, 156, 18, 0.1)';
-    }
-```
-
-##### Code Sesudah (Proposed/After):
-```javascript
-    // Start Frame Generation (Batch / Single)
-    else if (
-      item.workflow_status === 'start_frames_processing' ||
-      item.start_frame_status === 'processing' ||
-      ['queued', 'running'].includes(item.regenerate_start_frames_status) ||
-      batchRegeneratingSF[item.id]
-    ) {
-      text = item.regenerate_start_frames_progress
-        ? `⚡ Fase 1 : Generate Start Frame (${item.regenerate_start_frames_progress})`
-        : '⚡ Fase 1 : Generate Start Frame';
-      color = 'var(--status-success)';
-      bg = 'var(--status-success-soft)';
-      pulse = true;
-    }
-    // 3. Active processing states
-    else if (item.generation_status === 'processing') {
-      text = item.generation_progress ? `⚡ Fase 1 : ${item.generation_progress}` : '⚡ Fase 1 : AI Generation';
-      color = 'var(--accent-light)';
-      bg = 'var(--status-info-soft)';
-      pulse = true;
-    }
-    ...
-    // 3.5 Paused Review
-    else if (item.workflow_status === 'ready_for_review') {
-      text = '⏸️ Fase 2 : Paused (Ready for Review)';
-      color = 'var(--status-warning)';
-      bg = 'rgba(243, 156, 18, 0.1)';
-    }
+              return (
+                <div key={idx} id={`pillar-clip-${item.id}-${idx}`} ...>
 ```

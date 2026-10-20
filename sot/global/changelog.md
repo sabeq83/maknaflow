@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.64 — Accordion dan Quick Jump Klip Multiplier dan Pillar (20/10/2026)
+- Implementasi accordion klip storyboard pada Multiplier Lab dengan Klip 1 default terbuka
+- Membuka klip lain otomatis menutup klip aktif sebelumnya
+- Toolbar Quick Jump Klip pada Multiplier Lab dan Pillar Campaign
+
 ## V2.32.63 — Penyelarasan Generate All Start Frame Multiplier dan Pillar (20/10/2026)
 - Hapus modal confirm popup pada generate all start frame di Multiplier Lab
 - Tampilkan notifikasi toast 10 detik di pojok kanan bawah
