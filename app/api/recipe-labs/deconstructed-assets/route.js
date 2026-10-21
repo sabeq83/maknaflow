@@ -43,6 +43,9 @@ export const GET = withTenantContext(async () => {
         source_url: a.source_url,
         label: displayLabel,
         recipe_suggestion: recipeIdea,
+        tags: a.tags || '',
+        niche: a.niche || '',
+        original_caption: a.original_caption || '',
         raw_ideas: parsedIdeas
       };
     });

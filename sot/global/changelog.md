@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.67 — Recipe Labs Enhancements: Bugfix Payload, Search Filter Dekonstruksi & Live Mockup Preset Kolase (22/10/2026)
+- Fix ReferenceError body is not defined pada saat submit pembuatan kampanye Recipe Labs
+- Menambahkan filter pencarian real-time dan badge info untuk referensi video dekonstruksi
+- Menambahkan visual thumbnail preset cards dan live 1:1 preview mockup untuk layout kolase asimetris
+
 ## V2.32.66 — Arsitektur Skeduler Multi-Task & Non-Blocking Multiplier Lab (21/10/2026)
 - Pemisahan query antrean Fase 1 (sekuensial naskah) dan Fase 2 (konkuren produksi)
 - Refactor Multiplier worker processSingleMultiplierTask terisolasi per task

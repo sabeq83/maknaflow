@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Interaktif — Recipe Labs Enhancements</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --canvas: #080c14;
+      --sidebar: #0c121e;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --overlay-backdrop: rgba(2, 6, 14, 0.78);
+      --overlay-subtle: rgba(0, 0, 0, 0.24);
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --text-disabled: #66758a;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --link: #67e8f9;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --status-neutral: #a78bfa;
+      --status-neutral-soft: rgba(167, 139, 250, 0.14);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.28);
+      --shadow-modal: 0 26px 80px rgba(0, 0, 0, 0.6);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f2f5f8;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f7f9fc;
+      --surface-interactive: #edf2f7;
+      --surface-hover: #e6edf5;
+      --input-bg: #ffffff;
+      --overlay-backdrop: rgba(15, 23, 42, 0.54);
+      --overlay-subtle: rgba(0, 0, 0, 0.05);
+      --text-primary: #152033;
+      --text-secondary: #40506a;
+      --text-muted: #66758a;
+      --text-disabled: #8794a6;
+      --border-subtle: #d8e0ea;
+      --border-strong: #aebccd;
+      --action-primary: #087f73;
+      --action-primary-hover: #06665d;
+      --on-action-primary: #ffffff;
+      --link: #075ea8;
+      --status-info: #1d63b7;
+      --status-info-soft: #e8f1fc;
+      --status-success: #177a43;
+      --status-success-soft: #e6f5ec;
+      --status-warning: #925c08;
+      --status-warning-soft: #fff3d7;
+      --status-danger: #b4233d;
+      --status-danger-soft: #fdebef;
+      --status-neutral: #6548bd;
+      --status-neutral-soft: #f0ecfb;
+      --shadow-card: 0 12px 34px rgba(31, 45, 61, 0.09);
+      --shadow-modal: 0 26px 80px rgba(31, 45, 61, 0.22);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background: var(--canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Header Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 16px 24px;
+      box-shadow: var(--shadow-card);
+    }
+    .top-bar-title h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .top-bar-title p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .theme-toggle-btn {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .theme-toggle-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+
+    /* Section Cards */
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .section-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-success { background: var(--status-success-soft); color: var(--status-success); border: 1px solid var(--status-success-soft); }
+    .badge-info { background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info-soft); }
+    .badge-warning { background: var(--status-warning-soft); color: var(--status-warning); border: 1px solid var(--status-warning-soft); }
+
+    /* Form Controls */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .form-label {
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .form-control, .form-select {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 0.88rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 3px var(--status-info-soft);
+    }
+
+    /* Feature 2: Searchable Deconstruct Reference */
+    .search-box-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+    .search-input {
+      padding-left: 36px !important;
+      padding-right: 32px !important;
+    }
+    .search-clear-btn {
+      position: absolute;
+      right: 10px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 4px;
+      display: none;
+    }
+    .search-clear-btn:hover { color: var(--status-danger); }
+
+    .deconstruct-selected-card {
+      margin-top: 10px;
+      padding: 12px 16px;
+      background: var(--surface-interactive);
+      border: 1px solid var(--action-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    .deconstruct-selected-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      overflow: hidden;
+    }
+    .deconstruct-selected-title {
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: var(--action-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .deconstruct-selected-meta {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn-reset-selection {
+      background: var(--status-danger-soft);
+      border: 1px solid var(--status-danger-soft);
+      color: var(--status-danger);
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .btn-reset-selection:hover {
+      background: var(--status-danger);
+      color: #fff;
+    }
+
+    /* Feature 3: Collage Preset Layout Preview */
+    .collage-grid-layout-container {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      margin-top: 14px;
+    }
+    @media (max-width: 860px) {
+      .collage-grid-layout-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .preset-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .preset-card {
+      background: var(--surface-interactive);
+      border: 2px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .preset-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+    }
+    .preset-card.active {
+      border-color: var(--action-primary);
+      background: var(--surface-hover);
+      box-shadow: 0 0 16px var(--status-info-soft);
+    }
+    .preset-card-mini-preview {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: rgba(0,0,0,0.3);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+      padding: 4px;
+    }
+    .preset-card-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-align: center;
+    }
+
+    /* Live Preview Canvas */
+    .preview-canvas-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .preview-canvas-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .preview-canvas-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .preview-canvas-box {
+      width: 290px;
+      height: 290px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-sizing: border-box;
+    }
+    .grid-slot {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6px;
+      transition: all 0.3s;
+      overflow: hidden;
+      user-select: none;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.35);
+    }
+    .grid-slot-badge {
+      font-size: 0.7rem;
+      font-weight: 800;
+      background: rgba(0,0,0,0.6);
+      color: var(--action-primary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-bottom: 2px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .grid-slot-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #ffffff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      line-height: 1.2;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+    .btn-secondary {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-hover);
+    }
+
+    /* Bugfix test alert */
+    .alert-box {
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 14px;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    .alert-success {
+      background: var(--status-success-soft);
+      border: 1px solid var(--status-success);
+      color: var(--status-success);
+    }
+    .alert-danger {
+      background: var(--status-danger-soft);
+      border: 1px solid var(--status-danger);
+      color: var(--status-danger);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="top-bar-title">
+        <h1>🍳 Recipe Labs — UI Enhancements & Bugfix Mockup</h1>
+        <p>Simulasi Interaktif: Search Filter Dekonstruksi + Mockup Preset Kolase + Verifikasi Bugfix Payload</p>
+      </div>
+      <div>
+        <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()">
+          🌓 Toggle Light / Dark
+        </button>
+      </div>
+    </div>
+
+    <!-- SEKSI 1: VERIFIKASI BUGFIX `body is not defined` -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">
+          <span>🛠️ 1. Verifikasi Bugfix Error: "body is not defined"</span>
+        </div>
+        <span class="badge badge-success">Solusi Teridentifikasi</span>
+      </div>
+
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5;">
+        <strong>Akar Masalah:</strong> Pada file <code>app/recipe-labs/page.js</code> baris 495-496, kode memanggil variabel <code>body.target_demographic = ...</code> padahal objek yang dideklarasikan bernama <code>payload</code>. Hal ini melempar JavaScript ReferenceError yang ditangkap oleh <code>catch (err)</code> dan menampilkan pesan <em>"Terjadi kesalahan jaringan: body is not defined"</em>.
+      </p>
+
+      <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; margin-bottom: 14px; overflow-x: auto;">
+        <div style="color: var(--status-danger); margin-bottom: 6px;">
+          - // SEBELUM (Bug):<br>
+          - body.target_demographic = targetDemographic;<br>
+          - body.target_demographic_custom = targetDemographicCustom;
+        </div>
+        <div style="color: var(--status-success);">
+          + // SESUDAH (Fix):<br>
+          + payload.target_demographic = targetDemographic;<br>
+          + payload.target_demographic_custom = targetDemographicCustom;
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <button class="btn btn-primary" onclick="testFormSubmit(true)">
+          🚀 Test Submit dengan Bugfix (Berhasil)
+        </button>
+        <button class="btn btn-secondary" onclick="testFormSubmit(false)" style="color: var(--status-danger);">
+          ⚠️ Simulasi Kode Lama (Muncul Error)
+        </button>
+      </div>
+
+      <div id="bugfixResultArea"></div>
+    </div>
+
+    <!-- SEKSI 2: FILTER PENCARIAN REFERENSI VIDEO DEKONSTRUKSI -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">
+          <span>🔍 2. Filter Pencarian Referensi Video Dekonstruksi</span>
+        </div>
+        <span class="badge badge-info">Solusi UX Database Besar</span>
+      </div>
+
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+        Database dekonstruksi yang memiliki puluhan/ratusan video kini dilengkapi <strong>kotak pencarian real-time</strong>. Pengguna dapat mencari berdasarkan nama hidangan, URL sumber, tagar (#resep, #viral), atau niche.
+      </p>
+
+      <div class="form-group">
+        <div class="form-label">
+          <span>Gunakan Referensi Video Dekonstruksi (Opsional)</span>
+          <span id="deconstructMatchCount" style="font-size: 0.78rem; color: var(--text-muted);">
+            Menampilkan 6 dari 6 referensi
+          </span>
+        </div>
+
+        <!-- Search Input -->
+        <div class="search-box-wrapper">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            id="deconstructSearchInput"
+            class="form-control search-input"
+            placeholder="Ketik untuk mencari referensi (misal: 'sambal', 'ayam', 'tiktok', '#kuliner')..."
+            oninput="handleDeconstructSearch()"
+          />
+          <button class="search-clear-btn" id="searchClearBtn" onclick="clearDeconstructSearch()">✖</button>
+        </div>
+
+        <!-- Dropdown Selector -->
+        <select
+          id="deconstructSelect"
+          class="form-select"
+          style="margin-top: 8px;"
+          onchange="handleDeconstructSelectChange()"
+        >
+          <option value="">-- Tanpa Referensi (Buat Baru) --</option>
+        </select>
+
+        <!-- Selected Badge / Preview Card -->
+        <div id="deconstructSelectedCard" class="deconstruct-selected-card" style="display: none;">
+          <div class="deconstruct-selected-info">
+            <span style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted);">
+              ✅ Video Terpilih Sebagai Basis Resep:
+            </span>
+            <span id="selectedCardTitle" class="deconstruct-selected-title"></span>
+            <div id="selectedCardMeta" class="deconstruct-selected-meta"></div>
+          </div>
+          <button class="btn-reset-selection" onclick="resetDeconstructSelection()">
+            ✖ Batalkan Pilihan
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEKSI 3: PRESET LAYOUT KOLASE & MOCKUP PREVIEW INTERAKTIF -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">
+          <span>🖼️ 3. Preset Layout Kolase & Mockup Preview Interaktif</span>
+        </div>
+        <span class="badge badge-warning">Visual WYSIWYG</span>
+      </div>
+
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+        Ketika pengguna memilih jumlah gambar atau preset layout kolase, antarmuka langsung menyajikan <strong>mockup preview visual 1:1</strong> secara real-time lengkap dengan nama peranan slot (Bahan, Proses, Hasil, Plating) serta mengikuti nilai celah (gap), sudut radius, dan padding.
+      </p>
+
+      <!-- Selector Jumlah Gambar -->
+      <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap;">
+        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Jumlah Gambar per Resep:</span>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary count-btn" onclick="selectImageCount(3)">3 Gambar</button>
+          <button class="btn btn-secondary count-btn" onclick="selectImageCount(4)">4 Gambar (Default)</button>
+          <button class="btn btn-secondary count-btn" onclick="selectImageCount(5)">5 Gambar</button>
+          <button class="btn btn-secondary count-btn" onclick="selectImageCount(6)">6 Gambar</button>
+        </div>
+      </div>
+
+      <div class="collage-grid-layout-container">
+        <!-- Kolom Kiri: Pilihan Preset Cards & Slider Kontrol -->
+        <div>
+          <label class="form-label" style="margin-bottom: 10px;">
+            <span>Pilih Template Preset Layout:</span>
+            <span id="currentPresetNameLabel" style="color: var(--action-primary); font-weight: 700;"></span>
+          </label>
+
+          <!-- Preset Cards Grid -->
+          <div id="presetCardsContainer" class="preset-cards-grid" style="margin-bottom: 20px;"></div>
+
+          <!-- Controls: Gap, Radius, Padding, Background Color -->
+          <div style="background: var(--surface-interactive); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 16px;">
+            <div style="font-size: 0.82rem; font-weight: 700; margin-bottom: 12px; color: var(--text-primary);">
+              🎛️ Penyesuaian Ruang & Tampilan Kolase:
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 0.78rem;">
+                  <span>Jarak Celah (Gap):</span>
+                  <span id="gapVal" style="font-family: monospace; font-weight: 700;">12px</span>
+                </label>
+                <input type="range" id="gapRange" min="0" max="30" step="2" value="12" oninput="updateCollageStyles()" style="accent-color: var(--action-primary); width: 100%;">
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 0.78rem;">
+                  <span>Sudut Lengkung (Radius):</span>
+                  <span id="radiusVal" style="font-family: monospace; font-weight: 700;">16px</span>
+                </label>
+                <input type="range" id="radiusRange" min="0" max="40" step="2" value="16" oninput="updateCollageStyles()" style="accent-color: var(--action-primary); width: 100%;">
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 0.78rem;">
+                  <span>Outer Padding:</span>
+                  <span id="paddingVal" style="font-family: monospace; font-weight: 700;">16px</span>
+                </label>
+                <input type="range" id="paddingRange" min="0" max="40" step="2" value="16" oninput="updateCollageStyles()" style="accent-color: var(--action-primary); width: 100%;">
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 0.78rem;">
+                  <span>Warna Background Grid:</span>
+                  <span id="bgVal" style="font-family: monospace; font-weight: 700;">#0d0d12</span>
+                </label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <input type="color" id="bgColorInput" value="#0d0d12" oninput="updateCollageStyles()" style="border: none; background: none; width: 32px; height: 26px; cursor: pointer;">
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">Klik palet</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kolom Kanan: Preview Box Visual 1:1 -->
+        <div class="preview-canvas-card">
+          <div class="preview-canvas-header">
+            <span class="preview-canvas-title">📱 Live Layout Preview (1:1)</span>
+            <span id="previewSlotBadge" class="badge badge-info">4 Slots</span>
+          </div>
+
+          <!-- Preview Canvas Outer Box -->
+          <div id="livePreviewCanvas" class="preview-canvas-box"></div>
+
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; line-height: 1.4;">
+            Gambar dirender sesuai alur instruksi kuliner (Bahan ➔ Proses ➔ Matang ➔ Plating).
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- 1. THEME SWITCHER ---
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+    }
+
+    // --- 2. BUGFIX SIMULATION ---
+    function testFormSubmit(withFix) {
+      const resultArea = document.getElementById('bugfixResultArea');
+      if (withFix) {
+        // Simulasi setelah perbaikan: payload.target_demographic digunakan
+        const payload = {
+          category: 'Makanan',
+          target_demographic: 'genz_casual',
+          target_demographic_custom: '',
+          campaign_type: 'static'
+        };
+        resultArea.innerHTML = `
+          <div class="alert-box alert-success">
+            <span>✅</span>
+            <div>
+              <strong>Berhasil!</strong> Form berhasil disubmit tanpa error JavaScript.<br>
+              <span style="font-size: 0.78rem; opacity: 0.85;">Payload terkirim ke API: ${JSON.stringify(payload)}</span>
+            </div>
+          </div>
+        `;
+      } else {
+        // Simulasi error sebelum perbaikan
+        resultArea.innerHTML = `
+          <div class="alert-box alert-danger">
+            <span>❌</span>
+            <div>
+              <strong>ReferenceError Terdeteksi:</strong> body is not defined.<br>
+              <span style="font-size: 0.78rem; opacity: 0.85;">Muncul banner pesan error merah: "Terjadi kesalahan jaringan: body is not defined"</span>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // --- 3. SEARCHABLE DECONSTRUCTION DATA & LOGIC ---
+    const MOCK_DECONSTRUCT_ASSETS = [
+      {
+        id: 'dc_101',
+        source_url: 'tiktok.com/@chef_dimas/video/7321894102',
+        label: 'tiktok.com/@chef_dimas... (#ayamgoreng #crispy)',
+        recipe_suggestion: 'Ayam Goreng Lengkuas Super Renyah',
+        tags: '#ayamgoreng #crispy #lengkuas #resep',
+        niche: 'Kuliner Nusantara'
+      },
+      {
+        id: 'dc_102',
+        source_url: 'instagram.com/reel/C8_BakeryPastry9',
+        label: 'instagram.com/reel/C8_Bakery... (#croissant #pastry)',
+        recipe_suggestion: 'Croissant Coklat Butter Flaky',
+        tags: '#croissant #pastry #butter #dessert',
+        niche: 'Baking & Pastry'
+      },
+      {
+        id: 'dc_103',
+        source_url: 'tiktok.com/@dapur_umi/video/728819001',
+        label: 'tiktok.com/@dapur_umi... (#sambal #sambalmatah)',
+        recipe_suggestion: 'Sambal Matah Bali Segar Wangi',
+        tags: '#sambal #sambalmatah #pedas #nusantara',
+        niche: 'Bumbu & Sambal'
+      },
+      {
+        id: 'dc_104',
+        source_url: 'youtube.com/shorts/es_teh_kampoeng',
+        label: 'youtube.com/shorts/es_teh... (#minumansegar #esteh)',
+        recipe_suggestion: 'Es Teh Manis Melati Jumbo',
+        tags: '#minumansegar #esteh #segar #viral',
+        niche: 'Minuman'
+      },
+      {
+        id: 'dc_105',
+        source_url: 'tiktok.com/@streetfood_hunter/video/712398',
+        label: 'tiktok.com/@streetfood_hunter... (#martabak #manis)',
+        recipe_suggestion: 'Martabak Manis Bangka Pandan Keju',
+        tags: '#martabak #manis #keju #jajananpasar',
+        niche: 'Jajanan Pasar'
+      },
+      {
+        id: 'dc_106',
+        source_url: 'instagram.com/reel/C7_KoreanTteokbokki',
+        label: 'instagram.com/reel/C7_Korean... (#tteokbokki #kfood)',
+        recipe_suggestion: 'Spicy Cheese Tteokbokki Halal',
+        tags: '#tteokbokki #kfood #spicy #cheese',
+        niche: 'Asian Food'
+      }
+    ];
+
+    let currentSelectedAssetId = '';
+
+    function renderDeconstructOptions(items) {
+      const select = document.getElementById('deconstructSelect');
+      select.innerHTML = '<option value="">-- Tanpa Referensi (Buat Baru) --</option>';
+      items.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item.id;
+        opt.textContent = `${item.recipe_suggestion} — [${item.niche}] (${item.source_url})`;
+        if (item.id === currentSelectedAssetId) opt.selected = true;
+        select.appendChild(opt);
+      });
+      document.getElementById('deconstructMatchCount').textContent = 
+        `Menampilkan ${items.length} dari ${MOCK_DECONSTRUCT_ASSETS.length} referensi`;
+    }
+
+    function handleDeconstructSearch() {
+      const query = document.getElementById('deconstructSearchInput').value.trim().toLowerCase();
+      const clearBtn = document.getElementById('searchClearBtn');
+      clearBtn.style.display = query ? 'block' : 'none';
+
+      const filtered = MOCK_DECONSTRUCT_ASSETS.filter(item => {
+        return item.recipe_suggestion.toLowerCase().includes(query) ||
+               item.source_url.toLowerCase().includes(query) ||
+               item.tags.toLowerCase().includes(query) ||
+               item.niche.toLowerCase().includes(query);
+      });
+
+      renderDeconstructOptions(filtered);
+    }
+
+    function clearDeconstructSearch() {
+      document.getElementById('deconstructSearchInput').value = '';
+      document.getElementById('searchClearBtn').style.display = 'none';
+      renderDeconstructOptions(MOCK_DECONSTRUCT_ASSETS);
+    }
+
+    function handleDeconstructSelectChange() {
+      const select = document.getElementById('deconstructSelect');
+      currentSelectedAssetId = select.value;
+      updateSelectedCard();
+    }
+
+    function updateSelectedCard() {
+      const card = document.getElementById('deconstructSelectedCard');
+      if (!currentSelectedAssetId) {
+        card.style.display = 'none';
+        return;
+      }
+      const asset = MOCK_DECONSTRUCT_ASSETS.find(a => a.id === currentSelectedAssetId);
+      if (asset) {
+        document.getElementById('selectedCardTitle').textContent = `🍲 ${asset.recipe_suggestion}`;
+        document.getElementById('selectedCardMeta').innerHTML = `
+          <span>🔗 <strong>URL:</strong> ${asset.source_url}</span>
+          <span>📁 <strong>Niche:</strong> ${asset.niche}</span>
+          <span>🏷️ <strong>Tags:</strong> ${asset.tags}</span>
+        `;
+        card.style.display = 'flex';
+      }
+    }
+
+    function resetDeconstructSelection() {
+      currentSelectedAssetId = '';
+      document.getElementById('deconstructSelect').value = '';
+      updateSelectedCard();
+    }
+
+    // --- 4. PRESET LAYOUTS & INTERACTIVE MOCKUP PREVIEW ---
+    const GRID_LAYOUT_DEFINITIONS = {
+      3: [
+        {
+          id: '3_split_left',
+          name: 'Tri-Split Left',
+          slots: [
+            { id: 1, label: 'Hero Saji (Kiri)', x: 0, y: 0, w: 6, h: 12, bg: 'linear-gradient(135deg, #10b981 0%, #047857 100%)' },
+            { id: 2, label: 'Bahan', x: 6, y: 0, w: 6, h: 6, bg: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' },
+            { id: 3, label: 'Proses', x: 6, y: 6, w: 6, h: 6, bg: 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)' }
+          ]
+        },
+        {
+          id: '3_split_right',
+          name: 'Tri-Split Right Mirror',
+          slots: [
+            { id: 1, label: 'Bahan', x: 0, y: 0, w: 6, h: 6, bg: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' },
+            { id: 2, label: 'Proses', x: 0, y: 6, w: 6, h: 6, bg: 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)' },
+            { id: 3, label: 'Hero Saji (Kanan)', x: 6, y: 0, w: 6, h: 12, bg: 'linear-gradient(135deg, #10b981 0%, #047857 100%)' }
+          ]
+        },
+        {
+          id: '3_stacked_horizontal',
+          name: 'Landscape Cascade',
+          slots: [
+            { id: 1, label: 'Bahan Mentah', x: 0, y: 0, w: 12, h: 3, bg: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' },
+            { id: 2, label: 'Proses Masak', x: 0, y: 3, w: 12, h: 4, bg: 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)' },
+            { id: 3, label: 'Sajian Akhir', x: 0, y: 7, w: 12, h: 5, bg: 'linear-gradient(135deg, #10b981 0%, #047857 100%)' }
+          ]
+        }
+      ],
+      4: [
+        {
+          id: '4_editorial_split',
+          name: 'Editorial Split (Default)',
+          slots: [
+            { id: 1, label: 'Bahan Mentah (Hero)', x: 0, y: 0, w: 7, h: 8, bg: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' },
+            { id: 2, label: 'Proses Tumis', x: 7, y: 0, w: 5, h: 4, bg: 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)' },
+            { id: 3, label: 'Hasil Matang', x: 7, y: 4, w: 5, h: 4, bg: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' },
+            { id: 4, label: 'Penyajian Banner', x: 0, y: 8, w: 12, h: 4, bg: 'linear-gradient(135deg, #10b981 0%, #047857 100%)' }
+          ]
+        },
+        {
+          id: '4_modern_masonry',
+          name: 'Modern Masonry',
+          slots: [
+            { id: 1, label: 'Hasil Jadi (Hero Atas)', x: 0, y: 0, w: 12, h: 5, bg: 'linear-gradient(135deg, #10b981 0%, #047857 100%)' },
+            { id: 2, label: 'Bahan Mentah', x: 0, y: 5, w: 6, h: 4, bg: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' },
+            { id: 3, label: 'Proses Masak', x: 6, y: 5, w: 6, h: 7, bg: 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)' },
+            { id: 4, label: 'Plating Detail', x: 0, y: 9, w: 6, h: 3, bg: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)' }
+          ]
+        },
+        {
+          id: '4_landscape_cascade',
+          name: 'Vertical Cascade 4',
+          slots: [
+            { id: 1, label: '1. Bahan', x: 0, y: 0, w: 12, h: 3, bg: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' },
+            { id: 2, label: '2. Persiapan', x: 0, y: 3, w: 12, h: 2.5, bg: 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)' },
+            { id: 3, label: '3. Memasak', x: 0, y: 5.5, w: 12, h: 3.5, bg: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' },
+            { id: 4, label: '4. Sajian Final', x: 0, y: 9, w: 12, h: 3, bg: 'linear-gradient(135deg, #10b981 0%, #047857 100%)' }
+          ]
+        }
+      ],
+      5: [
+        {
+          id: '5_pentagon_grid',
+          name: 'Pentagon Asymmetric',
+          slots: [
+            { id: 1, label: 'Bahan Utama', x: 0, y: 0, w: 6, h: 4, bg: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' },
+            { id: 2, label: 'Bumbu Halus', x: 6, y: 0, w: 6, h: 3, bg: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)' },
+            { id: 3, label: 'Proses Rebus/Goreng', x: 0, y: 4, w: 7, h: 5, bg: 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)' },
+            { id: 4, label: 'Detail Tekstur', x: 7, y: 3, w: 5, h: 6, bg: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' },
+            { id: 5, label: 'Sajian Piring', x: 0, y: 9, w: 12, h: 3, bg: 'linear-gradient(135deg, #10b981 0%, #047857 100%)' }
+          ]
+        },
+        {
+          id: '5_magazine_editorial',
+          name: 'Magazine Editorial 5',
+          slots: [
+            { id: 1, label: 'Hero Banner Kolom', x: 0, y: 0, w: 4, h: 12, bg: 'linear-gradient(135deg, #10b981 0%, #047857 100%)' },
+            { id: 2, label: 'Bahan 1', x: 4, y: 0, w: 4, h: 4, bg: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' },
+            { id: 3, label: 'Bahan 2', x: 8, y: 0, w: 4, h: 4, bg: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)' },
+            { id: 4, label: 'Proses', x: 4, y: 4, w: 4, h: 4, bg: 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)' },
+            { id: 5, label: 'Garnish', x: 8, y: 4, w: 4, h: 4, bg: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' }
+          ]
+        }
+      ],
+      6: [
+        {
+          id: '6_magazine_spread',
+          name: 'Magazine Hexa-Grid',
+          slots: [
+            { id: 1, label: 'Bahan', x: 0, y: 0, w: 4, h: 4, bg: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' },
+            { id: 2, label: 'Proses Potong', x: 4, y: 0, w: 8, h: 4, bg: 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)' },
+            { id: 3, label: 'Proses Masak', x: 0, y: 4, w: 8, h: 4, bg: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)' },
+            { id: 4, label: 'Bumbu', x: 8, y: 4, w: 4, h: 4, bg: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)' },
+            { id: 5, label: 'Plating 1', x: 0, y: 8, w: 6, h: 4, bg: 'linear-gradient(135deg, #10b981 0%, #047857 100%)' },
+            { id: 6, label: 'Plating 2', x: 6, y: 8, w: 6, h: 4, bg: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)' }
+          ]
+        },
+        {
+          id: '6_vertical_masonry',
+          name: 'Pinterest Masonry 6',
+          slots: [
+            { id: 1, label: 'Bahan A', x: 0, y: 0, w: 6, h: 3, bg: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' },
+            { id: 2, label: 'Bahan B', x: 6, y: 0, w: 6, h: 4, bg: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)' },
+            { id: 3, label: 'Proses 1', x: 0, y: 3, w: 6, h: 5, bg: 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)' },
+            { id: 4, label: 'Proses 2', x: 6, y: 4, w: 6, h: 4, bg: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)' },
+            { id: 5, label: 'Hero Saji', x: 6, y: 8, w: 6, h: 4, bg: 'linear-gradient(135deg, #10b981 0%, #047857 100%)' },
+            { id: 6, label: 'Detail', x: 0, y: 8, w: 6, h: 4, bg: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)' }
+          ]
+        }
+      ]
+    };
+
+    let activeImageCount = 4;
+    let activePresetId = '4_editorial_split';
+
+    function selectImageCount(count) {
+      activeImageCount = count;
+      const presets = GRID_LAYOUT_DEFINITIONS[count] || [];
+      activePresetId = presets[0]?.id || '';
+
+      // Update button active states
+      document.querySelectorAll('.count-btn').forEach(btn => {
+        if (btn.textContent.includes(`${count} Gambar`)) {
+          btn.classList.add('btn-primary');
+          btn.classList.remove('btn-secondary');
+        } else {
+          btn.classList.remove('btn-primary');
+          btn.classList.add('btn-secondary');
+        }
+      });
+
+      renderPresetCards();
+      renderLiveCanvasPreview();
+    }
+
+    function renderPresetCards() {
+      const container = document.getElementById('presetCardsContainer');
+      container.innerHTML = '';
+      const presets = GRID_LAYOUT_DEFINITIONS[activeImageCount] || [];
+
+      presets.forEach(preset => {
+        const card = document.createElement('div');
+        card.className = `preset-card ${preset.id === activePresetId ? 'active' : ''}`;
+        card.onclick = () => {
+          activePresetId = preset.id;
+          renderPresetCards();
+          renderLiveCanvasPreview();
+        };
+
+        // Mini preview container
+        const mini = document.createElement('div');
+        mini.className = 'preset-card-mini-preview';
+
+        preset.slots.forEach(slot => {
+          const sBox = document.createElement('div');
+          sBox.style.position = 'absolute';
+          sBox.style.left = `${(slot.x / 12) * 100}%`;
+          sBox.style.top = `${(slot.y / 12) * 100}%`;
+          sBox.style.width = `calc(${(slot.w / 12) * 100}% - 2px)`;
+          sBox.style.height = `calc(${(slot.h / 12) * 100}% - 2px)`;
+          sBox.style.background = slot.bg;
+          sBox.style.borderRadius = '2px';
+          mini.appendChild(sBox);
+        });
+
+        const title = document.createElement('div');
+        title.className = 'preset-card-title';
+        title.textContent = preset.name;
+
+        card.appendChild(mini);
+        card.appendChild(title);
+        container.appendChild(card);
+      });
+
+      const currentPreset = presets.find(p => p.id === activePresetId);
+      document.getElementById('currentPresetNameLabel').textContent = currentPreset?.name || '';
+      document.getElementById('previewSlotBadge').textContent = `${activeImageCount} Slots`;
+    }
+
+    function renderLiveCanvasPreview() {
+      const canvas = document.getElementById('livePreviewCanvas');
+      canvas.innerHTML = '';
+
+      const presets = GRID_LAYOUT_DEFINITIONS[activeImageCount] || [];
+      const currentPreset = presets.find(p => p.id === activePresetId) || presets[0];
+      if (!currentPreset) return;
+
+      const gap = Number(document.getElementById('gapRange').value);
+      const radius = Number(document.getElementById('radiusRange').value);
+      const padding = Number(document.getElementById('paddingRange').value);
+      const bgColor = document.getElementById('bgColorInput').value;
+
+      const displayPadding = Math.round(padding * 0.7);
+      const displayGap = Math.round(gap * 0.7);
+      const displayRadius = Math.round(radius * 0.7);
+
+      canvas.style.backgroundColor = bgColor;
+      canvas.style.padding = `${displayPadding}px`;
+      canvas.style.borderRadius = `${displayRadius + 4}px`;
+
+      currentPreset.slots.forEach(slot => {
+        const slotEl = document.createElement('div');
+        slotEl.className = 'grid-slot';
+
+        const leftPercent = (slot.x / 12) * 100;
+        const topPercent = (slot.y / 12) * 100;
+        const widthPercent = (slot.w / 12) * 100;
+        const heightPercent = (slot.h / 12) * 100;
+
+        slotEl.style.left = `calc(${displayPadding}px + ${leftPercent}% + ${displayGap / 2}px)`;
+        slotEl.style.top = `calc(${displayPadding}px + ${topPercent}% + ${displayGap / 2}px)`;
+        slotEl.style.width = `calc(${widthPercent}% - ${displayGap}px)`;
+        slotEl.style.height = `calc(${heightPercent}% - ${displayGap}px)`;
+        slotEl.style.background = slot.bg;
+        slotEl.style.borderRadius = `${displayRadius}px`;
+
+        slotEl.innerHTML = `
+          <div class="grid-slot-badge">#${slot.id}</div>
+          <div class="grid-slot-label">${slot.label}</div>
+        `;
+        canvas.appendChild(slotEl);
+      });
+    }
+
+    function updateCollageStyles() {
+      const gap = document.getElementById('gapRange').value;
+      const radius = document.getElementById('radiusRange').value;
+      const padding = document.getElementById('paddingRange').value;
+      const bgColor = document.getElementById('bgColorInput').value;
+
+      document.getElementById('gapVal').textContent = `${gap}px`;
+      document.getElementById('radiusVal').textContent = `${radius}px`;
+      document.getElementById('paddingVal').textContent = `${padding}px`;
+      document.getElementById('bgVal').textContent = bgColor;
+
+      renderLiveCanvasPreview();
+    }
+
+    // --- INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+      renderDeconstructOptions(MOCK_DECONSTRUCT_ASSETS);
+      selectImageCount(4);
+    });
+  </script>
+</body>
+</html>

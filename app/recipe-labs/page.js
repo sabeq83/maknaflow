@@ -3,6 +3,48 @@
 import Sidebar from '../components/Sidebar';
 import { useState, useEffect, useRef } from 'react';
 import { VIDEO_MODELS } from '@/lib/words-per-clip-presets';
+import { GRID_LAYOUT_COORDINATES } from '@/lib/core/GridCoordinates';
+
+const LAYOUT_PRESET_METADATA = {
+  3: [
+    { id: '3_split_left', name: 'Editorial Tri-Split Left', desc: 'Kolom kiri penuh (hero) & 2 blok proses kanan' },
+    { id: '3_split_right', name: 'Tri-Split Right Mirror', desc: '2 blok persiapan kiri & kolom kanan penuh (hero)' },
+    { id: '3_stacked_horizontal', name: 'Landscape Cascade', desc: '3 strip horizontal bertingkat alur waktu' }
+  ],
+  4: [
+    { id: '4_editorial_split', name: 'Editorial Split (Default)', desc: 'Kolom kiri lebar, 2 proses kanan, banner saji bawah' },
+    { id: '4_modern_masonry', name: 'Modern Masonry', desc: 'Banner atas megah diikuti susunan kolom asimetris estetik' },
+    { id: '4_landscape_cascade', name: 'Vertical Story Cascade 4', desc: '4 strip bertumpuk naratif proses sekuensial' }
+  ],
+  5: [
+    { id: '5_pentagon_grid', name: 'Pentagon Asymmetric', desc: 'Susunan dinamis 5 modul foto dengan banner bawah' },
+    { id: '5_step_cascade', name: 'Story Step-by-Step 5', desc: '5 strip bertingkat dramatis step-by-step' },
+    { id: '5_magazine_editorial', name: 'Magazine Editorial', desc: 'Hero banner kolom kiri & 4 grid proses di kanan' }
+  ],
+  6: [
+    { id: '6_magazine_spread', name: 'Magazine Hexa-Grid', desc: 'Tata letak majalah kuliner komprehensif 6 slot' },
+    { id: '6_vertical_masonry', name: 'Pinterest Masonry Style', desc: 'Gaya visual masonry pinterest dinamis 6 slot' },
+    { id: '6_asymmetric_mosaic', name: 'Modern Asymmetric Mosaic', desc: 'Mosaik asimetris modern untuk resep kaya bumbu' }
+  ]
+};
+
+const SLOT_DEFAULT_ROLES = [
+  'Bahan Mentah',
+  'Persiapan & Bumbu',
+  'Proses Memasak',
+  'Sajian Akhir',
+  'Detail Garnish',
+  'Plating Piring'
+];
+
+const SLOT_GRADIENTS = [
+  'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+  'linear-gradient(135deg, #059669 0%, #047857 100%)',
+  'linear-gradient(135deg, #d97706 0%, #b45309 100%)',
+  'linear-gradient(135deg, #db2777 0%, #be185d 100%)',
+  'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+  'linear-gradient(135deg, #0891b2 0%, #0e7490 100%)'
+];
 
 const GEMINI_VOICES = [
   { id: 'Kore', name: 'Kore (Female)', avatar: '👩', desc: 'Standard Female (Skincare/Cosmetic)' },
@@ -111,6 +153,45 @@ export default function RecipeLabsPage() {
   const [brandProfiles, setBrandProfiles] = useState([]);
   const [deconstructedAssets, setDeconstructedAssets] = useState([]);
   const [sourceDeconstructAssetId, setSourceDeconstructAssetId] = useState('');
+  const [deconstructSearchQuery, setDeconstructSearchQuery] = useState('');
+
+  const filteredDeconstructedAssets = (deconstructedAssets || []).filter(asset => {
+    if (!deconstructSearchQuery.trim()) return true;
+    const q = deconstructSearchQuery.toLowerCase();
+    return (
+      (asset.recipe_suggestion && asset.recipe_suggestion.toLowerCase().includes(q)) ||
+      (asset.source_url && asset.source_url.toLowerCase().includes(q)) ||
+      (asset.tags && asset.tags.toLowerCase().includes(q)) ||
+      (asset.niche && asset.niche.toLowerCase().includes(q)) ||
+      (asset.label && asset.label.toLowerCase().includes(q))
+    );
+  });
+
+  const selectedDeconstructAsset = (deconstructedAssets || []).find(a => a.id === sourceDeconstructAssetId);
+
+  function handleSelectDeconstructAsset(assetId, isVideo = false) {
+    setSourceDeconstructAssetId(assetId);
+    if (assetId) {
+      const selected = deconstructedAssets.find(a => a.id === assetId);
+      if (selected && selected.recipe_suggestion) {
+        if (isVideo) {
+          setCampaignName(`Reels - ${selected.recipe_suggestion}`);
+          setContentPillar(`Membuat resep berdasarkan video: ${selected.recipe_suggestion}`);
+        } else {
+          setCategory('Custom Input');
+          setCustomCategory(selected.recipe_suggestion);
+        }
+      }
+    } else {
+      if (isVideo) {
+        setCampaignName('');
+        setContentPillar('');
+      } else {
+        setCategory('Makanan');
+        setCustomCategory('');
+      }
+    }
+  }
 
   // Collage configurations
   const [imagesPerRecipe, setImagesPerRecipe] = useState(4);
@@ -492,8 +573,8 @@ export default function RecipeLabsPage() {
         source_deconstruct_asset_id: sourceDeconstructAssetId || null
       };
 
-      body.target_demographic = targetDemographic;
-      body.target_demographic_custom = targetDemographicCustom;
+      payload.target_demographic = targetDemographic;
+      payload.target_demographic_custom = targetDemographicCustom;
       const res = await fetch('/api/recipe-labs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -924,30 +1005,107 @@ export default function RecipeLabsPage() {
                 {campaignType === 'static' && (
                   <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
                     <div className="form-group">
-                      <label className="form-label">Gunakan Referensi Video Dekonstruksi (Opsional)</label>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <label className="form-label" style={{ margin: 0 }}>Gunakan Referensi Video Dekonstruksi (Opsional)</label>
+                        <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                          {filteredDeconstructedAssets.length} dari {deconstructedAssets.length} referensi
+                        </span>
+                      </div>
+
+                      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                        <span style={{ position: 'absolute', left: '10px', color: 'var(--text-muted)', fontSize: '0.85rem', pointerEvents: 'none' }}>🔍</span>
+                        <input
+                          type="text"
+                          placeholder="Ketik untuk memfilter referensi (judul resep, URL, #tagar, niche)..."
+                          value={deconstructSearchQuery}
+                          onChange={(e) => setDeconstructSearchQuery(e.target.value)}
+                          className="form-control"
+                          style={{
+                            paddingLeft: '34px',
+                            paddingRight: deconstructSearchQuery ? '32px' : '12px',
+                            fontSize: '0.82rem',
+                            background: 'var(--input-bg)',
+                            border: '1px solid var(--border-subtle)',
+                            borderRadius: 'var(--radius-sm)',
+                            color: 'var(--text-primary)'
+                          }}
+                        />
+                        {deconstructSearchQuery && (
+                          <button
+                            type="button"
+                            onClick={() => setDeconstructSearchQuery('')}
+                            style={{
+                              position: 'absolute',
+                              right: '8px',
+                              background: 'none',
+                              border: 'none',
+                              color: 'var(--text-muted)',
+                              cursor: 'pointer',
+                              fontSize: '0.8rem',
+                              padding: '4px'
+                            }}
+                            title="Bersihkan pencarian"
+                          >
+                            ✖
+                          </button>
+                        )}
+                      </div>
+
                       <select
                         className="form-select"
                         value={sourceDeconstructAssetId}
-                        onChange={(e) => {
-                          const assetId = e.target.value;
-                          setSourceDeconstructAssetId(assetId);
-                          if (assetId) {
-                            const selected = deconstructedAssets.find(a => a.id === assetId);
-                            if (selected && selected.recipe_suggestion) {
-                              setCategory('Custom Input');
-                              setCustomCategory(selected.recipe_suggestion);
-                            }
-                          } else {
-                            setCategory('Makanan');
-                            setCustomCategory('');
-                          }
-                        }}
+                        onChange={(e) => handleSelectDeconstructAsset(e.target.value, false)}
                       >
                         <option value="">-- Tanpa Referensi (Buat Baru) --</option>
-                        {deconstructedAssets.map(asset => (
-                          <option key={asset.id} value={asset.id}>{asset.label}</option>
+                        {filteredDeconstructedAssets.map(asset => (
+                          <option key={asset.id} value={asset.id}>
+                            {asset.recipe_suggestion ? `${asset.recipe_suggestion} — ` : ''}{asset.label}
+                          </option>
                         ))}
                       </select>
+
+                      {selectedDeconstructAsset && (
+                        <div style={{
+                          marginTop: '8px',
+                          padding: '10px 14px',
+                          background: 'var(--surface-interactive)',
+                          border: '1px solid var(--action-primary)',
+                          borderRadius: 'var(--radius-sm)',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          gap: '12px'
+                        }}>
+                          <div style={{ overflow: 'hidden' }}>
+                            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--action-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span>🍲</span>
+                              <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {selectedDeconstructAsset.recipe_suggestion || 'Referensi Video Terpilih'}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '2px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                              <span>🔗 {selectedDeconstructAsset.source_url}</span>
+                              {selectedDeconstructAsset.niche && <span>📁 {selectedDeconstructAsset.niche}</span>}
+                              {selectedDeconstructAsset.tags && <span>🏷️ {selectedDeconstructAsset.tags}</span>}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleSelectDeconstructAsset('', false)}
+                            className="btn btn-secondary"
+                            style={{
+                              fontSize: '0.72rem',
+                              padding: '4px 10px',
+                              whiteSpace: 'nowrap',
+                              color: 'var(--status-danger)',
+                              borderColor: 'var(--status-danger-soft)',
+                              background: 'var(--status-danger-soft)'
+                            }}
+                          >
+                            ✖ Batalkan
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     <div className="form-group">
@@ -1070,146 +1228,332 @@ export default function RecipeLabsPage() {
                         border: '1px solid var(--border)',
                         marginBottom: '12px'
                       }}>
-                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '12px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          🎨 Konfigurasi Kolase Asimetris
+                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '14px', fontSize: '0.88rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            🎨 Konfigurasi Kolase Asimetris & Live Mockup Preview
+                          </span>
+                          <span style={{ fontSize: '0.74rem', background: 'var(--status-info-soft)', color: 'var(--status-info)', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>
+                            Format 1:1 Square
+                          </span>
                         </div>
 
-                        <div className="form-group" style={{ marginBottom: '12px' }}>
-                          <label className="form-label">Jumlah Gambar T2I</label>
-                          <select
-                            className="select-field"
-                            style={{
-                              width: '100%',
-                              padding: '8px',
-                              background: 'var(--bg-input)',
-                              border: '1px solid var(--border)',
-                              borderRadius: 'var(--radius-sm)',
-                              color: 'var(--text)',
-                              fontSize: '0.85rem'
-                            }}
-                            value={imagesPerRecipe}
-                            onChange={(e) => setImagesPerRecipe(Number(e.target.value))}
-                          >
-                            <option value={3}>3 Gambar</option>
-                            <option value={4}>4 Gambar (Default)</option>
-                            <option value={5}>5 Gambar</option>
-                            <option value={6}>6 Gambar</option>
-                          </select>
-                        </div>
-
-                        <div className="form-group" style={{ marginBottom: '12px' }}>
-                          <label className="form-label">Preset Layout Kolase</label>
-                          <select
-                            className="select-field"
-                            style={{
-                              width: '100%',
-                              padding: '8px',
-                              background: 'var(--bg-input)',
-                              border: '1px solid var(--border)',
-                              borderRadius: 'var(--radius-sm)',
-                              color: 'var(--text)',
-                              fontSize: '0.85rem'
-                            }}
-                            value={selectedLayoutId}
-                            onChange={(e) => setSelectedLayoutId(e.target.value)}
-                          >
-                            {imagesPerRecipe === 3 && (
-                              <>
-                                <option value="3_split_left">Editorial Tri-Split Left</option>
-                                <option value="3_split_right">Tri-Split Right Mirror</option>
-                                <option value="3_stacked_horizontal">Landscape Cascade</option>
-                              </>
-                            )}
-                            {imagesPerRecipe === 4 && (
-                              <>
-                                <option value="4_editorial_split">Editorial Split (Default)</option>
-                                <option value="4_modern_masonry">Modern Masonry</option>
-                                <option value="4_landscape_cascade">Vertical Story Cascade 4</option>
-                              </>
-                            )}
-                            {imagesPerRecipe === 5 && (
-                              <>
-                                <option value="5_pentagon_grid">Pentagon Asymmetric</option>
-                                <option value="5_step_cascade">Story Step-by-Step 5</option>
-                                <option value="5_magazine_editorial">Magazine Editorial</option>
-                              </>
-                            )}
-                            {imagesPerRecipe === 6 && (
-                              <>
-                                <option value="6_magazine_spread">Magazine Hexa-Grid</option>
-                                <option value="6_vertical_masonry">Pinterest Masonry Style</option>
-                                <option value="6_asymmetric_mosaic">Modern Asymmetric Mosaic</option>
-                              </>
-                            )}
-                          </select>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '12px' }}>
-                          <div className="form-group">
-                            <label className="form-label" style={{ fontSize: '0.8rem' }}>Jarak Celah (Gap): {gridGapSize}px</label>
-                            <input
-                              type="range"
-                              min="0"
-                              max="30"
-                              step="2"
-                              value={gridGapSize}
-                              onChange={(e) => setGridGapSize(Number(e.target.value))}
-                              style={{ width: '100%', accentColor: 'var(--accent)' }}
-                            />
-                          </div>
-
-                          <div className="form-group">
-                            <label className="form-label" style={{ fontSize: '0.8rem' }}>Sudut Lengkung (Radius): {gridBorderRadius}px</label>
-                            <input
-                              type="range"
-                              min="0"
-                              max="40"
-                              step="2"
-                              value={gridBorderRadius}
-                              onChange={(e) => setGridBorderRadius(Number(e.target.value))}
-                              style={{ width: '100%', accentColor: 'var(--accent)' }}
-                            />
-                          </div>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '12px' }}>
-                          <div className="form-group">
-                            <label className="form-label" style={{ fontSize: '0.8rem' }}>Outer Padding: {gridOuterPadding}px</label>
-                            <input
-                              type="range"
-                              min="0"
-                              max="40"
-                              step="2"
-                              value={gridOuterPadding}
-                              onChange={(e) => setGridOuterPadding(Number(e.target.value))}
-                              style={{ width: '100%', accentColor: 'var(--accent)' }}
-                            />
-                          </div>
-
-                          <div className="form-group">
-                            <label className="form-label" style={{ fontSize: '0.8rem' }}>Warna Background</label>
-                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                              <input
-                                type="color"
-                                value={gridBgColor}
-                                onChange={(e) => setGridBgColor(e.target.value)}
+                        {/* Pilihan Jumlah Gambar */}
+                        <div className="form-group" style={{ marginBottom: '14px' }}>
+                          <label className="form-label">Jumlah Gambar T2I per Resep</label>
+                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            {[3, 4, 5, 6].map(count => (
+                              <button
+                                key={count}
+                                type="button"
+                                onClick={() => setImagesPerRecipe(count)}
                                 style={{
-                                  border: 'none',
-                                  width: '28px',
-                                  height: '28px',
-                                  padding: 0,
-                                  background: 'none',
+                                  fontSize: '0.8rem',
+                                  padding: '6px 14px',
+                                  borderRadius: 'var(--radius-sm)',
+                                  border: imagesPerRecipe === count ? '1px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                                  background: imagesPerRecipe === count ? 'var(--action-primary)' : 'var(--input-bg)',
+                                  color: imagesPerRecipe === count ? 'var(--on-action-primary)' : 'var(--text-primary)',
+                                  fontWeight: 600,
                                   cursor: 'pointer',
-                                  borderRadius: '4px'
+                                  transition: 'all 0.15s ease'
                                 }}
-                              />
-                              <input
-                                type="text"
-                                className="form-input"
-                                value={gridBgColor}
-                                onChange={(e) => setGridBgColor(e.target.value)}
-                                style={{ padding: '4px 8px', fontSize: '0.75rem', height: '28px' }}
-                              />
+                              >
+                                {count} Gambar {count === 4 ? '(Default)' : ''}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Container 2 Kolom: Pilihan Preset + Controls di Kiri, Live Preview 1:1 di Kanan */}
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'minmax(260px, 1fr) 260px',
+                          gap: '18px',
+                          alignItems: 'start'
+                        }}>
+                          {/* Kolom Kiri: Pilihan Preset Cards & Sliders */}
+                          <div>
+                            <div className="form-group" style={{ marginBottom: '14px' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                <label className="form-label" style={{ margin: 0 }}>Template Preset Layout Kolase</label>
+                                <span style={{ fontSize: '0.74rem', color: 'var(--action-primary)', fontWeight: 700 }}>
+                                  {(LAYOUT_PRESET_METADATA[imagesPerRecipe] || []).find(p => p.id === selectedLayoutId)?.name || selectedLayoutId}
+                                </span>
+                              </div>
+
+                              {/* Thumbnail Cards Grid */}
+                              <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(115px, 1fr))',
+                                gap: '8px',
+                                marginBottom: '10px'
+                              }}>
+                                {(LAYOUT_PRESET_METADATA[imagesPerRecipe] || []).map(preset => {
+                                  const isSelected = selectedLayoutId === preset.id;
+                                  const presetSlots = GRID_LAYOUT_COORDINATES[imagesPerRecipe]?.[preset.id] || [];
+
+                                  return (
+                                    <div
+                                      key={preset.id}
+                                      onClick={() => setSelectedLayoutId(preset.id)}
+                                      style={{
+                                        background: isSelected ? 'var(--surface-hover)' : 'var(--input-bg)',
+                                        border: isSelected ? '2px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                                        borderRadius: 'var(--radius-sm)',
+                                        padding: '6px',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '6px',
+                                        transition: 'all 0.15s ease',
+                                        boxShadow: isSelected ? '0 0 10px var(--status-info-soft)' : 'none'
+                                      }}
+                                    >
+                                      {/* Miniature 12-grid preview */}
+                                      <div style={{
+                                        width: '100%',
+                                        aspectRatio: '1 / 1',
+                                        background: 'rgba(0,0,0,0.35)',
+                                        borderRadius: '3px',
+                                        position: 'relative',
+                                        overflow: 'hidden',
+                                        padding: '2px'
+                                      }}>
+                                        {presetSlots.map((s, idx) => (
+                                          <div
+                                            key={s.id}
+                                            style={{
+                                              position: 'absolute',
+                                              left: `${(s.x / 12) * 100}%`,
+                                              top: `${(s.y / 12) * 100}%`,
+                                              width: `calc(${(s.w / 12) * 100}% - 1px)`,
+                                              height: `calc(${(s.h / 12) * 100}% - 1px)`,
+                                              background: SLOT_GRADIENTS[idx % SLOT_GRADIENTS.length],
+                                              borderRadius: '2px'
+                                            }}
+                                          />
+                                        ))}
+                                      </div>
+                                      <div style={{
+                                        fontSize: '0.72rem',
+                                        fontWeight: isSelected ? 700 : 600,
+                                        color: isSelected ? 'var(--action-primary)' : 'var(--text-primary)',
+                                        textAlign: 'center',
+                                        lineHeight: 1.15
+                                      }}>
+                                        {preset.name}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+
+                              {/* Dropdown Fallback */}
+                              <select
+                                className="select-field"
+                                style={{
+                                  width: '100%',
+                                  padding: '8px 10px',
+                                  background: 'var(--input-bg)',
+                                  border: '1px solid var(--border-subtle)',
+                                  borderRadius: 'var(--radius-sm)',
+                                  color: 'var(--text-primary)',
+                                  fontSize: '0.82rem'
+                                }}
+                                value={selectedLayoutId}
+                                onChange={(e) => setSelectedLayoutId(e.target.value)}
+                              >
+                                {(LAYOUT_PRESET_METADATA[imagesPerRecipe] || []).map(preset => (
+                                  <option key={preset.id} value={preset.id}>{preset.name}</option>
+                                ))}
+                              </select>
+                            </div>
+
+                            {/* Sliders Box */}
+                            <div style={{
+                              background: 'var(--input-bg)',
+                              border: '1px solid var(--border-subtle)',
+                              borderRadius: 'var(--radius-sm)',
+                              padding: '12px'
+                            }}>
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                <div className="form-group" style={{ margin: 0 }}>
+                                  <label className="form-label" style={{ fontSize: '0.78rem', display: 'flex', justifyContent: 'space-between' }}>
+                                    <span>Celah (Gap):</span>
+                                    <span style={{ fontWeight: 700 }}>{gridGapSize}px</span>
+                                  </label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="30"
+                                    step="2"
+                                    value={gridGapSize}
+                                    onChange={(e) => setGridGapSize(Number(e.target.value))}
+                                    style={{ width: '100%', accentColor: 'var(--action-primary)' }}
+                                  />
+                                </div>
+
+                                <div className="form-group" style={{ margin: 0 }}>
+                                  <label className="form-label" style={{ fontSize: '0.78rem', display: 'flex', justifyContent: 'space-between' }}>
+                                    <span>Radius:</span>
+                                    <span style={{ fontWeight: 700 }}>{gridBorderRadius}px</span>
+                                  </label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="40"
+                                    step="2"
+                                    value={gridBorderRadius}
+                                    onChange={(e) => setGridBorderRadius(Number(e.target.value))}
+                                    style={{ width: '100%', accentColor: 'var(--action-primary)' }}
+                                  />
+                                </div>
+                              </div>
+
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '10px' }}>
+                                <div className="form-group" style={{ margin: 0 }}>
+                                  <label className="form-label" style={{ fontSize: '0.78rem', display: 'flex', justifyContent: 'space-between' }}>
+                                    <span>Padding:</span>
+                                    <span style={{ fontWeight: 700 }}>{gridOuterPadding}px</span>
+                                  </label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="40"
+                                    step="2"
+                                    value={gridOuterPadding}
+                                    onChange={(e) => setGridOuterPadding(Number(e.target.value))}
+                                    style={{ width: '100%', accentColor: 'var(--action-primary)' }}
+                                  />
+                                </div>
+
+                                <div className="form-group" style={{ margin: 0 }}>
+                                  <label className="form-label" style={{ fontSize: '0.78rem' }}>Warna Latar Grid</label>
+                                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                    <input
+                                      type="color"
+                                      value={gridBgColor}
+                                      onChange={(e) => setGridBgColor(e.target.value)}
+                                      style={{
+                                        border: 'none',
+                                        width: '28px',
+                                        height: '28px',
+                                        padding: 0,
+                                        background: 'none',
+                                        cursor: 'pointer',
+                                        borderRadius: '4px'
+                                      }}
+                                    />
+                                    <input
+                                      type="text"
+                                      className="form-control"
+                                      value={gridBgColor}
+                                      onChange={(e) => setGridBgColor(e.target.value)}
+                                      style={{ padding: '4px 8px', fontSize: '0.75rem', height: '28px' }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Kolom Kanan: Live Mockup Preview Box (1:1) */}
+                          <div style={{
+                            background: 'var(--surface-raised)',
+                            border: '1px solid var(--border-subtle)',
+                            borderRadius: 'var(--radius)',
+                            padding: '14px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '10px'
+                          }}>
+                            <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                                📱 Mockup Preview (1:1)
+                              </span>
+                              <span style={{ fontSize: '0.7rem', padding: '2px 6px', background: 'var(--status-info-soft)', color: 'var(--status-info)', borderRadius: '4px', fontWeight: 700 }}>
+                                {imagesPerRecipe} Slots
+                              </span>
+                            </div>
+
+                            {/* 1:1 Canvas Container (230px x 230px) */}
+                            <div style={{
+                              width: '230px',
+                              height: '230px',
+                              backgroundColor: gridBgColor,
+                              borderRadius: `${Math.round(gridBorderRadius * 0.4) + 4}px`,
+                              padding: `${Math.round(gridOuterPadding * 0.4)}px`,
+                              position: 'relative',
+                              boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
+                              overflow: 'hidden',
+                              boxSizing: 'border-box'
+                            }}>
+                              {(() => {
+                                const activeSlots = (GRID_LAYOUT_COORDINATES[imagesPerRecipe]?.[selectedLayoutId]) ||
+                                                    (GRID_LAYOUT_COORDINATES[imagesPerRecipe]?.[(LAYOUT_PRESET_METADATA[imagesPerRecipe]?.[0]?.id)]) || [];
+                                const dispPad = Math.round(gridOuterPadding * 0.4);
+                                const dispGap = Math.round(gridGapSize * 0.4);
+                                const dispRad = Math.round(gridBorderRadius * 0.4);
+
+                                return activeSlots.map((slot, sIdx) => {
+                                  const leftPct = (slot.x / 12) * 100;
+                                  const topPct = (slot.y / 12) * 100;
+                                  const widthPct = (slot.w / 12) * 100;
+                                  const heightPct = (slot.h / 12) * 100;
+
+                                  return (
+                                    <div
+                                      key={slot.id}
+                                      style={{
+                                        position: 'absolute',
+                                        left: `calc(${dispPad}px + ${leftPct}% + ${dispGap / 2}px)`,
+                                        top: `calc(${dispPad}px + ${topPct}% + ${dispGap / 2}px)`,
+                                        width: `calc(${widthPct}% - ${dispGap}px)`,
+                                        height: `calc(${heightPct}% - ${dispGap}px)`,
+                                        background: SLOT_GRADIENTS[sIdx % SLOT_GRADIENTS.length],
+                                        borderRadius: `${dispRad}px`,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        padding: '4px',
+                                        boxShadow: 'inset 0 0 10px rgba(0,0,0,0.35)',
+                                        boxSizing: 'border-box',
+                                        overflow: 'hidden',
+                                        transition: 'all 0.2s ease'
+                                      }}
+                                    >
+                                      <span style={{
+                                        fontSize: '0.62rem',
+                                        fontWeight: 800,
+                                        background: 'rgba(0,0,0,0.6)',
+                                        color: 'var(--action-primary)',
+                                        padding: '1px 5px',
+                                        borderRadius: '3px',
+                                        marginBottom: '2px',
+                                        fontFamily: 'var(--font-mono)'
+                                      }}>
+                                        #{slot.id}
+                                      </span>
+                                      <span style={{
+                                        fontSize: '0.58rem',
+                                        fontWeight: 600,
+                                        color: '#ffffff',
+                                        textAlign: 'center',
+                                        lineHeight: 1.1,
+                                        textShadow: '0 1px 2px rgba(0,0,0,0.8)'
+                                      }}>
+                                        {SLOT_DEFAULT_ROLES[sIdx % SLOT_DEFAULT_ROLES.length]}
+                                      </span>
+                                    </div>
+                                  );
+                                });
+                              })()}
+                            </div>
+
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.3 }}>
+                              Visualisasi live layout kolase sesuai gambar instruksional Sharp canvas.
                             </div>
                           </div>
                         </div>
@@ -1312,30 +1656,107 @@ export default function RecipeLabsPage() {
                         <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', background: 'var(--overlay-subtle)' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             <div className="form-group" style={{ flex: 1, minWidth: '200px' }}>
-                              <label className="form-label">Gunakan Referensi Video Dekonstruksi (Opsional)</label>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                                <label className="form-label" style={{ margin: 0 }}>Gunakan Referensi Video Dekonstruksi (Opsional)</label>
+                                <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                                  {filteredDeconstructedAssets.length} dari {deconstructedAssets.length} referensi
+                                </span>
+                              </div>
+
+                              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                                <span style={{ position: 'absolute', left: '10px', color: 'var(--text-muted)', fontSize: '0.85rem', pointerEvents: 'none' }}>🔍</span>
+                                <input
+                                  type="text"
+                                  placeholder="Ketik untuk memfilter referensi (judul resep, URL, #tagar, niche)..."
+                                  value={deconstructSearchQuery}
+                                  onChange={(e) => setDeconstructSearchQuery(e.target.value)}
+                                  className="form-control"
+                                  style={{
+                                    paddingLeft: '34px',
+                                    paddingRight: deconstructSearchQuery ? '32px' : '12px',
+                                    fontSize: '0.82rem',
+                                    background: 'var(--input-bg)',
+                                    border: '1px solid var(--border-subtle)',
+                                    borderRadius: 'var(--radius-sm)',
+                                    color: 'var(--text-primary)'
+                                  }}
+                                />
+                                {deconstructSearchQuery && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setDeconstructSearchQuery('')}
+                                    style={{
+                                      position: 'absolute',
+                                      right: '8px',
+                                      background: 'none',
+                                      border: 'none',
+                                      color: 'var(--text-muted)',
+                                      cursor: 'pointer',
+                                      fontSize: '0.8rem',
+                                      padding: '4px'
+                                    }}
+                                    title="Bersihkan pencarian"
+                                  >
+                                    ✖
+                                  </button>
+                                )}
+                              </div>
+
                               <select
                                 className="form-select"
                                 value={sourceDeconstructAssetId}
-                                onChange={(e) => {
-                                  const assetId = e.target.value;
-                                  setSourceDeconstructAssetId(assetId);
-                                  if (assetId) {
-                                    const selected = deconstructedAssets.find(a => a.id === assetId);
-                                    if (selected && selected.recipe_suggestion) {
-                                      setCampaignName(`Reels - ${selected.recipe_suggestion}`);
-                                      setContentPillar(`Membuat resep berdasarkan video: ${selected.recipe_suggestion}`);
-                                    }
-                                  } else {
-                                    setCampaignName('');
-                                    setContentPillar('');
-                                  }
-                                }}
+                                onChange={(e) => handleSelectDeconstructAsset(e.target.value, true)}
                               >
                                 <option value="">-- Tanpa Referensi (Buat Baru) --</option>
-                                {deconstructedAssets.map(asset => (
-                                  <option key={asset.id} value={asset.id}>{asset.label}</option>
+                                {filteredDeconstructedAssets.map(asset => (
+                                  <option key={asset.id} value={asset.id}>
+                                    {asset.recipe_suggestion ? `${asset.recipe_suggestion} — ` : ''}{asset.label}
+                                  </option>
                                 ))}
                               </select>
+
+                              {selectedDeconstructAsset && (
+                                <div style={{
+                                  marginTop: '8px',
+                                  padding: '10px 14px',
+                                  background: 'var(--surface-interactive)',
+                                  border: '1px solid var(--action-primary)',
+                                  borderRadius: 'var(--radius-sm)',
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  gap: '12px'
+                                }}>
+                                  <div style={{ overflow: 'hidden' }}>
+                                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--action-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                      <span>🍲</span>
+                                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        {selectedDeconstructAsset.recipe_suggestion || 'Referensi Video Terpilih'}
+                                      </span>
+                                    </div>
+                                    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '2px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                      <span>🔗 {selectedDeconstructAsset.source_url}</span>
+                                      {selectedDeconstructAsset.niche && <span>📁 {selectedDeconstructAsset.niche}</span>}
+                                      {selectedDeconstructAsset.tags && <span>🏷️ {selectedDeconstructAsset.tags}</span>}
+                                    </div>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSelectDeconstructAsset('', true)}
+                                    className="btn btn-secondary"
+                                    style={{
+                                      fontSize: '0.72rem',
+                                      padding: '4px 10px',
+                                      whiteSpace: 'nowrap',
+                                      color: 'var(--status-danger)',
+                                      borderColor: 'var(--status-danger-soft)',
+                                      background: 'var(--status-danger-soft)'
+                                    }}
+                                  >
+                                    ✖ Batalkan
+                                  </button>
+                                </div>
+                              )}
                             </div>
 
                             <div className="form-group" style={{ flex: 1, minWidth: '200px' }}>
