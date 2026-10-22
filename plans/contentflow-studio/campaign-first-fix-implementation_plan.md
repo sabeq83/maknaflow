@@ -741,7 +741,7 @@ Penyebab: `startWizard()` memanggil `crypto.randomUUID()` (secure-context-only) 
 ### Execution Task List — hotfix
 - [x] H1. Ganti generator idempotency client dengan helper yang kompatibel HTTP dan pertahankan key stabil per submit.
 - [x] H2. Uji randomUUID tidak tersedia/throw, fallback getRandomValues, dan keunikan; build.
-- [ ] H3. Rilis patch dan deploy atomic Dev/Staging; verifikasi SHA, health, dan perbaikan handler di release aktif.
+- [x] H3. Rilis patch dan deploy atomic Dev/Staging; verifikasi SHA, health, dan perbaikan handler di release aktif.
 
 ### `lib/contentflow-studio-manifest.js`
 **Code Sebelum (Current/Before)**
