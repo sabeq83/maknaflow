@@ -47,3 +47,14 @@ Pengguna dapat menguji langsung melalui link Dev/Staging sesudah deployment. Pem
 
 ## Pemeriksaan sebelum aktivasi
 Ditemukan race pada respons Generate Planner bila wizard ditutup dan batch baru dibuka sebelum request lama selesai. Ditambahkan epoch sesi wizard: hasil/error/finally request lama diabaikan, dan penutupan wizard diblokir selama commit batch. Ini mencegah respons lama mengganti Planner atau menutup wizard batch baru.
+
+## Rilis
+- v2.32.73: b63399ff0d1fda61c0f25013e96c7a3f3c26166f, main/tag remote terverifikasi.
+- v2.32.74: d344bc3efd95fb14ed73cf8708da00c3f1367d19, menambahkan guard sesi wizard; main/tag berhasil dipush.
+- Dev awal v2.32.73: release 20261022T133325Z-b63399ff0d1f, health passed. Deployment akhir memakai v2.32.74 agar Dev/Staging identik.
+
+## Penyelarasan navigasi wizard
+- Tombol Lanjut memeriksa prasyarat bagian aktif (sumber mass RE, nama/URL, bridging/Hybrid Lock, preview kombinasi Multiplier, brief Planner, nama/kategori Recipe dan row Pillar). Submit canonical tetap menjadi validasi akhir bersama menu asal.
+- Enter pada langkah antara tidak menjalankan submit campaign. Indikator tahapan luar memakai ID langkah aktual termasuk Review Planner dan Review Batch.
+- Form Pillar menunggu detail Planner selesai dimuat sebelum Lanjut tersedia.
+- Semua fixture input/handler dan SSR lima form tetap lulus setelah penyelarasan ini.

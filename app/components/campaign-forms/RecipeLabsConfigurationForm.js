@@ -745,6 +745,14 @@ export default function RecipeLabsPage({ mode = 'direct', onCapture, onSuccess, 
   const completedCampaigns = campaigns.filter(c => c.status === 'completed').length;
 
 
+  function validateStudioStep(step) {
+    if (step!==0) return true;
+    if (campaignType==='video' && !campaignName.trim()) { setErrorMsg('Nama Kampanye wajib diisi untuk Video Reels.'); return false; }
+    if (campaignType!=='video' && category==='Custom Input' && !customCategory.trim()) { setErrorMsg('Harap isi kategori custom jika memilih Custom Input.'); return false; }
+    if (campaignType!=='video' && !nextcloudParentFolder.trim()) { setErrorMsg('Harap isi Parent Folder Nextcloud.'); return false; }
+    setErrorMsg(''); return true;
+  }
+
 const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
                     {(!captureMode || studioStep === 0) && (<div className="form-group">
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
@@ -2253,7 +2261,7 @@ const canonicalConfigurationForm1 = (<form onSubmit={handleSubmit} style={{ disp
                       </button>
                     </div>)}
                   </form>);
-if (captureMode) return <><CampaignConfigurationWizard steps={campaignType === 'video' ? ['Basic Creative Strategy','Aesthetics & Visual Settings','Product Bridging Settings','Visual Identity','Workflow & Audio Settings'] : ['Sumber & Kategori','Layout & Komposisi','Brand & Demografi']} step={studioStep} onStepChange={next => { setStudioStep(next); setActiveAccordion(next ); }} busy={submitting} error={errorMsg} onCancel={onCancel} label="RECIPE"><div style={{display:'flex',gap:12,padding:16}}><button type="button" className="btn btn-secondary" onClick={() => {setCampaignType('static');setStudioStep(0);setActiveAccordion(0);}}>Static Post Campaign</button><button type="button" className="btn btn-secondary" onClick={() => {setCampaignType('video');setStudioStep(0);setActiveAccordion(0);}}>Reels Video Storyboard (Naskah & DNA)</button></div>{campaignType === 'video' ? canonicalConfigurationForm1 : canonicalConfigurationForm0}</CampaignConfigurationWizard></>;
+if (captureMode) return <><CampaignConfigurationWizard validateStep={validateStudioStep} steps={campaignType === 'video' ? ['Basic Creative Strategy','Aesthetics & Visual Settings','Product Bridging Settings','Visual Identity','Workflow & Audio Settings'] : ['Sumber & Kategori','Layout & Komposisi','Brand & Demografi']} step={studioStep} onStepChange={next => { setStudioStep(next); setActiveAccordion(next ); }} busy={submitting} error={errorMsg} onCancel={onCancel} label="RECIPE"><div style={{display:'flex',gap:12,padding:16}}><button type="button" className="btn btn-secondary" onClick={() => {setCampaignType('static');setStudioStep(0);setActiveAccordion(0);}}>Static Post Campaign</button><button type="button" className="btn btn-secondary" onClick={() => {setCampaignType('video');setStudioStep(0);setActiveAccordion(0);}}>Reels Video Storyboard (Naskah & DNA)</button></div>{campaignType === 'video' ? canonicalConfigurationForm1 : canonicalConfigurationForm0}</CampaignConfigurationWizard></>;
 return (
     <div className="app-layout">
       <Sidebar />

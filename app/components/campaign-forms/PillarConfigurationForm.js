@@ -697,6 +697,11 @@ export default function PillarConfigurationForm({
   if (!isOpen) return null;
 
 
+  function validateStudioStep(step) {
+    if (step===0 && (!selectedPlannerId || !selectedRowIds.length)) { alert('Pilih minimal satu baris Content Planner untuk batch ini.'); return false; }
+    return true;
+  }
+
 const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit}>
           {/* Top Mode Header Banner */}
           {(!captureMode || studioStep === 0) && (<div style={{
@@ -1738,7 +1743,7 @@ const canonicalConfigurationDialog0 = (<>{showPresetSaveModal && (
             </form>
           </div>
         )}</>);
-if (captureMode) return <><CampaignConfigurationWizard steps={["Planner, Preset & Strategi","Aesthetics & Visual Settings","Product Bridging Settings","Visual Identity","Workflow & Audio Settings"]} step={studioStep} onStepChange={next => { setStudioStep(next); setActiveAccordion(next ); }} busy={submitting} error={null} onCancel={onClose} label="PILLAR">{canonicalConfigurationForm0}</CampaignConfigurationWizard>{canonicalConfigurationDialog0}</>;
+if (captureMode) return <><CampaignConfigurationWizard validateStep={validateStudioStep} steps={["Planner, Preset & Strategi","Aesthetics & Visual Settings","Product Bridging Settings","Visual Identity","Workflow & Audio Settings"]} step={studioStep} onStepChange={next => { setStudioStep(next); setActiveAccordion(next ); }} busy={submitting || loading} error={null} onCancel={onClose} label="PILLAR">{canonicalConfigurationForm0}</CampaignConfigurationWizard>{canonicalConfigurationDialog0}</>;
 return (
     <div style={{
       position: 'fixed', inset: 0, background: 'var(--overlay-backdrop)',

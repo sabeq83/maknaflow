@@ -1077,6 +1077,12 @@ function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCan
   const filteredCampaigns = campaigns.filter(c => filterBrandId === 'all' || c.brand_profile_id === filterBrandId);
 
 
+  function validateStudioStep(step) {
+    if (step===0 && !combinationRows.length) { showToast('Buat tinjauan kombinasi terlebih dahulu sebelum melanjutkan.','error'); return false; }
+    if (step===0 && combinationRows.length>20) { showToast('Maksimum 20 kombinasi per submit sesuai menu Multiplier.','error'); return false; }
+    return true;
+  }
+
 const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>{captureMode && studioStep === 0 && (<div style={{ display: 'flex', gap: 6, background: 'var(--overlay-subtle)', padding: 3, borderRadius: 6, flexWrap: 'wrap' }}>
                   <button
                     type="button"
@@ -2604,7 +2610,7 @@ const canonicalConfigurationDialog1 = (<>{showExcludedModal && (
             </div>
           </div>
         )}</>);
-if (captureMode) return <><CampaignConfigurationWizard steps={["Workflow, Blueprint & Kombinasi","Basic Creative Strategy","Aesthetics & Visual Settings","Product Bridging Settings","Visual Identity"]} step={studioStep} onStepChange={next => { setStudioStep(next); setActiveAccordion(next - 1); }} busy={submitting} error={toast?.type === 'error' ? toast.msg : null} onCancel={onCancel} label="MULTIPLIER">{canonicalConfigurationForm0}</CampaignConfigurationWizard>{canonicalConfigurationDialog0}{canonicalConfigurationDialog1}</>;
+if (captureMode) return <><CampaignConfigurationWizard validateStep={validateStudioStep} steps={["Workflow, Blueprint & Kombinasi","Basic Creative Strategy","Aesthetics & Visual Settings","Product Bridging Settings","Visual Identity"]} step={studioStep} onStepChange={next => { setStudioStep(next); setActiveAccordion(next - 1); }} busy={submitting} error={toast?.type === 'error' ? toast.msg : null} onCancel={onCancel} label="MULTIPLIER">{canonicalConfigurationForm0}</CampaignConfigurationWizard>{canonicalConfigurationDialog0}{canonicalConfigurationDialog1}</>;
 return (
     <div className="app-layout">
       <Sidebar />

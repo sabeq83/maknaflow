@@ -145,7 +145,7 @@ Periksa apakah snapshot dan kolom existing cukup. Target awal tanpa perubahan DD
 - [x] Tahap 07 — Implementasikan shell wizard dan hubungkan konfigurasi canonical ke Studio.
 - [x] Tahap 08 — Integrasikan validasi server, aset, manifest, dispatch dan approval.
 - [x] Tahap 09 — Lulus tes kontrak/integrasi, regresi dan build; aplikasi disiapkan untuk review manual pengguna sesuai SOP.
-- [ ] Tahap 10 — Perbarui SOT/notes, rilis dan verifikasi main/tag remote.
+- [x] Tahap 10 — Perbarui SOT/notes, rilis dan verifikasi main/tag remote.
 - [ ] Tahap 11 — Deploy atomic Dev/Staging dan catat bukti verifikasi.
 
 Saat eksekusi: ubah checkbox masing-masing tahap menjadi `[x]` segera setelah seluruh hasil dan gate tahapnya terpenuhi. Update notes berisi bukti, bukan hanya pernyataan selesai. Semua checkbox tetap kosong pada tahap perencanaan ini.

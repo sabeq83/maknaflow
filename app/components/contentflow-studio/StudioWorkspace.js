@@ -672,16 +672,16 @@ export default function StudioWorkspace() {
                   ⚡ Wizard Kreasi Batch Studio
                 </h2>
                 <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
-                  {['Pilih Campaign', ...(selectedEngine==='pillar'?['Planner Sekali Pakai']:[]), 'Konfigurasi Existing', 'Jadwal Output'].map((st, i) => (
+                  {[['Pilih Campaign',0], ...(selectedEngine==='pillar'?[['Planner',1],['Review Planner',2]]:[]), ['Konfigurasi Campaign',3], ['Jadwal Output',4], ['Review Batch',5]].map(([st,stepId], i, all) => (
                     <span
                       key={i}
                       style={{
                         fontSize: '0.78rem',
-                        fontWeight: wizardStep === (i + 1) ? 700 : 500,
-                        color: wizardStep === (i + 1) ? 'var(--action-primary)' : 'var(--text-muted)'
+                        fontWeight: wizardStep === stepId ? 700 : 500,
+                        color: wizardStep === stepId ? 'var(--action-primary)' : 'var(--text-muted)'
                       }}
                     >
-                      {st} {i < 3 ? '→' : ''}
+                      {st} {i < all.length-1 ? '→' : ''}
                     </span>
                   ))}
                 </div>

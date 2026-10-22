@@ -579,6 +579,16 @@ export default function ContentPlannerDashboard({ mode = 'direct', onCapture, on
   });
 
 
+  function validateStudioStep(step) {
+    if (step!==1) return true;
+    if (plannerFocus==='product_campaign') {
+      if (!productName || !productDesc) { showToast('Nama Produk dan Deskripsi Wajib Diisi','error'); return false; }
+      if (!isNonAffiliate && !isAffiliateLinkLocked) { showToast('Isikan URL affiliate sesuai nama brand di database produk.','error'); return false; }
+    }
+    if (plannerFocus==='brand_editorial' && (!brandContext.trim() || !pillars.length)) { showToast('Konteks Brand dan minimal satu Pilar Konten wajib diisi','error'); return false; }
+    return true;
+  }
+
 const canonicalConfigurationForm0 = (<form onSubmit={handleGenerate}>
                 {(!captureMode || studioStep === 0) && (<div style={{ marginBottom: '20px' }}>
                   <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 600 }}>
@@ -1450,7 +1460,7 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleGenerate}>
                   {generating ? '⏳ Menyimpan Draft Planner...' : '💾 Simpan Draft Planner'}
                 </button>)}
               </form>);
-if (captureMode) return <><CampaignConfigurationWizard steps={["Fokus & Sumber","Brief Planner","Audiens & Jumlah"]} step={studioStep} onStepChange={next => setStudioStep(next)} busy={generating} error={toast?.type === 'error' ? toast.msg : null} onCancel={onCancel} label="Generator Content Planner" submitLabel="Generate Content Planner →">{canonicalConfigurationForm0}</CampaignConfigurationWizard></>;
+if (captureMode) return <><CampaignConfigurationWizard validateStep={validateStudioStep} steps={["Fokus & Sumber","Brief Planner","Audiens & Jumlah"]} step={studioStep} onStepChange={next => setStudioStep(next)} busy={generating} error={toast?.type === 'error' ? toast.msg : null} onCancel={onCancel} label="Generator Content Planner" submitLabel="Generate Content Planner →">{canonicalConfigurationForm0}</CampaignConfigurationWizard></>;
 return (
     <div className="app-layout">
       <Sidebar />

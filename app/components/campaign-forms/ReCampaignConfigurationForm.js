@@ -1038,6 +1038,22 @@ export default function RECampaignsPage({ mode = 'direct', onCapture, onSuccess,
   }
 
 
+  function validateStudioStep(step) {
+    const fail = message => { showToast(message,'error'); return false; };
+    if (step===0 && productionMode==='mass' && !parsedRows.length) return fail('Silakan pilih/unggah file CSV/XLSX terlebih dahulu.');
+    if (step===1 && (!campaignName.trim() || (productionMode!=='mass' && !urlsText.split('\n').some(url=>url.trim())))) return fail('Nama kampanye dan minimal satu sumber video diperlukan.');
+    if (step===3 && isBridgingActive) {
+      if (Number(bridgeAtClip)<2 || Number(bridgeAtClip)>Number(targetClipsCount)) return fail('Posisi transisi harus berada di antara klip ke-2 dan jumlah klip video.');
+      if (productionMode!=='mass') {
+        if (bridgingMode==='select_existing' && !targetProductId) return fail('Silakan pilih produk dari pustaka.');
+        if (bridgingMode==='manual_input' && (!manualProductName.trim() || !manualProductDesc.trim())) return fail('Nama produk dan deskripsi wajib diisi.');
+        if (bridgingMode==='url_extract' && !productUrl.trim()) return fail('Silakan masukkan URL produk target.');
+        if (visualMode==='hybrid_lock' && bridgingMode!=='url_extract' && (!productRefImage || !productFilenameDeclare.trim())) return fail('Unggah foto dan isi deklarasi nama berkas Hybrid Lock.');
+      }
+    }
+    return true;
+  }
+
 const canonicalConfigurationForm0 = (<form onSubmit={productionMode === 'mass' ? handleMassSubmit : handleCreate}>
 
               {/* Switcher Tab */}
@@ -2190,7 +2206,7 @@ const canonicalConfigurationDialog0 = (<>{showPresetSaveModal && (
             </form>
           </div>
         )}</>);
-if (captureMode) return <><CampaignConfigurationWizard steps={["Sumber, Mode & Preset","Basic Creative Strategy","Aesthetics & Visual Settings","Product Bridging Settings","Visual Identity","Workflow & Audio Settings"]} step={studioStep} onStepChange={next => { setStudioStep(next); setActiveAccordion(next - 1); }} busy={creating || massUploading} error={toast?.type === 'error' ? toast.msg : null} onCancel={onCancel} label="RE">{canonicalConfigurationForm0}</CampaignConfigurationWizard>{canonicalConfigurationDialog0}</>;
+if (captureMode) return <><CampaignConfigurationWizard validateStep={validateStudioStep} steps={["Sumber, Mode & Preset","Basic Creative Strategy","Aesthetics & Visual Settings","Product Bridging Settings","Visual Identity","Workflow & Audio Settings"]} step={studioStep} onStepChange={next => { setStudioStep(next); setActiveAccordion(next - 1); }} busy={creating || massUploading} error={toast?.type === 'error' ? toast.msg : null} onCancel={onCancel} label="RE">{canonicalConfigurationForm0}</CampaignConfigurationWizard>{canonicalConfigurationDialog0}</>;
 return (
     <div className="app-layout">
       <Sidebar />

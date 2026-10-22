@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.75 — Validate Studio Campaign Wizard Steps (22/10/2026)
+- Validasi prasyarat konfigurasi sebelum melanjutkan tiap langkah wizard
+- Selaraskan indikator langkah Planner konfigurasi jadwal dan review
+- Tunggu detail Planner dan pertahankan validasi submit canonical
+
 ## V2.32.74 — Guard Studio Planner Wizard Session (22/10/2026)
 - Abaikan respons generator dari sesi wizard yang sudah ditutup
 - Lindungi batch baru dari respons Planner lama dan penutupan saat commit

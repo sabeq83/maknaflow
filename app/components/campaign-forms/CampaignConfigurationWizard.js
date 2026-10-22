@@ -4,12 +4,13 @@ import { useRef } from 'react';
 import './campaign-wizard.css';
 
 /** Presentation only: the canonical form keeps its own state, controls and submit handler. */
-export default function CampaignConfigurationWizard({ steps, step, onStepChange, children, busy, error, onCancel, label = 'Konfigurasi Campaign', submitLabel = 'Review Jadwal →' }) {
+export default function CampaignConfigurationWizard({ steps, step, onStepChange, children, busy, error, onCancel, label = 'Konfigurasi Campaign', submitLabel = 'Review Jadwal →', validateStep }) {
   const root = useRef(null);
   const move = next => {
     if (busy || next < 0 || next >= steps.length) return;
     const form = root.current?.querySelector('form');
     if (next > step && form && !form.reportValidity()) return;
+    if (next > step && validateStep && !validateStep(step)) return;
     onStepChange(next);
   };
   const finish = () => {
