@@ -1,7 +1,7 @@
 # Implementation Plan — Perbaikan ContentFlow Studio: Campaign First
 
 Tanggal: 22 Oktober 2026 · Asia/Jakarta
-Status: rencana perbaikan; belum ada perubahan aplikasi, migrasi, rilis, atau deployment dari pekerjaan ini.
+Status: implementasi, migrasi Dev/Staging, rilis v2.32.71 dan deployment atomik selesai; review UI pengguna/publishing nyata belum dilakukan.
 Baseline staging yang diperiksa: `e334c8f7b732945c4e967c7214d2cdd9e3df8f8f`.
 
 ## Tujuan dan prioritas dokumen
@@ -112,7 +112,7 @@ Sediakan audit/repair script terpisah, dry-run default, tenant+schema+batch/slot
 - [x] 08. Perbaiki wizard React menggunakan form existing: campaign-first, ImportPlannerModal capture, reset state saat berganti tipe, output allocation dan konversi timezone yang benar.
 - [x] 09. Jalankan test integrasi terisolasi keempat jalur, regression existing, recovery/idempotency/tenant/timezone dan build. Sajikan link untuk manual review light/dark.
 - [x] 10. Lakukan audit repair scoped pada Dev lalu Staging sesuai laporan; verifikasi tidak ada campaign/post ganda dan consumption tidak terbuka kembali.
-- [ ] 11. Update SOT/execution notes, rilis/Git sync sesuai SOP setelah verifikasi, deploy atomic Dev lalu Staging dari full SHA remote, dan verifikasi kesehatan/pilot. Production tidak termasuk.
+- [x] 11. Update SOT/execution notes, rilis/Git sync sesuai SOP setelah verifikasi, deploy atomic Dev lalu Staging dari full SHA remote, dan verifikasi kesehatan/pilot. Production tidak termasuk.
 
 Update checkbox segera sesudah setiap tahap selesai. Tahap dengan review pengguna belum dilakukan tidak boleh dicentang. Rencana ini tidak memberi izin untuk menandai review manual sebagai sudah lulus hanya dari test otomatis.
 

@@ -21,3 +21,15 @@ Semua empat adapter domain RE, Multiplier, Pillar, Recipe diuji pada schema stud
 
 ## Kesiapan rilis
 Final suite: 4/4 passed (termasuk integrasi PostgreSQL terisolasi empat adapter domain). Focused regression: 10/10 passed. Build produksi lulus dengan background services/migrations dimatikan. Workspace perubahan hanya scope campaign-first; baseline remote main b84312f7953f8951330e1cc5d89958b4f89dbcd5 dan patch v2.32.71 belum tersedia sebelum rilis.
+
+## Rilis dan deployment aktual
+- Versi/tag v2.32.71; SHA kode c517f377011b1d5c6e895c826f99b6ebb1407794. Main dan annotated tag remote diverifikasi sebelum deployment.
+- Dev: release 20261022T104629Z-c517f377011b; Staging: release 20261022T104746Z-c517f377011b.
+- Kedua manifest health=passed, SHA sesuai; UI/API PM2 online dengan pm_cwd resolved release, schema dev/staging sesuai dan PGPOOL_MAX=3. Semua mutable paths menunjuk shared.
+- UI /login=200, API /health=200; /contentflow-studio unauthenticated=307 ke login (expected). Flag worker Studio configured true di shared env Dev/Staging. Production tidak diubah/deploy.
+- Link review: http://100.95.245.55:5010/contentflow-studio dan http://100.95.245.55:5020/contentflow-studio.
+- Manual UI setelah login dan publishing provider nyata belum diuji; tidak ada posting/panggilan AI produksi selama test.
+- Final build completed (148/148 routes) dengan warning baseline middleware/proxy dan fallback universe DB pada sandbox lokal; remote build berhasil dengan DB tersedia.
+
+## Batasan yang dipertahankan
+Recipe Labs mode video mengikuti output existing berupa storyboard/report. Studio menolak menganggapnya video siap publish; gunakan focus Recipe pada Pillar untuk produksi video akhir. Test lama Recipe mengharapkan 25 ditolak sementara MAX_RECIPE_COUNT HEAD=30; kegagalan baseline dicatat, tidak diubah untuk menghijaukan test.
