@@ -123,7 +123,7 @@ Approval dan enqueue intent harus atomik. Jika layanan publishing gagal sesudah 
 - [x] 08. Integrasikan review creative existing, preview aset final, approval revision/hash, target Repliz, reschedule/retry per akun, download/copy dan bukti upload manual.
 - [x] 09. Jalankan test kontrak/transaksi/integrasi yang relevan, regresi menu existing, build, dan verifikasi manual UI light/dark bersama pengguna.
 - [x] 10. Dokumentasikan operasi, migrasi/rollback, lakukan rilis dan Git sync wajib setelah verifikasi; pastikan commit/tag remote benar.
-- [ ] 11. Saat tahap rollout dijalankan, deploy Dev lalu Staging berdasarkan full remote SHA dan SOT atomic; verifikasi health/PM2/schema/pool/shared. Production menunggu instruksi eksplisit terpisah.
+- [x] 11. Saat tahap rollout dijalankan, deploy Dev lalu Staging berdasarkan full remote SHA dan SOT atomic; verifikasi health/PM2/schema/pool/shared. Production menunggu instruksi eksplisit terpisah.
 
 Setelah setiap tahap selesai, ubah checkbox tahap menjadi `[x]` di file ini. Tambahkan file/dependensi baru beserta before/after sebelum memodifikasinya. Jangan menandai implementasi selesai hanya karena dokumen rencana selesai.
 
