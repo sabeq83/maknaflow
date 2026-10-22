@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.71 — ContentFlow Studio Campaign First (22/10/2026)
+- Pilih campaign sebelum Planner dan pulihkan jalur Pillar
+- Batch atomik, Planner sekali pakai, output mapping dan retry idempotent
+- Koreksi approval aset final, timezone dan worker dispatch
+
 ## V2.32.70 — ContentFlow Studio (22/10/2026)
 - Orkestrasi kampanye multi-engine terpadu
 - Single-use Planner invariant & anti-bypass server guard

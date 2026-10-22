@@ -29,7 +29,7 @@ export const GET = withTenantContext(async (request) => {
     }
     if (brandId && brandId !== 'all') {
       filtered = filtered.filter(s => {
-        const snap = s.creative_snapshot_json || {};
+        const snap = s.batch_config || {};
         return snap.brand_profile_id === brandId || snap.selectedBrandId === brandId;
       });
     }
@@ -38,7 +38,7 @@ export const GET = withTenantContext(async (request) => {
       total: slots.length,
       pending: slots.filter(s => s.stage_status === 'pending').length,
       in_progress: slots.filter(s => s.stage_status === 'in_progress').length,
-      ready_for_review: slots.filter(s => s.stage_status === 'completed' && s.publishing_status === 'not_approved').length,
+      ready_for_review: slots.filter(s => ['ready','needs_review'].includes(s.stage_status) && s.publishing_status === 'not_approved').length,
       approved: slots.filter(s => s.publishing_status === 'approved' || s.publishing_status === 'scheduled').length,
       published: slots.filter(s => s.publishing_status === 'published').length,
       failed: slots.filter(s => s.stage_status === 'failed' || s.publishing_status === 'failed').length

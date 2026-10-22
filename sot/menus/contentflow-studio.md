@@ -2,13 +2,16 @@
 
 ## 1. Ikhtisar & Arsitektur
 
-ContentFlow Studio adalah orkestrator kampanye konten visual end-to-end yang menyatukan perencanaan ide (Content Planner), eksekusi mesin produksi multi-engine (RE Campaign, Multiplier Lab, Recipe Labs), dan penerbitan terjadwal lintas platform (Repliz Publishing Engine & ContentFlow Hub).
+ContentFlow Studio adalah orkestrator kampanye konten visual end-to-end yang menyatukan perencanaan ide (Content Planner), eksekusi mesin produksi multi-engine (Pillar Campaign, RE Campaign, Multiplier Lab, Recipe Labs), dan penerbitan terjadwal lintas platform (Repliz Publishing Engine & ContentFlow Hub).
 
 ```mermaid
 graph TD
-    A[Content Planner] -->|Single-Use Invariant| B[ContentFlow Studio Batch]
+    A[Pilih Campaign] --> P{Pillar?}
+    P -->|Ya| CP[Planner Sekali Pakai]
+    CP --> B[ContentFlow Studio Batch]
+    P -->|RE / Multiplier / Recipe Labs| B
     B -->|Jadwal Alokasi per Slot| C[Studio Slots Ledger]
-    C -->|Production Due Dispatch| D[Domain Engine: RE / Multiplier / Recipe]
+    C -->|Production Due Dispatch| D[Domain Engine: Pillar / RE / Multiplier / Recipe]
     D -->|Asset Output Rendered| E[Creative Review & Hash Gate]
     E -->|Approved + Hash Valid| F[Publishing Service: Repliz / Manual Evidence]
     F -->|Scheduled / Published| G[ContentFlow Hub Status Sync]
@@ -43,16 +46,17 @@ graph TD
 - **Navigasi Waktu**: Tombol `Sebelumnya`, `Bulan Ini`, `Selanjutnya` berbasis zona waktu tenant (`Asia/Jakarta`).
 - **Tampilan Kalender**: Memetakan setiap slot konten pada tanggal tayang yang ditargetkan (`scheduled_publish_at`).
 - **Badge Indikator**:
-  - Tipe Engine: `RE`, `MUL`, `REC`.
+  - Tipe Engine: `Pillar`, `RE`, `MUL`, `REC`.
   - Status Produksi: `Antrean`, `Diproduksi`, `Perlu Review`, `Gagal`.
   - Status Publikasi: `Disetujui`, `Terjadwal`, `Terbit`.
 - **Desain Semantik**: 100% menggunakan design tokens dari `app/theme.css` (`var(--surface)`, `var(--surface-raised)`, `var(--action-primary)`, dll.), sepenuhnya adaptif untuk Light Mode dan Dark Mode.
 
-### 2.2 Wizard Kreasi 4-Tahap
-1. **Tahap 1 — Ide & Riset Planner**: Membuat planner ide konten baru secara otomatis.
-2. **Tahap 2 — Pilih Engine**: Memilih target engine (RE Campaign, Multiplier Lab, atau Recipe Labs).
-3. **Tahap 3 — Konfigurasi Form Engine**: Mengisi parameter spesifik mesin (gaya visual, voice persona, VSO karakter, rasio aspek, tata letak grid, dll.).
-4. **Tahap 4 — Alokasi Jadwal**: Mengatur tanggal dan jam tayang per baris slot; sistem secara otomatis menghitung waktu mulai produksi yang lebih awal.
+### 2.2 Wizard Campaign-first
+1. Pilih Pillar Campaign, RE, Multiplier, atau Recipe Labs.
+2. Hanya Pillar: buat/generate Planner baru, review baris, lalu konfigurasi ImportPlannerModal existing. Focus Recipe memakai jalur culinary Pillar.
+3. Mesin lain langsung memakai form konfigurasi existing masing-masing tanpa Planner.
+4. Alokasikan jadwal produksi/tayang dan akun per output manifest, simpan Draft, lalu aktifkan Generate Batch.
+
 
 ### 2.3 Gate Review Kreatif & Approval Hash
 - **Player & Galeri Media**: Memutar video MP4 hasil render atau menampilkan foto grid resep beresolusi tinggi.
@@ -105,3 +109,17 @@ Jika terjadi kebutuhan rollback aplikasi:
    npm run deploy:dev:rollback -- --apply --confirm-dev
    ```
 3. Data audit di `content_planner_consumptions`, `content_studio_batches`, `content_studio_slots`, dan `content_studio_events` tetap dipertahankan secara utuh agar tidak ada pekerjaan yang hilang atau publikasi ganda.
+
+## Koreksi Campaign-first — 22 Oktober 2026
+
+Wizard dimulai dari pilihan Pillar, Reverse Engineering, Multiplier, atau Recipe Labs. Planner tidak lagi menjadi prasyarat universal. Pillar memakai Generator Planner baru lalu ImportPlannerModal existing dalam mode capture. Focus Recipe di Planner memakai pipeline culinary Pillar existing. RE, Multiplier dan Recipe Labs mengalokasikan slot berdasarkan output manifest konfigurasi existing tanpa konsumsi Planner.
+
+`engine_kind` pada batch memilih adapter; `source_kind` pada slot menjelaskan asal brief. Batch config versi 2 dibuat atomik bersama slot, target dan consumption bersyarat. Batch baru tetap Draft; Generate Batch mengaktifkan produksi dan worker hanya claim slot aktif yang sudah due. Idempotency key stabil dan hash request menolak reuse key untuk payload berbeda. Identitas domain deterministik per slot dan checkpoint ditulis bersama penciptaan campaign/item.
+
+Status Ready berasal dari aset akhir source item yang tepat. Recipe Labs mode video existing menghasilkan storyboard/report, bukan file video final; hasil ini ditandai Needs Review dan tidak boleh dipublish sebagai video. Untuk produksi video resep final gunakan Recipe Planner pada jalur Pillar.
+
+Approval memakai final_media_url/final_caption/contentflow_id dan revisi yang mengikat akun/jadwal. Target scheduling dengan approval tersimpan dapat dilanjutkan worker melalui publishing service existing; tidak mengulang target yang sudah memiliki job. Perubahan setelah intent aktif memerlukan pembatalan/review lebih dahulu. Status target direkonsiliasi dari publishing_jobs. Publikasi nyata tetap memerlukan approval pengguna dan akun/provider siap.
+
+Migrasi eksplisit: `scripts/migrate-contentflow-studio-campaign-first.mjs --schema dev|staging` (dry-run), lalu `--apply --confirm-dev|--confirm-staging`. Script menolak Production. Slot legacy dengan engine belum terbukti ditandai legacy_requires_review dan batch aktif dipause; consumption tidak dibuka. Audit scoped: `scripts/audit-repair-contentflow-studio.mjs --schema <env> --tenant <id>`. Audit tidak melakukan regenerate/publish.
+
+Boot worker Studio memerlukan `ENABLE_CONTENTFLOW_STUDIO=true` serta background services aktif. Nonaktifkan flag sebelum rollback ke versi lama yang belum memahami mapping baru. Review manual UI dilakukan melalui link Dev/Staging; test otomatis tidak berarti approval manual pengguna.

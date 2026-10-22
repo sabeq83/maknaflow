@@ -26,75 +26,30 @@ export const GET = withTenantContext(async (request) => {
   }
 });
 
-export const POST = withTenantContext(async (request, user) => {
+export const POST = withTenantContext(async (request, context, user) => {
   try {
-    const tenantId = getActiveTenantId() || 'default_tenant';
-    const body = await request.json();
-
-    const {
-      plannerId,
-      engine,
-      enginePayload = {},
-      title,
-      selectedRowIds = [],
-      slotScheduleMap = {},
-      defaultTargets = [],
-      timezone = 'Asia/Jakarta',
-      idempotencyKey = null
-    } = body;
-
-    if (!plannerId) {
-      return NextResponse.json({
-        success: false,
-        error: 'plannerId wajib disertakan. ContentFlow Studio membutuhkan Planner satu sesi.'
-      }, { status: 400 });
-    }
-
-    if (!engine || !['re', 'multiplier', 'recipe'].includes(engine)) {
-      return NextResponse.json({
-        success: false,
-        error: 'Engine tidak valid. Pilihan: re, multiplier, recipe.'
-      }, { status: 400 });
-    }
-
-    // 1. Create Studio Batch container
-    const cleanTitle = title || `[ STUDIO ] - ${engine.toUpperCase()} - ${plannerId.slice(0, 8)}`;
-    const batch = await createStudioBatch({
-      tenantId,
-      title: cleanTitle,
-      sourceKind: engine,
-      sourceId: plannerId,
-      configurationJson: enginePayload,
-      idempotencyKey,
-      createdBy: user?.id || user?.username || 'user'
-    });
-
-    // 2. Atomically consume planner rows into batch slots
-    const consumptionResult = await consumePlannerIntoBatch({
-      tenantId,
-      batchId: batch.id,
-      plannerId,
-      selectedRowIds,
-      slotScheduleMap,
-      defaultTargets,
-      timezone,
-      userId: user?.id || 'user'
-    });
-
-    // 3. Return full batch with slots
-    const fullBatch = await getStudioBatchById(batch.id, tenantId);
-
-    return NextResponse.json({
-      success: true,
-      message: `Berhasil membuat batch studio ${batch.id} dengan ${consumptionResult.slots.length} slot konten terjadwal.`,
-      data: fullBatch
-    }, { status: 201 });
+    let input;
+    if ((request.headers.get('content-type') || '').includes('multipart/form-data')) {
+      const form = await request.formData();
+      input = JSON.parse(form.get('input') || '{}');
+      const image = form.get('productRefImage');
+      if (image && typeof image.arrayBuffer === 'function') {
+        if (input.engineKind !== 're' || image.size > 10 * 1024 * 1024) throw Object.assign(Error('Upload gambar tidak valid atau terlalu besar.'), { status:400 });
+        const sharp = (await import('sharp')).default;
+        const buffer = await sharp(Buffer.from(await image.arrayBuffer())).rotate().png().toBuffer();
+        const crypto = await import('node:crypto');
+        const path = await import('node:path');
+        const fs = await import('node:fs/promises');
+        const name = crypto.createHash('sha256').update(getActiveTenantId() + ':').update(buffer).digest('hex') + '.png';
+        const dir = path.join(process.cwd(),'public','uploads','studio');
+        await fs.mkdir(dir,{recursive:true}); await fs.writeFile(path.join(dir,name),buffer);
+        input.enginePayload = { ...input.enginePayload, product_ref_image_path:'/uploads/studio/'+name };
+      }
+    } else input = await request.json();
+    const { createStudioBatchAtomically } = await import('@/lib/contentflow-studio-batch-service');
+    const data = await createStudioBatchAtomically({ ...input, tenantId: getActiveTenantId(), actorId: user?.id || user?.username });
+    return NextResponse.json({ success: true, data }, { status: data.reused ? 200 : 201 });
   } catch (error) {
-    console.error('[ContentFlow Studio Batches POST Error]:', error);
-    return NextResponse.json({
-      success: false,
-      code: error.code || 'BATCH_CREATION_FAILED',
-      error: error.message || 'Gagal membuat batch konten studio.'
-    }, { status: error.status || 500 });
+    return NextResponse.json({ success: false, code: error.code || 'STUDIO_BATCH_FAILED', error: error.message }, { status: error.status || 500 });
   }
 });

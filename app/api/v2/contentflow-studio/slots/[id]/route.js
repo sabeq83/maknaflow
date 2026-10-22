@@ -11,7 +11,7 @@ export const GET = withTenantContext(async (request, context) => {
     const { id } = await context.params;
 
     const slotRes = await pgQuery(`
-      SELECT s.*, b.title as batch_title, b.source_kind, b.configuration_json as batch_config
+      SELECT s.*, b.title as batch_title, b.source_kind as batch_source_kind, b.engine_kind as batch_engine_kind, b.configuration_json as batch_config
       FROM content_studio_slots s
       JOIN content_studio_batches b ON s.batch_id = b.id
       WHERE s.id = $1 AND s.tenant_id = $2
@@ -27,6 +27,8 @@ export const GET = withTenantContext(async (request, context) => {
       SELECT * FROM content_studio_targets WHERE slot_id = $1 AND tenant_id = $2 ORDER BY created_at ASC
     `, [id, tenantId]);
     slot.targets = targetsRes.rows;
+    const { computeApprovalRevisionHash } = await import('@/lib/contentflow-studio-contract');
+    slot.current_revision_hash = computeApprovalRevisionHash({mediaUrl:slot.final_media_url,caption:slot.final_caption,accountIds:slot.targets.map(t=>t.account_id),scheduledPublishAt:slot.scheduled_publish_at});
 
     const approvalsRes = await pgQuery(`
       SELECT * FROM content_studio_approvals WHERE slot_id = $1 AND tenant_id = $2 ORDER BY created_at DESC

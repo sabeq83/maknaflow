@@ -49,7 +49,8 @@ export default function ImportPlannerModal({
   isOpen,
   onClose,
   initialPlannerId = '',
-  onSuccess
+  onSuccess,
+  onConfigurationSubmit = null
 }) {
   const [planners, setPlanners] = useState([]);
   const [selectedPlannerId, setSelectedPlannerId] = useState(initialPlannerId);
@@ -662,6 +663,11 @@ export default function ImportPlannerModal({
         }
       };
 
+      if (onConfigurationSubmit) {
+        await onConfigurationSubmit(payload);
+        return;
+      }
+
       const res = await fetch('/api/v2/pillar-campaigns/ingest-planner', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -833,6 +839,7 @@ export default function ImportPlannerModal({
                       </label>
                       <select
                         value={selectedPlannerId}
+                        disabled={Boolean(onConfigurationSubmit && initialPlannerId)}
                         onChange={(e) => handleSelectPlanner(e.target.value)}
                         style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px', fontSize: '13px' }}
                       >
