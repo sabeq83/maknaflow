@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Interaktif — Recipe Labs UI & ContentFlow Hub Sync</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --canvas: #090d16;
+      --sidebar: #0d1424;
+      --surface: #111a2e;
+      --surface-raised: #16223b;
+      --surface-interactive: #1d2c4b;
+      --surface-hover: #233559;
+      --input-bg: #0c1424;
+      --overlay-backdrop: rgba(3, 7, 18, 0.78);
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --text-disabled: #64748b;
+      --border-subtle: #243552;
+      --border-strong: #3b5278;
+      --border-color: #243552;
+      --action-primary: #10b981;
+      --action-primary-hover: #34d399;
+      --on-action-primary: #022c22;
+      --accent-recipe: #8b5cf6;
+      --accent-recipe-light: #a78bfa;
+      --accent-recipe-soft: rgba(139, 92, 246, 0.15);
+      --status-info: #38bdf8;
+      --status-info-soft: rgba(56, 189, 248, 0.14);
+      --status-success: #34d399;
+      --status-success-soft: rgba(52, 211, 153, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #f87171;
+      --status-danger-soft: rgba(248, 113, 113, 0.14);
+      --shadow-card: 0 10px 28px rgba(0, 0, 0, 0.35);
+      --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.65);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f1f5f9;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #ffffff;
+      --overlay-backdrop: rgba(15, 23, 42, 0.55);
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-color: #e2e8f0;
+      --action-primary: #059669;
+      --action-primary-hover: #10b981;
+      --on-action-primary: #ffffff;
+      --accent-recipe: #7c3aed;
+      --accent-recipe-light: #6d28d9;
+      --accent-recipe-soft: rgba(124, 58, 237, 0.12);
+      --status-info: #0284c7;
+      --status-info-soft: rgba(2, 132, 199, 0.12);
+      --status-success: #059669;
+      --status-success-soft: rgba(5, 150, 105, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #dc2626;
+      --status-danger-soft: rgba(220, 38, 38, 0.12);
+      --shadow-card: 0 8px 24px rgba(15, 23, 42, 0.08);
+      --shadow-modal: 0 20px 50px rgba(15, 23, 42, 0.2);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--canvas);
+      color: var(--text-primary);
+      padding: 24px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-title h1 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .badge-recipe {
+      background: var(--accent-recipe-soft);
+      color: var(--accent-recipe-light);
+      border: 1px solid var(--accent-recipe);
+    }
+
+    .badge-success {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+
+    .badge-info {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+    }
+
+    .badge-warning {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1.35fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 980px) {
+      .grid-2col { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-header h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .form-control, .form-select {
+      background: var(--input-bg);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.86rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--accent-recipe);
+    }
+
+    .form-help {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .notice-box {
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.45;
+    }
+
+    .notice-info {
+      background: var(--accent-recipe-soft);
+      border: 1px solid var(--accent-recipe);
+      color: var(--text-primary);
+    }
+
+    .notice-success {
+      background: var(--status-success-soft);
+      border: 1px solid var(--status-success);
+      color: var(--text-primary);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+
+    .btn-recipe {
+      background: var(--accent-recipe);
+      color: #ffffff;
+    }
+    .btn-recipe:hover {
+      filter: brightness(1.1);
+    }
+
+    .btn-secondary {
+      background: var(--surface-interactive);
+      border-color: var(--border-subtle);
+      color: var(--text-primary);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-hover);
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.78rem;
+    }
+
+    /* Accordion Recipe Cards */
+    .recipe-accordion-item {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      background: var(--surface-raised);
+      overflow: hidden;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .recipe-accordion-item.is-open {
+      border-color: var(--accent-recipe);
+      box-shadow: 0 4px 16px var(--accent-recipe-soft);
+    }
+
+    .recipe-accordion-header {
+      padding: 14px 18px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+      user-select: none;
+      transition: background 0.15s ease;
+    }
+
+    .recipe-accordion-header:hover {
+      background: var(--surface-interactive);
+    }
+
+    .recipe-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .recipe-idx-badge {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--accent-recipe-light);
+      background: var(--accent-recipe-soft);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .recipe-title-text {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .recipe-header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chevron-icon {
+      font-size: 0.8rem;
+      transition: transform 0.2s ease;
+      color: var(--text-muted);
+    }
+
+    .is-open .chevron-icon {
+      transform: rotate(180deg);
+      color: var(--accent-recipe-light);
+    }
+
+    .recipe-accordion-body {
+      display: none;
+      padding: 18px;
+      border-top: 1px solid var(--border-subtle);
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .is-open .recipe-accordion-body {
+      display: flex;
+    }
+
+    .mockup-grid-visual {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .mockup-grid-visual { grid-template-columns: 1fr; }
+    }
+
+    .poster-preview-box {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #0d0d12;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 4px;
+      padding: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slot-thumb {
+      background: var(--surface-interactive);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-align: center;
+      padding: 4px;
+    }
+
+    .slot-main {
+      grid-column: 1 / 3;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(56, 189, 248, 0.25));
+      color: var(--text-primary);
+    }
+
+    .md-preview-pre {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+      max-height: 180px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    /* ContentFlow Hub Sync Toolbar */
+    .sync-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .sync-info-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-primary);
+    }
+
+    .sync-info-sub {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    /* ContentFlow Hub Table Simulator */
+    .hub-table-wrapper {
+      overflow-x: auto;
+    }
+    .hub-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    .hub-table th {
+      text-align: left;
+      padding: 10px 14px;
+      background: var(--surface-raised);
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-subtle);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .hub-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+    .hub-table tr:hover {
+      background: var(--surface-interactive);
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      background: var(--surface-raised);
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Top Bar & Theme Toggle -->
+  <header class="top-bar">
+    <div class="brand-title">
+      <span style="font-size: 1.6rem;">🧪</span>
+      <div>
+        <h1>Recipe Labs & ContentFlow Hub Integration Mockup</h1>
+        <p style="font-size: 0.76rem; color: var(--text-muted);">
+          Simulasi Sesuai SOP: Brand Account Static, Accordion Auto-Collapse, Zero-Facebook In Recipe Labs, Auto/Manual Sync Hub
+        </p>
+      </div>
+    </div>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <span class="badge-pill badge-recipe">v2.33 Proposal</span>
+      <button class="theme-toggle-btn" onclick="toggleTheme()">
+        <span id="theme-icon">☀️</span> <span id="theme-text">Light Mode</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Section 1 & 2: Form Statis dan Detail Card Accordion -->
+  <div class="grid-2col">
+    
+    <!-- LEFT: FORM PEMBUATAN RESEP TEKS (STATIS) -->
+    <div class="card">
+      <div class="card-header">
+        <h2>
+          <span>📝</span> Form Resep Statis (Tanpa Facebook Page)
+        </h2>
+        <span class="badge-pill badge-info">Poin 1 & 2</span>
+      </div>
+      <div class="card-body">
+        
+        <!-- Poin 1: Nama Akun (Brand Account) -->
+        <div class="form-group" style="border: 1px solid var(--accent-recipe); border-radius: var(--radius-sm); padding: 12px; background: var(--accent-recipe-soft);">
+          <label class="form-label" style="color: var(--accent-recipe-light);">
+            <span>🏷️ Nama Akun (Brand Profile DNA Kuliner) *</span>
+            <span class="badge-pill badge-recipe" style="font-size: 0.68rem;">BARU</span>
+          </label>
+          <select class="form-select" id="brand-account-select" onchange="handleBrandChange(this.value)">
+            <option value="">-- Pilih Brand Akun Publikasi --</option>
+            <option value="bp_1" selected>🍳 Dapur Makna Official (@dapurmakna)</option>
+            <option value="bp_2">🥩 Resep Nusantara Gurih (@resepgurih)</option>
+            <option value="bp_3">🥗 Clean Bites Sehat (@cleanbites_id)</option>
+            <option value="bp_4">🧁 Sweet Pastry Studio (@sweetpastry)</option>
+          </select>
+          <div class="form-help" style="color: var(--text-secondary); margin-top: 4px;">
+            Resep yang dibuat akan diasosiasikan dengan akun brand ini saat masuk ke <strong>ContentFlow Hub</strong> untuk posting ke media sosial.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Kategori Kuliner</label>
+          <select class="form-select">
+            <option>Makanan Tradisional Nusantara</option>
+            <option>Modern Fusion Food</option>
+            <option>Minuman & Dessert Segar</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Visual Style Prompt AI</label>
+          <select class="form-select">
+            <option>Food Porn (Cinematic, Glossy, Juicy, Shallow DOF)</option>
+            <option>Rustic Country Kitchen (Warm, Wooden, Soft Light)</option>
+            <option>Modern Studio Minimalist (Clean, Crisp, Overhead)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Folder Nextcloud Storage</label>
+          <input type="text" class="form-control" value="MAKNA_Recipes/2026/Oktober" />
+          <div class="form-help">Penyimpanan aset gambar 1:1 dan poster kolase.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Target Resep & Preset Kolase</label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <select class="form-select">
+              <option>1 Resep Lengkap</option>
+              <option selected>2 Resep Berseri</option>
+            </select>
+            <select class="form-select">
+              <option>4 Gambar - Editorial Split</option>
+              <option>3 Gambar - Hero Left</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Poin 2: Info ContentFlow Hub (Menggantikan Toggle Facebook) -->
+        <div class="notice-box notice-info">
+          <span style="font-size: 1.2rem;">🚀</span>
+          <div>
+            <strong>Otomatis Terhubung ke ContentFlow Hub</strong>
+            <p style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 2px;">
+              Toggle Facebook Page telah dihilangkan. Setelah poster selesai di-generate, resep otomatis disinkronkan ke <strong>ContentFlow Hub</strong> untuk penjadwalan multi-kanal (TikTok, FB, IG, YouTube) dengan nama akun yang dipilih.
+            </p>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" style="width: 100%; margin-top: 6px;" onclick="simulateSubmitForm()">
+          ✨ Mulai Generate Resep & Poster AI
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT: ACCORDION CARD RESEP DETIL -->
+    <div class="card">
+      <div class="card-header">
+        <h2>
+          <span>📂</span> Card Detil Resep (Accordion: 1 Card Terbuka)
+        </h2>
+        <span class="badge-pill badge-recipe">Poin 3 & 4 & 5</span>
+      </div>
+      <div class="card-body">
+        
+        <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px;">
+          <strong>Aturan Accordion:</strong> Default hanya 1 kartu yang terbuka. Membuka kartu lain otomatis menutup kartu yang sedang aktif. Integrasi Facebook dihilangkan dan digantikan tombol <strong>Sync ke ContentFlow</strong>.
+        </p>
+
+        <!-- ACCORDION ITEM #1 (DEFAULT TERBUKA) -->
+        <div class="recipe-accordion-item is-open" id="card-recipe-1">
+          <div class="recipe-accordion-header" onclick="toggleAccordion(1)">
+            <div class="recipe-header-left">
+              <span class="recipe-idx-badge">#1</span>
+              <div>
+                <div class="recipe-title-text">Ayam Geprek Sambal Korek Bawang Renyah</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted);">Brand: <strong>Dapur Makna Official</strong> • 4 Gambar Kolase</div>
+              </div>
+            </div>
+            <div class="recipe-header-right">
+              <span class="badge-pill badge-success" id="sync-badge-1">✓ Synced to Hub</span>
+              <span class="badge-pill badge-info">COMPLETED</span>
+              <span class="chevron-icon">▼</span>
+            </div>
+          </div>
+          
+          <div class="recipe-accordion-body">
+            <!-- Mockup Poster & Naskah -->
+            <div class="mockup-grid-visual">
+              <div>
+                <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600;">
+                  🖼️ Poster Kolase 1:1 Asimetris
+                </div>
+                <div class="poster-preview-box">
+                  <div class="slot-thumb slot-main">
+                    <span>🍗 Ayam Geprek Plated (Hero Shot)</span>
+                  </div>
+                  <div class="slot-thumb">
+                    <span>🧄 Raw Sambal</span>
+                  </div>
+                  <div class="slot-thumb">
+                    <span>🍳 Frying Crispy</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600;">
+                  📄 Pratinjau Teks Markdown
+                </div>
+                <pre class="md-preview-pre"># Resep Ayam Geprek Sambal Korek Bawang
+*Porsi: 4 Orang | Waktu: 30 Menit*
+
+## Bahan Utama:
+- 500g Daging Dada Ayam fillet
+- 200g Tepung Bumbu Crispy
+- 15 buah Cabai Rawit Merah
+- 5 siung Bawang Putih
+- Minyak Panas & Garam secukupnya
+
+## Langkah Memasak:
+1. Lumuri ayam dengan tepung bumbu, goreng hingga golden brown.
+2. Ulek kasar cabai rawit dan bawang putih dengan sedikit garam.
+3. Siram sambal dengan minyak panas sisa menggoreng ayam.
+4. Geprek ayam krispi di atas cobek sambal korek. Sajikan!</pre>
+              </div>
+            </div>
+
+            <!-- ContentFlow Hub Action Toolbar (Pengganti Facebook) -->
+            <div class="sync-toolbar">
+              <div>
+                <div class="sync-info-title">
+                  <span>🚀</span> ContentFlow Hub Gateway
+                </div>
+                <div class="sync-info-sub" id="sync-status-text-1">
+                  Item ini telah terintegrasi dengan ContentFlow Hub untuk penjadwalan konten ke media sosial.
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary btn-sm" id="sync-btn-1" onclick="manualSync(1)">
+                  🔄 Sync Ulang ke ContentFlow
+                </button>
+                <button class="btn btn-recipe btn-sm" onclick="scrollToHub()">
+                  ↗️ Buka di Hub
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACCORDION ITEM #2 (TERTUTUP) -->
+        <div class="recipe-accordion-item" id="card-recipe-2">
+          <div class="recipe-accordion-header" onclick="toggleAccordion(2)">
+            <div class="recipe-header-left">
+              <span class="recipe-idx-badge">#2</span>
+              <div>
+                <div class="recipe-title-text">Sop Iga Sapi Kuah Bening Rempah Jawa</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted);">Brand: <strong>Dapur Makna Official</strong> • 4 Gambar Kolase</div>
+              </div>
+            </div>
+            <div class="recipe-header-right">
+              <span class="badge-pill badge-warning" id="sync-badge-2">Ready to Sync</span>
+              <span class="badge-pill badge-info">COMPLETED</span>
+              <span class="chevron-icon">▼</span>
+            </div>
+          </div>
+          
+          <div class="recipe-accordion-body">
+            <div class="mockup-grid-visual">
+              <div>
+                <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600;">
+                  🖼️ Poster Kolase 1:1 Asimetris
+                </div>
+                <div class="poster-preview-box">
+                  <div class="slot-thumb slot-main">
+                    <span>🍲 Sop Iga Hot Steaming</span>
+                  </div>
+                  <div class="slot-thumb">
+                    <span>🥩 Raw Beef Ribs</span>
+                  </div>
+                  <div class="slot-thumb">
+                    <span>🌿 Spices & Broth</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600;">
+                  📄 Pratinjau Teks Markdown
+                </div>
+                <pre class="md-preview-pre"># Resep Sop Iga Sapi Kuah Bening Rempah
+*Porsi: 5 Orang | Waktu: 60 Menit*
+
+## Bahan Utama:
+- 750g Iga Sapi Segar
+- Kayu Manis, Cengkeh, Kapulaga, Pala
+- 3 batang Seledri & Daun Bawang
+- Wortel dan Kentang potong dadu</pre>
+              </div>
+            </div>
+
+            <!-- ContentFlow Hub Action Toolbar -->
+            <div class="sync-toolbar">
+              <div>
+                <div class="sync-info-title">
+                  <span>🚀</span> ContentFlow Hub Gateway
+                </div>
+                <div class="sync-info-sub" id="sync-status-text-2">
+                  Poster selesai. Klik tombol di kanan untuk mengirimkan naskah dan poster ini ke ContentFlow Hub.
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-primary btn-sm" id="sync-btn-2" onclick="manualSync(2)">
+                  🚀 Sync Manual ke ContentFlow
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACCORDION ITEM #3 (TERTUTUP) -->
+        <div class="recipe-accordion-item" id="card-recipe-3">
+          <div class="recipe-accordion-header" onclick="toggleAccordion(3)">
+            <div class="recipe-header-left">
+              <span class="recipe-idx-badge">#3</span>
+              <div>
+                <div class="recipe-title-text">Es Cendol Durian Gula Aren Legit</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted);">Brand: <strong>Dapur Makna Official</strong> • 3 Gambar Kolase</div>
+              </div>
+            </div>
+            <div class="recipe-header-right">
+              <span class="badge-pill badge-warning" id="sync-badge-3">Ready to Sync</span>
+              <span class="badge-pill badge-info">COMPLETED</span>
+              <span class="chevron-icon">▼</span>
+            </div>
+          </div>
+          
+          <div class="recipe-accordion-body">
+            <div class="mockup-grid-visual">
+              <div>
+                <div class="poster-preview-box">
+                  <div class="slot-thumb slot-main">
+                    <span>🍧 Es Cendol Durian Dessert</span>
+                  </div>
+                  <div class="slot-thumb">
+                    <span>🥥 Fresh Coconut Milk</span>
+                  </div>
+                  <div class="slot-thumb">
+                    <span>🍯 Palm Sugar Syrup</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <pre class="md-preview-pre"># Resep Es Cendol Durian Gula Aren
+Cendol pandan suji berpadu legitnya durian medan dan santan gurih...</pre>
+              </div>
+            </div>
+
+            <div class="sync-toolbar">
+              <div>
+                <div class="sync-info-title">
+                  <span>🚀</span> ContentFlow Hub Gateway
+                </div>
+                <div class="sync-info-sub" id="sync-status-text-3">
+                  Siap disinkronkan ke ContentFlow Hub.
+                </div>
+              </div>
+              <button class="btn btn-primary btn-sm" id="sync-btn-3" onclick="manualSync(3)">
+                🚀 Sync Manual ke ContentFlow
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: ContentFlow Hub Preview dengan Filter Recipe Labs (Poin 6) -->
+  <div class="card" id="hub-preview-section" style="border: 1px solid var(--accent-recipe);">
+    <div class="card-header" style="background: var(--surface-raised);">
+      <h2>
+        <span>🎛️</span> ContentFlow Hub — Filter Sumber Kampanye "Recipe Labs"
+      </h2>
+      <span class="badge-pill badge-recipe">Poin 6</span>
+    </div>
+    <div class="card-body">
+      
+      <!-- Filter Bar Simulator -->
+      <div class="filter-bar">
+        <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
+          <span>🔍 Filter:</span>
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label style="font-size: 0.76rem; color: var(--text-muted);">Sumber Kampanye:</label>
+          <select class="form-select" style="padding: 6px 12px; font-size: 0.8rem; border-color: var(--accent-recipe);" onchange="filterHubSource(this.value)">
+            <option value="all">Semua Sumber</option>
+            <option value="opc">🌿 Organic Pillar (OPC)</option>
+            <option value="strategic">🎯 Strategic Campaign</option>
+            <option value="recipe" selected>🧪 Recipe Labs</option>
+            <option value="re">⚡ Reverse Engineering</option>
+          </select>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label style="font-size: 0.76rem; color: var(--text-muted);">Akun Brand:</label>
+          <select class="form-select" style="padding: 6px 12px; font-size: 0.8rem;">
+            <option value="all">Semua Akun</option>
+            <option value="dapurmakna" selected>Dapur Makna Official</option>
+            <option value="resepgurih">Resep Nusantara Gurih</option>
+          </select>
+        </div>
+
+        <div style="margin-left: auto; font-size: 0.76rem; color: var(--status-success); font-weight: 600;">
+          ✓ Menampilkan item hasil sync dari Recipe Labs
+        </div>
+      </div>
+
+      <!-- Table Simulator -->
+      <div class="hub-table-wrapper">
+        <table class="hub-table">
+          <thead>
+            <tr>
+              <th>ID Resep / Video</th>
+              <th>Sumber</th>
+              <th>Nama Akun (Brand)</th>
+              <th>Judul Resep / Hook</th>
+              <th>Format Konten</th>
+              <th>Aset Poster / URL</th>
+              <th>Pipeline Status</th>
+              <th>Jadwal & Publish</th>
+            </tr>
+          </thead>
+          <tbody id="hub-table-rows">
+            <tr>
+              <td><code style="font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;">REC-7A19F84C</code></td>
+              <td><span class="badge-pill badge-recipe">🧪 Recipe Labs</span></td>
+              <td><strong>Dapur Makna Official</strong></td>
+              <td>Ayam Geprek Sambal Korek Bawang Renyah</td>
+              <td><span class="badge-pill badge-info">Recipe Poster 1:1</span></td>
+              <td>
+                <a href="#" style="color: var(--status-info); text-decoration: underline; font-size: 0.76rem;">
+                  05_GRID_POSTER.jpg
+                </a>
+              </td>
+              <td><span class="badge-pill badge-success">Completed</span></td>
+              <td>
+                <div style="display: flex; gap: 6px;">
+                  <button class="btn btn-secondary btn-sm" style="font-size: 0.72rem; padding: 4px 8px;">📅 Jadwalkan</button>
+                  <button class="btn btn-primary btn-sm" style="font-size: 0.72rem; padding: 4px 8px;">🚀 Publish Now</button>
+                </div>
+              </td>
+            </tr>
+            <tr id="synced-row-2" style="display: none; background: var(--surface-interactive);">
+              <td><code style="font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;">REC-B24490E1</code></td>
+              <td><span class="badge-pill badge-recipe">🧪 Recipe Labs</span></td>
+              <td><strong>Dapur Makna Official</strong></td>
+              <td>Sop Iga Sapi Kuah Bening Rempah Jawa</td>
+              <td><span class="badge-pill badge-info">Recipe Poster 1:1</span></td>
+              <td>
+                <a href="#" style="color: var(--status-info); text-decoration: underline; font-size: 0.76rem;">
+                  05_GRID_POSTER.jpg
+                </a>
+              </td>
+              <td><span class="badge-pill badge-success">Completed</span></td>
+              <td>
+                <div style="display: flex; gap: 6px;">
+                  <button class="btn btn-secondary btn-sm" style="font-size: 0.72rem; padding: 4px 8px;">📅 Jadwalkan</button>
+                  <button class="btn btn-primary btn-sm" style="font-size: 0.72rem; padding: 4px 8px;">🚀 Publish Now</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  let activeAccordionId = 1;
+
+  function toggleAccordion(id) {
+    if (activeAccordionId === id) {
+      // Klik kartu yang sama: tutup kartu
+      const current = document.getElementById('card-recipe-' + id);
+      if (current) current.classList.remove('is-open');
+      activeAccordionId = null;
+      return;
+    }
+
+    // Tutup kartu sebelumnya
+    if (activeAccordionId) {
+      const prev = document.getElementById('card-recipe-' + activeAccordionId);
+      if (prev) prev.classList.remove('is-open');
+    }
+
+    // Buka kartu target
+    const target = document.getElementById('card-recipe-' + id);
+    if (target) target.classList.add('is-open');
+    activeAccordionId = id;
+  }
+
+  function manualSync(id) {
+    const btn = document.getElementById('sync-btn-' + id);
+    const badge = document.getElementById('sync-badge-' + id);
+    const text = document.getElementById('sync-status-text-' + id);
+
+    btn.disabled = true;
+    btn.innerText = '⏳ Menyinkronkan...';
+
+    setTimeout(() => {
+      btn.innerText = '🔄 Sync Ulang ke ContentFlow';
+      btn.disabled = false;
+      btn.className = 'btn btn-secondary btn-sm';
+
+      badge.innerText = '✓ Synced to Hub';
+      badge.className = 'badge-pill badge-success';
+
+      text.innerText = '✓ Berhasil disinkronkan ke ContentFlow Hub! Siap untuk dipublikasikan.';
+
+      if (id === 2) {
+        const row = document.getElementById('synced-row-2');
+        if (row) row.style.display = 'table-row';
+      }
+    }, 700);
+  }
+
+  function simulateSubmitForm() {
+    alert('Simulasi Submit Resep Baru:\n- Akun Brand Terpilih: ' + document.getElementById('brand-account-select').selectedOptions[0].text + '\n- Facebook Page Toggle: SUDAH DIHILANGKAN\n- Item otomatis diarahkan ke ContentFlow Hub.');
+  }
+
+  function scrollToHub() {
+    document.getElementById('hub-preview-section').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function filterHubSource(val) {
+    const tableRows = document.getElementById('hub-table-rows');
+    if (val === 'recipe') {
+      tableRows.style.display = 'table-row-group';
+    } else {
+      alert('Mode simulasi hanya menampilkan filter "Recipe Labs".');
+    }
+  }
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    const nextTheme = isDark ? 'light' : 'dark';
+    html.setAttribute('data-theme', nextTheme);
+    document.getElementById('theme-icon').innerText = isDark ? '🌙' : '☀️';
+    document.getElementById('theme-text').innerText = isDark ? 'Dark Mode' : 'Light Mode';
+  }
+</script>
+
+</body>
+</html>

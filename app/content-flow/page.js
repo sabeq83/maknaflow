@@ -1589,9 +1589,17 @@ function ContentFlowHubPageContent() {
                         position: 'relative', width: '100%', height: '110px', borderRadius: '12px',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden'
                       }}>
-                        <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'var(--status-info-soft)', border: '1px solid var(--status-info-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--link)' }}>
-                          <FilmIcon style={{ width: 20, height: 20 }} />
-                        </div>
+                        {item.url_asset && (item.url_asset.endsWith('.jpg') || item.url_asset.endsWith('.png') || item.url_asset.endsWith('.jpeg') || item.url_asset.includes('05_GRID_POSTER')) ? (
+                          <img
+                            src={item.url_asset}
+                            alt="Preview Asset"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        ) : (
+                          <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'var(--status-info-soft)', border: '1px solid var(--status-info-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--link)' }}>
+                            <FilmIcon style={{ width: 20, height: 20 }} />
+                          </div>
+                        )}
 
                         <div style={{ position: 'absolute', top: '8px', left: '8px', zIndex: 2 }}>
                           <span className="contentflow-video-id" style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 700, fontFamily: 'monospace' }}>

@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.32.68 — Recipe Labs Brand Account, Accordion & ContentFlow Hub Sync (22/10/2026)
+- Tambah pilihan Brand Account pada form resep statis
+- Hilangkan toggle dan panel posting Facebook Page dari Recipe Labs
+- Implementasi accordion single-active pada card detil resep
+- Auto-sync dan tombol manual sync ke ContentFlow Hub
+- Dukungan filter sumber kampanye Recipe Labs di ContentFlow Hub
+
 ## V2.32.67 — Recipe Labs Enhancements: Bugfix Payload, Search Filter Dekonstruksi & Live Mockup Preset Kolase (22/10/2026)
 - Fix ReferenceError body is not defined pada saat submit pembuatan kampanye Recipe Labs
 - Menambahkan filter pencarian real-time dan badge info untuk referensi video dekonstruksi

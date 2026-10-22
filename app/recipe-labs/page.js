@@ -154,6 +154,9 @@ export default function RecipeLabsPage() {
   const [deconstructedAssets, setDeconstructedAssets] = useState([]);
   const [sourceDeconstructAssetId, setSourceDeconstructAssetId] = useState('');
   const [deconstructSearchQuery, setDeconstructSearchQuery] = useState('');
+  const [openRecipeCardIndex, setOpenRecipeCardIndex] = useState(0);
+  const [syncingItemId, setSyncingItemId] = useState(null);
+  const [syncSuccessMsg, setSyncSuccessMsg] = useState({});
 
   const filteredDeconstructedAssets = (deconstructedAssets || []).filter(asset => {
     if (!deconstructSearchQuery.trim()) return true;
@@ -448,6 +451,7 @@ export default function RecipeLabsPage() {
 
   async function fetchCampaignDetail(id) {
     setDetailLoading(true);
+    setOpenRecipeCardIndex(0);
     try {
       const res = await fetch(`/api/recipe-labs/${id}`);
       const json = await res.json();
@@ -458,6 +462,28 @@ export default function RecipeLabsPage() {
       console.error('Failed to fetch campaign detail:', err);
     } finally {
       setDetailLoading(false);
+    }
+  }
+
+  async function handleManualContentFlowSync(campaignId, itemId) {
+    setSyncingItemId(itemId);
+    try {
+      const res = await fetch(`/api/recipe-labs/${campaignId}/sync-contentflow`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ item_id: itemId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSyncSuccessMsg(prev => ({ ...prev, [itemId]: 'Tersinkron ke ContentFlow Hub' }));
+      } else {
+        alert('Gagal menyinkronkan: ' + (data.error || 'Terjadi kesalahan'));
+      }
+    } catch (err) {
+      console.error('Error syncing to ContentFlow:', err);
+      alert('Terjadi kesalahan jaringan saat sync ke ContentFlow.');
+    } finally {
+      setSyncingItemId(null);
     }
   }
 
@@ -557,11 +583,11 @@ export default function RecipeLabsPage() {
         custom_category: customCategory,
         visual_style: visualStyle,
         nextcloud_parent_folder: nextcloudParentFolder,
-        post_to_facebook: postToFacebook,
+        post_to_facebook: 0,
         enable_glabs: enableGlabs,
         target_recipe_count: targetCount,
         campaign_type: 'static',
-        brand_profile_id: null,
+        brand_profile_id: brandProfileId || null,
         spreadsheet_id: null,
         config_json: null,
         images_per_recipe: imagesPerRecipe,
@@ -1591,44 +1617,27 @@ export default function RecipeLabsPage() {
                       alignItems: 'center',
                       justify: 'space-between'
                     }}>
-                      <div>
-                        <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                          📘 Post Draft ke Facebook Page (Status Pending/Draft)
-                        </div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                          {postToFacebook
-                            ? 'ON: Otomatis membuat Draft Postingan di Facebook Page (TIDAK langsung published).'
-                            : 'OFF: Tidak mengirim postingan draft ke Facebook Page.'}
-                        </div>
+                      <div className="form-group" style={{ marginBottom: '8px', width: '100%' }}>
+                        <label className="form-label" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                          🏷️ Nama Akun (Brand Profile DNA Kuliner)
+                        </label>
+                        <select
+                          className="form-input"
+                          value={brandProfileId}
+                          onChange={e => setBrandProfileId(e.target.value)}
+                        >
+                          <option value="">-- Tanpa Brand Profile (Umum / Default) --</option>
+                          {brandProfiles.map(p => (
+                            <option key={p.id} value={p.id}>
+                              {p.brand_name} {p.account_name ? `(@${p.account_name})` : ''}
+                            </option>
+                          ))}
+                        </select>
+                        <small style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: '4px', display: 'block' }}>
+                          Resep yang dibuat akan diasosiasikan dengan akun brand ini saat masuk ke <strong>ContentFlow Hub</strong> untuk publikasi media sosial.
+                        </small>
                       </div>
 
-                      <label style={{ position: 'relative', display: 'inline-block', width: '50px', height: '26px', cursor: 'pointer', flexShrink: 0 }}>
-                        <input
-                          type="checkbox"
-                          checked={postToFacebook}
-                          onChange={(e) => setPostToFacebook(e.target.checked)}
-                          style={{ opacity: 0, width: 0, height: 0 }}
-                        />
-                        <span style={{
-                          position: 'absolute',
-                          top: 0, left: 0, right: 0, bottom: 0,
-                          backgroundColor: postToFacebook ? 'var(--accent)' : 'var(--surface-interactive)',
-                          transition: 'var(--transition)',
-                          borderRadius: '34px'
-                        }}>
-                          <span style={{
-                            position: 'absolute',
-                            content: '""',
-                            height: '20px',
-                            width: '20px',
-                            left: postToFacebook ? '26px' : '3px',
-                            bottom: '3px',
-                            backgroundColor: 'white',
-                            transition: 'var(--transition)',
-                            borderRadius: '50%'
-                          }} />
-                        </span>
-                      </label>
                     </div>
 
                     <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'flex-end' }}>
@@ -2687,27 +2696,63 @@ export default function RecipeLabsPage() {
                         try { if (item.video_dna_json) dnaObj = JSON.parse(item.video_dna_json); } catch (_) {}
                         try { if (item.seo_data_json) seoObj = JSON.parse(item.seo_data_json); } catch (_) {}
 
+                        const isOpen = openRecipeCardIndex === idx;
+
                         if (isVideo) {
                           return (
-                            <div key={item.id} style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
-                                <h4 style={{ color: 'var(--accent-light)', margin: 0 }}>
-                                  #{idx + 1} {item.recipe_title || 'Mengekstrak naskah video...'}
-                                </h4>
+                            <div
+                              key={item.id}
+                              style={{
+                                background: 'var(--surface)',
+                                borderRadius: 'var(--radius-sm)',
+                                border: isOpen ? '1px solid var(--accent)' : '1px solid var(--border)',
+                                overflow: 'hidden',
+                                transition: 'border-color 0.2s ease'
+                              }}
+                            >
+                              {/* Accordion Header */}
+                              <div
+                                onClick={() => setOpenRecipeCardIndex(isOpen ? null : idx)}
+                                style={{
+                                  padding: '14px 18px',
+                                  background: isOpen ? 'var(--surface-interactive)' : 'var(--bg-secondary)',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  userSelect: 'none',
+                                  borderBottom: isOpen ? '1px solid var(--border)' : 'none',
+                                  transition: 'background 0.15s ease'
+                                }}
+                              >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                  <span style={{ fontWeight: 800, color: 'var(--accent-light)', fontSize: '0.85rem' }}>
+                                    #{idx + 1}
+                                  </span>
+                                  <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
+                                    {item.recipe_title || 'Mengekstrak naskah video...'}
+                                  </span>
+                                </div>
                                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                  {item.fb_post_id && (
-                                    <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '4px', background: 'var(--status-info-soft)', color: 'var(--status-info)', border: '1px solid var(--status-info-soft)' }}>
-                                      📘 FB Draft #{item.fb_post_id}
+                                  {syncSuccessMsg[item.id] ? (
+                                    <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success)' }}>
+                                      ✓ {syncSuccessMsg[item.id]}
                                     </span>
-                                  )}
-                                  <span className={`stat-value ${item.status === 'completed' ? 'success' : item.status === 'failed' ? 'danger' : 'warning'}`} style={{ fontSize: '0.8rem' }}>
+                                  ) : null}
+                                  <span className={`stat-value ${item.status === 'completed' ? 'success' : item.status === 'failed' ? 'danger' : 'warning'}`} style={{ fontSize: '0.75rem' }}>
                                     STATUS: {item.status.toUpperCase()}
+                                  </span>
+                                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }}>
+                                    ▼
                                   </span>
                                 </div>
                               </div>
 
-                              {/* Visualisasi Pipeline Per Resep */}
-                              {renderRecipePipeline(item, campaignDetail)}
+                              {/* Accordion Body */}
+                              {isOpen && (
+                                <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                  {/* Visualisasi Pipeline Per Resep */}
+                                  {renderRecipePipeline(item, campaignDetail)}
 
                               {/* Video Storyboard (5 Modules Grid/List) */}
                               {Object.keys(storyboardObj).length > 0 ? (
@@ -2838,74 +2883,103 @@ export default function RecipeLabsPage() {
                                 </div>
                               )}
 
-                              {/* Manual Facebook Posting Panel */}
-                              <div style={{
-                                marginTop: '16px',
-                                padding: '12px 16px',
-                                background: 'rgba(24, 119, 242, 0.08)',
-                                border: '1px solid rgba(24, 119, 242, 0.3)',
-                                borderRadius: 'var(--radius-sm)',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                flexWrap: 'wrap',
-                                gap: '12px'
-                              }}>
-                                <div>
-                                  <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1877f2', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    📘 Integrasi Facebook Page (Draft / Pending)
-                                  </div>
-                                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                                    {item.fb_post_id ? `Draft tersimpan di Facebook Page (#${item.fb_post_id})` : 'Kirim teks naskah video ini ke tab Drafts di Facebook Page Anda.'}
-                                  </div>
-                                </div>
+                                  {/* Action Bar Sync ke ContentFlow Hub (Pengganti Facebook) */}
+                                  <div style={{
+                                    marginTop: '8px',
+                                    padding: '12px 16px',
+                                    background: 'var(--surface-interactive)',
+                                    border: '1px solid var(--border)',
+                                    borderRadius: 'var(--radius-sm)',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    flexWrap: 'wrap',
+                                    gap: '12px'
+                                  }}>
+                                    <div>
+                                      <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        🚀 ContentFlow Hub Gateway
+                                      </div>
+                                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                        {syncSuccessMsg[item.id] ? syncSuccessMsg[item.id] : 'Sinkronkan resep ini ke ContentFlow Hub untuk penjadwalan multi-kanal.'}
+                                      </div>
+                                    </div>
 
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                  <button
-                                    type="button"
-                                    className="btn btn-sm"
-                                    style={{ background: '#1877f2', borderColor: '#1877f2', color: 'var(--text-primary)', fontSize: '0.78rem', padding: '6px 14px', fontWeight: 600, borderRadius: '4px', cursor: 'pointer' }}
-                                    disabled={postingFbId === item.id || !item.recipe_markdown_text}
-                                    onClick={() => handleManualFbPost(item.id, (campaignDetail?.enable_glabs === 1 && campaignDetail?.nextcloud_folder_url) ? 'photo' : 'text_only')}
-                                  >
-                                    {postingFbId === item.id ? '⏳ Mengirim Draft...' : ((campaignDetail?.enable_glabs === 1 && campaignDetail?.nextcloud_folder_url) ? '📱 Post Draft Bergambar ke FB' : '📱 Post Draft Teks ke FB')}
-                                  </button>
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                      <button
+                                        type="button"
+                                        className="btn btn-sm btn-primary"
+                                        disabled={syncingItemId === item.id || (!item.img_grid_path && item.status !== 'completed' && !item.recipe_markdown_text)}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleManualContentFlowSync(campaignDetail.id, item.id);
+                                        }}
+                                      >
+                                        {syncingItemId === item.id ? '⏳ Menyinkronkan...' : '🔄 Sync ke ContentFlow'}
+                                      </button>
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>
+                              )}
                             </div>
                           );
                         }
 
                         // Original static campaign view
                         return (
-                          <div key={item.id} style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', flexWrap: 'wrap', gap: '8px' }}>
-                              <h4 style={{ color: 'var(--accent-light)', margin: 0 }}>
-                                #{idx + 1} {item.recipe_title || 'Mengekstrak judul resep...'}
-                              </h4>
+                          <div
+                            key={item.id}
+                            style={{
+                              background: 'var(--surface)',
+                              borderRadius: 'var(--radius-sm)',
+                              border: isOpen ? '1px solid var(--accent)' : '1px solid var(--border)',
+                              overflow: 'hidden',
+                              transition: 'border-color 0.2s ease'
+                            }}
+                          >
+                            {/* Accordion Header */}
+                            <div
+                              onClick={() => setOpenRecipeCardIndex(isOpen ? null : idx)}
+                              style={{
+                                padding: '14px 18px',
+                                background: isOpen ? 'var(--surface-interactive)' : 'var(--bg-secondary)',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                userSelect: 'none',
+                                borderBottom: isOpen ? '1px solid var(--border)' : 'none',
+                                transition: 'background 0.15s ease'
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <span style={{ fontWeight: 800, color: 'var(--accent-light)', fontSize: '0.85rem' }}>
+                                  #{idx + 1}
+                                </span>
+                                <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
+                                  {item.recipe_title || 'Mengekstrak judul resep...'}
+                                </span>
+                              </div>
                               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                {item.fb_post_id && (
-                                  <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '4px', background: 'var(--status-info-soft)', color: 'var(--status-info)', border: '1px solid var(--status-info-soft)' }}>
-                                    📘 FB Draft #{item.fb_post_id}
+                                {syncSuccessMsg[item.id] ? (
+                                  <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success)' }}>
+                                    ✓ {syncSuccessMsg[item.id]}
                                   </span>
-                                )}
-                                <button
-                                  type="button"
-                                  className="btn btn-sm btn-secondary"
-                                  style={{ fontSize: '0.72rem', padding: '3px 8px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                                  disabled={postingFbId === item.id || !item.recipe_markdown_text}
-                                  onClick={() => handleManualFbPost(item.id, (campaignDetail?.enable_glabs === 1 && campaignDetail?.nextcloud_folder_url) ? 'photo' : 'text_only')}
-                                >
-                                  {postingFbId === item.id ? '⏳ Kirim Draft...' : ((campaignDetail?.enable_glabs === 1 && campaignDetail?.nextcloud_folder_url) ? '📱 Post Draft Bergambar' : '📱 Post Draft Teks')}
-                                </button>
-                                <span className={`stat-value ${item.status === 'completed' ? 'success' : item.status === 'failed' ? 'danger' : 'warning'}`} style={{ fontSize: '0.8rem' }}>
+                                ) : null}
+                                <span className={`stat-value ${item.status === 'completed' ? 'success' : item.status === 'failed' ? 'danger' : 'warning'}`} style={{ fontSize: '0.75rem' }}>
                                   STATUS: {item.status.toUpperCase()}
+                                </span>
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }}>
+                                  ▼
                                 </span>
                               </div>
                             </div>
 
-                            {/* Visualisasi Pipeline Per Resep */}
-                            {renderRecipePipeline(item, campaignDetail)}
+                            {/* Accordion Body */}
+                            {isOpen && (
+                              <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                {/* Visualisasi Pipeline Per Resep */}
+                                {renderRecipePipeline(item, campaignDetail)}
 
                             {/* Content & Details */}
                             {item.img_grid_path ? (
@@ -2956,43 +3030,44 @@ export default function RecipeLabsPage() {
                               </div>
                             )}
 
-                            {/* Action Bar Khusus Facebook Posting */}
-                            <div style={{
-                              marginTop: '16px',
-                              padding: '12px 16px',
-                              background: 'rgba(24, 119, 242, 0.08)',
-                              border: '1px solid rgba(24, 119, 242, 0.3)',
-                              borderRadius: 'var(--radius-sm)',
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'center',
-                              flexWrap: 'wrap',
-                              gap: '12px'
-                            }}>
-                              <div>
-                                <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1877f2', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                  📘 Integrasi Facebook Page (Draft / Pending)
-                                </div>
-                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                                  {item.fb_post_id ? `Draft tersimpan di Facebook Page (#${item.fb_post_id})` : 'Kirim teks resep ini ke tab Drafts di Facebook Page Anda.'}
-                                </div>
-                              </div>
+                                {/* Action Bar Sync ke ContentFlow Hub (Pengganti Facebook) */}
+                                <div style={{
+                                  padding: '12px 16px',
+                                  background: 'var(--surface-interactive)',
+                                  border: '1px solid var(--border)',
+                                  borderRadius: 'var(--radius-sm)',
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  flexWrap: 'wrap',
+                                  gap: '12px'
+                                }}>
+                                  <div>
+                                    <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                      🚀 ContentFlow Hub Gateway
+                                    </div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                      {syncSuccessMsg[item.id] ? syncSuccessMsg[item.id] : 'Sinkronkan resep ini ke ContentFlow Hub untuk penjadwalan multi-kanal.'}
+                                    </div>
+                                  </div>
 
-                              <div style={{ display: 'flex', gap: '8px' }}>
-                                <button
-                                  type="button"
-                                  className="btn btn-sm"
-                                  style={{ background: '#1877f2', borderColor: '#1877f2', color: 'var(--text-primary)', fontSize: '0.78rem', padding: '6px 14px', fontWeight: 600, borderRadius: '4px', cursor: 'pointer' }}
-                                  disabled={postingFbId === item.id || !item.recipe_markdown_text}
-                                  onClick={() => handleManualFbPost(item.id, (campaignDetail?.enable_glabs === 1 && campaignDetail?.nextcloud_folder_url) ? 'photo' : 'text_only')}
-                                >
-                                  {postingFbId === item.id ? '⏳ Mengirim Draft...' : ((campaignDetail?.enable_glabs === 1 && campaignDetail?.nextcloud_folder_url) ? '📱 Post Draft Bergambar ke FB' : '📱 Post Draft Teks ke FB')}
-                                </button>
-                              </div>
-                            </div>
+                                  <div style={{ display: 'flex', gap: '8px' }}>
+                                    <button
+                                      type="button"
+                                      className="btn btn-sm btn-primary"
+                                      disabled={syncingItemId === item.id || (!item.img_grid_path && item.status !== 'completed' && !item.recipe_markdown_text)}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleManualContentFlowSync(campaignDetail.id, item.id);
+                                      }}
+                                    >
+                                      {syncingItemId === item.id ? '⏳ Menyinkronkan...' : '🔄 Sync ke ContentFlow'}
+                                    </button>
+                                  </div>
+                                </div>
 
-                            {/* 1 Kolom Vertikal Prompt T2I dengan Tombol Copy */}
-                            {Object.keys(promptsObj).length > 0 && (
+                                {/* 1 Kolom Vertikal Prompt T2I dengan Tombol Copy */}
+                                {Object.keys(promptsObj).length > 0 && (
                               <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px dashed var(--border)' }}>
                                 <div style={{ fontSize: '0.8rem', color: 'var(--accent-light)', fontWeight: 600, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                   📷 Prompt T2I Gambar AI (4 Fase Instruksional):
@@ -3029,6 +3104,8 @@ export default function RecipeLabsPage() {
                                     );
                                   })}
                                 </div>
+                              </div>
+                            )}
                               </div>
                             )}
                           </div>
