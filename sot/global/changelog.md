@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.74 — Guard Studio Planner Wizard Session (22/10/2026)
+- Abaikan respons generator dari sesi wizard yang sudah ditutup
+- Lindungi batch baru dari respons Planner lama dan penutupan saat commit
+- Pertahankan konfigurasi canonical serta wizard campaign v2.32.73
+
 ## V2.32.73 — ContentFlow Studio Canonical Campaign Wizard (22/10/2026)
 - Satukan konfigurasi menu asal dan wizard Studio untuk seluruh campaign
 - Pertahankan Planner sekali pakai serta dukung RE mass dan mapping multi-angle tanpa duplikasi

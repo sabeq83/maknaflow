@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PlannerConfigurationForm from '../campaign-forms/PlannerConfigurationForm';
 
 import StudioCampaignWizard from './StudioCampaignWizard';
@@ -10,6 +10,8 @@ import { buildOutputManifest, toZonedInput, zonedInputToIso, createStudioIdempot
 const DAYS_OF_WEEK = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
 
 export default function StudioWorkspace() {
+  const wizardSessionRef = useRef(0);
+  const renderedWizardSession = wizardSessionRef.current;
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState('calendar'); // 'calendar' | 'table'
@@ -111,12 +113,14 @@ export default function StudioWorkspace() {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   function startWizard() {
+    wizardSessionRef.current += 1;
     setCreatedPlanner(null); setSelectedEngine(null); setEnginePayload(null);
     setOutputManifest([]); setSlotScheduleMap({}); setAccountIds([]); setProductRefFile(null);
     setSubmitKey(createStudioIdempotencyKey()); setWizardError(''); setWizardStep(0); setShowWizard(true);
     fetch('/api/v2/publishing/accounts?provider=repliz').then(r=>r.json()).then(d=>setAccounts(d.data || d.accounts || [])).catch(()=>setAccounts([]));
   }
-  const handlePlannerSuccess = async result => {
+  const handlePlannerSuccess = async (result, session) => {
+    if (session !== wizardSessionRef.current) return;
     setWizardSubmitting(true); setWizardError('');
     try {
       const id = result.planner_id || result.planner?.id;
@@ -124,10 +128,11 @@ export default function StudioWorkspace() {
       const run = await fetch(`/api/content-planner/${id}/execute`, { method:'POST' }).then(r=>r.json());
       if (!run.success) throw Error(run.error);
       const d = await fetch(`/api/content-planner/${id}`).then(r=>r.json());
+      if (session !== wizardSessionRef.current) return;
       if (!d.success) throw Error(d.error);
       if (!(d.planner?.rows || d.rows || []).length) throw Error('Planner belum memiliki hasil. Coba kembali setelah proses generator selesai.');
       setCreatedPlanner({ ...d.planner, rows:d.planner.rows || d.rows || [] }); setWizardStep(2);
-    } catch(e) { setWizardError(e.message); } finally { setWizardSubmitting(false); }
+    } catch(e) { if (session === wizardSessionRef.current) setWizardError(e.message); } finally { if (session === wizardSessionRef.current) setWizardSubmitting(false); }
   };
   const handleEngineCapture = captured => {
     try {
@@ -683,7 +688,8 @@ export default function StudioWorkspace() {
               </div>
               <button
                 type="button"
-                onClick={() => setShowWizard(false)}
+                disabled={wizardSubmitting}
+                onClick={() => {wizardSessionRef.current += 1;setShowWizard(false);}}
                 style={{ background: 'transparent', border: 'none', fontSize: '1.3rem', color: 'var(--text-muted)', cursor: 'pointer' }}
               >
                 ✕
@@ -709,7 +715,7 @@ export default function StudioWorkspace() {
             {selectedEngine==='pillar' && <div hidden={wizardStep!==1}>
               <p>Planner hanya digunakan sekali untuk batch ini. Pilih fokus dan konfigurasi sesuai Generator Content Planner.</p>
               {wizardSubmitting && <p role="status">Generator Planner sedang bekerja…</p>}
-              <PlannerConfigurationForm mode="direct" onSuccess={handlePlannerSuccess} onCancel={()=>setWizardStep(0)} />
+              <PlannerConfigurationForm mode="direct" onSuccess={result=>handlePlannerSuccess(result,renderedWizardSession)} onCancel={()=>setWizardStep(0)} />
             </div>}
             {wizardStep===2 && createdPlanner && <div>
               <h3>Review Content Planner</h3><p>{createdPlanner.rows.length} baris siap untuk dikonfigurasi menjadi Pillar Campaign. Planner belum dikonsumsi.</p>

@@ -44,3 +44,6 @@ Selesai audit baseline, inventaris sumber dan mapping handler/payload. Bukti: pa
 
 ## Review pengguna
 Pengguna dapat menguji langsung melalui link Dev/Staging sesudah deployment. Pemeriksaan visual/interaksi dengan akun nyata dan produksi AI/publishing nyata belum dinyatakan sudah dilakukan oleh pengguna.
+
+## Pemeriksaan sebelum aktivasi
+Ditemukan race pada respons Generate Planner bila wizard ditutup dan batch baru dibuka sebelum request lama selesai. Ditambahkan epoch sesi wizard: hasil/error/finally request lama diabaikan, dan penutupan wizard diblokir selama commit batch. Ini mencegah respons lama mengganti Planner atau menutup wizard batch baru.
