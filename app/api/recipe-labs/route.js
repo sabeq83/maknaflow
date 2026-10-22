@@ -7,7 +7,9 @@ import { withTenantContext } from '@/lib/auth';
 
 export const GET = withTenantContext(async () => {
   try {
-    const campaigns = await getRecipeCampaigns();
+    const { getActiveTenantId } = await import('@/lib/tenant-context');
+    const tenantId = getActiveTenantId();
+    const campaigns = await getRecipeCampaigns(tenantId);
     return NextResponse.json({ success: true, data: campaigns });
   } catch (error) {
     console.error('[API /api/recipe-labs GET Error]:', error);
@@ -17,6 +19,8 @@ export const GET = withTenantContext(async () => {
 
 export const POST = withTenantContext(async (request) => {
   try {
+    const { getActiveTenantId } = await import('@/lib/tenant-context');
+    const tenantId = getActiveTenantId() || 'default_tenant';
     const body = await request.json();
     const { 
       category, 
@@ -49,6 +53,7 @@ export const POST = withTenantContext(async (request) => {
     // 1. Buat Kampanye Utama
     await createRecipeCampaign({
       id: campaignId,
+      tenant_id: tenantId,
       category,
       custom_category: category === 'Custom Input' ? custom_category : null,
       visual_style: visual_style || 'Food Porn',
@@ -77,6 +82,7 @@ export const POST = withTenantContext(async (request) => {
       await createRecipeItem({
         id: itemId,
         campaign_id: campaignId,
+        tenant_id: tenantId,
         status: 'pending_gemini'
       });
       createdItemIds.push(itemId);

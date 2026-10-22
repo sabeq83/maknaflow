@@ -1,399 +1,277 @@
-# Implementation Plan: Recipe Labs Enhancements & ContentFlow Hub Integration
+# Implementation Plan: Fix Missing `tenant_id` on Recipe Campaigns & Items
 
-Rencana implementasi ini dirancang untuk memenuhi 6 kebutuhan pada menu **Recipe Labs** dan integrasinya dengan **ContentFlow Hub**:
-1. **Nama Akun (Brand Account) pada Form Statis**: Menambahkan dropdown pilihan Brand Profile DNA pada formulir pembuatan resep teks (statis), agar saat disimpan dan dipublikasikan, resep terasosiasi dengan akun brand tersebut.
-2. **Penghapusan Toggle Facebook Page pada Form Statis**: Menghilangkan kontrol *"📘 Post Draft ke Facebook Page (Status Pending/Draft)"* karena ContentFlow Hub telah menjadi gerbang tunggal penjadwalan dan publikasi media sosial.
-3. **Penghapusan Panel Integrasi Facebook Page pada Card Detil Resep**: Menghapus seluruh tombol dan panel integrasi Facebook Page draft dari kartu detail resep.
-4. **Accordion Buka-Tutup pada Card Detil Resep**: Menerapkan pola single-active accordion pada setiap kartu resep dalam modal detail kampanye. Secara default hanya 1 kartu yang terbuka (kartu pertama), dan bila pengguna mengklik kartu lain, kartu yang sedang terbuka otomatis tertutup.
-5. **Auto-Sync & Tombol Manual Sync ke ContentFlow Hub**:
-   - Resep otomatis disinkronkan ke tabel `content_flow_items` begitu proses pembuatan poster kolase dan ekspor resep selesai (`status = 'completed'`).
-   - Menyediakan tombol *“🔄 Sync ke ContentFlow”* pada kartu detail resep untuk sinkronisasi manual kapan saja.
-6. **Filter Sumber Kampanye Recipe Labs di ContentFlow Hub**: Memastikan filter sumber kampanye `recipe` berfungsi lancar dan menampilkan poster 1:1, judul, naskah markdown, serta brand account di ContentFlow Hub.
+Rencana perbaikan ini mengatasi error log server staging:
+`[PostgreSQL Query Error] column "tenant_id" does not exist SQL: SELECT tenant_id FROM recipe_campaigns WHERE id = $1`
+`[Campaign Scheduler] Error fetching tenantId for runStep: column "tenant_id" does not exist`
+
+### Akar Masalah (Root Cause):
+Tabel `recipe_campaigns` dan `recipe_items` di seluruh schema PostgreSQL (`public`, `staging`, `dev`) belum memiliki kolom `tenant_id`. Saat background `campaign-scheduler` menjalankan step kampanye resep, scheduler mengeksekusi query `SELECT tenant_id FROM recipe_campaigns WHERE id = ?` yang memicu error fatal pada PostgreSQL dan mengotori system logs.
 
 ---
 
 ## 📋 Execution Task List
 
-- [x] **Task 1: Validasi & Review Mockup HTML Standalone (`public/mockup_recipe_labs_contentflow.html`)**
-  - [x] Sediakan mockup interaktif visual lengkap dengan Dark/Light mode, simulasi accordion buka-tutup resep, form statis dengan Brand Account, dan simulasi ContentFlow Hub.
-  - [x] Dapatkan konfirmasi dan review pengguna sebelum penulisan kode ke codebase utama.
+- [x] **Task 1: Eksekusi Migrasi DDL PostgreSQL pada Schema `public`, `staging`, dan `dev`**
+  - [x] Tambahkan kolom `tenant_id TEXT DEFAULT 'default_tenant'` pada `recipe_campaigns` dan `recipe_items` di seluruh schema aktif.
+  - [x] Buat index performa `idx_recipe_campaigns_tenant` dan `idx_recipe_items_tenant`.
 
-- [x] **Task 2: Penambahan Brand Account & Penghapusan Facebook Toggle pada Form Statis (`app/recipe-labs/page.js`)**
-  - [x] Tambahkan dropdown `brandProfiles` ke formulir tipe resep statis dengan label *Nama Akun (Brand Account)*.
-  - [x] Hapus blok JSX checkbox toggle Facebook Page dari formulir statis.
-  - [x] Pastikan payload pengiriman form statis menyertakan `brand_profile_id: brandProfileId || null` dan `post_to_facebook: 0`.
+- [x] **Task 2: Penambahan Auto-Migration pada `lib/db-pg.js`**
+  - [x] Daftarkan script auto-migration `ALTER TABLE recipe_campaigns ADD COLUMN IF NOT EXISTS tenant_id TEXT DEFAULT 'default_tenant'` dan `recipe_items`.
 
-- [x] **Task 3: Implementasi Accordion Buka-Tutup & Pembersihan Facebook pada Card Detil Resep (`app/recipe-labs/page.js`)**
-  - [x] Tambahkan state `openRecipeCardIndex` dengan nilai default `0` (hanya 1 kartu terbuka).
-  - [x] Buat header kartu resep interaktif yang dapat diklik untuk toggle buka-tutup (jika kartu lain diklik, kartu lama otomatis tertutup).
-  - [x] Hapus panel *“📘 Integrasi Facebook Page (Draft / Pending)”* dan tombol Facebook draft dari kartu detail resep (baik tipe video maupun statis).
-  - [x] Gantikan dengan toolbar ContentFlow Hub yang memuat tombol manual *“🔄 Sync ke ContentFlow”* dan indikator status sinkronisasi.
+- [x] **Task 3: Perbaikan Query dan Persistensi Tenant pada `lib/db.js`**
+  - [x] Perbarui `createRecipeCampaign` agar menyertakan kolom `tenant_id` (fallback `'default_tenant'`).
+  - [x] Perbarui `createRecipeItem` agar menyertakan kolom `tenant_id` (fallback `'default_tenant'`).
+  - [x] Perbarui `getRecipeCampaigns` agar mendukung tenant-scoping dengan fallback `'default_tenant'`.
 
-- [x] **Task 4: Ingestion Scanner & Sync Function Recipe Labs (`lib/contentflow-ingest.js`)**
-  - [x] Tambahkan pemindaian `recipe_campaigns` dan `recipe_items` (kategori, status completed, link Nextcloud/poster, markdown resep) ke dalam fungsi `scanAndSyncExistingCampaigns()`.
-  - [x] Buat dan ekspor fungsi `syncRecipeCampaignToContentFlow(campaignId, itemId)`.
+- [x] **Task 4: Integrasi Tenant Context pada `app/api/recipe-labs/route.js`**
+  - [x] Teruskan `tenantId` dari `getActiveTenantId()` saat pembuatan kampanye baru dan pembuatan recipe items.
 
-- [x] **Task 5: API Route Sync Manual Recipe Labs (`app/api/recipe-labs/[id]/sync-contentflow/route.js`)**
-  - [x] Buat endpoint API POST untuk menerima permintaan sinkronisasi manual dari kartu detail resep.
-  - [x] Panggil `syncRecipeCampaignToContentFlow()` dan kembalikan response JSON status sukses/gagal.
+- [x] **Task 5: Defensive Query Handling pada `lib/campaign-scheduler.js`**
+  - [x] Bungkus pemanggilan `SELECT tenant_id FROM recipe_campaigns` dalam blok try-catch dengan fallback `'default_tenant'` agar scheduler kebal terhadap replika lag atau anomali skema.
 
-- [x] **Task 6: Auto-Sync ke ContentFlow Hub pada Scheduler Exporter (`lib/scheduler-processors.js`)**
-  - [x] Pada pipeline akhir ekspor resep (setelah poster kolase dan markdown selesai dibuat), panggil sinkronisasi otomatis ke ContentFlow Hub.
+- [x] **Task 6: Uji Verifikasi Database & Query**
+  - [x] Jalankan query verifikasi langsung ke database PostgreSQL untuk memastikan kolom `tenant_id` telah aktif dan query scheduler berjalan tanpa error.
 
-- [x] **Task 7: Verifikasi Filter Sumber `recipe` pada ContentFlow Hub (`app/content-flow/page.js`)**
-  - [x] Verifikasi bahwa filter sumber kampanye `recipe` memuat item resep yang telah di-sync dengan thumbnail poster 1:1, judul resep, dan preview naskah.
-
-- [x] **Task 8: Build Check & Rilis Otomatis**
-  - [x] Jalankan `npm run build` untuk memverifikasi tidak ada sintaks error atau typing issues.
-  - [x] Jalankan rilis otomatis non-interaktif `npm run release-non-interactive`.
+- [ ] **Task 7: Build, Rilis Non-Interaktif & Deployment Mac Mini Dev & Staging**
+  - [ ] Verifikasi `npm run build` bebas error.
+  - [ ] Jalankan `npm run release-non-interactive` sesuai SOP.
+  - [ ] Deploy ke server dev Mac Mini (`npm run deploy:dev:atomic`).
+  - [ ] Deploy ke server staging Mac Mini (`npm run deploy:staging`).
 
 ---
 
 ## 🔍 Before & After Code Snippets
 
-### 1. `app/recipe-labs/page.js` — Penambahan Nama Akun (Brand Account) & Penghapusan Facebook Toggle
+### 1. `lib/db-pg.js` — Auto-Migration `tenant_id` untuk Recipe Tables
 
 #### Code Sebelum (Current/Before):
 ```javascript
-// app/recipe-labs/page.js:L555-L574
-      } : {
-        category,
-        custom_category: customCategory,
-        visual_style: visualStyle,
-        nextcloud_parent_folder: nextcloudParentFolder,
-        post_to_facebook: postToFacebook,
-        enable_glabs: enableGlabs,
-        target_recipe_count: targetCount,
-        campaign_type: 'static',
-        brand_profile_id: null,
-        spreadsheet_id: null,
-        config_json: null,
-        images_per_recipe: imagesPerRecipe,
-        selected_layout_id: selectedLayoutId,
-        grid_gap_size: gridGapSize,
-        grid_border_radius: gridBorderRadius,
-        grid_outer_padding: gridOuterPadding,
-        grid_bg_color: gridBgColor,
-        source_deconstruct_asset_id: sourceDeconstructAssetId || null
-      };
+// lib/db-pg.js:L279-L293
+    pool.query(`
+      ALTER TABLE pillar_campaigns
+        ADD COLUMN IF NOT EXISTS target_demographic TEXT,
+        ADD COLUMN IF NOT EXISTS target_demographic_custom TEXT,
+        ADD COLUMN IF NOT EXISTS clip_duration INTEGER DEFAULT 8;
+      ALTER TABLE re_campaigns
+        ADD COLUMN IF NOT EXISTS clip_duration INTEGER DEFAULT 8;
+      ALTER TABLE sheets_campaigns
+        ADD COLUMN IF NOT EXISTS clip_duration INTEGER DEFAULT 8;
+      ALTER TABLE recipe_campaigns
+        ADD COLUMN IF NOT EXISTS clip_duration INTEGER DEFAULT 8;
+    `).catch(err => {
+      console.warn('[PostgreSQL Auto-Migration Warning] Gagal migrasi demographic & clip_duration:', err.message);
+    });
 ```
 
 #### Code Sesudah (Proposed/After):
 ```javascript
-// app/recipe-labs/page.js
-      } : {
-        category,
-        custom_category: customCategory,
-        visual_style: visualStyle,
-        nextcloud_parent_folder: nextcloudParentFolder,
-        post_to_facebook: 0,
-        enable_glabs: enableGlabs,
-        target_recipe_count: targetCount,
-        campaign_type: 'static',
-        brand_profile_id: brandProfileId || null,
-        spreadsheet_id: null,
-        config_json: null,
-        images_per_recipe: imagesPerRecipe,
-        selected_layout_id: selectedLayoutId,
-        grid_gap_size: gridGapSize,
-        grid_border_radius: gridBorderRadius,
-        grid_outer_padding: gridOuterPadding,
-        grid_bg_color: gridBgColor,
-        source_deconstruct_asset_id: sourceDeconstructAssetId || null
-      };
+    pool.query(`
+      ALTER TABLE pillar_campaigns
+        ADD COLUMN IF NOT EXISTS target_demographic TEXT,
+        ADD COLUMN IF NOT EXISTS target_demographic_custom TEXT,
+        ADD COLUMN IF NOT EXISTS clip_duration INTEGER DEFAULT 8;
+      ALTER TABLE re_campaigns
+        ADD COLUMN IF NOT EXISTS clip_duration INTEGER DEFAULT 8;
+      ALTER TABLE sheets_campaigns
+        ADD COLUMN IF NOT EXISTS clip_duration INTEGER DEFAULT 8;
+      ALTER TABLE recipe_campaigns
+        ADD COLUMN IF NOT EXISTS clip_duration INTEGER DEFAULT 8,
+        ADD COLUMN IF NOT EXISTS tenant_id TEXT DEFAULT 'default_tenant';
+      ALTER TABLE recipe_items
+        ADD COLUMN IF NOT EXISTS tenant_id TEXT DEFAULT 'default_tenant';
+      CREATE INDEX IF NOT EXISTS idx_recipe_campaigns_tenant ON recipe_campaigns (tenant_id);
+      CREATE INDEX IF NOT EXISTS idx_recipe_items_tenant ON recipe_items (tenant_id);
+    `).catch(err => {
+      console.warn('[PostgreSQL Auto-Migration Warning] Gagal migrasi demographic & clip_duration:', err.message);
+    });
 ```
 
 ---
 
-### 2. `app/recipe-labs/page.js` — Form Statis: Brand Account Dropdown & Hilangkan FB Toggle
+### 2. `lib/campaign-scheduler.js` — Defensive Tenant Fetching
 
 #### Code Sebelum (Current/Before):
-```jsx
-// app/recipe-labs/page.js:L1584-L1633
-                    <div style={{
-                      padding: '16px',
-                      background: 'var(--bg-glass)',
-                      borderRadius: 'var(--radius-sm)',
-                      border: '1px solid var(--border)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between'
-                    }}>
-                      <div>
-                        <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                          📘 Post Draft ke Facebook Page (Status Pending/Draft)
-                        </div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                          {postToFacebook
-                            ? 'ON: Otomatis membuat Draft Postingan di Facebook Page (TIDAK langsung published).'
-                            : 'OFF: Tidak mengirim postingan draft ke Facebook Page.'}
-                        </div>
-                      </div>
-
-                      <label style={{ position: 'relative', display: 'inline-block', width: '50px', height: '26px', cursor: 'pointer', flexShrink: 0 }}>
-                        <input
-                          type="checkbox"
-                          checked={postToFacebook}
-                          onChange={(e) => setPostToFacebook(e.target.checked)}
-                          style={{ opacity: 0, width: 0, height: 0 }}
-                        />
-                        <span style={{ ... }}>
-                          <span style={{ ... }} />
-                        </span>
-                      </label>
-                    </div>
-```
-
-#### Code Sesudah (Proposed/After):
-```jsx
-// app/recipe-labs/page.js
-                    {/* Pemilihan Nama Akun (Brand Account) untuk Form Statis */}
-                    <div className="form-group">
-                      <label className="form-label" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                        🏷️ Nama Akun (Brand Profile DNA Kuliner)
-                      </label>
-                      <select
-                        className="form-select"
-                        value={brandProfileId}
-                        onChange={e => setBrandProfileId(e.target.value)}
-                      >
-                        <option value="">-- Tanpa Brand Profile (Umum / Default) --</option>
-                        {brandProfiles.map(p => (
-                          <option key={p.id} value={p.id}>
-                            {p.brand_name} {p.account_name ? `(@${p.account_name})` : ''}
-                          </option>
-                        ))}
-                      </select>
-                      <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '4px' }}>
-                        Resep akan diasosiasikan dengan akun ini saat masuk ke ContentFlow Hub untuk publikasi media sosial.
-                      </small>
-                    </div>
-```
-
----
-
-### 3. `app/recipe-labs/page.js` — Card Detil Resep: Accordion Single-Active & Sync ke ContentFlow
-
-#### Code Sebelum (Current/Before):
-```jsx
-// app/recipe-labs/page.js:L2879-L2905
-                        return (
-                          <div key={item.id} style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', flexWrap: 'wrap', gap: '8px' }}>
-                              <h4 style={{ color: 'var(--accent-light)', margin: 0 }}>
-                                #{idx + 1} {item.recipe_title || 'Mengekstrak judul resep...'}
-                              </h4>
-                              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                {item.fb_post_id && (
-                                  <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '4px', background: 'var(--status-info-soft)', color: 'var(--status-info)', border: '1px solid var(--status-info-soft)' }}>
-                                    📘 FB Draft #{item.fb_post_id}
-                                  </span>
-                                )}
-                                <button
-                                  type="button"
-                                  className="btn btn-sm btn-secondary"
-                                  disabled={postingFbId === item.id || !item.recipe_markdown_text}
-                                  onClick={() => handleManualFbPost(...)}
-                                >
-                                  {postingFbId === item.id ? '⏳ Kirim Draft...' : '📱 Post Draft Teks'}
-                                </button>
-                                <span className={`stat-value ${item.status === 'completed' ? 'success' : item.status === 'failed' ? 'danger' : 'warning'}`} style={{ fontSize: '0.8rem' }}>
-                                  STATUS: {item.status.toUpperCase()}
-                                </span>
-                              </div>
-                            </div>
-```
-
-#### Code Sesudah (Proposed/After):
-```jsx
-// app/recipe-labs/page.js
-                        const isOpen = openRecipeCardIndex === idx;
-                        return (
-                          <div
-                            key={item.id}
-                            style={{
-                              background: 'var(--bg-secondary)',
-                              borderRadius: 'var(--radius-sm)',
-                              border: isOpen ? '1px solid var(--accent)' : '1px solid var(--border)',
-                              overflow: 'hidden',
-                              transition: 'border-color 0.2s ease'
-                            }}
-                          >
-                            {/* Accordion Header (Click to Open/Close, Auto-Close Others) */}
-                            <div
-                              onClick={() => setOpenRecipeCardIndex(isOpen ? null : idx)}
-                              style={{
-                                padding: '14px 16px',
-                                background: isOpen ? 'var(--surface-interactive)' : 'var(--bg-secondary)',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                userSelect: 'none'
-                              }}
-                            >
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <span style={{ fontWeight: 800, color: 'var(--accent-light)', fontSize: '0.85rem' }}>
-                                  #{idx + 1}
-                                </span>
-                                <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
-                                  {item.recipe_title || 'Mengekstrak resep...'}
-                                </span>
-                              </div>
-                              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                <span className={`stat-value ${item.status === 'completed' ? 'success' : item.status === 'failed' ? 'danger' : 'warning'}`} style={{ fontSize: '0.75rem' }}>
-                                  {item.status.toUpperCase()}
-                                </span>
-                                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                  {isOpen ? '▲' : '▼'}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Accordion Body: Hanya render saat isOpen === true */}
-                            {isOpen && (
-                              <div style={{ padding: '16px', borderTop: '1px solid var(--border)' }}>
-                                {/* Pipeline Visualizer & Media */}
-                                ...
-                                {/* Action Bar Sync ke ContentFlow Hub (Pengganti Facebook) */}
-                                <div style={{
-                                  marginTop: '16px',
-                                  padding: '12px 16px',
-                                  background: 'var(--surface-interactive)',
-                                  border: '1px solid var(--border)',
-                                  borderRadius: 'var(--radius-sm)',
-                                  display: 'flex',
-                                  justifyContent: 'space-between',
-                                  alignItems: 'center',
-                                  flexWrap: 'wrap',
-                                  gap: '12px'
-                                }}>
-                                  <div>
-                                    <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                      🚀 ContentFlow Hub Gateway
-                                    </div>
-                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                                      Sinkronkan resep ini ke ContentFlow Hub untuk penjadwalan multi-kanal.
-                                    </div>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    className="btn btn-sm btn-primary"
-                                    disabled={syncingItemId === item.id || item.status !== 'completed'}
-                                    onClick={() => handleManualContentFlowSync(campaignDetail.id, item.id)}
-                                  >
-                                    {syncingItemId === item.id ? '⏳ Menyinkronkan...' : '🔄 Sync ke ContentFlow'}
-                                  </button>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        );
-```
-
----
-
-### 4. `lib/contentflow-ingest.js` — Penambahan Scanner `recipe_campaigns` & `recipe_items`
-
-#### Code Sesudah (Proposed/After):
 ```javascript
-// lib/contentflow-ingest.js
-  // 7. Scan Recipe Labs Campaigns
-  try {
-    let recipeWhere = 'WHERE rc.tenant_id = ?';
-    const recipeParams = [tenantId];
-    if (targetCampaignId) {
-      recipeWhere = 'WHERE rc.tenant_id = ? AND rc.id = ?';
-      recipeParams.push(targetCampaignId);
+// lib/campaign-scheduler.js:L1116-L1121
+    } else if (name.startsWith('recipe_')) {
+      const item = await db.prepare("SELECT campaign_id FROM recipe_items WHERE id = ?").get(itemId);
+      if (item) {
+        const campaign = await db.prepare("SELECT tenant_id FROM recipe_campaigns WHERE id = ?").get(item.campaign_id);
+        if (campaign) tenantId = campaign.tenant_id || 'default_tenant';
+      }
     }
+```
 
-    const recipeRows = await db.prepare(`
-      SELECT ri.*, rc.category, rc.custom_category, rc.nextcloud_folder_url, rc.brand_profile_id, rc.campaign_type, rc.config_json,
-             bp.brand_name, bp.account_name AS bp_account_name
-      FROM recipe_items ri
-      JOIN recipe_campaigns rc ON ri.campaign_id = rc.id
-      LEFT JOIN brand_profiles bp ON rc.brand_profile_id = bp.id
-      ${recipeWhere}
-      ORDER BY ri.created_at DESC
-    `).all(...recipeParams);
+#### Code Sesudah (Proposed/After):
+```javascript
+    } else if (name.startsWith('recipe_')) {
+      const item = await db.prepare("SELECT campaign_id FROM recipe_items WHERE id = ?").get(itemId);
+      if (item) {
+        try {
+          const campaign = await db.prepare("SELECT tenant_id FROM recipe_campaigns WHERE id = ?").get(item.campaign_id);
+          if (campaign) tenantId = campaign.tenant_id || 'default_tenant';
+        } catch (e) {
+          console.warn('[Campaign Scheduler] Warning fetching tenantId for recipe campaign:', e.message);
+          tenantId = 'default_tenant';
+        }
+      }
+    }
+```
 
-    for (const item of (recipeRows || [])) {
-      if (item.status !== 'completed' && !item.img_grid_path) continue;
-      const cfId = `cf_rec_${item.id}`;
-      const accountName = item.bp_account_name || item.brand_name || 'Recipe Labs';
-      const videoId = `REC-${item.id.slice(0, 8).toUpperCase()}`;
-      const assetUrl = item.img_grid_path || item.nextcloud_folder_url || '';
-      const nextcloudUrl = item.nextcloud_folder_url || item.img_grid_path || '';
+---
 
-      const p = upsertContentFlowItem({
-        id: cfId,
-        source_type: 'recipe',
-        source_campaign_id: item.campaign_id,
-        source_item_id: item.id,
-        account_name: accountName,
-        video_id: videoId,
-        campaign_title: item.recipe_title || 'Resep Kuliner',
-        hook: item.recipe_title || 'Resep Lezat',
-        nama_produk: item.recipe_title || 'Resep Spesial',
-        link_affiliate: '',
-        link_produk: '',
-        caption: item.recipe_markdown_text || '',
-        production_date: item.created_at,
-        url_asset: assetUrl,
-        drive_link: '',
-        nextcloud_url: nextcloudUrl,
-        pipeline_status: item.status === 'completed' ? 'Completed' : 'In Production',
-        brand_profile_id: item.brand_profile_id || null,
-        recipe_text_markdown: item.recipe_markdown_text || null,
-        recipe_text_plain: item.recipe_markdown_text || null,
-        recipe_payload_json: item.t2i_prompts_json || null,
-        social_media_package_json: item.seo_data_json || null,
-        content_kind: 'recipe',
-        recipe_revision: 1
+### 3. `lib/db.js` — Menyimpan `tenant_id` pada `createRecipeCampaign` & `createRecipeItem`
+
+#### Code Sebelum (Current/Before):
+```javascript
+// lib/db.js:L3374-L3403
+export async function createRecipeCampaign(data) {
+  const db = getDb();
+  db.prepare(`
+    INSERT INTO recipe_campaigns (
+      id, category, custom_category, visual_style, nextcloud_parent_folder, post_to_facebook, enable_glabs, target_recipe_count, images_per_recipe, selected_layout_id, grid_gap_size, grid_border_radius, grid_outer_padding, grid_bg_color, status, campaign_type, brand_profile_id, spreadsheet_id, config_json, source_deconstruct_asset_id
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    data.id,
+    data.category,
+    data.custom_category || null,
+    data.visual_style || 'Food Porn',
+    data.nextcloud_parent_folder || 'MAKNA_Recipes',
+    data.post_to_facebook !== undefined ? Number(data.post_to_facebook) : 0,
+    data.enable_glabs !== undefined ? Number(data.enable_glabs) : 1,
+    data.target_recipe_count || 1,
+    data.images_per_recipe || 4,
+    data.selected_layout_id || '4_editorial_split',
+    data.grid_gap_size !== undefined ? Number(data.grid_gap_size) : 12,
+    data.grid_border_radius !== undefined ? Number(data.grid_border_radius) : 16,
+    data.grid_outer_padding !== undefined ? Number(data.grid_outer_padding) : 16,
+    data.grid_bg_color || '#0d0d12',
+    data.status || 'processing',
+    data.campaign_type || 'static',
+    data.brand_profile_id || null,
+    data.spreadsheet_id || null,
+    data.config_json || null,
+    data.source_deconstruct_asset_id || null
+  );
+  return data.id;
+}
+```
+
+#### Code Sesudah (Proposed/After):
+```javascript
+export async function createRecipeCampaign(data) {
+  const db = getDb();
+  db.prepare(`
+    INSERT INTO recipe_campaigns (
+      id, category, custom_category, visual_style, nextcloud_parent_folder, post_to_facebook, enable_glabs, target_recipe_count, images_per_recipe, selected_layout_id, grid_gap_size, grid_border_radius, grid_outer_padding, grid_bg_color, status, campaign_type, brand_profile_id, spreadsheet_id, config_json, source_deconstruct_asset_id, tenant_id
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    data.id,
+    data.category,
+    data.custom_category || null,
+    data.visual_style || 'Food Porn',
+    data.nextcloud_parent_folder || 'MAKNA_Recipes',
+    data.post_to_facebook !== undefined ? Number(data.post_to_facebook) : 0,
+    data.enable_glabs !== undefined ? Number(data.enable_glabs) : 1,
+    data.target_recipe_count || 1,
+    data.images_per_recipe || 4,
+    data.selected_layout_id || '4_editorial_split',
+    data.grid_gap_size !== undefined ? Number(data.grid_gap_size) : 12,
+    data.grid_border_radius !== undefined ? Number(data.grid_border_radius) : 16,
+    data.grid_outer_padding !== undefined ? Number(data.grid_outer_padding) : 16,
+    data.grid_bg_color || '#0d0d12',
+    data.status || 'processing',
+    data.campaign_type || 'static',
+    data.brand_profile_id || null,
+    data.spreadsheet_id || null,
+    data.config_json || null,
+    data.source_deconstruct_asset_id || null,
+    data.tenant_id || 'default_tenant'
+  );
+  return data.id;
+}
+```
+
+---
+
+### 4. `app/api/recipe-labs/route.js` — Memasukkan `tenant_id` saat POST & GET
+
+#### Code Sebelum (Current/Before):
+```javascript
+// app/api/recipe-labs/route.js:L50-L83
+    await createRecipeCampaign({
+      id: campaignId,
+      category,
+      custom_category: category === 'Custom Input' ? custom_category : null,
+      visual_style: visual_style || 'Food Porn',
+      nextcloud_parent_folder: nextcloud_parent_folder ? nextcloud_parent_folder.trim() : 'MAKNA_Recipes',
+      post_to_facebook: post_to_facebook !== undefined ? (post_to_facebook ? 1 : 0) : 0,
+      enable_glabs: enable_glabs !== undefined ? (enable_glabs ? 1 : 0) : 1,
+      target_recipe_count: count,
+      images_per_recipe: images_per_recipe !== undefined ? Number(images_per_recipe) : 4,
+      selected_layout_id: selected_layout_id || '4_editorial_split',
+      grid_gap_size: grid_gap_size !== undefined ? Number(grid_gap_size) : 12,
+      grid_border_radius: grid_border_radius !== undefined ? Number(grid_border_radius) : 16,
+      grid_outer_padding: grid_outer_padding !== undefined ? Number(grid_outer_padding) : 16,
+      grid_bg_color: grid_bg_color || '#0d0d12',
+      status: 'processing',
+      campaign_type: campaign_type || 'static',
+      brand_profile_id: brand_profile_id || null,
+      spreadsheet_id: spreadsheet_id || null,
+      config_json: config_json ? (typeof config_json === 'string' ? config_json : JSON.stringify(config_json)) : null,
+      source_deconstruct_asset_id: source_deconstruct_asset_id || null
+    });
+
+    const createdItemIds = [];
+    for (let i = 0; i < count; i++) {
+      const itemId = `rcitem_${campaignId}_${i + 1}`;
+      await createRecipeItem({
+        id: itemId,
+        campaign_id: campaignId,
+        status: 'pending_gemini'
       });
-      safePush(p, cfId);
-      totalIngested++;
-    }
-  } catch (err) {
-    console.error('[ContentFlow Sync] Error scanning Recipe Labs campaigns:', err);
-  }
-```
-
----
-
-### 5. `lib/scheduler-processors.js` — Auto-Sync ke ContentFlow saat Pembuatan Resep Selesai
-
-#### Code Sebelum (Current/Before):
-```javascript
-// lib/scheduler-processors.js:L9910-L9917
-    updateRecipeItem(item.id, {
-      img_grid_path: gridRelPath,
-      status: 'completed'
-    });
-
-    if (folderShareUrl && !campaign.nextcloud_folder_url) {
-      updateRecipeCampaign(campaign.id, { nextcloud_folder_url: folderShareUrl });
+      createdItemIds.push(itemId);
     }
 ```
 
 #### Code Sesudah (Proposed/After):
 ```javascript
-// lib/scheduler-processors.js
-    updateRecipeItem(item.id, {
-      img_grid_path: gridRelPath,
-      status: 'completed'
+    const { getActiveTenantId } = await import('@/lib/tenant-context');
+    const tenantId = getActiveTenantId() || 'default_tenant';
+
+    await createRecipeCampaign({
+      id: campaignId,
+      tenant_id: tenantId,
+      category,
+      custom_category: category === 'Custom Input' ? custom_category : null,
+      visual_style: visual_style || 'Food Porn',
+      nextcloud_parent_folder: nextcloud_parent_folder ? nextcloud_parent_folder.trim() : 'MAKNA_Recipes',
+      post_to_facebook: post_to_facebook !== undefined ? (post_to_facebook ? 1 : 0) : 0,
+      enable_glabs: enable_glabs !== undefined ? (enable_glabs ? 1 : 0) : 1,
+      target_recipe_count: count,
+      images_per_recipe: images_per_recipe !== undefined ? Number(images_per_recipe) : 4,
+      selected_layout_id: selected_layout_id || '4_editorial_split',
+      grid_gap_size: grid_gap_size !== undefined ? Number(grid_gap_size) : 12,
+      grid_border_radius: grid_border_radius !== undefined ? Number(grid_border_radius) : 16,
+      grid_outer_padding: grid_outer_padding !== undefined ? Number(grid_outer_padding) : 16,
+      grid_bg_color: grid_bg_color || '#0d0d12',
+      status: 'processing',
+      campaign_type: campaign_type || 'static',
+      brand_profile_id: brand_profile_id || null,
+      spreadsheet_id: spreadsheet_id || null,
+      config_json: config_json ? (typeof config_json === 'string' ? config_json : JSON.stringify(config_json)) : null,
+      source_deconstruct_asset_id: source_deconstruct_asset_id || null
     });
 
-    if (folderShareUrl && !campaign.nextcloud_folder_url) {
-      updateRecipeCampaign(campaign.id, { nextcloud_folder_url: folderShareUrl });
-    }
-
-    // Auto-sync ke ContentFlow Hub (Pintu gerbang publikasi multi-kanal)
-    try {
-      const { syncRecipeCampaignToContentFlow } = await import('./contentflow-ingest.js');
-      await syncRecipeCampaignToContentFlow(campaign.id, item.id);
-      console.log(`[Recipe Exporter] Berhasil auto-sync item #${item.id} ke ContentFlow Hub.`);
-    } catch (syncErr) {
-      console.warn(`[Recipe Exporter Warning] Gagal auto-sync ke ContentFlow Hub:`, syncErr.message);
+    const createdItemIds = [];
+    for (let i = 0; i < count; i++) {
+      const itemId = `rcitem_${campaignId}_${i + 1}`;
+      await createRecipeItem({
+        id: itemId,
+        campaign_id: campaignId,
+        tenant_id: tenantId,
+        status: 'pending_gemini'
+      });
+      createdItemIds.push(itemId);
     }
 ```

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.69 — Fix Missing tenant_id on Recipe Campaigns (22/10/2026)
+- Migrasi kolom tenant_id dan index pada recipe_campaigns dan recipe_items di seluruh schema
+- Perbaiki Campaign Scheduler agar kebal dari error fetching tenantId
+- Sertakan tenant_id aktif saat insert kampanye dan item recipe
+
 ## V2.32.68 — Recipe Labs Brand Account, Accordion & ContentFlow Hub Sync (22/10/2026)
 - Tambah pilihan Brand Account pada form resep statis
 - Hilangkan toggle dan panel posting Facebook Page dari Recipe Labs
