@@ -33,3 +33,6 @@ Final suite: 4/4 passed (termasuk integrasi PostgreSQL terisolasi empat adapter 
 
 ## Batasan yang dipertahankan
 Recipe Labs mode video mengikuti output existing berupa storyboard/report. Studio menolak menganggapnya video siap publish; gunakan focus Recipe pada Pillar untuk produksi video akhir. Test lama Recipe mengharapkan 25 ditolak sementara MAX_RECIPE_COUNT HEAD=30; kegagalan baseline dicatat, tidak diubah untuk menghijaukan test.
+
+## Hotfix HTTP wizard button
+Penyebab: crypto.randomUUID secure-context-only dipanggil sebelum setShowWizard pada HTTP staging. Ganti dengan createStudioIdempotencyKey: randomUUID bila tersedia, getRandomValues pada HTTP, fallback unik non-auth bila crypto diblokir. Key tetap stabil per sesi submit. Uji absent/throw API dan 1000 fallback keys unik lulus; suite focused 14 passed, 1 DB integration skipped karena tidak ada perubahan DB. Build produksi lulus. Rilis target v2.32.72; tanpa migrasi database.

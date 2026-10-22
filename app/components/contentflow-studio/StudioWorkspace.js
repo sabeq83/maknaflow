@@ -7,7 +7,7 @@ import MultiplierConfigurationForm from '../campaign-forms/MultiplierConfigurati
 import RecipeLabsConfigurationForm from '../campaign-forms/RecipeLabsConfigurationForm';
 
 import ImportPlannerModal from '../ImportPlannerModal';
-import { buildOutputManifest, toZonedInput, zonedInputToIso } from '@/lib/contentflow-studio-manifest';
+import { buildOutputManifest, toZonedInput, zonedInputToIso, createStudioIdempotencyKey } from '@/lib/contentflow-studio-manifest';
 
 const DAYS_OF_WEEK = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
 
@@ -115,7 +115,7 @@ export default function StudioWorkspace() {
   function startWizard() {
     setCreatedPlanner(null); setSelectedEngine(null); setEnginePayload(null);
     setOutputManifest([]); setSlotScheduleMap({}); setAccountIds([]); setProductRefFile(null);
-    setSubmitKey(crypto.randomUUID()); setWizardError(''); setWizardStep(0); setShowWizard(true);
+    setSubmitKey(createStudioIdempotencyKey()); setWizardError(''); setWizardStep(0); setShowWizard(true);
     fetch('/api/v2/publishing/accounts?provider=repliz').then(r=>r.json()).then(d=>setAccounts(d.data || d.accounts || [])).catch(()=>setAccounts([]));
   }
   const handlePlannerSuccess = async result => {

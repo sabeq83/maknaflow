@@ -733,3 +733,44 @@ package.json version 2.32.70; package-lock.json root/version 2.23.20; changelog 
 ```text
 package.json dan root lockfile version 2.32.71; changelog entry Campaign-first berisi koreksi mesin/Planner/idempotency.
 ```
+
+## Hotfix tombol Buat Batch pada HTTP private IP
+
+Penyebab: `startWizard()` memanggil `crypto.randomUUID()` (secure-context-only) sebelum `setShowWizard(true)`. Staging memakai HTTP Tailscale IP. Ini nonvisual event-handler bug; tampilan/mockup campaign-first tidak berubah.
+
+### Execution Task List — hotfix
+- [x] H1. Ganti generator idempotency client dengan helper yang kompatibel HTTP dan pertahankan key stabil per submit.
+- [x] H2. Uji randomUUID tidak tersedia/throw, fallback getRandomValues, dan keunikan; build.
+- [ ] H3. Rilis patch dan deploy atomic Dev/Staging; verifikasi SHA, health, dan perbaikan handler di release aktif.
+
+### `lib/contentflow-studio-manifest.js`
+**Code Sebelum (Current/Before)**
+```javascript
+// Belum ada helper idempotency key untuk browser HTTP.
+```
+**Code Sesudah (Proposed/After)**
+```javascript
+export function createStudioIdempotencyKey(provider = globalThis.crypto) {
+  // randomUUID bila tersedia; getRandomValues pada HTTP; fallback unik non-auth.
+}
+```
+### `app/components/contentflow-studio/StudioWorkspace.js`
+**Code Sebelum (Current/Before)**
+```javascript
+setSubmitKey(crypto.randomUUID()); setWizardError(''); setWizardStep(0); setShowWizard(true);
+```
+**Code Sesudah (Proposed/After)**
+```javascript
+setSubmitKey(createStudioIdempotencyKey()); setWizardError(''); setWizardStep(0); setShowWizard(true);
+```
+### `tests/contentflow-studio-campaign-first.test.mjs`
+**Code Sebelum (Current/Before)**
+```javascript
+// Belum menguji ketiadaan randomUUID pada HTTP origin.
+```
+**Code Sesudah (Proposed/After)**
+```javascript
+// Provider tanpa randomUUID, randomUUID throw, getRandomValues fallback, no-crypto uniqueness.
+```
+
+Hotfix release metadata Before: package.json dan package-lock.json 2.32.71, changelog V2.32.71. After: 2.32.72, entry HTTP-compatible wizard ID.

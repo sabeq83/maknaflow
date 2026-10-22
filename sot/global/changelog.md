@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.72 — Fix Studio Wizard on HTTP (22/10/2026)
+- Perbaiki tombol Buat Batch pada HTTP private IP
+- Gunakan idempotency ID browser dengan fallback tanpa randomUUID
+- Uji API crypto tidak tersedia dan build produksi
+
 ## V2.32.71 — ContentFlow Studio Campaign First (22/10/2026)
 - Pilih campaign sebelum Planner dan pulihkan jalur Pillar
 - Batch atomik, Planner sekali pakai, output mapping dan retry idempotent

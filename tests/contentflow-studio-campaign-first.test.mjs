@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildOutputManifest,validateEngineSource,toZonedInput,zonedInputToIso} from '../lib/contentflow-studio-manifest.js';
+import {buildOutputManifest,validateEngineSource,toZonedInput,zonedInputToIso,createStudioIdempotencyKey} from '../lib/contentflow-studio-manifest.js';
 
 test('Campaign-first: Planner required only by Pillar and rejected by other engines',()=>{
  for(const [engineKind,sourceKind] of [['re','re_campaign'],['multiplier','multiplier_lab'],['recipe','recipe_labs']]){
@@ -95,4 +95,14 @@ test('Isolated PostgreSQL: atomic batches, single-use, activation, aliases and d
   const calendar=await getCalendarProjection(tenant);assert.equal(calendar.find(s=>s.batch_id===a.id).source_kind,'re_campaign');
   assert.equal((await pgQuery('SELECT COUNT(*)::int n FROM content_planner_consumptions')).rows[0].n,1);
  }finally{await c.query(`DROP SCHEMA IF EXISTS "${schema}" CASCADE`);c.release();await closePgPool();}
+});
+
+test('Wizard idempotency key works on HTTP without secure-context randomUUID',()=>{
+ const httpCrypto={getRandomValues:bytes=>{bytes.fill(42);return bytes;}};
+ assert.match(createStudioIdempotencyKey(httpCrypto),/^studio_[a-f0-9]{32}$/);
+ assert.match(createStudioIdempotencyKey({...httpCrypto,randomUUID:()=>{throw Error('insecure context');}}),/^studio_[a-f0-9]{32}$/);
+ assert.equal(createStudioIdempotencyKey({randomUUID:()=> 'secure-uuid'}),'secure-uuid');
+ const keys=new Set(Array.from({length:1000},()=>createStudioIdempotencyKey(null)));
+ assert.equal(keys.size,1000);
+ assert.doesNotThrow(()=>createStudioIdempotencyKey({getRandomValues:()=>{throw Error('blocked');}}));
 });
