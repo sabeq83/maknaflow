@@ -58,3 +58,31 @@ Ditemukan race pada respons Generate Planner bila wizard ditutup dan batch baru 
 - Enter pada langkah antara tidak menjalankan submit campaign. Indikator tahapan luar memakai ID langkah aktual termasuk Review Planner dan Review Batch.
 - Form Pillar menunggu detail Planner selesai dimuat sebelum Lanjut tersedia.
 - Semua fixture input/handler dan SSR lima form tetap lulus setelah penyelarasan ini.
+
+## Panduan review manual pengguna
+1. Buka Studio, Buat Batch, pilih RE: Planner tidak muncul. Coba Single/Mass, preset, mode eksekusi, bridging, VSO dan audio. Lanjut berhenti pada prasyarat yang belum lengkap.
+2. Kembali dari Jadwal atau Review ke konfigurasi: isian tetap ada. Edit sumber/kombinasi dan pastikan jadwal tidak berpindah ke sumber lain.
+3. Pillar: pilih salah satu dari tiga fokus Planner, Generate Planner secara eksplisit, review hasil dan konfigurasi produksi. Planner dikunci hanya saat batch berhasil disimpan.
+4. Multiplier: coba empat workflow dan preview kombinasi, termasuk jalur non-produk; unggah gambar bila relevan. Maksimal 20 kombinasi mengikuti API asal.
+5. Recipe: coba Static/kolase 3–6 gambar dengan preset/spacing, serta Reels Video Storyboard. Storyboard/text-only tanpa media tidak dinyatakan siap tayang.
+6. Periksa Light/Dark, lebar layar kecil, keyboard Enter dan kembali/lanjut.
+7. Setelah memilih waktu dan akun, simpan draft; Generate Content terpisah. Publishing hanya setelah review dan approval. Pengujian AI/publishing nyata dilakukan secara sadar oleh pengguna, bukan bagian fixture otomatis.
+
+## Deployment akhir dan verifikasi
+
+Rilis aktif: **v2.32.75**, Git SHA `1c5ca7734afa1dfa7483a3c2136f68876d75dc17`. Main dan annotated tag v2.32.75 telah diverifikasi menunjuk SHA tersebut sebelum commit bukti dokumentasi.
+
+| Environment | Release ID | UI login | API health | Schema | PGPOOL_MAX | PM2 / cwd / shared |
+|---|---|---|---|---|---|---|
+| dev | `20261022T134335Z-1c5ca7734afa` | 200 | 200 | dev | 3 | online; cwd resolved ke current; seluruh shared path sesuai |
+| staging | `20261022T134448Z-1c5ca7734afa` | 200 | 200 | staging | 3 | online; cwd resolved ke current; seluruh shared path sesuai |
+
+- Build remote Dev dan Staging berhasil sebelum aktivasi; semua 149 routes selesai.
+- Halaman Studio tanpa sesi mengembalikan 307 ke login, sesuai perlindungan autentikasi; respons ini tidak diklaim sebagai pengujian interaksi pengguna terautentikasi.
+- `.env.local`, data, logs, public/uploads dan public/temp merujuk shared masing-masing environment. Tidak membaca/menyalin nilai secret ke laporan.
+- Dev: http://100.95.245.55:5020/contentflow-studio
+- Staging: http://100.95.245.55:5010/contentflow-studio
+- Script kesehatan cluster: endpoint ContentFlow Node 3 merespons 405 dan webhook G-Labs merespons 501 pada probe GET; ini bukti endpoint merespons, bukan klaim health aplikasi 200. UI/API target Dev/Staging sudah diperiksa terpisah dengan hasil 200.
+- Tidak ada deployment Production atau migrasi database. Tidak menjalankan generasi AI/publishing nyata.
+
+Seluruh tahap implementasi agen selesai. Review visual/interaksi oleh pengguna dilakukan melalui link di atas sesuai SOP manual UI; panduan ada pada seksi sebelumnya.
