@@ -2,10 +2,14 @@ import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import { regeneratePlannerRow } from '@/lib/content-planner-engine';
 import { withTenantContext } from '@/lib/auth';
+import { ensurePlannerNotConsumed } from '@/lib/content-planner-consumption';
 
 export const PATCH = withTenantContext(async (request, { params }, user) => {
   try {
     const { id: plannerId, rowId } = await params;
+    const tenantId = user?.tenantId || 'default_tenant';
+    await ensurePlannerNotConsumed(plannerId, tenantId);
+
     const body = await request.json();
     const db = getDb();
 
@@ -42,13 +46,16 @@ export const PATCH = withTenantContext(async (request, { params }, user) => {
     return NextResponse.json({ success: true, row: updatedRow });
   } catch (error) {
     console.error('[API /content-planner/[id]/rows/[rowId] PATCH Error]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message, code: error.code }, { status: error.status || 500 });
   }
 });
 
 export const POST = withTenantContext(async (request, { params }, user) => {
   try {
     const { id: plannerId, rowId } = await params;
+    const tenantId = user?.tenantId || 'default_tenant';
+    await ensurePlannerNotConsumed(plannerId, tenantId);
+
     const body = await request.json();
 
     const updatedRow = await regeneratePlannerRow({
@@ -61,19 +68,22 @@ export const POST = withTenantContext(async (request, { params }, user) => {
     return NextResponse.json({ success: true, row: updatedRow });
   } catch (error) {
     console.error('[API /content-planner/[id]/rows/[rowId] POST Error]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message, code: error.code }, { status: error.status || 500 });
   }
 });
 
 export const DELETE = withTenantContext(async (request, { params }, user) => {
   try {
     const { id: plannerId, rowId } = await params;
+    const tenantId = user?.tenantId || 'default_tenant';
+    await ensurePlannerNotConsumed(plannerId, tenantId);
+
     const db = getDb();
 
     await db.prepare('DELETE FROM content_planner_rows WHERE id = ? AND planner_id = ?').run(rowId, plannerId);
     return NextResponse.json({ success: true, message: 'Baris berhasil dihapus.' });
   } catch (error) {
     console.error('[API /content-planner/[id]/rows/[rowId] DELETE Error]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message, code: error.code }, { status: error.status || 500 });
   }
 });

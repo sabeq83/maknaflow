@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.70 — ContentFlow Studio (22/10/2026)
+- Orkestrasi kampanye multi-engine terpadu
+- Single-use Planner invariant & anti-bypass server guard
+- Review kreatif & approval publishing terjadwal
+
 ## V2.32.69 — Fix Missing tenant_id on Recipe Campaigns (22/10/2026)
 - Migrasi kolom tenant_id dan index pada recipe_campaigns dan recipe_items di seluruh schema
 - Perbaiki Campaign Scheduler agar kebal dari error fetching tenantId

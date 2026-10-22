@@ -9,6 +9,7 @@ import ContentFlowLogo from './ContentFlowLogo';
 const menuKeyMap = {
   '/youtube-studio': 'youtube_studio',
   '/affiliate-studio': 'affiliate_studio',
+  '/contentflow-studio': 'content_flow',
   '/content-flow': 'content_flow',
   '/instant-factory': 'instant_campaign',
   '/re-campaigns': 're_campaign',
@@ -59,6 +60,7 @@ const navItems = [
   { label: 'Product Bridging', href: '/product-bridge-inject', icon: '🎯' },
 
   { section: 'PUBLISHING' },
+  { label: 'ContentFlow Studio', href: '/contentflow-studio', icon: '✨' },
   { label: 'ContentFlow Hub', href: '/content-flow', icon: '📊' },
   { label: 'Content Automations', href: '/content-automations', icon: '⏱️' },
 

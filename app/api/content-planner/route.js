@@ -12,6 +12,7 @@ export const GET = withTenantContext(async (request, _context, user) => {
     const brandId = searchParams.get('brand_id');
     const search = searchParams.get('search');
     const isArchivedParam = searchParams.get('is_archived'); // 'all', 'true', 'false', or null
+    const excludeConsumed = searchParams.get('exclude_consumed') === 'true';
 
     const db = getDb();
     const tenantId = user?.tenantId || 'default_tenant';
@@ -35,21 +36,28 @@ export const GET = withTenantContext(async (request, _context, user) => {
       conditions.push('(p.is_archived = 0 OR p.is_archived IS NULL)');
     }
 
+    if (excludeConsumed) {
+      conditions.push('c.id IS NULL AND p.status != \'consumed\'');
+    }
+
     const whereClause = `WHERE ${conditions.join(' AND ')}`;
 
     const planners = await db.prepare(`
-      SELECT p.*, b.brand_name AS brand_profile_name, COUNT(r.id) as row_count
+      SELECT p.*, b.brand_name AS brand_profile_name, COUNT(r.id) as row_count,
+             c.status as consumption_status, c.owner_type as consumed_owner_type, c.owner_id as consumed_owner_id
       FROM content_planners p
       LEFT JOIN brand_profiles b ON p.brand_id = b.id
       LEFT JOIN content_planner_rows r ON p.id = r.planner_id
+      LEFT JOIN content_planner_consumptions c ON p.id = c.planner_id AND (c.tenant_id = p.tenant_id OR c.tenant_id = ?)
       ${whereClause}
-      GROUP BY p.id, b.brand_name
+      GROUP BY p.id, b.brand_name, c.status, c.owner_type, c.owner_id
       ORDER BY p.created_at DESC
-    `).all(...params);
+    `).all(tenantId, ...params);
 
     const formattedPlanners = (planners || []).map(p => ({
       ...p,
-      is_archived: Boolean(p.is_archived)
+      is_archived: Boolean(p.is_archived),
+      is_consumed: Boolean(p.consumption_status === 'consumed' || p.status === 'consumed')
     }));
 
     return NextResponse.json({ success: true, planners: formattedPlanners });

@@ -32,11 +32,11 @@ Tabel `recipe_campaigns` dan `recipe_items` di seluruh schema PostgreSQL (`publi
 - [x] **Task 6: Uji Verifikasi Database & Query**
   - [x] Jalankan query verifikasi langsung ke database PostgreSQL untuk memastikan kolom `tenant_id` telah aktif dan query scheduler berjalan tanpa error.
 
-- [ ] **Task 7: Build, Rilis Non-Interaktif & Deployment Mac Mini Dev & Staging**
-  - [ ] Verifikasi `npm run build` bebas error.
-  - [ ] Jalankan `npm run release-non-interactive` sesuai SOP.
-  - [ ] Deploy ke server dev Mac Mini (`npm run deploy:dev:atomic`).
-  - [ ] Deploy ke server staging Mac Mini (`npm run deploy:staging`).
+- [x] **Task 7: Build, Rilis Non-Interaktif & Deployment Mac Mini Dev & Staging**
+  - [x] Verifikasi `npm run build` bebas error.
+  - [x] Jalankan `npm run release-non-interactive` sesuai SOP (v2.32.69).
+  - [x] Deploy ke server dev Mac Mini (`npm run deploy:dev:atomic`).
+  - [x] Deploy ke server staging Mac Mini (`npm run deploy:staging`).
 
 ---
 

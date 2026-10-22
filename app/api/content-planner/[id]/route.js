@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import { withTenantContext } from '@/lib/auth';
+import { ensurePlannerNotConsumed } from '@/lib/content-planner-consumption';
 
 export const GET = withTenantContext(async (request, { params }, user) => {
   try {
@@ -100,13 +101,15 @@ export const PATCH = withTenantContext(async (request, { params }, user) => {
 export const DELETE = withTenantContext(async (request, { params }, user) => {
   try {
     const { id } = await params;
-    const db = getDb();
+    const tenantId = user?.tenantId || 'default_tenant';
+    await ensurePlannerNotConsumed(id, tenantId);
 
+    const db = getDb();
     await db.prepare('DELETE FROM content_planners WHERE id = ?').run(id);
 
     return NextResponse.json({ success: true, message: 'Planner berhasil dihapus.' });
   } catch (error) {
     console.error('[API /content-planner/[id] DELETE Error]', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message, code: error.code }, { status: error.status || 500 });
   }
 });

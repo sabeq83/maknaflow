@@ -456,7 +456,7 @@ export default function ImportPlannerModal({
 
   async function fetchPlanners() {
     try {
-      const res = await fetch('/api/content-planner');
+      const res = await fetch('/api/content-planner?exclude_consumed=true');
       const data = await res.json();
       if (data.success) {
         setPlanners(data.planners || []);
