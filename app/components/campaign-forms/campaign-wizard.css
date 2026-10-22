@@ -1,0 +1,18 @@
+.campaign-wizard{display:grid;grid-template-columns:205px minmax(0,1fr);gap:20px;align-items:start;color:var(--text-primary)}
+.campaign-wizard-steps{position:sticky;top:0;display:flex;flex-direction:column;gap:8px;padding:14px;background:var(--surface-raised);border:1px solid var(--border-subtle);border-radius:var(--radius-md)}
+.campaign-wizard-steps strong{font-size:13px;margin-bottom:8px}
+.campaign-wizard-steps button{display:flex;gap:8px;align-items:center;text-align:left;background:var(--surface);border:1px solid var(--border-subtle);color:var(--text-secondary);padding:10px;border-radius:var(--radius-sm);font-size:12px;cursor:pointer}
+.campaign-wizard-steps button[aria-current=step]{background:var(--status-success-soft);border-color:var(--action-primary);color:var(--action-primary)}
+.campaign-wizard-steps button:disabled{opacity:.5;cursor:default}
+.campaign-wizard-steps button span{font-weight:700;min-width:18px}
+.campaign-wizard-steps small,.campaign-wizard-heading small,.campaign-wizard-policy{color:var(--text-muted);font-size:11px}
+.campaign-wizard-panel{min-width:0;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:var(--surface);overflow:hidden}
+.campaign-wizard-heading{padding:20px 22px;border-bottom:1px solid var(--border-subtle)}
+.campaign-wizard-heading h3{margin:6px 0 0;font-size:19px}
+.campaign-wizard-fields{padding:4px 0}
+.campaign-wizard-fields form{margin:0}
+.campaign-wizard-footer{display:flex;justify-content:space-between;gap:12px;padding:16px 20px;border-top:1px solid var(--border-subtle);background:var(--surface-raised)}
+.campaign-wizard-policy{padding:10px 20px;margin:0;line-height:1.6}
+.campaign-wizard-error{background:var(--status-danger-soft);color:var(--status-danger);padding:12px 20px;border-bottom:1px solid var(--border-subtle)}
+.campaign-wizard input:focus-visible,.campaign-wizard select:focus-visible,.campaign-wizard textarea:focus-visible,.campaign-wizard button:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+@media(max-width:760px){.campaign-wizard{grid-template-columns:1fr}.campaign-wizard-steps{position:static;display:flex;flex-direction:row;overflow:auto;align-items:center}.campaign-wizard-steps strong,.campaign-wizard-steps small{display:none}.campaign-wizard-steps button{min-width:145px;flex-shrink:0}}

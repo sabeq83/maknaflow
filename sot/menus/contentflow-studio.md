@@ -28,12 +28,15 @@ graph TD
   - Di-ingest ulang via menu lama atau Operator (`ingestPlannerToPillarCampaign`, `ingestRecipePlannerToPillarCampaign`, `operator-content-worker`).
 - **Idempotensi**: Permintaan konsumsi ulang oleh batch yang sama bersifat idempotent; permintaan oleh owner atau tenant lain langsung ditolak dengan `409 Conflict`.
 
-### 1.2 Form Sharing Kontrak (Zero Behavior Drift)
+### 1.2 Konfigurasi Canonical dan Wizard
 - Seluruh form konfigurasi diekstrak menjadi komponen modular di `app/components/campaign-forms/`:
   - `PlannerConfigurationForm.js`: Mendukung mode direct create dan mode capture.
   - `ReCampaignConfigurationForm.js`: Mendukung seluruh opsi audio/tts, visual VSO, model Veo, demografi, dan bridging.
   - `MultiplierConfigurationForm.js`: Mendukung 4 mode workflow (1P×NB, 1B×NP, 1B×NA, 1A×NB), Niche KB dynamic angles, dan preview kombinasi baris.
-  - `RecipeLabsConfigurationForm.js`: Mendukung mode Static Recipe Collage (3–6 slot tata letak majalah kuliner) dan Video Reels Recipe sekuensial.
+  - `RecipeLabsConfigurationForm.js`: Mendukung mode Static Recipe Collage (3–6 slot tata letak majalah kuliner) dan Reels Video Storyboard (Naskah & DNA). Storyboard tanpa media final tetap needs_review.
+- `PillarConfigurationForm.js` menampung form dan controller asli ImportPlannerModal; modal lama menjadi wrapper kompatibel. Studio merendernya inline dengan `layout='wizard'`.
+- Halaman Content Planner, RE, Multiplier dan Recipe menjadi wrapper direct dari komponen canonical. JSX, state, dependency, preset dan serializer handler tidak direkonstruksi dari mockup. Shell/history menu lama tetap dirender dalam mode direct.
+- `CampaignConfigurationWizard` hanya mengatur presentasi dan navigasi; tidak mempunyai definisi field tersendiri. Enter sebelum langkah terakhir hanya maju ke langkah berikutnya. State controller tetap hidup saat ke jadwal/review.
 - **Dual Mode**:
   - `mode='direct'`: Digunakan oleh menu standalone lama.
   - `mode='capture'`: Digunakan oleh wizard ContentFlow Studio untuk menangkap payload tervalidasi tanpa memicu eksekusi sebelum jadwal tiba.
@@ -123,3 +126,27 @@ Approval memakai final_media_url/final_caption/contentflow_id dan revisi yang me
 Migrasi eksplisit: `scripts/migrate-contentflow-studio-campaign-first.mjs --schema dev|staging` (dry-run), lalu `--apply --confirm-dev|--confirm-staging`. Script menolak Production. Slot legacy dengan engine belum terbukti ditandai legacy_requires_review dan batch aktif dipause; consumption tidak dibuka. Audit scoped: `scripts/audit-repair-contentflow-studio.mjs --schema <env> --tenant <id>`. Audit tidak melakukan regenerate/publish.
 
 Boot worker Studio memerlukan `ENABLE_CONTENTFLOW_STUDIO=true` serta background services aktif. Nonaktifkan flag sebelum rollback ke versi lama yang belum memahami mapping baru. Review manual UI dilakukan melalui link Dev/Staging; test otomatis tidak berarti approval manual pengguna.
+
+## Wizard konfigurasi dan kontrak batch versi 3
+
+Alur: pilih campaign → konfigurasi canonical per bagian → jadwal semua output → review batch → simpan draft → Generate Content. Pillar mempunyai Generate Planner dan Review Planner sebelum konfigurasi produksi. Planner baru ini consumed atomik hanya ketika batch berhasil disimpan; tidak ada Bank Ide.
+
+RE mempertahankan Single/Mass Production, CSV/XLSX, mode eksekusi, angle multiplier, visual/VSO, bridging, audio dan seluruh preset. Multiplier mempertahankan empat workflow dan batas 20 kombinasi sesuai API asal. Recipe mempertahankan Static Post/kolase dan Reels Video Storyboard. Batas jumlah pada UI/API masing-masing engine tetap mengikuti sumbernya; Recipe Planner bukan Recipe Labs.
+
+Batch baru memakai `schemaVersion=3` dengan normalisasi/validasi server, ownership referensi katalog dan aset, serta rekonstruksi manifest. Bentuk batch lama tetap dibaca. Perlindungan aset dan tenant juga berlaku pada input versi lama. Flag FormData `'0'`/`'1'` diproses sebagai boolean/numerik yang benar.
+
+### Slot RE multi-angle
+
+Satu URL sumber membuat satu invocation campaign/item; varian 3/4/5 disimpan oleh engine asli di re_item_angle_variants. Slot varian berbagi invocation key dan waktu mulai produksi, tetapi memiliki jadwal tayang/approval sendiri. Lock dan deterministic executionOwner mencegah parent ganda. Setelah tersedia, ordinal varian dipin ke variant ID pada snapshot slot. Ketidaksesuaian jumlah varian menjadi needs_review.
+
+Variant siap hanya jika FFmpeg dan upload selesai serta caption ada. Slot menyimpan media/caption final tanpa menganggap parent RE sebagai video final. Caption awal memakai caption parent bila ada, atau deskripsi/nama angle sebagai fallback untuk review. Pengguna tetap memverifikasi caption sebelum approval.
+
+Key output batch versi 3 mengikuti identitas sumber/kombinasi, bukan posisi tampilan. Perubahan urutan tidak memindahkan jadwal ke sumber lain. Recipe count yang bertambah mempertahankan key hasil yang sudah direncanakan. Perubahan brief Recipe membentuk key baru.
+
+### Aset dan publishing
+
+`POST /api/v2/contentflow-studio/assets` menyimpan gambar tervalidasi (maksimal 10 MB) pada prefix tenant di shared public/uploads/studio. Upload Multiplier menggunakan endpoint ini; referensi gambar pustaka produk tetap didukung jika milik tenant. File tidak disimpan dalam JSON. RE multipart batch memakai staging yang sama. Referensi path arbitrer, lintas tenant, traversal atau file yang sudah tidak ada ditolak. Path upload RE lama diterima hanya jika content hash yang terikat tenant terbukti benar.
+
+Konfigurasi user disimpan utuh. Saat dispatch, policy Studio menonaktifkan direct social post/draft termasuk nested config_json, audio_config_json dan shared_config. Ini mencegah bypass approval dan publikasi ganda. Approval Studio tetap satu-satunya pintu publishing.
+
+Kelima form menggunakan semantic theme tokens pada style yang direlokasi; parameter warna background kolase merupakan pengaturan konten, bukan palet tema UI.

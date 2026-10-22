@@ -1,72 +1,66 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import CampaignConfigurationWizard from './CampaignConfigurationWizard';
+import { captureCanonicalFormData } from '@/lib/campaign-configuration/capture';
+
+import Sidebar from '../Sidebar';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { getBrandEditorialDefaults, shouldHydrateBrandEditorial } from '@/lib/brand-editorial-defaults';
 import { DEFAULT_EDITORIAL_ROWS_PER_PILLAR, getBrandEditorialCountOptions } from '@/lib/content-planner-contract';
 
-export default function PlannerConfigurationForm({
-  mode = 'direct', // 'direct' | 'capture'
-  initialValues = {},
-  onCapture = null,
-  onSuccess = null,
-  onCancel = null,
-  isInline = false
-}) {
+export default function ContentPlannerDashboard({ mode = 'direct', onCapture, onSuccess, onCancel } = {}) {
+  const captureMode = mode === 'capture' || Boolean(onSuccess);
+  const [studioStep,setStudioStep] = useState(0);
+  const router = useRouter();
+  const [planners, setPlanners] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+  const [showModal, setShowModal] = useState(false);
   const [toast, setToast] = useState(null);
 
   // Form State
-  const [plannerFocus, setPlannerFocus] = useState(initialValues.plannerFocus || 'product_campaign');
-  const [recipeCategory, setRecipeCategory] = useState(initialValues.recipeCategory || 'minuman');
-  const [recipeProductIds, setRecipeProductIds] = useState(initialValues.recipeProductIds || []);
+  const [plannerFocus, setPlannerFocus] = useState('product_campaign');
+  const [recipeCategory, setRecipeCategory] = useState('minuman');
+  const [recipeProductIds, setRecipeProductIds] = useState([]);
   const [selectedProductsMap, setSelectedProductsMap] = useState({});
-  const [recipeStrategyMode, setRecipeStrategyMode] = useState(initialValues.recipeStrategyMode || 'synergy');
-  const [recipeCount, setRecipeCount] = useState(initialValues.recipeCount || 3);
-  const [brandContext, setBrandContext] = useState(initialValues.brandContext || '');
-  const [contentGoal, setContentGoal] = useState(initialValues.contentGoal || '');
-  const [pillars, setPillars] = useState(initialValues.pillars || []);
+  const [recipeStrategyMode, setRecipeStrategyMode] = useState('synergy');
+  const [recipeCount, setRecipeCount] = useState(3);
+  const [brandContext, setBrandContext] = useState('');
+  const [contentGoal, setContentGoal] = useState('');
+  const [pillars, setPillars] = useState([]);
   const [pillarDraft, setPillarDraft] = useState('');
-  const [pillarDistributionMode, setPillarDistributionMode] = useState(initialValues.pillarDistributionMode || 'balanced');
-  const [inputMode, setInputMode] = useState(initialValues.inputMode || 'manual');
-  const [accountName, setAccountName] = useState(initialValues.accountName || '');
-  const [googleSheetId, setGoogleSheetId] = useState(initialValues.googleSheetId || '');
-  const [title, setTitle] = useState(initialValues.title || '');
-  const [productName, setProductName] = useState(initialValues.productName || '');
-  const [productDesc, setProductDesc] = useState(initialValues.productDesc || '');
-  const [productUsp, setProductUsp] = useState(initialValues.productUsp || '');
-  const [productUrl, setProductUrl] = useState(initialValues.productUrl || '');
-  const [affiliateUrl, setAffiliateUrl] = useState(initialValues.affiliateUrl || '');
-  const [productPhotoUrl, setProductPhotoUrl] = useState(initialValues.productPhotoUrl || '');
-  const [platform, setPlatform] = useState(initialValues.platform || 'tiktok');
-  const [objective, setObjective] = useState(initialValues.objective || 'soft_sell');
-  const [productPlannerCount, setProductPlannerCount] = useState(initialValues.productPlannerCount || 6);
+  const [pillarDistributionMode, setPillarDistributionMode] = useState('balanced');
+  const [inputMode, setInputMode] = useState('manual'); // 'manual' or 'existing'
+  const [accountName, setAccountName] = useState('');
+  const [googleSheetId, setGoogleSheetId] = useState('');
+  const [title, setTitle] = useState('');
+  const [productName, setProductName] = useState('');
+  const [productDesc, setProductDesc] = useState('');
+  const [productUsp, setProductUsp] = useState('');
+  const [productUrl, setProductUrl] = useState('');
+  const [affiliateUrl, setAffiliateUrl] = useState('');
+  const [productPhotoUrl, setProductPhotoUrl] = useState('');
+  const [platform, setPlatform] = useState('tiktok');
+  const [objective, setObjective] = useState('soft_sell');
+  const [productPlannerCount, setProductPlannerCount] = useState(6);
   const [editorialRowsPerPillar, setEditorialRowsPerPillar] = useState(DEFAULT_EDITORIAL_ROWS_PER_PILLAR);
   const [editorialCountNotice, setEditorialCountNotice] = useState('');
-  const [targetAudience, setTargetAudience] = useState(initialValues.targetAudience || 'ibu_rumah_tangga');
+  const [targetAudience, setTargetAudience] = useState('ibu_rumah_tangga');
   const [customTargetAudience, setCustomTargetAudience] = useState('');
-  const [promotionContext, setPromotionContext] = useState(initialValues.promotionContext || '');
-  const [customInstructions, setCustomInstructions] = useState(initialValues.customInstructions || '');
+  const [promotionContext, setPromotionContext] = useState('');
+  const [customInstructions, setCustomInstructions] = useState('');
   const [isTitleManuallyEdited, setIsTitleManuallyEdited] = useState(false);
   const [editorialDirty, setEditorialDirty] = useState(false);
   const [editorialSource, setEditorialSource] = useState('empty');
   const [pendingEditorialBrandId, setPendingEditorialBrandId] = useState('');
 
-  // World-Aware state
-  const [contentWorld, setContentWorld] = useState(initialValues.contentWorld || 'real_world');
-  const [knowledgeDomain, setKnowledgeDomain] = useState(initialValues.knowledgeDomain || 'general');
-  const [universeProfile, setUniverseProfile] = useState(initialValues.universeProfile || null);
+  // World-Aware state (Tahap 1)
+  const [contentWorld, setContentWorld] = useState('real_world');
+  const [knowledgeDomain, setKnowledgeDomain] = useState('general');
+  const [universeProfile, setUniverseProfile] = useState(null);
   const [availableUniverses, setAvailableUniverses] = useState([]);
   const [selectedUniverseInfo, setSelectedUniverseInfo] = useState(null);
-
-  // Existing Product / Brand Selection State
-  const [existingProducts, setExistingProducts] = useState([]);
-  const [selectedProductId, setSelectedProductId] = useState(initialValues.selectedProductId || '');
-  const [productSearchQuery, setProductSearchQuery] = useState('');
-  const [brandProfiles, setBrandProfiles] = useState([]);
-  const [selectedBrandId, setSelectedBrandId] = useState(initialValues.selectedBrandId || '');
-  const [isAffiliateLinkLocked, setIsAffiliateLinkLocked] = useState(false);
-  const [isNonAffiliate, setIsNonAffiliate] = useState(false);
 
   function generateAutofillTitle(accName, prodName) {
     const now = new Date();
@@ -89,6 +83,23 @@ export default function PlannerConfigurationForm({
     return '';
   }
 
+  // Existing Product / Brand Selection State
+  const [existingProducts, setExistingProducts] = useState([]);
+  const [selectedProductId, setSelectedProductId] = useState('');
+  const [productSearchQuery, setProductSearchQuery] = useState('');
+  const [brandProfiles, setBrandProfiles] = useState([]);
+  const [selectedBrandId, setSelectedBrandId] = useState('');
+  const [executingIds, setExecutingIds] = useState({});
+  const [isAffiliateLinkLocked, setIsAffiliateLinkLocked] = useState(false);
+  const [isNonAffiliate, setIsNonAffiliate] = useState(false);
+  const [syncingIds, setSyncingIds] = useState({});
+
+  // Filter, Search & Archive View State
+  const [filterArchiveMode, setFilterArchiveMode] = useState('active'); // 'active', 'archived', 'all'
+  const [filterBrandId, setFilterBrandId] = useState('');
+  const [filterSearchQuery, setFilterSearchQuery] = useState('');
+  const [archivingIds, setArchivingIds] = useState({});
+
   const editorialCountOptions = getBrandEditorialCountOptions(pillars.length);
   const maxEditorialRowsPerPillar = editorialCountOptions.length;
   const effectiveEditorialRowsPerPillar = maxEditorialRowsPerPillar > 0
@@ -99,10 +110,8 @@ export default function PlannerConfigurationForm({
     : (plannerFocus === 'recipe_campaign' ? (Number.parseInt(recipeCount, 10) || 3) : Number(productPlannerCount));
 
   useEffect(() => {
-    fetch('/api/v2/brand-profiles')
-      .then(r => r.json())
-      .then(d => { if (d.success) setBrandProfiles(d.data || []); })
-      .catch(() => {});
+    if (!captureMode) fetchPlanners();
+    fetch('/api/v2/brand-profiles').then(r => r.json()).then(d => { if (d.success) setBrandProfiles(d.data || []); }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -120,6 +129,7 @@ export default function PlannerConfigurationForm({
     }
   }, [plannerFocus, inputMode, productSearchQuery]);
 
+  // Auto-resolve affiliate link reaktif saat produk atau brand dipilih
   useEffect(() => {
     if (plannerFocus !== 'product_campaign' || !selectedProductId || isNonAffiliate) {
       if (isNonAffiliate) {
@@ -145,10 +155,12 @@ export default function PlannerConfigurationForm({
       .then(d => {
         if (d.success && d.data) {
           const resolution = d.data;
+          // Jika resolusi berasal dari brand_product (sudah dibinding), autofill dan kunci
           if (resolution.source === 'brand_product') {
             setAffiliateUrl(resolution.affiliateLink || '');
             setIsAffiliateLinkLocked(true);
           } else {
+            // Jika tidak terikat brand, biarkan kosong dan tidak terkunci agar memicu validasi error di Generate
             setAffiliateUrl('');
             setIsAffiliateLinkLocked(false);
           }
@@ -166,19 +178,71 @@ export default function PlannerConfigurationForm({
     if (maxEditorialRowsPerPillar > 0 && editorialRowsPerPillar > maxEditorialRowsPerPillar) {
       setEditorialRowsPerPillar(maxEditorialRowsPerPillar);
       setEditorialCountNotice(`Jumlah ide disesuaikan menjadi ${maxEditorialRowsPerPillar} per pilar agar total tidak melebihi 30 baris.`);
+      return;
     }
   }, [editorialRowsPerPillar, maxEditorialRowsPerPillar]);
 
-  function handleProductSelection(prodId) {
+  // Fetch available universes when cartoon_universe is selected
+  useEffect(() => {
+    if (contentWorld === 'cartoon_universe') {
+      fetch('/api/v2/universe-profiles').then(r => r.json()).then(data => {
+        if (data.success && data.data) {
+          setAvailableUniverses(data.data);
+          // Auto-select first if none selected
+          if (!universeProfile && data.data.length > 0) {
+            const first = data.data[0];
+            setUniverseProfile(first.slug);
+            setKnowledgeDomain(first.knowledge_domain || 'general');
+            setSelectedUniverseInfo(first);
+          } else if (universeProfile) {
+            const found = data.data.find(p => p.slug === universeProfile);
+            if (found) setSelectedUniverseInfo(found);
+          }
+        }
+      }).catch(() => {
+        // Fallback: keep PawVille as static option
+        setAvailableUniverses([{ slug: 'pawville', name: 'PawVille Pet Universe', knowledge_domain: 'pet_supplies', default_visual_style: 'cinematic_3d_clay', default_scene_count: 7, default_scene_duration: 8, human_presence: 'none' }]);
+      });
+    } else {
+      setAvailableUniverses([]);
+      setSelectedUniverseInfo(null);
+    }
+  }, [contentWorld]);
+
+  async function fetchPlanners() {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/content-planner');
+      const data = await res.json();
+      if (data.success) {
+        setPlanners(data.planners || []);
+      }
+    } catch (e) {
+      showToast('Gagal memuat daftar planner: ' + e.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleSelectExistingProduct(prodId) {
     setSelectedProductId(prodId);
     const prod = existingProducts.find(p => p.id === prodId);
     if (prod) {
-      setProductName(prod.product_name);
-      setProductDesc(prod.product_description);
-      setProductUsp(prod.unique_selling_point);
-      setProductUrl(prod.product_url || '');
-      setProductPhotoUrl(prod.cleaned_photo_url || prod.clean_photo_url || prod.raw_photo_url || '');
+      setProductName(prod.product_name || '');
+      setProductDesc(prod.product_description || '');
+      setProductUsp(prod.unique_selling_point || '');
 
+      // Extract product URL (supports input_source when is_url=1 or startsWith http, as well as product_url / source_product_url)
+      const detectedUrl = prod.product_url || prod.source_product_url || (
+        (prod.is_url === 1 || (prod.input_source || '').startsWith('http')) ? prod.input_source : ''
+      );
+      setProductUrl(detectedUrl || '');
+
+      // Extract product photo URL if available (prioritize clean_photo_url/cleaned_photo_url)
+      const detectedPhoto = prod.clean_photo_url || prod.cleaned_photo_url || prod.photo_url || prod.product_photo_url || prod.product_image_url || '';
+      setProductPhotoUrl(detectedPhoto || '');
+
+      // Extract target audience if available
       if (prod.target_audience) {
         const presets = ['genz_casual', 'ibu_rumah_tangga', 'professional_executive', 'hijab_syari_family', 'fitness_health_enthusiast'];
         if (presets.includes(prod.target_audience)) {
@@ -190,13 +254,28 @@ export default function PlannerConfigurationForm({
         }
       }
 
+      // Auto-fill Title if title was not manually edited or is empty
       if (!isTitleManuallyEdited || !title) {
         const selectedBrand = brandProfiles.find(b => b.id === selectedBrandId);
         const effectiveAcc = selectedBrand?.brand_name || accountName;
         const autoTitle = generateAutofillTitle(effectiveAcc, prod.product_name);
-        if (autoTitle) setTitle(autoTitle);
+        if (autoTitle) {
+          setTitle(autoTitle);
+        }
       }
     }
+  }
+
+  function applyBrandEditorialDefaults(profile) {
+    if (!profile) return;
+    const defaults = getBrandEditorialDefaults(profile);
+    setBrandContext(defaults.brandContext);
+    setContentGoal(defaults.contentGoal);
+    setPillars(defaults.pillars);
+    setPillarDraft('');
+    setEditorialDirty(false);
+    setEditorialSource('profile');
+    setPendingEditorialBrandId('');
   }
 
   function handleBrandSelection(brandId) {
@@ -209,30 +288,38 @@ export default function PlannerConfigurationForm({
       if (autoTitle) setTitle(autoTitle);
     }
     if (plannerFocus !== 'brand_editorial' || !brand) return;
-    const defaults = getBrandEditorialDefaults(brand);
-    setBrandContext(defaults.brandContext);
-    setContentGoal(defaults.contentGoal);
-    setPillars(defaults.pillars);
-    setPillarDraft('');
+    if (!shouldHydrateBrandEditorial({ dirty: editorialDirty, brandContext, contentGoal, pillars })) {
+      setPendingEditorialBrandId(brandId);
+      return;
+    }
+    applyBrandEditorialDefaults(brand);
+  }
+
+  function showToast(msg, type = 'success', duration = 3500, isCenter = false) {
+    setToast({ msg, type, isCenter });
+    setTimeout(() => setToast(null), duration);
   }
 
   async function handleGenerate(e) {
     e.preventDefault();
-    setErrorMsg('');
-
     if (plannerFocus === 'product_campaign') {
       if (!productName || !productDesc) {
-        setErrorMsg('Nama Produk dan Deskripsi Wajib Diisi');
+        showToast('Nama Produk dan Deskripsi Wajib Diisi', 'error');
         return;
       }
+      // Validasi ketat jika bukan kampanye non-affiliate, wajib terikat (locked dari brand_product)
       if (!isNonAffiliate && !isAffiliateLinkLocked) {
-        setErrorMsg('Gagal membuat planner: isikan URL affiliate sesuai nama brand di database produk.');
+        showToast(
+          'Gagal membuat planner, isikan url affiliate dulu sesuai nama brand di menu product database.',
+          'error',
+          30000,
+          true
+        );
         return;
       }
     }
-
     if (plannerFocus === 'brand_editorial' && (!brandContext.trim() || pillars.length === 0)) {
-      setErrorMsg('Konteks Brand dan minimal satu Pilar Konten wajib diisi');
+      showToast('Konteks Brand dan minimal satu Pilar Konten wajib diisi', 'error');
       return;
     }
 
@@ -247,394 +334,1556 @@ export default function PlannerConfigurationForm({
       ? (customTargetAudience.trim() || 'General Audience')
       : targetAudience;
 
-    const payload = {
-      title: title || `Planner - ${plannerFocus === 'brand_editorial' ? effectiveAccountName : productName}`,
-      account_name: effectiveAccountName,
-      google_sheet_id: (googleSheetId || '').trim(),
-      input_mode: inputMode,
-      planner_focus: plannerFocus,
-      brand_context: brandContext.trim(),
-      content_goal: contentGoal.trim(),
-      pillars,
-      pillar_distribution_mode: pillarDistributionMode,
-      brand_id: selectedBrandId || null,
-      product_id: selectedProductId || null,
-      product_name: plannerFocus === 'product_campaign' ? productName : null,
-      product_description: plannerFocus === 'product_campaign' ? productDesc : null,
-      product_usp: plannerFocus === 'product_campaign' ? productUsp : null,
-      product_url: plannerFocus === 'product_campaign' ? productUrl.trim() : null,
-      affiliate_url: plannerFocus === 'product_campaign' ? affiliateUrl.trim() : null,
-      product_photo_url: plannerFocus === 'product_campaign' ? productPhotoUrl.trim() : null,
-      platform,
-      objective,
-      planner_count: effectivePlannerCount,
-      target_audience: effectiveTargetAudience,
-      promotion_context: promotionContext.trim() || null,
-      custom_instructions: customInstructions.trim() || null,
-      recipe_config: plannerFocus === 'recipe_campaign' ? {
-        category: recipeCategory,
-        product_ids: recipeProductIds,
-        strategy_mode: recipeStrategyMode
-      } : null,
-      products_snapshot: plannerFocus === 'recipe_campaign'
-        ? recipeProductIds.map(id => selectedProductsMap[id] || existingProducts.find(p => p.id === id)).filter(Boolean).map(p => ({
-            product_id: p.id,
-            name: p.product_name,
-            description: p.product_description,
-            usp: p.unique_selling_point,
-            reference_image: p.product_photo_url || p.photo_url || null
-          }))
-        : [],
-      content_world: contentWorld,
-      knowledge_domain: knowledgeDomain,
-      universe_profile: universeProfile,
-      universe_config_json: selectedUniverseInfo ? JSON.stringify({
-        visual_style: selectedUniverseInfo.default_visual_style || 'cinematic_3d_clay',
-        human_presence: selectedUniverseInfo.human_presence || 'none',
-        scene_count: selectedUniverseInfo.default_scene_count || 7,
-        scene_duration: selectedUniverseInfo.default_scene_duration || 8,
-        aspect_ratio: selectedUniverseInfo.default_aspect_ratio || '9:16',
-      }) : null
-    };
-
-    if (mode === 'capture' && onCapture) {
-      onCapture(payload);
-      return;
-    }
-
     try {
       setGenerating(true);
       const res = await fetch('/api/content-planner', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          title: title || `Planner - ${plannerFocus === 'brand_editorial' ? effectiveAccountName : productName}`,
+          account_name: effectiveAccountName,
+          google_sheet_id: (googleSheetId || '').trim(),
+          input_mode: inputMode,
+          planner_focus: plannerFocus,
+          brand_context: brandContext.trim(),
+          content_goal: contentGoal.trim(),
+          pillars,
+          pillar_distribution_mode: pillarDistributionMode,
+          brand_id: selectedBrandId || null,
+          product_id: selectedProductId || null,
+          product_name: plannerFocus === 'product_campaign' ? productName : null,
+          product_description: plannerFocus === 'product_campaign' ? productDesc : null,
+          product_usp: plannerFocus === 'product_campaign' ? productUsp : null,
+          product_url: plannerFocus === 'product_campaign' ? productUrl.trim() : null,
+          affiliate_url: plannerFocus === 'product_campaign' ? affiliateUrl.trim() : null,
+          product_photo_url: plannerFocus === 'product_campaign' ? productPhotoUrl.trim() : null,
+          platform,
+          objective,
+          planner_count: effectivePlannerCount,
+          target_audience: effectiveTargetAudience,
+          promotion_context: promotionContext.trim() || null,
+          custom_instructions: customInstructions.trim() || null,
+          // Recipe Campaign payload
+          recipe_config: plannerFocus === 'recipe_campaign' ? {
+            category: recipeCategory,
+            product_ids: recipeProductIds,
+            strategy_mode: recipeStrategyMode
+          } : null,
+          products_snapshot: plannerFocus === 'recipe_campaign'
+            ? recipeProductIds.map(id => selectedProductsMap[id] || existingProducts.find(p => p.id === id)).filter(Boolean).map(p => ({
+                product_id: p.id,
+                name: p.product_name,
+                description: p.product_description,
+                usp: p.unique_selling_point,
+                reference_image: p.product_photo_url || p.photo_url || null
+              }))
+            : [],
+          // World-Aware fields (Tahap 1)
+          content_world: contentWorld,
+          knowledge_domain: knowledgeDomain,
+          universe_profile: universeProfile,
+          universe_config_json: selectedUniverseInfo ? JSON.stringify({
+            visual_style: selectedUniverseInfo.default_visual_style || 'cinematic_3d_clay',
+            human_presence: selectedUniverseInfo.human_presence || 'none',
+            scene_count: selectedUniverseInfo.default_scene_count || 7,
+            scene_duration: selectedUniverseInfo.default_scene_duration || 8,
+            aspect_ratio: selectedUniverseInfo.default_aspect_ratio || '9:16',
+          }) : null,
+        })
       });
-      const data = await res.json();
-      if (data.success) {
-        if (onSuccess) onSuccess(data);
-      } else {
-        setErrorMsg(data.error || 'Gagal menyimpan draft planner.');
+
+      let data = {};
+      try {
+        const text = await res.text();
+        data = JSON.parse(text);
+      } catch (parseErr) {
+        if (!captureMode) fetchPlanners();
+        if (!res.ok) {
+          throw new Error(`Server response error (${res.status}). Data sedang diproses di latar belakang, silakan cek daftar planner.`);
+        }
+        throw new Error('Respon server tidak valid.');
       }
-    } catch (err) {
-      setErrorMsg('Error: ' + err.message);
+
+      if (data.success) {
+        if (onSuccess) { await onSuccess(data); return; }
+        showToast('Draft Content Planner Berhasil Disimpan!');
+        setShowModal(false);
+        if (!captureMode) fetchPlanners();
+      } else {
+        showToast('Gagal menyimpan draft planner: ' + (data.error || 'Terjadi kesalahan internal'), 'error');
+      }
+    } catch (e) {
+      showToast('Error: ' + e.message, 'error');
     } finally {
       setGenerating(false);
     }
   }
 
-  const formContent = (
-    <form onSubmit={handleGenerate} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      {errorMsg && (
-        <div style={{
-          padding: '12px 16px', background: 'var(--status-danger-soft)', border: '1px solid var(--status-danger)',
-          borderRadius: '10px', color: 'var(--status-danger)', fontSize: '13px'
-        }}>
-          ⚠️ {errorMsg}
-        </div>
-      )}
+  async function handleExecutePlanner(id, e) {
+    if (e) e.stopPropagation();
+    try {
+      setExecutingIds(prev => ({ ...prev, [id]: true }));
+      showToast('Memulai 3-Fase AI Pipeline...');
+      const res = await fetch(`/api/content-planner/${id}/execute`, {
+        method: 'POST'
+      });
 
-      {/* Fokus Planner */}
-      <div>
-        <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 600 }}>
-          🧭 Fokus Planner:
-        </label>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-          {[
-            ['brand_editorial', '🧩 Brand Editorial', 'Berbasis brand, audiens, dan pilar.'],
-            ['product_campaign', '📦 Product Campaign', 'Berpusat pada satu produk tunggal.'],
-            ['recipe_campaign', '🍳 Recipe Campaign', 'Resep kuliner dengan integrasi produk natural.']
-          ].map(([value, label, desc]) => (
-            <button key={value} type="button" onClick={() => setPlannerFocus(value)} style={{
-              padding: '12px', textAlign: 'left', borderRadius: '10px', cursor: 'pointer',
-              border: plannerFocus === value ? '1px solid var(--action-primary)' : '1px solid var(--border-subtle)',
-              background: plannerFocus === value ? 'var(--surface-interactive)' : 'var(--surface)', color: 'var(--text-primary)'
-            }}>
-              <div style={{ fontWeight: 700, marginBottom: '4px', fontSize: '13px' }}>{label}</div>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', lineHeight: 1.3 }}>{desc}</div>
-            </button>
-          ))}
-        </div>
-      </div>
+      let data = {};
+      try {
+        const text = await res.text();
+        data = JSON.parse(text);
+      } catch (parseErr) {
+        // Jika server mengembalikan timeout gateway / HTML tapi proses tetap selesai di backend
+        if (!captureMode) fetchPlanners();
+        if (!res.ok) {
+          showToast('Proses AI sedang berlangsung atau selesai di latar belakang. Menyegarkan data...', 'info');
+          return;
+        }
+        throw new Error('Respon server tidak valid.');
+      }
 
-      {/* Brand Selection */}
-      <div>
-        <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>
-          🏷️ Pilih Brand Profile:
-        </label>
-        <select
-          value={selectedBrandId}
-          onChange={e => handleBrandSelection(e.target.value)}
-          style={{
-            width: '100%', padding: '10px 12px', borderRadius: '10px',
-            background: 'var(--input-bg, var(--surface))', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '14px'
-          }}
-        >
-          <option value="">-- Tanpa Brand Profile (Input Manual) --</option>
-          {brandProfiles.map(b => (
-            <option key={b.id} value={b.id}>{b.brand_name}</option>
-          ))}
-        </select>
-      </div>
+      if (data.success) {
+        showToast('AI Content Planner Berhasil Dieksekusi!');
+        if (!captureMode) fetchPlanners();
+      } else {
+        showToast('Gagal eksekusi AI: ' + (data.error || 'Terjadi kesalahan sistem'), 'error');
+        if (!captureMode) fetchPlanners();
+      }
+    } catch (e) {
+      showToast('Error eksekusi: ' + e.message, 'error');
+      if (!captureMode) fetchPlanners();
+    } finally {
+      setExecutingIds(prev => ({ ...prev, [id]: false }));
+    }
+  }
 
-      {/* Product Campaign Mode Inputs */}
-      {plannerFocus === 'product_campaign' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+  async function handleSyncSheets(id, e) {
+    if (e) e.stopPropagation();
+    try {
+      setSyncingIds(prev => ({ ...prev, [id]: true }));
+      showToast('Menulis data ke Google Sheet...');
+      const res = await fetch(`/api/content-planner/${id}/sync-sheets`, {
+        method: 'POST'
+      });
+
+      let data = {};
+      try {
+        const text = await res.text();
+        data = JSON.parse(text);
+      } catch (parseErr) {
+        if (!res.ok) throw new Error(`Server error (${res.status}) saat sinkronisasi Google Sheet.`);
+        throw new Error('Respon Google Sheet tidak valid.');
+      }
+
+      if (data.success) {
+        showToast(`Berhasil sinkronisasi ${data.synced_rows} baris ke Tab "${data.tab_name}" di Google Sheet! ✨`);
+        if (!captureMode) fetchPlanners();
+      } else {
+        showToast('Gagal sinkronisasi Google Sheet: ' + (data.error || 'Gagal sinkronisasi'), 'error');
+      }
+    } catch (e) {
+      showToast('Error sync: ' + e.message, 'error');
+    } finally {
+      setSyncingIds(prev => ({ ...prev, [id]: false }));
+    }
+  }
+
+  async function handleToggleArchive(planner, e) {
+    if (e) e.stopPropagation();
+    const targetArchived = !planner.is_archived;
+    const actionText = targetArchived ? 'mengarsipkan' : 'memulihkan';
+    if (!confirm(`Yakin ingin ${actionText} Content Planner "${planner.title}"?`)) return;
+
+    try {
+      setArchivingIds(prev => ({ ...prev, [planner.id]: true }));
+      const res = await fetch(`/api/content-planner/${planner.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_archived: targetArchived })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message || (targetArchived ? 'Planner berhasil diarsipkan' : 'Planner berhasil dipulihkan'));
+        setPlanners(prev => prev.map(item => item.id === planner.id ? { ...item, is_archived: targetArchived } : item));
+      } else {
+        showToast('Gagal mengubah status arsip: ' + data.error, 'error');
+      }
+    } catch (err) {
+      showToast('Error: ' + err.message, 'error');
+    } finally {
+      setArchivingIds(prev => ({ ...prev, [planner.id]: false }));
+    }
+  }
+
+  async function handleDeletePlanner(id, e) {
+    e.stopPropagation();
+    if (!confirm('Yakin ingin menghapus Content Planner ini beserta seluruh barisnya?')) return;
+    try {
+      const res = await fetch(`/api/content-planner/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Planner berhasil dihapus');
+        if (!captureMode) fetchPlanners();
+      }
+    } catch (e) {
+      showToast('Gagal menghapus: ' + e.message, 'error');
+    }
+  }
+
+  // Derived filter & brand calculations
+  const activeCount = planners.filter(p => !p.is_archived).length;
+  const archivedCount = planners.filter(p => Boolean(p.is_archived)).length;
+
+  const brandOptions = (() => {
+    const map = new Map();
+    brandProfiles.forEach(b => {
+      if (b.id && b.brand_name) {
+        map.set(b.id, { id: b.id, name: b.brand_name });
+      }
+    });
+    planners.forEach(p => {
+      const name = p.brand_profile_name || p.account_name;
+      const id = p.brand_id;
+      if (id && !map.has(id)) {
+        map.set(id, { id, name: name || id });
+      } else if (!id && name && !Array.from(map.values()).some(v => v.name.toLowerCase() === name.toLowerCase())) {
+        map.set(name, { id: name, name });
+      }
+    });
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  })();
+
+  const filteredPlanners = planners.filter(p => {
+    if (filterArchiveMode === 'active' && p.is_archived) return false;
+    if (filterArchiveMode === 'archived' && !p.is_archived) return false;
+
+    if (filterBrandId) {
+      const pBrandId = p.brand_id || '';
+      const pBrandName = p.brand_profile_name || p.account_name || '';
+      const matches = pBrandId === filterBrandId || pBrandName.toLowerCase() === filterBrandId.toLowerCase();
+      if (!matches) return false;
+    }
+
+    if (filterSearchQuery.trim()) {
+      const q = filterSearchQuery.trim().toLowerCase();
+      const pName = (p.product_name || '').toLowerCase();
+      const pTitle = (p.title || '').toLowerCase();
+      const pBrandCtx = (p.brand_context || '').toLowerCase();
+      const pAcc = (p.brand_profile_name || p.account_name || '').toLowerCase();
+      if (!pName.includes(q) && !pTitle.includes(q) && !pBrandCtx.includes(q) && !pAcc.includes(q)) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+
+const canonicalConfigurationForm0 = (<form onSubmit={handleGenerate}>
+                {(!captureMode || studioStep === 0) && (<div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 600 }}>
+                    🧭 Fokus Planner:
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                    {[
+                      ['brand_editorial', '🧩 Brand Editorial', 'Berbasis brand, audiens, dan pilar.'],
+                      ['product_campaign', '📦 Product Campaign', 'Berpusat pada satu produk tunggal.'],
+                      ['recipe_campaign', '🍳 Recipe Campaign', 'Resep kuliner dengan integrasi produk natural.']
+                    ].map(([value, label, desc]) => (
+                      <button key={value} type="button" onClick={() => setPlannerFocus(value)} style={{
+                        padding: '12px', textAlign: 'left', borderRadius: '10px', cursor: 'pointer',
+                        border: plannerFocus === value ? '1px solid var(--status-neutral)' : '1px solid var(--border-subtle)',
+                        background: plannerFocus === value ? 'var(--status-neutral-soft)' : 'var(--bg-secondary)', color: 'var(--text-primary)'
+                      }}>
+                        <div style={{ fontWeight: 700, marginBottom: '4px', fontSize: '13px' }}>{label}</div>
+                        <div style={{ fontSize: '10px', color: 'var(--text-muted)', lineHeight: 1.3 }}>{desc}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>)}
+
+                {/* === Content World Selector (Tahap 1) === */}
+                {(!captureMode || studioStep === 0) && (<div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 600 }}>
+                    🌍 Dunia Konten:
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    {[
+                      ['real_world', '🏠 Dunia Nyata', 'Konten realistis dengan manusia & produk nyata'],
+                      ['cartoon_universe', '🎬 Cartoon Universe', 'Dunia karakter fiksi animasi']
+                    ].map(([value, label, desc]) => (
+                      <button key={value} type="button" onClick={() => {
+                        setContentWorld(value);
+                        if (value === 'cartoon_universe') {
+                          if (availableUniverses.length > 0) {
+                            const first = availableUniverses[0];
+                            setUniverseProfile(first.slug);
+                            setKnowledgeDomain(first.knowledge_domain || 'general');
+                            setSelectedUniverseInfo(first);
+                          }
+                        } else {
+                          setUniverseProfile(null);
+                        }
+                      }} style={{
+                        padding: '10px 8px', textAlign: 'left', borderRadius: '10px', cursor: 'pointer',
+                        border: contentWorld === value ? '1px solid var(--status-neutral)' : '1px solid var(--border-subtle)',
+                        background: contentWorld === value ? 'var(--status-neutral-soft)' : 'var(--bg-secondary)', color: 'var(--text-primary)'
+                      }}>
+                        <div style={{ fontWeight: 700, fontSize: '13px', marginBottom: '3px' }}>{label}</div>
+                        <div style={{ fontSize: '10px', color: 'var(--text-muted)', lineHeight: 1.3 }}>{desc}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>)}
+
+                {/* Knowledge Domain Selector */}
+                {(!captureMode || studioStep === 0) && (<div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 600 }}>
+                    📚 Domain Pengetahuan:
+                  </label>
+                  <select
+                    value={knowledgeDomain}
+                    onChange={e => setKnowledgeDomain(e.target.value)}
+                    style={{
+                      width: '100%', padding: '10px 12px', borderRadius: '10px',
+                      background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '14px'
+                    }}
+                  >
+                    <option value="general">General</option>
+                    <option value="pet_supplies">Pet Supplies</option>
+                    <option value="food_culinary">Food &amp; Culinary</option>
+                    <option value="history">History</option>
+                    <option value="islamic_history">Islamic History</option>
+                    <option value="kitchen">Kitchen</option>
+                    <option value="home_improvement">Home Improvement</option>
+                    <option value="herbal">Herbal</option>
+                  </select>
+                </div>)}
+
+                {/* Universe Profile (conditional - only for cartoon_universe) */}
+                {(!captureMode || studioStep === 0) && (contentWorld === 'cartoon_universe' && (
+                  <div style={{
+                    marginBottom: '20px', background: 'var(--status-neutral-soft)', border: '1px solid var(--status-neutral)',
+                    borderRadius: '12px', padding: '16px'
+                  }}>
+                    <label style={{ display: 'block', fontSize: '13px', color: 'var(--status-neutral)', marginBottom: '8px', fontWeight: 600 }}>
+                      🏰 Universe Profile:
+                    </label>
+                    <select
+                      value={universeProfile || ''}
+                      onChange={e => {
+                        const slug = e.target.value;
+                        setUniverseProfile(slug);
+                        const info = availableUniverses.find(u => u.slug === slug);
+                        if (info) {
+                          setSelectedUniverseInfo(info);
+                          setKnowledgeDomain(info.knowledge_domain || 'general');
+                        }
+                      }}
+                      style={{
+                        width: '100%', padding: '10px 12px', borderRadius: '10px',
+                        background: 'var(--status-neutral-soft)', border: '1px solid var(--status-neutral)', color: 'var(--text-primary)', fontSize: '14px'
+                      }}
+                    >
+                      {availableUniverses.length === 0 && (
+                        <option value="pawville">🐾 PawVille Pet Universe</option>
+                      )}
+                      {availableUniverses.map(u => (
+                        <option key={u.slug} value={u.slug}>
+                          {u.slug === 'pawville' ? '🐾' : u.slug === 'kitchentails' ? '🍳' : '🏰'} {u.name}
+                        </option>
+                      ))}
+                    </select>
+                    {selectedUniverseInfo && (
+                      <div style={{ marginTop: '10px', fontSize: '11px', color: 'var(--status-neutral)', lineHeight: 1.5 }}>
+                        <strong>Preset:</strong> {selectedUniverseInfo.default_visual_style || 'cinematic_3d_clay'} • {selectedUniverseInfo.default_scene_count || 7} Scene × {selectedUniverseInfo.default_scene_duration || 8}s • {selectedUniverseInfo.human_presence === 'none' ? 'No Human' : selectedUniverseInfo.human_presence}<br/>
+                        {selectedUniverseInfo.tone && <><strong>Tone:</strong> {selectedUniverseInfo.tone}<br/></>}
+                      </div>
+                    )}
+                    {!selectedUniverseInfo && (
+                      <div style={{ marginTop: '10px', fontSize: '11px', color: 'var(--status-neutral)', lineHeight: 1.5 }}>
+                        <strong>Preset:</strong> 3D Clay Style • 7 Scene × 8s • No Human<br/>
+                        <strong>Karakter:</strong> Mochi (British Shorthair) • Dr. Paw (Shiba Inu) • Coco (Corgi) • Boba (Hamster) • Tofu (Rabbit)
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {/* Input Mode Selector */}
+                {(!captureMode || studioStep === 0) && (plannerFocus === 'product_campaign' && <div style={{ marginBottom: '20px', background: 'var(--bg-secondary)', padding: '4px', borderRadius: '10px', display: 'flex' }}>
+                  <button
+                    type="button"
+                    onClick={() => setInputMode('manual')}
+                    style={{
+                      flex: 1, padding: '10px', borderRadius: '8px', border: 'none', fontWeight: 600, cursor: 'pointer',
+                      background: inputMode === 'manual' ? 'var(--status-neutral)' : 'transparent',
+                      color: inputMode === 'manual' ? 'var(--text-primary)' : 'var(--text-muted)'
+                    }}
+                  >
+                    ✏️ Direct Manual Input (Instan)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setInputMode('existing')}
+                    style={{
+                      flex: 1, padding: '10px', borderRadius: '8px', border: 'none', fontWeight: 600, cursor: 'pointer',
+                      background: inputMode === 'existing' ? 'var(--status-neutral)' : 'transparent',
+                      color: inputMode === 'existing' ? 'var(--text-primary)' : 'var(--text-muted)'
+                    }}
+                  >
+                    📦 Pilih dari Database Produk
+                  </button>
+                </div>)}
+
+                {(!captureMode || studioStep === 0) && (plannerFocus === 'product_campaign' && inputMode === 'existing' && (
+                  <div style={{ marginBottom: '16px', background: 'var(--bg-secondary)', padding: '14px', borderRadius: '10px', border: '1px solid var(--border-subtle)' }}>
+                    <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 600 }}>
+                      🔍 Cari & Pilih Produk dari Database:
+                    </label>
+                    <div style={{ position: 'relative', marginBottom: '8px' }}>
+                      <input
+                        type="text"
+                        placeholder="Ketik untuk mencari nama produk..."
+                        value={productSearchQuery}
+                        onChange={(e) => setProductSearchQuery(e.target.value)}
+                        style={{
+                          width: '100%', padding: '10px 36px 10px 12px', background: 'var(--bg-secondary)',
+                          border: '1px solid var(--border-strong)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '13px'
+                        }}
+                      />
+                      {productSearchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setProductSearchQuery('')}
+                          style={{
+                            position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
+                            background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '14px'
+                          }}
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Filtered Product Selection List */}
+                    <div style={{ maxHeight: '160px', overflowY: 'auto', borderRadius: '8px', border: '1px solid var(--border-subtle)', background: 'var(--bg-secondary)' }}>
+                      {existingProducts.filter(p => (p.product_name || '').toLowerCase().includes(productSearchQuery.toLowerCase())).length === 0 ? (
+                        <div style={{ padding: '12px', fontSize: '13px', color: 'var(--text-muted)', textAlign: 'center' }}>
+                          Tidak ada produk ditemukan
+                        </div>
+                      ) : (
+                        existingProducts
+                          .filter(p => (p.product_name || '').toLowerCase().includes(productSearchQuery.toLowerCase()))
+                          .map(p => {
+                            const isSelected = selectedProductId === p.id;
+                            return (
+                              <div
+                                key={p.id}
+                                onClick={() => handleSelectExistingProduct(p.id)}
+                                style={{
+                                  padding: '10px 12px', cursor: 'pointer', borderBottom: "1px solid var(--border-subtle)",
+                                  background: isSelected ? 'var(--status-neutral-soft)' : 'transparent',
+                                  color: isSelected ? 'var(--status-neutral)' : 'var(--text-primary)',
+                                  fontSize: '13px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                  transition: 'background 0.15s ease'
+                                }}
+                                onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--border-subtle)'; }}
+                                onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
+                              >
+                                <div>
+                                  <div style={{ fontWeight: isSelected ? 700 : 500 }}>{p.product_name}</div>
+                                  {p.unique_selling_point && (
+                                    <div style={{ fontSize: '11px', color: isSelected ? 'var(--status-neutral)' : 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '380px' }}>
+                                      {p.unique_selling_point}
+                                    </div>
+                                  )}
+                                </div>
+                                {isSelected && <span style={{ fontSize: '14px' }}>✓</span>}
+                              </div>
+                            );
+                          })
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Product Visual Verification Card */}
+                {(!captureMode || studioStep === 0) && (plannerFocus === 'product_campaign' && selectedProductId && (
+                  <div style={{
+                    marginBottom: '16px', padding: '12px 14px', borderRadius: '10px',
+                    background: "var(--surface-interactive)", border: '1px solid var(--status-success-soft)',
+                    display: 'flex', gap: '12px', alignItems: 'center'
+                  }}>
+                    <div style={{
+                      width: '72px', height: '72px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0,
+                      background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    }}>
+                      {productPhotoUrl ? (
+                        <img
+                          src={productPhotoUrl.startsWith('http') || productPhotoUrl.startsWith('/api/') ? productPhotoUrl : `/api/v2/products/image?path=${encodeURIComponent(productPhotoUrl)}`}
+                          alt={productName || 'Product'}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          onError={(e) => { e.target.style.display = 'none'; }}
+                        />
+                      ) : (
+                        <span style={{ fontSize: '24px' }}>📦</span>
+                      )}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                        <span style={{
+                          fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '4px',
+                          background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success-soft)'
+                        }}>
+                          ✓ Product Image Verified
+                        </span>
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {productPhotoUrl ? productPhotoUrl.split('/').pop() : 'Tanpa foto clean'}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {productName || 'Tanpa Nama Produk'}
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {productUsp || productDesc || 'Visual produk siap digunakan untuk ideasi & kampanye.'}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Brand Profile Dropdown (Taruh di atas Judul Planner) */}
+                {(!captureMode || studioStep === 1) && (plannerFocus === 'brand_editorial' && <>
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>🧬 Brand Profile (Akun Brand) *:</label>
+                    <select value={selectedBrandId} required onChange={e => handleBrandSelection(e.target.value)} style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}>
+                      <option value="">-- Pilih Brand Profile --</option>
+                      {brandProfiles.map(b => <option key={b.id} value={b.id}>{b.brand_name} {b.niche ? `(${b.niche})` : ''}</option>)}
+                    </select>
+                  </div>
+                  {pendingEditorialBrandId && (
+                    <div style={{ marginBottom: '16px', padding: '10px 12px', borderRadius: '8px', border: "1px solid var(--border-subtle)", background: 'var(--status-warning-soft)', color: 'var(--status-warning)', fontSize: '12px' }}>
+                      Isian editorial sudah Anda ubah. Nilai tidak ditimpa otomatis.
+                      <button type="button" onClick={() => applyBrandEditorialDefaults(brandProfiles.find(item => item.id === pendingEditorialBrandId))} style={{ marginLeft: '8px', padding: '5px 8px', borderRadius: '6px', border: '1px solid var(--status-warning)', background: 'transparent', color: 'var(--status-warning)', cursor: 'pointer' }}>Muat default brand terpilih</button>
+                    </div>
+                  )}
+                  {selectedBrandId && !pendingEditorialBrandId && (
+                    <div style={{ marginBottom: '12px', color: editorialSource === 'profile' && !editorialDirty ? 'var(--status-success)' : 'var(--status-neutral)', fontSize: '12px' }}>
+                      {editorialSource === 'profile' && !editorialDirty ? '✓ Default dari Brand Profile' : '✎ Disesuaikan untuk planner ini'}
+                      {editorialDirty && <button type="button" onClick={() => applyBrandEditorialDefaults(brandProfiles.find(item => item.id === selectedBrandId))} style={{ marginLeft: '8px', border: 0, background: 'none', color: 'var(--status-neutral)', textDecoration: 'underline', cursor: 'pointer' }}>Muat ulang default</button>}
+                    </div>
+                  )}
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>Konteks Brand *:</label>
+                    <textarea required rows={3} maxLength={4000} placeholder="Jelaskan niche, positioning, dan nilai akun..." value={brandContext} onChange={e => { setBrandContext(e.target.value); setEditorialDirty(true); setEditorialSource('custom'); }} style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }} />
+                  </div>
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>Tujuan Konten:</label>
+                    <textarea rows={2} maxLength={2000} placeholder="misal: Bangun authority, save, share, dan follow" value={contentGoal} onChange={e => { setContentGoal(e.target.value); setEditorialDirty(true); setEditorialSource('custom'); }} style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }} />
+                  </div>
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>Pilar Konten *:</label>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                      <input value={pillarDraft} maxLength={120} onChange={e => setPillarDraft(e.target.value)} onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const value = pillarDraft.trim();
+                          if (value && pillars.length < 12 && !pillars.some(p => p.toLowerCase() === value.toLowerCase())) { setPillars([...pillars, value]); setEditorialDirty(true); setEditorialSource('custom'); }
+                          setPillarDraft('');
+                        }
+                      }} placeholder="misal: Healthy Breakfast" style={{ flex: 1, padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }} />
+                      <button type="button" onClick={() => {
+                        const value = pillarDraft.trim();
+                        if (value && pillars.length < 12 && !pillars.some(p => p.toLowerCase() === value.toLowerCase())) { setPillars([...pillars, value]); setEditorialDirty(true); setEditorialSource('custom'); }
+                        setPillarDraft('');
+                      }} style={{ padding: '10px 14px', border: 0, borderRadius: '8px', background: 'var(--status-neutral)', color: 'var(--text-primary)', cursor: 'pointer' }}>+ Tambah</button>
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px' }}>
+                      {pillars.map((pillar, index) => <span key={pillar} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 9px', borderRadius: '999px', background: 'var(--surface)', color: 'var(--text-primary)', fontSize: '12px' }}>
+                        {pillar}<button type="button" aria-label={`Hapus ${pillar}`} onClick={() => { setPillars(pillars.filter((_, i) => i !== index)); setEditorialDirty(true); setEditorialSource('custom'); }} style={{ border: 0, background: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0 }}>✕</button>
+                      </span>)}
+                      {pillars.length === 0 && <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>Belum ada pilar.</span>}
+                    </div>
+                    <select value={pillarDistributionMode} onChange={e => setPillarDistributionMode(e.target.value)} style={{ width: '100%', marginTop: '10px', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}>
+                      <option value="balanced">Balanced — dibagi merata</option>
+                      <option value="custom" disabled>Custom Weight — Segera Hadir</option>
+                      <option value="growth" disabled>Growth Priority — Segera Hadir</option>
+                    </select>
+                  </div>
+                  <div style={{ marginBottom: '16px', padding: '10px 12px', border: '1px solid var(--status-info)', borderRadius: '8px', background: 'var(--status-info-soft)', color: 'var(--status-info)', fontSize: '12px' }}>
+                    🛡️ Produk tidak akan dikarang. CTA default diarahkan ke save, share, follow, atau comment.
+                  </div>
+                </>)}
+
+                {(!captureMode || studioStep === 1) && ((plannerFocus === 'product_campaign' || plannerFocus === 'recipe_campaign') && <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>
+                    🧬 Brand Profile (Akun Brand):
+                  </label>
+                  <select
+                    value={selectedBrandId}
+                    onChange={e => handleBrandSelection(e.target.value)}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                  >
+                    <option value="">-- Pilih Brand Profile (Opsional) --</option>
+                    {brandProfiles.map(b => (
+                      <option key={b.id} value={b.id}>
+                        {b.brand_name} {b.niche ? `(${b.niche})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>)}
+
+                {/* Recipe Campaign Specific Inputs */}
+                {(!captureMode || studioStep === 1) && (plannerFocus === 'recipe_campaign' && (
+                  <div style={{ marginBottom: '20px', background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '16px' }}>
+
+                    {/* Multi-Product Catalog Selector */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <label style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: 700 }}>
+                          📦 Pilih Produk Katalog Terkait (Opsional):
+                        </label>
+                        <span style={{
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          padding: '3px 8px',
+                          borderRadius: '12px',
+                          background: recipeProductIds.length > 0 ? 'var(--status-info-soft)' : 'var(--status-success-soft)',
+                          color: recipeProductIds.length > 0 ? 'var(--status-info)' : 'var(--status-success)',
+                          border: `1px solid ${recipeProductIds.length > 0 ? 'var(--status-info)' : 'var(--status-success)'}`
+                        }}>
+                          {recipeProductIds.length > 0 ? `📦 ${recipeProductIds.length} Produk Dipilih` : '🌿 Mode Resep Organik'}
+                        </span>
+                      </div>
+
+                      <div style={{ position: 'relative', marginBottom: '8px' }}>
+                        <input
+                          type="text"
+                          placeholder="Cari produk dari katalog tenant (opsional)..."
+                          value={productSearchQuery}
+                          onChange={(e) => setProductSearchQuery(e.target.value)}
+                          style={{
+                            width: '100%', padding: '8px 12px', background: 'var(--input-bg)',
+                            border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '13px'
+                          }}
+                        />
+                      </div>
+
+                      <div style={{ maxHeight: '160px', overflowY: 'auto', borderRadius: '8px', border: '1px solid var(--border-subtle)', background: 'var(--input-bg)', padding: '6px' }}>
+                        {existingProducts.length === 0 ? (
+                          <div style={{ padding: '12px', fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center' }}>
+                            Tidak ada produk ditemukan di database. (Mode Organik aktif secara otomatis)
+                          </div>
+                        ) : (
+                          existingProducts.map(p => {
+                            const isChecked = recipeProductIds.includes(p.id);
+                            return (
+                              <label
+                                key={p.id}
+                                style={{
+                                  display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px',
+                                  borderRadius: '6px', cursor: 'pointer', marginBottom: '4px',
+                                  background: isChecked ? 'var(--status-info-soft)' : 'transparent',
+                                  border: isChecked ? '1px solid var(--status-info)' : '1px solid transparent',
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => {
+                                    if (isChecked) {
+                                      setRecipeProductIds(recipeProductIds.filter(id => id !== p.id));
+                                    } else {
+                                      setRecipeProductIds([...recipeProductIds, p.id]);
+                                      setSelectedProductsMap(prev => ({ ...prev, [p.id]: p }));
+                                    }
+                                  }}
+                                  style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                                />
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div style={{ fontSize: '13px', fontWeight: isChecked ? 700 : 500, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {p.product_name}
+                                  </div>
+                                  {p.unique_selling_point && (
+                                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                      {p.unique_selling_point}
+                                    </div>
+                                  )}
+                                </div>
+                              </label>
+                            );
+                          })
+                        )}
+                      </div>
+
+                      {recipeProductIds.length === 0 && (
+                        <div style={{ marginTop: '8px', padding: '8px 12px', background: 'var(--status-success-soft)', border: '1px solid var(--status-success)', borderRadius: '8px', fontSize: '11px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span>🌿</span>
+                          <span><strong>Mode Organik:</strong> AI akan merancang resep rumahan berbahan dapur umum (murni edukasi &amp; estetika viral tanpa sponsor produk katalog).</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Multi-Product Strategy Mode (Hanya jika produk dipilih) */}
+                    {recipeProductIds.length > 0 && (
+                      <div style={{ marginBottom: '16px' }}>
+                        <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-primary)', marginBottom: '8px', fontWeight: 700 }}>
+                          🔀 Strategi Integrasi Produk:
+                        </label>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                          <div
+                            onClick={() => setRecipeStrategyMode('synergy')}
+                            style={{
+                              background: recipeStrategyMode === 'synergy' ? 'var(--status-success-soft)' : 'var(--surface-interactive)',
+                              border: recipeStrategyMode === 'synergy' ? '1px solid var(--status-success)' : '1px solid var(--border-subtle)',
+                              borderRadius: '8px',
+                              padding: '10px 12px',
+                              cursor: 'pointer',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                              <span style={{ fontWeight: 700, fontSize: '12px', color: 'var(--text-primary)' }}>🌟 Sinergi Kombo</span>
+                              <span style={{ fontSize: '9px', background: 'var(--status-success)', color: "var(--text-primary)", padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>Rekomendasi</span>
+                            </div>
+                            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.35 }}>
+                              Padukan <strong>semua produk</strong> (Bahan + Alat) di tiap resep &amp; keranjang ganda.
+                            </div>
+                          </div>
+
+                          <div
+                            onClick={() => setRecipeStrategyMode('rotation')}
+                            style={{
+                              background: recipeStrategyMode === 'rotation' ? 'var(--status-warning-soft)' : 'var(--surface-interactive)',
+                              border: recipeStrategyMode === 'rotation' ? '1px solid var(--status-warning)' : '1px solid var(--border-subtle)',
+                              borderRadius: '8px',
+                              padding: '10px 12px',
+                              cursor: 'pointer',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            <div style={{ fontWeight: 700, fontSize: '12px', color: 'var(--text-primary)', marginBottom: '4px' }}>
+                              🔄 Rotasi Bergantian
+                            </div>
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.35 }}>
+                              Bagi produk <strong>secara terpisah</strong> (1 produk per baris resep).
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Culinary Category Chips */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-primary)', marginBottom: '8px', fontWeight: 700 }}>
+                        🍲 Kategori Kuliner:
+                      </label>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+                        {[
+                          ['masakan', '🍲 Masakan'],
+                          ['minuman', '🍹 Minuman'],
+                          ['dessert', '🍮 Dessert'],
+                          ['kue', '🧁 Kue']
+                        ].map(([catKey, catLabel]) => (
+                          <button
+                            key={catKey}
+                            type="button"
+                            onClick={() => setRecipeCategory(catKey)}
+                            style={{
+                              padding: '8px 10px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 650,
+                              border: recipeCategory === catKey ? '1px solid var(--status-warning)' : '1px solid var(--border-subtle)',
+                              background: recipeCategory === catKey ? 'var(--status-warning-soft)' : 'var(--surface-interactive)',
+                              color: 'var(--text-primary)', textAlign: 'center'
+                            }}
+                          >
+                            {catLabel}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Promotion Context & Custom Instructions */}
+                    <div style={{ marginBottom: '12px' }}>
+                      <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>
+                        Sudut Pandang / Konteks Promosi (Opsional):
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Contoh: Menu Sarapan Sehat, Cafe at Home, Minuman Segar Rendah Kalori"
+                        value={promotionContext}
+                        onChange={e => setPromotionContext(e.target.value)}
+                        style={{ width: '100%', padding: '8px 10px', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '13px' }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>
+                        Instruksi Khusus Tambahan (Opsional):
+                      </label>
+                      <textarea
+                        rows={2}
+                        placeholder="Contoh: Gunakan takaran sendok teh/makan agar mudah diikuti pemula..."
+                        value={customInstructions}
+                        onChange={e => setCustomInstructions(e.target.value)}
+                        style={{ width: '100%', padding: '8px 10px', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '13px' }}
+                      />
+                    </div>
+
+                  </div>
+                ))}
+
+                {(!captureMode || studioStep === 1) && (<div style={{ marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <label style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 600 }}>Judul Planner (Opsional):</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const selectedBrand = brandProfiles.find(b => b.id === selectedBrandId);
+                        const acc = selectedBrand?.brand_name || accountName;
+                        const autoTitle = generateAutofillTitle(acc, productName);
+                        if (autoTitle) {
+                          setTitle(autoTitle);
+                          setIsTitleManuallyEdited(false);
+                          showToast('✨ Judul planner berhasil di-autofill!', 'success');
+                        } else {
+                          showToast('Silakan isi Nama Produk atau Brand terlebih dahulu', 'error');
+                        }
+                      }}
+                      style={{ background: 'none', border: 'none', color: 'var(--status-neutral)', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}
+                    >
+                      ✨ Auto-fill
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="namaakun - YYYYMMDD - 2 Kata nama produk"
+                    value={title}
+                    onChange={e => {
+                      setTitle(e.target.value);
+                      setIsTitleManuallyEdited(true);
+                    }}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                  />
+                </div>)}
+
+                {(!captureMode || studioStep === 1) && (plannerFocus === 'product_campaign' && <>
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>Nama Produk *:</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="misal: Premium Cocoa Powder / Ceramide Moisturizer"
+                    value={productName}
+                    onChange={e => setProductName(e.target.value)}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>Deskripsi Produk & Manfaat *:</label>
+                  <textarea
+                    required
+                    rows={3}
+                    placeholder="Jelaskan fungsi utama, bahan, dan manfaat produk untuk pengguna..."
+                    value={productDesc}
+                    onChange={e => setProductDesc(e.target.value)}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>USP / Unique Selling Point:</label>
+                  <input
+                    type="text"
+                    placeholder="misal: 5X Ceramide, Halal MUI, Tekstur gel dingin instan"
+                    value={productUsp}
+                    onChange={e => setProductUsp(e.target.value)}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>Sudut Pandang / Konteks Promosi (Opsional):</label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: Weight Management, Ramadhan Hampers, Anti-Aging"
+                    value={promotionContext}
+                    onChange={e => setPromotionContext(e.target.value)}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>Instruksi Khusus Tambahan (Opsional):</label>
+                  <textarea
+                    rows={2}
+                    placeholder="Contoh: Gunakan bahasa gaul Jakarta Selatan, jangan sebutkan kata 'diet', dll."
+                    value={customInstructions}
+                    onChange={e => setCustomInstructions(e.target.value)}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                  />
+                </div>
+
+                {/* URL Fields */}
+                <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <input
+                    type="checkbox"
+                    id="isNonAffiliate"
+                    checked={isNonAffiliate}
+                    onChange={e => setIsNonAffiliate(e.target.checked)}
+                    style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                  />
+                  <label htmlFor="isNonAffiliate" style={{ fontSize: '13px', color: 'var(--text-muted)', cursor: 'pointer', userSelect: 'none' }}>
+                    Bukan Produk Affiliate (Kampanye Non-Affiliate)
+                  </label>
+                </div>
+
+                {inputMode === 'manual' ? (
+                  <>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>URL Produk:</label>
+                        <input
+                          type="text"
+                          placeholder="https://shopee.co.id/product/..."
+                          value={productUrl}
+                          onChange={e => setProductUrl(e.target.value)}
+                          style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>URL Affiliate:</label>
+                        <input
+                          type="text"
+                          placeholder="https://shope.ee/..."
+                          value={affiliateUrl}
+                          onChange={e => setAffiliateUrl(e.target.value)}
+                          style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                        />
+                      </div>
+                    </div>
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>URL Foto Produk:</label>
+                      <input
+                        type="text"
+                        placeholder="https://images.shopee.co.id/..."
+                        value={productPhotoUrl}
+                        onChange={e => setProductPhotoUrl(e.target.value)}
+                        style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>
+                        🔗 URL Produk (Otomatis Ditarik):
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="https://..."
+                        disabled={isNonAffiliate}
+                        value={productUrl}
+                        onChange={e => setProductUrl(e.target.value)}
+                        style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)', opacity: isNonAffiliate ? 0.6 : 1 }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '13px', color: isAffiliateLinkLocked ? 'var(--text-muted)' : 'var(--status-neutral)', marginBottom: '6px', fontWeight: 700 }}>
+                        🛍️ URL Affiliate Kampanye {isAffiliateLinkLocked ? '(Terkunci)' : '(Wajib dari DB)'}:
+                      </label>
+                      <input
+                        type="text"
+                        placeholder={isNonAffiliate ? 'Non-Affiliate Campaign' : 'Harus terdaftar di database produk...'}
+                        disabled={isAffiliateLinkLocked}
+                        value={affiliateUrl}
+                        onChange={e => setAffiliateUrl(e.target.value)}
+                        style={{
+                          width: '100%', padding: '10px',
+                          background: isAffiliateLinkLocked ? 'var(--bg-secondary)' : 'var(--status-neutral-soft)',
+                          border: isAffiliateLinkLocked ? '1px solid var(--border-subtle)' : '1px solid var(--status-neutral)',
+                          borderRadius: '8px', color: 'var(--text-primary)', fontWeight: 600,
+                          opacity: isAffiliateLinkLocked ? 0.7 : 1
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+                </>)}
+
+                {/* Target Demografi Audiens (Preset Prompt Builder) */}
+                {(!captureMode || studioStep === 2) && (<div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>
+                    🎯 Target Demografi Audiens (Personalitas Hook):
+                  </label>
+                  <select
+                    value={targetAudience}
+                    onChange={e => setTargetAudience(e.target.value)}
+                    style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                  >
+                    <option value="genz_casual">🔥 Gen-Z & Milenial Muda (Gaul, Santai, Relatable)</option>
+                    <option value="ibu_rumah_tangga">🏡 Ibu Rumah Tangga & Keluarga (Hangat, Ramah, Solutif)</option>
+                    <option value="professional_executive">💼 Profesional & Pekerja Kantoran (Lugas, Berbobot, Refined)</option>
+                    <option value="hijab_syari_family">🧕 Komunitas Syari & Keluarga Hijrah (Santun, Islami Alami)</option>
+                    <option value="fitness_health_enthusiast">💪 Penggiat Olahraga & Kesehatan (Energik, Motivatif, Informatif)</option>
+                    <option value="custom">✏️ Custom / Bebas (Tentukan Sendiri...)</option>
+                  </select>
+
+                  {targetAudience === 'custom' && (
+                    <input
+                      type="text"
+                      placeholder="Ketik deskripsi target audiens kustom (misal: Gamers 18-24th)..."
+                      value={customTargetAudience}
+                      onChange={e => setCustomTargetAudience(e.target.value)}
+                      style={{ width: '100%', padding: '10px', marginTop: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--status-neutral)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                    />
+                  )}
+                </div>)}
+
+                {(!captureMode || studioStep === 2) && (<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>Platform Target:</label>
+                    <select
+                      value={platform}
+                      onChange={e => setPlatform(e.target.value)}
+                      style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                    >
+                      <option value="tiktok">TikTok (Short Form)</option>
+                      <option value="reels">Instagram Reels</option>
+                      <option value="youtube_shorts">YouTube Shorts</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>
+                      {plannerFocus === 'recipe_campaign' ? 'Jumlah Resep (1 - 30):' : 'Jumlah Baris Planner:'}
+                    </label>
+                    {plannerFocus === 'recipe_campaign' ? (
+                      <div>
+                        <input
+                          type="number"
+                          min="1"
+                          max="30"
+                          value={recipeCount}
+                          onChange={e => {
+                            const val = e.target.value;
+                            if (val === '') {
+                              setRecipeCount('');
+                              return;
+                            }
+                            const num = Number.parseInt(val, 10);
+                            if (Number.isNaN(num)) return;
+                            setRecipeCount(Math.max(1, Math.min(30, num)));
+                          }}
+                          onBlur={() => {
+                            if (!recipeCount || Number(recipeCount) < 1) {
+                              setRecipeCount(3);
+                            } else if (Number(recipeCount) > 30) {
+                              setRecipeCount(30);
+                            }
+                          }}
+                          placeholder="Default: 3 (Maks: 30)"
+                          style={{
+                            width: '100%',
+                            padding: '10px 12px',
+                            background: 'var(--bg-secondary)',
+                            border: '1px solid var(--border-subtle)',
+                            borderRadius: '8px',
+                            color: 'var(--text-primary)',
+                            fontSize: '14px',
+                            boxSizing: 'border-box'
+                          }}
+                        />
+                        <div style={{ marginTop: '4px', fontSize: '11px', color: 'var(--text-muted)' }}>
+                          Tentukan jumlah resep yang ingin digenerate (Default: 3, Maksimal: 30 resep).
+                        </div>
+                      </div>
+                    ) : (
+                      <select
+                        disabled={plannerFocus === 'brand_editorial' && pillars.length === 0}
+                        value={plannerFocus === 'brand_editorial' ? effectiveEditorialRowsPerPillar : productPlannerCount}
+                        onChange={e => {
+                          if (plannerFocus === 'brand_editorial') {
+                            setEditorialRowsPerPillar(Number(e.target.value));
+                            setEditorialCountNotice('');
+                          } else {
+                            setProductPlannerCount(Number(e.target.value));
+                          }
+                        }}
+                        style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                      >
+                        {plannerFocus === 'brand_editorial' ? (
+                          pillars.length === 0
+                            ? <option value={0}>Masukkan Pilar Konten terlebih dahulu</option>
+                            : editorialCountOptions.map(option => (
+                              <option key={option.rowsPerPillar} value={option.rowsPerPillar}>
+                                {option.label}{option.rowsPerPillar === DEFAULT_EDITORIAL_ROWS_PER_PILLAR ? ' (Direkomendasikan)' : ''}
+                              </option>
+                            ))
+                        ) : (
+                          <>
+                            <option value="6">6 Baris Plan (1x CEP)</option>
+                            <option value="12">12 Baris Plan (2x CEP - Standar)</option>
+                            <option value="18">18 Baris Plan (3x CEP)</option>
+                            <option value="24">24 Baris Plan (4x CEP - Massal)</option>
+                            <option value="30">30 Baris Plan (5x CEP - Maksimal)</option>
+                          </>
+                        )}
+                      </select>
+                    )}
+                    {plannerFocus === 'brand_editorial' && editorialCountNotice && (
+                      <div style={{ marginTop: '6px', color: 'var(--status-warning)', fontSize: '11px', lineHeight: 1.4 }}>
+                        {editorialCountNotice}
+                      </div>
+                    )}
+                  </div>
+                </div>)}
+
+                {(!captureMode || studioStep === -999) && (<button
+                  type="submit"
+                  disabled={generating}
+                  style={{
+                    width: '100%', padding: '14px', background: 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)',
+                    color: 'var(--text-primary)', border: 'none', borderRadius: '10px', fontWeight: 700, cursor: 'pointer',
+                    fontSize: '15px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px'
+                  }}
+                >
+                  {generating ? '⏳ Menyimpan Draft Planner...' : '💾 Simpan Draft Planner'}
+                </button>)}
+              </form>);
+if (captureMode) return <><CampaignConfigurationWizard steps={["Fokus & Sumber","Brief Planner","Audiens & Jumlah"]} step={studioStep} onStepChange={next => setStudioStep(next)} busy={generating} error={toast?.type === 'error' ? toast.msg : null} onCancel={onCancel} label="Generator Content Planner" submitLabel="Generate Content Planner →">{canonicalConfigurationForm0}</CampaignConfigurationWizard></>;
+return (
+    <div className="app-layout">
+      <Sidebar />
+
+      <main className="main-content">
+        <div className="page-container">
+        {toast && (
+          <div style={{
+            position: 'fixed',
+            top: toast.isCenter ? '50%' : '24px',
+            left: toast.isCenter ? '50%' : 'auto',
+            right: toast.isCenter ? 'auto' : '24px',
+            transform: toast.isCenter ? 'translate(-50%, -50%)' : 'none',
+            zIndex: 9999,
+            padding: toast.isCenter ? '24px 32px' : '12px 24px',
+            borderRadius: '8px',
+            background: toast.type === 'error' ? 'var(--status-danger)' : 'var(--status-success)',
+            color: 'var(--text-primary)',
+            fontWeight: 600,
+            boxShadow: "0 10px 30px var(--surface-interactive)",
+            maxWidth: toast.isCenter ? '500px' : 'auto',
+            textAlign: toast.isCenter ? 'center' : 'left',
+            border: toast.isCenter ? "2px solid var(--border-subtle)" : 'none'
+          }}>
+            {toast.msg}
+            {toast.isCenter && (
+              <button
+                type="button"
+                onClick={() => setToast(null)}
+                style={{
+                  display: 'block', margin: '16px auto 0 auto', padding: '6px 16px',
+                  background: "var(--surface-interactive)", border: 'none', borderRadius: '4px',
+                  color: "var(--text-primary)", cursor: 'pointer', fontWeight: 'bold'
+                }}
+              >
+                Tutup
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Header Section */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>
-              Mode Input Produk:
-            </label>
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <h1 style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span>🗓️</span> Content Planner Web App
+            </h1>
+            <p style={{ color: 'var(--text-muted)', marginTop: '6px', fontSize: '14px' }}>
+              Mesin perencanaan konten strategis 9-kolom berbasis Strategic Frameworks & Decision Tree AI (VFO, CEP, W'S Matrix, Strategic Angle).
+            </p>
+          </div>
+          <button
+            onClick={() => setShowModal(true)}
+            style={{
+              padding: '12px 24px',
+              background: 'var(--action-primary)',
+              color: 'var(--on-action-primary)', border: 'none', borderRadius: '10px', fontWeight: 700,
+              cursor: 'pointer', boxShadow: '0 4px 14px var(--status-neutral-soft)',
+              display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px'
+            }}
+          >
+            <span>✨</span> Buat Content Planner Baru
+          </button>
+        </div>
+
+        {/* Filter, Search & Archive Controls Bar */}
+        <div style={{
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--border-subtle)',
+          borderRadius: '14px',
+          padding: '16px 20px',
+          marginBottom: '24px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '16px'
+        }}>
+          {/* Status Tabs: Aktif / Arsip / Semua */}
+          <div style={{ display: 'flex', gap: '6px', background: 'var(--surface-interactive)', padding: '4px', borderRadius: '10px' }}>
+            {[
+              { id: 'active', label: '📁 Aktif', count: activeCount },
+              { id: 'archived', label: '📦 Arsip', count: archivedCount },
+              { id: 'all', label: '🌐 Semua', count: planners.length }
+            ].map(tab => (
               <button
+                key={tab.id}
                 type="button"
-                onClick={() => setInputMode('manual')}
+                onClick={() => setFilterArchiveMode(tab.id)}
                 style={{
-                  padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px',
-                  background: inputMode === 'manual' ? 'var(--action-primary)' : 'var(--surface)',
-                  color: inputMode === 'manual' ? 'var(--on-action-primary, #ffffff)' : 'var(--text-primary)',
-                  border: '1px solid var(--border-subtle)'
+                  padding: '7px 14px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  fontSize: '13px',
+                  fontWeight: filterArchiveMode === tab.id ? 700 : 500,
+                  background: filterArchiveMode === tab.id ? 'var(--action-primary)' : 'transparent',
+                  color: filterArchiveMode === tab.id ? 'var(--on-action-primary)' : 'var(--text-muted)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.15s ease'
                 }}
               >
-                Input Manual
+                <span>{tab.label}</span>
+                <span style={{
+                  fontSize: '11px',
+                  padding: '1px 6px',
+                  borderRadius: '10px',
+                  background: filterArchiveMode === tab.id ? "var(--surface-interactive)" : "var(--surface-interactive)",
+                  color: filterArchiveMode === tab.id ? 'inherit' : 'var(--text-secondary)',
+                  opacity: 0.9
+                }}>{tab.count}</span>
               </button>
-              <button
-                type="button"
-                onClick={() => setInputMode('existing')}
-                style={{
-                  padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px',
-                  background: inputMode === 'existing' ? 'var(--action-primary)' : 'var(--surface)',
-                  color: inputMode === 'existing' ? 'var(--on-action-primary, #ffffff)' : 'var(--text-primary)',
-                  border: '1px solid var(--border-subtle)'
-                }}
-              >
-                Pilih dari Pustaka Produk
-              </button>
-            </div>
+            ))}
           </div>
 
-          {inputMode === 'existing' && (
-            <div>
-              <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>
-                Pilih Produk Pustaka:
-              </label>
+          {/* Search & Brand Filter */}
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', flex: 1, justifyContent: 'flex-end' }}>
+            {/* Brand Filter */}
+            <div style={{ minWidth: '180px' }}>
               <select
-                value={selectedProductId}
-                onChange={e => handleProductSelection(e.target.value)}
+                value={filterBrandId}
+                onChange={e => setFilterBrandId(e.target.value)}
                 style={{
-                  width: '100%', padding: '10px 12px', borderRadius: '10px',
-                  background: 'var(--input-bg, var(--surface))', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '14px'
+                  width: '100%',
+                  padding: '9px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border-subtle)',
+                  background: 'var(--surface-interactive)',
+                  color: 'var(--text-primary)',
+                  fontSize: '13px',
+                  cursor: 'pointer'
                 }}
               >
-                <option value="">-- Pilih Produk --</option>
-                {existingProducts.map(p => (
-                  <option key={p.id} value={p.id}>{p.product_name}</option>
+                <option value="">🏢 Semua Brand</option>
+                {brandOptions.map(b => (
+                  <option key={b.id || b.name} value={b.id || b.name}>{b.name}</option>
                 ))}
               </select>
             </div>
-          )}
 
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>
-              Nama Produk:
-            </label>
-            <input
-              type="text"
-              value={productName}
-              onChange={e => setProductName(e.target.value)}
-              placeholder="Contoh: Madu Habbatussauda Al-Barokah"
-              style={{
-                width: '100%', padding: '10px 12px', borderRadius: '10px',
-                background: 'var(--input-bg, var(--surface))', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '14px'
-              }}
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>
-              Deskripsi Produk:
-            </label>
-            <textarea
-              rows={3}
-              value={productDesc}
-              onChange={e => setProductDesc(e.target.value)}
-              placeholder="Deskripsi khasiat, manfaat, atau cara konsumsi produk..."
-              style={{
-                width: '100%', padding: '10px 12px', borderRadius: '10px',
-                background: 'var(--input-bg, var(--surface))', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '14px'
-              }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Brand Editorial Mode Inputs */}
-      {plannerFocus === 'brand_editorial' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>
-              Konteks Brand &amp; Audiens:
-            </label>
-            <textarea
-              rows={3}
-              value={brandContext}
-              onChange={e => setBrandContext(e.target.value)}
-              placeholder="Jelaskan nilai brand, identitas target audiens, dan misi konten..."
-              style={{
-                width: '100%', padding: '10px 12px', borderRadius: '10px',
-                background: 'var(--input-bg, var(--surface))', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '14px'
-              }}
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>
-              Pilar Konten (Minimal 1):
-            </label>
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+            {/* Product & Title Search Box */}
+            <div style={{ position: 'relative', minWidth: '220px', flex: 1, maxWidth: '340px' }}>
+              <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '13px' }}>🔍</span>
               <input
                 type="text"
-                value={pillarDraft}
-                onChange={e => setPillarDraft(e.target.value)}
-                placeholder="Tambah pilar (misal: Edukasi Herbal, Tips Sehat Pagi)"
+                value={filterSearchQuery}
+                onChange={e => setFilterSearchQuery(e.target.value)}
+                placeholder="Cari produk / judul planner..."
                 style={{
-                  flex: 1, padding: '10px 12px', borderRadius: '10px',
-                  background: 'var(--input-bg, var(--surface))', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '14px'
+                  width: '100%',
+                  padding: '9px 30px 9px 34px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border-subtle)',
+                  background: 'var(--surface-interactive)',
+                  color: 'var(--text-primary)',
+                  fontSize: '13px',
+                  outline: 'none'
                 }}
               />
-              <button
-                type="button"
-                onClick={() => {
-                  if (pillarDraft.trim()) {
-                    setPillars([...pillars, pillarDraft.trim()]);
-                    setPillarDraft('');
-                  }
-                }}
-                style={{
-                  padding: '10px 16px', background: 'var(--action-primary)', color: 'var(--on-action-primary, #ffffff)',
-                  border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 600
-                }}
-              >
-                + Tambah
-              </button>
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-              {pillars.map((pil, idx) => (
-                <span
-                  key={idx}
+              {filterSearchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setFilterSearchQuery('')}
                   style={{
-                    background: 'var(--surface-interactive)', color: 'var(--text-primary)', padding: '4px 10px',
-                    borderRadius: '8px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px'
+                    position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
+                    background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '13px'
                   }}
                 >
-                  {pil}
-                  <button
-                    type="button"
-                    onClick={() => setPillars(pillars.filter((_, i) => i !== idx))}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
-                  >
-                    ✕
-                  </button>
-                </span>
-              ))}
+                  ✕
+                </button>
+              )}
             </div>
+
+            {/* Reset Filter Button if active */}
+            {(filterBrandId || filterSearchQuery || filterArchiveMode !== 'active') && (
+              <button
+                type="button"
+                onClick={() => { setFilterBrandId(''); setFilterSearchQuery(''); setFilterArchiveMode('active'); }}
+                style={{
+                  padding: '8px 12px',
+                  background: 'transparent',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: '8px',
+                  color: 'var(--text-muted)',
+                  fontSize: '12px',
+                  cursor: 'pointer'
+                }}
+                title="Reset semua filter"
+              >
+                ↺ Reset
+              </button>
+            )}
           </div>
         </div>
-      )}
 
-      {/* Target Audiens & Jumlah Baris */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-        <div>
-          <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>
-            Target Audiens:
-          </label>
-          <select
-            value={targetAudience}
-            onChange={e => setTargetAudience(e.target.value)}
-            style={{
-              width: '100%', padding: '10px 12px', borderRadius: '10px',
-              background: 'var(--input-bg, var(--surface))', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '14px'
-            }}
-          >
-            <option value="genz_casual">Gen-Z Kasual</option>
-            <option value="ibu_rumah_tangga">Ibu Rumah Tangga</option>
-            <option value="professional_executive">Profesional / Eksekutif</option>
-            <option value="hijab_syari_family">Keluarga Muslim / Syar'i</option>
-            <option value="fitness_health_enthusiast">Fitness &amp; Healthy Lifestyle</option>
-          </select>
-        </div>
+        {/* Planner List Grid */}
+        {loading ? (
+          <div style={{ padding: '48px', textAlign: 'center', color: 'var(--text-muted)' }}>Memuat daftar planner...</div>
+        ) : planners.length === 0 ? (
+          <div style={{
+            padding: '64px 24px', textAlign: 'center', background: 'var(--bg-secondary)',
+            borderRadius: '16px', border: '1px solid var(--border-subtle)'
+          }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🗓️</div>
+            <h3 style={{ fontSize: '20px', color: 'var(--text-primary)', marginBottom: '8px' }}>Belum ada Content Planner</h3>
+            <p style={{ color: 'var(--text-muted)', maxWidth: '480px', margin: '0 auto 24px' }}>
+              Mulai buat perencanaan konten terstruktur 9 kolom untuk produk Anda dalam hitungan detik.
+            </p>
+            <button
+              onClick={() => setShowModal(true)}
+              style={{
+                padding: '10px 20px', background: 'var(--status-neutral)', color: 'var(--text-primary)',
+                border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer'
+              }}
+            >
+              Buat Planner Pertama
+            </button>
+          </div>
+        ) : filteredPlanners.length === 0 ? (
+          <div style={{
+            padding: '48px 24px', textAlign: 'center', background: 'var(--bg-secondary)',
+            borderRadius: '16px', border: '1px solid var(--border-subtle)'
+          }}>
+            <div style={{ fontSize: '40px', marginBottom: '12px' }}>🔍</div>
+            <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '6px' }}>
+              Tidak ada planner yang sesuai filter
+            </h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '13px', maxWidth: '420px', margin: '0 auto 16px' }}>
+              Coba sesuaikan kata kunci pencarian, filter brand, atau beralih ke tab status lain.
+            </p>
+            <button
+              type="button"
+              onClick={() => { setFilterBrandId(''); setFilterSearchQuery(''); setFilterArchiveMode('all'); }}
+              style={{
+                padding: '8px 16px', background: 'var(--surface-interactive)', color: 'var(--text-primary)',
+                border: '1px solid var(--border-subtle)', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '13px'
+              }}
+            >
+              Tampilkan Semua Planner ({planners.length})
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '20px' }}>
+            {filteredPlanners.map(p => {
+              const isDraft = p.status === 'draft' || !p.row_count || p.row_count === 0;
+              const isExecuting = executingIds[p.id] || p.status === 'generating';
+              const isArchived = Boolean(p.is_archived);
+              const isArchiving = archivingIds[p.id];
+              const brandLabel = p.brand_profile_name || p.account_name;
 
-        <div>
-          <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>
-            Target Baris Ide:
-          </label>
-          <select
-            value={productPlannerCount}
-            onChange={e => setProductPlannerCount(e.target.value)}
-            style={{
-              width: '100%', padding: '10px 12px', borderRadius: '10px',
-              background: 'var(--input-bg, var(--surface))', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: '14px'
-            }}
-          >
-            <option value="6">6 Baris Plan (1x CEP)</option>
-            <option value="12">12 Baris Plan (2x CEP - Standar)</option>
-            <option value="18">18 Baris Plan (3x CEP)</option>
-            <option value="24">24 Baris Plan (4x CEP - Massal)</option>
-            <option value="30">30 Baris Plan (5x CEP - Maksimal)</option>
-          </select>
-        </div>
-      </div>
+              return (
+                <div
+                  key={p.id}
+                  onClick={() => router.push(`/content-planner/${p.id}`)}
+                  style={{
+                    background: isArchived ? "var(--surface-interactive)" : 'var(--bg-secondary)',
+                    border: isArchived ? '1px dashed var(--border-subtle)' : '1px solid var(--border-subtle)',
+                    borderRadius: '14px',
+                    padding: '20px', cursor: 'pointer', transition: 'all 0.2s ease',
+                    position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+                    opacity: isArchived ? 0.85 : 1
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = isArchived ? 'var(--status-warning)' : 'var(--status-neutral)'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = isArchived ? 'var(--border-subtle)' : 'var(--border-subtle)'}
+                >
+                  <div>
+                    {/* Header Card: Title & Badges */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px', gap: '10px' }}>
+                      <h4 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: 'var(--text-primary)', flex: 1, lineHeight: 1.3 }}>
+                        {p.title}
+                      </h4>
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
+                        {isArchived && (
+                          <span style={{
+                            fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px',
+                            background: 'var(--status-warning-soft)', color: 'var(--status-warning)'
+                          }}>
+                            📦 Terarsip
+                          </span>
+                        )}
+                        <span style={{
+                          fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px',
+                          background: isDraft ? 'var(--status-warning-soft)' : 'var(--status-success-soft)',
+                          color: isDraft ? 'var(--status-warning)' : 'var(--status-success)'
+                        }}>
+                          {isDraft ? 'Draft' : `${p.row_count || 0} Baris`}
+                        </span>
+                      </div>
+                    </div>
 
-      {/* Action Buttons */}
-      <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-        {onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            style={{
-              flex: 1, padding: '12px', background: 'var(--surface)', color: 'var(--text-primary)',
-              border: '1px solid var(--border-subtle)', borderRadius: '10px', fontWeight: 600, cursor: 'pointer'
-            }}
-          >
-            Batal
-          </button>
+                    {/* Brand & Product Lineage */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px', fontSize: '12px' }}>
+                      {brandLabel && (
+                        <span style={{
+                          padding: '3px 8px', borderRadius: '6px', background: 'var(--surface-interactive)',
+                          color: 'var(--text-primary)', fontWeight: 600, border: '1px solid var(--border-subtle)',
+                          display: 'inline-flex', alignItems: 'center', gap: '4px'
+                        }}>
+                          🏢 {brandLabel}
+                        </span>
+                      )}
+                      <span style={{
+                        padding: '3px 8px', borderRadius: '6px', background: 'var(--surface-interactive)',
+                        color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)',
+                        display: 'inline-flex', alignItems: 'center', gap: '4px'
+                      }}>
+                        {p.planner_focus === 'brand_editorial' ? '🧩 Editorial' : (p.planner_focus === 'recipe_campaign' ? '🍳 Recipe Campaign' : `📦 ${p.product_name || 'Produk'}`)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    {/* Primary Action Button */}
+                    {isDraft ? (
+                      <button
+                        type="button"
+                        onClick={(e) => handleExecutePlanner(p.id, e)}
+                        disabled={isExecuting}
+                        style={{
+                          width: '100%', padding: '10px', marginBottom: '10px',
+                          background: isExecuting ? 'var(--status-neutral-soft)' : 'linear-gradient(135deg, var(--status-neutral) 0%, var(--status-neutral) 100%)',
+                          color: 'var(--text-primary)', border: 'none', borderRadius: '8px', fontWeight: 700,
+                          cursor: isExecuting ? 'not-allowed' : 'pointer', fontSize: '13px',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                          boxShadow: '0 4px 12px var(--status-neutral-soft)'
+                        }}
+                      >
+                        {isExecuting ? '⏳ Memproses 3-Fase AI...' : '🚀 Eksekusi AI Pipeline'}
+                      </button>
+                    ) : (
+                      p.google_sheet_id ? (
+                        <button
+                          type="button"
+                          onClick={(e) => handleSyncSheets(p.id, e)}
+                          disabled={syncingIds[p.id]}
+                          style={{
+                            width: '100%', padding: '8px 12px', marginBottom: '10px',
+                            background: 'var(--status-success-soft)',
+                            color: 'var(--status-success)', border: '1px solid var(--status-success)', borderRadius: '8px', fontWeight: 600,
+                            cursor: syncingIds[p.id] ? 'not-allowed' : 'pointer', fontSize: '12px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
+                          }}
+                        >
+                          {syncingIds[p.id] ? '⏳ Menyinkronkan...' : '📊 Sync ke Google Sheet'}
+                        </button>
+                      ) : null
+                    )}
+
+                    {/* Secondary Actions & Footer Info */}
+                    <div style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      paddingTop: '10px', borderTop: '1px solid var(--border-subtle)', fontSize: '12px', color: 'var(--text-muted)'
+                    }}>
+                      <span>📊 {p.row_count || 0} / {p.planner_count || 12} Baris</span>
+
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                        {/* Archive / Restore Button */}
+                        <button
+                          type="button"
+                          onClick={(e) => handleToggleArchive(p, e)}
+                          disabled={isArchiving}
+                          title={isArchived ? 'Pulihkan dari arsip' : 'Arsipkan planner ini'}
+                          style={{
+                            padding: '4px 8px',
+                            background: isArchived ? 'var(--status-success-soft)' : 'var(--surface-interactive)',
+                            color: isArchived ? 'var(--status-success)' : 'var(--text-secondary)',
+                            border: `1px solid ${isArchived ? 'var(--status-success)' : 'var(--border-subtle)'}`,
+                            borderRadius: '6px',
+                            cursor: isArchiving ? 'not-allowed' : 'pointer',
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          {isArchiving ? '⏳' : (isArchived ? '🔄 Pulihkan' : '📦 Arsip')}
+                        </button>
+
+                        {/* Delete Button */}
+                        <button
+                          type="button"
+                          onClick={(e) => handleDeletePlanner(p.id, e)}
+                          title="Hapus planner permanen"
+                          style={{
+                            padding: '4px 8px',
+                            background: "var(--surface-interactive)",
+                            color: 'var(--status-danger)',
+                            border: "1px solid var(--border-subtle)",
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '11px'
+                          }}
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         )}
-        <button
-          type="submit"
-          disabled={generating}
-          style={{
-            flex: 2, padding: '12px', background: 'var(--action-primary)', color: 'var(--on-action-primary, #ffffff)',
-            border: 'none', borderRadius: '10px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
-          }}
-        >
-          {generating ? '⏳ Menyimpan...' : (mode === 'capture' ? '✅ Konfirmasi Brief Planner' : '💾 Simpan Draft Planner')}
-        </button>
-      </div>
-    </form>
-  );
 
-  if (isInline) {
-    return formContent;
-  }
+        {/* Modal Generator */}
+        {showModal && (
+          <div style={{
+            position: 'fixed', inset: 0, background: 'var(--overlay-backdrop)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999
+          }}>
+            <div style={{
+              background: 'var(--bg-secondary)', border: '1px solid var(--border-subtle)', borderRadius: '16px',
+              width: '100%', maxWidth: '640px', maxHeight: '90vh', overflowY: 'auto', padding: '28px'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h2 style={{ fontSize: '20px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+                  ✨ Generator Content Planner Baru
+                </h2>
+                <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '20px', cursor: 'pointer' }}>✕</button>
+              </div>
 
-  return (
-    <div style={{
-      position: 'fixed', inset: 0, background: 'var(--overlay-backdrop)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999
-    }}>
-      <div style={{
-        background: 'var(--surface)', border: '1px solid var(--border-subtle)', borderRadius: '16px',
-        width: '100%', maxWidth: '640px', maxHeight: '90vh', overflowY: 'auto', padding: '28px',
-        boxShadow: 'var(--shadow-modal)'
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
-            ✨ Generator Content Planner Baru
-          </h2>
-          {onCancel && (
-            <button onClick={onCancel} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '20px', cursor: 'pointer' }}>✕</button>
-          )}
+              {canonicalConfigurationForm0}
+            </div>
+          </div>
+        )}
+          <footer style={{ marginTop: '80px', padding: '24px 0', borderTop: '1px solid var(--border-subtle)', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+            © 2026 MaknaFlow
+          </footer>
         </div>
-        {formContent}
-      </div>
+      </main>
     </div>
   );
 }

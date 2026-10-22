@@ -2,11 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import PlannerConfigurationForm from '../campaign-forms/PlannerConfigurationForm';
-import ReCampaignConfigurationForm from '../campaign-forms/ReCampaignConfigurationForm';
-import MultiplierConfigurationForm from '../campaign-forms/MultiplierConfigurationForm';
-import RecipeLabsConfigurationForm from '../campaign-forms/RecipeLabsConfigurationForm';
 
-import ImportPlannerModal from '../ImportPlannerModal';
+import StudioCampaignWizard from './StudioCampaignWizard';
+import { updateStudioOutputSchedule } from '@/lib/contentflow-studio-wizard-steps';
 import { buildOutputManifest, toZonedInput, zonedInputToIso, createStudioIdempotencyKey } from '@/lib/contentflow-studio-manifest';
 
 const DAYS_OF_WEEK = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
@@ -127,20 +125,23 @@ export default function StudioWorkspace() {
       if (!run.success) throw Error(run.error);
       const d = await fetch(`/api/content-planner/${id}`).then(r=>r.json());
       if (!d.success) throw Error(d.error);
-      setCreatedPlanner({ ...d.planner, rows:d.planner.rows || d.rows || [] }); setWizardStep(3);
+      if (!(d.planner?.rows || d.rows || []).length) throw Error('Planner belum memiliki hasil. Coba kembali setelah proses generator selesai.');
+      setCreatedPlanner({ ...d.planner, rows:d.planner.rows || d.rows || [] }); setWizardStep(2);
     } catch(e) { setWizardError(e.message); } finally { setWizardSubmitting(false); }
   };
   const handleEngineCapture = captured => {
     try {
       const payload = captured.config || captured;
+      if (selectedEngine==='pillar') payload.global_settings={...payload.global_settings,campaign_name:payload.campaign_name};
       const rows = createdPlanner?.rows || [];
       const chosen = captured.selected_row_ids ? rows.filter(r=>captured.selected_row_ids.map(String).includes(String(r.id))) : rows;
-      const manifest = buildOutputManifest(selectedEngine, selectedEngine==='pillar' ? captured.global_settings : payload, chosen);
-      setEnginePayload(captured.config || captured); setProductRefFile(captured.productRefImage || null);
+      const manifest = buildOutputManifest(selectedEngine, selectedEngine==='pillar' ? captured.global_settings : payload, chosen, {stableKeys:true});
+      setEnginePayload(payload); setProductRefFile(captured.productRefImage || null);
       setOutputManifest(manifest);
       const base = Date.now() + 2*86400000;
+      const groupTimes = new Map();
       setSlotScheduleMap(Object.fromEntries(manifest.map((o,n)=>[o.outputKey,{
-        scheduledPublishAt:toZonedInput(base+n*86400000), scheduledProductionAt:toZonedInput(base+(n-1)*86400000)
+        scheduledPublishAt:slotScheduleMap[o.outputKey]?.scheduledPublishAt || toZonedInput(base+n*86400000), scheduledProductionAt:(()=>{const group=o.snapshot?.invocationKey||o.outputKey;if(!groupTimes.has(group))groupTimes.set(group,slotScheduleMap[o.outputKey]?.scheduledProductionAt||toZonedInput(base+(n-1)*86400000));return groupTimes.get(group);})()
       }]))); setWizardStep(4);
     } catch(e) { setWizardError(e.message); if(selectedEngine==='pillar') throw e; }
   };
@@ -149,7 +150,7 @@ export default function StudioWorkspace() {
     try {
       if (!accountIds.length) throw Error('Pilih minimal satu akun tujuan.');
       const sourceKind = selectedEngine==='pillar' ? (createdPlanner?.planner_focus==='recipe_campaign'?'planner_recipe':'planner_pillar') : ({re:'re_campaign',multiplier:'multiplier_lab',recipe:'recipe_labs'})[selectedEngine];
-      const input = { schemaVersion:2,engineKind:selectedEngine,sourceKind,plannerId:selectedEngine==='pillar'?createdPlanner.id:null,
+      const input = { schemaVersion:3,engineKind:selectedEngine,sourceKind,plannerId:selectedEngine==='pillar'?createdPlanner.id:null,
         enginePayload,title:enginePayload?.campaign_name || enginePayload?.global_settings?.campaign_name || 'Studio Batch',timezone:'Asia/Jakarta',idempotencyKey:submitKey,
         outputSchedules:outputManifest.map(o=>({ outputKey:o.outputKey,productionAt:zonedInputToIso(slotScheduleMap[o.outputKey].scheduledProductionAt),publishAt:zonedInputToIso(slotScheduleMap[o.outputKey].scheduledPublishAt),accountIds })) };
       let body=JSON.stringify(input),headers={'Content-Type':'application/json'};
@@ -630,9 +631,8 @@ export default function StudioWorkspace() {
       )}
 
       {createdBatchId && <div style={{padding:14,background:'var(--status-info-soft)',color:'var(--text-primary)'}}>Draft tersimpan. Produksi belum dimulai. <button type="button" onClick={()=>activateBatch(createdBatchId)}>▶ Generate Content</button></div>}
-      {showWizard && wizardStep===3 && selectedEngine==='pillar' && createdPlanner && <ImportPlannerModal isOpen initialPlannerId={createdPlanner.id} onClose={()=>setWizardStep(1)} onConfigurationSubmit={handleEngineCapture} />}
       {/* Creation Wizard Modal */}
-      {showWizard && !(wizardStep===3 && selectedEngine==='pillar') && (
+      {showWizard && (
         <div style={{
           position: 'fixed',
           top: 0,
@@ -651,7 +651,7 @@ export default function StudioWorkspace() {
             border: '1px solid var(--border)',
             borderRadius: '14px',
             width: '100%',
-            maxWidth: '850px',
+            maxWidth: '1200px',
             maxHeight: '90vh',
             overflowY: 'auto',
             padding: '24px',
@@ -706,14 +706,20 @@ export default function StudioWorkspace() {
             {wizardStep===0 && <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:12}}>
               {[['pillar','Pillar Campaign','Planner baru → produksi Pillar'],['re','Reverse Engineering','Referensi video → produksi RE'],['multiplier','Multiplier','Blueprint dan kombinasi → produksi'],['recipe','Recipe Labs','Konfigurasi resep gambar/video existing']].map(([kind,label,desc])=><button key={kind} type="button" onClick={()=>{setCreatedPlanner(null);setEnginePayload(null);setOutputManifest([]);setSlotScheduleMap({});setProductRefFile(null);setSelectedEngine(kind);setWizardError('');setWizardStep(kind==='pillar'?1:3);}} style={{padding:20,border:'1px solid var(--border-subtle)',borderRadius:10,background:'var(--surface-raised)',color:'var(--text-primary)',textAlign:'left',cursor:'pointer'}}><strong>{label}</strong><p style={{color:'var(--text-muted)'}}>{desc}</p></button>)}
             </div>}
-            {wizardStep===1 && <div>
-              <p>Planner hanya digunakan sekali untuk batch ini. Focus Recipe pada Generator Planner mengikuti jalur produksi Recipe/Pillar existing.</p>
-              {wizardSubmitting ? <p>Generator Planner sedang bekerja…</p> : <PlannerConfigurationForm mode="direct" onSuccess={handlePlannerSuccess} onCancel={()=>setWizardStep(0)} />}
+            {selectedEngine==='pillar' && <div hidden={wizardStep!==1}>
+              <p>Planner hanya digunakan sekali untuk batch ini. Pilih fokus dan konfigurasi sesuai Generator Content Planner.</p>
+              {wizardSubmitting && <p role="status">Generator Planner sedang bekerja…</p>}
+              <PlannerConfigurationForm mode="direct" onSuccess={handlePlannerSuccess} onCancel={()=>setWizardStep(0)} />
             </div>}
-            {wizardStep===3 && selectedEngine==='pillar' && <div><p>Review hasil Planner dan konfigurasi produksi pada form Pillar existing.</p><button type="button" onClick={()=>setWizardStep(0)}>Ganti jenis campaign</button></div>}
-            {wizardStep===3 && selectedEngine==='re' && <ReCampaignConfigurationForm mode="capture" onCapture={handleEngineCapture} onCancel={()=>setWizardStep(0)} />}
-            {wizardStep===3 && selectedEngine==='multiplier' && <MultiplierConfigurationForm mode="capture" onCapture={handleEngineCapture} onCancel={()=>setWizardStep(0)} />}
-            {wizardStep===3 && selectedEngine==='recipe' && <RecipeLabsConfigurationForm mode="capture" onCapture={handleEngineCapture} onCancel={()=>setWizardStep(0)} />}
+            {wizardStep===2 && createdPlanner && <div>
+              <h3>Review Content Planner</h3><p>{createdPlanner.rows.length} baris siap untuk dikonfigurasi menjadi Pillar Campaign. Planner belum dikonsumsi.</p>
+              <div style={{maxHeight:350,overflow:'auto'}}><table className="table"><thead><tr><th>No</th><th>Rencana Konten</th></tr></thead><tbody>{createdPlanner.rows.map((row,index)=><tr key={row.id}><td>{index+1}</td><td>{row.title||row.hook||row.content_subject||row.topic||`Konten ${index+1}`}</td></tr>)}</tbody></table></div>
+              <button type="button" className="btn btn-secondary" onClick={()=>setWizardStep(1)}>Edit Planner</button>{' '}
+              <button type="button" className="btn btn-primary" onClick={()=>setWizardStep(3)}>Konfigurasi Pillar →</button>
+            </div>}
+            {selectedEngine && (selectedEngine!=='pillar'||createdPlanner) && <div hidden={wizardStep!==3}>
+              <StudioCampaignWizard engine={selectedEngine} planner={createdPlanner} onCapture={handleEngineCapture} onCancel={()=>{if(window.confirm('Ganti jenis campaign? Isian konfigurasi batch ini akan direset.')) {setSelectedEngine(null);setWizardStep(0);}}} />
+            </div>}
             {/* Step 4: Schedule Allocation per Slot */}
             {wizardStep === 4 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -762,7 +768,7 @@ export default function StudioWorkspace() {
                           </div>
                         </div>
                         <div>
-                          <label style={{fontSize:12,color:'var(--text-secondary)'}}>Mulai produksi (WIB)<input type="datetime-local" value={rowSched.scheduledProductionAt || ''} onChange={e=>setSlotScheduleMap(prev=>({...prev,[row.outputKey]:{...prev[row.outputKey],scheduledProductionAt:e.target.value}}))} style={{width:'100%',background:'var(--input-bg)',color:'var(--text-primary)',border:'1px solid var(--border-subtle)',padding:6}} /></label>
+                          <label style={{fontSize:12,color:'var(--text-secondary)'}}>Mulai produksi (WIB)<input type="datetime-local" value={rowSched.scheduledProductionAt || ''} onChange={e=>setSlotScheduleMap(prev=>updateStudioOutputSchedule(outputManifest,prev,row.outputKey,{scheduledProductionAt:e.target.value}))} style={{width:'100%',background:'var(--input-bg)',color:'var(--text-primary)',border:'1px solid var(--border-subtle)',padding:6}} /></label>
                           <label style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '2px' }}>
                             Waktu Tayang (WIB)
                           </label>
@@ -772,13 +778,7 @@ export default function StudioWorkspace() {
                             onChange={(e) => {
                               const pubTime = e.target.value;
                               const prodTime = pubTime ? toZonedInput(new Date(zonedInputToIso(pubTime)).getTime() - 86400000) : '';
-                              setSlotScheduleMap({
-                                ...slotScheduleMap,
-                                [row.outputKey]: {
-                                  scheduledPublishAt: pubTime,
-                                  scheduledProductionAt: prodTime
-                                }
-                              });
+                              setSlotScheduleMap(prev=>updateStudioOutputSchedule(outputManifest,prev,row.outputKey,{scheduledPublishAt:pubTime,scheduledProductionAt:rowSched.scheduledProductionAt && rowSched.scheduledProductionAt<prodTime ? rowSched.scheduledProductionAt : prodTime}));
                             }}
                             style={{
                               padding: '6px 8px',
@@ -807,7 +807,7 @@ export default function StudioWorkspace() {
                   </button>
                   <button
                     type="button"
-                    onClick={handleCommitBatch}
+                    onClick={()=>setWizardStep(5)}
                     disabled={wizardSubmitting}
                     style={{
                       padding: '10px 22px',
@@ -819,11 +819,20 @@ export default function StudioWorkspace() {
                       cursor: wizardSubmitting ? 'not-allowed' : 'pointer'
                     }}
                   >
-                    {wizardSubmitting ? 'Mendaftarkan Batch Studio...' : 'Simpan Draft & Kunci Planner bila digunakan'}
+                    Review Batch →
                   </button>
                 </div>
               </div>
             )}
+            {wizardStep===5 && <div>
+              <h3>Review Batch sebelum disimpan</h3>
+              <p>{getEngineBadge(selectedEngine)} · {outputManifest.length} slot · Asia/Jakarta (WIB)</p>
+              <p>Batch disimpan sebagai draft. Produksi dimulai setelah Generate Content, mengikuti jadwalnya. Publikasi tetap memerlukan approval.</p>
+              {selectedEngine==='pillar'&&<p>Planner akan dikunci untuk batch ini setelah penyimpanan berhasil.</p>}
+              <div style={{maxHeight:300,overflow:'auto'}}><table className="table"><thead><tr><th>Output</th><th>Mulai Produksi (WIB)</th><th>Target Tayang (WIB)</th></tr></thead><tbody>{outputManifest.map(output=><tr key={output.outputKey}><td>{output.title}</td><td>{slotScheduleMap[output.outputKey]?.scheduledProductionAt}</td><td>{slotScheduleMap[output.outputKey]?.scheduledPublishAt}</td></tr>)}</tbody></table></div>
+              <button type="button" className="btn btn-secondary" onClick={()=>setWizardStep(3)}>Tinjau / Edit Konfigurasi Campaign</button>
+              <div style={{display:'flex',justifyContent:'space-between',gap:12,marginTop:20}}><button type="button" className="btn btn-secondary" disabled={wizardSubmitting} onClick={()=>setWizardStep(4)}>← Edit Jadwal</button><button type="button" className="btn btn-primary" disabled={wizardSubmitting} onClick={handleCommitBatch}>{wizardSubmitting?'Menyimpan…':'Simpan Draft Batch'}</button></div>
+            </div>}
           </div>
         </div>
       )}

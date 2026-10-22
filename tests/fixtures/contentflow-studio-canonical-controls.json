@@ -1,0 +1,2116 @@
+{
+  "planner": [
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{filterBrandId}",
+        "onChange": "{e => setFilterBrandId(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{filterSearchQuery}",
+        "onChange": "{e => setFilterSearchQuery(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{knowledgeDomain}",
+        "onChange": "{e => setKnowledgeDomain(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{universeProfile || ''}",
+        "onChange": "{e => { const slug = e.target.value; setUniverseProfile(slug); const info = availableUniverses.find(u => u.slug === slug); if (info) { setSelectedUniverseInfo(info); setKnowledgeDomain(info.knowledge_domain || 'general'); } }}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{productSearchQuery}",
+        "onChange": "{(e) => setProductSearchQuery(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{selectedBrandId}",
+        "required": true,
+        "onChange": "{e => handleBrandSelection(e.target.value)}"
+      }
+    },
+    {
+      "tag": "textarea",
+      "attrs": {
+        "required": true,
+        "value": "{brandContext}",
+        "onChange": "{e => { setBrandContext(e.target.value); setEditorialDirty(true); setEditorialSource('custom'); }}"
+      }
+    },
+    {
+      "tag": "textarea",
+      "attrs": {
+        "value": "{contentGoal}",
+        "onChange": "{e => { setContentGoal(e.target.value); setEditorialDirty(true); setEditorialSource('custom'); }}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "value": "{pillarDraft}",
+        "onChange": "{e => setPillarDraft(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{pillarDistributionMode}",
+        "onChange": "{e => setPillarDistributionMode(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{selectedBrandId}",
+        "onChange": "{e => handleBrandSelection(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{productSearchQuery}",
+        "onChange": "{(e) => setProductSearchQuery(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{isChecked}",
+        "onChange": "{() => { if (isChecked) { setRecipeProductIds(recipeProductIds.filter(id => id !== p.id)); } else { setRecipeProductIds([...recipeProductIds, p.id]); setSelectedProductsMap(prev => ({ ...prev, [p.id]: p })); } }}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{promotionContext}",
+        "onChange": "{e => setPromotionContext(e.target.value)}"
+      }
+    },
+    {
+      "tag": "textarea",
+      "attrs": {
+        "value": "{customInstructions}",
+        "onChange": "{e => setCustomInstructions(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{title}",
+        "onChange": "{e => { setTitle(e.target.value); setIsTitleManuallyEdited(true); }}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "required": true,
+        "value": "{productName}",
+        "onChange": "{e => setProductName(e.target.value)}"
+      }
+    },
+    {
+      "tag": "textarea",
+      "attrs": {
+        "required": true,
+        "value": "{productDesc}",
+        "onChange": "{e => setProductDesc(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{productUsp}",
+        "onChange": "{e => setProductUsp(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{promotionContext}",
+        "onChange": "{e => setPromotionContext(e.target.value)}"
+      }
+    },
+    {
+      "tag": "textarea",
+      "attrs": {
+        "value": "{customInstructions}",
+        "onChange": "{e => setCustomInstructions(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{isNonAffiliate}",
+        "onChange": "{e => setIsNonAffiliate(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{productUrl}",
+        "onChange": "{e => setProductUrl(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{affiliateUrl}",
+        "onChange": "{e => setAffiliateUrl(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{productPhotoUrl}",
+        "onChange": "{e => setProductPhotoUrl(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{productUrl}",
+        "onChange": "{e => setProductUrl(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{affiliateUrl}",
+        "onChange": "{e => setAffiliateUrl(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{targetAudience}",
+        "onChange": "{e => setTargetAudience(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{customTargetAudience}",
+        "onChange": "{e => setCustomTargetAudience(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{platform}",
+        "onChange": "{e => setPlatform(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"number\"",
+        "min": "\"1\"",
+        "max": "\"30\"",
+        "value": "{recipeCount}",
+        "onChange": "{e => { const val = e.target.value; if (val === '') { setRecipeCount(''); return; } const num = Number.parseInt(val, 10); if (Number.isNaN(num)) return; setRecipeCount(Math.max(1, Math.min(30, num))); }}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{plannerFocus === 'brand_editorial' ? effectiveEditorialRowsPerPillar : productPlannerCount}",
+        "onChange": "{e => { if (plannerFocus === 'brand_editorial') { setEditorialRowsPerPillar(Number(e.target.value)); setEditorialCountNotice(''); } else { setProductPlannerCount(Number(e.target.value)); } }}"
+      }
+    }
+  ],
+  "pillar": [
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{selectedPresetKey}",
+        "onChange": "{(e) => { const key = e.target.value; setSelectedPresetKey(key); const preset = presets.find(p => p.key === key); if (preset) applyPresetToForm(preset); }}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{selectedPlannerId}",
+        "onChange": "{(e) => handleSelectPlanner(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{selectedRowIds.includes(r.id)}",
+        "onChange": "{() => toggleRowSelection(r.id)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"file\"",
+        "accept": "\"image/*\"",
+        "onChange": "{(e) => handleUploadCharacterRef(charKey, e.target.files[0])}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{selectedBrandId}",
+        "onChange": "{e => { const profile = brandProfiles.find(item => item.id === e.target.value); const newAcc = profile?.brand_name || ''; setSelectedBrandId(profile?.id || ''); setAccountName(newAcc); const now = new Date(); const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`; setCampaignName(`[ OPC ${dateStr} ] - ${newAcc ? newAcc + ' - ' : ''}`); }}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{campaignName}",
+        "onChange": "{e => setCampaignName(e.target.value)}",
+        "required": true
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{narrativeMode}",
+        "onChange": "{e => setNarrativeMode(e.target.value)}"
+      }
+    },
+    {
+      "tag": "textarea",
+      "attrs": {
+        "value": "{aiDirective}",
+        "onChange": "{e => setAiDirective(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{mandatoryOutroLine}",
+        "onChange": "{e => setMandatoryOutroLine(e.target.value)}"
+      }
+    },
+    {
+      "tag": "textarea",
+      "attrs": {
+        "value": "{customInstruction}",
+        "onChange": "{e => setCustomInstruction(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{voiceProvider}",
+        "onChange": "{e => setVoiceProvider(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{targetLanguage}",
+        "onChange": "{e => setTargetLanguage(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{targetDemographic}",
+        "onChange": "{e => setTargetDemographic(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{targetDemographicCustom}",
+        "onChange": "{e => setTargetDemographicCustom(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{enableAudioSegment ? 'enabled' : 'disabled'}",
+        "onChange": "{e => setEnableAudioSegment(e.target.value === 'enabled')}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{sfxSetting}",
+        "onChange": "{e => setSfxSetting(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{enableVoAudit}",
+        "onChange": "{e => setEnableVoAudit(Number(e.target.value))}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{nextcloudParentFolder}",
+        "onChange": "{e => setNextcloudParentFolder(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{selectedBrandId}",
+        "onChange": "{e => { const profile = brandProfiles.find(item => item.id === e.target.value); setSelectedBrandId(profile?.id || ''); setAccountName(profile?.brand_name || ''); if (profile?.nextcloud_target_folder) { setNextcloudParentFolder(profile.nextcloud_target_folder); } }}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{visualStyle}",
+        "onChange": "{e => setVisualStyle(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{planner?.content_world === 'cartoon_universe' ? 'hybrid_lock' : (executionMode === 'full_autopilot' ? 'pure_t2v' : visualMode)}",
+        "onChange": "{e => setVisualMode(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{videoModel}",
+        "onChange": "{e => { const mod = e.target.value; setVideoModel(mod); if (mod !== 'omni_flash' && clipDuration === 10) { setClipDuration(8); setWordsPerClip(getDefaultWordsPerClip(8)); } }}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{clipDuration}",
+        "onChange": "{e => { const dur = Number(e.target.value); setClipDuration(dur); setWordsPerClip(getDefaultWordsPerClip(dur)); }}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{faceVisibility}",
+        "onChange": "{e => setFaceVisibility(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"number\"",
+        "min": "\"1\"",
+        "max": "\"12\"",
+        "value": "{targetClipsCount}",
+        "onChange": "{e => setTargetClipsCount(Number(e.target.value))}",
+        "required": true
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{wordsPerClip}",
+        "onChange": "{e => setWordsPerClip(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{aspectRatio}",
+        "onChange": "{e => setAspectRatio(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{isBridgingActive}",
+        "onChange": "{e => setIsBridgingActive(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"number\"",
+        "min": "\"1\"",
+        "max": "\"10\"",
+        "value": "{bridgeAtClip}",
+        "onChange": "{e => setBridgeAtClip(Number(e.target.value))}",
+        "required": true
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{bridgeDurationClips}",
+        "onChange": "{e => setBridgeDurationClips(Number(e.target.value))}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{bridgingMode}",
+        "onChange": "{e => setBridgingMode(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{isVsoActive}",
+        "onChange": "{e => setIsVsoActive(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "VisualIdentitySelector",
+      "attrs": {
+        "value": "{visualIdentity}",
+        "onChange": "{setVisualIdentity}",
+        "allowLegacyCustom": "{true}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{enableTts}",
+        "onChange": "{e => setEnableTts(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{enableGlabs}",
+        "onChange": "{e => setEnableGlabs(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{enableFfmpeg}",
+        "onChange": "{e => setEnableFfmpeg(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{enableSocialPost}",
+        "onChange": "{e => setEnableSocialPost(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{voiceProvider}",
+        "onChange": "{e => setVoiceProvider(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{voicePersona}",
+        "onChange": "{e => setVoicePersona(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"range\"",
+        "min": "\"0.5\"",
+        "max": "\"2.0\"",
+        "step": "\"0.1\"",
+        "value": "{voiceSpeed}",
+        "onChange": "{e => setVoiceSpeed(parseFloat(e.target.value))}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"range\"",
+        "min": "\"0.0\"",
+        "max": "\"1.0\"",
+        "step": "\"0.1\"",
+        "value": "{voiceVolume}",
+        "onChange": "{e => setVoiceVolume(parseFloat(e.target.value))}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"radio\"",
+        "value": "\"auto\"",
+        "checked": "{syncMode === 'auto'}",
+        "onChange": "{() => { setSyncMode('auto'); setFfmpegSyncOption('smart_sync'); }}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"radio\"",
+        "value": "\"manual\"",
+        "checked": "{syncMode === 'manual'}",
+        "onChange": "{() => { setSyncMode('manual'); setFfmpegSyncOption('shortest'); }}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{ffmpegSyncOption}",
+        "onChange": "{e => setFfmpegSyncOption(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"range\"",
+        "min": "\"1.0\"",
+        "max": "\"2.0\"",
+        "step": "\"0.05\"",
+        "value": "{ffmpegVideoScale}",
+        "onChange": "{e => setFfmpegVideoScale(parseFloat(e.target.value))}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{newPresetLabel}",
+        "onChange": "{(e) => { const val = e.target.value; setNewPresetLabel(val); setNewPresetKey(val.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')); }}",
+        "required": true
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{newPresetKey}",
+        "onChange": "{(e) => setNewPresetKey(e.target.value.toLowerCase().replace(/[^a-z0-9_-]+/g, ''))}",
+        "required": true
+      }
+    }
+  ],
+  "re": [
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{selectedPresetKey}",
+        "onChange": "{(e) => { const key = e.target.value; setSelectedPresetKey(key); const preset = presets.find(p => p.key === key); if (preset) applyPresetToForm(preset); }}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{accountName}",
+        "onChange": "{e => { const newAcc = e.target.value; setAccountName(newAcc); const matchingProfile = brandProfiles.find(bp => (bp.account_name || bp.brand_name) === newAcc); if (matchingProfile) { setSelectedBrandId(matchingProfile.id); } else { setSelectedBrandId(''); } const now = new Date(); const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`; setCampaignName(`[ RE ${dateStr} ] - ${newAcc ? newAcc + ' - ' : ''}`); }}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "value": "{campaignName}",
+        "onChange": "{e => setCampaignName(e.target.value)}",
+        "required": true
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "value": "{nextcloudParentFolder}",
+        "onChange": "{e => setNextcloudParentFolder(e.target.value)}",
+        "required": true
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{targetLanguage}",
+        "onChange": "{e => setTargetLanguage(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{targetDemographic}",
+        "onChange": "{e => setTargetDemographic(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{targetDemographicCustom}",
+        "onChange": "{e => setTargetDemographicCustom(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{enableAudioSegment ? 'enabled' : 'disabled'}",
+        "onChange": "{e => setEnableAudioSegment(e.target.value === 'enabled')}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{voiceProvider}",
+        "onChange": "{e => { const prov = e.target.value; setVoiceProvider(prov); if (prov === 'gemini') { setVoicePersona('Kore'); } else { if (targetLanguage === 'en-US') { setVoicePersona('English_causual_narrator_vv1'); } else { setVoicePersona('Indonesian_casual_reporter_vv2'); } } }}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{sfxSetting}",
+        "onChange": "{e => setSfxSetting(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{enableVoAudit}",
+        "onChange": "{e => setEnableVoAudit(Number(e.target.value))}"
+      }
+    },
+    {
+      "tag": "textarea",
+      "attrs": {
+        "value": "{urlsText}",
+        "onChange": "{e => setUrlsText(e.target.value)}",
+        "required": true
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"file\"",
+        "accept": "\".csv,.xlsx\"",
+        "onChange": "{handleMassFileUpload}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{generateRecipe}",
+        "onChange": "{e => setGenerateRecipe(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "textarea",
+      "attrs": {
+        "value": "{aiDirective}",
+        "onChange": "{e => setAiDirective(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{mandatoryOutroLine}",
+        "onChange": "{e => setMandatoryOutroLine(e.target.value)}"
+      }
+    },
+    {
+      "tag": "textarea",
+      "attrs": {
+        "value": "{customInstruction}",
+        "onChange": "{e => setCustomInstruction(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{angleMultiplier}",
+        "onChange": "{e => setAngleMultiplier(Number(e.target.value))}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{narrativeMode}",
+        "onChange": "{e => setNarrativeMode(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{aspectRatio}",
+        "onChange": "{e => setAspectRatio(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{targetAi}",
+        "onChange": "{e => setTargetAi(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{videoModel}",
+        "onChange": "{e => { const mod = e.target.value; setVideoModel(mod); if (mod !== 'omni_flash' && clipDuration === 10) { setClipDuration(8); setWordsPerClip(getDefaultWordsPerClip(8)); } }}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{clipDuration}",
+        "onChange": "{e => { const dur = Number(e.target.value); setClipDuration(dur); setWordsPerClip(getDefaultWordsPerClip(dur)); }}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{faceVisibility}",
+        "onChange": "{e => setFaceVisibility(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"number\"",
+        "min": "\"3\"",
+        "max": "\"10\"",
+        "value": "{targetClipsCount}",
+        "onChange": "{e => { const val = parseInt(e.target.value) || 3; setTargetClipsCount(val); if (isBridgingActive && val < bridgeAtClip) { setBridgeAtClip(val); } }}",
+        "required": true
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{wordsPerClip}",
+        "onChange": "{e => setWordsPerClip(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{visualStyle}",
+        "onChange": "{e => setVisualStyle(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{executionMode === 'full_autopilot' ? 'pure_t2v' : visualMode}",
+        "onChange": "{e => setVisualMode(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{isBridgingActive}",
+        "onChange": "{e => { const checked = e.target.checked; setIsBridgingActive(checked); if (checked && targetClipsCount < bridgeAtClip) { setTargetClipsCount(bridgeAtClip); } }}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"number\"",
+        "min": "\"2\"",
+        "value": "{bridgeAtClip}",
+        "onChange": "{e => { const val = parseInt(e.target.value) || 4; if (val < 2) { showToast('Titik transisi minimal dimulai dari klip ke-2', 'error'); setBridgeAtClip(2); } else { setBridgeAtClip(val); if (val > targetClipsCount) { setTargetClipsCount(val); } } }}",
+        "required": true
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{bridgeDurationClips}",
+        "onChange": "{e => setBridgeDurationClips(parseInt(e.target.value) || 0)}",
+        "required": "{isBridgingActive}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{promotionStyle}",
+        "onChange": "{e => setPromotionStyle(e.target.value)}",
+        "required": "{isBridgingActive}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"radio\"",
+        "value": "\"select_existing\"",
+        "checked": "{bridgingMode === 'select_existing'}",
+        "onChange": "{e => setBridgingMode(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"radio\"",
+        "value": "\"manual_input\"",
+        "checked": "{bridgingMode === 'manual_input'}",
+        "onChange": "{e => setBridgingMode(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"radio\"",
+        "value": "\"url_extract\"",
+        "checked": "{bridgingMode === 'url_extract'}",
+        "onChange": "{e => setBridgingMode(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{targetProductId}",
+        "onChange": "{e => { const val = e.target.value; setTargetProductId(val); if (val) { const selProduct = products.find(p => String(p.id) === String(val)); if (selProduct) { const photoPath = selProduct.photo_url || selProduct.clean_photo_url || selProduct.generated_photo_url || selProduct.raw_photo_url || ''; if (photoPath) { setProductRefImage(photoPath); const derivedFilename = selProduct.filename_declare || (selProduct.product_name ? `${selProduct.product_name.toLowerCase().replace(/[^a-z0-9]/g, '_')}_ref.jpg` : 'product_ref.jpg'); setProductFilenameDeclare(derivedFilename); } } } }}",
+        "required": "{isBridgingActive && bridgingMode === 'select_existing'}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{manualProductName}",
+        "onChange": "{e => setManualProductName(e.target.value)}",
+        "required": "{isBridgingActive && bridgingMode === 'manual_input'}"
+      }
+    },
+    {
+      "tag": "textarea",
+      "attrs": {
+        "value": "{manualProductDesc}",
+        "onChange": "{e => setManualProductDesc(e.target.value)}",
+        "required": "{isBridgingActive && bridgingMode === 'manual_input'}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{manualProductUsp}",
+        "onChange": "{e => setManualProductUsp(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"url\"",
+        "value": "{productUrl}",
+        "onChange": "{e => setProductUrl(e.target.value)}",
+        "required": "{isBridgingActive && bridgingMode === 'url_extract'}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"file\"",
+        "accept": "\"image/*\"",
+        "onChange": "{e => setProductRefImage(e.target.files?.[0] || null)}",
+        "required": "{isBridgingActive && visualMode === 'hybrid_lock'}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{productFilenameDeclare}",
+        "onChange": "{e => setProductFilenameDeclare(e.target.value)}",
+        "required": "{isBridgingActive && visualMode === 'hybrid_lock'}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{isVsoActive}",
+        "onChange": "{e => setIsVsoActive(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "VisualIdentitySelector",
+      "attrs": {
+        "value": "{visualIdentity}",
+        "onChange": "{setVisualIdentity}",
+        "allowLegacyCustom": "{true}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{enableTts}",
+        "onChange": "{e => setEnableTts(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{enableGlabs}",
+        "onChange": "{e => setEnableGlabs(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{enableFfmpeg}",
+        "onChange": "{e => setEnableFfmpeg(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{enableSocialPost}",
+        "onChange": "{e => setEnableSocialPost(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{voiceProvider}",
+        "onChange": "{e => setVoiceProvider(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{voicePersona}",
+        "onChange": "{e => setVoicePersona(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"range\"",
+        "min": "\"0.5\"",
+        "max": "\"2.0\"",
+        "step": "\"0.1\"",
+        "value": "{voiceSpeed}",
+        "onChange": "{e => setVoiceSpeed(parseFloat(e.target.value))}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"range\"",
+        "min": "\"0.0\"",
+        "max": "\"1.0\"",
+        "step": "\"0.1\"",
+        "value": "{voiceVolume}",
+        "onChange": "{e => setVoiceVolume(parseFloat(e.target.value))}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"radio\"",
+        "value": "\"auto\"",
+        "checked": "{syncMode === 'auto'}",
+        "onChange": "{() => { setSyncMode('auto'); setFfmpegSyncOption('smart_sync'); }}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"radio\"",
+        "value": "\"manual\"",
+        "checked": "{syncMode === 'manual'}",
+        "onChange": "{() => { setSyncMode('manual'); setFfmpegSyncOption('shortest'); }}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{ffmpegSyncOption}",
+        "onChange": "{e => setFfmpegSyncOption(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"range\"",
+        "min": "\"1.0\"",
+        "max": "\"2.0\"",
+        "step": "\"0.05\"",
+        "value": "{ffmpegVideoScale}",
+        "onChange": "{e => setFfmpegVideoScale(parseFloat(e.target.value))}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{newPresetLabel}",
+        "onChange": "{(e) => { const val = e.target.value; setNewPresetLabel(val); setNewPresetKey(val.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')); }}",
+        "required": true
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{newPresetKey}",
+        "onChange": "{(e) => setNewPresetKey(e.target.value.toLowerCase().replace(/[^a-z0-9_-]+/g, ''))}",
+        "required": true
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{filterBrandId}",
+        "onChange": "{e => setFilterBrandId(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"file\"",
+        "accept": "\".makna\"",
+        "onChange": "{e => setImportFile(e.target.files[0])}",
+        "required": true
+      }
+    }
+  ],
+  "multiplier": [
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{assetSearchQuery}",
+        "onChange": "{e => setAssetSearchQuery(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{nicheFilter}",
+        "onChange": "{e => setNicheFilter(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"radio\"",
+        "checked": "{campaignType === 'editorial'}",
+        "onChange": "{() => setCampaignType('editorial')}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"radio\"",
+        "checked": "{campaignType === 'product'}",
+        "onChange": "{() => setCampaignType('product')}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{selectedNicheKb}",
+        "onChange": "{e => setSelectedNicheKb(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{angleCount}",
+        "onChange": "{e => setAngleCount(Number(e.target.value))}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{customAngleTheme}",
+        "onChange": "{e => { setCustomAngleTheme(e.target.value); setEditorialTopic(e.target.value); }}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{isChecked}",
+        "onChange": "{() => { setSelectedAngleIds(prev => { const next = new Set(prev); if (next.has(ang.angle_id)) next.delete(ang.angle_id); else next.add(ang.angle_id); return next; }); }}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{editorialOutro}",
+        "onChange": "{e => setEditorialOutro(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"radio\"",
+        "value": "\"select_existing\"",
+        "checked": "{bridgingMode === 'select_existing'}",
+        "onChange": "{e => setBridgingMode(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"radio\"",
+        "value": "\"manual_input\"",
+        "checked": "{bridgingMode === 'manual_input'}",
+        "onChange": "{e => setBridgingMode(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"radio\"",
+        "value": "\"url_extract\"",
+        "checked": "{bridgingMode === 'url_extract'}",
+        "onChange": "{e => setBridgingMode(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{productSearchQuery}",
+        "onChange": "{e => setProductSearchQuery(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"radio\"",
+        "checked": "{isSelected}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"url\"",
+        "value": "{productUrl}",
+        "onChange": "{e => setProductUrl(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"url\"",
+        "value": "{affiliateUrl}",
+        "onChange": "{e => setAffiliateUrl(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{manualProductName}",
+        "onChange": "{e => setManualProductName(e.target.value)}"
+      }
+    },
+    {
+      "tag": "textarea",
+      "attrs": {
+        "value": "{manualProductDesc}",
+        "onChange": "{e => setManualProductDesc(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{manualProductUsp}",
+        "onChange": "{e => setManualProductUsp(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"radio\"",
+        "value": "\"select_existing\"",
+        "checked": "{bridgingMode === 'select_existing'}",
+        "onChange": "{e => setBridgingMode(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"radio\"",
+        "value": "\"url_extract\"",
+        "checked": "{bridgingMode === 'url_extract'}",
+        "onChange": "{e => setBridgingMode(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{productSearchQuery}",
+        "onChange": "{e => setProductSearchQuery(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{isSelected}"
+      }
+    },
+    {
+      "tag": "textarea",
+      "attrs": {
+        "value": "{massUrlsText}",
+        "onChange": "{e => setMassUrlsText(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{selectedPresetKey}",
+        "onChange": "{(e) => { const key = e.target.value; setSelectedPresetKey(key); const preset = presets.find(p => p.key === key); if (preset) applyPresetToForm(preset); }}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{selectedBrandId}",
+        "onChange": "{e => { const matchingProfile = brandProfiles.find(bp => bp.id === e.target.value); const newAcc = matchingProfile?.brand_name || ''; setSelectedBrandId(matchingProfile?.id || ''); setAccountName(newAcc); const now = new Date(); const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`; setCampaignName(`[ MULTIPLIER ${dateStr} ] - ${newAcc ? newAcc + ' - ' : ''}`); }}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{campaignName}",
+        "onChange": "{e => setCampaignName(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{nextcloudParentFolder}",
+        "onChange": "{e => setNextcloudParentFolder(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{targetLanguage}",
+        "onChange": "{e => setTargetLanguage(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{targetDemographic}",
+        "onChange": "{e => setTargetDemographic(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{targetDemographicCustom}",
+        "onChange": "{e => setTargetDemographicCustom(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{enableAudioSegment ? 'enabled' : 'disabled'}",
+        "onChange": "{e => setEnableAudioSegment(e.target.value === 'enabled')}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{sfxSetting}",
+        "onChange": "{e => setSfxSetting(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{enableVoAudit}",
+        "onChange": "{e => setEnableVoAudit(Number(e.target.value))}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{generateRecipe}",
+        "onChange": "{e => setGenerateRecipe(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "textarea",
+      "attrs": {
+        "value": "{aiDirective}",
+        "onChange": "{e => setAiDirective(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{mandatoryOutroLine}",
+        "onChange": "{e => setMandatoryOutroLine(e.target.value)}"
+      }
+    },
+    {
+      "tag": "textarea",
+      "attrs": {
+        "value": "{customInstruction}",
+        "onChange": "{e => setCustomInstruction(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{narrativeMode}",
+        "onChange": "{e => setNarrativeMode(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{aspectRatio}",
+        "onChange": "{e => setAspectRatio(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{targetAi}",
+        "onChange": "{e => setTargetAi(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{videoModel}",
+        "onChange": "{e => { const mod = e.target.value; setVideoModel(mod); if (mod !== 'omni_flash' && clipDuration === 10) { setClipDuration(8); setWordsPerClip(getDefaultWordsPerClip(8)); } }}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{clipDuration}",
+        "onChange": "{e => { const dur = Number(e.target.value); setClipDuration(dur); setWordsPerClip(getDefaultWordsPerClip(dur)); }}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{faceVisibility}",
+        "onChange": "{e => setFaceVisibility(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"number\"",
+        "min": "\"3\"",
+        "max": "\"10\"",
+        "value": "{targetClipsCount}",
+        "onChange": "{e => setTargetClipsCount(Number(e.target.value))}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{wordsPerClip}",
+        "onChange": "{e => setWordsPerClip(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{visualStyle}",
+        "onChange": "{e => setVisualStyle(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{visualMode}",
+        "onChange": "{e => setVisualMode(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{isBridgingActive}",
+        "onChange": "{e => setIsBridgingActive(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"number\"",
+        "min": "\"2\"",
+        "max": "{targetClipsCount}",
+        "value": "{bridgeAtClip}",
+        "onChange": "{e => setBridgeAtClip(Number(e.target.value))}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{bridgeDurationClips}",
+        "onChange": "{e => setBridgeDurationClips(Number(e.target.value))}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{promotionStyle}",
+        "onChange": "{e => setPromotionStyle(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"file\"",
+        "accept": "\"image/*\"",
+        "onChange": "{handleImageUpload}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{isVsoActive}",
+        "onChange": "{e => setIsVsoActive(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "VisualIdentitySelector",
+      "attrs": {
+        "value": "{visualIdentity}",
+        "onChange": "{setVisualIdentity}",
+        "allowLegacyCustom": "{true}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{filterBrandId}",
+        "onChange": "{e => setFilterBrandId(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{newPresetLabel}",
+        "onChange": "{e => { setNewPresetLabel(e.target.value); const k = e.target.value .toLowerCase() .replace(/[^a-z0-9]+/g, '_') .replace(/(^_+|_+$)/g, ''); setNewPresetKey(k); }}",
+        "required": true
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{newPresetKey}",
+        "onChange": "{e => setNewPresetKey(e.target.value)}",
+        "required": true
+      }
+    }
+  ],
+  "recipe": [
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{deconstructSearchQuery}",
+        "onChange": "{(e) => setDeconstructSearchQuery(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{sourceDeconstructAssetId}",
+        "onChange": "{(e) => handleSelectDeconstructAsset(e.target.value, false)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{category}",
+        "onChange": "{(e) => setCategory(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{customCategory}",
+        "onChange": "{(e) => setCustomCategory(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{visualStyle}",
+        "onChange": "{(e) => setVisualStyle(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{nextcloudParentFolder}",
+        "onChange": "{(e) => setNextcloudParentFolder(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"number\"",
+        "min": "\"1\"",
+        "max": "\"10\"",
+        "value": "{targetCount}",
+        "onChange": "{(e) => setTargetCount(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{enableGlabs}",
+        "onChange": "{(e) => setEnableGlabs(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{selectedLayoutId}",
+        "onChange": "{(e) => setSelectedLayoutId(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"range\"",
+        "min": "\"0\"",
+        "max": "\"30\"",
+        "step": "\"2\"",
+        "value": "{gridGapSize}",
+        "onChange": "{(e) => setGridGapSize(Number(e.target.value))}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"range\"",
+        "min": "\"0\"",
+        "max": "\"40\"",
+        "step": "\"2\"",
+        "value": "{gridBorderRadius}",
+        "onChange": "{(e) => setGridBorderRadius(Number(e.target.value))}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"range\"",
+        "min": "\"0\"",
+        "max": "\"40\"",
+        "step": "\"2\"",
+        "value": "{gridOuterPadding}",
+        "onChange": "{(e) => setGridOuterPadding(Number(e.target.value))}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"color\"",
+        "value": "{gridBgColor}",
+        "onChange": "{(e) => setGridBgColor(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{gridBgColor}",
+        "onChange": "{(e) => setGridBgColor(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{targetDemographic}",
+        "onChange": "{e => setTargetDemographic(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{targetDemographicCustom}",
+        "onChange": "{e => setTargetDemographicCustom(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{brandProfileId}",
+        "onChange": "{e => setBrandProfileId(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{deconstructSearchQuery}",
+        "onChange": "{(e) => setDeconstructSearchQuery(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{sourceDeconstructAssetId}",
+        "onChange": "{(e) => handleSelectDeconstructAsset(e.target.value, true)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{accountName}",
+        "onChange": "{e => { const newAcc = e.target.value; setAccountName(newAcc); const now = new Date(); const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`; setCampaignName(`[ RECIPE ${dateStr} ] - ${newAcc ? newAcc + ' - ' : ''}`); }}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "value": "{campaignName}",
+        "onChange": "{e => setCampaignName(e.target.value)}",
+        "required": true
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "value": "{spreadsheetId}",
+        "onChange": "{e => setSpreadsheetId(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{targetLanguage}",
+        "onChange": "{e => setTargetLanguage(e.target.value)}"
+      }
+    },
+    {
+      "tag": "textarea",
+      "attrs": {
+        "value": "{contentPillar}",
+        "onChange": "{e => setContentPillar(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "value": "{customHook}",
+        "onChange": "{e => setCustomHook(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{brandProfileId}",
+        "onChange": "{e => setBrandProfileId(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "value": "{visualActionGuideline}",
+        "onChange": "{e => setVisualActionGuideline(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "value": "{customInstruction}",
+        "onChange": "{e => setCustomInstruction(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{nextcloudParentFolder}",
+        "onChange": "{(e) => setNextcloudParentFolder(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{narrativeMode}",
+        "onChange": "{e => setNarrativeMode(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{visualStyleVideo}",
+        "onChange": "{e => setVisualStyleVideo(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{targetAi}",
+        "onChange": "{e => setTargetAi(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{videoModel}",
+        "onChange": "{e => setVideoModel(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{aspectRatio}",
+        "onChange": "{e => setAspectRatio(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{faceVisibility}",
+        "onChange": "{e => setFaceVisibility(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "value": "{wordsPerClip}",
+        "onChange": "{e => setWordsPerClip(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{isBridgingActive}",
+        "onChange": "{e => setIsBridgingActive(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"number\"",
+        "value": "{targetClipsCount}",
+        "onChange": "{e => setTargetClipsCount(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"number\"",
+        "value": "{bridgeAtClip}",
+        "onChange": "{e => setBridgeAtClip(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{promotionStyle}",
+        "onChange": "{e => setPromotionStyle(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{bridgingMode}",
+        "onChange": "{e => setBridgingMode(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{visualMode}",
+        "onChange": "{e => setVisualMode(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{targetProductId}",
+        "onChange": "{e => setTargetProductId(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "value": "{manualProductName}",
+        "onChange": "{e => setManualProductName(e.target.value)}"
+      }
+    },
+    {
+      "tag": "textarea",
+      "attrs": {
+        "value": "{manualProductDesc}",
+        "onChange": "{e => setManualProductDesc(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "value": "{manualProductUsp}",
+        "onChange": "{e => setManualProductUsp(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "value": "{productUrl}",
+        "onChange": "{e => setProductUrl(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{isVsoActive}",
+        "onChange": "{e => setIsVsoActive(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{characterConcept}",
+        "onChange": "{e => setCharacterConcept(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{subjectDemographic}",
+        "onChange": "{e => { const val = e.target.value; setSubjectDemographic(val); setWardrobeStyle('random'); if (val.startsWith('stylized_3d_')) { setCharacterConcept('stylized_3d'); } else { setCharacterConcept('faceless'); } }}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{wardrobeStyle}",
+        "onChange": "{e => setWardrobeStyle(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{wardrobeStyleCustom}",
+        "onChange": "{e => setWardrobeStyleCustom(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{lightingStyle}",
+        "onChange": "{e => setLightingStyle(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{lightingStyleCustom}",
+        "onChange": "{e => setLightingStyleCustom(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{enableTts}",
+        "onChange": "{e => setEnableTts(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{voiceProvider}",
+        "onChange": "{e => setVoiceProvider(e.target.value)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{voicePersona}",
+        "onChange": "{e => setVoicePersona(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"range\"",
+        "min": "\"0.5\"",
+        "max": "\"2.0\"",
+        "step": "\"0.1\"",
+        "value": "{voiceSpeed}",
+        "onChange": "{e => setVoiceSpeed(Number(e.target.value))}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"range\"",
+        "min": "\"0.1\"",
+        "max": "\"2.0\"",
+        "step": "\"0.1\"",
+        "value": "{voiceVolume}",
+        "onChange": "{e => setVoiceVolume(Number(e.target.value))}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{ttsModelQuality}",
+        "onChange": "{e => setTtsModelQuality(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{enableGlabsVideo}",
+        "onChange": "{e => setEnableGlabsVideo(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{enableFfmpeg}",
+        "onChange": "{e => setEnableFfmpeg(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"radio\"",
+        "value": "\"auto\"",
+        "checked": "{syncMode === 'auto'}",
+        "onChange": "{() => { setSyncMode('auto'); setFfmpegSyncOption('smart_sync'); }}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"radio\"",
+        "value": "\"manual\"",
+        "checked": "{syncMode === 'manual'}",
+        "onChange": "{() => { setSyncMode('manual'); setFfmpegSyncOption('shortest'); }}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{ffmpegSyncOption}",
+        "onChange": "{e => setFfmpegSyncOption(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"range\"",
+        "min": "\"1.0\"",
+        "max": "\"2.0\"",
+        "step": "\"0.05\"",
+        "value": "{ffmpegVideoScale}",
+        "onChange": "{e => setFfmpegVideoScale(Number(e.target.value))}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"range\"",
+        "min": "\"0.0\"",
+        "max": "\"1.0\"",
+        "step": "\"0.05\"",
+        "value": "{ffmpegSfxVolume}",
+        "onChange": "{e => setFfmpegSfxVolume(Number(e.target.value))}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"range\"",
+        "min": "\"0.0\"",
+        "max": "\"1.0\"",
+        "step": "\"0.05\"",
+        "value": "{ffmpegBgmVolume}",
+        "onChange": "{e => setFfmpegBgmVolume(Number(e.target.value))}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"checkbox\"",
+        "checked": "{enableSocialPost}",
+        "onChange": "{e => setEnableSocialPost(e.target.checked)}"
+      }
+    },
+    {
+      "tag": "select",
+      "attrs": {
+        "value": "{facebookPageId}",
+        "onChange": "{e => setFacebookPageId(e.target.value)}"
+      }
+    },
+    {
+      "tag": "input",
+      "attrs": {
+        "type": "\"text\"",
+        "value": "{facebookServerUrl}",
+        "onChange": "{e => setFacebookServerUrl(e.target.value)}"
+      }
+    }
+  ]
+}

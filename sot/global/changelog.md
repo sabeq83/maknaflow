@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.73 — ContentFlow Studio Canonical Campaign Wizard (22/10/2026)
+- Satukan konfigurasi menu asal dan wizard Studio untuk seluruh campaign
+- Pertahankan Planner sekali pakai serta dukung RE mass dan mapping multi-angle tanpa duplikasi
+- Validasi aset tenant dan pertahankan approval publishing
+- Verifikasi paritas form integrasi terisolasi dan build produksi
+
 ## V2.32.72 — Fix Studio Wizard on HTTP (22/10/2026)
 - Perbaiki tombol Buat Batch pada HTTP private IP
 - Gunakan idempotency ID browser dengan fallback tanpa randomUUID

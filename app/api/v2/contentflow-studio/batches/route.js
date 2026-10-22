@@ -34,16 +34,10 @@ export const POST = withTenantContext(async (request, context, user) => {
       input = JSON.parse(form.get('input') || '{}');
       const image = form.get('productRefImage');
       if (image && typeof image.arrayBuffer === 'function') {
-        if (input.engineKind !== 're' || image.size > 10 * 1024 * 1024) throw Object.assign(Error('Upload gambar tidak valid atau terlalu besar.'), { status:400 });
-        const sharp = (await import('sharp')).default;
-        const buffer = await sharp(Buffer.from(await image.arrayBuffer())).rotate().png().toBuffer();
-        const crypto = await import('node:crypto');
-        const path = await import('node:path');
-        const fs = await import('node:fs/promises');
-        const name = crypto.createHash('sha256').update(getActiveTenantId() + ':').update(buffer).digest('hex') + '.png';
-        const dir = path.join(process.cwd(),'public','uploads','studio');
-        await fs.mkdir(dir,{recursive:true}); await fs.writeFile(path.join(dir,name),buffer);
-        input.enginePayload = { ...input.enginePayload, product_ref_image_path:'/uploads/studio/'+name };
+        if (input.engineKind !== 're') throw Object.assign(Error('Unggahan multipart tidak sesuai engine.'),{status:400});
+        const { stageStudioImage } = await import('@/lib/contentflow-studio-assets');
+        const asset = await stageStudioImage(getActiveTenantId(), image);
+        input.enginePayload = { ...input.enginePayload, product_ref_image_path:asset.filePath };
       }
     } else input = await request.json();
     const { createStudioBatchAtomically } = await import('@/lib/contentflow-studio-batch-service');
