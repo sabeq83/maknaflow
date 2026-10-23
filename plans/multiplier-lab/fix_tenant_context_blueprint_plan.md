@@ -305,5 +305,5 @@ export async function generateDynamicMultiplierAngles({
 - [x] **Task 1**: Update `app/api/v2/multiplier/generate-angles/route.js` untuk membungkus `GET` dan `POST` dengan `withTenantContext`.
 - [x] **Task 2**: Update `lib/multiplier-angle-generator.js` dengan isolasi `tenantContext.run` dan sanitasi ID regex defensif.
 - [x] **Task 3**: Jalankan automated test suite `tests/multiplier-angle-generator.test.js` untuk memverifikasi tidak ada regresi fungsional.
-- [ ] **Task 4**: Lakukan rilis non-interaktif dan deploy ke server Staging sesuai SOP Mac Mini Atomic Deployment.
-- [ ] **Task 5**: Konfirmasi hasil pengujian di staging.
+- [x] **Task 4**: Lakukan rilis non-interaktif dan deploy ke server Staging sesuai SOP Mac Mini Atomic Deployment.
+- [x] **Task 5**: Konfirmasi hasil pengujian di staging.
