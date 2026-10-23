@@ -50,6 +50,7 @@ export default function ContentPlannerDashboard({ mode = 'direct', onCapture, on
   const [customTargetAudience, setCustomTargetAudience] = useState('');
   const [promotionContext, setPromotionContext] = useState('');
   const [customInstructions, setCustomInstructions] = useState('');
+  const [targetLanguage, setTargetLanguage] = useState('id-ID');
   const [isTitleManuallyEdited, setIsTitleManuallyEdited] = useState(false);
   const [editorialDirty, setEditorialDirty] = useState(false);
   const [editorialSource, setEditorialSource] = useState('empty');
@@ -282,7 +283,15 @@ export default function ContentPlannerDashboard({ mode = 'direct', onCapture, on
     setSelectedBrandId(brandId);
     const brand = brandProfiles.find(item => item.id === brandId);
     const nextAccount = brand?.brand_name || accountName;
-    if (brand) setAccountName(brand.brand_name || '');
+    if (brand) {
+      setAccountName(brand.brand_name || '');
+      // Auto-detect English target language for global brands like HabitFolk
+      const bName = (brand.brand_name || '').toLowerCase();
+      const bCtx = (brand.editorial_brand_context || '').toLowerCase();
+      if (bName.includes('habit') || bName.includes('folk') || bCtx.includes('better together') || bCtx.includes('habitfolk')) {
+        setTargetLanguage('en-US');
+      }
+    }
     if (!isTitleManuallyEdited || !title) {
       const autoTitle = generateAutofillTitle(nextAccount, productName);
       if (autoTitle) setTitle(autoTitle);
@@ -360,6 +369,7 @@ export default function ContentPlannerDashboard({ mode = 'direct', onCapture, on
           platform,
           objective,
           planner_count: effectivePlannerCount,
+          target_language: targetLanguage,
           target_audience: effectiveTargetAudience,
           promotion_context: promotionContext.trim() || null,
           custom_instructions: customInstructions.trim() || null,
@@ -1321,6 +1331,62 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleGenerate}>
                 )}
                 </>)}
 
+                {/* Target Bahasa Konten (Target Language Selector) */}
+                {(!captureMode || studioStep === 2) && (
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>
+                      <span>🌐 Bahasa Konten (Target Language):</span>
+                      <span style={{ fontSize: '11px', color: targetLanguage === 'en-US' ? 'var(--status-info)' : 'var(--text-secondary)' }}>
+                        {targetLanguage === 'en-US' ? '🇺🇸 100% English Hook & Visual' : '🇮🇩 Bahasa Indonesia'}
+                      </span>
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setTargetLanguage('id-ID')}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          padding: '10px 14px',
+                          background: targetLanguage === 'id-ID' ? 'var(--surface-interactive)' : 'var(--bg-secondary)',
+                          border: `1px solid ${targetLanguage === 'id-ID' ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                          borderRadius: '8px',
+                          color: targetLanguage === 'id-ID' ? 'var(--text-primary)' : 'var(--text-muted)',
+                          fontWeight: targetLanguage === 'id-ID' ? 700 : 500,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        <span>🇮🇩</span>
+                        <span>Indonesia (id-ID)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTargetLanguage('en-US')}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          padding: '10px 14px',
+                          background: targetLanguage === 'en-US' ? 'var(--surface-interactive)' : 'var(--bg-secondary)',
+                          border: `1px solid ${targetLanguage === 'en-US' ? 'var(--action-primary)' : 'var(--border-subtle)'}`,
+                          borderRadius: '8px',
+                          color: targetLanguage === 'en-US' ? 'var(--text-primary)' : 'var(--text-muted)',
+                          fontWeight: targetLanguage === 'en-US' ? 700 : 500,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        <span>🇺🇸</span>
+                        <span>English (en-US)</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Target Demografi Audiens (Preset Prompt Builder) */}
                 {(!captureMode || studioStep === 2) && (<div style={{ marginBottom: '16px' }}>
                   <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>
@@ -1771,6 +1837,15 @@ return (
                       }}>
                         {p.planner_focus === 'brand_editorial' ? '🧩 Editorial' : (p.planner_focus === 'recipe_campaign' ? '🍳 Recipe Campaign' : `📦 ${p.product_name || 'Produk'}`)}
                       </span>
+                      {p.target_language === 'en-US' && (
+                        <span style={{
+                          padding: '3px 8px', borderRadius: '6px', background: 'var(--status-info-soft)',
+                          color: 'var(--status-info)', border: '1px solid var(--border-subtle)',
+                          display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 600
+                        }}>
+                          🇺🇸 EN
+                        </span>
+                      )}
                     </div>
                   </div>
 

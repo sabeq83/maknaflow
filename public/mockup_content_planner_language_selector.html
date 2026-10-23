@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup — Content Planner Target Language Selector</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --surface: #0b0f17;
+      --surface-raised: #131b26;
+      --surface-interactive: #1a2434;
+      --surface-subtle: #0f1622;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.16);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --action-primary: #10b981;
+      --action-primary-hover: #059669;
+      --on-action-primary: #ffffff;
+      --input-bg: rgba(255, 255, 255, 0.04);
+      --status-info-soft: rgba(56, 189, 248, 0.12);
+      --status-info: #38bdf8;
+      --status-success-soft: rgba(16, 185, 129, 0.12);
+      --status-success: #10b981;
+      --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--surface);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      padding: 40px 24px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 32px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 24px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      background: var(--status-info-soft);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: var(--status-info);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    p.subtitle {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      margin-top: 6px;
+    }
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 32px;
+    }
+
+    @media (max-width: 860px) {
+      .grid-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-card, .preview-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 22px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    select, input, textarea {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--action-primary);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+
+    /* Language Toggle Segment */
+    .lang-selector-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .lang-pill {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      user-select: none;
+    }
+
+    .lang-pill:hover {
+      background: var(--surface-interactive);
+      border-color: var(--border-strong);
+    }
+
+    .lang-pill.active {
+      background: rgba(16, 185, 129, 0.12);
+      border-color: var(--action-primary);
+    }
+
+    .lang-flag {
+      font-size: 1.6rem;
+      line-height: 1;
+    }
+
+    .lang-info .lang-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .lang-info .lang-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .auto-badge {
+      display: none;
+      margin-top: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: var(--status-success-soft);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--status-success);
+      font-size: 0.82rem;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .auto-badge.visible {
+      display: flex;
+    }
+
+    /* Live Output Preview */
+    .preview-box {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 20px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .row-meta {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--action-primary);
+      margin-bottom: 6px;
+    }
+
+    .row-hook {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    .row-field {
+      margin-bottom: 10px;
+    }
+
+    .field-lbl {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .field-val {
+      color: #cbd5e1;
+      font-size: 0.88rem;
+    }
+
+    .preview-pill {
+      display: inline-block;
+      font-size: 0.72rem;
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      padding: 2px 8px;
+      border-radius: 6px;
+      color: #94a3b8;
+      margin-right: 6px;
+      margin-top: 4px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      margin-top: 12px;
+    }
+
+    .btn-submit:hover {
+      background: var(--action-primary-hover);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="badge">MAKNA Flow • Content Planner Engine V2.5</div>
+      <h1>Simulasi Pilihan Bahasa (Target Language)</h1>
+      <p class="subtitle">Mendukung pembuatan Planner berbahasa Indonesia (id-ID) dan English (US) (en-US) secara native</p>
+    </header>
+
+    <div class="grid-layout">
+
+      <!-- Form Simulation -->
+      <div class="form-card">
+        <h2 class="section-title">⚙️ Konfigurasi Planner</h2>
+
+        <div class="form-group">
+          <label>Brand Profile / Akun</label>
+          <select id="brandSelect" onchange="onBrandChange()">
+            <option value="umum">Umum / Tanpa Brand Khusus</option>
+            <option value="habitfolk" selected>HabitFolk (Global Wellness & Recipes)</option>
+            <option value="dapurbotani">Dapur Botani (Lokal Herbal Indonesia)</option>
+          </select>
+        </div>
+
+        <!-- NEW FIELD: Target Language Selector -->
+        <div class="form-group">
+          <label>Bahasa Konten (Target Language)</label>
+          <div class="lang-selector-group">
+            <div id="langId" class="lang-pill" onclick="setLanguage('id-ID')">
+              <span class="lang-flag">🇮🇩</span>
+              <div class="lang-info">
+                <div class="lang-name">Bahasa Indonesia</div>
+                <div class="lang-desc">id-ID (Pasar Lokal)</div>
+              </div>
+            </div>
+
+            <div id="langEn" class="lang-pill active" onclick="setLanguage('en-US')">
+              <span class="lang-flag">🇺🇸</span>
+              <div class="lang-info">
+                <div class="lang-name">English (US)</div>
+                <div class="lang-desc">en-US (Global Market)</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="autoSuggestBadge" class="auto-badge visible">
+            💡 <strong>Rekomendasi Otomatis:</strong> Brand HabitFolk menggunakan panduan editorial global. Bahasa disetel ke <strong>English (US)</strong>.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Pilar Konten Utama</label>
+          <input type="text" id="pillarInput" value="Eat Better, Not Perfect, Hype Check, Small Habits" />
+        </div>
+
+        <div class="form-group">
+          <label>Target Audiens</label>
+          <select id="audienceSelect" onchange="updatePreview()">
+            <option value="fitness_health_enthusiast">Health & Fitness Seekers</option>
+            <option value="professional_executive">Busy Professionals</option>
+            <option value="custom">Custom Audience</option>
+          </select>
+        </div>
+
+        <button class="btn-submit" onclick="triggerSimulate()">Simulasi Generate 6 Baris Planner</button>
+      </div>
+
+      <!-- Live Generated Row Preview -->
+      <div class="preview-card">
+        <h2 class="section-title">📄 Preview Output Baris Planner</h2>
+        
+        <div class="preview-box" id="previewBox">
+          <div class="row-meta">Row 01 • Pillar: Eat Better, Not Perfect</div>
+          <div class="row-hook" id="rowHook">"Your morning green smoothie isn't fixing a broken sleep schedule."</div>
+
+          <div class="row-field">
+            <div class="field-lbl">Context (Situasi Kehidupan Nyata)</div>
+            <div class="field-val" id="rowContext">Rushing into the kitchen at 7:15 AM, trying to blend expensive powders while running on 4 hours of sleep.</div>
+          </div>
+
+          <div class="row-field">
+            <div class="field-lbl">Visual Action (Aksi Kamera Makro)</div>
+            <div class="field-val" id="rowVisual">Extreme macro 45° angle. A stainless steel spoon scoops green spirulina powder into a glass blender jar on white Carrara marble. Background arms are soft and blurred in bokeh.</div>
+          </div>
+
+          <div class="row-field">
+            <div class="field-lbl">Metadata Permutasi Strategis</div>
+            <div id="rowMetaPills">
+              <span class="preview-pill">CEP: Problem-Solution</span>
+              <span class="preview-pill">W'S: When (Morning) + While (Rushing)</span>
+              <span class="preview-pill">Angle: The Contrast Shock</span>
+              <span class="preview-pill">Lang: en-US</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    let currentLang = 'en-US';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      document.getElementById('langId').classList.toggle('active', lang === 'id-ID');
+      document.getElementById('langEn').classList.toggle('active', lang === 'en-US');
+      updatePreview();
+    }
+
+    function onBrandChange() {
+      const brand = document.getElementById('brandSelect').value;
+      const badge = document.getElementById('autoSuggestBadge');
+      if (brand === 'habitfolk') {
+        setLanguage('en-US');
+        badge.classList.add('visible');
+        document.getElementById('pillarInput').value = "Eat Better, Not Perfect, Hype Check, Small Habits";
+      } else {
+        setLanguage('id-ID');
+        badge.classList.remove('visible');
+        document.getElementById('pillarInput').value = "Edukasi Nutrisi, Mitos vs Fakta, Tips Praktis";
+      }
+    }
+
+    function updatePreview() {
+      if (currentLang === 'en-US') {
+        document.getElementById('rowHook').innerText = `"Your morning green smoothie isn't fixing a broken sleep schedule."`;
+        document.getElementById('rowContext').innerText = `Rushing into the kitchen at 7:15 AM, trying to blend expensive powders while running on 4 hours of sleep.`;
+        document.getElementById('rowVisual').innerText = `Extreme macro 45° angle. A stainless steel spoon scoops green spirulina powder into a glass blender jar on white Carrara marble. Background arms are soft and blurred in bokeh.`;
+        document.getElementById('rowMetaPills').innerHTML = `
+          <span class="preview-pill">CEP: Problem-Solution</span>
+          <span class="preview-pill">W'S: When (Morning) + While (Rushing)</span>
+          <span class="preview-pill">Angle: The Contrast Shock</span>
+          <span class="preview-pill">Lang: en-US</span>
+        `;
+      } else {
+        document.getElementById('rowHook').innerText = `"Beli blender mahal-mahal, tapi cuma dipakai seminggu terus disimpan di kardus?"`;
+        document.getElementById('rowContext').innerText = `Pagi hari saat mau sarapan sehat tapi malas repot mencuci peralatan dapur yang ribet.`;
+        document.getElementById('rowVisual').innerText = `Kamera macro level meja memperlihatkan irisan apel dan jahe dimasukkan ke dalam jar blender di atas meja marmer putih.`;
+        document.getElementById('rowMetaPills').innerHTML = `
+          <span class="preview-pill">CEP: Problem-Solution</span>
+          <span class="preview-pill">W'S: When (Pagi) + While (Buru-buru)</span>
+          <span class="preview-pill">Angle: The Contrast Shock</span>
+          <span class="preview-pill">Lang: id-ID</span>
+        `;
+      }
+    }
+
+    function triggerSimulate() {
+      alert(`Simulasi berhasil! Planner akan disimpan dengan konfigurasi target_language: "${currentLang}". Seluruh hook dan context akan konsisten dalam bahasa tersebut.`);
+    }
+  </script>
+
+</body>
+</html>

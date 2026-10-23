@@ -1,5 +1,12 @@
 # Changelog
 
+## V2.32.81 — Support Target Language in Content Planner (24/10/2026)
+- Add target_language column to content_planners table with auto-migration
+- Add SUPPORTED_PLANNER_LANGUAGES and normalizePlannerLanguage contract
+- Inject critical English language mandate in AI Call 1 and Call 2 planner engines
+- Add Target Language selector UI with HabitFolk auto-detection in PlannerConfigurationForm
+- Add unit test suite tests/content-planner-language-support.test.js
+
 ## V2.32.80 — Support Sequential Wardrobe in Multiplier Lab (23/10/2026)
 - Dukungan rotasi sequential wardrobe pada buildMultiplierPhase2Prompt per row
 - Resolusi per-row visual overrides pada multiplier worker

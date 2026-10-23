@@ -533,6 +533,7 @@ export default function ContentPlannerWorkbench() {
                 <span>{planner?.planner_focus === 'brand_editorial' ? '🧩 Brand Editorial' : <>📦 Produk: <strong>{planner?.product_name}</strong></>}</span>
               )}
               <span>Platform: <strong>{planner?.platform?.toUpperCase() || 'TIKTOK'}</strong></span>
+              <span>🌐 Bahasa: <strong style={{ color: planner?.target_language === 'en-US' ? 'var(--status-info)' : 'inherit' }}>{planner?.target_language === 'en-US' ? '🇺🇸 English' : '🇮🇩 Indonesia'}</strong></span>
               <span>Total: <strong>{rows.length} Baris Plan</strong></span>
             </p>
           </div>

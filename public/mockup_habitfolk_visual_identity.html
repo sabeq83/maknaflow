@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HabitFolk — Visual Identity Showcase & Storyboard Mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --surface: #0b0f17;
+      --surface-raised: #131b26;
+      --surface-interactive: #1a2434;
+      --surface-subtle: #0f1622;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.16);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --action-primary: #10b981;
+      --action-primary-hover: #059669;
+      --on-action-primary: #ffffff;
+      --status-info-soft: rgba(56, 189, 248, 0.12);
+      --status-info: #38bdf8;
+      --status-success-soft: rgba(16, 185, 129, 0.12);
+      --status-success: #10b981;
+      --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-serif: 'Playfair Display', Georgia, serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--surface);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      padding: 40px 24px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 36px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      background: var(--status-success-soft);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--status-success);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .title-group h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .title-group p {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      margin-top: 6px;
+    }
+
+    .spec-pills {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill strong {
+      color: var(--text-primary);
+    }
+
+    /* Grid Layout */
+    .showcase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 28px;
+      margin-bottom: 48px;
+    }
+
+    .card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      transition: transform 0.25s ease, border-color 0.25s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-strong);
+    }
+
+    .media-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      background: #000;
+      overflow: hidden;
+    }
+
+    .media-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+
+    .card:hover .media-container img {
+      transform: scale(1.02);
+    }
+
+    .step-tag {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(11, 15, 23, 0.8);
+      backdrop-filter: blur(8px);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .card-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .scene-meta {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--action-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .scene-title {
+      font-size: 1.28rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--text-primary);
+    }
+
+    .scene-desc {
+      color: var(--text-secondary);
+      font-size: 0.94rem;
+      line-height: 1.55;
+      margin-bottom: 18px;
+      flex-grow: 1;
+    }
+
+    .dna-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      background: var(--surface-interactive);
+      color: #cbd5e1;
+      padding: 3px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .prompt-box {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 0.82rem;
+      font-family: monospace;
+      color: #94a3b8;
+      max-height: 80px;
+      overflow-y: auto;
+      line-height: 1.4;
+      cursor: pointer;
+    }
+
+    .prompt-box:hover {
+      color: #f1f5f9;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Spec Section */
+    .spec-section {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 36px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .spec-section h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .spec-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .spec-item {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      padding: 20px;
+      border-radius: 14px;
+    }
+
+    .spec-item .label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .spec-item .val {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .spec-item .detail {
+      font-size: 0.86rem;
+      color: var(--text-secondary);
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="title-group">
+        <div class="brand-badge">HabitFolk • Visual Identity System</div>
+        <h1>Modern Culinary Lab (Caucasian Male Chef)</h1>
+        <p>Storyboard Simulasi Resep Jus Apel Sehat — Meja Marmer Putih, Lengan Digulung & Bebas Wajah (Strictly Faceless)</p>
+      </div>
+
+      <div class="spec-pills">
+        <div class="pill">Subjek: <strong>Caucasian Male</strong></div>
+        <div class="pill">Framing: <strong>Forearms & Hands</strong></div>
+        <div class="pill">Surface: <strong>White Carrara Marble</strong></div>
+        <div class="pill">Sleeve: <strong>Rolled Charcoal Linen</strong></div>
+      </div>
+    </header>
+
+    <!-- 3-Shot Sequence Grid -->
+    <div class="showcase-grid">
+
+      <!-- Scene 1: Prep -->
+      <div class="card">
+        <div class="media-container">
+          <span class="step-tag">Scene 01 • Prep</span>
+          <img src="/temp/mockups/habitfolk_apple_prep_1792748865645.jpg" alt="Scene 1: Slicing Apples on Rustic Oak and Marble" />
+        </div>
+        <div class="card-body">
+          <div class="scene-meta">Hook & Preparation</div>
+          <h3 class="scene-title">The Crisp Slice</h3>
+          <p class="scene-desc">
+            Lengan bawah pria kaukasia dengan kemeja linen charcoal digulung rapi memotong apel hijau & merah renyah di atas talenan kayu oak. Meja dapur marmer putih Carrara memantulkan cahaya alami jendela yang hangat.
+          </p>
+          <div class="dna-tags">
+            <span class="tag">Oak Board</span>
+            <span class="tag">Chef Knife</span>
+            <span class="tag">Fresh Apples</span>
+            <span class="tag">Morning Daylight</span>
+          </div>
+          <div class="prompt-box" title="Klik untuk melihat prompt DNA">
+            High-end culinary cinematography, Caucasian male hands slicing fresh apples on rustic oak board, white Carrara marble island, natural daylight...
+          </div>
+        </div>
+      </div>
+
+      <!-- Scene 2: Blend -->
+      <div class="card">
+        <div class="media-container">
+          <span class="step-tag">Scene 02 • Mechanism</span>
+          <img src="/temp/mockups/habitfolk_apple_blender_1792748885004.jpg" alt="Scene 2: Loading Ingredients into Blender Jar" />
+        </div>
+        <div class="card-body">
+          <div class="scene-meta">Action & Assembly</div>
+          <h3 class="scene-title">The Pure Blend</h3>
+          <p class="scene-desc">
+            Tangan memasukkan potongan apel segar, rempah jahe, dan daun mint ke tabung blender kaca bening. Komposisi bersih menampakkan bulir air segar dan lemon di atas meja marmer putih.
+          </p>
+          <div class="dna-tags">
+            <span class="tag">Glass Blender</span>
+            <span class="tag">Ginger & Mint</span>
+            <span class="tag">White Marble</span>
+            <span class="tag">Tactile Food</span>
+          </div>
+          <div class="prompt-box" title="Klik untuk melihat prompt DNA">
+            Caucasian male hands adding sliced green apples, fresh ginger, and mint into a modern glass blender jar on white marble countertop...
+          </div>
+        </div>
+      </div>
+
+      <!-- Scene 3: Pour -->
+      <div class="card">
+        <div class="media-container">
+          <span class="step-tag">Scene 03 • The Finish</span>
+          <img src="/temp/mockups/habitfolk_apple_pour_1792748905747.jpg" alt="Scene 3: Pouring Fresh Juice over Ice Cubes" />
+        </div>
+        <div class="card-body">
+          <div class="scene-meta">Outcome & Appetite Appeal</div>
+          <h3 class="scene-title">The Golden Pour</h3>
+          <p class="scene-desc">
+            Aksi menuang jus apel keemasan berbusa lembut dari pitcher kaca ke gelas kristal penuh es batu. Percikan dinamis dan kilau cairan di atas marmer putih memberikan visual reward yang memikat penonton.
+          </p>
+          <div class="dna-tags">
+            <span class="tag">Golden Pour</span>
+            <span class="tag">Clear Ice Cubes</span>
+            <span class="tag">High-Speed Splash</span>
+            <span class="tag">Visual Reward</span>
+          </div>
+          <div class="prompt-box" title="Klik untuk melihat prompt DNA">
+            Caucasian male hands pouring freshly blended golden-green apple juice into tall crystal glass with clear ice cubes, dynamic splash...
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Parameter Specifications Summary -->
+    <div class="spec-section">
+      <h2>⚙️ Arsitektur Visual Identity HabitFolk</h2>
+      <div class="spec-grid">
+        <div class="spec-item">
+          <div class="label">Demografis & Karakter</div>
+          <div class="val">Caucasian Male (Pria Kaukasia)</div>
+          <div class="detail">Lengan berotot bersih terawat, proporsional, kulit light-tan alami. Strictly faceless (kamera crop di dada/bawah leher).</div>
+        </div>
+        <div class="spec-item">
+          <div class="label">Aturan Lengan (Sleeve Policy)</div>
+          <div class="val">Forearms Exposed (Rolled Sleeves)</div>
+          <div class="detail">Kemeja linen kasual warna Charcoal / Stone Grey digulung rapi hingga tengah lengan bawah, memberi kesan chef artisan aktif.</div>
+        </div>
+        <div class="spec-item">
+          <div class="label">Alas & Latar Belakang Dapur</div>
+          <div class="val">White Carrara Marble Countertop</div>
+          <div class="detail">Meja pulau dapur marmer putih mewah dengan serat abu-abu lembut. Higienis, elegan, dan membuat warna buah/sayur menyala.</div>
+        </div>
+        <div class="spec-item">
+          <div class="label">Tata Cahaya & Lensa</div>
+          <div class="val">Natural Window Daylight (Soft Warm)</div>
+          <div class="detail">Cahaya samping jendela alami, shallow depth of field (f/2.0), menangkap detail tekstur makanan dan embun dingin tanpa glare buatan.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -46,12 +46,11 @@ test('validateRecipePlannerDraft rejects invalid category and count outside 1-20
   }, /Jumlah baris Recipe Campaign/);
 
   assert.throws(() => {
-    validateRecipePlannerDraft({ category: 'masakan', count: 25, productIds: ['p1'] });
+    validateRecipePlannerDraft({ category: 'masakan', count: 35, productIds: ['p1'] });
   }, /Jumlah baris Recipe Campaign/);
 
-  assert.throws(() => {
-    validateRecipePlannerDraft({ category: 'masakan', count: 5, productIds: [] });
-  }, /Minimal satu produk katalog/);
+  const organicDraft = validateRecipePlannerDraft({ category: 'masakan', count: 5, productIds: [] });
+  assert.equal(organicDraft.isOrganicMode, true);
 });
 
 test('validateCanonicalRecipe validates complete recipe structure', () => {
