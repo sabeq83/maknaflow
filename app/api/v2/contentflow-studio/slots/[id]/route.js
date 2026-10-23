@@ -40,6 +40,10 @@ export const GET = withTenantContext(async (request, context) => {
     `, [id, tenantId]);
     slot.events = eventsRes.rows;
 
+    // Enrich with live engine tracker data
+    const { resolveLiveEngineState } = await import('@/lib/contentflow-studio-live-tracker');
+    slot.live_engine = await resolveLiveEngineState(slot, tenantId);
+
     return NextResponse.json({ success: true, data: slot });
   } catch (error) {
     console.error('[Slot GET Error]:', error);

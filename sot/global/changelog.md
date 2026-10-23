@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.78 — ContentFlow Studio Live Progress Tracker & Detail Logs (23/10/2026)
+- Helper resolveLiveEngineState untuk tracking sub-status real-time engine domain
+- Perkaya calendar dan slot detail API dengan live_engine data
+- Tampilkan sub-status dan elapsed time pada kolom Status Produksi tabel studio
+- Sediakan Live Tracker card, Visual Stepper 6 tahap, dan deep-link campaign sumber di modal log
+
 ## V2.32.77 — ContentFlow Studio Execution & Retry Enhancements (23/10/2026)
 - Dukungan aktivasi batch v3 pada guard actions
 - Aksi cepat dispatch_now dan quick retry di tabel serta modal slot

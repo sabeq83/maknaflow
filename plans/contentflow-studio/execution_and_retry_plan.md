@@ -53,7 +53,7 @@ Sesuai SOP, simulasi interaktif telah dibuat di:
   - Tambahkan tombol `⚡ Eksekusi Sekarang` pada baris tabel slot berstatus `draft`.
   - Tambahkan tombol `🔄 Retry AI` langsung di baris tabel untuk slot `failed`.
   - Sediakan tombol eksekusi dan penyesuaian jadwal tayang di modal slot detail.
-- [ ] **Task 5: Verifikasi di Server Dev & Aktivasi 5 Konten Eksisting**
+- [x] **Task 5: Verifikasi di Server Dev & Aktivasi 5 Konten Eksisting**
   - Build dan reload PM2 dev (`maknaflow-dev-ui` & `maknaflow-dev-api`).
   - Verifikasi aktivasi 3 batch dan perhatikan antrean 5 slot terproses oleh worker.
 

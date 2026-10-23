@@ -794,7 +794,23 @@ export default function StudioWorkspace() {
                     <td style={{ padding: '10px 14px', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
                       {s.scheduled_publish_at ? new Date(s.scheduled_publish_at).toLocaleString('id-ID') : '-'}
                     </td>
-                    <td style={{ padding: '10px 14px' }}>{getStatusBadge(s.stage_status, null)}</td>
+                    <td style={{ padding: '10px 14px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <div>{getStatusBadge(s.stage_status, null)}</div>
+                        {s.stage_status === 'in_progress' && s.live_engine && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <span style={{ fontSize: '0.72rem', color: 'var(--status-info)', fontWeight: 500 }}>
+                              {s.live_engine.sub_status_label}
+                            </span>
+                            {s.live_engine.elapsed_text && (
+                              <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                                ⏱️ {s.live_engine.elapsed_text}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </td>
                     <td style={{ padding: '10px 14px' }}>{getStatusBadge(null, s.publishing_status)}</td>
                     <td style={{ padding: '10px 14px', textAlign: 'right', whiteSpace: 'nowrap' }}>
                       {s.stage_status === 'draft' && (
@@ -851,7 +867,7 @@ export default function StudioWorkspace() {
                           marginRight: '6px'
                         }}
                       >
-                        📜 Log
+                        📜 Log Detil
                       </button>
                       <button
                         type="button"
@@ -1432,7 +1448,7 @@ export default function StudioWorkspace() {
                   cursor: 'pointer'
                 }}
               >
-                📜 Log Eksekusi & Audit ({selectedSlot.events?.length || 0})
+                ⚡ Live Tracker & Log Detil
               </button>
             </div>
 
@@ -2005,134 +2021,320 @@ export default function StudioWorkspace() {
               </>
             )}
 
-            {/* TAB CONTENT: Log Eksekusi & Audit Trail */}
+            {/* TAB CONTENT: Log Eksekusi, Live Tracker & Stepper Timeline */}
             {slotModalTab === 'log' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                    Riwayat event audit trail untuk slot ini dari <code>content_studio_events</code>:
-                  </span>
-                </div>
-
-                {(!selectedSlot.events || selectedSlot.events.length === 0) ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {/* 1. LIVE ENGINE TRACKER CARD */}
+                {selectedSlot.live_engine ? (
                   <div style={{
-                    padding: '24px',
-                    textAlign: 'center',
-                    background: 'var(--surface-subtle)',
-                    borderRadius: '8px',
-                    color: 'var(--text-muted)',
-                    fontSize: '0.85rem'
+                    background: 'var(--surface-raised)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: '10px',
+                    padding: '16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px'
                   }}>
-                    Belum ada event audit log tercatat untuk slot ini.
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        ⚡ Status Mesin Domain ({selectedSlot.live_engine.kind?.toUpperCase()} Engine)
+                      </span>
+                      <span style={{
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        background: 'var(--status-warning-soft)',
+                        color: 'var(--status-warning)',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        border: '1px solid rgba(245, 158, 11, 0.3)'
+                      }}>
+                        {selectedSlot.live_engine.engine_status?.toUpperCase()}
+                      </span>
+                    </div>
+
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                      gap: '10px',
+                      fontSize: '0.82rem'
+                    }}>
+                      <div style={{ background: 'var(--surface)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem', display: 'block', textTransform: 'uppercase' }}>ID CAMPAIGN SUMBER</span>
+                        <span style={{ fontFamily: 'monospace', fontWeight: 600, fontSize: '0.76rem', wordBreak: 'break-all' }}>{selectedSlot.live_engine.campaign_id}</span>
+                      </div>
+                      <div style={{ background: 'var(--surface)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem', display: 'block', textTransform: 'uppercase' }}>SUB-TAHAP BERJALAN</span>
+                        <span style={{ color: 'var(--status-info)', fontWeight: 600 }}>{selectedSlot.live_engine.sub_status_label}</span>
+                      </div>
+                      <div style={{ background: 'var(--surface)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem', display: 'block', textTransform: 'uppercase' }}>DURASI PROSES</span>
+                        <span style={{ fontWeight: 600 }}>⏱️ {selectedSlot.live_engine.elapsed_text || 'Baru saja'}</span>
+                      </div>
+                    </div>
+
+                    <div style={{
+                      background: 'var(--surface)',
+                      borderLeft: '3px solid var(--action-primary)',
+                      padding: '10px 14px',
+                      borderRadius: '4px',
+                      fontSize: '0.82rem',
+                      lineHeight: '1.4'
+                    }}>
+                      <strong>Informasi Detail:</strong> {selectedSlot.live_engine.details}
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      {selectedSlot.live_engine.campaign_url && selectedSlot.live_engine.campaign_url !== '#' && (
+                        <a
+                          href={selectedSlot.live_engine.campaign_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{
+                            padding: '6px 14px',
+                            borderRadius: '6px',
+                            background: 'var(--action-primary)',
+                            color: 'var(--on-action-primary)',
+                            textDecoration: 'none',
+                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                          }}
+                        >
+                          🔗 Buka Halaman Campaign Sumber ({selectedSlot.live_engine.kind?.toUpperCase()})
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => openSlot(selectedSlot.id, 'log')}
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          border: '1px solid var(--border-subtle)',
+                          background: 'var(--surface)',
+                          color: 'var(--text-secondary)',
+                          fontSize: '0.8rem',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        🔄 Refresh Status Live
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '10px',
-                    maxHeight: '340px',
-                    overflowY: 'auto',
-                    border: '1px solid var(--border-subtle)',
+                    padding: '14px 18px',
+                    background: 'var(--surface-raised)',
                     borderRadius: '8px',
-                    padding: '12px',
-                    background: 'var(--surface-raised)'
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-secondary)',
+                    fontSize: '0.84rem'
                   }}>
-                    {selectedSlot.events.map((ev, i) => (
-                      <div
-                        key={ev.id || i}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '4px',
-                          padding: '10px 12px',
-                          borderRadius: '6px',
-                          border: '1px solid var(--border-subtle)',
-                          background: 'var(--surface)'
-                        }}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{
-                            padding: '2px 8px',
-                            borderRadius: '4px',
-                            background: ev.event_type?.includes('fail') ? 'var(--status-danger-soft)' :
-                                       ev.event_type?.includes('retry') ? 'var(--status-info-soft)' :
-                                       ev.event_type?.includes('reschedule') ? 'var(--status-warning-soft)' : 'var(--surface-interactive)',
-                            color: ev.event_type?.includes('fail') ? 'var(--status-danger)' :
-                                   ev.event_type?.includes('retry') ? 'var(--status-info)' :
-                                   ev.event_type?.includes('reschedule') ? 'var(--status-warning)' : 'var(--text-primary)',
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                            fontFamily: 'monospace'
-                          }}>
-                            {ev.event_type}
-                          </span>
-                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                            {ev.created_at ? new Date(ev.created_at).toLocaleString('id-ID') : '-'}
-                          </span>
-                        </div>
-                        {ev.checkpoint_state && (
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                            Status checkpoint: <code>{ev.checkpoint_state}</code>
-                          </div>
-                        )}
-                        {ev.error_message && (
-                          <div style={{ fontSize: '0.78rem', color: 'var(--status-danger)', background: 'var(--status-danger-soft)', padding: '4px 8px', borderRadius: '4px' }}>
-                            ⚠️ {ev.error_message}
-                          </div>
-                        )}
-                        {ev.payload_json && (
-                          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
-                            {typeof ev.payload_json === 'string' ? ev.payload_json : JSON.stringify(ev.payload_json)}
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                    {selectedSlot.stage_status === 'draft' ? '📝 Slot berstatus Draft. Belum dialokasikan ke worker AI.' :
+                     selectedSlot.stage_status === 'pending' ? '⏳ Slot dalam antrean worker AI. Menunggu giliran jadwal produksi.' :
+                     '✓ Produksi AI telah selesai dirender.'}
                   </div>
                 )}
 
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  borderTop: '1px solid var(--border-subtle)',
-                  paddingTop: '12px',
-                  marginTop: '6px'
-                }}>
-                  <button
-                    type="button"
-                    onClick={() => setSlotModalTab('details')}
-                    style={{
-                      padding: '6px 12px',
-                      borderRadius: '6px',
+                {/* 2. VISUAL STEPPER TIMELINE (6 TAHAPAN) */}
+                {(() => {
+                  const stepIdx = selectedSlot.live_engine?.step_index || (selectedSlot.stage_status === 'ready' || selectedSlot.stage_status === 'completed' ? 5 : selectedSlot.stage_status === 'in_progress' ? 3 : 1);
+                  return (
+                    <div style={{
+                      background: 'var(--surface-raised)',
                       border: '1px solid var(--border-subtle)',
-                      background: 'var(--surface)',
-                      color: 'var(--text-secondary)',
-                      fontSize: '0.8rem',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    ← Kembali ke Detail
-                  </button>
-                  <a
-                    href="/content-flow"
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{
-                      padding: '6px 14px',
-                      borderRadius: '6px',
+                      borderRadius: '10px',
+                      padding: '16px'
+                    }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        📋 Alur & Progres Tahapan Konten (6 Langkah)
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingLeft: '14px', borderLeft: '2px solid var(--border-strong)', marginLeft: '10px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <span style={{ fontWeight: 600, fontSize: '0.84rem', color: stepIdx >= 1 ? 'var(--status-success)' : 'var(--text-primary)' }}>
+                            {stepIdx >= 1 ? '✓' : '1.'} 1. Perencanaan Batch & Slot Jadwal
+                          </span>
+                          <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                            Slot dikonfigurasi pada jadwal tayang {selectedSlot.scheduled_publish_at ? new Date(selectedSlot.scheduled_publish_at).toLocaleDateString('id-ID') : '-'}.
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <span style={{ fontWeight: 600, fontSize: '0.84rem', color: stepIdx > 2 ? 'var(--status-success)' : (stepIdx === 2 ? 'var(--action-primary)' : 'var(--text-primary)') }}>
+                            {stepIdx > 2 ? '✓' : '2.'} 2. Alokasi Worker & Dispatch AI Engine
+                          </span>
+                          <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                            {selectedSlot.dispatched_at ? `Diklaim pada ${new Date(selectedSlot.dispatched_at).toLocaleTimeString('id-ID')}` : 'Menunggu antrean worker.'}
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <span style={{ fontWeight: 600, fontSize: '0.84rem', color: stepIdx > 3 ? 'var(--status-success)' : (stepIdx === 3 ? 'var(--action-primary)' : 'var(--text-primary)') }}>
+                            {stepIdx > 3 ? '✓' : '3.'} 3. Penyusunan Naskah & Storyboard DNA
+                          </span>
+                          <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                            Gemini AI menyusun naskah VO, 10 parameter video, dan storyboard.
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <span style={{ fontWeight: 600, fontSize: '0.84rem', color: stepIdx > 4 ? 'var(--status-success)' : (stepIdx === 4 ? 'var(--action-primary)' : 'var(--text-primary)') }}>
+                            {stepIdx > 4 ? '✓' : '4.'} 4. Sintesis Suara TTS & Render Klip Video
+                          </span>
+                          <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                            ElevenLabs merender audio voiceover dan G-Labs/FFmpeg merender video final.
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <span style={{ fontWeight: 600, fontSize: '0.84rem', color: stepIdx > 5 ? 'var(--status-success)' : (stepIdx === 5 ? 'var(--action-primary)' : 'var(--text-primary)') }}>
+                            {stepIdx > 5 ? '✓' : '5.'} 5. Peninjauan Tim & Persetujuan (Approval)
+                          </span>
+                          <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                            Video dan naskah ditinjau oleh operator sebelum diizinkan posting.
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <span style={{ fontWeight: 600, fontSize: '0.84rem', color: selectedSlot.publishing_status === 'published' ? 'var(--status-success)' : 'var(--text-primary)' }}>
+                            {selectedSlot.publishing_status === 'published' ? '✓' : '6.'} 6. Publikasi Otomatis ke Sosmed (Repliz)
+                          </span>
+                          <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                            Video diposting ke seluruh akun Repliz yang terhubung sesuai jam tayang.
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* 3. AUDIT TRAIL LOG TEKNIS */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                      📜 Histori Audit Log Teknis (content_studio_events):
+                    </span>
+                  </div>
+
+                  {(!selectedSlot.events || selectedSlot.events.length === 0) ? (
+                    <div style={{
+                      padding: '20px',
+                      textAlign: 'center',
+                      background: 'var(--surface-subtle)',
+                      borderRadius: '8px',
+                      color: 'var(--text-muted)',
+                      fontSize: '0.82rem'
+                    }}>
+                      Belum ada event audit log teknis tercatat untuk slot ini.
+                    </div>
+                  ) : (
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px',
+                      maxHeight: '260px',
+                      overflowY: 'auto',
                       border: '1px solid var(--border-subtle)',
-                      background: 'var(--surface-interactive)',
-                      color: 'var(--action-primary)',
-                      fontSize: '0.8rem',
-                      fontWeight: 600,
-                      textDecoration: 'none',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                  >
-                    🔗 Buka di ContentFlow / Log Publishing Sistem →
-                  </a>
+                      borderRadius: '8px',
+                      padding: '10px',
+                      background: 'var(--surface-raised)'
+                    }}>
+                      {selectedSlot.events.map((ev, i) => (
+                        <div
+                          key={ev.id || i}
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '4px',
+                            padding: '8px 10px',
+                            borderRadius: '6px',
+                            border: '1px solid var(--border-subtle)',
+                            background: 'var(--surface)'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              background: ev.event_type?.includes('fail') ? 'var(--status-danger-soft)' :
+                                         ev.event_type?.includes('retry') ? 'var(--status-info-soft)' :
+                                         ev.event_type?.includes('reschedule') ? 'var(--status-warning-soft)' : 'var(--surface-interactive)',
+                              color: ev.event_type?.includes('fail') ? 'var(--status-danger)' :
+                                     ev.event_type?.includes('retry') ? 'var(--status-info)' :
+                                     ev.event_type?.includes('reschedule') ? 'var(--status-warning)' : 'var(--text-primary)',
+                              fontSize: '0.74rem',
+                              fontWeight: 600,
+                              fontFamily: 'monospace'
+                            }}>
+                              {ev.event_type}
+                            </span>
+                            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                              {ev.created_at ? new Date(ev.created_at).toLocaleString('id-ID') : '-'}
+                            </span>
+                          </div>
+                          {ev.checkpoint_state && (
+                            <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)' }}>
+                              Status checkpoint: <code>{ev.checkpoint_state}</code>
+                            </div>
+                          )}
+                          {ev.error_message && (
+                            <div style={{ fontSize: '0.76rem', color: 'var(--status-danger)', background: 'var(--status-danger-soft)', padding: '4px 8px', borderRadius: '4px' }}>
+                              ⚠️ {ev.error_message}
+                            </div>
+                          )}
+                          {ev.payload_json && (
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                              {typeof ev.payload_json === 'string' ? ev.payload_json : JSON.stringify(ev.payload_json)}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    borderTop: '1px solid var(--border-subtle)',
+                    paddingTop: '12px',
+                    marginTop: '4px'
+                  }}>
+                    <button
+                      type="button"
+                      onClick={() => setSlotModalTab('details')}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        border: '1px solid var(--border-subtle)',
+                        background: 'var(--surface)',
+                        color: 'var(--text-secondary)',
+                        fontSize: '0.8rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ← Kembali ke Detail
+                    </button>
+                    <a
+                      href="/content-flow"
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        padding: '6px 14px',
+                        borderRadius: '6px',
+                        border: '1px solid var(--border-subtle)',
+                        background: 'var(--surface-interactive)',
+                        color: 'var(--action-primary)',
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        textDecoration: 'none',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      🔗 Buka di ContentFlow / Log Publishing Sistem →
+                    </a>
+                  </div>
                 </div>
               </div>
             )}

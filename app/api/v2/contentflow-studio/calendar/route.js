@@ -52,9 +52,20 @@ export const GET = withTenantContext(async (request) => {
       failed: filtered.filter(s => s.stage_status === 'failed' || s.publishing_status === 'failed').length
     };
 
+    const { resolveLiveEngineState } = await import('@/lib/contentflow-studio-live-tracker');
+    const enrichedData = await Promise.all(
+      filtered.map(async (slot) => {
+        if (['in_progress', 'needs_review'].includes(slot.stage_status)) {
+          const live = await resolveLiveEngineState(slot, tenantId);
+          return { ...slot, live_engine: live };
+        }
+        return slot;
+      })
+    );
+
     return NextResponse.json({
       success: true,
-      data: filtered,
+      data: enrichedData,
       metrics
     });
   } catch (error) {
