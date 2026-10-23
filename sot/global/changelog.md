@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.82 — Fix JSON parser glitch in Recipe OPC Pillar Generator (24/10/2026)
+- Implement safeParseRecipeJson with jsonrepair multi-tier fallback
+- Migrate recipe creative generation to generateContentFlexible with key pool
+- Add jsonrepair fallback to recipe-planner and content-planner engines
+- Add tests/recipe-json-repair.test.js suite
+
 ## V2.32.81 — Support Target Language in Content Planner (24/10/2026)
 - Add target_language column to content_planners table with auto-migration
 - Add SUPPORTED_PLANNER_LANGUAGES and normalizePlannerLanguage contract
