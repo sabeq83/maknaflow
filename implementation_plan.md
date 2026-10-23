@@ -1,277 +1,236 @@
-# Implementation Plan: Fix Missing `tenant_id` on Recipe Campaigns & Items
+# Implementation Plan - Dukungan Wardrobe Sequential pada Multiplier Lab
 
-Rencana perbaikan ini mengatasi error log server staging:
-`[PostgreSQL Query Error] column "tenant_id" does not exist SQL: SELECT tenant_id FROM recipe_campaigns WHERE id = $1`
-`[Campaign Scheduler] Error fetching tenantId for runStep: column "tenant_id" does not exist`
+Dokumen ini menganalisis penyebab Wardrobe Mode / Key tidak bisa sequential pada Multiplier Lab (dibandingkan dengan Kampanye Pillar) dan merinci tahapan implementasi perbaikan agar rotasi pakaian antar-baris (Baris 1 s/d N) berjalan sempurna secara berurutan.
 
-### Akar Masalah (Root Cause):
-Tabel `recipe_campaigns` dan `recipe_items` di seluruh schema PostgreSQL (`public`, `staging`, `dev`) belum memiliki kolom `tenant_id`. Saat background `campaign-scheduler` menjalankan step kampanye resep, scheduler mengeksekusi query `SELECT tenant_id FROM recipe_campaigns WHERE id = ?` yang memicu error fatal pada PostgreSQL dan mengotori system logs.
+## 1. Analisis Akar Masalah (Root Cause Analysis)
 
----
+### 1.1 Perbandingan Arsitektur: Pillar Campaign vs Multiplier Lab
 
-## 📋 Execution Task List
+| Komponen | Kampanye Pillar (OPC) | Multiplier Lab (Saat Ini) |
+| :--- | :--- | :--- |
+| **Penyimpanan VSO** | `campaign.visual_overrides_json` menyimpan snapshot visual identity | `task.vso_config_json` menyimpan konfigurasi VSO mentah |
+| **Resolusi per Baris/Item** | Worker memanggil `resolveVisualOverrides({ visualOverrides, itemIndex })` di mana `itemIndex = row_number - 1` | Worker **TIDAK PERNAH** memanggil `resolveVisualOverrides`, hanya membaca `JSON.parse(task.vso_config_json)` |
+| **Dukungan `sequential` di Prompt Builder** | `buildOrganicPillarPrompt` menerima `vsoData` yang sudah di-resolve menjadi `wardrobe_style_custom` spesifik per baris | `buildMultiplierPhase2Prompt` **HANYA** memiliki logika `if (wardrobeStyleVal === 'random')`. Tidak ada logika `sequential`, dan tidak menerima parameter `rowIndex` |
+| **Hasil Output saat `sequential` dipilih** | Baris 1: Amber Terracotta, Baris 2: Mocca Caramel, Baris 3: Warm Grey, dst. | Variabel `targetWardrobe` jatuh ke fallback string literal: **`"sequential"`**. Prompt AI bertuliskan `- Wardrobe / Pakaian: sequential` tanpa warna nyata |
+| **Sinkronisasi Form UI** | Membaca langsung dari `visualIdentity.visual_overrides_json` | `wardrobeStyle` di root payload tidak tersinkronisasi dengan pilihan dropdown di `VisualIdentitySelector` |
 
-- [x] **Task 1: Eksekusi Migrasi DDL PostgreSQL pada Schema `public`, `staging`, dan `dev`**
-  - [x] Tambahkan kolom `tenant_id TEXT DEFAULT 'default_tenant'` pada `recipe_campaigns` dan `recipe_items` di seluruh schema aktif.
-  - [x] Buat index performa `idx_recipe_campaigns_tenant` dan `idx_recipe_items_tenant`.
-
-- [x] **Task 2: Penambahan Auto-Migration pada `lib/db-pg.js`**
-  - [x] Daftarkan script auto-migration `ALTER TABLE recipe_campaigns ADD COLUMN IF NOT EXISTS tenant_id TEXT DEFAULT 'default_tenant'` dan `recipe_items`.
-
-- [x] **Task 3: Perbaikan Query dan Persistensi Tenant pada `lib/db.js`**
-  - [x] Perbarui `createRecipeCampaign` agar menyertakan kolom `tenant_id` (fallback `'default_tenant'`).
-  - [x] Perbarui `createRecipeItem` agar menyertakan kolom `tenant_id` (fallback `'default_tenant'`).
-  - [x] Perbarui `getRecipeCampaigns` agar mendukung tenant-scoping dengan fallback `'default_tenant'`.
-
-- [x] **Task 4: Integrasi Tenant Context pada `app/api/recipe-labs/route.js`**
-  - [x] Teruskan `tenantId` dari `getActiveTenantId()` saat pembuatan kampanye baru dan pembuatan recipe items.
-
-- [x] **Task 5: Defensive Query Handling pada `lib/campaign-scheduler.js`**
-  - [x] Bungkus pemanggilan `SELECT tenant_id FROM recipe_campaigns` dalam blok try-catch dengan fallback `'default_tenant'` agar scheduler kebal terhadap replika lag atau anomali skema.
-
-- [x] **Task 6: Uji Verifikasi Database & Query**
-  - [x] Jalankan query verifikasi langsung ke database PostgreSQL untuk memastikan kolom `tenant_id` telah aktif dan query scheduler berjalan tanpa error.
-
-- [x] **Task 7: Build, Rilis Non-Interaktif & Deployment Mac Mini Dev & Staging**
-  - [x] Verifikasi `npm run build` bebas error.
-  - [x] Jalankan `npm run release-non-interactive` sesuai SOP (v2.32.69).
-  - [x] Deploy ke server dev Mac Mini (`npm run deploy:dev:atomic`).
-  - [x] Deploy ke server staging Mac Mini (`npm run deploy:staging`).
-
----
-
-## 🔍 Before & After Code Snippets
-
-### 1. `lib/db-pg.js` — Auto-Migration `tenant_id` untuk Recipe Tables
-
-#### Code Sebelum (Current/Before):
-```javascript
-// lib/db-pg.js:L279-L293
-    pool.query(`
-      ALTER TABLE pillar_campaigns
-        ADD COLUMN IF NOT EXISTS target_demographic TEXT,
-        ADD COLUMN IF NOT EXISTS target_demographic_custom TEXT,
-        ADD COLUMN IF NOT EXISTS clip_duration INTEGER DEFAULT 8;
-      ALTER TABLE re_campaigns
-        ADD COLUMN IF NOT EXISTS clip_duration INTEGER DEFAULT 8;
-      ALTER TABLE sheets_campaigns
-        ADD COLUMN IF NOT EXISTS clip_duration INTEGER DEFAULT 8;
-      ALTER TABLE recipe_campaigns
-        ADD COLUMN IF NOT EXISTS clip_duration INTEGER DEFAULT 8;
-    `).catch(err => {
-      console.warn('[PostgreSQL Auto-Migration Warning] Gagal migrasi demographic & clip_duration:', err.message);
-    });
-```
-
-#### Code Sesudah (Proposed/After):
-```javascript
-    pool.query(`
-      ALTER TABLE pillar_campaigns
-        ADD COLUMN IF NOT EXISTS target_demographic TEXT,
-        ADD COLUMN IF NOT EXISTS target_demographic_custom TEXT,
-        ADD COLUMN IF NOT EXISTS clip_duration INTEGER DEFAULT 8;
-      ALTER TABLE re_campaigns
-        ADD COLUMN IF NOT EXISTS clip_duration INTEGER DEFAULT 8;
-      ALTER TABLE sheets_campaigns
-        ADD COLUMN IF NOT EXISTS clip_duration INTEGER DEFAULT 8;
-      ALTER TABLE recipe_campaigns
-        ADD COLUMN IF NOT EXISTS clip_duration INTEGER DEFAULT 8,
-        ADD COLUMN IF NOT EXISTS tenant_id TEXT DEFAULT 'default_tenant';
-      ALTER TABLE recipe_items
-        ADD COLUMN IF NOT EXISTS tenant_id TEXT DEFAULT 'default_tenant';
-      CREATE INDEX IF NOT EXISTS idx_recipe_campaigns_tenant ON recipe_campaigns (tenant_id);
-      CREATE INDEX IF NOT EXISTS idx_recipe_items_tenant ON recipe_items (tenant_id);
-    `).catch(err => {
-      console.warn('[PostgreSQL Auto-Migration Warning] Gagal migrasi demographic & clip_duration:', err.message);
-    });
-```
-
----
-
-### 2. `lib/campaign-scheduler.js` — Defensive Tenant Fetching
-
-#### Code Sebelum (Current/Before):
-```javascript
-// lib/campaign-scheduler.js:L1116-L1121
-    } else if (name.startsWith('recipe_')) {
-      const item = await db.prepare("SELECT campaign_id FROM recipe_items WHERE id = ?").get(itemId);
-      if (item) {
-        const campaign = await db.prepare("SELECT tenant_id FROM recipe_campaigns WHERE id = ?").get(item.campaign_id);
-        if (campaign) tenantId = campaign.tenant_id || 'default_tenant';
-      }
-    }
-```
-
-#### Code Sesudah (Proposed/After):
-```javascript
-    } else if (name.startsWith('recipe_')) {
-      const item = await db.prepare("SELECT campaign_id FROM recipe_items WHERE id = ?").get(itemId);
-      if (item) {
-        try {
-          const campaign = await db.prepare("SELECT tenant_id FROM recipe_campaigns WHERE id = ?").get(item.campaign_id);
-          if (campaign) tenantId = campaign.tenant_id || 'default_tenant';
-        } catch (e) {
-          console.warn('[Campaign Scheduler] Warning fetching tenantId for recipe campaign:', e.message);
-          tenantId = 'default_tenant';
-        }
-      }
-    }
-```
-
----
-
-### 3. `lib/db.js` — Menyimpan `tenant_id` pada `createRecipeCampaign` & `createRecipeItem`
-
-#### Code Sebelum (Current/Before):
-```javascript
-// lib/db.js:L3374-L3403
-export async function createRecipeCampaign(data) {
-  const db = getDb();
-  db.prepare(`
-    INSERT INTO recipe_campaigns (
-      id, category, custom_category, visual_style, nextcloud_parent_folder, post_to_facebook, enable_glabs, target_recipe_count, images_per_recipe, selected_layout_id, grid_gap_size, grid_border_radius, grid_outer_padding, grid_bg_color, status, campaign_type, brand_profile_id, spreadsheet_id, config_json, source_deconstruct_asset_id
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(
-    data.id,
-    data.category,
-    data.custom_category || null,
-    data.visual_style || 'Food Porn',
-    data.nextcloud_parent_folder || 'MAKNA_Recipes',
-    data.post_to_facebook !== undefined ? Number(data.post_to_facebook) : 0,
-    data.enable_glabs !== undefined ? Number(data.enable_glabs) : 1,
-    data.target_recipe_count || 1,
-    data.images_per_recipe || 4,
-    data.selected_layout_id || '4_editorial_split',
-    data.grid_gap_size !== undefined ? Number(data.grid_gap_size) : 12,
-    data.grid_border_radius !== undefined ? Number(data.grid_border_radius) : 16,
-    data.grid_outer_padding !== undefined ? Number(data.grid_outer_padding) : 16,
-    data.grid_bg_color || '#0d0d12',
-    data.status || 'processing',
-    data.campaign_type || 'static',
-    data.brand_profile_id || null,
-    data.spreadsheet_id || null,
-    data.config_json || null,
-    data.source_deconstruct_asset_id || null
-  );
-  return data.id;
+### 1.2 Bukti Lapangan Database Staging (Tenant Default)
+Pada batch riil di server Staging (`mul_261021_gleesx`), data tugas `mul_261021_gleesx_01` s/d `08` tersimpan dengan konfigurasi:
+```json
+{
+  "wardrobeStyle": "sequential",
+  "subjectDemographic": "syari_classic",
+  "visual_overrides_json": {
+    "character_concept": "faceless",
+    "subject_demographic": "syari_classic",
+    "wardrobe_style": "sequential"
+  }
 }
 ```
+Namun karena `lib/re-multiplier-worker.js` dan `lib/prompts.js` tidak memproses `sequential` dengan `task.row_index`, seluruh tugas dalam batch tersebut tidak menghasilkan rotasi warna pakaian.
 
-#### Code Sesudah (Proposed/After):
+---
+
+## 2. Proposed Changes & Code Snippets (Before & After)
+
+### File 1: `lib/re-multiplier-worker.js`
+* **Tujuan**: Di fungsi `handleStoryboardRemake(task)`, resolve visual overrides berbasis `task.row_index` menggunakan `resolveVisualOverrides`, dan teruskan `rowIndex` ke `buildMultiplierPhase2Prompt`.
+
+#### Code Sebelum (Current/Before)
 ```javascript
-export async function createRecipeCampaign(data) {
-  const db = getDb();
-  db.prepare(`
-    INSERT INTO recipe_campaigns (
-      id, category, custom_category, visual_style, nextcloud_parent_folder, post_to_facebook, enable_glabs, target_recipe_count, images_per_recipe, selected_layout_id, grid_gap_size, grid_border_radius, grid_outer_padding, grid_bg_color, status, campaign_type, brand_profile_id, spreadsheet_id, config_json, source_deconstruct_asset_id, tenant_id
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(
-    data.id,
-    data.category,
-    data.custom_category || null,
-    data.visual_style || 'Food Porn',
-    data.nextcloud_parent_folder || 'MAKNA_Recipes',
-    data.post_to_facebook !== undefined ? Number(data.post_to_facebook) : 0,
-    data.enable_glabs !== undefined ? Number(data.enable_glabs) : 1,
-    data.target_recipe_count || 1,
-    data.images_per_recipe || 4,
-    data.selected_layout_id || '4_editorial_split',
-    data.grid_gap_size !== undefined ? Number(data.grid_gap_size) : 12,
-    data.grid_border_radius !== undefined ? Number(data.grid_border_radius) : 16,
-    data.grid_outer_padding !== undefined ? Number(data.grid_outer_padding) : 16,
-    data.grid_bg_color || '#0d0d12',
-    data.status || 'processing',
-    data.campaign_type || 'static',
-    data.brand_profile_id || null,
-    data.spreadsheet_id || null,
-    data.config_json || null,
-    data.source_deconstruct_asset_id || null,
-    data.tenant_id || 'default_tenant'
-  );
-  return data.id;
-}
+  const aesthetics = JSON.parse(task.vso_config_json || '{}'); // UI stores aesthetics here
+  const vso = aesthetics; // aesthetic configs and visual overrides are merged
+  const audio = JSON.parse(task.audio_config_json || '{}');
+
+  const productDNA = bridging.resolvedDNA || {
+    product_name: bridging.manualProductName || '',
+    product_description: bridging.manualProductDesc || '',
+    unique_selling_point: bridging.manualProductUsp || ''
+  };
+...
+  logToMultiplier(`[Multiplier Worker] Prompting Gemini for storyboard remake of task ${task.id}`);
+  const prompt = buildMultiplierPhase2Prompt(originalStoryboard, productDNA, aesthetics, bridging, vso, audio);
+```
+
+#### Code Sesudah (Proposed/After)
+```javascript
+  const aesthetics = JSON.parse(task.vso_config_json || '{}'); // UI stores aesthetics here
+  const audio = JSON.parse(task.audio_config_json || '{}');
+
+  const rowIndex = (task.row_index !== undefined && task.row_index !== null) ? Number(task.row_index) : 0;
+  
+  // Resolve Visual Overrides per baris untuk mendukung Wardrobe Sequential, Random, dan Snapshot V1
+  let resolvedVso = aesthetics;
+  try {
+    const { resolveVisualOverrides } = await import('./visual-override-resolver.js');
+    const rawOverrides = aesthetics.visual_overrides_json || aesthetics.visualIdentity?.visual_overrides_json || {
+      character_concept: aesthetics.characterConcept || 'faceless',
+      subject_demographic: aesthetics.subjectDemographic || 'syari_classic',
+      wardrobe_style: aesthetics.wardrobeStyle || 'random',
+      wardrobe_style_custom: aesthetics.wardrobeStyleCustom || '',
+      lighting_style: aesthetics.lightingStyle || 'window_daylight',
+      lighting_style_custom: aesthetics.lightingStyleCustom || '',
+      visual_style_preset: aesthetics.visualStylePreset || 'cinematic_realistic'
+    };
+
+    const resolvedVisuals = resolveVisualOverrides({
+      visualOverrides: rawOverrides,
+      itemIndex: rowIndex,
+      stableSeed: `${task.batch_id || 'multiplier'}:${task.id || rowIndex}`
+    });
+
+    resolvedVso = {
+      ...aesthetics,
+      ...resolvedVisuals,
+      isVsoActive: aesthetics.isVsoActive !== undefined ? aesthetics.isVsoActive : true,
+      characterConcept: resolvedVisuals.character_concept || aesthetics.characterConcept || 'faceless',
+      subjectDemographic: resolvedVisuals.subject_demographic || aesthetics.subjectDemographic || 'syari_classic',
+      wardrobeStyle: resolvedVisuals.wardrobe_style || aesthetics.wardrobeStyle,
+      wardrobeStyleCustom: resolvedVisuals.wardrobe_style_custom || aesthetics.wardrobeStyleCustom || '',
+      lightingStyle: resolvedVisuals.lighting_style || aesthetics.lightingStyle,
+      lightingStyleCustom: resolvedVisuals.lighting_style_custom || aesthetics.lightingStyleCustom || ''
+    };
+  } catch (vsoErr) {
+    console.warn(`[Multiplier Worker] Visual override resolution fallback for task ${task.id}:`, vsoErr.message);
+  }
+
+  const vso = resolvedVso;
+
+  const productDNA = bridging.resolvedDNA || {
+    product_name: bridging.manualProductName || '',
+    product_description: bridging.manualProductDesc || '',
+    unique_selling_point: bridging.manualProductUsp || ''
+  };
+...
+  logToMultiplier(`[Multiplier Worker] Prompting Gemini for storyboard remake of task ${task.id} (Row ${rowIndex + 1})`);
+  const prompt = buildMultiplierPhase2Prompt(originalStoryboard, productDNA, aesthetics, bridging, vso, audio, rowIndex);
 ```
 
 ---
 
-### 4. `app/api/recipe-labs/route.js` — Memasukkan `tenant_id` saat POST & GET
+### File 2: `lib/prompts.js`
+* **Tujuan**: Di `buildMultiplierPhase2Prompt`, terima parameter `rowIndex = 0`, kenali `wardrobe_style === 'custom'` / `wardrobe_style_custom` dari resolver, dan sediakan fallback direct `resolveWardrobe` jika `wardrobeStyleVal === 'sequential'`.
 
-#### Code Sebelum (Current/Before):
+#### Code Sebelum (Current/Before)
 ```javascript
-// app/api/recipe-labs/route.js:L50-L83
-    await createRecipeCampaign({
-      id: campaignId,
-      category,
-      custom_category: category === 'Custom Input' ? custom_category : null,
-      visual_style: visual_style || 'Food Porn',
-      nextcloud_parent_folder: nextcloud_parent_folder ? nextcloud_parent_folder.trim() : 'MAKNA_Recipes',
-      post_to_facebook: post_to_facebook !== undefined ? (post_to_facebook ? 1 : 0) : 0,
-      enable_glabs: enable_glabs !== undefined ? (enable_glabs ? 1 : 0) : 1,
-      target_recipe_count: count,
-      images_per_recipe: images_per_recipe !== undefined ? Number(images_per_recipe) : 4,
-      selected_layout_id: selected_layout_id || '4_editorial_split',
-      grid_gap_size: grid_gap_size !== undefined ? Number(grid_gap_size) : 12,
-      grid_border_radius: grid_border_radius !== undefined ? Number(grid_border_radius) : 16,
-      grid_outer_padding: grid_outer_padding !== undefined ? Number(grid_outer_padding) : 16,
-      grid_bg_color: grid_bg_color || '#0d0d12',
-      status: 'processing',
-      campaign_type: campaign_type || 'static',
-      brand_profile_id: brand_profile_id || null,
-      spreadsheet_id: spreadsheet_id || null,
-      config_json: config_json ? (typeof config_json === 'string' ? config_json : JSON.stringify(config_json)) : null,
-      source_deconstruct_asset_id: source_deconstruct_asset_id || null
-    });
+export function buildMultiplierPhase2Prompt(originalStoryboard, productDNA, aesthetics, bridging, vso, audio) {
+  const targetLanguage = audio?.targetLanguage || 'id-ID';
+...
+  // Resolve VSO details using presets
+  let vsoSection = "";
+  if (vso?.isVsoActive) {
+    const targetConcept = vso.characterConcept || "faceless";
 
-    const createdItemIds = [];
-    for (let i = 0; i < count; i++) {
-      const itemId = `rcitem_${campaignId}_${i + 1}`;
-      await createRecipeItem({
-        id: itemId,
-        campaign_id: campaignId,
-        status: 'pending_gemini'
-      });
-      createdItemIds.push(itemId);
+    let wardrobeStyleVal = vso.wardrobeStyle;
+    if (wardrobeStyleVal === 'random') {
+      const keys = Object.keys(WARDROBE_PRESETS);
+      wardrobeStyleVal = keys[Math.floor(Math.random() * keys.length)];
     }
+    const targetWardrobe = WARDROBE_PRESETS[wardrobeStyleVal] || wardrobeStyleVal || "modest clothing";
+
+    let lightingStyleVal = vso.lightingStyle;
+    if (lightingStyleVal === 'random') {
+      const keys = Object.keys(LIGHTING_PRESETS);
+      lightingStyleVal = keys[Math.floor(Math.random() * keys.length)];
+    }
+    const targetLighting = LIGHTING_PRESETS[lightingStyleVal] || lightingStyleVal || "soft natural light";
+
+    const targetCharacter = DEMOGRAPHIC_PRESETS[vso.subjectDemographic] || vso.subjectDemographic || "a graceful Muslimah";
 ```
 
-#### Code Sesudah (Proposed/After):
+#### Code Sesudah (Proposed/After)
 ```javascript
-    const { getActiveTenantId } = await import('@/lib/tenant-context');
-    const tenantId = getActiveTenantId() || 'default_tenant';
+export function buildMultiplierPhase2Prompt(originalStoryboard, productDNA, aesthetics, bridging, vso, audio, rowIndex = 0) {
+  const targetLanguage = audio?.targetLanguage || 'id-ID';
+...
+  // Resolve VSO details using presets
+  let vsoSection = "";
+  if (vso?.isVsoActive) {
+    const targetConcept = vso.characterConcept || vso.character_concept || "faceless";
+    const subjectDemo = vso.subjectDemographic || vso.subject_demographic || "syari_classic";
 
-    await createRecipeCampaign({
-      id: campaignId,
-      tenant_id: tenantId,
-      category,
-      custom_category: category === 'Custom Input' ? custom_category : null,
-      visual_style: visual_style || 'Food Porn',
-      nextcloud_parent_folder: nextcloud_parent_folder ? nextcloud_parent_folder.trim() : 'MAKNA_Recipes',
-      post_to_facebook: post_to_facebook !== undefined ? (post_to_facebook ? 1 : 0) : 0,
-      enable_glabs: enable_glabs !== undefined ? (enable_glabs ? 1 : 0) : 1,
-      target_recipe_count: count,
-      images_per_recipe: images_per_recipe !== undefined ? Number(images_per_recipe) : 4,
-      selected_layout_id: selected_layout_id || '4_editorial_split',
-      grid_gap_size: grid_gap_size !== undefined ? Number(grid_gap_size) : 12,
-      grid_border_radius: grid_border_radius !== undefined ? Number(grid_border_radius) : 16,
-      grid_outer_padding: grid_outer_padding !== undefined ? Number(grid_outer_padding) : 16,
-      grid_bg_color: grid_bg_color || '#0d0d12',
-      status: 'processing',
-      campaign_type: campaign_type || 'static',
-      brand_profile_id: brand_profile_id || null,
-      spreadsheet_id: spreadsheet_id || null,
-      config_json: config_json ? (typeof config_json === 'string' ? config_json : JSON.stringify(config_json)) : null,
-      source_deconstruct_asset_id: source_deconstruct_asset_id || null
-    });
-
-    const createdItemIds = [];
-    for (let i = 0; i < count; i++) {
-      const itemId = `rcitem_${campaignId}_${i + 1}`;
-      await createRecipeItem({
-        id: itemId,
-        campaign_id: campaignId,
-        tenant_id: tenantId,
-        status: 'pending_gemini'
-      });
-      createdItemIds.push(itemId);
+    let targetWardrobe = "modest clothing";
+    if (vso.wardrobe_style === "custom" && vso.wardrobe_style_custom) {
+      targetWardrobe = vso.wardrobe_style_custom;
+    } else {
+      let wardrobeStyleVal = vso.wardrobeStyle || vso.wardrobe_style || 'random';
+      if (wardrobeStyleVal === 'sequential') {
+        const GROUPS = {
+          syari_classic: ['amber_terracotta', 'mocca_caramel', 'warm_grey', 'sage_muted', 'lavender_lilac', 'butter_yellow', 'teal_navy', 'olive_modern', 'mahogany_maroon', 'cloud_dancer'],
+          southeast_asian_male: ['male_terracotta', 'male_caramel', 'male_khaki_tan', 'male_navy_blue', 'male_forest_green', 'male_charcoal', 'male_burgundy', 'male_sage_muted', 'male_steel_blue', 'male_cloud_dancer'],
+          caucasian_male: ['male_terracotta', 'male_caramel', 'male_khaki_tan', 'male_navy_blue', 'male_forest_green', 'male_charcoal', 'male_burgundy', 'male_sage_muted', 'male_steel_blue', 'male_cloud_dancer'],
+          stylized_3d_muslimah: ['3d_fem_emerald', '3d_fem_pastel_pink', '3d_fem_jetblack', '3d_fem_mocca'],
+          stylized_3d_male: ['3d_male_tan_knit', '3d_male_sage_jacket', '3d_male_charcoal_tshirt', '3d_male_terracotta_flannel'],
+          stylized_3d_duo: ['3d_duo_earth', '3d_duo_contrast', '3d_duo_monochrome', '3d_duo_pastel', '3d_duo_cool']
+        };
+        const catalog = GROUPS[subjectDemo] || GROUPS.syari_classic;
+        const key = catalog[Math.max(0, Number(rowIndex) || 0) % catalog.length];
+        wardrobeStyleVal = key;
+      } else if (wardrobeStyleVal === 'random') {
+        const keys = Object.keys(WARDROBE_PRESETS);
+        wardrobeStyleVal = keys[Math.floor(Math.random() * keys.length)];
+      }
+      targetWardrobe = WARDROBE_PRESETS[wardrobeStyleVal] || wardrobeStyleVal || "modest clothing";
     }
+
+    let targetLighting = "soft natural light";
+    if (vso.lighting_style === "custom" && vso.lighting_style_custom) {
+      targetLighting = vso.lighting_style_custom;
+    } else {
+      let lightingStyleVal = vso.lightingStyle || vso.lighting_style || 'random';
+      if (lightingStyleVal === 'random') {
+        const keys = Object.keys(LIGHTING_PRESETS);
+        lightingStyleVal = keys[Math.floor(Math.random() * keys.length)];
+      }
+      targetLighting = LIGHTING_PRESETS[lightingStyleVal] || lightingStyleVal || "soft natural light";
+    }
+
+    const targetCharacter = DEMOGRAPHIC_PRESETS[subjectDemo] || subjectDemo || "a graceful Muslimah";
 ```
+
+---
+
+### File 3: `app/components/campaign-forms/MultiplierConfigurationForm.js`
+* **Tujuan**: Sinkronisasi nilai `characterConcept`, `subjectDemographic`, `wardrobeStyle`, `wardrobeStyleCustom`, `lightingStyle`, dan `lightingStyleCustom` di root `vso_config_json` langsung dari `visualIdentity.visual_overrides_json` saat mode Custom dipilih.
+
+#### Code Sebelum (Current/Before)
+```javascript
+        vso_config_json: JSON.stringify({
+          narrativeMode, visualStyle, targetAi, videoModel, clipDuration, aspectRatio, faceVisibility, wordsPerClip,
+          isVsoActive, characterConcept, subjectDemographic, wardrobeStyle, wardrobeStyleCustom, lightingStyle, lightingStyleCustom,
+          visualIdentity,
+          visual_identity_preset_id: isVsoActive ? visualIdentity?.preset_id : null,
+          visual_identity_inline_config: isVsoActive && visualIdentity?.preset_id === 'inline' ? visualIdentity.inline_config : null,
+          visual_overrides_json: isVsoActive && visualIdentity?.preset_id === 'custom' ? visualIdentity.visual_overrides_json : null
+        }),
+```
+
+#### Code Sesudah (Proposed/After)
+```javascript
+        vso_config_json: JSON.stringify({
+          narrativeMode, visualStyle, targetAi, videoModel, clipDuration, aspectRatio, faceVisibility, wordsPerClip,
+          isVsoActive,
+          characterConcept: isVsoActive && visualIdentity?.preset_id === 'custom' ? (visualIdentity.visual_overrides_json?.character_concept || characterConcept) : characterConcept,
+          subjectDemographic: isVsoActive && visualIdentity?.preset_id === 'custom' ? (visualIdentity.visual_overrides_json?.subject_demographic || subjectDemographic) : subjectDemographic,
+          wardrobeStyle: isVsoActive && visualIdentity?.preset_id === 'custom' ? (visualIdentity.visual_overrides_json?.wardrobe_style || wardrobeStyle) : wardrobeStyle,
+          wardrobeStyleCustom: isVsoActive && visualIdentity?.preset_id === 'custom' ? (visualIdentity.visual_overrides_json?.wardrobe_style_custom || wardrobeStyleCustom) : wardrobeStyleCustom,
+          lightingStyle: isVsoActive && visualIdentity?.preset_id === 'custom' ? (visualIdentity.visual_overrides_json?.lighting_style || lightingStyle) : lightingStyle,
+          lightingStyleCustom: isVsoActive && visualIdentity?.preset_id === 'custom' ? (visualIdentity.visual_overrides_json?.lighting_style_custom || lightingStyleCustom) : lightingStyleCustom,
+          visualIdentity,
+          visual_identity_preset_id: isVsoActive ? visualIdentity?.preset_id : null,
+          visual_identity_inline_config: isVsoActive && visualIdentity?.preset_id === 'inline' ? visualIdentity.inline_config : null,
+          visual_overrides_json: isVsoActive && visualIdentity?.preset_id === 'custom' ? visualIdentity.visual_overrides_json : null
+        }),
+```
+
+---
+
+## 3. Execution Task List
+
+- [x] **Task 1**: Update `lib/prompts.js` (`buildMultiplierPhase2Prompt`) untuk mendukung `rowIndex` dan rotasi `sequential` wardrobe.
+- [x] **Task 2**: Update `lib/re-multiplier-worker.js` (`handleStoryboardRemake`) agar meresolusi visual identity per baris dengan `resolveVisualOverrides` dan meneruskan `rowIndex`.
+- [x] **Task 3**: Update `app/components/campaign-forms/MultiplierConfigurationForm.js` untuk menyelaraskan sinkronisasi `visual_overrides_json` ke root payload VSO.
+- [x] **Task 4**: Buat automated unit test suite `tests/multiplier-sequential-wardrobe.test.js` untuk memverifikasi bahwa Baris 1, Baris 2, Baris 3, dst. menghasilkan warna wardrobe sequential yang berputar berbeda.
+- [x] **Task 5**: Jalankan seluruh unit test suite dan pastikan tidak ada regresi.
+- [ ] **Task 6**: Rilis versi baru (`npm run release-non-interactive`) dan deploy ke server Staging Mac Mini via SOP Atomic Deployment.
+- [ ] **Task 7**: Verifikasi di server Staging untuk tenant `default`.

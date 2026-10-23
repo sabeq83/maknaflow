@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.80 — Support Sequential Wardrobe in Multiplier Lab (23/10/2026)
+- Dukungan rotasi sequential wardrobe pada buildMultiplierPhase2Prompt per row
+- Resolusi per-row visual overrides pada multiplier worker
+- Sinkronisasi visual overrides pada MultiplierConfigurationForm
+
 ## V2.32.79 — Fix Tenant Context Multiplier Blueprint (23/10/2026)
 - Bungkus endpoint generate-angles dengan withTenantContext
 - Isolasi tenantContext.run pada multiplier angle generator
