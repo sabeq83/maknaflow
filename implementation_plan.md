@@ -166,5 +166,5 @@ Dan pada fungsi `executeContentPlanner`:
 - [x] **Task 4**: Update `lib/recipe-planner-engine.js` untuk mendukung `target_language` pada perumusan resep kuliner.
 - [x] **Task 5**: Update `app/components/campaign-forms/PlannerConfigurationForm.js` dengan komponen UI Language Selector & auto-detection brand.
 - [x] **Task 6**: Buat automated unit test suite `tests/content-planner-language-support.test.js` dan jalankan pengujian.
-- [ ] **Task 7**: Rilis versi baru (`npm run release-non-interactive`) dan deploy ke server Staging Mac Mini via SOP Atomic Deployment.
-- [ ] **Task 8**: Verifikasi fungsionalitas pembuatan Content Planner berbahasa Inggris di server Staging.
+- [x] **Task 7**: Rilis versi baru (`npm run release-non-interactive`) dan deploy ke server Staging Mac Mini via SOP Atomic Deployment.
+- [x] **Task 8**: Verifikasi fungsionalitas pembuatan Content Planner berbahasa Inggris di server Staging.
