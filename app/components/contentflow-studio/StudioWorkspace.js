@@ -67,6 +67,19 @@ export default function StudioWorkspace() {
   const [reschedulePublishAt, setReschedulePublishAt] = useState('');
   const [rescheduleAccountIds, setRescheduleAccountIds] = useState([]);
 
+  // Derived: Draft batches needing activation
+  const draftBatches = useMemo(() => {
+    const map = new Map();
+    (slots || []).forEach(s => {
+      if (s.stage_status === 'draft' || s.activation_status === 'manual') {
+        if (s.batch_id && !map.has(s.batch_id)) {
+          map.set(s.batch_id, { id: s.batch_id, title: s.batch_title || s.batch_id });
+        }
+      }
+    });
+    return Array.from(map.values());
+  }, [slots]);
+
   useEffect(() => {
     fetchInitialData();
   }, [currentDate, selectedBrandId, statusFilter]);
@@ -224,6 +237,51 @@ export default function StudioWorkspace() {
       console.error('Failed to open slot:', err);
     }
   }
+
+  // Fast Action: Dispatch Slot Now (Immediate Queue)
+  const handleDispatchNow = async (slotId) => {
+    const targetId = slotId || selectedSlot?.id;
+    if (!targetId) return;
+    setMitigationLoading(true);
+    setMitigationSuccess('');
+    setApprovalError('');
+    try {
+      const res = await fetch(`/api/v2/contentflow-studio/slots/${targetId}/actions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'dispatch_now' })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Gagal memulai eksekusi slot.');
+      setMitigationSuccess('⚡ Eksekusi slot dimulai! Worker segera memproses antrean.');
+      if (selectedSlot && selectedSlot.id === targetId) {
+        const refreshSlot = await fetch(`/api/v2/contentflow-studio/slots/${targetId}`).then(r => r.json());
+        if (refreshSlot.success) setSelectedSlot(refreshSlot.data);
+      }
+      fetchInitialData();
+    } catch (err) {
+      setApprovalError(err.message || 'Terjadi kesalahan sistem.');
+    } finally {
+      setMitigationLoading(false);
+    }
+  };
+
+  // Fast Action: Quick Retry from Table Row
+  const handleQuickRetry = async (slotId) => {
+    if (!slotId) return;
+    try {
+      const res = await fetch(`/api/v2/contentflow-studio/slots/${slotId}/actions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'retry_production' })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Gagal mengulang produksi.');
+      fetchInitialData();
+    } catch (err) {
+      alert(err.message || 'Gagal mengulang produksi.');
+    }
+  };
 
   // Mitigation 1: Retry AI Production (Option 1)
   const handleRetryProduction = async () => {
@@ -739,6 +797,46 @@ export default function StudioWorkspace() {
                     <td style={{ padding: '10px 14px' }}>{getStatusBadge(s.stage_status, null)}</td>
                     <td style={{ padding: '10px 14px' }}>{getStatusBadge(null, s.publishing_status)}</td>
                     <td style={{ padding: '10px 14px', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                      {s.stage_status === 'draft' && (
+                        <button
+                          type="button"
+                          onClick={() => handleDispatchNow(s.id)}
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            background: 'var(--action-primary)',
+                            color: 'var(--on-action-primary)',
+                            cursor: 'pointer',
+                            fontSize: '0.78rem',
+                            fontWeight: 600,
+                            marginRight: '6px'
+                          }}
+                          title="Mulai eksekusi antrean worker sekarang"
+                        >
+                          ⚡ Eksekusi
+                        </button>
+                      )}
+                      {s.stage_status === 'failed' && (
+                        <button
+                          type="button"
+                          onClick={() => handleQuickRetry(s.id)}
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            border: '1px solid var(--status-danger)',
+                            background: 'var(--status-danger-soft)',
+                            color: 'var(--status-danger)',
+                            cursor: 'pointer',
+                            fontSize: '0.78rem',
+                            fontWeight: 600,
+                            marginRight: '6px'
+                          }}
+                          title="Ulangi produksi AI"
+                        >
+                          🔄 Retry
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => openSlot(s.id, 'log')}
@@ -779,7 +877,49 @@ export default function StudioWorkspace() {
         </div>
       )}
 
-      {createdBatchId && <div style={{padding:14,background:'var(--status-info-soft)',color:'var(--text-primary)',borderRadius:'8px',border:'1px solid var(--border-subtle)'}}>Draft tersimpan. Produksi belum dimulai. <button type="button" onClick={()=>activateBatch(createdBatchId)} style={{marginLeft:'8px',padding:'4px 12px',borderRadius:'6px',border:'none',background:'var(--action-primary)',color:'var(--on-action-primary)',cursor:'pointer',fontWeight:600}}>▶ Generate Content</button></div>}
+      {/* Draft Batches Banner */}
+      {draftBatches.length > 0 && (
+        <div style={{
+          padding: '12px 18px',
+          background: 'var(--status-info-soft)',
+          color: 'var(--text-primary)',
+          borderRadius: '8px',
+          border: '1px solid var(--border-subtle)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '10px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.88rem' }}>
+            <span>📦</span>
+            <span>
+              Terdapat <strong>{draftBatches.length} Batch</strong> berstatus <strong>Draft</strong> (jadwal belum diaktifkan).
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {draftBatches.map(b => (
+              <button
+                key={b.id}
+                type="button"
+                onClick={() => activateBatch(b.id)}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  background: 'var(--action-primary)',
+                  color: 'var(--on-action-primary)',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.8rem'
+                }}
+              >
+                ▶ Aktifkan {b.title ? (b.title.length > 20 ? b.title.slice(0, 20) + '...' : b.title) : b.id}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {/* Creation Wizard Modal */}
       {showWizard && (
         <div style={{
@@ -1320,6 +1460,75 @@ export default function StudioWorkspace() {
                 fontSize: '0.85rem'
               }}>
                 {mitigationSuccess}
+              </div>
+            )}
+
+            {/* DRAFT STATE: DISPATCH SECTION */}
+            {selectedSlot.stage_status === 'draft' && (
+              <div style={{
+                background: 'var(--surface-raised)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: '8px',
+                padding: '14px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                    📝 Status Slot: Draft (Belum Diantrekan)
+                  </span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Menunggu Aktivasi</span>
+                </div>
+                {selectedSlot.scheduled_production_at && new Date(selectedSlot.scheduled_production_at) < new Date() && (
+                  <div style={{
+                    background: 'var(--status-warning-soft)',
+                    border: '1px solid var(--status-warning)',
+                    borderRadius: '6px',
+                    padding: '8px 12px',
+                    fontSize: '0.8rem',
+                    color: 'var(--status-warning)'
+                  }}>
+                    ⚠️ <strong>Jadwal Produksi Terlewat:</strong> Jam produksi ({new Date(selectedSlot.scheduled_production_at).toLocaleString('id-ID')}) sudah lewat. Slot ini akan <strong>langsung diproses seketika</strong> oleh worker AI saat Anda mengklik Eksekusi.
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <button
+                    type="button"
+                    onClick={() => handleDispatchNow(selectedSlot.id)}
+                    disabled={mitigationLoading}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      background: 'var(--action-primary)',
+                      color: 'var(--on-action-primary)',
+                      fontWeight: 600,
+                      fontSize: '0.82rem',
+                      cursor: mitigationLoading ? 'not-allowed' : 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    {mitigationLoading ? 'Memproses...' : '⚡ Eksekusi Produksi Sekarang'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSlotModalTab('log')}
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid var(--border-subtle)',
+                      background: 'var(--surface)',
+                      color: 'var(--text-secondary)',
+                      fontSize: '0.82rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    📜 Buka Log Detail Slot
+                  </button>
+                </div>
               </div>
             )}
 

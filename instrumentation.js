@@ -86,8 +86,15 @@ export async function register() {
     }
 
     if (backgroundServicesEnabled && process.env.ENABLE_CONTENTFLOW_STUDIO === 'true') {
-      const { startStudioWorker } = await import('./lib/contentflow-studio-worker.js');
-      startStudioWorker();
+      try {
+        const { startStudioWorker } = await import('./lib/contentflow-studio-worker.js');
+        startStudioWorker();
+        console.log('🎬 Durable ContentFlow Studio Worker started.');
+      } catch (err) {
+        console.error('❌ Failed to start ContentFlow Studio Worker:', err.message);
+      }
+    } else {
+      console.log('ℹ️  ContentFlow Studio Worker disabled by environment.');
     }
 
     const { shouldStartAgentAutomationWorker } = await import('./lib/agent-automation-contract.js');

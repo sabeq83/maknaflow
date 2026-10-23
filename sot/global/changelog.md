@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.77 — ContentFlow Studio Execution & Retry Enhancements (23/10/2026)
+- Dukungan aktivasi batch v3 pada guard actions
+- Aksi cepat dispatch_now dan quick retry di tabel serta modal slot
+- Aktivasi ContentFlow Studio Worker di PM2 dev dan instrumentation
+- Penanganan slot overdue langsung diprioritaskan saat aktivasi
+
 ## V2.32.76 — Perbaikan Bug & Fitur Mitigasi ContentFlow Studio (23/10/2026)
 - Fix bug reset tanggal produksi ke tgl 1 pada wizard alokasi jadwal
 - Perbaikan akun Repliz live sync tombol reload filter search & connected only

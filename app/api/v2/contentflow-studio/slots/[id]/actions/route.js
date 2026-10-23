@@ -29,11 +29,20 @@ export const POST = withTenantContext(async (request, context) => {
 
     const slot = slotRes.rows[0];
 
-    // ACTION 1: Retry AI Production (Option 1)
-    if (action === 'retry_production') {
+    // ACTION 1: Retry AI Production (Option 1) & Dispatch Now (Immediate Execution)
+    if (action === 'retry_production' || action === 'dispatch_now') {
+      // Pastikan batch induk juga berstatus active jika sebelumnya masih draft
+      await pgQuery(`
+        UPDATE content_studio_batches
+        SET status = 'active', updated_at = CURRENT_TIMESTAMP
+        WHERE id = $1 AND tenant_id = $2 AND status = 'draft'
+      `, [slot.batch_id, tenantId]);
+
       const updateRes = await pgQuery(`
         UPDATE content_studio_slots
         SET stage_status = 'pending',
+            activation_status = 'active',
+            scheduled_production_at = LEAST(scheduled_production_at, CURRENT_TIMESTAMP),
             error_message = NULL,
             progress_percent = 0,
             dispatched_at = NULL,
@@ -49,17 +58,19 @@ export const POST = withTenantContext(async (request, context) => {
         tenantId,
         batchId: slot.batch_id,
         slotId: id,
-        eventType: 'retry_production',
+        eventType: action === 'dispatch_now' ? 'dispatch_now' : 'retry_production',
         checkpointState: 'pending',
         payload: {
           initiated_by: currentUser?.username || currentUser?.email || 'user',
-          reason: body.reason || 'Manual retry after failure'
+          reason: body.reason || (action === 'dispatch_now' ? 'Manual dispatch now from studio UI' : 'Manual retry after failure')
         }
       });
 
       return NextResponse.json({
         success: true,
-        message: 'Produksi AI berhasil di-queue ulang.',
+        message: action === 'dispatch_now'
+          ? 'Produksi AI slot berhasil dimulai dan diantrekan ke worker.'
+          : 'Produksi AI berhasil di-queue ulang.',
         data: updatedSlot
       });
     }

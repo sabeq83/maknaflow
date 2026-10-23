@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi & Mockup Interaktif: Eksekusi Konten Overdue & Retry Studio</title>
+  <link rel="stylesheet" href="/app/theme.css">
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --surface: #1e293b;
+      --surface-raised: #334155;
+      --surface-interactive: #475569;
+      --surface-subtle: rgba(255, 255, 255, 0.05);
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --border-strong: rgba(255, 255, 255, 0.2);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --action-primary: #3b82f6;
+      --action-primary-hover: #2563eb;
+      --on-action-primary: #ffffff;
+      --input-bg: #0f172a;
+      --status-success: #10b981;
+      --status-success-soft: rgba(16, 185, 129, 0.15);
+      --status-warning: #f59e0b;
+      --status-warning-soft: rgba(245, 158, 11, 0.15);
+      --status-info: #06b6d4;
+      --status-info-soft: rgba(6, 182, 212, 0.15);
+      --status-danger: #ef4444;
+      --status-danger-soft: rgba(239, 68, 68, 0.15);
+      --overlay-backdrop: rgba(15, 23, 42, 0.75);
+      --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 24px;
+    }
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .header-box {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+    .header-box h1 {
+      margin: 0 0 8px 0;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-box p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+    .info-callout {
+      background: var(--surface-raised);
+      border-left: 4px solid var(--status-warning);
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      margin-top: 14px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 22px;
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 0 0 6px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-draft { background: var(--surface-interactive); color: var(--text-secondary); }
+    .badge-pending { background: var(--status-info-soft); color: var(--status-info); }
+    .badge-progress { background: var(--status-warning-soft); color: var(--status-warning); }
+    .badge-success { background: var(--status-success-soft); color: var(--status-success); }
+    .badge-danger { background: var(--status-danger-soft); color: var(--status-danger); }
+    .badge-overdue { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-top: 14px;
+    }
+    th {
+      text-align: left;
+      padding: 10px 12px;
+      background: var(--surface-subtle);
+      color: var(--text-secondary);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+    }
+    tr:hover td {
+      background: var(--surface-subtle);
+    }
+    .btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+    .btn-secondary {
+      background: var(--surface);
+      border-color: var(--border-subtle);
+      color: var(--text-primary);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-interactive);
+    }
+    .btn-warning {
+      background: var(--status-warning-soft);
+      border-color: var(--status-warning);
+      color: var(--status-warning);
+    }
+    .btn-warning:hover {
+      background: var(--status-warning);
+      color: #000;
+    }
+    .btn-danger {
+      background: var(--status-danger-soft);
+      border-color: var(--status-danger);
+      color: var(--status-danger);
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-backdrop.active {
+      display: flex;
+    }
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      box-shadow: var(--shadow-modal);
+      width: 100%;
+      max-width: 640px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: var(--surface-subtle);
+    }
+    .banner-overdue {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid var(--status-warning);
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.85rem;
+    }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface-raised);
+      border: 1px solid var(--status-success);
+      color: var(--status-success);
+      padding: 12px 18px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-modal);
+      font-size: 0.88rem;
+      display: none;
+      z-index: 200;
+    }
+    .toast.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-box">
+      <h1>⚡ Simulasi Penanganan 5 Konten Lewat Jam Produksi & Aksi Cepat Studio</h1>
+      <p>
+        Halaman ini mensimulasikan mekanisme penanganan konten di server dev yang berstatus <code>draft</code> dengan jadwal produksi yang sudah lewat waktu (overdue), serta opsi mitigasi manual (Eksekusi Sekarang, Retry AI, Reschedule Tayang).
+      </p>
+      <div class="info-callout">
+        <strong>💡 Karakteristik Worker:</strong> Slot yang diaktifkan dengan <code>scheduled_production_at &le; CURRENT_TIMESTAMP</code> dianggap <strong>Due Now (Segera Diproduksi)</strong> dan langsung ditarik oleh background worker pada interval berikutnya.
+      </div>
+    </div>
+
+    <!-- Active Batches Overview -->
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div>
+          <div class="card-title">📦 Daftar Batch Studio (Server Dev)</div>
+          <div style="font-size: 0.82rem; color: var(--text-secondary);">3 Batch berstatus draft karena guard config_version = 3</div>
+        </div>
+        <button class="btn btn-primary" onclick="simulateActivateAllBatches()">
+          ▶ Aktifkan Semua Batch & Mulai Eksekusi
+        </button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Batch ID & Judul</th>
+            <th>Engine</th>
+            <th>Version</th>
+            <th>Status Batch</th>
+            <th>Slot Konten</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="batchTableBody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 5 Content Slots Status -->
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div>
+          <div class="card-title">🎬 5 Slot Konten & Jadwal Waktu</div>
+          <div style="font-size: 0.82rem; color: var(--text-secondary);">Waktu server saat ini: <strong>23 Okt 2026, 10:45 WIB</strong></div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary" onclick="resetSimData()">🔄 Reset Data Simulasi</button>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Judul / Batch</th>
+            <th>Jadwal Produksi</th>
+            <th>Jadwal Tayang</th>
+            <th>Tahap Produksi</th>
+            <th>Status Tayang</th>
+            <th style="text-align: right;">Aksi Cepat</th>
+          </tr>
+        </thead>
+        <tbody id="slotTableBody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Detail & Mitigasi Slot -->
+  <div class="modal-backdrop" id="slotModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div style="font-weight: 700; font-size: 1.05rem;" id="modalSlotTitle">Detail Slot Konten</div>
+        <button onclick="closeModal()" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.2rem;">✕</button>
+      </div>
+      <div class="modal-body" id="modalSlotBody">
+        <!-- Injected via JS -->
+      </div>
+      <div class="modal-footer" id="modalSlotFooter">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toastMessage"></div>
+
+  <script>
+    const INITIAL_BATCHES = [
+      { id: 'stb_d6de9b7e1fea', title: 'Batch Multiplier Demo', engine: 'multiplier', version: 3, status: 'draft', slot_count: 3 },
+      { id: 'stb_a082ed1850b5', title: 'Batch Recipe Video', engine: 'recipe', version: 3, status: 'draft', slot_count: 1 },
+      { id: 'stb_9574dad7f36b', title: 'Batch Real Estate Showcase', engine: 're', version: 3, status: 'draft', slot_count: 1 }
+    ];
+
+    const INITIAL_SLOTS = [
+      {
+        id: 'sts_76d626b00dd',
+        batch_id: 'stb_d6de9b7e1fea',
+        batch_title: 'Batch Multiplier Demo',
+        slot_number: 1,
+        engine: 'multiplier',
+        scheduled_production_at: '2026-10-22T05:05:00+07:00', // Lewat 29 jam
+        scheduled_publish_at: '2026-10-23T05:05:00+07:00',    // Lewat 5 jam
+        stage_status: 'draft',
+        publishing_status: 'unrendered',
+        error_message: null
+      },
+      {
+        id: 'sts_86d0a25f16f',
+        batch_id: 'stb_a082ed1850b5',
+        batch_title: 'Batch Recipe Video',
+        slot_number: 1,
+        engine: 'recipe',
+        scheduled_production_at: '2026-10-22T05:13:00+07:00', // Lewat 29 jam
+        scheduled_publish_at: '2026-10-23T05:13:00+07:00',    // Lewat 5 jam
+        stage_status: 'draft',
+        publishing_status: 'unrendered',
+        error_message: null
+      },
+      {
+        id: 'sts_2957d1169f1',
+        batch_id: 'stb_9574dad7f36b',
+        batch_title: 'Batch Real Estate Showcase',
+        slot_number: 1,
+        engine: 're',
+        scheduled_production_at: '2026-10-23T05:25:00+07:00', // Lewat 5 jam
+        scheduled_publish_at: '2026-10-24T05:16:00+07:00',    // Besok
+        stage_status: 'draft',
+        publishing_status: 'unrendered',
+        error_message: null
+      },
+      {
+        id: 'sts_fe214998753',
+        batch_id: 'stb_d6de9b7e1fea',
+        batch_title: 'Batch Multiplier Demo',
+        slot_number: 2,
+        engine: 'multiplier',
+        scheduled_production_at: '2026-10-23T05:05:00+07:00', // Lewat 5 jam
+        scheduled_publish_at: '2026-10-24T05:05:00+07:00',    // Besok
+        stage_status: 'draft',
+        publishing_status: 'unrendered',
+        error_message: null
+      },
+      {
+        id: 'sts_47131aea76a',
+        batch_id: 'stb_d6de9b7e1fea',
+        batch_title: 'Batch Multiplier Demo',
+        slot_number: 3,
+        engine: 'multiplier',
+        scheduled_production_at: '2026-10-24T05:05:00+07:00', // Besok (On Schedule)
+        scheduled_publish_at: '2026-10-25T05:05:00+07:00',    // Lusa
+        stage_status: 'draft',
+        publishing_status: 'unrendered',
+        error_message: null
+      }
+    ];
+
+    let batches = JSON.parse(JSON.stringify(INITIAL_BATCHES));
+    let slots = JSON.parse(JSON.stringify(INITIAL_SLOTS));
+    let activeModalSlot = null;
+
+    const NOW = new Date('2026-10-23T10:45:00+07:00').getTime();
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastMessage');
+      toast.innerText = msg;
+      toast.classList.add('active');
+      setTimeout(() => toast.classList.remove('active'), 3500);
+    }
+
+    function renderBatches() {
+      const tbody = document.getElementById('batchTableBody');
+      tbody.innerHTML = batches.map(b => `
+        <tr>
+          <td><strong>${b.title}</strong><br><span style="font-size:0.75rem; color:var(--text-muted);">${b.id}</span></td>
+          <td><span class="badge badge-info">${b.engine.toUpperCase()}</span></td>
+          <td><code>v${b.version}</code></td>
+          <td>
+            <span class="badge ${b.status === 'active' ? 'badge-success' : 'badge-draft'}">
+              ${b.status === 'active' ? '● Aktif' : '○ Draft'}
+            </span>
+          </td>
+          <td>${b.slot_count} Slot</td>
+          <td>
+            ${b.status === 'draft' ? `
+              <button class="btn btn-primary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="activateSingleBatch('${b.id}')">
+                ▶ Aktifkan
+              </button>
+            ` : `
+              <span style="font-size: 0.78rem; color: var(--status-success);">✓ Berjalan</span>
+            `}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderSlots() {
+      const tbody = document.getElementById('slotTableBody');
+      tbody.innerHTML = slots.map((s, idx) => {
+        const prodTime = new Date(s.scheduled_production_at).getTime();
+        const pubTime = new Date(s.scheduled_publish_at).getTime();
+        const isProdOverdue = prodTime < NOW;
+        const isPubOverdue = pubTime < NOW;
+
+        let stageBadge = `<span class="badge badge-draft">Draft</span>`;
+        if (s.stage_status === 'pending') stageBadge = `<span class="badge badge-pending">Pending Worker</span>`;
+        if (s.stage_status === 'processing') stageBadge = `<span class="badge badge-progress">⚡ Processing</span>`;
+        if (s.stage_status === 'completed') stageBadge = `<span class="badge badge-success">✓ Selesai Render</span>`;
+        if (s.stage_status === 'failed') stageBadge = `<span class="badge badge-danger">❌ Gagal</span>`;
+
+        return `
+          <tr>
+            <td>${s.slot_number}</td>
+            <td>
+              <strong>${s.batch_title}</strong>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">${s.id}</div>
+            </td>
+            <td>
+              <div>${new Date(s.scheduled_production_at).toLocaleString('id-ID')}</div>
+              ${isProdOverdue ? `<span class="badge badge-overdue" style="margin-top:4px;">⚠️ Lewat Jam Prod</span>` : `<span style="font-size: 0.75rem; color: var(--text-muted);">Sesuai Jadwal</span>`}
+            </td>
+            <td>
+              <div>${new Date(s.scheduled_publish_at).toLocaleString('id-ID')}</div>
+              ${isPubOverdue ? `<span class="badge badge-overdue" style="margin-top:4px;">⚠️ Lewat Jam Tayang</span>` : `<span style="font-size: 0.75rem; color: var(--text-muted);">Mendatang</span>`}
+            </td>
+            <td>${stageBadge}</td>
+            <td>
+              <span class="badge ${s.publishing_status === 'published' ? 'badge-success' : 'badge-draft'}">
+                ${s.publishing_status}
+              </span>
+            </td>
+            <td style="text-align: right; white-space: nowrap;">
+              ${s.stage_status === 'draft' ? `
+                <button class="btn btn-primary" style="padding: 4px 8px; font-size: 0.75rem; margin-right: 4px;" onclick="triggerDispatchSlot('${s.id}')">
+                  ⚡ Eksekusi Sekarang
+                </button>
+              ` : ''}
+              ${s.stage_status === 'failed' ? `
+                <button class="btn btn-warning" style="padding: 4px 8px; font-size: 0.75rem; margin-right: 4px;" onclick="retrySlot('${s.id}')">
+                  🔄 Retry AI
+                </button>
+              ` : ''}
+              <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="openSlotModal('${s.id}')">
+                Tinjau
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function activateSingleBatch(batchId) {
+      const b = batches.find(x => x.id === batchId);
+      if (!b) return;
+      b.status = 'active';
+      slots.forEach(s => {
+        if (s.batch_id === batchId && s.stage_status === 'draft') {
+          s.stage_status = 'pending';
+        }
+      });
+      renderBatches();
+      renderSlots();
+      showToast(`Batch "${b.title}" diaktifkan! Slot yang jatuh tempo segera dieksekusi worker.`);
+      simulateWorkerProcessing();
+    }
+
+    function simulateActivateAllBatches() {
+      batches.forEach(b => b.status = 'active');
+      slots.forEach(s => {
+        if (s.stage_status === 'draft') {
+          s.stage_status = 'pending';
+        }
+      });
+      renderBatches();
+      renderSlots();
+      showToast(`Semua batch diaktifkan! 4 slot overdue langsung diprioritaskan.`);
+      simulateWorkerProcessing();
+    }
+
+    function triggerDispatchSlot(slotId) {
+      const s = slots.find(x => x.id === slotId);
+      if (!s) return;
+      // Aktifkan juga batch-nya jika masih draft
+      const b = batches.find(x => x.id === s.batch_id);
+      if (b) b.status = 'active';
+
+      s.stage_status = 'pending';
+      renderBatches();
+      renderSlots();
+      showToast(`Slot ${s.id} langsung diantrekan ke worker AI.`);
+      simulateWorkerProcessing();
+    }
+
+    function retrySlot(slotId) {
+      const s = slots.find(x => x.id === slotId);
+      if (!s) return;
+      s.stage_status = 'pending';
+      s.error_message = null;
+      renderSlots();
+      showToast(`Slot ${s.id} berhasil di-retry!`);
+      simulateWorkerProcessing();
+    }
+
+    function simulateWorkerProcessing() {
+      // Cari slot yang pending dan prodTime <= NOW
+      setTimeout(() => {
+        slots.forEach(s => {
+          if (s.stage_status === 'pending') {
+            s.stage_status = 'processing';
+          }
+        });
+        renderSlots();
+      }, 1000);
+
+      setTimeout(() => {
+        slots.forEach(s => {
+          if (s.stage_status === 'processing') {
+            s.stage_status = 'completed';
+            s.publishing_status = 'awaiting_approval';
+          }
+        });
+        renderSlots();
+        showToast('✓ AI Worker selesai merender konten video!');
+      }, 3000);
+    }
+
+    function openSlotModal(slotId) {
+      activeModalSlot = slots.find(x => x.id === slotId);
+      if (!activeModalSlot) return;
+
+      const s = activeModalSlot;
+      const prodTime = new Date(s.scheduled_production_at).getTime();
+      const pubTime = new Date(s.scheduled_publish_at).getTime();
+      const isProdOverdue = prodTime < NOW;
+      const isPubOverdue = pubTime < NOW;
+
+      document.getElementById('modalSlotTitle').innerText = `Tinjau Slot: ${s.id} (${s.batch_title})`;
+
+      let overdueAlertHtml = '';
+      if (isProdOverdue && s.stage_status === 'draft') {
+        overdueAlertHtml = `
+          <div class="banner-overdue">
+            <div style="font-weight: 700; color: var(--status-warning); display: flex; align-items: center; gap: 6px;">
+              ⚠️ Jam Produksi Terlewat (${new Date(s.scheduled_production_at).toLocaleString('id-ID')})
+            </div>
+            <div>
+              Slot ini berstatus <strong>Draft</strong>. Begitu Anda mengklik <strong>"Eksekusi Sekarang"</strong>, worker akan langsung memproduksinya seketika (tanpa menunggu jadwal).
+            </div>
+          </div>
+        `;
+      }
+
+      let rescheduleSectionHtml = '';
+      if (isPubOverdue) {
+        rescheduleSectionHtml = `
+          <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 14px;">
+            <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; color: var(--status-warning);">
+              📅 Penyesuaian Jadwal Tayang (Overdue)
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 10px;">
+              Jadwal tayang lama (${new Date(s.scheduled_publish_at).toLocaleString('id-ID')}) sudah lewat. Anda dapat memajukan jadwal tayang ke waktu mendatang:
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="datetime-local" id="newPublishInput" style="background: var(--input-bg); border: 1px solid var(--border-subtle); color: var(--text-primary); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem;" value="2026-10-23T15:00">
+              <button class="btn btn-warning" onclick="applyReschedule('${s.id}')">Simpan Jadwal Baru</button>
+            </div>
+          </div>
+        `;
+      }
+
+      document.getElementById('modalSlotBody').innerHTML = `
+        ${overdueAlertHtml}
+        ${rescheduleSectionHtml}
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.85rem;">
+          <div><strong>Engine:</strong> ${s.engine.toUpperCase()}</div>
+          <div><strong>Status Produksi:</strong> ${s.stage_status.toUpperCase()}</div>
+          <div><strong>Jadwal Produksi:</strong> ${new Date(s.scheduled_production_at).toLocaleString('id-ID')}</div>
+          <div><strong>Jadwal Tayang:</strong> ${new Date(s.scheduled_publish_at).toLocaleString('id-ID')}</div>
+        </div>
+      `;
+
+      let footerButtons = `<button class="btn btn-secondary" onclick="closeModal()">Tutup</button>`;
+      if (s.stage_status === 'draft') {
+        footerButtons += `
+          <button class="btn btn-primary" onclick="triggerDispatchSlot('${s.id}'); closeModal();">
+            ⚡ Eksekusi Sekarang
+          </button>
+        `;
+      } else if (s.stage_status === 'failed') {
+        footerButtons += `
+          <button class="btn btn-warning" onclick="retrySlot('${s.id}'); closeModal();">
+            🔄 Retry Produksi AI
+          </button>
+        `;
+      } else if (s.stage_status === 'completed') {
+        footerButtons += `
+          <button class="btn btn-primary" onclick="showToast('Konten video berhasil dipublikasikan!'); closeModal();">
+            🚀 Publikasikan Sekarang
+          </button>
+        `;
+      }
+
+      document.getElementById('modalSlotFooter').innerHTML = footerButtons;
+      document.getElementById('slotModal').classList.add('active');
+    }
+
+    function applyReschedule(slotId) {
+      const s = slots.find(x => x.id === slotId);
+      if (!s) return;
+      const inputVal = document.getElementById('newPublishInput').value;
+      if (inputVal) {
+        s.scheduled_publish_at = new Date(inputVal).toISOString();
+        renderSlots();
+        showToast('✓ Jadwal tayang baru berhasil diperbarui!');
+        openSlotModal(slotId);
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('slotModal').classList.remove('active');
+    }
+
+    function resetSimData() {
+      batches = JSON.parse(JSON.stringify(INITIAL_BATCHES));
+      slots = JSON.parse(JSON.stringify(INITIAL_SLOTS));
+      renderBatches();
+      renderSlots();
+      showToast('Data simulasi di-reset ke kondisi awal server dev.');
+    }
+
+    // Init
+    renderBatches();
+    renderSlots();
+  </script>
+</body>
+</html>
