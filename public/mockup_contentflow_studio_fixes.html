@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi & Mockup Interaktif: Perbaikan & Mitigasi ContentFlow Studio</title>
+  <link rel="stylesheet" href="/app/theme.css">
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --surface: #1e293b;
+      --surface-raised: #334155;
+      --surface-interactive: #475569;
+      --surface-subtle: rgba(255, 255, 255, 0.05);
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --border-strong: rgba(255, 255, 255, 0.2);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --action-primary: #3b82f6;
+      --action-primary-hover: #2563eb;
+      --on-action-primary: #ffffff;
+      --input-bg: #0f172a;
+      --status-success: #10b981;
+      --status-success-soft: rgba(16, 185, 129, 0.15);
+      --status-warning: #f59e0b;
+      --status-warning-soft: rgba(245, 158, 11, 0.15);
+      --status-info: #06b6d4;
+      --status-info-soft: rgba(6, 182, 212, 0.15);
+      --status-danger: #ef4444;
+      --status-danger-soft: rgba(239, 68, 68, 0.15);
+      --overlay-backdrop: rgba(15, 23, 42, 0.75);
+      --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 24px;
+    }
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .header-box {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+    .header-box h1 {
+      margin: 0 0 8px 0;
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-box p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 0 0 6px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-primary);
+    }
+    .card-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin: 0 0 20px 0;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-success { background: var(--status-success-soft); color: var(--status-success); }
+    .badge-info { background: var(--status-info-soft); color: var(--status-info); }
+    .badge-warning { background: var(--status-warning-soft); color: var(--status-warning); }
+    .badge-danger { background: var(--status-danger-soft); color: var(--status-danger); }
+
+    /* Fix 1: Schedule */
+    .slot-row {
+      display: grid;
+      grid-template-columns: 36px 1fr 210px 210px 100px;
+      gap: 14px;
+      align-items: center;
+      padding: 14px 16px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .slot-num {
+      font-weight: 700;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .slot-info h5 {
+      margin: 0 0 4px 0;
+      font-size: 0.92rem;
+      color: var(--text-primary);
+    }
+    .slot-info span {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+    .input-group label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .input-control {
+      width: 100%;
+      background: var(--input-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 0.85rem;
+      box-sizing: border-box;
+      outline: none;
+    }
+    .input-control:focus {
+      border-color: var(--action-primary);
+    }
+
+    /* Fix 2: Repliz accounts */
+    .toolbar-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .search-box {
+      flex: 1;
+      min-width: 260px;
+      position: relative;
+    }
+    .search-input {
+      width: 100%;
+      padding: 9px 12px 9px 36px;
+      background: var(--input-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      font-size: 0.88rem;
+      box-sizing: border-box;
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .btn-secondary {
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-interactive);
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+    .btn-danger {
+      background: var(--status-danger);
+      color: #fff;
+    }
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 0.78rem;
+      border-radius: 6px;
+    }
+    .account-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+      max-height: 280px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .account-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .account-card:hover {
+      border-color: var(--action-primary);
+      background: var(--surface-interactive);
+    }
+    .account-card.selected {
+      border-color: var(--action-primary);
+      background: rgba(59, 130, 246, 0.15);
+    }
+    .account-card input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--action-primary);
+    }
+    .account-info {
+      flex: 1;
+      overflow: hidden;
+    }
+    .account-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .account-meta {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    /* Fix 3: Pillar Planner Flow */
+    .flow-stepper {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .step-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .step-box.active {
+      border-color: var(--action-primary);
+      background: rgba(59, 130, 246, 0.1);
+    }
+    .step-box.done {
+      border-color: var(--status-success);
+    }
+    .step-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      flex-shrink: 0;
+    }
+    .step-box.done .step-number {
+      background: var(--status-success);
+      color: #fff;
+    }
+    .step-text h6 {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-primary);
+    }
+    .step-text p {
+      margin: 2px 0 0 0;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+      margin-bottom: 18px;
+    }
+    .tab-btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
+    }
+    .planner-card-item {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Modal Overlay & Drawer */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--overlay-backdrop);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 680px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 24px;
+      box-shadow: var(--shadow-modal);
+    }
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+      padding-left: 20px;
+      border-left: 2px solid var(--border-subtle);
+      margin: 16px 0;
+    }
+    .timeline-item {
+      position: relative;
+    }
+    .timeline-dot {
+      position: absolute;
+      left: -27px;
+      top: 2px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--action-primary);
+    }
+    .timeline-dot.danger { background: var(--status-danger); }
+    .timeline-dot.success { background: var(--status-success); }
+    .timeline-time {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+    .timeline-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 2px 0;
+    }
+    .timeline-desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      background: var(--surface-raised);
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-top: 4px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header Box -->
+    <div class="header-box">
+      <h1>🚀 Simulasi & Mockup Interaktif: Perbaikan & Mitigasi ContentFlow Studio</h1>
+      <p>Simulasi interaktif lengkap: Perbaikan kalkulasi jadwal, Selector Akun Repliz Connected, Alur aman Planner Pillar, <strong>Tombol Log Eksekusi per Baris</strong>, serta <strong>Panel Mitigasi Manual untuk Gagal Produksi / Gagal Skedul</strong>.</p>
+    </div>
+
+    <!-- POIN 1: Perbaikan Bug Alokasi Jadwal & Filter Brand Profile -->
+    <div class="card" id="card-schedule">
+      <div class="card-title">
+        <span>⚡ 1. Alokasikan Jadwal Tayang, Filter Brand Profile & Tombol Log</span>
+        <span class="badge badge-success">Bugfix Tanggal + Brand Filter + Log</span>
+      </div>
+      <p class="card-subtitle">
+        Saat <strong>Waktu Tayang</strong> diubah, <strong>Mulai Produksi</strong> otomatis mengikuti (H-1 sebelum tayang). Disediakan filter Brand Profile aktif per tenant untuk menyaring jadwal secara instan.
+      </p>
+
+      <!-- Brand Filter Bar -->
+      <div style="display: flex; gap: 12px; align-items: center; background: var(--surface-raised); padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; border: 1px solid var(--border-subtle);">
+        <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+          🏢 Filter Brand Profile:
+        </label>
+        <select id="mock-brand-filter" class="input-control" style="max-width: 280px; padding: 6px 12px;" onchange="filterSlotsByBrand(this.value)">
+          <option value="all">Semua Brand Profile (Tenant)</option>
+          <option value="bp_01">Airfry Official (ID: bp_01)</option>
+          <option value="bp_02">Dapur Nusantara (ID: bp_02)</option>
+        </select>
+        <span id="brand-filter-status" style="font-size: 0.8rem; color: var(--status-info);">Menampilkan seluruh brand profile (2 slot)</span>
+      </div>
+
+      <div id="slot-list">
+        <!-- Rendered via JS -->
+      </div>
+      <div style="margin-top: 14px; font-size: 0.82rem; color: var(--status-info); background: var(--status-info-soft); padding: 10px 14px; border-radius: 8px;">
+        💡 <strong>Uji Coba:</strong> Pilih <em>"Airfry Official"</em> atau <em>"Dapur Nusantara"</em> pada dropdown di atas untuk melihat kalender/daftar slot otomatis tersaring khusus untuk brand tersebut.
+      </div>
+    </div>
+
+    <!-- POIN BARU: Mitigasi Manual Terpilih -->
+    <div class="card" id="card-mitigation">
+      <div class="card-title">
+        <span>🛠️ 2. Mitigasi Manual Terpilih (Sesuai Konfirmasi Pengguna)</span>
+        <span class="badge badge-info">Keputusan User Disetujui</span>
+      </div>
+      <p class="card-subtitle">
+        Alur mitigasi manual saat terjadi kegagalan baris konten yang telah disepakati:
+      </p>
+
+      <!-- Kasus A: Gagal Produksi AI -> Opsi 1 -->
+      <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 16px; margin-bottom: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+          <div>
+            <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">
+              A. Kasus Gagal Produksi (AI Worker Failure) → <span style="color: var(--action-primary);">Opsi 1: Retry Dispatch AI</span>
+            </div>
+            <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">
+              Slot #03 · Recipe Air Fryer Brownies Lumer
+            </div>
+          </div>
+          <span class="badge badge-danger" id="sim-prod-status">❌ Gagal Produksi AI</span>
+        </div>
+
+        <div style="background: var(--status-danger-soft); border: 1px solid var(--status-danger); border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; font-size: 0.82rem; color: var(--status-danger);" id="sim-prod-msg">
+          ⚠️ <strong>Error Worker AI:</strong> <code>Connection timeout to GPU Node 2 after 120s (Prompt Video Generation failed)</code>
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+          <button type="button" class="btn btn-primary btn-sm" onclick="mitigateRetryProduction()">
+            🔄 Ulangi Produksi AI (Retry Dispatch)
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="openLogModal('slot_03', 'Slot #03 · Recipe Air Fryer Brownies Lumer')">
+            📜 Buka Log Detail Slot
+          </button>
+          <span style="font-size: 0.78rem; color: var(--text-muted); margin-left: 8px;">
+            Mereset status ke <code>pending</code> & membersihkan error message agar worker memproses ulang di antrean.
+          </span>
+        </div>
+      </div>
+
+      <!-- Kasus B: Gagal Skedul/Publikasi -> Opsi 2 -->
+      <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+          <div>
+            <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">
+              B. Kasus Gagal Skedul / Publikasi → <span style="color: var(--action-primary);">Opsi 2: Jadwalkan Ulang & Ganti Akun</span>
+            </div>
+            <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">
+              Slot #04 · Multiplier Hook Ayam Crispy Madu
+            </div>
+          </div>
+          <span class="badge badge-warning" id="sim-pub-status">⚠️ Gagal Skedul / Publikasi</span>
+        </div>
+
+        <div style="background: var(--status-warning-soft); border: 1px solid var(--status-warning); border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; font-size: 0.82rem; color: var(--status-warning);" id="sim-pub-msg">
+          ⚠️ <strong>Error Repliz API:</strong> <code>TikTok Access Token Expired (Please reconnect account or refresh permission)</code>
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+          <button type="button" class="btn btn-primary btn-sm" onclick="mitigateReschedule()">
+            ⏰ Jadwalkan Ulang / Ganti Akun Target (Reschedule)
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="openLogModal('slot_04', 'Slot #04 · Multiplier Hook Ayam Crispy Madu')">
+            📜 Buka Log Detail Slot
+          </button>
+          <span style="font-size: 0.78rem; color: var(--text-muted); margin-left: 8px;">
+            Membuka form reschedule untuk menggeser waktu tayang & memilih akun sosial media pengganti yang aktif.
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- POIN 3: Perbaikan UI & Fungsi Akun Repliz -->
+    <div class="card" id="card-repliz">
+      <div class="card-title">
+        <span>🌐 3. Akun Tujuan Repliz (Connected Only, Search Filter & Sync)</span>
+        <span class="badge badge-info"><span id="repliz-count">3</span> Akun Terhubung</span>
+      </div>
+      <p class="card-subtitle">
+        Memuat seluruh akun Repliz yang berstatus <code>connected/active</code>, tombol reload sinkronisasi instan, serta pencarian real-time nama dan platform.
+      </p>
+
+      <div class="toolbar-row">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="repliz-search" class="search-input" placeholder="Cari nama akun atau platform (cth: tiktok, instagram, mas benu)..." oninput="filterReplizAccounts()">
+        </div>
+        <button type="button" class="btn btn-secondary" onclick="reloadReplizAccounts(this)" id="btn-reload-repliz">
+          <span id="reload-icon">🔄</span> Reload Akun Repliz
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="selectAllRepliz(true)">Pilih Semua</button>
+        <button type="button" class="btn btn-secondary" onclick="selectAllRepliz(false)">Batal Pilih</button>
+      </div>
+
+      <div class="account-grid" id="repliz-account-grid">
+        <!-- Rendered via JS -->
+      </div>
+
+      <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; color: var(--text-secondary);">
+        <span id="selected-summary">1 akun terpilih untuk batch ini</span>
+        <span>Hanya menampilkan akun dengan status <code>active / connected</code> di Repliz</span>
+      </div>
+    </div>
+
+    <!-- POIN 4: Perbaikan Bug & Alur Planner Pillar -->
+    <div class="card" id="card-pillar">
+      <div class="card-title">
+        <span>🏛️ 4. Alur Kampanye Pillar: Save → Generate AI → Bawa ke Wizard Campaign</span>
+        <span class="badge badge-warning">Pencegahan State Incomplete</span>
+      </div>
+      <p class="card-subtitle">
+        Content planner <strong>disimpan</strong>, lalu <strong>digenerate hingga selesai</strong> (status <code>completed/planned</code> & baris > 0), baru setelah data planner siap dapat dilanjutkan ke konfigurasi campaign.
+      </p>
+
+      <div class="flow-stepper">
+        <div class="step-box" id="step-box-1">
+          <div class="step-number" id="step-num-1">1</div>
+          <div class="step-text">
+            <h6>1. Simpan & Generate AI</h6>
+            <p>Draft disimpan & dieksekusi</p>
+          </div>
+        </div>
+        <div class="step-box" id="step-box-2">
+          <div class="step-number" id="step-num-2">2</div>
+          <div class="step-text">
+            <h6>2. Review Baris Konten</h6>
+            <p>Verifikasi status siap & jumlah baris</p>
+          </div>
+        </div>
+        <div class="step-box" id="step-box-3">
+          <div class="step-number" id="step-num-3">3</div>
+          <div class="step-text">
+            <h6>3. Wizard Campaign Pillar</h6>
+            <p>Alokasi slot & commit batch</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Selection in Studio: Buat Baru vs Pilih Siap Pakai -->
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tab-create" onclick="switchPlannerTab('create')">✨ Buat & Generate Planner Baru</button>
+        <button class="tab-btn" id="tab-select" onclick="switchPlannerTab('select')">📋 Pilih dari Planner Siap Pakai</button>
+      </div>
+
+      <!-- Tab Content: Buat Baru -->
+      <div id="planner-create-view" style="display: block;">
+        <div style="background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 18px; margin-bottom: 16px;">
+          <h4 style="margin: 0 0 12px 0; font-size: 0.95rem;">Brief & Konfigurasi Planner Baru</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+            <div>
+              <label style="display:block; font-size:0.75rem; color:var(--text-secondary); margin-bottom:4px;">Nama Brand / Akun</label>
+              <input type="text" class="input-control" id="sim-brand-name" value="Airfry Recipes Pro">
+            </div>
+            <div>
+              <label style="display:block; font-size:0.75rem; color:var(--text-secondary); margin-bottom:4px;">Fokus Planner</label>
+              <select class="input-control" id="sim-focus">
+                <option value="product_campaign">📦 Product Campaign</option>
+                <option value="brand_editorial">🧩 Brand Editorial</option>
+                <option value="recipe_campaign">🍳 Recipe Campaign</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label style="display:block; font-size:0.75rem; color:var(--text-secondary); margin-bottom:4px;">Nama Produk / Topik Utama</label>
+            <input type="text" class="input-control" id="sim-product" value="Air Fryer Smart Dual Zone 8L">
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button type="button" class="btn btn-primary" id="btn-save-generate" onclick="simulateSaveAndGenerate()">
+            🚀 Simpan Draft & Eksekusi Generator AI
+          </button>
+          <span id="planner-status-msg" style="font-size: 0.85rem; color: var(--text-secondary);"></span>
+        </div>
+      </div>
+
+      <!-- Tab Content: Pilih Siap Pakai -->
+      <div id="planner-select-view" style="display: none;">
+        <div style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 12px;">
+          Menampilkan planner yang sudah selesai di-generate (status <code>completed / planned</code>) dan belum dikonsumsi oleh batch lain:
+        </div>
+        <div id="existing-planners-list">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <!-- Live Pipeline Progress Box -->
+      <div id="generation-progress-box" style="display: none; margin-top: 16px; background: rgba(59, 130, 246, 0.1); border: 1px solid var(--action-primary); border-radius: 8px; padding: 14px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="spinner"></span>
+          <div>
+            <strong style="color: var(--text-primary); font-size: 0.9rem;" id="progress-step-title">Menyimpan draft planner ke database...</strong>
+            <p style="margin: 2px 0 0 0; font-size: 0.78rem; color: var(--text-secondary);" id="progress-step-desc">Membuat rekaman draft di content_planners.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review Ready Box -->
+      <div id="planner-ready-box" style="display: none; margin-top: 16px; background: var(--status-success-soft); border: 1px solid var(--status-success); border-radius: 8px; padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <strong style="color: var(--status-success); font-size: 0.95rem;">✅ Planner Siap Dibawa ke Wizard Campaign!</strong>
+            <p style="margin: 4px 0 0 0; font-size: 0.82rem; color: var(--text-primary);" id="ready-summary">
+              Planner "Airfry Recipes Pro" telah terisi 12 baris konten dengan status <code>completed</code>.
+            </p>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="alert('Melanjutkan ke Step 2 (Review) dan Step 3 (Konfigurasi Campaign Pillar)!')">
+            Lanjut ke Konfigurasi Campaign →
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- MODAL LOG EKSEKUSI SLOT -->
+  <div class="modal-overlay" id="log-modal" style="display: none;">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div>
+          <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-primary);" id="log-modal-title">Log Eksekusi Slot</h3>
+          <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: var(--text-secondary);" id="log-modal-sub">Audit trail lengkap dan event lifecycle</p>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeLogModal()">✕ Tutup</button>
+      </div>
+
+      <div class="timeline" id="log-timeline">
+        <!-- Rendered via JS -->
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 14px; margin-top: 14px;">
+        <span style="font-size: 0.78rem; color: var(--text-muted);">Data bersumber dari <code>content_studio_events</code></span>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="alert('Membuka halaman log sistem Publishing Scheduler di /content-flow')">
+          🔗 Buka di Log Publishing Sistem →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- POIN 1: SCHEDULE DATA & LOGIC ---
+    const now = new Date();
+    function formatDateInput(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const hours = String(d.getHours()).padStart(2, '0');
+      const mins = String(d.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day}T${hours}:${mins}`;
+    }
+
+    const d1 = new Date(now.getTime() + 2 * 86400000);
+    const d2 = new Date(now.getTime() + 3 * 86400000);
+
+    let allSlots = [
+      {
+        id: 'slot_1',
+        brandId: 'bp_01',
+        brandName: 'Airfry Official',
+        title: 'Kombinasi 1 · Hook Visual Crispy Skin Chicken',
+        mediaType: 'Video (9:16)',
+        publishAt: formatDateInput(d1),
+        productionAt: formatDateInput(new Date(d1.getTime() - 86400000))
+      },
+      {
+        id: 'slot_2',
+        brandId: 'bp_02',
+        brandName: 'Dapur Nusantara',
+        title: 'Kombinasi 2 · Testimoni Emak-emak Hemat Minyak 80%',
+        mediaType: 'Video (9:16)',
+        publishAt: formatDateInput(d2),
+        productionAt: formatDateInput(new Date(d2.getTime() - 86400000))
+      }
+    ];
+    let slots = [...allSlots];
+
+    function filterSlotsByBrand(bId) {
+      if (!bId || bId === 'all') {
+        slots = [...allSlots];
+        document.getElementById('brand-filter-status').textContent = `Menampilkan seluruh brand profile (${slots.length} slot)`;
+      } else {
+        slots = allSlots.filter(s => s.brandId === bId);
+        const name = bId === 'bp_01' ? 'Airfry Official' : 'Dapur Nusantara';
+        document.getElementById('brand-filter-status').textContent = `Menampilkan ${slots.length} slot khusus brand: ${name}`;
+      }
+      renderSlots();
+    }
+
+    function renderSlots() {
+      const el = document.getElementById('slot-list');
+      if (!slots.length) {
+        el.innerHTML = '<div style="padding: 24px; text-align: center; color: var(--text-muted); background: var(--surface-raised); border-radius: 8px;">Tidak ada slot konten untuk brand ini.</div>';
+        return;
+      }
+      el.innerHTML = slots.map((s, idx) => `
+        <div class="slot-row">
+          <span class="slot-num">#${idx + 1}</span>
+          <div class="slot-info">
+            <h5>${s.title}</h5>
+            <span>${s.mediaType} · 🏢 <strong>${s.brandName}</strong></span>
+          </div>
+          <div class="input-group">
+            <label>Mulai Produksi (WIB)</label>
+            <input type="datetime-local" class="input-control" value="${s.productionAt}" onchange="updateProductionDate('${s.id}', this.value)">
+          </div>
+          <div class="input-group">
+            <label>Waktu Tayang (WIB)</label>
+            <input type="datetime-local" class="input-control" value="${s.publishAt}" onchange="updatePublishDate('${s.id}', this.value)">
+          </div>
+          <div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openLogModal('${s.id}', '${s.title}')" style="width: 100%; justify-content: center;">
+              📜 Log
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateProductionDate(slotId, val) {
+      const s = slots.find(x => x.id === slotId);
+      if (s) s.productionAt = val;
+    }
+
+    function updatePublishDate(slotId, val) {
+      const s = slots.find(x => x.id === slotId);
+      if (!s) return;
+      s.publishAt = val;
+      if (val) {
+        const pubTime = new Date(val).getTime();
+        if (!isNaN(pubTime)) {
+          s.productionAt = formatDateInput(new Date(pubTime - 86400000));
+        }
+      }
+      renderSlots();
+    }
+
+    // --- LOG MODAL ---
+    function openLogModal(slotId, slotTitle) {
+      document.getElementById('log-modal-title').textContent = `Log Eksekusi: ${slotTitle}`;
+      document.getElementById('log-modal-sub').textContent = `Slot ID: ${slotId} · Tenant: default_tenant`;
+
+      const timelineEl = document.getElementById('log-timeline');
+      if (slotId === 'slot_03') {
+        timelineEl.innerHTML = `
+          <div class="timeline-item">
+            <div class="timeline-dot danger"></div>
+            <div class="timeline-time">23 Okt 2026, 10:02:15 WIB</div>
+            <div class="timeline-title">❌ Production Failed (Worker Error)</div>
+            <div class="timeline-desc">Error: Connection timeout to GPU Node 2 after 120s. Checkpoint: video_generation_timeout</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">23 Okt 2026, 10:00:10 WIB</div>
+            <div class="timeline-title">⚙️ Dispatched to Worker Queue</div>
+            <div class="timeline-desc">Worker: node_2_gpu · Engine: ComfyUI + Minimax Vv2 · Correlation ID: corr_98231afb</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot success"></div>
+            <div class="timeline-time">23 Okt 2026, 09:30:00 WIB</div>
+            <div class="timeline-title">✅ Slot Created & Scheduled</div>
+            <div class="timeline-desc">Batch ID: btc_87f1 · Output Key: recipe:0 · Scheduled Publish: 24 Okt 2026 10:00 WIB</div>
+          </div>
+        `;
+      } else {
+        timelineEl.innerHTML = `
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">23 Okt 2026, 10:15:00 WIB</div>
+            <div class="timeline-title">⏳ Waiting for Production Schedule</div>
+            <div class="timeline-desc">Slot dijadwalkan masuk antrean produksi otomatis pada waktu yang ditentukan.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot success"></div>
+            <div class="timeline-time">23 Okt 2026, 09:30:00 WIB</div>
+            <div class="timeline-title">✅ Slot Created & Approved</div>
+            <div class="timeline-desc">Output Key: multiplier:0 · Target: 1 akun Repliz aktif.</div>
+          </div>
+        `;
+      }
+
+      document.getElementById('log-modal').style.display = 'flex';
+    }
+
+    function closeLogModal() {
+      document.getElementById('log-modal').style.display = 'none';
+    }
+
+    // --- MITIGATION ACTIONS ---
+    function mitigateRetryProduction() {
+      document.getElementById('sim-prod-status').className = 'badge badge-info';
+      document.getElementById('sim-prod-status').textContent = '⚙️ Diproses Ulang (Retry Dispatch)...';
+      document.getElementById('sim-prod-msg').style.background = 'var(--status-info-soft)';
+      document.getElementById('sim-prod-msg').style.borderColor = 'var(--status-info)';
+      document.getElementById('sim-prod-msg').style.color = 'var(--status-info)';
+      document.getElementById('sim-prod-msg').innerHTML = 'ℹ️ Slot dikembalikan ke status <code>pending</code>. Worker mengambil ulang antrean render.';
+      setTimeout(() => {
+        document.getElementById('sim-prod-status').className = 'badge badge-success';
+        document.getElementById('sim-prod-status').textContent = '✅ Siap Review (Needs Review)';
+        document.getElementById('sim-prod-msg').style.background = 'var(--status-success-soft)';
+        document.getElementById('sim-prod-msg').style.borderColor = 'var(--status-success)';
+        document.getElementById('sim-prod-msg').style.color = 'var(--status-success)';
+        document.getElementById('sim-prod-msg').innerHTML = '✅ Video berhasil dirender ulang oleh worker! Siap dipublikasikan.';
+      }, 1200);
+    }
+
+    function mitigateManualUpload() {
+      const url = prompt('Masukkan URL video hasil render manual atau upload file:', 'https://storage.maknaflow.id/uploads/brownies_manual_edit.mp4');
+      if (url) {
+        document.getElementById('sim-prod-status').className = 'badge badge-success';
+        document.getElementById('sim-prod-status').textContent = '✅ Media Manual Terpasang';
+        document.getElementById('sim-prod-msg').style.background = 'var(--status-success-soft)';
+        document.getElementById('sim-prod-msg').style.borderColor = 'var(--status-success)';
+        document.getElementById('sim-prod-msg').style.color = 'var(--status-success)';
+        document.getElementById('sim-prod-msg').innerHTML = `✅ Bypass AI berhasil! Menggunakan media manual: <code>${url}</code>.`;
+      }
+    }
+
+    function mitigateSkipSlot() {
+      if (confirm('Yakin ingin melewati (skip) baris konten ini agar tidak memblokir batch?')) {
+        document.getElementById('sim-prod-status').className = 'badge badge-warning';
+        document.getElementById('sim-prod-status').textContent = '⏭️ Dilewati (Skipped)';
+        document.getElementById('sim-prod-msg').style.display = 'none';
+      }
+    }
+
+    function mitigateRetryPublish() {
+      document.getElementById('sim-pub-status').className = 'badge badge-info';
+      document.getElementById('sim-pub-status').textContent = '🚀 Mempublikasikan Ulang...';
+      setTimeout(() => {
+        document.getElementById('sim-pub-status').className = 'badge badge-success';
+        document.getElementById('sim-pub-status').textContent = '✅ Terpublikasi (Published)';
+        document.getElementById('sim-pub-msg').style.background = 'var(--status-success-soft)';
+        document.getElementById('sim-pub-msg').style.borderColor = 'var(--status-success)';
+        document.getElementById('sim-pub-msg').style.color = 'var(--status-success)';
+        document.getElementById('sim-pub-msg').innerHTML = '✅ Sukses terpublikasi ke TikTok via Repliz API!';
+      }, 1000);
+    }
+
+    function mitigateReschedule() {
+      const newTime = prompt('Masukkan jadwal tayang baru (WIB):', '2026-10-25 15:00');
+      if (newTime) {
+        document.getElementById('sim-pub-status').className = 'badge badge-info';
+        document.getElementById('sim-pub-status').textContent = '⏰ Dijadwalkan Ulang';
+        document.getElementById('sim-pub-msg').innerHTML = `ℹ️ Jadwal diperbarui ke: <strong>${newTime} WIB</strong>. Token akun telah divalidasi ulang.`;
+      }
+    }
+
+    function mitigateManualEvidence() {
+      const link = prompt('Masukkan tautan bukti posting manual (misal link VT TikTok):', 'https://www.tiktok.com/@airfry_official/video/72918273618');
+      if (link) {
+        document.getElementById('sim-pub-status').className = 'badge badge-success';
+        document.getElementById('sim-pub-status').textContent = '✅ Terpublikasi (Manual Evidence)';
+        document.getElementById('sim-pub-msg').style.background = 'var(--status-success-soft)';
+        document.getElementById('sim-pub-msg').style.borderColor = 'var(--status-success)';
+        document.getElementById('sim-pub-msg').style.color = 'var(--status-success)';
+        document.getElementById('sim-pub-msg').innerHTML = `✅ Ditandai selesai secara manual. Tautan bukti: <a href="${link}" target="_blank" style="color:var(--action-primary);">${link}</a>`;
+      }
+    }
+
+    // --- POIN 2: REPLIZ ACCOUNTS ---
+    let replizAccounts = [
+      { id: 'acc_101', name: 'Airfry Official TikTok', platform: 'tiktok', status: 'active', selected: true },
+      { id: 'acc_102', name: 'Mas Benu Kuliner IG', platform: 'instagram', status: 'active', selected: false },
+      { id: 'acc_103', name: 'Resep Dapur Viral FB Page', platform: 'facebook', status: 'active', selected: false },
+      { id: 'acc_104', name: 'Old Disconnected Account', platform: 'tiktok', status: 'disconnected', selected: false }
+    ];
+
+    function getConnectedAccounts() {
+      return replizAccounts.filter(a => a.status === 'active');
+    }
+
+    function renderReplizAccounts(filtered = null) {
+      const list = filtered || getConnectedAccounts();
+      const grid = document.getElementById('repliz-account-grid');
+      document.getElementById('repliz-count').textContent = getConnectedAccounts().length;
+
+      if (!list.length) {
+        grid.innerHTML = `<div style="grid-column: 1 / -1; padding: 20px; text-align: center; color: var(--text-muted);">Tidak ada akun Repliz terhubung yang cocok dengan pencarian.</div>`;
+        updateSelectionSummary();
+        return;
+      }
+
+      grid.innerHTML = list.map(a => `
+        <div class="account-card ${a.selected ? 'selected' : ''}" onclick="toggleAccount('${a.id}')">
+          <input type="checkbox" ${a.selected ? 'checked' : ''} onclick="event.stopPropagation(); toggleAccount('${a.id}')">
+          <div class="account-info">
+            <div class="account-name">${a.name}</div>
+            <div class="account-meta">
+              <span class="badge badge-info">${a.platform.toUpperCase()}</span>
+              <span class="badge badge-success">Connected</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      updateSelectionSummary();
+    }
+
+    function toggleAccount(id) {
+      const a = replizAccounts.find(x => x.id === id);
+      if (a) {
+        a.selected = !a.selected;
+        filterReplizAccounts();
+      }
+    }
+
+    function filterReplizAccounts() {
+      const q = (document.getElementById('repliz-search').value || '').trim().toLowerCase();
+      const connected = getConnectedAccounts();
+      const filtered = connected.filter(a => a.name.toLowerCase().includes(q) || a.platform.toLowerCase().includes(q));
+      renderReplizAccounts(filtered);
+    }
+
+    function reloadReplizAccounts(btn) {
+      const icon = document.getElementById('reload-icon');
+      btn.disabled = true;
+      icon.innerHTML = '<span class="spinner" style="width:12px;height:12px;vertical-align:middle;"></span>';
+      
+      setTimeout(() => {
+        if (!replizAccounts.some(x => x.id === 'acc_105')) {
+          replizAccounts.push({ id: 'acc_105', name: 'Airfry YouTube Shorts', platform: 'youtube', status: 'active', selected: false });
+        }
+        btn.disabled = false;
+        icon.textContent = '🔄';
+        filterReplizAccounts();
+        alert('Sinkronisasi akun Repliz berhasil! Akun terbaru telah dimuat.');
+      }, 900);
+    }
+
+    function selectAllRepliz(checked) {
+      getConnectedAccounts().forEach(a => a.selected = checked);
+      filterReplizAccounts();
+    }
+
+    function updateSelectionSummary() {
+      const count = getConnectedAccounts().filter(a => a.selected).length;
+      document.getElementById('selected-summary').textContent = `${count} akun terpilih untuk batch ini`;
+    }
+
+    // --- POIN 4: PILLAR PLANNER SIMULATION ---
+    const existingPlanners = [
+      { id: 'pln_ready_1', title: 'Content Planner Resep Air Fryer Edisi Ramadhan', focus: 'recipe_campaign', status: 'planned', rows: 15, date: '2026-10-22' },
+      { id: 'pln_ready_2', title: 'Pillar Campaign Smart Dual Zone Healthy Meal', focus: 'product_campaign', status: 'completed', rows: 12, date: '2026-10-21' }
+    ];
+
+    function switchPlannerTab(tab) {
+      document.getElementById('tab-create').classList.toggle('active', tab === 'create');
+      document.getElementById('tab-select').classList.toggle('active', tab === 'select');
+      document.getElementById('planner-create-view').style.display = tab === 'create' ? 'block' : 'none';
+      document.getElementById('planner-select-view').style.display = tab === 'select' ? 'block' : 'none';
+      if (tab === 'select') renderExistingPlanners();
+    }
+
+    function renderExistingPlanners() {
+      const el = document.getElementById('existing-planners-list');
+      el.innerHTML = existingPlanners.map(p => `
+        <div class="planner-card-item">
+          <div>
+            <div style="font-weight: 700; font-size: 0.92rem; color: var(--text-primary); margin-bottom: 4px;">${p.title}</div>
+            <div style="display:flex; gap:6px; font-size: 0.78rem;">
+              <span class="badge badge-info">${p.focus}</span>
+              <span class="badge badge-success">${p.rows} Baris Siap</span>
+              <span class="badge badge-info">Status: ${p.status}</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="useExistingPlanner('${p.id}')">
+            Gunakan Planner Ini →
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function useExistingPlanner(id) {
+      const p = existingPlanners.find(x => x.id === id);
+      if (!p) return;
+      document.getElementById('step-box-1').classList.add('done');
+      document.getElementById('step-box-2').classList.add('active');
+      document.getElementById('planner-ready-box').style.display = 'block';
+      document.getElementById('ready-summary').textContent = `Planner "${p.title}" memiliki ${p.rows} baris konten (status: ${p.status}) dan siap dikonfigurasi.`;
+    }
+
+    function simulateSaveAndGenerate() {
+      const btn = document.getElementById('btn-save-generate');
+      const pBox = document.getElementById('generation-progress-box');
+      const rBox = document.getElementById('planner-ready-box');
+      const pTitle = document.getElementById('progress-step-title');
+      const pDesc = document.getElementById('progress-step-desc');
+
+      btn.disabled = true;
+      rBox.style.display = 'none';
+      pBox.style.display = 'block';
+      pTitle.textContent = 'Langkah 1/2: Menyimpan Draft Planner...';
+      pDesc.textContent = 'Menyimpan konfigurasi brief dan pilar ke database (POST /api/content-planner).';
+
+      setTimeout(() => {
+        pTitle.textContent = 'Langkah 2/2: Menjalankan AI Generator Pipeline...';
+        pDesc.textContent = 'AI Gemini menghasilkan matriks konten, hook, dan voice-over (POST /api/content-planner/:id/execute).';
+
+        setTimeout(() => {
+          pBox.style.display = 'none';
+          btn.disabled = false;
+          document.getElementById('step-box-1').classList.add('done');
+          document.getElementById('step-box-2').classList.add('active');
+          rBox.style.display = 'block';
+          document.getElementById('ready-summary').textContent = `Planner "${document.getElementById('sim-brand-name').value}" berhasil digenerate dengan 12 baris konten lengkap dan status 'completed'.`;
+        }, 1400);
+      }, 1000);
+    }
+
+    // Init
+    renderSlots();
+    renderReplizAccounts();
+  </script>
+</body>
+</html>

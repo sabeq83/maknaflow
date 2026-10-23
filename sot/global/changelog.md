@@ -1,5 +1,14 @@
 # Changelog
 
+## V2.32.76 — Perbaikan Bug & Fitur Mitigasi ContentFlow Studio (23/10/2026)
+- Fix bug reset tanggal produksi ke tgl 1 pada wizard alokasi jadwal
+- Perbaikan akun Repliz live sync tombol reload filter search & connected only
+- Perbaikan guard alur status planner pillar sebelum dibawa ke wizard
+- Tombol dan modal log audit trail eksekusi per baris konten
+- Implementasi mitigasi manual terpilih Retry AI Worker & Reschedule Akun Target
+- Filter dropdown brand profile tenant aktif reaktif pada kalender dan tabel
+- Pembersihan CSS token 100% semantic dan standardisasi hierarki tipografi
+
 ## V2.32.75 — Validate Studio Campaign Wizard Steps (22/10/2026)
 - Validasi prasyarat konfigurasi sebelum melanjutkan tiap langkah wizard
 - Selaraskan indikator langkah Planner konfigurasi jadwal dan review

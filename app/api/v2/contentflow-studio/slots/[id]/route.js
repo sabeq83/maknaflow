@@ -35,6 +35,11 @@ export const GET = withTenantContext(async (request, context) => {
     `, [id, tenantId]);
     slot.approvals = approvalsRes.rows;
 
+    const eventsRes = await pgQuery(`
+      SELECT * FROM content_studio_events WHERE slot_id = $1 AND tenant_id = $2 ORDER BY created_at DESC
+    `, [id, tenantId]);
+    slot.events = eventsRes.rows;
+
     return NextResponse.json({ success: true, data: slot });
   } catch (error) {
     console.error('[Slot GET Error]:', error);

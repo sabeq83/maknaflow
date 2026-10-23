@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import PlannerConfigurationForm from '../campaign-forms/PlannerConfigurationForm';
 
 import StudioCampaignWizard from './StudioCampaignWizard';
@@ -47,13 +47,25 @@ export default function StudioWorkspace() {
   const [wizardSubmitting, setWizardSubmitting] = useState(false);
   const [wizardError, setWizardError] = useState('');
 
+  // Repliz Account Selector Enhancements
+  const [replizSearchQuery, setReplizSearchQuery] = useState('');
+  const [isSyncingRepliz, setIsSyncingRepliz] = useState(false);
+
   // Slot Detail Drawer / Modal State
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const [slotModalTab, setSlotModalTab] = useState('details'); // 'details' | 'log'
   const [approvingSlot, setApprovingSlot] = useState(false);
   const [approvalError, setApprovalError] = useState('');
   const [customCaption, setCustomCaption] = useState('');
   const [showEvidenceInput, setShowEvidenceInput] = useState(false);
   const [manualEvidenceUrl, setManualEvidenceUrl] = useState('');
+
+  // Mitigation States
+  const [mitigationLoading, setMitigationLoading] = useState(false);
+  const [mitigationSuccess, setMitigationSuccess] = useState('');
+  const [showRescheduleForm, setShowRescheduleForm] = useState(false);
+  const [reschedulePublishAt, setReschedulePublishAt] = useState('');
+  const [rescheduleAccountIds, setRescheduleAccountIds] = useState([]);
 
   useEffect(() => {
     fetchInitialData();
@@ -79,15 +91,16 @@ export default function StudioWorkspace() {
 
       const [resCal, resBrands] = await Promise.all([
         fetch(`/api/v2/contentflow-studio/calendar?${params.toString()}`).then(r => r.json()).catch(() => ({ success: false })),
-        fetch('/api/brand-profiles').then(r => r.json()).catch(() => ({ profiles: [] }))
+        fetch('/api/brand-profiles').then(r => r.json()).catch(() => ({ brands: [] }))
       ]);
 
       if (resCal.success) {
         setSlots(resCal.data || []);
         if (resCal.metrics) setMetrics(resCal.metrics);
       }
-      if (resBrands?.profiles) {
-        setBrandProfiles(resBrands.profiles);
+      const loadedBrands = resBrands?.brands || resBrands?.profiles || [];
+      if (Array.isArray(loadedBrands)) {
+        setBrandProfiles(loadedBrands);
       }
     } catch (e) {
       console.error('Failed to load studio calendar data:', e);
@@ -95,6 +108,21 @@ export default function StudioWorkspace() {
       setLoading(false);
     }
   }
+
+  // Reload Repliz Accounts from API with sync parameter
+  const reloadReplizAccounts = async () => {
+    setIsSyncingRepliz(true);
+    try {
+      const res = await fetch('/api/v2/publishing/accounts?sync=1&provider=repliz').then(r => r.json());
+      if (res.success && (res.data || res.accounts)) {
+        setAccounts(res.data || res.accounts || []);
+      }
+    } catch (err) {
+      console.warn('Failed to sync Repliz accounts:', err);
+    } finally {
+      setIsSyncingRepliz(false);
+    }
+  };
 
   // Month navigation
   const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
@@ -117,8 +145,10 @@ export default function StudioWorkspace() {
     setCreatedPlanner(null); setSelectedEngine(null); setEnginePayload(null);
     setOutputManifest([]); setSlotScheduleMap({}); setAccountIds([]); setProductRefFile(null);
     setSubmitKey(createStudioIdempotencyKey()); setWizardError(''); setWizardStep(0); setShowWizard(true);
+    setReplizSearchQuery('');
     fetch('/api/v2/publishing/accounts?provider=repliz').then(r=>r.json()).then(d=>setAccounts(d.data || d.accounts || [])).catch(()=>setAccounts([]));
   }
+
   const handlePlannerSuccess = async (result, session) => {
     if (session !== wizardSessionRef.current) return;
     setWizardSubmitting(true); setWizardError('');
@@ -126,12 +156,15 @@ export default function StudioWorkspace() {
       const id = result.planner_id || result.planner?.id;
       if (!id) throw Error('Planner tidak mengembalikan identitas.');
       const run = await fetch(`/api/content-planner/${id}/execute`, { method:'POST' }).then(r=>r.json());
-      if (!run.success) throw Error(run.error);
+      if (!run.success) throw Error(run.error || 'Gagal mengeksekusi planner.');
       const d = await fetch(`/api/content-planner/${id}`).then(r=>r.json());
       if (session !== wizardSessionRef.current) return;
-      if (!d.success) throw Error(d.error);
-      if (!(d.planner?.rows || d.rows || []).length) throw Error('Planner belum memiliki hasil. Coba kembali setelah proses generator selesai.');
-      setCreatedPlanner({ ...d.planner, rows:d.planner.rows || d.rows || [] }); setWizardStep(2);
+      if (!d.success) throw Error(d.error || 'Gagal memuat detail planner.');
+      const p = d.planner || d.data || d;
+      const rows = p.rows || d.rows || [];
+      if (!rows.length) throw Error('Planner belum memiliki baris konten yang digenerate. Pastikan proses AI generator selesai terlebih dahulu.');
+      setCreatedPlanner({ ...p, rows });
+      setWizardStep(2);
     } catch(e) { if (session === wizardSessionRef.current) setWizardError(e.message); } finally { if (session === wizardSessionRef.current) setWizardSubmitting(false); }
   };
   const handleEngineCapture = captured => {
@@ -171,10 +204,82 @@ export default function StudioWorkspace() {
     setCreatedBatchId(null);setSelectedSlot(null);fetchInitialData();
   }
 
-  async function openSlot(id) {
-    const d=await fetch(`/api/v2/contentflow-studio/slots/${id}`).then(r=>r.json());
-    if(d.success){setSelectedSlot(d.data);setCustomCaption(d.data.final_caption||'');setApprovalError('');}
+  async function openSlot(id, defaultTab = 'details') {
+    setSlotModalTab(defaultTab);
+    setMitigationSuccess('');
+    setApprovalError('');
+    setShowRescheduleForm(false);
+    try {
+      const d = await fetch(`/api/v2/contentflow-studio/slots/${id}`).then(r => r.json());
+      if (d.success) {
+        setSelectedSlot(d.data);
+        setCustomCaption(d.data.final_caption || '');
+        setReschedulePublishAt(d.data.scheduled_publish_at ? toZonedInput(new Date(d.data.scheduled_publish_at).getTime()) : '');
+        setRescheduleAccountIds(d.data.targets?.map(t => t.account_id) || []);
+        if (accounts.length === 0) {
+          fetch('/api/v2/publishing/accounts?provider=repliz').then(r => r.json()).then(res => setAccounts(res.data || res.accounts || [])).catch(() => {});
+        }
+      }
+    } catch (err) {
+      console.error('Failed to open slot:', err);
+    }
   }
+
+  // Mitigation 1: Retry AI Production (Option 1)
+  const handleRetryProduction = async () => {
+    if (!selectedSlot) return;
+    setMitigationLoading(true);
+    setMitigationSuccess('');
+    setApprovalError('');
+    try {
+      const res = await fetch(`/api/v2/contentflow-studio/slots/${selectedSlot.id}/actions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'retry_production' })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Gagal mengulang produksi AI.');
+      setMitigationSuccess('✅ Berhasil me-reset status & mengantrekan ulang produksi AI ke background worker.');
+      const refreshSlot = await fetch(`/api/v2/contentflow-studio/slots/${selectedSlot.id}`).then(r => r.json());
+      if (refreshSlot.success) setSelectedSlot(refreshSlot.data);
+      fetchInitialData();
+    } catch (err) {
+      setApprovalError(err.message || 'Terjadi kesalahan sistem.');
+    } finally {
+      setMitigationLoading(false);
+    }
+  };
+
+  // Mitigation 2: Reschedule & Re-target (Option 2)
+  const handleRescheduleMitigation = async () => {
+    if (!selectedSlot) return;
+    setMitigationLoading(true);
+    setMitigationSuccess('');
+    setApprovalError('');
+    try {
+      const payload = {
+        action: 'reschedule',
+        scheduled_publish_at: reschedulePublishAt ? zonedInputToIso(reschedulePublishAt) : undefined,
+        target_account_ids: rescheduleAccountIds
+      };
+      const res = await fetch(`/api/v2/contentflow-studio/slots/${selectedSlot.id}/actions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Gagal menjadwalkan ulang.');
+      setMitigationSuccess('✅ Jadwal tayang dan akun target berhasil diperbarui.');
+      setShowRescheduleForm(false);
+      const refreshSlot = await fetch(`/api/v2/contentflow-studio/slots/${selectedSlot.id}`).then(r => r.json());
+      if (refreshSlot.success) setSelectedSlot(refreshSlot.data);
+      fetchInitialData();
+    } catch (err) {
+      setApprovalError(err.message || 'Terjadi kesalahan sistem.');
+    } finally {
+      setMitigationLoading(false);
+    }
+  };
   // Approval Handler
   const handleApproveSlot = async (publishMode = 'schedule') => {
     if (!selectedSlot) return;
@@ -251,6 +356,29 @@ export default function StudioWorkspace() {
     return <span style={{ padding: '2px 6px', borderRadius: '4px', background: 'var(--surface-subtle)', color: 'var(--text-muted)', fontSize: '0.72rem' }}>⏳ Antrean</span>;
   };
 
+  // Reactively filter slots based on selected brand profile
+  const displayedSlots = useMemo(() => {
+    if (!selectedBrandId || selectedBrandId === 'all') return slots;
+    return slots.filter(s => {
+      let snap = s.batch_config || {};
+      if (typeof snap === 'string') { try { snap = JSON.parse(snap); } catch {} }
+      let slotSnap = s.output_snapshot_json || {};
+      if (typeof slotSnap === 'string') { try { slotSnap = JSON.parse(slotSnap); } catch {} }
+      const bId = snap.brand_profile_id || snap.selectedBrandId || snap.brandId || snap.brand_id || snap.global_settings?.brand_profile_id || snap.global_settings?.brandId || slotSnap.brand_profile_id || slotSnap.brandId || slotSnap.row?.brand_profile_id || slotSnap.row?.brand_id;
+      return String(bId) === String(selectedBrandId);
+    });
+  }, [slots, selectedBrandId]);
+
+  const computedMetrics = useMemo(() => {
+    return {
+      total: displayedSlots.length,
+      ready_for_review: displayedSlots.filter(s => ['ready', 'needs_review'].includes(s.stage_status) && s.publishing_status === 'not_approved').length,
+      in_progress: displayedSlots.filter(s => s.stage_status === 'in_progress').length,
+      approved: displayedSlots.filter(s => s.publishing_status === 'approved' || s.publishing_status === 'scheduled').length,
+      published: displayedSlots.filter(s => s.publishing_status === 'published').length
+    };
+  }, [displayedSlots]);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Header bar */}
@@ -263,7 +391,7 @@ export default function StudioWorkspace() {
         background: 'var(--surface-raised)',
         padding: '20px 24px',
         borderRadius: '12px',
-        border: '1px solid var(--border)'
+        border: '1px solid var(--border-subtle)'
       }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -316,17 +444,17 @@ export default function StudioWorkspace() {
         gap: '12px'
       }}>
         {[
-          { label: 'Total Slot Konten', value: metrics.total, color: 'var(--text-primary)' },
-          { label: 'Menunggu Review', value: metrics.ready_for_review, color: 'var(--status-warning)' },
-          { label: 'Dalam Produksi', value: metrics.in_progress, color: 'var(--text-secondary)' },
-          { label: 'Disetujui / Terjadwal', value: metrics.approved, color: 'var(--status-info)' },
-          { label: 'Berhasil Terbit', value: metrics.published, color: 'var(--status-success)' }
+          { label: 'Total Slot Konten', value: computedMetrics.total, color: 'var(--text-primary)' },
+          { label: 'Menunggu Review', value: computedMetrics.ready_for_review, color: 'var(--status-warning)' },
+          { label: 'Dalam Produksi', value: computedMetrics.in_progress, color: 'var(--text-secondary)' },
+          { label: 'Disetujui / Terjadwal', value: computedMetrics.approved, color: 'var(--status-info)' },
+          { label: 'Berhasil Terbit', value: computedMetrics.published, color: 'var(--status-success)' }
         ].map((m, i) => (
           <div
             key={i}
             style={{
               background: 'var(--surface)',
-              border: '1px solid var(--border)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '8px',
               padding: '12px 16px',
               display: 'flex',
@@ -356,7 +484,7 @@ export default function StudioWorkspace() {
             style={{
               padding: '6px 12px',
               borderRadius: '6px',
-              border: '1px solid var(--border)',
+              border: '1px solid var(--border-subtle)',
               background: 'var(--surface)',
               color: 'var(--text-primary)',
               cursor: 'pointer',
@@ -374,7 +502,7 @@ export default function StudioWorkspace() {
             style={{
               padding: '6px 12px',
               borderRadius: '6px',
-              border: '1px solid var(--border)',
+              border: '1px solid var(--border-subtle)',
               background: 'var(--surface)',
               color: 'var(--text-primary)',
               cursor: 'pointer',
@@ -389,7 +517,7 @@ export default function StudioWorkspace() {
             style={{
               padding: '6px 10px',
               borderRadius: '6px',
-              border: '1px solid var(--border)',
+              border: '1px solid var(--border-subtle)',
               background: 'var(--surface-interactive)',
               color: 'var(--text-primary)',
               cursor: 'pointer',
@@ -408,19 +536,19 @@ export default function StudioWorkspace() {
             style={{
               padding: '6px 12px',
               borderRadius: '6px',
-              border: '1px solid var(--border)',
-              background: 'var(--surface)',
+              border: '1px solid var(--border-subtle)',
+              background: 'var(--input-bg)',
               color: 'var(--text-primary)',
               fontSize: '0.82rem'
             }}
           >
-            <option value="all">Semua Brand Profile</option>
+            <option value="all">Semua Brand Profile ({brandProfiles.length})</option>
             {brandProfiles.map(b => (
-              <option key={b.id} value={b.id}>{b.name || b.brand_name}</option>
+              <option key={b.id} value={b.id}>{b.brand_name || b.name || b.id}</option>
             ))}
           </select>
 
-          <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: '6px', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', border: '1px solid var(--border-subtle)', borderRadius: '6px', overflow: 'hidden' }}>
             <button
               type="button"
               onClick={() => setViewMode('calendar')}
@@ -459,7 +587,7 @@ export default function StudioWorkspace() {
       {viewMode === 'calendar' ? (
         <div style={{
           background: 'var(--surface)',
-          border: '1px solid var(--border)',
+          border: '1px solid var(--border-subtle)',
           borderRadius: '12px',
           overflow: 'hidden'
         }}>
@@ -468,7 +596,7 @@ export default function StudioWorkspace() {
             display: 'grid',
             gridTemplateColumns: 'repeat(7, 1fr)',
             background: 'var(--surface-subtle)',
-            borderBottom: '1px solid var(--border)'
+            borderBottom: '1px solid var(--border-subtle)'
           }}>
             {DAYS_OF_WEEK.map(d => (
               <div key={d} style={{ padding: '10px', textAlign: 'center', fontWeight: 600, fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
@@ -493,8 +621,8 @@ export default function StudioWorkspace() {
               const dayNum = i + 1;
               const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
 
-              // Slots belonging to this day (by scheduled_publish_at)
-              const daySlots = slots.filter(s => {
+              // Slots belonging to this day (by scheduled_publish_at) from displayedSlots
+              const daySlots = displayedSlots.filter(s => {
                 if (!s.scheduled_publish_at) return false;
                 return s.scheduled_publish_at.startsWith(dateStr);
               });
@@ -533,12 +661,12 @@ export default function StudioWorkspace() {
                     {daySlots.map(slot => (
                       <div
                         key={slot.id}
-                        onClick={() => openSlot(slot.id)}
+                        onClick={() => openSlot(slot.id, 'details')}
                         style={{
                           padding: '6px',
                           borderRadius: '6px',
                           background: 'var(--surface-raised)',
-                          border: '1px solid var(--border)',
+                          border: '1px solid var(--border-subtle)',
                           cursor: 'pointer',
                           display: 'flex',
                           flexDirection: 'column',
@@ -572,13 +700,13 @@ export default function StudioWorkspace() {
         /* Table View */
         <div style={{
           background: 'var(--surface)',
-          border: '1px solid var(--border)',
+          border: '1px solid var(--border-subtle)',
           borderRadius: '12px',
           overflow: 'hidden'
         }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
             <thead>
-              <tr style={{ background: 'var(--surface-subtle)', borderBottom: '1px solid var(--border)' }}>
+              <tr style={{ background: 'var(--surface-subtle)', borderBottom: '1px solid var(--border-subtle)' }}>
                 <th style={{ padding: '10px 14px' }}>#</th>
                 <th style={{ padding: '10px 14px' }}>Judul Batch / Topik</th>
                 <th style={{ padding: '10px 14px' }}>Engine</th>
@@ -590,14 +718,14 @@ export default function StudioWorkspace() {
               </tr>
             </thead>
             <tbody>
-              {slots.length === 0 ? (
+              {displayedSlots.length === 0 ? (
                 <tr>
                   <td colSpan={8} style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                    Belum ada slot konten untuk bulan ini. Klik "Buat Batch Konten Baru" untuk memulai.
+                    Belum ada slot konten untuk filter bulan / brand ini. Klik "Buat Batch Konten Baru" untuk memulai.
                   </td>
                 </tr>
               ) : (
-                slots.map((s, idx) => (
+                displayedSlots.map((s, idx) => (
                   <tr key={s.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                     <td style={{ padding: '10px 14px' }}>{s.slot_number || idx + 1}</td>
                     <td style={{ padding: '10px 14px', fontWeight: 500, color: 'var(--text-primary)' }}>{s.batch_title}</td>
@@ -610,14 +738,30 @@ export default function StudioWorkspace() {
                     </td>
                     <td style={{ padding: '10px 14px' }}>{getStatusBadge(s.stage_status, null)}</td>
                     <td style={{ padding: '10px 14px' }}>{getStatusBadge(null, s.publishing_status)}</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'right' }}>
+                    <td style={{ padding: '10px 14px', textAlign: 'right', whiteSpace: 'nowrap' }}>
                       <button
                         type="button"
-                        onClick={() => openSlot(s.id)}
+                        onClick={() => openSlot(s.id, 'log')}
+                        style={{
+                          padding: '4px 8px',
+                          borderRadius: '6px',
+                          border: '1px solid var(--border-subtle)',
+                          background: 'var(--surface)',
+                          color: 'var(--text-secondary)',
+                          cursor: 'pointer',
+                          fontSize: '0.78rem',
+                          marginRight: '6px'
+                        }}
+                      >
+                        📜 Log
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => openSlot(s.id, 'details')}
                         style={{
                           padding: '4px 10px',
                           borderRadius: '6px',
-                          border: '1px solid var(--border)',
+                          border: '1px solid var(--border-subtle)',
                           background: 'var(--surface-interactive)',
                           color: 'var(--text-primary)',
                           cursor: 'pointer',
@@ -635,7 +779,7 @@ export default function StudioWorkspace() {
         </div>
       )}
 
-      {createdBatchId && <div style={{padding:14,background:'var(--status-info-soft)',color:'var(--text-primary)'}}>Draft tersimpan. Produksi belum dimulai. <button type="button" onClick={()=>activateBatch(createdBatchId)}>▶ Generate Content</button></div>}
+      {createdBatchId && <div style={{padding:14,background:'var(--status-info-soft)',color:'var(--text-primary)',borderRadius:'8px',border:'1px solid var(--border-subtle)'}}>Draft tersimpan. Produksi belum dimulai. <button type="button" onClick={()=>activateBatch(createdBatchId)} style={{marginLeft:'8px',padding:'4px 12px',borderRadius:'6px',border:'none',background:'var(--action-primary)',color:'var(--on-action-primary)',cursor:'pointer',fontWeight:600}}>▶ Generate Content</button></div>}
       {/* Creation Wizard Modal */}
       {showWizard && (
         <div style={{
@@ -653,7 +797,7 @@ export default function StudioWorkspace() {
         }}>
           <div style={{
             background: 'var(--surface)',
-            border: '1px solid var(--border)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '14px',
             width: '100%',
             maxWidth: '1200px',
@@ -741,7 +885,7 @@ export default function StudioWorkspace() {
                 <div style={{
                   maxHeight: '320px',
                   overflowY: 'auto',
-                  border: '1px solid var(--border)',
+                  border: '1px solid var(--border-subtle)',
                   borderRadius: '8px',
                   padding: '8px',
                   display: 'flex',
@@ -774,7 +918,24 @@ export default function StudioWorkspace() {
                           </div>
                         </div>
                         <div>
-                          <label style={{fontSize:12,color:'var(--text-secondary)'}}>Mulai produksi (WIB)<input type="datetime-local" value={rowSched.scheduledProductionAt || ''} onChange={e=>setSlotScheduleMap(prev=>updateStudioOutputSchedule(outputManifest,prev,row.outputKey,{scheduledProductionAt:e.target.value}))} style={{width:'100%',background:'var(--input-bg)',color:'var(--text-primary)',border:'1px solid var(--border-subtle)',padding:6}} /></label>
+                          <label style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '2px' }}>
+                            Mulai produksi (WIB)
+                          </label>
+                          <input
+                            type="datetime-local"
+                            value={rowSched.scheduledProductionAt || ''}
+                            onChange={e => setSlotScheduleMap(prev => updateStudioOutputSchedule(outputManifest, prev, row.outputKey, { scheduledProductionAt: e.target.value }))}
+                            style={{
+                              width: '100%',
+                              background: 'var(--input-bg)',
+                              color: 'var(--text-primary)',
+                              border: '1px solid var(--border-subtle)',
+                              padding: '6px 8px',
+                              borderRadius: '6px',
+                              fontSize: '0.8rem',
+                              marginBottom: '6px'
+                            }}
+                          />
                           <label style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '2px' }}>
                             Waktu Tayang (WIB)
                           </label>
@@ -783,14 +944,24 @@ export default function StudioWorkspace() {
                             value={rowSched.scheduledPublishAt || ''}
                             onChange={(e) => {
                               const pubTime = e.target.value;
-                              const prodTime = pubTime ? toZonedInput(new Date(zonedInputToIso(pubTime)).getTime() - 86400000) : '';
-                              setSlotScheduleMap(prev=>updateStudioOutputSchedule(outputManifest,prev,row.outputKey,{scheduledPublishAt:pubTime,scheduledProductionAt:rowSched.scheduledProductionAt && rowSched.scheduledProductionAt<prodTime ? rowSched.scheduledProductionAt : prodTime}));
+                              let prodTime = rowSched.scheduledProductionAt || '';
+                              if (pubTime) {
+                                try {
+                                  prodTime = toZonedInput(new Date(zonedInputToIso(pubTime)).getTime() - 86400000);
+                                } catch (err) {
+                                  console.warn('Date calculation error:', err);
+                                }
+                              }
+                              setSlotScheduleMap(prev => updateStudioOutputSchedule(outputManifest, prev, row.outputKey, {
+                                scheduledPublishAt: pubTime,
+                                scheduledProductionAt: prodTime
+                              }));
                             }}
                             style={{
                               padding: '6px 8px',
                               borderRadius: '6px',
-                              border: '1px solid var(--border)',
-                              background: 'var(--surface)',
+                              border: '1px solid var(--border-subtle)',
+                              background: 'var(--input-bg)',
                               color: 'var(--text-primary)',
                               fontSize: '0.8rem',
                               width: '100%'
@@ -802,12 +973,206 @@ export default function StudioWorkspace() {
                   })}
                 </div>
 
-                <div><h4>Akun tujuan Repliz</h4>{accounts.length ? accounts.filter(a=>a.provider==='repliz').map(a=><label key={a.id} style={{display:'block'}}><input type="checkbox" checked={accountIds.includes(a.id)} onChange={e=>setAccountIds(prev=>e.target.checked?[...prev,a.id]:prev.filter(id=>id!==a.id))} /> {a.display_name || a.id} · {a.platform}</label>):<p>Akun belum tersedia. Hubungkan akun melalui Publishing Scheduler.</p>}</div>
+                {/* Repliz Accounts Section */}
+                <div style={{
+                  background: 'var(--surface-raised)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-primary)', fontWeight: 600 }}>
+                        🌐 Akun Tujuan Repliz ({accounts.filter(a => a.provider === 'repliz' && a.status === 'active').length} Akun Terhubung)
+                      </h4>
+                      <p style={{ margin: '2px 0 0 0', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                        Hanya akun dengan status <code>connected / active</code> yang ditampilkan.
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <button
+                        type="button"
+                        onClick={reloadReplizAccounts}
+                        disabled={isSyncingRepliz}
+                        style={{
+                          padding: '5px 12px',
+                          borderRadius: '6px',
+                          border: '1px solid var(--border-subtle)',
+                          background: 'var(--surface)',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.8rem',
+                          cursor: isSyncingRepliz ? 'not-allowed' : 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        <span style={{ display: 'inline-block', transform: isSyncingRepliz ? 'rotate(360deg)' : 'none', transition: 'transform 0.5s' }}>🔄</span>
+                        {isSyncingRepliz ? 'Menyinkronkan...' : 'Reload Akun Repliz'}
+                      </button>
+
+                      {(() => {
+                        const activeRepliz = accounts.filter(a => a.provider === 'repliz' && a.status === 'active');
+                        return (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const allIds = activeRepliz.map(a => a.id);
+                                setAccountIds(prev => Array.from(new Set([...prev, ...allIds])));
+                              }}
+                              style={{
+                                padding: '5px 10px',
+                                borderRadius: '6px',
+                                border: '1px solid var(--border-subtle)',
+                                background: 'var(--surface)',
+                                color: 'var(--text-secondary)',
+                                fontSize: '0.78rem',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Pilih Semua
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const replizIds = new Set(activeRepliz.map(a => a.id));
+                                setAccountIds(prev => prev.filter(id => !replizIds.has(id)));
+                              }}
+                              style={{
+                                padding: '5px 10px',
+                                borderRadius: '6px',
+                                border: '1px solid var(--border-subtle)',
+                                background: 'var(--surface)',
+                                color: 'var(--text-secondary)',
+                                fontSize: '0.78rem',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Batal Pilih
+                            </button>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* Search input for accounts */}
+                  <div>
+                    <input
+                      type="text"
+                      value={replizSearchQuery}
+                      onChange={e => setReplizSearchQuery(e.target.value)}
+                      placeholder="🔍 Cari nama akun atau platform (cth: tiktok, instagram, mas benu)..."
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        border: '1px solid var(--border-subtle)',
+                        background: 'var(--input-bg)',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.82rem'
+                      }}
+                    />
+                  </div>
+
+                  {/* Account Grid */}
+                  {(() => {
+                    const activeRepliz = accounts.filter(a => a.provider === 'repliz' && a.status === 'active');
+                    const filteredAccounts = activeRepliz.filter(a => {
+                      if (!replizSearchQuery.trim()) return true;
+                      const q = replizSearchQuery.toLowerCase();
+                      return (a.display_name || a.id || '').toLowerCase().includes(q) || (a.platform || '').toLowerCase().includes(q);
+                    });
+
+                    if (activeRepliz.length === 0) {
+                      return (
+                        <div style={{
+                          padding: '20px',
+                          textAlign: 'center',
+                          background: 'var(--surface-subtle)',
+                          borderRadius: '6px',
+                          color: 'var(--text-muted)',
+                          fontSize: '0.82rem'
+                        }}>
+                          Belum ada akun Repliz yang terhubung aktif. Klik <strong>Reload Akun Repliz</strong> di atas atau hubungkan akun melalui Publishing Scheduler.
+                        </div>
+                      );
+                    }
+
+                    if (filteredAccounts.length === 0) {
+                      return (
+                        <div style={{
+                          padding: '16px',
+                          textAlign: 'center',
+                          color: 'var(--text-muted)',
+                          fontSize: '0.82rem'
+                        }}>
+                          Tidak ada akun yang sesuai dengan pencarian "{replizSearchQuery}".
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+                        gap: '8px',
+                        maxHeight: '180px',
+                        overflowY: 'auto'
+                      }}>
+                        {filteredAccounts.map(a => {
+                          const isChecked = accountIds.includes(a.id);
+                          return (
+                            <label
+                              key={a.id}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                border: isChecked ? '1px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                                background: isChecked ? 'var(--surface-interactive)' : 'var(--surface)',
+                                cursor: 'pointer',
+                                transition: 'all 0.15s ease'
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={e => setAccountIds(prev => e.target.checked ? [...prev, a.id] : prev.filter(id => id !== a.id))}
+                                style={{ accentColor: 'var(--action-primary)', cursor: 'pointer' }}
+                              />
+                              <div style={{ overflow: 'hidden' }}>
+                                <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {a.display_name || a.id}
+                                </div>
+                                <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'capitalize' }}>
+                                  {a.platform} · <span style={{ color: 'var(--status-success)' }}>● Connected</span>
+                                </div>
+                              </div>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
+
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>{accountIds.length} akun terpilih untuk batch ini</span>
+                  </div>
+                </div>
+
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                   <button
                     type="button"
                     onClick={() => setWizardStep(3)}
-                    style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                    style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid var(--border-subtle)', background: 'var(--surface)', color: 'var(--text-secondary)', cursor: 'pointer' }}
                   >
                     Kembali
                   </button>
@@ -843,7 +1208,7 @@ export default function StudioWorkspace() {
         </div>
       )}
 
-      {/* Slot Review & Approval Drawer / Modal */}
+      {/* Slot Review, Mitigation & Log Modal */}
       {selectedSlot && (
         <div style={{
           position: 'fixed',
@@ -860,7 +1225,7 @@ export default function StudioWorkspace() {
         }}>
           <div style={{
             background: 'var(--surface)',
-            border: '1px solid var(--border)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '14px',
             width: '100%',
             maxWidth: '680px',
@@ -869,34 +1234,69 @@ export default function StudioWorkspace() {
             padding: '24px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '18px',
+            gap: '16px',
             boxShadow: 'var(--shadow-modal)'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            {/* Modal Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                     Slot #{selectedSlot.slot_number} Review
                   </span>
                   {getEngineBadge(selectedSlot.source_kind)}
-                  {selectedSlot.error_message && <p style={{color:'var(--status-warning)'}}>{selectedSlot.error_message}</p>}
-                  {selectedSlot.stage_status==='draft' && <button type="button" onClick={()=>activateBatch(selectedSlot.batch_id)}>▶ Generate Batch</button>}
-                  {selectedSlot.stage_status==='needs_review' && selectedSlot.source_campaign_id && <a href={selectedSlot.batch_engine_kind==='recipe'?'/recipe-labs':`/${({pillar:'pillar-campaigns',re:'re-campaigns',multiplier:'multiplier-lab'})[selectedSlot.batch_engine_kind] || 'pillar-campaigns'}/${selectedSlot.source_campaign_id}`} target="_blank" rel="noreferrer">Review Campaign Sumber</a>}
                   {getStatusBadge(selectedSlot.stage_status, selectedSlot.publishing_status)}
                 </div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                  {selectedSlot.batch_title}
+                <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '3px' }}>
+                  {selectedSlot.batch_title || selectedSlot.title}
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedSlot(null)}
-                style={{ background: 'transparent', border: 'none', fontSize: '1.3rem', color: 'var(--text-muted)', cursor: 'pointer' }}
+                style={{ background: 'transparent', border: 'none', fontSize: '1.3rem', color: 'var(--text-muted)', cursor: 'pointer', padding: '0 4px' }}
               >
                 ✕
               </button>
             </div>
 
+            {/* Navigation Tabs: Detail vs Log */}
+            <div style={{ display: 'flex', borderBottom: '1px solid var(--border-subtle)', gap: '12px' }}>
+              <button
+                type="button"
+                onClick={() => setSlotModalTab('details')}
+                style={{
+                  padding: '8px 14px',
+                  background: 'transparent',
+                  border: 'none',
+                  borderBottom: slotModalTab === 'details' ? '2px solid var(--action-primary)' : '2px solid transparent',
+                  color: slotModalTab === 'details' ? 'var(--action-primary)' : 'var(--text-secondary)',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer'
+                }}
+              >
+                📝 Detail & Approval
+              </button>
+              <button
+                type="button"
+                onClick={() => setSlotModalTab('log')}
+                style={{
+                  padding: '8px 14px',
+                  background: 'transparent',
+                  border: 'none',
+                  borderBottom: slotModalTab === 'log' ? '2px solid var(--action-primary)' : '2px solid transparent',
+                  color: slotModalTab === 'log' ? 'var(--action-primary)' : 'var(--text-secondary)',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer'
+                }}
+              >
+                📜 Log Eksekusi & Audit ({selectedSlot.events?.length || 0})
+              </button>
+            </div>
+
+            {/* Alerts */}
             {approvalError && (
               <div style={{
                 padding: '10px 14px',
@@ -910,211 +1310,623 @@ export default function StudioWorkspace() {
               </div>
             )}
 
-            {/* Media Preview */}
-            <div style={{
-              background: 'var(--surface-raised)',
-              border: '1px solid var(--border)',
-              borderRadius: '8px',
-              padding: '14px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '10px'
-            }}>
-              <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                Media Output Kreatif
-              </span>
-              {(selectedSlot.output_media_type==='video' ? selectedSlot.final_media_url : null) ? (
-                <video
-                  controls
-                  src={selectedSlot.final_media_url}
-                  style={{ width: '100%', maxHeight: '300px', borderRadius: '6px', background: 'var(--surface-raised)' }}
-                />
-              ) : (selectedSlot.output_media_type==='image' ? selectedSlot.final_media_url : null) ? (
-                <img
-                  src={selectedSlot.final_media_url}
-                  alt="Output"
-                  style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', borderRadius: '6px' }}
-                />
-              ) : (
-                <div style={{
-                  padding: '30px',
-                  textAlign: 'center',
-                  background: 'var(--surface-subtle)',
-                  borderRadius: '6px',
-                  color: 'var(--text-muted)',
-                  fontSize: '0.85rem'
-                }}>
-                  {selectedSlot.stage_status === 'in_progress'
-                    ? '⚙️ Media sedang diproduksi oleh worker engine...'
-                    : '⏳ Media belum selesai diproduksi. Menunggu jadwal produksi slot.'}
-                </div>
-              )}
-            </div>
-
-            {/* Hook & Caption */}
-            <div>
-              <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
-                Caption / Teks Publikasi
-              </label>
-              <textarea
-                rows={3}
-                value={customCaption || (selectedSlot.final_caption || selectedSlot.creative_snapshot_json?.caption || selectedSlot.creative_snapshot_json?.hook_text || '')}
-                onChange={e => setCustomCaption(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid var(--border)',
-                  background: 'var(--surface)',
-                  color: 'var(--text-primary)',
-                  fontSize: '0.85rem'
-                }}
-              />
-              <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const textToCopy = customCaption || (selectedSlot.final_caption || selectedSlot.creative_snapshot_json?.caption || selectedSlot.creative_snapshot_json?.hook_text || '');
-                    if (textToCopy) {
-                      navigator.clipboard.writeText(textToCopy);
-                      alert('Caption berhasil disalin ke clipboard!');
-                    }
-                  }}
-                  style={{
-                    padding: '4px 10px',
-                    borderRadius: '6px',
-                    border: '1px solid var(--border)',
-                    background: 'var(--surface-interactive)',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.78rem',
-                    cursor: 'pointer'
-                  }}
-                >
-                  📋 Salin Teks / Caption
-                </button>
-                {((selectedSlot.output_media_type==='video' ? selectedSlot.final_media_url : null) || (selectedSlot.output_media_type==='image' ? selectedSlot.final_media_url : null)) && (
-                  <a
-                    href={(selectedSlot.output_media_type==='video' ? selectedSlot.final_media_url : null) || (selectedSlot.output_media_type==='image' ? selectedSlot.final_media_url : null)}
-                    download
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{
-                      padding: '4px 10px',
-                      borderRadius: '6px',
-                      border: '1px solid var(--border)',
-                      background: 'var(--surface-interactive)',
-                      color: 'var(--text-primary)',
-                      fontSize: '0.78rem',
-                      textDecoration: 'none',
-                      display: 'inline-flex',
-                      alignItems: 'center'
-                    }}
-                  >
-                    💾 Unduh File Media
-                  </a>
-                )}
+            {mitigationSuccess && (
+              <div style={{
+                padding: '10px 14px',
+                background: 'var(--status-success-soft)',
+                border: '1px solid var(--status-success)',
+                color: 'var(--status-success)',
+                borderRadius: '8px',
+                fontSize: '0.85rem'
+              }}>
+                {mitigationSuccess}
               </div>
-            </div>
+            )}
 
-            {/* Manual Evidence Toggle */}
-            <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '10px' }}>
-              <button
-                type="button"
-                onClick={() => setShowEvidenceInput(!showEvidenceInput)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--action-primary)',
-                  cursor: 'pointer',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  padding: 0
-                }}
-              >
-                {showEvidenceInput ? '▲ Tutup Upload Manual' : '▼ Unggah Bukti Tayang Manual (Jika publish di luar sistem)'}
-              </button>
-
-              {showEvidenceInput && (
-                <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <input
-                    type="text"
-                    value={manualEvidenceUrl}
-                    onChange={e => setManualEvidenceUrl(e.target.value)}
-                    placeholder="URL Postingan / Bukti Tayang (Instagram / TikTok / YouTube)"
-                    style={{
-                      width: '100%',
-                      padding: '6px 10px',
-                      borderRadius: '6px',
-                      border: '1px solid var(--border)',
-                      background: 'var(--surface)',
-                      color: 'var(--text-primary)',
-                      fontSize: '0.8rem'
-                    }}
-                  />
+            {/* MITIGATION SECTION: Case A - AI Worker Failure (Option 1) */}
+            {selectedSlot.stage_status === 'failed' && (
+              <div style={{
+                background: 'var(--surface-raised)',
+                border: '1px solid var(--status-danger)',
+                borderRadius: '8px',
+                padding: '14px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--status-danger)' }}>
+                    ❌ Produksi AI Gagal
+                  </span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Mitigasi Opsi 1 (Retry AI)</span>
+                </div>
+                {selectedSlot.error_message && (
+                  <div style={{
+                    background: 'var(--status-danger-soft)',
+                    border: '1px solid var(--status-danger)',
+                    borderRadius: '6px',
+                    padding: '8px 12px',
+                    fontSize: '0.8rem',
+                    color: 'var(--status-danger)'
+                  }}>
+                    <strong>Penyebab:</strong> {selectedSlot.error_message}
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                   <button
                     type="button"
-                    onClick={() => handleApproveSlot('manual_evidence')}
-                    disabled={!manualEvidenceUrl.trim() || approvingSlot}
+                    onClick={handleRetryProduction}
+                    disabled={mitigationLoading}
                     style={{
-                      alignSelf: 'flex-start',
-                      padding: '6px 12px',
+                      padding: '6px 14px',
                       borderRadius: '6px',
                       border: 'none',
-                      background: 'var(--status-success)',
-                      color: '#fff',
-                      fontSize: '0.78rem',
+                      background: 'var(--action-primary)',
+                      color: 'var(--on-action-primary)',
+                      fontWeight: 600,
+                      fontSize: '0.8rem',
+                      cursor: mitigationLoading ? 'not-allowed' : 'pointer'
+                    }}
+                  >
+                    {mitigationLoading ? 'Memproses...' : '🔄 Ulangi Produksi AI (Retry Dispatch)'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSlotModalTab('log')}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid var(--border-subtle)',
+                      background: 'var(--surface)',
+                      color: 'var(--text-secondary)',
+                      fontSize: '0.8rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    📜 Buka Log Detail Slot
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* MITIGATION SECTION: Case B - Publishing Failure (Option 2) */}
+            {(selectedSlot.publishing_status === 'failed' || selectedSlot.targets?.some(t => t.status === 'failed')) && (
+              <div style={{
+                background: 'var(--surface-raised)',
+                border: '1px solid var(--status-warning)',
+                borderRadius: '8px',
+                padding: '14px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--status-warning)' }}>
+                    ⚠️ Gagal Skedul / Publikasi ke Platform
+                  </span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Mitigasi Opsi 2 (Reschedule)</span>
+                </div>
+
+                {selectedSlot.targets?.filter(t => t.status === 'failed' && t.error_message).map(t => (
+                  <div key={t.id} style={{
+                    background: 'var(--status-warning-soft)',
+                    border: '1px solid var(--status-warning)',
+                    borderRadius: '6px',
+                    padding: '8px 12px',
+                    fontSize: '0.8rem',
+                    color: 'var(--status-warning)'
+                  }}>
+                    <strong>Akun {t.platform}:</strong> {t.error_message}
+                  </div>
+                ))}
+
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowRescheduleForm(!showRescheduleForm)}
+                    style={{
+                      padding: '6px 14px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      background: 'var(--action-primary)',
+                      color: 'var(--on-action-primary)',
+                      fontWeight: 600,
+                      fontSize: '0.8rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {showRescheduleForm ? '▲ Tutup Form Reschedule' : '⏰ Jadwalkan Ulang / Ganti Akun Target (Reschedule)'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSlotModalTab('log')}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid var(--border-subtle)',
+                      background: 'var(--surface)',
+                      color: 'var(--text-secondary)',
+                      fontSize: '0.8rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    📜 Buka Log Detail Slot
+                  </button>
+                </div>
+
+                {showRescheduleForm && (
+                  <div style={{
+                    marginTop: '8px',
+                    borderTop: '1px solid var(--border-subtle)',
+                    paddingTop: '12px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px'
+                  }}>
+                    <div>
+                      <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                        Waktu Tayang Baru (WIB)
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={reschedulePublishAt}
+                        onChange={e => setReschedulePublishAt(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '6px 10px',
+                          borderRadius: '6px',
+                          border: '1px solid var(--border-subtle)',
+                          background: 'var(--input-bg)',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.82rem'
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                        Pilih Akun Tujuan Pengganti
+                      </label>
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                        gap: '6px',
+                        maxHeight: '130px',
+                        overflowY: 'auto'
+                      }}>
+                        {accounts.filter(a => a.provider === 'repliz' && a.status === 'active').map(a => {
+                          const isChecked = rescheduleAccountIds.includes(a.id);
+                          return (
+                            <label
+                              key={a.id}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                padding: '6px 10px',
+                                borderRadius: '6px',
+                                border: isChecked ? '1px solid var(--action-primary)' : '1px solid var(--border-subtle)',
+                                background: isChecked ? 'var(--surface-interactive)' : 'var(--surface)',
+                                cursor: 'pointer',
+                                fontSize: '0.78rem'
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={e => setRescheduleAccountIds(prev => e.target.checked ? [...prev, a.id] : prev.filter(id => id !== a.id))}
+                                style={{ accentColor: 'var(--action-primary)' }}
+                              />
+                              <span>{a.display_name || a.id} ({a.platform})</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleRescheduleMitigation}
+                      disabled={mitigationLoading || !reschedulePublishAt}
+                      style={{
+                        alignSelf: 'flex-start',
+                        padding: '6px 16px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        background: 'var(--status-success)',
+                        color: 'var(--on-action-primary)',
+                        fontWeight: 600,
+                        fontSize: '0.8rem',
+                        cursor: mitigationLoading ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {mitigationLoading ? 'Menyimpan...' : '💾 Simpan Jadwal & Akun Pengganti'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB CONTENT: Detail & Approval */}
+            {slotModalTab === 'details' && (
+              <>
+                {/* Media Preview */}
+                <div style={{
+                  background: 'var(--surface-raised)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: '8px',
+                  padding: '14px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px'
+                }}>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                    Media Output Kreatif
+                  </span>
+                  {(selectedSlot.output_media_type === 'video' ? selectedSlot.final_media_url : null) ? (
+                    <video
+                      controls
+                      src={selectedSlot.final_media_url}
+                      style={{ width: '100%', maxHeight: '300px', borderRadius: '6px', background: 'var(--surface-raised)' }}
+                    />
+                  ) : (selectedSlot.output_media_type === 'image' ? selectedSlot.final_media_url : null) ? (
+                    <img
+                      src={selectedSlot.final_media_url}
+                      alt="Output"
+                      style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', borderRadius: '6px' }}
+                    />
+                  ) : (
+                    <div style={{
+                      padding: '30px',
+                      textAlign: 'center',
+                      background: 'var(--surface-subtle)',
+                      borderRadius: '6px',
+                      color: 'var(--text-muted)',
+                      fontSize: '0.85rem'
+                    }}>
+                      {selectedSlot.stage_status === 'in_progress'
+                        ? '⚙️ Media sedang diproduksi oleh worker engine...'
+                        : '⏳ Media belum selesai diproduksi. Menunggu jadwal produksi slot.'}
+                    </div>
+                  )}
+                </div>
+
+                {/* Target Accounts List */}
+                {selectedSlot.targets && selectedSlot.targets.length > 0 && (
+                  <div>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '6px' }}>
+                      Akun Tujuan Publikasi ({selectedSlot.targets.length})
+                    </label>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      {selectedSlot.targets.map(t => (
+                        <div
+                          key={t.id}
+                          style={{
+                            padding: '6px 10px',
+                            borderRadius: '6px',
+                            background: 'var(--surface-raised)',
+                            border: '1px solid var(--border-subtle)',
+                            fontSize: '0.78rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                          }}
+                        >
+                          <span style={{ fontWeight: 600, textTransform: 'capitalize' }}>{t.platform}</span>
+                          <span style={{ color: 'var(--text-muted)' }}>·</span>
+                          <span style={{
+                            color: t.status === 'published' ? 'var(--status-success)' :
+                                   t.status === 'failed' ? 'var(--status-danger)' :
+                                   t.status === 'scheduled' ? 'var(--status-info)' : 'var(--text-secondary)'
+                          }}>
+                            {t.status === 'published' ? '✅ Terbit' :
+                             t.status === 'failed' ? '❌ Gagal' :
+                             t.status === 'scheduled' ? '⏰ Terjadwal' : '⏳ Menunggu Approval'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Hook & Caption */}
+                <div>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                    Caption / Teks Publikasi
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={customCaption || (selectedSlot.final_caption || selectedSlot.creative_snapshot_json?.caption || selectedSlot.creative_snapshot_json?.hook_text || '')}
+                    onChange={e => setCustomCaption(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid var(--border-subtle)',
+                      background: 'var(--input-bg)',
+                      color: 'var(--text-primary)',
+                      fontSize: '0.85rem'
+                    }}
+                  />
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const textToCopy = customCaption || (selectedSlot.final_caption || selectedSlot.creative_snapshot_json?.caption || selectedSlot.creative_snapshot_json?.hook_text || '');
+                        if (textToCopy) {
+                          navigator.clipboard.writeText(textToCopy);
+                          alert('Caption berhasil disalin ke clipboard!');
+                        }
+                      }}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        border: '1px solid var(--border-subtle)',
+                        background: 'var(--surface-interactive)',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.78rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      📋 Salin Teks / Caption
+                    </button>
+                    {((selectedSlot.output_media_type === 'video' ? selectedSlot.final_media_url : null) || (selectedSlot.output_media_type === 'image' ? selectedSlot.final_media_url : null)) && (
+                      <a
+                        href={(selectedSlot.output_media_type === 'video' ? selectedSlot.final_media_url : null) || (selectedSlot.output_media_type === 'image' ? selectedSlot.final_media_url : null)}
+                        download
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                          padding: '4px 10px',
+                          borderRadius: '6px',
+                          border: '1px solid var(--border-subtle)',
+                          background: 'var(--surface-interactive)',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.78rem',
+                          textDecoration: 'none',
+                          display: 'inline-flex',
+                          alignItems: 'center'
+                        }}
+                      >
+                        💾 Unduh File Media
+                      </a>
+                    )}
+                  </div>
+                </div>
+
+                {/* Manual Evidence Toggle */}
+                <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '10px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowEvidenceInput(!showEvidenceInput)}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--action-primary)',
+                      cursor: 'pointer',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      padding: 0
+                    }}
+                  >
+                    {showEvidenceInput ? '▲ Tutup Upload Manual' : '▼ Unggah Bukti Tayang Manual (Jika publish di luar sistem)'}
+                  </button>
+
+                  {showEvidenceInput && (
+                    <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <input
+                        type="text"
+                        value={manualEvidenceUrl}
+                        onChange={e => setManualEvidenceUrl(e.target.value)}
+                        placeholder="URL Postingan / Bukti Tayang (Instagram / TikTok / YouTube)"
+                        style={{
+                          width: '100%',
+                          padding: '6px 10px',
+                          borderRadius: '6px',
+                          border: '1px solid var(--border-subtle)',
+                          background: 'var(--input-bg)',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.8rem'
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleApproveSlot('manual_evidence')}
+                        disabled={!manualEvidenceUrl.trim() || approvingSlot}
+                        style={{
+                          alignSelf: 'flex-start',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          border: 'none',
+                          background: 'var(--status-success)',
+                          color: 'var(--on-action-primary)',
+                          fontSize: '0.78rem',
+                          fontWeight: 600,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Simpan Bukti Tayang Manual
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedSlot(null)}
+                    style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid var(--border-subtle)', background: 'var(--surface)', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                  >
+                    Tutup
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleApproveSlot('now')}
+                    disabled={approvingSlot}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '6px',
+                      border: '1px solid var(--border-subtle)',
+                      background: 'var(--surface-interactive)',
+                      color: 'var(--text-primary)',
                       fontWeight: 600,
                       cursor: 'pointer'
                     }}
                   >
-                    Simpan Bukti Tayang Manual
+                    🚀 Publikasikan Sekarang
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleApproveSlot('schedule')}
+                    disabled={approvingSlot}
+                    style={{
+                      padding: '8px 20px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      background: 'var(--action-primary)',
+                      color: 'var(--on-action-primary)',
+                      fontWeight: 600,
+                      cursor: approvingSlot ? 'not-allowed' : 'pointer'
+                    }}
+                  >
+                    {approvingSlot ? 'Memproses...' : '👍 Setujui & Jadwalkan'}
                   </button>
                 </div>
-              )}
-            </div>
+              </>
+            )}
 
-            {/* Action Buttons */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
-              <button
-                type="button"
-                onClick={() => setSelectedSlot(null)}
-                style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-secondary)', cursor: 'pointer' }}
-              >
-                Tutup
-              </button>
-              <button
-                type="button"
-                onClick={() => handleApproveSlot('now')}
-                disabled={approvingSlot}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '6px',
-                  border: '1px solid var(--border)',
-                  background: 'var(--surface-interactive)',
-                  color: 'var(--text-primary)',
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
-              >
-                🚀 Publikasikan Sekarang
-              </button>
-              <button
-                type="button"
-                onClick={() => handleApproveSlot('schedule')}
-                disabled={approvingSlot}
-                style={{
-                  padding: '8px 20px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  background: 'var(--action-primary)',
-                  color: 'var(--on-action-primary)',
-                  fontWeight: 600,
-                  cursor: approvingSlot ? 'not-allowed' : 'pointer'
-                }}
-              >
-                {approvingSlot ? 'Memproses...' : '👍 Setujui & Jadwalkan'}
-              </button>
-            </div>
+            {/* TAB CONTENT: Log Eksekusi & Audit Trail */}
+            {slotModalTab === 'log' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                    Riwayat event audit trail untuk slot ini dari <code>content_studio_events</code>:
+                  </span>
+                </div>
+
+                {(!selectedSlot.events || selectedSlot.events.length === 0) ? (
+                  <div style={{
+                    padding: '24px',
+                    textAlign: 'center',
+                    background: 'var(--surface-subtle)',
+                    borderRadius: '8px',
+                    color: 'var(--text-muted)',
+                    fontSize: '0.85rem'
+                  }}>
+                    Belum ada event audit log tercatat untuk slot ini.
+                  </div>
+                ) : (
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px',
+                    maxHeight: '340px',
+                    overflowY: 'auto',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    background: 'var(--surface-raised)'
+                  }}>
+                    {selectedSlot.events.map((ev, i) => (
+                      <div
+                        key={ev.id || i}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '4px',
+                          padding: '10px 12px',
+                          borderRadius: '6px',
+                          border: '1px solid var(--border-subtle)',
+                          background: 'var(--surface)'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            background: ev.event_type?.includes('fail') ? 'var(--status-danger-soft)' :
+                                       ev.event_type?.includes('retry') ? 'var(--status-info-soft)' :
+                                       ev.event_type?.includes('reschedule') ? 'var(--status-warning-soft)' : 'var(--surface-interactive)',
+                            color: ev.event_type?.includes('fail') ? 'var(--status-danger)' :
+                                   ev.event_type?.includes('retry') ? 'var(--status-info)' :
+                                   ev.event_type?.includes('reschedule') ? 'var(--status-warning)' : 'var(--text-primary)',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            fontFamily: 'monospace'
+                          }}>
+                            {ev.event_type}
+                          </span>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                            {ev.created_at ? new Date(ev.created_at).toLocaleString('id-ID') : '-'}
+                          </span>
+                        </div>
+                        {ev.checkpoint_state && (
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                            Status checkpoint: <code>{ev.checkpoint_state}</code>
+                          </div>
+                        )}
+                        {ev.error_message && (
+                          <div style={{ fontSize: '0.78rem', color: 'var(--status-danger)', background: 'var(--status-danger-soft)', padding: '4px 8px', borderRadius: '4px' }}>
+                            ⚠️ {ev.error_message}
+                          </div>
+                        )}
+                        {ev.payload_json && (
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                            {typeof ev.payload_json === 'string' ? ev.payload_json : JSON.stringify(ev.payload_json)}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderTop: '1px solid var(--border-subtle)',
+                  paddingTop: '12px',
+                  marginTop: '6px'
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => setSlotModalTab('details')}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid var(--border-subtle)',
+                      background: 'var(--surface)',
+                      color: 'var(--text-secondary)',
+                      fontSize: '0.8rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    ← Kembali ke Detail
+                  </button>
+                  <a
+                    href="/content-flow"
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      padding: '6px 14px',
+                      borderRadius: '6px',
+                      border: '1px solid var(--border-subtle)',
+                      background: 'var(--surface-interactive)',
+                      color: 'var(--action-primary)',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    🔗 Buka di ContentFlow / Log Publishing Sistem →
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

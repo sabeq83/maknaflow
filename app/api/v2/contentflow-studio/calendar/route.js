@@ -29,19 +29,27 @@ export const GET = withTenantContext(async (request) => {
     }
     if (brandId && brandId !== 'all') {
       filtered = filtered.filter(s => {
-        const snap = s.batch_config || {};
-        return snap.brand_profile_id === brandId || snap.selectedBrandId === brandId;
+        let snap = s.batch_config || {};
+        if (typeof snap === 'string') {
+          try { snap = JSON.parse(snap); } catch {}
+        }
+        let slotSnap = s.output_snapshot_json || {};
+        if (typeof slotSnap === 'string') {
+          try { slotSnap = JSON.parse(slotSnap); } catch {}
+        }
+        const bId = snap.brand_profile_id || snap.selectedBrandId || snap.brandId || snap.brand_id || snap.global_settings?.brand_profile_id || snap.global_settings?.brandId || slotSnap.brand_profile_id || slotSnap.brandId || slotSnap.row?.brand_profile_id || slotSnap.row?.brand_id;
+        return String(bId) === String(brandId);
       });
     }
 
     const metrics = {
-      total: slots.length,
-      pending: slots.filter(s => s.stage_status === 'pending').length,
-      in_progress: slots.filter(s => s.stage_status === 'in_progress').length,
-      ready_for_review: slots.filter(s => ['ready','needs_review'].includes(s.stage_status) && s.publishing_status === 'not_approved').length,
-      approved: slots.filter(s => s.publishing_status === 'approved' || s.publishing_status === 'scheduled').length,
-      published: slots.filter(s => s.publishing_status === 'published').length,
-      failed: slots.filter(s => s.stage_status === 'failed' || s.publishing_status === 'failed').length
+      total: filtered.length,
+      pending: filtered.filter(s => s.stage_status === 'pending').length,
+      in_progress: filtered.filter(s => s.stage_status === 'in_progress').length,
+      ready_for_review: filtered.filter(s => ['ready','needs_review'].includes(s.stage_status) && s.publishing_status === 'not_approved').length,
+      approved: filtered.filter(s => s.publishing_status === 'approved' || s.publishing_status === 'scheduled').length,
+      published: filtered.filter(s => s.publishing_status === 'published').length,
+      failed: filtered.filter(s => s.stage_status === 'failed' || s.publishing_status === 'failed').length
     };
 
     return NextResponse.json({
