@@ -4,17 +4,19 @@ import {
   getAvailableNicheKBs, 
   getExcludedAnglesHistory 
 } from '@/lib/multiplier-angle-generator';
+import { withTenantContext } from '@/lib/auth';
 import { getActiveTenantId } from '@/lib/tenant-context';
 
-export async function GET(req) {
+export const GET = withTenantContext(async (req, context, user) => {
   try {
     const { searchParams } = new URL(req.url);
     const blueprintId = searchParams.get('blueprintId');
+    const tenantId = user?.tenant_id || getActiveTenantId();
 
     const nicheKBs = getAvailableNicheKBs();
     let excludedHistory = [];
     if (blueprintId) {
-      excludedHistory = await getExcludedAnglesHistory(blueprintId);
+      excludedHistory = await getExcludedAnglesHistory(blueprintId, tenantId);
     }
 
     return NextResponse.json({
@@ -26,12 +28,12 @@ export async function GET(req) {
     console.error('[API Multiplier Generate Angles GET Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function POST(req) {
+export const POST = withTenantContext(async (req, context, user) => {
   try {
     const body = await req.json();
-    const tenantId = getActiveTenantId();
+    const tenantId = user?.tenant_id || getActiveTenantId();
 
     const {
       blueprint_id,
@@ -61,4 +63,4 @@ export async function POST(req) {
     console.error('[API Multiplier Generate Angles POST Error]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
+});

@@ -43,6 +43,12 @@ test('Multiplier Angle Generator - getExcludedAnglesHistory handles valid & empt
   });
 });
 
+test('Multiplier Angle Generator - sanitizes display label to pure UUID', async () => {
+  const displayId = 'Blueprint s/d 1c669d76-b009-4d9a-930a-64c3060e944e';
+  const history = await getExcludedAnglesHistory(displayId, 'tnt_sy-dodot_4ba27b');
+  assert.ok(Array.isArray(history), 'Should accept display label with UUID and return array');
+});
+
 test('Multiplier Angle Generator - Teardown', () => {
   setTimeout(() => process.exit(0), 200).unref();
 });

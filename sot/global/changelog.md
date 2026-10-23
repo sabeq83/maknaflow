@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.79 — Fix Tenant Context Multiplier Blueprint (23/10/2026)
+- Bungkus endpoint generate-angles dengan withTenantContext
+- Isolasi tenantContext.run pada multiplier angle generator
+- Sanitasi regex UUID blueprintId defensif
+
 ## V2.32.78 — ContentFlow Studio Live Progress Tracker & Detail Logs (23/10/2026)
 - Helper resolveLiveEngineState untuk tracking sub-status real-time engine domain
 - Perkaya calendar dan slot detail API dengan live_engine data

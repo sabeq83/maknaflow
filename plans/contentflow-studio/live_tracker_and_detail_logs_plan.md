@@ -27,7 +27,7 @@ Menjawab kebutuhan pengguna agar tidak hanya melihat status statis `⚙️ Dipro
   - File: `app/components/contentflow-studio/StudioWorkspace.js`
   - Tambahkan tab switcher pada modal log (`Live Engine Tracker & Timeline` dan `Audit Trail Log Teknis`).
   - Sediakan tombol `🔗 Buka Halaman Campaign Sumber` dan stepper visual alur 6 tahap.
-- [ ] **Task 5: Pengujian, Validasi Build & Deploy Dev Mac Mini**
+- [x] **Task 5: Pengujian, Validasi Build & Deploy Dev Mac Mini**
   - Validasi build lokal (`npm run build`).
   - Rilis patch non-interaktif (`npm run release-non-interactive`).
   - Deploy atomic ke server Dev (`npm run deploy:dev:atomic`).
