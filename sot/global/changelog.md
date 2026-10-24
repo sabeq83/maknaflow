@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.88 — Fix ReferenceError lang in generateMinimaxVO (24/10/2026)
+- Fix undefined lang variable in MiniMax TTS engine
+- Explicitly define isEn and targetLanguage in generateMinimaxVO
+- Add payload generation test for Indonesian and English in tests/minimax-english-voices.test.js
+
 ## V2.32.87 — Integrate 38 Official MiniMax English Voices Across All Video Campaign Menus (24/10/2026)
 - Centralize MiniMax and Gemini voices into lib/voice-constants.js
 - Register 38 official MiniMax English voices in backend minimax-tts.js

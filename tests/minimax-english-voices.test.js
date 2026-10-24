@@ -11,8 +11,10 @@ import {
 import {
   AVAILABLE_MINIMAX_VOICES_EN,
   FRIENDLY_TO_MINIMAX_MAP,
-  resolveMinimaxVoice
+  resolveMinimaxVoice,
+  generateMinimaxVO
 } from '../lib/minimax-tts.js';
+import { setSetting } from '../lib/db.js';
 
 test('OFFICIAL_MINIMAX_ENGLISH_VOICES has exactly 38 official voices without duplicates', () => {
   assert.equal(OFFICIAL_MINIMAX_ENGLISH_VOICES.length, 38, 'Should have 38 official English voices');
@@ -89,6 +91,45 @@ test('getAvailableVoices utility returns correct voice set', () => {
 
   const geminiVoices = getAvailableVoices('gemini', 'en-US');
   assert.equal(geminiVoices.length, GEMINI_VOICES.length, 'getAvailableVoices should return GEMINI_VOICES for gemini provider');
+});
+
+test('generateMinimaxVO payload generation handles both Indonesian and English without ReferenceError', async () => {
+  // Set dummy API key in settings for test
+  await setSetting('minimax_api_key', 'TEST_MOCK_API_KEY');
+
+  const originalFetch = global.fetch;
+  let interceptedPayload = null;
+
+  global.fetch = async (url, options) => {
+    interceptedPayload = JSON.parse(options.body);
+    return {
+      ok: true,
+      json: async () => ({
+        base_resp: { status_code: 0 },
+        data: { audio: '48656c6c6f' } // hex for Hello
+      })
+    };
+  };
+
+  try {
+    const dummyOutput = '/tmp/test_minimax_out.mp3';
+
+    // 1. Test Indonesian
+    await generateMinimaxVO('Halo dunia', 'Indonesian_casual_reporter_vv2', dummyOutput, {
+      language: 'id-ID'
+    });
+    assert.equal(interceptedPayload.language_boost, 'Indonesian');
+    assert.equal(interceptedPayload.voice_setting.voice_id, 'Indonesian_casual_reporter_vv2');
+
+    // 2. Test English
+    await generateMinimaxVO('Hello world', 'English_radiant_girl', dummyOutput, {
+      language: 'en-US'
+    });
+    assert.equal(interceptedPayload.language_boost, 'English');
+    assert.equal(interceptedPayload.voice_setting.voice_id, 'English_radiant_girl');
+  } finally {
+    global.fetch = originalFetch;
+  }
 });
 
 test.after(() => {
