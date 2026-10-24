@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.84 — HabitFolk Food-First Visual Identity Fix (24/10/2026)
+- Update HabitFolk preset to pure ASMR macro food prep without default caucasian male hands
+- Adapt recipe production adapter framing to prioritize food transformation over hands
+- Add habitfolk visual identity unit tests
+
 ## V2.32.83 — Fix Recipe AI Parser Unexpected Comma Noise (24/10/2026)
 - Implement extractBalancedJson and error-position slicing recovery in safeParseRecipeJson
 - Eliminate unexpected comma parser crash on trailing noise and commentary
