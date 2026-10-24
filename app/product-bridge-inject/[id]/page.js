@@ -3,24 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Sidebar from '../../components/Sidebar';
-
-const GEMINI_VOICES = [
-  { id: 'Kore', name: 'Kore (Male)' },
-  { id: 'Puck', name: 'Puck (Male)' },
-  { id: 'Charon', name: 'Charon (Male)' },
-  { id: 'Fenrir', name: 'Fenrir (Male)' },
-  { id: 'Aoede', name: 'Aoede (Female)' }
-];
-
-const MINIMAX_VOICES = [
-  { id: 'Indonesian_energetic_streamer_vv2', name: '⚡ Energetic Streamer (Male)' },
-  { id: 'Indonesian_crisp_reporter_vv2', name: '🎙 Crisp Reporter (Female)' },
-  { id: 'Indonesian_professional_anchor_vv2', name: '📺 Professional Anchor (Female)' },
-  { id: 'Indonesian_casual_reporter_vv2', name: '😊 Casual Reporter (Male)' },
-  { id: 'Indonesian_intellectual_commentator_vv2', name: '🧠 Intellectual Commentator (Female)' },
-  { id: 'Indonesian_compelling_storyteller_vv2', name: '📖 Compelling Storyteller (Male)' },
-  { id: 'Indonesian_expressive_podcaster_vv2', name: '🎤 Expressive Podcaster (Male)' }
-];
+import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES } from '@/lib/voice-constants';
 
 export default function BridgeBulkCampaignDetailPage() {
   const params = useParams();
@@ -775,11 +758,30 @@ export default function BridgeBulkCampaignDetailPage() {
                             disabled={['pending', 'processing'].includes(item.workflow_status)}
                             style={{ width: '100%', background: '#000', border: '1px solid var(--border)', borderRadius: '4px', padding: '6px', color: 'var(--text-primary)', fontSize: '0.78rem', outline: 'none' }}
                           >
-                            {(voiceProvider === 'minimax' ? MINIMAX_VOICES : GEMINI_VOICES).map(voice => (
-                              <option key={voice.id} value={voice.id}>
-                                {voice.name}
-                              </option>
-                            ))}
+                            {voiceProvider === 'minimax' ? (
+                              <>
+                                <optgroup label="🇮🇩 MiniMax Bahasa Indonesia">
+                                  {MINIMAX_VOICES.map(voice => (
+                                    <option key={voice.id} value={voice.id}>
+                                      {voice.name}
+                                    </option>
+                                  ))}
+                                </optgroup>
+                                <optgroup label="🇺🇸 MiniMax English">
+                                  {MINIMAX_ENGLISH_VOICES.map(voice => (
+                                    <option key={voice.id} value={voice.id}>
+                                      {voice.name}
+                                    </option>
+                                  ))}
+                                </optgroup>
+                              </>
+                            ) : (
+                              GEMINI_VOICES.map(voice => (
+                                <option key={voice.id} value={voice.id}>
+                                  {voice.name}
+                                </option>
+                              ))
+                            )}
                           </select>
                         </div>
                       </div>

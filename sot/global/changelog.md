@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.87 — Integrate 38 Official MiniMax English Voices Across All Video Campaign Menus (24/10/2026)
+- Centralize MiniMax and Gemini voices into lib/voice-constants.js
+- Register 38 official MiniMax English voices in backend minimax-tts.js
+- Integrate 38 English voices to all 14 video campaign forms and detail views
+- Add unit tests for voice registry
+
 ## V2.32.86 — Clean-slate Start Frame Reset on Storyboard Regeneration (24/10/2026)
 - Clean up all start frames and asset records when retrying Generate Storyboard
 - Add clear warning confirmation when regenerating storyboard in UI

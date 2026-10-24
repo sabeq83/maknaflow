@@ -4,32 +4,7 @@ import Sidebar from '../components/Sidebar';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
-const GEMINI_VOICES = [
-  { id: 'Kore', name: 'Kore (Female)', avatar: '👩', desc: 'Standard Female (Skincare/Cosmetic)' },
-  { id: 'Fenrir', name: 'Fenrir (Male)', avatar: '🧔', desc: 'Deep/Heavy Male (Otomotif/High-End)' },
-  { id: 'Puck', name: 'Puck (Male)', avatar: '👦', desc: 'Ceria, Playful (Makanan/Promo Kilat)' },
-  { id: 'Charon', name: 'Charon (Male)', avatar: '👨', desc: 'Formal, News Style (Review Tech/Finansial)' },
-  { id: 'Leda', name: 'Leda (Female)', avatar: '👵', desc: 'Hangat, Ramah (Edukasi/Ibu Anak)' },
-  { id: 'Zephyr', name: 'Zephyr (Male)', avatar: '👨', desc: 'Kasual, Santai (Storytelling/Daily Vlog)' },
-  { id: 'Orus', name: 'Orus (Male)', avatar: '🧔', desc: 'Tegas, Optimis (Motivasi/Online Course)' },
-  { id: 'Aoede', name: 'Aoede (Female)', avatar: '👩‍🎨', desc: 'Artistik, Ekspresif (Fashion/Seni)' },
-  { id: 'Callirrhoe', name: 'Callirrhoe (Female)', avatar: '👩‍💼', desc: 'Berenergi, Dinamis (Olahraga/Lifestyle)' },
-  { id: 'Autonoe', name: 'Autonoe (Female)', avatar: '👩‍🎓', desc: 'Dewasa, Profesional (Bisnis/Corporate)' },
-  { id: 'Enceladus', name: 'Enceladus (Male)', avatar: '👨‍🎤', desc: 'Misterius, Berat (Teaser/Trailer)' },
-  { id: 'Iapetus', name: 'Iapetus (Male)', avatar: '👴', desc: 'Bijaksana, Ramah (Mentor/Tips Hidup)' },
-  { id: 'Umbriel', name: 'Umbriel (Male)', avatar: '👨‍🔬', desc: 'Dingin, Fokus (Dokumenter/Sains)' },
-  { id: 'Despina', name: 'Despina (Female)', avatar: '👧', desc: 'Cepat, Riang (TikTok/Tips Singkat)' },
-];
-
-const MINIMAX_VOICES = [
-  { id: 'Indonesian_casual_reporter_vv2', name: 'Casual Reporter (Male)', avatar: '👨', desc: 'Laki-laki (Casual Reporter - Vv2)' },
-  { id: 'Indonesian_compelling_storyteller_vv2', name: 'Compelling Storyteller (Male)', avatar: '👨', desc: 'Laki-laki (Storyteller - Vv2)' },
-  { id: 'Indonesian_expressive_podcaster_vv2', name: 'Expressive Podcaster (Male)', avatar: '👨', desc: 'Laki-laki (Podcaster - Vv2)' },
-  { id: 'Indonesian_energetic_streamer_vv2', name: 'Energetic Streamer (Male)', avatar: '👨', desc: 'Laki-laki (Streamer - Vv2)' },
-  { id: 'Indonesian_intellectual_commentator_vv2', name: 'Intellectual Commentator (Female)', avatar: '👩', desc: 'Perempuan (Commentator - Vv2)' },
-  { id: 'Indonesian_professional_anchor_vv2', name: 'Professional Anchor (Female)', avatar: '👩', desc: 'Perempuan (Anchor - Vv2)' },
-  { id: 'Indonesian_crisp_reporter_vv2', name: 'Crisp Reporter (Female)', avatar: '👩', desc: 'Perempuan (Crisp Reporter - Vv2)' }
-];
+import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES } from '@/lib/voice-constants';
 
 export default function REPlusRecommPage() {
   const router = useRouter();
@@ -927,9 +902,24 @@ export default function REPlusRecommPage() {
                           value={dispatchOptions.voice_persona}
                           onChange={e => setDispatchOptions(prev => ({ ...prev, voice_persona: e.target.value }))}
                         >
-                          {(dispatchOptions.voice_provider === 'gemini' ? GEMINI_VOICES : MINIMAX_VOICES).map(v => (
-                            <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>
-                          ))}
+                          {dispatchOptions.voice_provider === 'minimax' ? (
+                            <>
+                              <optgroup label="🇮🇩 MiniMax Bahasa Indonesia">
+                                {MINIMAX_VOICES.map(v => (
+                                  <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>
+                                ))}
+                              </optgroup>
+                              <optgroup label="🇺🇸 MiniMax English">
+                                {MINIMAX_ENGLISH_VOICES.map(v => (
+                                  <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>
+                                ))}
+                              </optgroup>
+                            </>
+                          ) : (
+                            GEMINI_VOICES.map(v => (
+                              <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>
+                            ))
+                          )}
                         </select>
                       </div>
                     </div>

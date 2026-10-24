@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useEffect, useState, useRef, Fragment } from 'react';
 import { useParams } from 'next/navigation';
 import { getDemographicLabel, getVisualOverrideLabel, parseVisualOverrides } from '../../../lib/campaign-config-labels';
+import { MINIMAX_ENGLISH_VOICES } from '@/lib/voice-constants';
 
 const writeToClipboard = (text) => {
   if (typeof window !== 'undefined') {
@@ -90,18 +91,7 @@ const MINIMAX_VOICES = [
   { id: 'Indonesian_crisp_reporter_vv2', name: 'Crisp Reporter (Female)', avatar: '👩', desc: 'Perempuan (Crisp Reporter - Vv2)' }
 ];
 
-const MINIMAX_ENGLISH_VOICES = [
-  { id: 'English_Resonant_Man', name: 'Resonant Man (Male)', avatar: '👨', desc: 'English Resonant Man' },
-  { id: 'English_Trustworth_Man', name: 'Trustworthy Man (Male)', avatar: '👨', desc: 'English Trustworthy Man' },
-  { id: 'English_causual_narrator_vv1', name: 'Casual Narrator (Male)', avatar: '👨', desc: 'English Casual Narrator' },
-  { id: 'English_causual_podcast_vv1', name: 'Casual Podcast (Male)', avatar: '👨', desc: 'English Casual Podcast' },
-  { id: 'English_expressive_host__vv1', name: 'Expressive Host (Male)', avatar: '👨', desc: 'English Expressive Host' },
-  { id: 'English_instructive_professor_vv1', name: 'Instructive Professor (Female)', avatar: '👩', desc: 'English Instructive Professor' },
-  { id: 'English_nursery_teacher_vv2', name: 'Nursery Teacher (Female)', avatar: '👩', desc: 'English Nursery Teacher' },
-  { id: 'English_captivating_female1', name: 'Captivating Female (Female)', avatar: '👩', desc: 'English Captivating Female' },
-  { id: 'English_radiant_girl', name: 'Radiant Girl (Female)', avatar: '👩', desc: 'English Radiant Girl' },
-  { id: 'English_CalmWoman', name: 'Calm Woman (Female)', avatar: '👩', desc: 'English Calm Woman' }
-];
+
 
 const hookTypeOptions = ["Pertanyaan", "Mitos", "Hasil Akhir", "Visual Shock", "Curiosity", "Problem/Solution", "Statement"];
 const visualStyleOptions = ["Faceless", "Macro", "Food Porn", "Cinematic", "Lifestyle", "Studio/Unboxing"];
@@ -315,13 +305,6 @@ export default function PillarCampaignDetailPage() {
     { id: 'Indonesian_intellectual_commentator_vv2', name: '🧠 Intellectual Commentator (Female)', avatar: '🧠' },
     { id: 'Indonesian_compelling_storyteller_vv2', name: '📖 Compelling Storyteller (Male)', avatar: '📖' },
     { id: 'Indonesian_expressive_podcaster_vv2', name: '🎤 Expressive Podcaster (Male)', avatar: '🎤' }
-  ];
-
-  const MINIMAX_ENGLISH_VOICES = [
-    { id: 'male-rad-presenter', name: 'Male Rad Presenter', avatar: '🧔' },
-    { id: 'female-active-presenter', name: 'Female Active Presenter', avatar: '👩' },
-    { id: 'male-crisp-presenter', name: 'Male Crisp Presenter', avatar: '🧔' },
-    { id: 'female-casual-presenter', name: 'Female Casual Presenter', avatar: '👩' }
   ];
 
   const handleSaveVoiceCast = async () => {
