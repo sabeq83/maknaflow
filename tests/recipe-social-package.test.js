@@ -86,3 +86,55 @@ test('buildRecipeSocialPackage creates full platform caption package', () => {
   assert.ok(Array.isArray(pkg.hashtags) && pkg.hashtags.length > 0);
   assert.ok(pkg.platform_captions.tiktok);
 });
+
+test('formatRecipeTextPlain and formatRecipeTextMarkdown support English (lang: en)', () => {
+  const recipe = {
+    title: 'Garlic Butter Salmon with Cauliflower Mash',
+    servings: '1 Serving',
+    prep_minutes: 5,
+    cook_minutes: 10,
+    ingredients: [
+      { name: 'Salmon Fillet', amount: '200', unit: 'g', product_id: 'prod_salmon' }
+    ],
+    steps: [
+      { index: 1, instruction: 'Pan-sear salmon until golden.' }
+    ],
+    tips: ['Baste with garlic butter for extra juiciness.']
+  };
+
+  const plainEn = formatRecipeTextPlain(recipe, { lang: 'en' });
+  assert.ok(plainEn.includes('GARLIC BUTTER SALMON'));
+  assert.ok(plainEn.includes('Servings: 1 Serving'));
+  assert.ok(plainEn.includes('Total Time: 15 Mins'));
+  assert.ok(plainEn.includes('INGREDIENTS:'));
+  assert.ok(plainEn.includes('• 200 g Salmon Fillet'));
+  assert.ok(plainEn.includes('INSTRUCTIONS:'));
+  assert.ok(plainEn.includes('1. Pan-sear salmon until golden.'));
+  assert.ok(plainEn.includes('TIPS:'));
+  assert.equal(plainEn.includes('Porsi:'), false, 'Must NOT contain Indonesian Porsi');
+  assert.equal(plainEn.includes('BAHAN-BAHAN:'), false, 'Must NOT contain Indonesian BAHAN-BAHAN');
+  assert.equal(plainEn.includes('CARA MEMBUAT:'), false, 'Must NOT contain Indonesian CARA MEMBUAT');
+
+  const mdEn = formatRecipeTextMarkdown(recipe, { lang: 'en-US' });
+  assert.ok(mdEn.includes('# Garlic Butter Salmon'));
+  assert.ok(mdEn.includes('Servings: 1 Serving'));
+  assert.ok(mdEn.includes('## Ingredients:'));
+  assert.ok(mdEn.includes('- 200 g Salmon Fillet (Featured Product)'));
+  assert.ok(mdEn.includes('## Instructions:'));
+  assert.ok(mdEn.includes('## Chef Tips:'));
+  assert.equal(mdEn.includes('## Bahan-Bahan:'), false);
+  assert.equal(mdEn.includes('## Cara Membuat:'), false);
+
+  const pkgEn = buildRecipeSocialPackage(recipe, {
+    hook: 'Think a diabetes-friendly dinner has to be boring?',
+    cta: 'Tap save and share this recipe!',
+    lang: 'en'
+  });
+  assert.ok(pkgEn.caption.includes('Think a diabetes-friendly dinner has to be boring?'));
+  assert.ok(pkgEn.caption.includes('INGREDIENTS:'));
+  assert.ok(pkgEn.caption.includes('INSTRUCTIONS:'));
+  assert.ok(pkgEn.caption.includes('Tap save and share this recipe!'));
+  assert.equal(pkgEn.caption.includes('BAHAN-BAHAN:'), false);
+  assert.equal(pkgEn.caption.includes('CARA MEMBUAT:'), false);
+});
+

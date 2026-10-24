@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.85 — Multi-Language Recipe Caption Support (24/10/2026)
+- Add English and Indonesian multi-language support to recipe-social-package
+- Pass targetLanguage to recipe text formatters and social package in adapter
+- Add unit tests for English recipe text formatting
+
 ## V2.32.84 — HabitFolk Food-First Visual Identity Fix (24/10/2026)
 - Update HabitFolk preset to pure ASMR macro food prep without default caucasian male hands
 - Adapt recipe production adapter framing to prioritize food transformation over hands
