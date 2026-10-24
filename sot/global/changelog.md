@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.86 — Clean-slate Start Frame Reset on Storyboard Regeneration (24/10/2026)
+- Clean up all start frames and asset records when retrying Generate Storyboard
+- Add clear warning confirmation when regenerating storyboard in UI
+- Add unit test for clean-slate start frame reset
+
 ## V2.32.85 — Multi-Language Recipe Caption Support (24/10/2026)
 - Add English and Indonesian multi-language support to recipe-social-package
 - Pass targetLanguage to recipe text formatters and social package in adapter

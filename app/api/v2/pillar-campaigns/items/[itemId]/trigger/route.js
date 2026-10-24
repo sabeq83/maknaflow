@@ -31,8 +31,70 @@ export const POST = withTenantContext(async (request, { params }) => {
         }
       } catch (_) {}
 
+      // Bersihkan file fisik start frame lama di disk jika ada
+      try {
+        const { unlinkSync, existsSync } = await import('fs');
+        const path = await import('path');
+        const oldImages = [];
+        if (item.t2i_images_json) {
+          try {
+            const parsed = JSON.parse(item.t2i_images_json);
+            if (Array.isArray(parsed)) oldImages.push(...parsed);
+          } catch (_) {}
+        }
+        if (item.t2i_start_frame_path) oldImages.push(item.t2i_start_frame_path);
+
+        for (const imgPath of oldImages) {
+          if (typeof imgPath === 'string' && imgPath.includes('/uploads/start_frames/')) {
+            const rel = imgPath.startsWith('/') ? imgPath.slice(1) : imgPath;
+            const fullPath = path.join(process.cwd(), 'public', rel);
+            if (existsSync(fullPath)) {
+              unlinkSync(fullPath);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn(`[Trigger Route] Non-fatal cleanup error for item #${itemId}:`, err.message);
+      }
+
+      // Bersihkan record asset start frame di database PostgreSQL
+      try {
+        const { pgQuery } = await import('@/lib/db-pg');
+        await pgQuery(
+          'DELETE FROM pillar_campaign_item_assets WHERE campaign_item_id = $1 AND asset_type = $2',
+          [String(itemId), 'start_frame']
+        );
+      } catch (err) {
+        console.warn(`[Trigger Route] Failed to clean start_frame assets for item #${itemId}:`, err.message);
+      }
+
       updateFields.generation_status = nextStatus;
       updateFields.result_json = null;
+      updateFields.new_video_plan_json = null;
+      updateFields.video_dna_json = null;
+      updateFields.recipe_data_json = null;
+      updateFields.recipe_revision = null;
+
+      // Reset Start Frame
+      updateFields.t2i_start_frame_path = null;
+      updateFields.t2i_images_json = null;
+      updateFields.start_frame_status = 'pending';
+      updateFields.start_frame_completed_count = 0;
+      updateFields.start_frame_expected_count = 0;
+      updateFields.regenerate_start_frames_status = null;
+      updateFields.regenerate_start_frames_progress = null;
+
+      // Reset Review / Approval Checkpoint
+      updateFields.review_revision = null;
+      updateFields.approved_revision = null;
+      updateFields.approved_at = null;
+      updateFields.approved_by = null;
+      updateFields.review_state = 'pending_review';
+      updateFields.review_reason = null;
+      updateFields.review_actor_id = null;
+      updateFields.review_state_updated_at = null;
+
+      // Reset Downstream Production Pipeline
       updateFields.tts_status = 'pending';
       updateFields.tts_batch_id = null;
       updateFields.visual_status = 'pending';
@@ -44,6 +106,7 @@ export const POST = withTenantContext(async (request, { params }) => {
       updateFields.drive_link = null;
       updateFields.social_post_status = 'pending';
       updateFields.social_links_json = null;
+      updateFields.workflow_status = 'creative_processing';
     } else if (step === 'tts_remux') {
       let visualPaths = [];
       try { visualPaths = JSON.parse(item.visual_clip_paths || '[]'); } catch (_) {}
@@ -93,7 +156,7 @@ export const POST = withTenantContext(async (request, { params }) => {
     updateFields.retry_count = 0;
 
     // Reset workflow status jika sebelumnya sudah completed
-    if (item.workflow_status === 'completed') {
+    if (item.workflow_status === 'completed' && !updateFields.workflow_status) {
       updateFields.workflow_status = 'production_processing';
     }
 

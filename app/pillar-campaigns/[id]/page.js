@@ -331,9 +331,14 @@ export default function PillarCampaignDetailPage() {
     showToast('Voice Cast berhasil disimpan!');
   };
   async function triggerManualStep(itemId, step) {
-    const confirmation = step === 'tts_remux'
-      ? 'Buat ulang audio TTS dengan persona campaign saat ini, render ulang FFmpeg, dan upload ulang hasil final? Video G-Labs tidak akan dibuat ulang.'
-      : `Apakah Anda yakin ingin memicu proses ${step.toUpperCase()} secara manual?`;
+    let confirmation;
+    if (step === 'generate') {
+      confirmation = 'Mengulang langkah Generate Storyboard akan merancang ulang naskah, alur adegan, prompt T2I, serta MENGHAPUS seluruh Start Frame gambar yang sudah dibuat sebelumnya. Apakah Anda yakin ingin mengulang dari awal?';
+    } else if (step === 'tts_remux') {
+      confirmation = 'Buat ulang audio TTS dengan persona campaign saat ini, render ulang FFmpeg, dan upload ulang hasil final? Video G-Labs tidak akan dibuat ulang.';
+    } else {
+      confirmation = `Apakah Anda yakin ingin memicu proses ${step.toUpperCase()} secara manual?`;
+    }
     if (!confirm(confirmation)) return;
     setTriggering(prev => ({ ...prev, [`${itemId}-${step}`]: true }));
     try {
