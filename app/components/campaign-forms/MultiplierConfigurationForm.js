@@ -8,7 +8,8 @@ import VisualIdentitySelector from '../VisualIdentitySelector';
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { getWordsPerClipOptions, getDefaultWordsPerClip, VIDEO_MODELS } from '@/lib/words-per-clip-presets';
-import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES } from '@/lib/voice-constants';
+import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES, getDefaultVoicePersona } from '@/lib/voice-constants';
+import { getDemographicOptions } from '@/lib/demographic-constants';
 
 function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCancel } = {}) {
   const captureMode = mode === 'capture';
@@ -141,6 +142,12 @@ function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCan
   const [aiDirective, setAiDirective] = useState('');
   const [mandatoryOutroLine, setMandatoryOutroLine] = useState('');
   const [customInstruction, setCustomInstruction] = useState('');
+
+  const handleLanguageChange = (newLang) => {
+    setTargetLanguage(newLang);
+    const nextPersona = getDefaultVoicePersona(voiceProvider, newLang);
+    setVoicePersona(nextPersona);
+  };
 
   const fetchProducts = async (search = '') => {
     try {
@@ -435,7 +442,8 @@ function MultiplierLabPageContent({ mode = 'direct', onCapture, onSuccess, onCan
           mode: workflowMode === 'multi_blueprint_one_angle' ? 'multi_to_1' : '1_to_multi',
           niche_kb_name: selectedNicheKb,
           angle_count: isMore ? 3 : angleCount,
-          custom_theme: customAngleTheme || editorialTopic
+          custom_theme: customAngleTheme || editorialTopic,
+          target_language: targetLanguage
         })
       });
       const data = await res.json();
@@ -2009,7 +2017,7 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
 
                       <div className="form-group">
                         <label className="form-label">Bahasa Naskah Voiceover (Script Language)</label>
-                        <select className="form-input" value={targetLanguage} onChange={e => setTargetLanguage(e.target.value)}>
+                        <select className="form-input" value={targetLanguage} onChange={e => handleLanguageChange(e.target.value)}>
                           <option value="id-ID">🇮🇩 Bahasa Indonesia (Lokal)</option>
                           <option value="en-US">🇺🇸 English (Global / US Market)</option>
                         </select>
@@ -2018,23 +2026,84 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
                       <div className="form-group">
                         <label className="form-label">🎯 Target Demografi & Tone Bahasa</label>
                         <select className="form-input" value={targetDemographic} onChange={e => setTargetDemographic(e.target.value)}>
-                          <option value="genz_casual">Gen-Z & Milenial Muda (Santai, Gaul, Akrab "Kamu/Lo")</option>
-                          <option value="ibu_rumah_tangga">Ibu Rumah Tangga & Keluarga (Ramah, Mengayomi "Bunda/Moms")</option>
-                          <option value="professional_executive">Profesional & Worker (Lugas, Refined, Efisien "Anda/Kamu")</option>
-                          <option value="hijab_syari_family">Keluarga Hijrah & Syari (Santun, Islami Alami "Bunda/Ukhti")</option>
-                          <option value="fitness_health_enthusiast">Penggiat Olahraga & Kesehatan (Motivatif, Energik, Informatif)</option>
-                          <option value="custom">Custom Input Bebas...</option>
+                          {getDemographicOptions(targetLanguage).map(d => (
+                            <option key={d.id} value={d.id}>{d.label}</option>
+                          ))}
                         </select>
                         {targetDemographic === 'custom' && (
                           <input
                             type="text"
                             className="form-input"
                             style={{ marginTop: 8 }}
-                            placeholder="Contoh: Mahasiswa Rantau yang Hemat"
+                            placeholder={targetLanguage === 'en-US' ? 'Example: Busy college athletes on a budget' : 'Contoh: Mahasiswa Rantau yang Hemat'}
                             value={targetDemographicCustom}
                             onChange={e => setTargetDemographicCustom(e.target.value)}
                           />
                         )}
+                      </div>
+
+                      {/* Konfigurasi Voiceover (TTS) */}
+                      <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: 14, marginTop: 10, marginBottom: 14 }}>
+                        <label style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--action-primary)', display: 'block', marginBottom: 10 }}>
+                          🎙️ Konfigurasi Voiceover (TTS)
+                        </label>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                          <div className="form-group">
+                            <label className="form-label">Voice Provider</label>
+                            <select
+                              className="form-input"
+                              value={voiceProvider}
+                              onChange={e => {
+                                setVoiceProvider(e.target.value);
+                                setVoicePersona(getDefaultVoicePersona(e.target.value, targetLanguage));
+                              }}
+                            >
+                              <option value="minimax">MiniMax VO Engine (Direkomendasikan)</option>
+                              <option value="gemini">Gemini TTS Engine</option>
+                            </select>
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">Voice Persona</label>
+                            <select
+                              className="form-input"
+                              value={voicePersona}
+                              onChange={e => setVoicePersona(e.target.value)}
+                            >
+                              {voiceProvider === 'gemini'
+                                ? GEMINI_VOICES.map(v => <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>)
+                                : (targetLanguage === 'en-US' ? MINIMAX_ENGLISH_VOICES : MINIMAX_VOICES).map(v => (
+                                    <option key={v.id} value={v.id}>{v.name} - {v.desc}</option>
+                                  ))
+                              }
+                            </select>
+                          </div>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 8 }}>
+                          <div className="form-group">
+                            <label className="form-label">Voice Speed ({voiceSpeed}x)</label>
+                            <input
+                              type="range"
+                              min="0.5"
+                              max="2.0"
+                              step="0.1"
+                              value={voiceSpeed}
+                              onChange={e => setVoiceSpeed(parseFloat(e.target.value))}
+                              style={{ width: '100%', accentColor: 'var(--action-primary)' }}
+                            />
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">Voice Volume ({voiceVolume}x)</label>
+                            <input
+                              type="range"
+                              min="0.0"
+                              max="2.0"
+                              step="0.1"
+                              value={voiceVolume}
+                              onChange={e => setVoiceVolume(parseFloat(e.target.value))}
+                              style={{ width: '100%', accentColor: 'var(--action-primary)' }}
+                            />
+                          </div>
+                        </div>
                       </div>
 
                       <div className="form-group">

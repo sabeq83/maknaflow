@@ -8,7 +8,8 @@ import VisualIdentitySelector from '../VisualIdentitySelector';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 import { getWordsPerClipOptions, getDefaultWordsPerClip, VIDEO_MODELS } from '@/lib/words-per-clip-presets';
-import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES } from '@/lib/voice-constants';
+import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES, getDefaultVoicePersona } from '@/lib/voice-constants';
+import { getDemographicOptions } from '@/lib/demographic-constants';
 
 export default function RECampaignsPage({ mode = 'direct', onCapture, onSuccess, onCancel } = {}) {
   const captureMode = mode === 'capture';
@@ -1211,7 +1212,11 @@ const canonicalConfigurationForm0 = (<form onSubmit={productionMode === 'mass' ?
                       <select
                         className="form-input"
                         value={targetLanguage}
-                        onChange={e => setTargetLanguage(e.target.value)}
+                        onChange={e => {
+                          const newLang = e.target.value;
+                          setTargetLanguage(newLang);
+                          setVoicePersona(getDefaultVoicePersona(voiceProvider, newLang));
+                        }}
                       >
                         <option value="id-ID">🇮🇩 Bahasa Indonesia (Lokal)</option>
                         <option value="en-US">🇺🇸 English (Global / US Market)</option>
@@ -1224,19 +1229,16 @@ const canonicalConfigurationForm0 = (<form onSubmit={productionMode === 'mass' ?
                         value={targetDemographic}
                         onChange={e => setTargetDemographic(e.target.value)}
                       >
-                        <option value="genz_casual">Gen-Z & Milenial Muda (Santai, Gaul, Akrab "Kamu/Lo")</option>
-                        <option value="ibu_rumah_tangga">Ibu Rumah Tangga & Keluarga (Ramah, Mengayomi "Bunda/Moms")</option>
-                        <option value="professional_executive">Profesional & Worker (Lugas, Refined, Efisien "Anda/Kamu")</option>
-                        <option value="hijab_syari_family">Keluarga Hijrah & Syari (Santun, Islami Alami "Bunda/Ukhti")</option>
-                        <option value="fitness_health_enthusiast">Penggiat Olahraga & Kesehatan (Motivatif, Energik, Informatif)</option>
-                        <option value="custom">Custom Input Bebas...</option>
+                        {getDemographicOptions(targetLanguage).map(d => (
+                          <option key={d.id} value={d.id}>{d.label}</option>
+                        ))}
                       </select>
                       {targetDemographic === 'custom' && (
                         <input
                           type="text"
                           className="form-input"
                           style={{ marginTop: 8 }}
-                          placeholder="Contoh: Mahasiswa Rantau yang Hemat"
+                          placeholder={targetLanguage === 'en-US' ? 'Example: Busy college athletes on a budget' : 'Contoh: Mahasiswa Rantau yang Hemat'}
                           value={targetDemographicCustom}
                           onChange={e => setTargetDemographicCustom(e.target.value)}
                         />

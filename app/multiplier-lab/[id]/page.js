@@ -1026,6 +1026,13 @@ function CampaignDetailPageContent() {
                   bridgingConfig = task.bridging_config_json ? (typeof task.bridging_config_json === 'string' ? JSON.parse(task.bridging_config_json) : task.bridging_config_json) : {};
                 } catch (_) {}
 
+                let audioConfig = {};
+                try {
+                  audioConfig = task.audio_config_json ? (typeof task.audio_config_json === 'string' ? JSON.parse(task.audio_config_json) : task.audio_config_json) : {};
+                } catch (_) {}
+
+                const isEnglish = (audioConfig.targetLanguage === 'en-US' || audioConfig.target_language === 'en-US' || task.target_language === 'en-US');
+
                 const isExpanded = expandedTaskId === task.id;
                 const activeTab = activeTabs[task.id] || 'storyboard';
                 const storyboard = editedStoryboards[task.id] || [];
@@ -1042,6 +1049,17 @@ function CampaignDetailPageContent() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, flexWrap: 'wrap' }}>
                           <span style={{ fontSize: '0.68rem', fontFamily: 'monospace', fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: 'var(--surface-interactive)', color: 'var(--action-primary)', border: '1px solid var(--border-subtle)' }}>
                             Baris #{rowNumber} ({task.id})
+                          </span>
+                          <span style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            padding: '2px 7px',
+                            borderRadius: 4,
+                            background: isEnglish ? 'rgba(59, 130, 246, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                            color: isEnglish ? 'var(--action-primary)' : 'var(--status-danger)',
+                            border: `1px solid ${isEnglish ? 'var(--action-primary)' : 'var(--status-danger)'}`
+                          }}>
+                            {isEnglish ? '🇺🇸 English' : '🇮🇩 Indonesia'}
                           </span>
                           {bridgingConfig.hookType && (
                             <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: 'rgba(45, 212, 191, 0.15)', color: 'var(--action-primary)', border: '1px solid rgba(45, 212, 191, 0.3)' }}>

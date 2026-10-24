@@ -7,6 +7,7 @@ import Sidebar from '../Sidebar';
 import { useState, useEffect, useRef } from 'react';
 import { VIDEO_MODELS } from '@/lib/words-per-clip-presets';
 import { GRID_LAYOUT_COORDINATES } from '@/lib/core/GridCoordinates';
+import { getDemographicOptions } from '@/lib/demographic-constants';
 
 const LAYOUT_PRESET_METADATA = {
   3: [
@@ -1275,19 +1276,16 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
                     {(!captureMode || studioStep === 2) && (<div className="form-group" style={{ marginBottom: '16px' }}>
                       <label className="form-label">🎯 Target Demografi & Tone Bahasa</label>
                       <select className="form-input" value={targetDemographic} onChange={e => setTargetDemographic(e.target.value)}>
-                        <option value="genz_casual">Gen-Z & Milenial Muda (Santai, Gaul, Akrab "Kamu/Lo")</option>
-                        <option value="ibu_rumah_tangga">Ibu Rumah Tangga & Keluarga (Ramah, Mengayomi "Bunda/Moms")</option>
-                        <option value="professional_executive">Profesional & Worker (Lugas, Refined, Efisien "Anda/Kamu")</option>
-                        <option value="hijab_syari_family">Keluarga Hijrah & Syari (Santun, Islami Alami "Bunda/Ukhti")</option>
-                        <option value="fitness_health_enthusiast">Penggiat Olahraga & Kesehatan (Motivatif, Energik, Informatif)</option>
-                        <option value="custom">Custom Input Bebas...</option>
+                        {getDemographicOptions(targetLanguage).map(d => (
+                          <option key={d.id} value={d.id}>{d.label}</option>
+                        ))}
                       </select>
                       {targetDemographic === 'custom' && (
                         <input
                           type="text"
                           className="form-input"
                           style={{ marginTop: 8 }}
-                          placeholder="Contoh: Mahasiswa Rantau yang Hemat"
+                          placeholder={targetLanguage === 'en-US' ? 'Example: Busy college athletes on a budget' : 'Contoh: Mahasiswa Rantau yang Hemat'}
                           value={targetDemographicCustom}
                           onChange={e => setTargetDemographicCustom(e.target.value)}
                         />

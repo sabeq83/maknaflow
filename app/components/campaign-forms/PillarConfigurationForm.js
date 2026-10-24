@@ -7,7 +7,8 @@ import { useState, useEffect } from 'react';
 import { resolvePlannerInstructions } from '@/lib/prompt-instructions';
 import { VIDEO_MODELS, getWordsPerClipOptions, getDefaultWordsPerClip } from '@/lib/words-per-clip-presets';
 import VisualIdentitySelector from '../VisualIdentitySelector';
-import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES } from '@/lib/voice-constants';
+import { GEMINI_VOICES, MINIMAX_VOICES, MINIMAX_ENGLISH_VOICES, getDefaultVoicePersona } from '@/lib/voice-constants';
+import { getDemographicOptions } from '@/lib/demographic-constants';
 
 export default function PillarConfigurationForm({
   isOpen,
@@ -1071,7 +1072,11 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit}>
                       <label style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Bahasa Naskah Voiceover:</label>
                       <select
                         value={targetLanguage}
-                        onChange={e => setTargetLanguage(e.target.value)}
+                        onChange={e => {
+                          const newLang = e.target.value;
+                          setTargetLanguage(newLang);
+                          setVoicePersona(getDefaultVoicePersona(voiceProvider, newLang));
+                        }}
                         style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                       >
                         <option value="id-ID">Bahasa Indonesia (id-ID)</option>
@@ -1086,17 +1091,14 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit}>
                         onChange={e => setTargetDemographic(e.target.value)}
                         style={{ width: '100%', padding: '10px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px' }}
                       >
-                        <option value="genz_casual">Gen-Z & Milenial Muda (Santai, Gaul, Akrab "Kamu/Lo")</option>
-                        <option value="ibu_rumah_tangga">Ibu Rumah Tangga & Keluarga (Ramah, Mengayomi "Bunda/Moms")</option>
-                        <option value="professional_executive">Profesional & Worker (Lugas, Refined, Efisien "Anda/Kamu")</option>
-                        <option value="hijab_syari_family">Keluarga Hijrah & Syari (Santun, Islami Alami "Bunda/Ukhti")</option>
-                        <option value="fitness_health_enthusiast">Penggiat Olahraga & Kesehatan (Motivatif, Energik, Informatif)</option>
-                        <option value="custom">Custom Input Bebas...</option>
+                        {getDemographicOptions(targetLanguage).map(d => (
+                          <option key={d.id} value={d.id}>{d.label}</option>
+                        ))}
                       </select>
                       {targetDemographic === 'custom' && (
                         <input
                           type="text"
-                          placeholder="Contoh: Mahasiswa Rantau yang Hemat"
+                          placeholder={targetLanguage === 'en-US' ? 'Example: Busy college athletes on a budget' : 'Contoh: Mahasiswa Rantau yang Hemat'}
                           value={targetDemographicCustom}
                           onChange={e => setTargetDemographicCustom(e.target.value)}
                           style={{ width: '100%', marginTop: '6px', padding: '8px', background: 'var(--surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', borderRadius: '8px', fontSize: '12px' }}

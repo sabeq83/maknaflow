@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Mockup: Multiplier Labs Bilingual & Centralized Demographic</title>
+  <style>
+    :root {
+      --surface: #0f172a;
+      --surface-raised: #1e293b;
+      --surface-interactive: #334155;
+      --surface-subtle: #1e293b80;
+      --border-subtle: #334155;
+      --border-strong: #475569;
+      --border-color: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --action-primary: #3b82f6;
+      --action-primary-hover: #2563eb;
+      --on-action-primary: #ffffff;
+      --status-success: #10b981;
+      --status-success-soft: #064e3b;
+      --status-info: #0ea5e9;
+      --status-info-soft: #0c4a6e;
+      --status-warning: #f59e0b;
+      --status-neutral: #6366f1;
+      --focus-ring: #60a5fa;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background: var(--surface);
+      color: var(--text-primary);
+      padding: 24px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 960px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .header-banner {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(99, 102, 241, 0.15));
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-banner h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-hub {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 16px 20px;
+      background: var(--surface-subtle);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-header h2 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--action-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .form-input, .form-select {
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: var(--focus-ring);
+    }
+
+    .helper-text {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .range-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .range-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    input[type="range"] {
+      accent-color: var(--action-primary);
+      width: 100%;
+    }
+
+    .preview-box {
+      background: var(--surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      font-family: monospace;
+      font-size: 0.78rem;
+      color: #38bdf8;
+      white-space: pre-wrap;
+      line-height: 1.5;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+
+    .angles-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.8rem;
+    }
+
+    .angles-table th {
+      background: var(--surface);
+      color: var(--text-secondary);
+      text-align: left;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-color);
+      font-weight: 600;
+    }
+
+    .angles-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-primary);
+      vertical-align: top;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: var(--surface-interactive);
+      color: var(--text-secondary);
+    }
+
+    .tag.en {
+      background: #1e3a8a;
+      color: #93c5fd;
+    }
+
+    .tag.id {
+      background: #7f1d1d;
+      color: #fca5a5;
+    }
+
+    .btn-action {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border: none;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+    }
+
+    .btn-action:hover {
+      background: var(--action-primary-hover);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-banner">
+      <div>
+        <h1>🔄 Multiplier Labs — Upgrade Konten Bilingual & Demografi Terpusat</h1>
+        <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 4px;">
+          Simulasi pergantian bahasa dinamis (ID / EN), integrasi suara MiniMax otomatis, dan sistem demografi terpusat (Centralized Demographic Hub).
+        </p>
+      </div>
+      <span class="badge-hub">SOP Mockup Simulasi</span>
+    </div>
+
+    <!-- Step 1 Form Simulation -->
+    <div class="card">
+      <div class="card-header">
+        <h2>⚙️ Step 1: Strategi Dasar & Pengaturan Suara</h2>
+        <span id="currentLangTag" class="tag id">🇮🇩 Bahasa Indonesia</span>
+      </div>
+      <div class="card-body">
+        <div class="form-grid">
+          <!-- Bahasa Selection -->
+          <div class="form-group">
+            <label class="form-label">🌐 Bahasa Naskah Voiceover (Target Language)</label>
+            <select id="selectLanguage" class="form-select" onchange="onLanguageChanged()">
+              <option value="id-ID">🇮🇩 Bahasa Indonesia (Lokal)</option>
+              <option value="en-US">🇺🇸 English (Global / US Market)</option>
+            </select>
+            <span class="helper-text">Mengubah bahasa naskah narasi, judul YouTube Shorts, caption resep, dan persona suara.</span>
+          </div>
+
+          <!-- Centralized Demographic Selection -->
+          <div class="form-group">
+            <label class="form-label">🎯 Target Demografi & Tone Bicara (Terpusat)</label>
+            <select id="selectDemographic" class="form-select" onchange="onDemographicChanged()">
+              <!-- Dynamic Options loaded by JS -->
+            </select>
+            <span class="helper-text" id="demographicHelper">Dikelola terpusat oleh <code>lib/demographic-constants.js</code></span>
+          </div>
+        </div>
+
+        <div id="customDemographicWrapper" class="form-group" style="display: none;">
+          <label class="form-label">✍️ Custom Audience Input</label>
+          <input type="text" id="inputCustomDemo" class="form-input" placeholder="e.g. Busy college athletes on a budget" oninput="updatePromptPreview()">
+        </div>
+
+        <!-- Voice Settings Grid -->
+        <div style="border-top: 1px solid var(--border-color); padding-top: 14px; margin-top: 6px;">
+          <label style="font-size: 0.85rem; font-weight: 700; color: var(--action-primary); display: block; margin-bottom: 12px;">
+            🎙️ Konfigurasi Mesin Voiceover (MiniMax & Gemini TTS)
+          </label>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Voice Provider</label>
+              <select id="selectProvider" class="form-select" onchange="onProviderChanged()">
+                <option value="minimax">MiniMax VO Engine (Direkomendasikan)</option>
+                <option value="gemini">Gemini TTS Engine</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Voice Persona</label>
+              <select id="selectPersona" class="form-select" onchange="updatePromptPreview()">
+                <!-- Populated dynamically based on language & provider -->
+              </select>
+              <span class="helper-text" id="personaBadge">Auto-switch saat bahasa diubah</span>
+            </div>
+          </div>
+
+          <div class="form-grid" style="margin-top: 12px;">
+            <div class="range-group">
+              <div class="range-header">
+                <span>Speed</span>
+                <span id="speedVal">1.0x</span>
+              </div>
+              <input type="range" id="rangeSpeed" min="0.5" max="2.0" step="0.1" value="1.0" oninput="document.getElementById('speedVal').innerText = this.value + 'x'; updatePromptPreview();">
+            </div>
+
+            <div class="range-group">
+              <div class="range-header">
+                <span>Volume</span>
+                <span id="volumeVal">1.0x</span>
+              </div>
+              <input type="range" id="rangeVolume" min="0.0" max="2.0" step="0.1" value="1.0" oninput="document.getElementById('volumeVal').innerText = this.value + 'x'; updatePromptPreview();">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Gemini Prompt Directive Preview -->
+    <div class="card">
+      <div class="card-header">
+        <h2>🧠 Live AI Prompt Directive (Injeksikan ke Gemini Engine)</h2>
+      </div>
+      <div class="card-body">
+        <p style="font-size: 0.78rem; color: var(--text-secondary);">
+          Berikut instruksi yang secara otomatis dibentuk oleh modul <code>lib/demographic-constants.js</code> dan <code>lib/prompts.js</code> untuk Gemini AI:
+        </p>
+        <div id="promptDirectivePreview" class="preview-box"></div>
+      </div>
+    </div>
+
+    <!-- Step 2 Angles Simulation -->
+    <div class="card">
+      <div class="card-header">
+        <h2>📐 Step 2: Simulasi Output Generator Sudut Pandang (Angles)</h2>
+        <button class="btn-action" onclick="generateSimulatedAngles()">⚡ Refresh Sudut Pandang</button>
+      </div>
+      <div class="card-body">
+        <p style="font-size: 0.78rem; color: var(--text-secondary);">
+          Hasil <code>generateDynamicMultiplierAngles</code> ketika parameter <code>target_language</code> dikirim:
+        </p>
+        <table class="angles-table">
+          <thead>
+            <tr>
+              <th style="width: 25%;">Sudut Pandang (Title)</th>
+              <th style="width: 35%;">Hook 0-3 Detik</th>
+              <th style="width: 25%;">Preview Voiceover</th>
+              <th style="width: 15%;">CTA</th>
+            </tr>
+          </thead>
+          <tbody id="anglesTableBody">
+            <!-- Simulated Rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Centralized Demographic Data (mirroring lib/demographic-constants.js)
+    const CENTRALIZED_DEMOGRAPHICS = {
+      'id-ID': [
+        { id: 'genz_casual', label: 'Gen-Z & Milenial Muda (Santai, Gaul, Akrab "Kamu/Lo")' },
+        { id: 'ibu_rumah_tangga', label: 'Ibu Rumah Tangga & Keluarga (Ramah, Mengayomi "Bunda/Moms")' },
+        { id: 'professional_executive', label: 'Profesional & Worker (Lugas, Refined, Efisien "Anda/Kamu")' },
+        { id: 'hijab_syari_family', label: 'Keluarga Hijrah & Syari (Santun, Islami Alami "Bunda/Ukhti")' },
+        { id: 'fitness_health_enthusiast', label: 'Penggiat Olahraga & Kesehatan (Motivatif, Energik, Informatif)' },
+        { id: 'custom', label: 'Custom Input Bebas...' }
+      ],
+      'en-US': [
+        { id: 'genz_casual', label: 'Gen-Z & Young Millennials (Conversational, authentic, slang "You")' },
+        { id: 'ibu_rumah_tangga', label: 'Busy Parents & Families (Warm, encouraging, practical time-savers)' },
+        { id: 'professional_executive', label: 'Professionals & Busy Executives (Polished, concise, high-value)' },
+        { id: 'hijab_syari_family', label: 'Modest Living & Wholesome Families (Respectful, gracious, calming)' },
+        { id: 'fitness_health_enthusiast', label: 'Health & Fitness Enthusiasts (High-energy, motivating, macro-focused)' },
+        { id: 'custom', label: 'Custom Input...' }
+      ]
+    };
+
+    const TONE_INSTRUCTIONS = {
+      'id-ID': {
+        genz_casual: "Target Audiens: Gen-Z & Milenial Muda. Gunakan nada bicara santai, gaul, akrab (relatable), dengan sapaan 'kamu' atau 'lo'. Gunakan diksi modern kasual tanpa kaku.",
+        ibu_rumah_tangga: "Target Audiens: Ibu Rumah Tangga & Keluarga. Nada bicara hangat, ramah, mengayomi, solutif, sapaan 'Bunda' / 'Moms' / 'Kamu'. Utamakan efisiensi waktu dan kepraktisan keluarga.",
+        professional_executive: "Target Audiens: Profesional & Pekerja Kantoran. Nada bicara lugas, berbobot, cerdas, refined, sapaan 'Anda' / 'Kamu'. Fokus pada kualitas & hasil konkret.",
+        hijab_syari_family: "Target Audiens: Komunitas Syari & Keluarga Hijrah. Nada bicara santun, ramah, hangat, islami alami ('Bunda', 'Ukhti', 'Sahabat').",
+        fitness_health_enthusiast: "Target Audiens: Penggiat Olahraga & Kesehatan. Nada bicara motivatif, energik, informatif, menyertakan fakta nutrisi/kesehatan praktis."
+      },
+      'en-US': {
+        genz_casual: "Target Audience: Gen-Z & Young Millennials. Use a conversational, authentic, snappy US English tone, addressing the viewer as 'you'. Modern everyday phrasing, zero corporate jargon.",
+        ibu_rumah_tangga: "Target Audience: Busy Parents & Families. Warm, encouraging, nurturing tone. Focus on effortless kitchen prep, time-saving family routines, and accessible wellness.",
+        professional_executive: "Target Audience: Busy Professionals & Executives. Polished, concise, intelligent delivery. High-value takeaways, zero fluff, sharp execution.",
+        hijab_syari_family: "Target Audience: Modest Living & Wholesome Families. Gracious, respectful, calming, and inspiring tone.",
+        fitness_health_enthusiast: "Target Audience: Fitness & Health Enthusiasts. High-energy, motivating, instructional tone with practical nutrition, macro breakdown, and clean ingredient insights."
+      }
+    };
+
+    const MINIMAX_EN_VOICES = [
+      { id: 'English_radiant_girl', name: 'Radiant Girl (Female)', desc: 'Warm, bright, friendly' },
+      { id: 'English_expressive_narrator', name: 'Expressive Narrator (Male)', desc: 'Clear, dynamic storytelling' },
+      { id: 'English_friendly_host', name: 'Friendly Host (Male)', desc: 'Engaging, upbeat presenter' },
+      { id: 'English_calm_anchor', name: 'Calm Anchor (Female)', desc: 'Soothing, polished news style' },
+      { id: 'English_energetic_coach', name: 'Energetic Coach (Male)', desc: 'High-power, motivating fitness' },
+      { id: 'English_soothing_storyteller', name: 'Soothing Storyteller (Female)', desc: 'Cozy, gentle bedside tone' }
+    ];
+
+    const MINIMAX_ID_VOICES = [
+      { id: 'Indonesian_casual_reporter_vv2', name: 'Riko Santai (Male)', desc: 'Kasual, luwes, berita ringan' },
+      { id: 'Indonesian_SweetGirl', name: 'Nabila Manis (Female)', desc: 'Hangat, ramah, bersahabat' },
+      { id: 'Indonesian_warm_mentor', name: 'Pak Budi (Male)', desc: 'Bijak, mengayomi, kebapakan' },
+      { id: 'Indonesian_cheerful_sister', name: 'Kak Sarah (Female)', desc: 'Ceria, energik, gen-z' }
+    ];
+
+    function populateDemographics(lang) {
+      const select = document.getElementById('selectDemographic');
+      const curVal = select.value || 'genz_casual';
+      select.innerHTML = '';
+      CENTRALIZED_DEMOGRAPHICS[lang].forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item.id;
+        opt.innerText = item.label;
+        if (item.id === curVal) opt.selected = true;
+        select.appendChild(opt);
+      });
+      onDemographicChanged();
+    }
+
+    function populateVoices(lang, provider) {
+      const select = document.getElementById('selectPersona');
+      select.innerHTML = '';
+      if (provider === 'minimax') {
+        const voices = lang === 'en-US' ? MINIMAX_EN_VOICES : MINIMAX_ID_VOICES;
+        voices.forEach(v => {
+          const opt = document.createElement('option');
+          opt.value = v.id;
+          opt.innerText = `${v.name} — ${v.desc}`;
+          select.appendChild(opt);
+        });
+        select.value = lang === 'en-US' ? 'English_radiant_girl' : 'Indonesian_casual_reporter_vv2';
+      } else {
+        const opt = document.createElement('option');
+        opt.value = lang === 'en-US' ? 'Puck' : 'Kore';
+        opt.innerText = `Gemini Voice: ${opt.value}`;
+        select.appendChild(opt);
+      }
+    }
+
+    function onLanguageChanged() {
+      const lang = document.getElementById('selectLanguage').value;
+      const tag = document.getElementById('currentLangTag');
+      if (lang === 'en-US') {
+        tag.className = 'tag en';
+        tag.innerText = '🇺🇸 English (US Market)';
+      } else {
+        tag.className = 'tag id';
+        tag.innerText = '🇮🇩 Bahasa Indonesia';
+      }
+
+      populateDemographics(lang);
+      const provider = document.getElementById('selectProvider').value;
+      populateVoices(lang, provider);
+      updatePromptPreview();
+      generateSimulatedAngles();
+    }
+
+    function onDemographicChanged() {
+      const demoVal = document.getElementById('selectDemographic').value;
+      const customWrap = document.getElementById('customDemographicWrapper');
+      if (demoVal === 'custom') {
+        customWrap.style.display = 'flex';
+      } else {
+        customWrap.style.display = 'none';
+      }
+      updatePromptPreview();
+    }
+
+    function onProviderChanged() {
+      const lang = document.getElementById('selectLanguage').value;
+      const provider = document.getElementById('selectProvider').value;
+      populateVoices(lang, provider);
+      updatePromptPreview();
+    }
+
+    function updatePromptPreview() {
+      const lang = document.getElementById('selectLanguage').value;
+      const demoVal = document.getElementById('selectDemographic').value;
+      const customVal = document.getElementById('inputCustomDemo').value;
+      const persona = document.getElementById('selectPersona').value;
+      const speed = document.getElementById('rangeSpeed').value;
+      const volume = document.getElementById('rangeVolume').value;
+
+      let toneText = '';
+      if (demoVal === 'custom') {
+        toneText = lang === 'en-US' 
+          ? `Target Audience: Specific Custom (${customVal || 'Custom'}). Tailor tone and vocabulary specifically for this group.`
+          : `Target Audiens Spesifik: ${customVal || 'Bebas'}. Adaptasikan diksi dan nada bicara secara presisi.`;
+      } else {
+        toneText = TONE_INSTRUCTIONS[lang][demoVal] || '';
+      }
+
+      const recipeMandate = lang === 'en-US'
+        ? `## RECIPE & SOCIAL MEDIA PACKAGE MANDATE [ENGLISH]:\n- Format: Ingredients & Exact Measurements, Step-by-Step Instructions, Benefits, and Pro-Tips.\n- YouTube Shorts Title: High-CTR, curiosity-driven (e.g. "Overripe Avocado Hack You Need to Try #Shorts")\n- Voiceover: 100% Conversational US English sync with scenes.`
+        : `## PANDUAN RESEP & PAKET MEDIA SOSIAL [INDONESIA]:\n- Format: Bahan-bahan & Takaran, Langkah Pembuatan Runtut, Khasiat, dan Tips.\n- Judul YouTube Shorts: High-CTR (misal: "Ngidam Manis Jam 10 Malam? Resep Puding Bebas Spike #Shorts")\n- Voiceover: 100% Bahasa Indonesia kasual relatable.`;
+
+      const prompt = `// SYSTEM DIRECTIVE INJECTED TO GEMINI AI:
+Target Language : ${lang === 'en-US' ? 'ENGLISH (US)' : 'INDONESIAN (Lokal)'}
+TTS Engine      : MiniMax VO Engine (Persona: ${persona}, Speed: ${speed}x, Volume: ${volume}x)
+
+## GAYA BAHASA & TARGET DEMOGRAFI AUDIENS (CENTRALIZED):
+${toneText}
+
+${recipeMandate}`;
+
+      document.getElementById('promptDirectivePreview').innerText = prompt;
+    }
+
+    function generateSimulatedAngles() {
+      const lang = document.getElementById('selectLanguage').value;
+      const tbody = document.getElementById('anglesTableBody');
+      tbody.innerHTML = '';
+
+      const angles = lang === 'en-US' ? [
+        {
+          title: "The 2-Minute Overripe Fix",
+          hook: "Stop throwing away brown avocados! Turn them into chocolate velvet in 2 minutes.",
+          vo: "Blend chilled avocado with raw cocoa and honey. Creamy, nutrient-rich, zero guilt.",
+          cta: "Comment 'RECIPE' for full macros"
+        },
+        {
+          title: "Late-Night Sugar Cravings",
+          hook: "Craving dessert at 10 PM? Your blood sugar doesn't have to suffer.",
+          vo: "This 3-ingredient midnight mousse takes less than 5 minutes to whip up.",
+          cta: "Save this for tonight"
+        },
+        {
+          title: "The 30g Protein Breakfast Bowl",
+          hook: "Tired of eggs? This thick chocolate whip packs 30g of plant-based fuel.",
+          vo: "Pour over your morning chia bowl for all-day steady energy without afternoon crashes.",
+          cta: "Share with your gym buddy"
+        }
+      ] : [
+        {
+          title: "Trik Alpukat Kematangan 2 Menit",
+          hook: "Jangan buang alpukat kelewat matang! Dalam 2 menit jadi dessert cokelat mewah.",
+          vo: "Blender bareng bubuk kakao dan madu murni. Lembut banget, tinggi lemak sehat.",
+          cta: "Komen 'RESEP' di bawah ya"
+        },
+        {
+          title: "Solusi Ngidam Manis Jam 10 Malam",
+          hook: "Jam segini pengen yang manis-manis tapi takut timbangan melonjak?",
+          vo: "Cuma butuh 3 bahan dapur sederhana, rasanya seenak mousse kafe bintang lima.",
+          cta: "Simpan video ini buat malam nanti"
+        },
+        {
+          title: "Sarapan Padat Energi Seharian",
+          hook: "Bosan sarapan telur? Cobain racikan alpukat cokelat yang bikin kenyang 6 jam.",
+          vo: "Campurkan ke toples chia seed kamu untuk energi stabil tanpa rasa kantuk siang.",
+          cta: "Bagikan ke teman pejuang dietmu"
+        }
+      ];
+
+      angles.forEach(a => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><b>${a.title}</b></td>
+          <td><span style="color: #60a5fa;">"${a.hook}"</span></td>
+          <td style="color: var(--text-secondary);">${a.vo}</td>
+          <td><span class="tag ${lang === 'en-US' ? 'en' : 'id'}">${a.cta}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Initialize
+    onLanguageChanged();
+  </script>
+</body>
+</html>

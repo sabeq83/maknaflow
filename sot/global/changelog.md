@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.89 — Upgrade Multiplier Labs Bilingual & Ekosistem Modul Terpusat (24/10/2026)
+- Upgrade Multiplier Labs mendukung konten US English penuh
+- Modul Demografi Terpusat lib/demographic-constants.js untuk seluruh form
+- Format Resep dan YouTube Shorts High-CTR bilingual di lib/content-format-constants.js
+- Katalog Visual Styles, Audio-Video Sync, Niche KB, dan Compliance terpusat
+
 ## V2.32.88 — Fix ReferenceError lang in generateMinimaxVO (24/10/2026)
 - Fix undefined lang variable in MiniMax TTS engine
 - Explicitly define isEn and targetLanguage in generateMinimaxVO

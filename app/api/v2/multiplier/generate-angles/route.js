@@ -41,7 +41,9 @@ export const POST = withTenantContext(async (req, context, user) => {
       mode,
       niche_kb_name,
       angle_count,
-      custom_theme
+      custom_theme,
+      target_language,
+      targetLanguage
     } = body;
 
     const angles = await generateDynamicMultiplierAngles({
@@ -51,6 +53,7 @@ export const POST = withTenantContext(async (req, context, user) => {
       nicheKbName: niche_kb_name || null,
       angleCount: angle_count || 5,
       customTheme: custom_theme || '',
+      targetLanguage: target_language || targetLanguage || 'id-ID',
       tenantId
     });
 
