@@ -101,3 +101,39 @@ test('parseRecipePlannerSafeJson handles unescaped quotes in planner engine', ()
   assert.equal(parsed.recipe_rows.length, 1);
   assert.ok(parsed.recipe_rows[0].title.includes('Avocado Toast'));
 });
+
+test('safeParseRecipeJson recovers from trailing commas and extraneous noise after root object (error 9788 / 10018 / 10118)', () => {
+  // Simulates AI completing a full JSON document (~10k chars), but ending with trailing comma/commentary
+  const trailingNoise = `\`\`\`json
+  {
+    "recipe": {
+      "title": "Pan-Seared Salmon with Asparagus",
+      "servings": 1,
+      "prep_minutes": 2,
+      "cook_minutes": 4,
+      "ingredients": [{ "name": "Salmon", "amount": "150", "unit": "g" }],
+      "steps": [{ "index": 1, "instruction": "Panaskan wajan dan masak salmon." }],
+      "tips": []
+    },
+    "scenes": [{
+      "index": 1, "scene_function": "hook", "duration_seconds": 4,
+      "visual_action": "Salmon sizzling on marble pan",
+      "on_screen_text": "Resep Salmon Cepat",
+      "voice_over": "Mau makan enak tapi sehat?",
+      "sfx_prompt": "[SFX: Sizzle]",
+      "t2i_prompt": "(VERTICAL 9:16) [LAYER 1: OPTICS] (Angle: Top-down 45-degree)",
+      "i2v_prompt": "(VERTICAL 9:16) 0.0s-4.0s: Action",
+      "recipe_step_indices": [1], "product_ids": []
+    }],
+    "video_dna": { "visual_style": "photorealistic_culinary" },
+    "social_media_package": { "cta": "Simpan resep!", "hashtags": ["#Salmon"] }
+  }
+  \`\`\`
+  ,, Catatan tambahan: Resep ini cocok untuk {diabetic-friendly}, selamat mencoba!`;
+
+  const parsed = safeParseRecipeJson(trailingNoise);
+  assert.equal(parsed.recipe.title, 'Pan-Seared Salmon with Asparagus');
+  assert.equal(parsed.scenes.length, 1);
+  assert.equal(parsed.social_media_package.cta, 'Simpan resep!');
+});
+

@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.83 — Fix Recipe AI Parser Unexpected Comma Noise (24/10/2026)
+- Implement extractBalancedJson and error-position slicing recovery in safeParseRecipeJson
+- Eliminate unexpected comma parser crash on trailing noise and commentary
+- Add automated unit tests for trailing noise recovery
+
 ## V2.32.82 — Fix JSON parser glitch in Recipe OPC Pillar Generator (24/10/2026)
 - Implement safeParseRecipeJson with jsonrepair multi-tier fallback
 - Migrate recipe creative generation to generateContentFlexible with key pool
