@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup — Dual Visual Mode (Pure T2V vs Hybrid Lock) Recipe Campaigns</title>
+  <style>
+    :root {
+      --canvas: #080c14;
+      --surface: #101827;
+      --surface-raised: #162235;
+      --surface-interactive: #1c2a40;
+      --surface-hover: #22334b;
+      --input-bg: #0c1422;
+      --text-primary: #f4f7fb;
+      --text-secondary: #b6c2d2;
+      --text-muted: #8290a5;
+      --border-subtle: #26354a;
+      --border-strong: #3c506b;
+      --action-primary: #2dd4bf;
+      --action-primary-hover: #5eead4;
+      --on-action-primary: #042f2e;
+      --status-info: #60a5fa;
+      --status-info-soft: rgba(96, 165, 250, 0.14);
+      --status-success: #4ade80;
+      --status-success-soft: rgba(74, 222, 128, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #fb7185;
+      --status-danger-soft: rgba(251, 113, 133, 0.14);
+      --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+
+    [data-theme="light"] {
+      --canvas: #f8fafc;
+      --surface: #ffffff;
+      --surface-raised: #f1f5f9;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border-subtle: #cbd5e1;
+      --border-strong: #94a3b8;
+      --action-primary: #0d9488;
+      --action-primary-hover: #14b8a6;
+      --on-action-primary: #ffffff;
+      --status-info: #2563eb;
+      --status-info-soft: rgba(37, 99, 235, 0.1);
+      --status-success: #16a34a;
+      --status-success-soft: rgba(22, 163, 74, 0.1);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.1);
+      --status-danger: #e11d48;
+      --status-danger-soft: rgba(225, 29, 72, 0.1);
+      --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-sans); }
+    body { background: var(--canvas); color: var(--text-primary); padding: 32px 20px; min-height: 100vh; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    
+    .header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-subtle);
+    }
+    .header h1 { font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+    .badge-tag { font-size: 0.75rem; padding: 4px 10px; border-radius: 999px; font-weight: 700; background: var(--status-info-soft); color: var(--status-info); border: 1px solid var(--status-info); }
+    
+    .theme-toggle {
+      background: var(--surface-interactive); border: 1px solid var(--border-subtle);
+      color: var(--text-primary); padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media (max-width: 860px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--surface); border: 1px solid var(--border-subtle);
+      border-radius: 14px; padding: 24px; box-shadow: var(--shadow-card); margin-bottom: 24px;
+    }
+    .card-title {
+      font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+    }
+
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+    .form-hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+    
+    select, input {
+      width: 100%; padding: 10px 14px; background: var(--input-bg);
+      border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary);
+      font-size: 0.9rem; outline: none; transition: border-color 0.2s;
+    }
+    select:focus, input:focus { border-color: var(--action-primary); }
+
+    /* Visual Mode Option Selector */
+    .mode-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+    .mode-card {
+      border: 2px solid var(--border-subtle); background: var(--surface-raised);
+      border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.2s; position: relative;
+    }
+    .mode-card.active {
+      border-color: var(--action-primary); background: var(--surface-interactive);
+    }
+    .mode-card-title { font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+    .mode-card-desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; }
+    .mode-card-badge {
+      display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-top: 8px;
+    }
+    .badge-speed { background: var(--status-success-soft); color: var(--status-success); }
+    .badge-quality { background: var(--status-info-soft); color: var(--status-info); }
+
+    /* Pipeline Flow */
+    .pipeline-steps {
+      display: flex; align-items: center; justify-content: space-between;
+      margin: 20px 0; padding: 16px; background: var(--surface-raised); border-radius: 10px; border: 1px solid var(--border-subtle);
+    }
+    .pipe-step {
+      display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; flex: 1;
+    }
+    .step-icon {
+      width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; background: var(--surface-interactive); border: 1px solid var(--border-subtle);
+    }
+    .pipe-step.active .step-icon {
+      background: var(--action-primary); color: var(--on-action-primary); border-color: var(--action-primary);
+    }
+    .step-title { font-size: 0.8rem; font-weight: 700; }
+    .step-sub { font-size: 0.7rem; color: var(--text-muted); }
+    .pipe-arrow { color: var(--text-muted); font-size: 1.2rem; }
+
+    /* Code & Output Box */
+    .code-box {
+      background: var(--input-bg); border: 1px solid var(--border-subtle);
+      border-radius: 10px; padding: 16px; font-family: var(--font-mono); font-size: 0.8rem;
+      color: var(--text-secondary); line-height: 1.5; max-height: 340px; overflow-y: auto; white-space: pre-wrap; word-break: break-word;
+    }
+    .tab-header {
+      display: flex; gap: 8px; margin-bottom: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;
+    }
+    .tab-btn {
+      background: transparent; border: none; padding: 6px 12px; border-radius: 6px;
+      font-size: 0.82rem; font-weight: 600; color: var(--text-muted); cursor: pointer;
+    }
+    .tab-btn.active {
+      background: var(--surface-interactive); color: var(--action-primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>🍳 Dual Visual Mode (Pure T2V vs Hybrid Lock) <span class="badge-tag">Simulasi Recipe Campaigns</span></h1>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Uji interaktif arsitektur perbandingan Text-to-Video murni vs Double-Pass Start Frame</p>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()">🌓 Ganti Tema</button>
+    </div>
+
+    <div class="grid-2">
+      <!-- Left: Configuration Form -->
+      <div class="card">
+        <h2 class="card-title">⚙️ Konfigurasi Kampanye Resep</h2>
+
+        <div class="form-group">
+          <label class="form-label">Nama Resep Target</label>
+          <input type="text" id="recipeTitle" value="Gourmet Chimichurri Steak & Quinoa Power Bowl" oninput="updateSimulation()">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Visual Mode (Metode Generasi)</label>
+          <div class="mode-cards">
+            <div class="mode-card active" id="modeCardPureT2v" onclick="selectMode('pure_t2v')">
+              <div class="mode-card-title">🚀 Pure T2V</div>
+              <div class="mode-card-desc">1-Pass Text-to-Video langsung ke engine video terpilih tanpa Start Frame.</div>
+              <span class="mode-card-badge badge-speed">⚡ Hemat 50% Antrean GPU</span>
+            </div>
+            <div class="mode-card" id="modeCardHybrid" onclick="selectMode('hybrid_lock')">
+              <div class="mode-card-title">🎯 Hybrid Lock</div>
+              <div class="mode-card-desc">Double-Pass: Start Frame T2I (Nano Banana) ➜ Motion I2V.</div>
+              <span class="mode-card-badge badge-quality">💎 Presisi Bahan & Geometri</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 20px;">
+          <label class="form-label">Model Video Dinamis (Agnostik Engine)</label>
+          <select id="videoModel" onchange="onModelChange()">
+            <option value="omni_flash">⚡ Google Veo Omni Flash (Support 4s, 6s, 8s, 10s)</option>
+            <option value="veo_31_lite">Google Veo 3.1 Lite (Standar Cepat 8s)</option>
+            <option value="veo_31_fast">Google Veo 3.1 Fast (8s)</option>
+            <option value="veo_31_quality">Google Veo 3.1 Quality (Ultra Fidelity 8s)</option>
+          </select>
+          <div class="form-hint" id="modelHint">⚡ Mendukung fleksibilitas durasi dari 4 detik hingga 10 detik penuh.</div>
+        </div>
+
+        <div class="grid-2" style="gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Durasi per Klip</label>
+            <select id="clipDuration" onchange="updateSimulation()">
+              <option value="4">4 Detik (Snappy)</option>
+              <option value="6">6 Detik (Medium)</option>
+              <option value="8" selected>8 Detik (Standar)</option>
+              <option value="10">10 Detik (Omni Flash Only)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Batasan Kata per Klip</label>
+            <input type="text" id="wordsPerClip" value="17-19 kata" readonly style="opacity: 0.85;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Pipeline Execution & Prompt Output -->
+      <div>
+        <div class="card">
+          <h2 class="card-title">📡 Alur Eksekusi Worker (Node 2 G-Labs)</h2>
+          
+          <div class="pipeline-steps" id="pipelineFlow">
+            <!-- Dynamic flow rendered by JS -->
+          </div>
+
+          <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; padding: 12px; background: var(--surface-raised); border-radius: 8px;">
+            <div id="pipelineSummary">...</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="tab-header">
+            <button class="tab-btn active" id="tabOutputPrompt" onclick="setTab('prompt')">📝 Prompt Output AI</button>
+            <button class="tab-btn" id="tabSchema" onclick="setTab('schema')">📦 JSON Payload Package</button>
+          </div>
+
+          <div class="code-box" id="codeDisplay">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentMode = 'pure_t2v';
+    let currentTab = 'prompt';
+
+    const WORDS_MAP = {
+      4: '8-9 kata',
+      6: '12-14 kata',
+      8: '17-19 kata',
+      10: '22-24 kata'
+    };
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const cur = html.getAttribute('data-theme');
+      html.setAttribute('data-theme', cur === 'light' ? 'dark' : 'light');
+    }
+
+    function selectMode(mode) {
+      currentMode = mode;
+      document.getElementById('modeCardPureT2v').classList.toggle('active', mode === 'pure_t2v');
+      document.getElementById('modeCardHybrid').classList.toggle('active', mode === 'hybrid_lock');
+      updateSimulation();
+    }
+
+    function onModelChange() {
+      const mod = document.getElementById('videoModel').value;
+      const durSelect = document.getElementById('clipDuration');
+      const hint = document.getElementById('modelHint');
+      
+      if (mod === 'omni_flash') {
+        hint.textContent = '⚡ Mendukung fleksibilitas durasi dari 4 detik hingga 10 detik penuh.';
+      } else {
+        hint.textContent = 'ℹ️ Dioptimalkan untuk durasi standar 8 detik (Veo 3.1).';
+        if (durSelect.value === '10') {
+          durSelect.value = '8';
+        }
+      }
+      updateSimulation();
+    }
+
+    function setTab(tab) {
+      currentTab = tab;
+      document.getElementById('tabOutputPrompt').classList.toggle('active', tab === 'prompt');
+      document.getElementById('tabSchema').classList.toggle('active', tab === 'schema');
+      updateSimulation();
+    }
+
+    function updateSimulation() {
+      const title = document.getElementById('recipeTitle').value || 'Gourmet Culinary Bowl';
+      const duration = document.getElementById('clipDuration').value;
+      const words = WORDS_MAP[duration] || '17-19 kata';
+      document.getElementById('wordsPerClip').value = words;
+      const model = document.getElementById('videoModel').value;
+
+      // Update Pipeline Flow UI
+      const pipeFlow = document.getElementById('pipelineFlow');
+      const pipeSummary = document.getElementById('pipelineSummary');
+
+      if (currentMode === 'pure_t2v') {
+        pipeFlow.innerHTML = `
+          <div class="pipe-step active">
+            <div class="step-icon">🤖</div>
+            <div class="step-title">Single-Pass Gemini</div>
+            <div class="step-sub">1x Prompt T2V</div>
+          </div>
+          <div class="pipe-arrow">➜</div>
+          <div class="pipe-step active">
+            <div class="step-icon">🎬</div>
+            <div class="step-title">${model} (T2V)</div>
+            <div class="step-sub">Direct Video Render</div>
+          </div>
+          <div class="pipe-arrow">➜</div>
+          <div class="pipe-step active">
+            <div class="step-icon">📦</div>
+            <div class="step-title">FFmpeg Final</div>
+            <div class="step-sub">Sync Audio & Video</div>
+          </div>
+        `;
+        pipeSummary.innerHTML = `
+          🚀 <strong>Mode Pure T2V (1-Pass) Aktif:</strong><br>
+          Adegan kuliner langsung di-render ke model video <code>${model}</code> (${duration}s). Menghilangkan kebutuhan antrean T2I image, menghemat 50% beban render Node 2 Worker.
+        `;
+      } else {
+        pipeFlow.innerHTML = `
+          <div class="pipe-step active">
+            <div class="step-icon">🤖</div>
+            <div class="step-title">Double-Pass Gemini</div>
+            <div class="step-sub">T2I + I2V Prompts</div>
+          </div>
+          <div class="pipe-arrow">➜</div>
+          <div class="pipe-step active">
+            <div class="step-icon">🖼️</div>
+            <div class="step-title">Nano Banana Pro</div>
+            <div class="step-sub">Start Frame (T2I)</div>
+          </div>
+          <div class="pipe-arrow">➜</div>
+          <div class="pipe-step active">
+            <div class="step-icon">🎥</div>
+            <div class="step-title">${model} (I2V)</div>
+            <div class="step-sub">Motion Interpolation</div>
+          </div>
+        `;
+        pipeSummary.innerHTML = `
+          💎 <strong>Mode Hybrid Lock (Double-Pass) Aktif:</strong><br>
+          Start Frame dirender terlebih dahulu dengan Nano Banana Pro untuk mengunci geometri peralatan dan bahan masakan, lalu digerakkan oleh <code>${model}</code> via mode Image-to-Video.
+        `;
+      }
+
+      // Code box output
+      const codeBox = document.getElementById('codeDisplay');
+      if (currentTab === 'prompt') {
+        if (currentMode === 'pure_t2v') {
+          codeBox.textContent = `// [Clip 1 - Pure T2V Prompt]
+(VERTICAL 9:16) --ar 9:16 --no landscape [LAYER 0: VISUAL TRUTH & ANCHORS] (Anchor: POV close-up culinary framing focusing strictly on female forearms in rolled charcoal linen sleeves), (Food Truth: Fresh raw steak cubes glistening with coarse sea salt and cracked pepper), (Cookware Truth: Heavy polished cast-iron skillet on Carrara marble). [LAYER 1: SCENE & OPTICS] (Angle: Top-down 45-degree tabletop macro / tight overhead culinary framing), (Shot on Phase One XF IQ4 (150MP), 100mm Macro Food Photography lens, soft appetizing shallow depth of field), (Environment: Pristine polished white Carrara marble island countertop), (Lighting: Soft directional morning window daylight catching moisture droplets). [LAYER 2: KINETIC ACTION & MICRO-PACING] 0.0s-2.0s: (Top-down 45-degree camera focusing smoothly as olive oil is poured into hot pan), 2.0s-${duration}.0s: (Steak cube dropped into pan with immediate energetic sizzle and rising aromatic steam). [LAYER 3: SFX] [SFX: Loud crisp sizzle, popping olive oil].`;
+        } else {
+          codeBox.textContent = `// [Clip 1 - Hybrid Lock T2I (Start Frame)]
+(VERTICAL 9:16) --ar 9:16 --no landscape [LAYER 1: OPTICS] (Angle: Top-down 45-degree tabletop macro / tight overhead culinary framing), (Shot on Phase One XF IQ4 (150MP), 100mm Macro Food Photography lens, soft appetizing shallow depth of field). [LAYER 2: SUBJECT, COOKWARE & VISUAL TRUTH] (Anchor: POV close-up culinary framing focusing strictly on female forearms in rolled charcoal linen sleeves), (Food Truth: Fresh raw steak cubes seasoned with sea salt), (Cookware Truth: Heavy cast-iron pan on white marble countertop). [LAYER 3: SCENE & LIGHT] (Environment: White Carrara marble countertop), (Lighting: Soft morning window daylight). [LAYER 4: KINETIC IMPLICATION] (Frozen Action: Tongs hovering 2cm above the hot pan surface).
+
+// [Clip 1 - Hybrid Lock I2V (Motion Prompt)]
+(VERTICAL 9:16) --ar 9:16 --no landscape [LAYER 1: INPUT & TRUTH LOCK] (Start Frame Reference: CLIP_1_START_FRAME.png), (Consistency: MAX). [LAYER 2: MICRO-PACING & ACTION] 0.0s-2.0s: (Top-down 45-degree camera focusing smoothly as tongs lower steak into hot pan), 2.0s-${duration}.0s: (Instant vigorous sizzle, micro oil bubbles popping with rising steam). [LAYER 3: SFX] [SFX: Energetic pan sizzle].`;
+        }
+      } else {
+        const schema = {
+          content_kind: "recipe_campaign",
+          visual_mode: currentMode,
+          video_model: model,
+          clip_duration: Number(duration),
+          words_per_clip: words,
+          scenes: [
+            {
+              clip: 1,
+              scene_function: "hook",
+              duration_seconds: Number(duration),
+              t2v_prompt: currentMode === 'pure_t2v' ? "(VERTICAL 9:16) [LAYER 0: TRUTH] ... [LAYER 1: OPTICS] ... [LAYER 2: KINETICS] ..." : "",
+              t2i_prompt: currentMode === 'hybrid_lock' ? "(VERTICAL 9:16) [LAYER 1: OPTICS] ... [LAYER 2: FOOD TRUTH] ..." : "",
+              i2v_prompt: currentMode === 'hybrid_lock' ? "(VERTICAL 9:16) [LAYER 1: START FRAME] ... [LAYER 2: MICRO-PACING] ..." : ""
+            }
+          ],
+          t2v_prompts: currentMode === 'pure_t2v' ? [{ clip: 1, prompt: "..." }] : [],
+          t2i_prompts: currentMode === 'hybrid_lock' ? [{ clip: 1, prompt: "..." }] : [],
+          i2v_prompts: currentMode === 'hybrid_lock' ? [{ clip: 1, prompt: "..." }] : []
+        };
+        codeBox.textContent = JSON.stringify(schema, null, 2);
+      }
+    }
+
+    // Initialize
+    updateSimulation();
+  </script>
+</body>
+</html>

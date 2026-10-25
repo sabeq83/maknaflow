@@ -1256,7 +1256,7 @@ export default function PillarCampaignDetailPage() {
     const t2i = parsed.t2i_prompts || [];
     const i2v = parsed.i2v_prompts || [];
     const clipsList = Array.from({ length: campaign?.target_clips_count || 4 }, (_, i) => i + 1);
-    const isHybrid = campaign?.visual_mode === 'hybrid_lock';
+    const isHybrid = campaign?.visual_mode === 'hybrid_lock' || ((t2i.length > 0 || i2v.length > 0) && t2v.length === 0);
 
     let t2iImagePaths = [];
     try {

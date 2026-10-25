@@ -2306,8 +2306,8 @@ const canonicalConfigurationForm0 = (<form onSubmit={handleSubmit} style={{ disp
                       <div className="form-group" style={{ gridColumn: 'span 2' }}>
                         <label className="form-label">Visual Mode</label>
                         <select className="form-input" value={visualMode} onChange={e => setVisualMode(e.target.value)}>
-                          <option value="hybrid_lock">Double-Pass Pixel Lock (Nano Banana Pro T2I ➜ Veo 3.1 I2V)</option>
-                          <option value="pure_t2v">Pure Text-To-Video (T2V Langsung)</option>
+                          <option value="hybrid_lock">Double-Pass Pixel Lock (T2I ➜ I2V) — Presisi Tinggi (Rekomendasi Resep & Produk)</option>
+                          <option value="pure_t2v">Pure Text-To-Video (T2V Langsung) — Cepat & Hemat Antrean (1-Pass)</option>
                         </select>
                       </div>
                     </div>

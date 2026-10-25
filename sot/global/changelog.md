@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.91 — Support Dual Visual Mode Pure T2V & Hybrid Lock di Recipe Campaigns (25/10/2026)
+- Support Dual Visual Mode (Pure T2V & Hybrid Lock) pada Recipe Campaigns
+- Menghilangkan hardcoded lock hybrid agar prompt T2V resep dieksekusi agnostik model (Omni Flash, Veo 3.1)
+- Harmonisasi tab prompt di halaman detail kampanye dan form dropdown visual mode
+- Menambahkan interactive simulation mockup di public/mockup_recipe_dual_visual_mode.html
+
 ## V2.32.90 — Fix Detail Kampanye OPC & Fallback Hybrid Glabs (25/10/2026)
 - Pulihkan konstanta label visual overrides di lib/campaign-config-labels.js
 - Tambahkan error boundary card & tombol coba lagi di halaman detail pillar campaign

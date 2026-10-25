@@ -1711,8 +1711,8 @@ const canonicalConfigurationForm1 = (<form onSubmit={handleSubmit} style={{ disp
                                 <div className="form-group" style={{ flex: 1, minWidth: '200px' }}>
                                   <label className="form-label">Visual Mode</label>
                                   <select className="form-select" value={visualMode} onChange={e => setVisualMode(e.target.value)}>
-                                    <option value="hybrid_lock">hybrid_lock (Fokus Visual & Teks)</option>
-                                    <option value="full_dynamic">full_dynamic</option>
+                                    <option value="hybrid_lock">Double-Pass Pixel Lock (T2I ➜ I2V) — Presisi Tinggi (Rekomendasi Resep & Produk)</option>
+                                    <option value="pure_t2v">Pure Text-To-Video (T2V Langsung) — Cepat & Hemat Antrean (1-Pass)</option>
                                   </select>
                                 </div>
                               </div>
