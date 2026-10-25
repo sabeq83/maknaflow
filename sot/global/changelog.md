@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.90 — Fix Detail Kampanye OPC & Fallback Hybrid Glabs (25/10/2026)
+- Pulihkan konstanta label visual overrides di lib/campaign-config-labels.js
+- Tambahkan error boundary card & tombol coba lagi di halaman detail pillar campaign
+- Tambahkan deteksi otomatis hybrid lock mode untuk resep/T2I prompts di scheduler processors
+- Tambahkan unit test komprehensif untuk label konfigurasi kampanye
+
 ## V2.32.89 — Upgrade Multiplier Labs Bilingual & Ekosistem Modul Terpusat (24/10/2026)
 - Upgrade Multiplier Labs mendukung konten US English penuh
 - Modul Demografi Terpusat lib/demographic-constants.js untuk seluruh form

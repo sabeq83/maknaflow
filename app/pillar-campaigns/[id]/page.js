@@ -108,6 +108,7 @@ export default function PillarCampaignDetailPage() {
   const [items, setItems] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [triggering, setTriggering] = useState({});
   const [toast, setToast] = useState(null);
   const [copySuccess, setCopySuccess] = useState({});
@@ -214,8 +215,12 @@ export default function PillarCampaignDetailPage() {
 
   async function fetchDetail() {
     try {
+      setLoadError(null);
       const res = await fetch(`/api/v2/pillar-campaigns/${id}`);
-      if (!res.ok) throw new Error('Gagal memuat detail kampanye');
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || `Gagal memuat detail kampanye (Status ${res.status})`);
+      }
       const data = await res.json();
       setCampaign(data.campaign);
       try {
@@ -243,6 +248,7 @@ export default function PillarCampaignDetailPage() {
       });
     } catch (err) {
       console.error(err);
+      setLoadError(err.message || 'Gagal memuat detail kampanye');
     } finally {
       setLoading(false);
     }
@@ -3019,12 +3025,45 @@ export default function PillarCampaignDetailPage() {
     );
   };
 
-  if (loading || !campaign) {
+  if (loading) {
     return (
       <div className="app-layout">
         <Sidebar />
         <main className="main-content" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
           <p>Memuat detail kampanye...</p>
+        </main>
+      </div>
+    );
+  }
+
+  if (loadError || !campaign) {
+    return (
+      <div className="app-layout">
+        <Sidebar />
+        <main className="main-content" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh', padding: '24px' }}>
+          <div className="card" style={{ maxWidth: '480px', width: '100%', padding: '32px', textAlign: 'center', background: 'var(--surface-raised)', border: '1px solid var(--border-color)', borderRadius: '12px', boxShadow: 'var(--shadow-card)' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '16px' }}>⚠️</div>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '8px', color: 'var(--text-primary)' }}>Gagal Memuat Detail Kampanye</h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '24px', lineHeight: 1.5 }}>
+              {loadError || 'Data kampanye tidak ditemukan atau terjadi kesalahan saat memuat.'}
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button 
+                onClick={() => { setLoading(true); fetchDetail(); }} 
+                className="btn btn-primary"
+                style={{ padding: '8px 20px', fontSize: '0.88rem' }}
+              >
+                🔄 Coba Lagi
+              </button>
+              <Link 
+                href="/pillar-campaigns" 
+                className="btn btn-secondary"
+                style={{ padding: '8px 20px', fontSize: '0.88rem', textDecoration: 'none' }}
+              >
+                ← Kembali ke Dashboard
+              </Link>
+            </div>
+          </div>
         </main>
       </div>
     );
