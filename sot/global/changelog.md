@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.93 — Standarisasi Dynamic Micro-KB untuk Brand Editorial, Product Campaign, dan Multiplier Lab (26/10/2026)
+- Pembuatan 3 Micro-KB mandiri (BRAND_EDITORIAL_GUIDE, PRODUCT_CAMPAIGN_GUIDE, MULTIPLIER_BRIDGING_GUIDE)
+- Arsitektur Dynamic Story Curve adaptif N-klip (1 hingga 12 klip)
+- Bypass menyeluruh cache 91K Master KB pada Brand Editorial, Product Campaign, Multiplier Lab, dan RE
+
 ## V2.32.92 — Standarisasi KB Pola Multiplier dan Recipe pada Pillar Campaign (26/10/2026)
 - Daftarkan RECIPE_CAMPAIGN_CREATIVE dengan useKB false untuk bypass cache Master KB 91k token
 - Terapkan Micro-Snippet KB 1500 chars pada OPC dengan Visual Identity
