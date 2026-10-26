@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.92 — Standarisasi KB Pola Multiplier dan Recipe pada Pillar Campaign (26/10/2026)
+- Daftarkan RECIPE_CAMPAIGN_CREATIVE dengan useKB false untuk bypass cache Master KB 91k token
+- Terapkan Micro-Snippet KB 1500 chars pada OPC dengan Visual Identity
+- Perluas deteksi isRecipeContent di scheduler processors dan ingest planner
+- Simpan content_kind recipe_campaign secara konsisten pada createPillarCampaignItem
+
 ## V2.32.91 — Support Dual Visual Mode Pure T2V & Hybrid Lock di Recipe Campaigns (25/10/2026)
 - Support Dual Visual Mode (Pure T2V & Hybrid Lock) pada Recipe Campaigns
 - Menghilangkan hardcoded lock hybrid agar prompt T2V resep dieksekusi agnostik model (Omni Flash, Veo 3.1)
