@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.96 — Perbaikan AI Auto Enrich dan Ingestion Resep Campaign (27/10/2026)
+- Integrasi getGeminiModel Settings pada AI Auto Enrich
+- Dukungan Ingestion Resep dari Pillar Campaign Items dan Content Planner Rows
+- Pemolesan Resep Mempertahankan Bahan dan Langkah Asli
+
 ## V2.32.95 — Penyempurnaan Recipe Exporter Hub dan Status Ekspor (27/10/2026)
 - Penyematan Sidebar Navigasi Standar pada Recipe Exporter Hub
 - Live Data Ingestion dari Database via GET /api/recipes

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
-import { callGeminiWithRetry } from '@/lib/gemini';
+import { getGeminiModel } from '@/lib/gemini';
+import { withTenantContext } from '@/lib/auth';
 
-export async function POST(req) {
+export const POST = withTenantContext(async (req) => {
   try {
     const { title, currentIngredients, currentDirections } = await req.json();
 
@@ -10,35 +11,41 @@ export async function POST(req) {
     }
 
     const prompt = `Anda adalah Food Editor dan Culinary Expert profesional untuk aplikasi mobile resep Android.
-Tugas Anda adalah memperkaya dan menstandarisasi data resep masakan berikut menjadi standar tinggi:
+Tugas Anda adalah MEMOLES, MENSTANDARISASI, dan MENYEMPURNAKAN data resep masakan yang sudah ada berikut menjadi standar editorial tinggi:
 
 Judul Resep: ${title.trim()}
-Bahan Awal (jika ada): ${currentIngredients || '(Belum terstruktur)'}
-Langkah Awal (jika ada): ${currentDirections || '(Belum terstruktur)'}
+Bahan-Bahan yang Sudah Ada:
+${currentIngredients && currentIngredients.trim() ? currentIngredients.trim() : '(Belum ada bahan terstruktur)'}
 
-ATURAN PENGELOMPOKAN BAHAN (PENTING):
-- TIDAK SEMUA RESEP MEMILIKI SUB-KELOMPOK! Jangan memaksakan membuat sub-kelompok jika resep sederhana.
-- Jika masakan adalah olahan satu kesatuan tanpa saus/komponen terpisah, letakkan SELURUH bahan di dalam "base_ingredients" dan biarkan "ingredient_groups": [].
-- HANYA buat kelompok di "ingredient_groups" jika resep memang memiliki bagian terpisah alami, misalnya:
-  * Saus / Sambal: "For the sauce :" atau "For the dipping sauce :"
-  * Bumbu Marinasi: "For the marinade :"
-  * Salad Dressing: "For the dressing :"
-  * Adonan / Isian Kue: "For the dough :" atau "For the filling :"
-  * Kuah / Kaldu: "For the soup base :" atau "For the broth :"
-  * Topping / Garnish: "For the topping :" atau "For the garnish :" (hanya bila benar-benar ada)
+Langkah Memasak yang Sudah Ada:
+${currentDirections && currentDirections.trim() ? currentDirections.trim() : '(Belum ada langkah terstruktur)'}
 
-Hasilkan output JSON valid persis dengan struktur berikut tanpa teks pembuka/penutup lain:
+ATURAN PEMOLESAN & STANDARISASI EDITORIAL:
+1. PERTAHANKAN BAHAN ASLI: Jika sudah ada bahan-bahan di atas, pertahankan bahan dan takaran aslinya! Rapikan penulisan takaran (contoh: "1 tbsp", "900 g", dsb) tanpa mengurangi bahan penting.
+2. PERTAHANKAN LANGKAH ASLI: Jika sudah ada langkah-langkah di atas, pertahankan urutan instruksinya. Poles kalimatnya agar terstruktur, instruktif, dan enak dibaca di layar ponsel.
+3. BUATKAN "summary": 3-5 kalimat naratif sensory copywriting yang menggugah selera pembaca, mendeskripsikan aroma, tekstur/kerenyahan, profil rasa hidangan, serta tips penyajian atau keunggulan praktisnya.
+4. ATURAN PENGELOMPOKAN BAHAN (ADAPTIF):
+   - Jika masakan adalah olahan satu kesatuan tanpa saus/komponen terpisah, letakkan SELURUH bahan di dalam "base_ingredients" dan biarkan "ingredient_groups": [].
+   - HANYA buat kelompok di "ingredient_groups" jika resep memang memiliki bagian terpisah alami, misalnya:
+     * Saus / Sambal: "For the sauce :" atau "For the dipping sauce :"
+     * Bumbu Marinasi: "For the marinade :"
+     * Salad Dressing: "For the dressing :"
+     * Adonan / Isian Kue: "For the dough :" atau "For the filling :"
+     * Kuah / Kaldu: "For the soup base :" atau "For the broth :"
+     * Topping / Bumbu Tabur: "For the seasoning / topping :" (hanya bila benar-benar ada)
+5. BUATKAN "t2i_prompt_4_3": Prompt food photography rasio landscape 4:3 yang menampilkan sajian akhir hidangan secara menggoda, fotorealistik, eye-level 45-degree angle, rustic styling, natural appetizing lighting, shallow depth of field --ar 4:3 --stylize 250.
+
+Hasilkan output JSON valid persis dengan struktur berikut:
 {
-  "recipe_time": "Contoh: 10 mins prep | 25 mins cook",
-  "summary": "3-5 kalimat naratif sensory copywriting yang menggugah selera pembaca, mendeskripsikan aroma, kerenyahan, kelembutan rasa, dan keunggulan praktis hidangan ini.",
+  "recipe_time": "Contoh: 10 mins prep | 20 mins cook",
+  "summary": "3-5 kalimat sensory copywriting...",
   "base_ingredients": [
     "item 1...",
     "item 2..."
   ],
   "ingredient_groups": [
     // Kosongkan [] jika resep tidak memiliki komponen terpisah.
-    // Jika ada komponen terpisah (marinasi/saus/kuah/adonan/topping), format:
-    // { "name": "For the [nama komponen] :", "items": ["item A...", "item B..."] }
+    // Jika ada kelompok: { "name": "For the [nama komponen] :", "items": ["item A...", "item B..."] }
   ],
   "directions": [
     "Langkah 1 secara terperinci...",
@@ -47,11 +54,10 @@ Hasilkan output JSON valid persis dengan struktur berikut tanpa teks pembuka/pen
   "t2i_prompt_4_3": "Award-winning 4:3 food photography of [dish], eye-level 45-degree angle, rustic styling, natural appetizing lighting, shallow depth of field --ar 4:3 --stylize 250"
 }`;
 
-    const rawResponse = await callGeminiWithRetry({
-      prompt,
-      modelTask: 'RECIPE_CAMPAIGN_CREATIVE',
-      temperature: 0.4
-    });
+    // Otomatis membaca API Key dari tenant_settings / gemini_key_pool / .env
+    const model = await getGeminiModel();
+    const response = await model.generateContent(prompt);
+    const rawResponse = response.response.text();
 
     const cleanJson = String(rawResponse || '')
       .replace(/```json\n?|\n?```/g, '')
@@ -61,7 +67,6 @@ Hasilkan output JSON valid persis dengan struktur berikut tanpa teks pembuka/pen
     try {
       result = JSON.parse(cleanJson);
     } catch (e) {
-      // Fallback regex extraction jika ada formatting markdown
       const jsonMatch = cleanJson.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         result = JSON.parse(jsonMatch[0]);
@@ -82,6 +87,7 @@ Hasilkan output JSON valid persis dengan struktur berikut tanpa teks pembuka/pen
       }
     });
   } catch (err) {
+    console.error('[API /api/recipes/auto-enrich Error]:', err);
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
-}
+});

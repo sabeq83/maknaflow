@@ -88,10 +88,127 @@ export const GET = withTenantContext(async (req) => {
       return NextResponse.json({ success: true, data: mapped, source: 'labs' });
     }
 
-    // Source: Campaign (Content Planner with recipe_campaign focus)
-    let rows = [];
+    // Source: Campaign (Pillar Campaign Items & Content Planner Rows)
+    // 1. Ambil dari pillar_campaign_items (Pillar Campaign Pipeline yang telah diproduksi)
+    let pillarRows = [];
     try {
-      rows = await db.prepare(`
+      pillarRows = await db.prepare(`
+        SELECT 
+          pci.id,
+          pci.campaign_id,
+          pci.content_kind,
+          pci.row_creative_payload,
+          pci.result_json,
+          pci.t2i_start_frame_path,
+          pci.ffmpeg_output_path,
+          pci.drive_link,
+          pci.created_at,
+          pc.campaign_name,
+          pc.content_pillar
+        FROM pillar_campaign_items pci
+        LEFT JOIN pillar_campaigns pc ON pci.campaign_id = pc.id
+        WHERE (pci.content_kind = 'recipe_campaign' 
+               OR pci.result_json LIKE '%"recipe":%' 
+               OR pci.row_creative_payload LIKE '%recipe_idea%')
+        ORDER BY pci.id DESC
+        LIMIT 200
+      `).all();
+    } catch (e) {
+      console.warn('[API /api/recipes] Failed to query pillar_campaign_items:', e.message);
+      pillarRows = [];
+    }
+
+    const mappedPillar = (pillarRows || []).map(item => {
+      let result = {};
+      let payload = {};
+      try {
+        if (item.result_json) {
+          result = typeof item.result_json === 'string' ? JSON.parse(item.result_json) : item.result_json;
+        }
+      } catch (_) {}
+      try {
+        if (item.row_creative_payload) {
+          payload = typeof item.row_creative_payload === 'string' ? JSON.parse(item.row_creative_payload) : item.row_creative_payload;
+        }
+      } catch (_) {}
+
+      const recipeObj = result.recipe || {};
+      const idea = payload.recipe_idea || {};
+
+      const exports = exportMap.get(item.id) || exportMap.get(`pci_${item.id}`) || [];
+      const isExported = exports.length > 0;
+      const lastExport = isExported ? exports[0] : null;
+
+      // Ambil judul dari yt_title -> recipe.title -> recipe_idea.title -> payload.title
+      const title = result.yt_title || recipeObj.title || idea.recipe_title || idea.title || payload.title || 'Resep Kampanye Pilar';
+
+      const rawMarkdown = result.recipe_text_markdown || result.yt_desc || result.caption || '';
+      const parsed = parseRecipeDescriptionHtml(rawMarkdown);
+
+      // Ekstraksi Bahan Terstruktur
+      let baseIngredients = parsed.baseIngredients.length > 0 ? parsed.baseIngredients : [];
+      if (baseIngredients.length === 0 && Array.isArray(recipeObj.ingredients)) {
+        baseIngredients = recipeObj.ingredients.map(ing => {
+          if (typeof ing === 'string') return ing;
+          const amt = ing.amount ? `${ing.amount} ` : '';
+          const u = ing.unit ? `${ing.unit} ` : '';
+          return `${amt}${u}${ing.name}`.trim();
+        });
+      }
+      if (baseIngredients.length === 0 && Array.isArray(idea.ingredients)) {
+        baseIngredients = idea.ingredients.map(ing => {
+          if (typeof ing === 'string') return ing;
+          const amt = ing.amount ? `${ing.amount} ` : '';
+          const u = ing.unit ? `${ing.unit} ` : '';
+          return `${amt}${u}${ing.name}`.trim();
+        });
+      }
+
+      // Ekstraksi Langkah Terstruktur
+      let directions = parsed.directions.length > 0 ? parsed.directions : [];
+      if (directions.length === 0 && Array.isArray(recipeObj.steps)) {
+        directions = recipeObj.steps.map(s => (typeof s === 'string' ? s : s.instruction)).filter(Boolean);
+      }
+      if (directions.length === 0 && Array.isArray(idea.steps)) {
+        directions = idea.steps.map(s => (typeof s === 'string' ? s : s.instruction)).filter(Boolean);
+      }
+
+      const summaryText = parsed.summary || payload.hook || idea.hook || (result.recipe ? result.recipe.summary : '') || '';
+      const hasSummary = Boolean(summaryText && summaryText.trim().length > 0);
+
+      const videoUrl = item.ffmpeg_output_path || item.drive_link || '';
+      const hasVideo = Boolean(videoUrl);
+      const videoMutedReady = Boolean(videoUrl && (videoUrl.includes('pub-r2') || videoUrl.includes('_muted.mp4') || videoUrl.includes('.mp4')));
+
+      return {
+        id: item.id,
+        sourceType: 'campaign',
+        source: `Recipe Campaign (${item.campaign_name || item.content_pillar || 'Pillar'} #${item.id})`,
+        title,
+        time: recipeObj.cook_minutes ? `${recipeObj.cook_minutes} mins` : (idea.cook_minutes ? `${idea.cook_minutes} mins` : '20 mins'),
+        category: payload.category || idea.category || 'Healthy Food',
+        image: item.t2i_start_frame_path || '',
+        summary: summaryText,
+        baseIng: baseIngredients.join('\n'),
+        groups: parsed.ingredientGroups || [],
+        directions: directions.join('\n'),
+        rawMarkdown,
+        hasSummary,
+        hasVideo,
+        videoMutedReady,
+        videoR2Url: videoUrl,
+        isExported,
+        lastExportTarget: lastExport ? lastExport.target_app : null,
+        lastExportedAt: lastExport ? lastExport.exported_at : null,
+        exportCount: exports.length,
+        created_at: item.created_at
+      };
+    });
+
+    // 2. Ambil dari content_planner_rows (Perencanaan awal)
+    let plannerRows = [];
+    try {
+      plannerRows = await db.prepare(`
         SELECT cpr.*, cp.name AS planner_name, cp.category AS planner_category, cp.target_audience
         FROM content_planner_rows cpr
         JOIN content_planners cp ON cpr.planner_id = cp.id
@@ -102,17 +219,17 @@ export const GET = withTenantContext(async (req) => {
     } catch (e) {
       console.warn('[API /api/recipes] Failed to query content_planner_rows with JOIN:', e.message);
       try {
-        rows = await db.prepare(`
+        plannerRows = await db.prepare(`
           SELECT * FROM content_planner_rows 
           WHERE recipe_idea_json IS NOT NULL 
           ORDER BY created_at DESC
         `).all();
       } catch (_) {
-        rows = [];
+        plannerRows = [];
       }
     }
 
-    const mapped = rows.map(row => {
+    const mappedPlanner = (plannerRows || []).map(row => {
       let idea = {};
       try {
         if (row.recipe_idea_json) {
@@ -125,20 +242,33 @@ export const GET = withTenantContext(async (req) => {
       const lastExport = isExported ? exports[0] : null;
 
       const title = idea.recipe_title || idea.title || row.title || 'Resep Kampanye Kuliner';
-      const rawText = row.full_recipe_text || idea.recipe_text || '';
+      const rawText = row.body || row.full_recipe_text || idea.recipe_text || '';
       const parsed = parseRecipeDescriptionHtml(rawText);
 
       // Gunakan data dari parsed HTML atau fallback ke idea JSON
       const summaryText = parsed.summary || idea.summary || idea.hook || '';
-      const baseIngredients = parsed.baseIngredients.length > 0
+      let baseIngredients = parsed.baseIngredients.length > 0
         ? parsed.baseIngredients
         : Array.isArray(idea.base_ingredients) ? idea.base_ingredients : [];
-      const ingredientGroups = parsed.ingredientGroups.length > 0
+      if (baseIngredients.length === 0 && Array.isArray(idea.ingredients)) {
+        baseIngredients = idea.ingredients.map(ing => {
+          if (typeof ing === 'string') return ing;
+          const amt = ing.amount ? `${ing.amount} ` : '';
+          const u = ing.unit ? `${ing.unit} ` : '';
+          return `${amt}${u}${ing.name}`.trim();
+        });
+      }
+
+      let ingredientGroups = parsed.ingredientGroups.length > 0
         ? parsed.ingredientGroups
         : Array.isArray(idea.ingredient_groups) ? idea.ingredient_groups : [];
-      const directions = parsed.directions.length > 0
+
+      let directions = parsed.directions.length > 0
         ? parsed.directions
         : Array.isArray(idea.directions) ? idea.directions : [];
+      if (directions.length === 0 && Array.isArray(idea.steps)) {
+        directions = idea.steps.map(s => (typeof s === 'string' ? s : s.instruction)).filter(Boolean);
+      }
 
       const hasSummary = Boolean(summaryText && summaryText.trim().length > 0);
       const videoUrl = row.video_url || row.final_video_url || row.rendered_video_url || '';
@@ -170,7 +300,10 @@ export const GET = withTenantContext(async (req) => {
       };
     });
 
-    return NextResponse.json({ success: true, data: mapped, source: 'campaign' });
+    // Gabungkan: letakkan item pilar yang telah diproduksi di baris awal
+    const combinedCampaign = [...mappedPillar, ...mappedPlanner];
+
+    return NextResponse.json({ success: true, data: combinedCampaign, source: 'campaign' });
   } catch (err) {
     console.error('[API /api/recipes GET Error]:', err);
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
