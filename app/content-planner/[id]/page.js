@@ -2,6 +2,8 @@
 
 import Sidebar from '../../components/Sidebar';
 import ImportPlannerModal from '../../components/ImportPlannerModal';
+import RecipeExportModal from '../../components/recipe-export/RecipeExportModal';
+import DedicatedVideoLightbox from '../../components/recipe-export/DedicatedVideoLightbox';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -27,6 +29,8 @@ export default function ContentPlannerWorkbench() {
   // Selected row for Drawer (especially Recipe Campaign)
   const [selectedRowId, setSelectedRowId] = useState(null);
   const [drawerTab, setDrawerTab] = useState(1);
+  const [exportModalRecipe, setExportModalRecipe] = useState(null);
+  const [previewVideoItem, setPreviewVideoItem] = useState(null);
 
   // Research UI State
   const [showEvidenceModal, setShowEvidenceModal] = useState(false);
@@ -1051,6 +1055,58 @@ export default function ContentPlannerWorkbench() {
                 >
                   📱 Salin Caption Lengkap
                 </button>
+                {(selectedRow.video_url || selectedRow.final_video_url || selectedRow.rendered_video_url) && (
+                  <button
+                    onClick={() => {
+                      setPreviewVideoItem({
+                        id: selectedRow.id,
+                        title: selectedRecipeIdea.recipe_title || selectedRow.title,
+                        videoUrl: selectedRow.video_url || selectedRow.final_video_url || selectedRow.rendered_video_url
+                      });
+                    }}
+                    style={{
+                      padding: '8px 14px',
+                      background: 'var(--surface-interactive)',
+                      border: '1px solid var(--border-subtle)',
+                      color: 'var(--text-primary)',
+                      borderRadius: '8px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      fontSize: '13px'
+                    }}
+                  >
+                    🔇 Preview Video
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    setExportModalRecipe({
+                      id: selectedRow.id,
+                      recipe_title: selectedRecipeIdea.recipe_title || selectedRow.title || 'Resep Kuliner',
+                      recipe_markdown_text: selectedRow.full_recipe_text || selectedRecipeIdea.recipe_text || '',
+                      img_grid_path: selectedRow.preview_image || selectedRow.thumbnail_url || selectedRow.media_url,
+                      video_url: selectedRow.video_url || selectedRow.final_video_url || selectedRow.rendered_video_url,
+                      category: selectedRecipeIdea.category || recipeConfig.category || 'Healthy Food',
+                      created_at: selectedRow.created_at,
+                      source: 'campaign'
+                    });
+                  }}
+                  style={{
+                    padding: '8px 14px',
+                    background: 'var(--action-primary)',
+                    border: 'none',
+                    color: 'var(--on-action-primary)',
+                    borderRadius: '8px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  🚀 Export ke Android App
+                </button>
               </div>
             </div>
 
@@ -1433,6 +1489,26 @@ Yuk recook sekarang! Simpan postingan ini ya ✨
             router.push('/pillar-campaigns');
           }}
         />
+        {/* Modal Tuning Ekspor Resep ke Android Apps */}
+        {exportModalRecipe && (
+          <RecipeExportModal
+            recipe={exportModalRecipe}
+            onClose={() => setExportModalRecipe(null)}
+            onSuccess={() => {
+              showToast('Resep berhasil disinkronkan ke Android App!');
+            }}
+          />
+        )}
+
+        {/* Modal Dedicated Video Lightbox */}
+        {previewVideoItem && (
+          <DedicatedVideoLightbox
+            videoUrl={previewVideoItem.videoUrl}
+            title={previewVideoItem.title}
+            onClose={() => setPreviewVideoItem(null)}
+          />
+        )}
+
           <footer style={{ marginTop: '80px', padding: '24px 0', borderTop: '1px solid var(--border-subtle)', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
             © 2026 MaknaFlow
           </footer>

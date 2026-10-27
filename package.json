@@ -1,6 +1,6 @@
 {
   "name": "maknaflow",
-  "version": "2.32.93",
+  "version": "2.32.94",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack -p 3005",
@@ -72,6 +72,7 @@
     "release-non-interactive": "node scripts/release.js --non-interactive"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1157.0",
     "@google/generative-ai": "^0.24.1",
     "@imgly/background-removal-node": "^1.4.5",
     "adm-zip": "^0.5.17",

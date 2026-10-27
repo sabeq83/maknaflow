@@ -8,6 +8,8 @@ import { useState, useEffect, useRef } from 'react';
 import { VIDEO_MODELS } from '@/lib/words-per-clip-presets';
 import { GRID_LAYOUT_COORDINATES } from '@/lib/core/GridCoordinates';
 import { getDemographicOptions } from '@/lib/demographic-constants';
+import RecipeExportModal from '../recipe-export/RecipeExportModal';
+import DedicatedVideoLightbox from '../recipe-export/DedicatedVideoLightbox';
 
 const LAYOUT_PRESET_METADATA = {
   3: [
@@ -125,6 +127,8 @@ export default function RecipeLabsPage({ mode = 'direct', onCapture, onSuccess, 
   const [openRecipeCardIndex, setOpenRecipeCardIndex] = useState(0);
   const [syncingItemId, setSyncingItemId] = useState(null);
   const [syncSuccessMsg, setSyncSuccessMsg] = useState({});
+  const [exportModalRecipe, setExportModalRecipe] = useState(null);
+  const [previewVideoItem, setPreviewVideoItem] = useState(null);
 
   const filteredDeconstructedAssets = (deconstructedAssets || []).filter(asset => {
     if (!deconstructSearchQuery.trim()) return true;
@@ -2883,7 +2887,7 @@ return (
                                       </div>
                                     </div>
 
-                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                                       <button
                                         type="button"
                                         className="btn btn-sm btn-primary"
@@ -2894,6 +2898,43 @@ return (
                                         }}
                                       >
                                         {syncingItemId === item.id ? '⏳ Menyinkronkan...' : '🔄 Sync ke ContentFlow'}
+                                      </button>
+                                      {(item.video_url || item.rendered_video_url || item.video_path) && (
+                                        <button
+                                          type="button"
+                                          className="btn btn-sm btn-secondary"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setPreviewVideoItem({
+                                              id: item.id,
+                                              title: item.recipe_title,
+                                              videoUrl: item.video_url || item.rendered_video_url || item.video_path
+                                            });
+                                          }}
+                                        >
+                                          🔇 Preview Video
+                                        </button>
+                                      )}
+                                      <button
+                                        type="button"
+                                        className="btn btn-sm"
+                                        style={{ background: 'var(--action-primary)', color: 'var(--on-action-primary)', border: 'none', fontWeight: 600 }}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setExportModalRecipe({
+                                            id: item.id,
+                                            recipe_title: item.recipe_title,
+                                            recipe_markdown_text: item.recipe_markdown_text,
+                                            img_grid_path: item.img_grid_path,
+                                            img_collage_path: item.img_collage_path,
+                                            video_url: item.video_url || item.rendered_video_url || item.video_path,
+                                            category: campaignDetail?.category || 'Healthy Food',
+                                            created_at: item.created_at,
+                                            source: 'labs'
+                                          });
+                                        }}
+                                      >
+                                        🚀 Export ke Android App
                                       </button>
                                     </div>
                                   </div>
@@ -3029,7 +3070,7 @@ return (
                                     </div>
                                   </div>
 
-                                  <div style={{ display: 'flex', gap: '8px' }}>
+                                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                                     <button
                                       type="button"
                                       className="btn btn-sm btn-primary"
@@ -3040,6 +3081,43 @@ return (
                                       }}
                                     >
                                       {syncingItemId === item.id ? '⏳ Menyinkronkan...' : '🔄 Sync ke ContentFlow'}
+                                    </button>
+                                    {(item.video_url || item.rendered_video_url || item.video_path) && (
+                                      <button
+                                        type="button"
+                                        className="btn btn-sm btn-secondary"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setPreviewVideoItem({
+                                            id: item.id,
+                                            title: item.recipe_title,
+                                            videoUrl: item.video_url || item.rendered_video_url || item.video_path
+                                          });
+                                        }}
+                                      >
+                                        🔇 Preview Video
+                                      </button>
+                                    )}
+                                    <button
+                                      type="button"
+                                      className="btn btn-sm"
+                                      style={{ background: 'var(--action-primary)', color: 'var(--on-action-primary)', border: 'none', fontWeight: 600 }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setExportModalRecipe({
+                                          id: item.id,
+                                          recipe_title: item.recipe_title,
+                                          recipe_markdown_text: item.recipe_markdown_text,
+                                          img_grid_path: item.img_grid_path,
+                                          img_collage_path: item.img_collage_path,
+                                          video_url: item.video_url || item.rendered_video_url || item.video_path,
+                                          category: campaignDetail?.category || 'Healthy Food',
+                                          created_at: item.created_at,
+                                          source: 'labs'
+                                        });
+                                      }}
+                                    >
+                                      🚀 Export ke Android App
                                     </button>
                                   </div>
                                 </div>
@@ -3097,6 +3175,27 @@ return (
           )}
 
         </div>
+
+        {/* Modal Tuning Ekspor Resep ke Android Apps */}
+        {exportModalRecipe && (
+          <RecipeExportModal
+            recipe={exportModalRecipe}
+            onClose={() => setExportModalRecipe(null)}
+            onSuccess={() => {
+              setSuccessMsg('Resep berhasil disinkronkan ke Android App!');
+              setTimeout(() => setSuccessMsg(''), 4000);
+            }}
+          />
+        )}
+
+        {/* Modal Dedicated Video Lightbox */}
+        {previewVideoItem && (
+          <DedicatedVideoLightbox
+            videoUrl={previewVideoItem.videoUrl}
+            title={previewVideoItem.title}
+            onClose={() => setPreviewVideoItem(null)}
+          />
+        )}
       </main>
     </div>
   );

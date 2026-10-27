@@ -90,6 +90,16 @@ export default function SettingsPage() {
   const [savingStorageConfig, setSavingStorageConfig] = useState(false);
   const [appOrigin, setAppOrigin] = useState('http://localhost:3000');
 
+  // Cloudflare R2 Setup (Video Delivery & CDN)
+  const [r2AccountId, setR2AccountId] = useState('');
+  const [r2AccessKeyId, setR2AccessKeyId] = useState('');
+  const [r2SecretAccessKey, setR2SecretAccessKey] = useState('');
+  const [r2BucketName, setR2BucketName] = useState('makna-recipe-videos');
+  const [r2PublicDomain, setR2PublicDomain] = useState('');
+  const [hasR2Config, setHasR2Config] = useState(false);
+  const [testingR2, setTestingR2] = useState(false);
+  const [savingR2, setSavingR2] = useState(false);
+
   // Facebook Page Credentials
   const [fbPageId, setFbPageId] = useState('');
   const [fbPageIds, setFbPageIds] = useState('');
@@ -135,6 +145,7 @@ export default function SettingsPage() {
   useEffect(() => {
     fetchKBs();
     fetchSettings();
+    fetchR2Config();
     fetchGoogleStatus();
     fetchScraperSessionStatus();
     fetchPool();
@@ -178,7 +189,7 @@ export default function SettingsPage() {
   }
 
   function collapseAllCards() {
-    const allKeys = ['gemini_config', 'pool_manager', 'minimax', 'cloud_storage', 'google_workspace', 'kb', 'glabs_webhook', 'marketplace_scraper', 'facebook_page', 'repliz_config'];
+    const allKeys = ['gemini_config', 'pool_manager', 'minimax', 'cloud_storage', 'cloudflare_r2', 'google_workspace', 'kb', 'glabs_webhook', 'marketplace_scraper', 'facebook_page', 'repliz_config'];
     const next = {};
     allKeys.forEach(k => next[k] = true);
     setCollapsedCards(next);
@@ -191,6 +202,71 @@ export default function SettingsPage() {
     const res = await fetch('/api/kb');
     const data = await res.json();
     if (data.success) setKbs(data.data);
+  }
+
+  async function fetchR2Config() {
+    try {
+      const res = await fetch('/api/settings/r2');
+      const data = await res.json();
+      if (data.success && data.config) {
+        setR2AccountId(data.config.accountId || '');
+        setR2AccessKeyId(data.config.accessKeyId || '');
+        setR2SecretAccessKey(data.config.secretAccessKey || '');
+        setR2BucketName(data.config.bucketName || 'makna-recipe-videos');
+        setR2PublicDomain(data.config.publicDomain || '');
+        setHasR2Config(data.config.isConfigured);
+      }
+    } catch (_) {}
+  }
+
+  async function handleSaveR2() {
+    setSavingR2(true);
+    try {
+      const res = await fetch('/api/settings/r2', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save',
+          config: {
+            accountId: r2AccountId,
+            accessKeyId: r2AccessKeyId,
+            secretAccessKey: r2SecretAccessKey,
+            bucketName: r2BucketName,
+            publicDomain: r2PublicDomain
+          }
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message || 'Konfigurasi R2 berhasil disimpan!', 'success');
+        fetchR2Config();
+      } else {
+        showToast(`Gagal: ${data.error}`, 'error');
+      }
+    } catch (e) {
+      showToast(`Gagal: ${e.message}`, 'error');
+    }
+    setSavingR2(false);
+  }
+
+  async function handleTestR2Connection() {
+    setTestingR2(true);
+    try {
+      const res = await fetch('/api/settings/r2', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'test' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`🟢 ${data.message}`, 'success');
+      } else {
+        showToast(`🔴 Gagal: ${data.error}`, 'error');
+      }
+    } catch (e) {
+      showToast(`🔴 Gagal: ${e.message}`, 'error');
+    }
+    setTestingR2(false);
   }
 
   async function fetchSettings() {
@@ -1868,6 +1944,101 @@ export default function SettingsPage() {
                 disabled={savingStorageConfig}
               >
                 {savingStorageConfig ? '⏳' : '💾'} Save Storage Config
+              </button>
+            </div>
+          ))}
+
+          {/* 4B. CARD: Cloudflare R2 Storage & CDN Setup */}
+          {renderCollapsibleCard('cloudflare_r2', 'storage', 'Cloudflare R2 Storage & CDN Setup (Video Delivery)', '☁️', (
+            <div>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: 1.5 }}>
+                Penyimpanan objek S3-compatible berkecepatan tinggi tanpa biaya egress bandwidth untuk menyajikan video ter-mute ke aplikasi mobile.
+              </p>
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', padding: '10px 14px', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '0.85rem' }}>{hasR2Config ? '🟢' : '🟡'}</span>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    Status: {hasR2Config ? 'Terkonfigurasi (Siap Distribusi Video)' : 'Belum Dikonfigurasi (Fallback .env aktif jika ada)'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-secondary"
+                  onClick={handleTestR2Connection}
+                  disabled={testingR2}
+                  style={{ fontSize: '0.72rem', padding: '4px 10px' }}
+                >
+                  {testingR2 ? '⏳ Testing R2...' : '🔌 Test Connection R2'}
+                </button>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label className="form-label">Cloudflare Account ID</label>
+                <input
+                  className="form-input"
+                  placeholder="e.g. 1a2b3c4d5e6f7g8h9i0..."
+                  value={r2AccountId}
+                  onChange={e => setR2AccountId(e.target.value)}
+                />
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  Dapat disalin dari Cloudflare Dashboard Overview di menu R2.
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                <div className="form-group">
+                  <label className="form-label">R2 Access Key ID</label>
+                  <input
+                    className="form-input"
+                    placeholder="SAMPLE_R2_ACCESS_KEY..."
+                    value={r2AccessKeyId}
+                    onChange={e => setR2AccessKeyId(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">R2 Secret Access Key</label>
+                  <input
+                    type="password"
+                    className="form-input"
+                    placeholder="SAMPLE_R2_SECRET_KEY..."
+                    value={r2SecretAccessKey}
+                    onChange={e => setR2SecretAccessKey(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '12px', marginBottom: '16px' }}>
+                <div className="form-group">
+                  <label className="form-label">R2 Bucket Name</label>
+                  <input
+                    className="form-input"
+                    placeholder="makna-recipe-videos"
+                    value={r2BucketName}
+                    onChange={e => setR2BucketName(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Public CDN Domain / Base URL</label>
+                  <input
+                    className="form-input"
+                    placeholder="https://pub-r2.maknaflow.com"
+                    value={r2PublicDomain}
+                    onChange={e => setR2PublicDomain(e.target.value)}
+                  />
+                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                    Custom Domain atau r2.dev subdomain yang diaktifkan publik.
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleSaveR2}
+                disabled={savingR2}
+              >
+                {savingR2 ? '⏳ Menyimpan...' : '💾 Simpan Konfigurasi R2'}
               </button>
             </div>
           ))}

@@ -20,6 +20,7 @@ const menuKeyMap = {
   '/deconstruct': 'deconstruct_lab',
   '/multiplier-lab': 'multiplier_lab',
   '/recipe-labs': 'recipe_labs',
+  '/recipe-exporter': 'recipe_labs',
   '/product-bridge-inject': 'product_bridging',
   '/sheets-autopilot': 'sheets_autopilot',
   '/video-studio': 'ffmpeg_studio',
@@ -60,6 +61,7 @@ const navItems = [
   { label: 'Product Bridging', href: '/product-bridge-inject', icon: '🎯' },
 
   { section: 'PUBLISHING' },
+  { label: 'Recipe Exporter', href: '/recipe-exporter', icon: '📱' },
   { label: 'ContentFlow Studio', href: '/contentflow-studio', icon: '✨' },
   { label: 'ContentFlow Hub', href: '/content-flow', icon: '📊' },
   { label: 'Content Automations', href: '/content-automations', icon: '⏱️' },

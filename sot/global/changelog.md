@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.94 — Modul Export Recipe ke Android Apps & Cloudflare R2 Sync (27/10/2026)
+- Modul Recipe Exporter di Sidebar dan Recipe Labs/Planner
+- 1-Klik AI Auto Enrich 4 Elemen adaptif
+- FFmpeg Muting dan Cloudflare R2 Sync
+- Simulator Google Pixel 7 WebView
+
 ## V2.32.93 — Standarisasi Dynamic Micro-KB untuk Brand Editorial, Product Campaign, dan Multiplier Lab (26/10/2026)
 - Pembuatan 3 Micro-KB mandiri (BRAND_EDITORIAL_GUIDE, PRODUCT_CAMPAIGN_GUIDE, MULTIPLIER_BRIDGING_GUIDE)
 - Arsitektur Dynamic Story Curve adaptif N-klip (1 hingga 12 klip)
