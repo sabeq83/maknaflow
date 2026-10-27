@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.97 — Perbaikan Video Mute Lokal, Smart Language Alignment & Perataan Textbox (28/10/2026)
+- Membaca Video Lokal Mac Mini Langsung untuk FFmpeg Mute
+- Upload Otomatis ke Cloudflare R2 Mengikuti Setting
+- Smart Language Alignment Menyesuaikan Bahasa Asal Resep
+- Penyelarasan Lebar Textbox Summary dan Direction 100%
+
 ## V2.32.96 — Perbaikan AI Auto Enrich dan Ingestion Resep Campaign (27/10/2026)
 - Integrasi getGeminiModel Settings pada AI Auto Enrich
 - Dukungan Ingestion Resep dari Pillar Campaign Items dan Content Planner Rows

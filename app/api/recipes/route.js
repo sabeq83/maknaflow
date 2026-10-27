@@ -56,9 +56,9 @@ export const GET = withTenantContext(async (req) => {
         const parsed = parseRecipeDescriptionHtml(rawText);
 
         const hasSummary = Boolean(parsed.summary && parsed.summary.trim().length > 0);
-        const videoUrl = item.video_url || item.rendered_video_url || '';
-        const hasVideo = Boolean(videoUrl || item.video_storyboard_json);
-        const videoMutedReady = Boolean(videoUrl && (videoUrl.includes('pub-r2') || videoUrl.includes('_muted.mp4')));
+        const rawVideo = item.video_url || item.rendered_video_url || '';
+        const isR2Url = Boolean(rawVideo && (rawVideo.includes('.r2.cloudflarestorage.com') || rawVideo.includes('video.ast402.my.id') || rawVideo.includes('pub-r2')));
+        const videoMutedReady = Boolean(isR2Url || (rawVideo && rawVideo.includes('_muted.mp4')));
 
         return {
           id: item.id,
@@ -74,9 +74,13 @@ export const GET = withTenantContext(async (req) => {
           directions: parsed.directions.join('\n'),
           rawMarkdown: rawText,
           hasSummary,
-          hasVideo,
+          hasVideo: Boolean(rawVideo || item.video_storyboard_json),
+          hasLocalVideo: Boolean(rawVideo && !rawVideo.startsWith('http')),
           videoMutedReady,
-          videoR2Url: videoUrl,
+          sourceVideoPath: rawVideo,
+          video_url: rawVideo,
+          media_url: rawVideo,
+          videoR2Url: isR2Url ? rawVideo : '',
           isExported,
           lastExportTarget: lastExport ? lastExport.target_app : null,
           lastExportedAt: lastExport ? lastExport.exported_at : null,
@@ -176,9 +180,9 @@ export const GET = withTenantContext(async (req) => {
       const summaryText = parsed.summary || payload.hook || idea.hook || (result.recipe ? result.recipe.summary : '') || '';
       const hasSummary = Boolean(summaryText && summaryText.trim().length > 0);
 
-      const videoUrl = item.ffmpeg_output_path || item.drive_link || '';
-      const hasVideo = Boolean(videoUrl);
-      const videoMutedReady = Boolean(videoUrl && (videoUrl.includes('pub-r2') || videoUrl.includes('_muted.mp4') || videoUrl.includes('.mp4')));
+      const rawVideo = item.ffmpeg_output_path || item.drive_link || '';
+      const isR2Url = Boolean(rawVideo && (rawVideo.includes('.r2.cloudflarestorage.com') || rawVideo.includes('video.ast402.my.id') || rawVideo.includes('pub-r2')));
+      const videoMutedReady = Boolean(isR2Url || (rawVideo && rawVideo.includes('_muted.mp4')));
 
       return {
         id: item.id,
@@ -194,9 +198,13 @@ export const GET = withTenantContext(async (req) => {
         directions: directions.join('\n'),
         rawMarkdown,
         hasSummary,
-        hasVideo,
+        hasVideo: Boolean(rawVideo),
+        hasLocalVideo: Boolean(rawVideo && !rawVideo.startsWith('http')),
         videoMutedReady,
-        videoR2Url: videoUrl,
+        sourceVideoPath: rawVideo,
+        video_url: rawVideo,
+        media_url: rawVideo,
+        videoR2Url: isR2Url ? rawVideo : '',
         isExported,
         lastExportTarget: lastExport ? lastExport.target_app : null,
         lastExportedAt: lastExport ? lastExport.exported_at : null,
@@ -271,9 +279,9 @@ export const GET = withTenantContext(async (req) => {
       }
 
       const hasSummary = Boolean(summaryText && summaryText.trim().length > 0);
-      const videoUrl = row.video_url || row.final_video_url || row.rendered_video_url || '';
-      const hasVideo = Boolean(videoUrl);
-      const videoMutedReady = Boolean(videoUrl && (videoUrl.includes('pub-r2') || videoUrl.includes('_muted.mp4')));
+      const rawVideo = row.video_url || row.final_video_url || row.rendered_video_url || '';
+      const isR2Url = Boolean(rawVideo && (rawVideo.includes('.r2.cloudflarestorage.com') || rawVideo.includes('video.ast402.my.id') || rawVideo.includes('pub-r2')));
+      const videoMutedReady = Boolean(isR2Url || (rawVideo && rawVideo.includes('_muted.mp4')));
 
       return {
         id: row.id,
@@ -289,9 +297,13 @@ export const GET = withTenantContext(async (req) => {
         directions: directions.join('\n'),
         rawMarkdown: rawText,
         hasSummary,
-        hasVideo,
+        hasVideo: Boolean(rawVideo),
+        hasLocalVideo: Boolean(rawVideo && !rawVideo.startsWith('http')),
         videoMutedReady,
-        videoR2Url: videoUrl,
+        sourceVideoPath: rawVideo,
+        video_url: rawVideo,
+        media_url: rawVideo,
+        videoR2Url: isR2Url ? rawVideo : '',
         isExported,
         lastExportTarget: lastExport ? lastExport.target_app : null,
         lastExportedAt: lastExport ? lastExport.exported_at : null,

@@ -455,16 +455,59 @@
 }
 
 .recipe-ing-textarea {
-  width: 100%;
+  width: 100% !important;
+  box-sizing: border-box !important;
   min-height: 60px;
   background: var(--input-bg);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xs);
   color: var(--text-primary);
   font-size: 0.8rem;
-  padding: 8px;
+  padding: 8px 10px;
   font-family: inherit;
   resize: vertical;
+}
+
+.recipe-export-modal-box .form-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.recipe-export-modal-box .form-control,
+.recipe-export-modal-box textarea.form-control,
+.recipe-export-modal-box .recipe-ing-textarea,
+.recipe-export-modal-box .form-group textarea,
+.recipe-export-modal-box .form-group input[type="text"],
+.recipe-export-modal-box .form-group input[type="password"] {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  background: var(--input-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  color: var(--text-primary);
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.recipe-export-modal-box .form-control:focus,
+.recipe-export-modal-box textarea.form-control:focus,
+.recipe-export-modal-box .recipe-ing-textarea:focus,
+.recipe-export-modal-box .form-group textarea:focus,
+.recipe-export-modal-box .form-group input:focus {
+  border-color: var(--action-primary);
+  box-shadow: 0 0 0 2px var(--focus-ring);
+  outline: none;
+}
+
+.recipe-export-modal-box textarea.form-control,
+.recipe-export-modal-box .form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.45;
 }
 
 /* =========================================================================

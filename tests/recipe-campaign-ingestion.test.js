@@ -44,3 +44,22 @@ test('Validasi format prompt pemolesan AI Auto Enrich', () => {
   assert.ok(currentIngredients.includes('chicken wings'));
   assert.ok(currentDirections.includes('Pat wings dry.'));
 });
+
+test('Smart Language Detection (English vs Indonesian)', async () => {
+  const { detectRecipeLanguage } = await import('../lib/recipe-export-helper.js');
+
+  const enLang = detectRecipeLanguage(
+    'Gourmet Truffle & Herb Crispy Air Fryer Wings',
+    '900 g chicken wings\n1 tbsp baking powder\n1 tsp sea salt',
+    'Pat chicken wings dry with paper towels. Toss wings with powder and air fry.'
+  );
+  assert.equal(enLang, 'en', 'Resep Truffle Wings harus terdeteksi bahasa Inggris');
+
+  const idLang = detectRecipeLanguage(
+    'Puding Cokelat Sutra Lapis Biskuit',
+    '1 bungkus agar-agar cokelat\n500 ml susu cair\n4 sdm gula pasir',
+    'Campur agar-agar dan susu di dalam panci. Panaskan hingga mendidih sambil diaduk.'
+  );
+  assert.equal(idLang, 'id', 'Resep Puding harus terdeteksi bahasa Indonesia');
+});
+

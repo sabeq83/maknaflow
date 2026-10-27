@@ -158,6 +158,12 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
 
   // FFmpeg Muting & Video Pipeline
   async function handleRunFfmpegMute() {
+    const rawLocalPath = recipe?.sourceVideoPath || recipe?.video_url || recipe?.media_url || recipe?.ffmpeg_output_path;
+    if (!rawLocalPath && !videoR2Url) {
+      alert('Resep ini belum memiliki file video ter-render di server Mac Mini.');
+      return;
+    }
+
     setProcessingVideo(true);
     try {
       const res = await fetch('/api/recipes/video-pipeline', {
@@ -165,7 +171,8 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           recipeId: recipe?.id || 'rcitem_' + Date.now(),
-          videoUrl: recipe?.video_url || recipe?.media_url || 'https://assets.mixkit.co/videos/preview/mixkit-vegetables-and-meat-simmering-in-a-pan-43407-large.mp4'
+          sourceVideoPath: rawLocalPath,
+          videoUrl: videoR2Url || rawLocalPath
         })
       });
       const data = await res.json();
@@ -174,6 +181,7 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
         if (data.videoR2Url) setVideoR2Url(data.videoR2Url);
         setInlineVideoOpen(true);
         setAudioMode('muted');
+        alert('Video berhasil disalin, di-mute via FFmpeg (-an), dan diunggah ke Cloudflare R2!');
         try {
           if (inlinePlayerRef.current) {
             inlinePlayerRef.current.currentTime = 0;
@@ -191,6 +199,12 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
 
   // Upload to Cloudflare R2
   async function handleUploadToR2() {
+    const rawLocalPath = recipe?.sourceVideoPath || recipe?.video_url || recipe?.media_url || recipe?.ffmpeg_output_path;
+    if (!rawLocalPath && !videoR2Url) {
+      alert('Tidak ada file video lokal yang dapat diunggah ke Cloudflare R2.');
+      return;
+    }
+
     setUploadingR2(true);
     try {
       const res = await fetch('/api/recipes/video-pipeline', {
@@ -198,12 +212,14 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           recipeId: recipe?.id || 'rcitem_' + Date.now(),
-          videoUrl: videoR2Url || recipe?.video_url || recipe?.media_url
+          sourceVideoPath: rawLocalPath,
+          videoUrl: videoR2Url || rawLocalPath
         })
       });
       const data = await res.json();
       if (data.success && data.videoR2Url) {
         setVideoR2Url(data.videoR2Url);
+        setVideoMutedReady(true);
         alert('Video ter-mute berhasil diunggah ke Cloudflare R2!');
         setPixelMediaTab('video');
       } else {
@@ -836,12 +852,12 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
                 </div>
 
                 {/* SUMMARY */}
-                <div className="form-group">
+                <div className="form-group" style={{ width: '100%' }}>
                   <label className="form-label" style={{ fontSize: '0.75rem' }}>SUMMARY (Naratif Sensory Hook)</label>
                   <textarea
-                    className="form-control"
+                    className="recipe-ing-textarea"
                     rows={3}
-                    style={{ fontSize: '0.8rem' }}
+                    style={{ width: '100%', boxSizing: 'border-box', minHeight: '75px', fontSize: '0.8rem' }}
                     value={summary}
                     onChange={e => setSummary(e.target.value)}
                     placeholder="Deskripsi pembuka yang menggugah selera..."
@@ -901,12 +917,12 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
                 </div>
 
                 {/* DIRECTIONS */}
-                <div className="form-group">
+                <div className="form-group" style={{ width: '100%' }}>
                   <label className="form-label" style={{ fontSize: '0.75rem' }}>DIRECTION (Langkah Memasak Berurutan)</label>
                   <textarea
-                    className="form-control"
+                    className="recipe-ing-textarea"
                     rows={4}
-                    style={{ fontSize: '0.8rem' }}
+                    style={{ width: '100%', boxSizing: 'border-box', minHeight: '90px', fontSize: '0.8rem' }}
                     value={directions}
                     onChange={e => setDirections(e.target.value)}
                     placeholder="1 baris per langkah memasak..."

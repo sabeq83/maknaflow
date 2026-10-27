@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getGeminiModel } from '@/lib/gemini';
 import { withTenantContext } from '@/lib/auth';
+import { detectRecipeLanguage } from '@/lib/recipe-export-helper';
 
 export const POST = withTenantContext(async (req) => {
   try {
@@ -9,6 +10,10 @@ export const POST = withTenantContext(async (req) => {
     if (!title || !title.trim()) {
       return NextResponse.json({ success: false, error: 'Judul resep wajib diisi.' }, { status: 400 });
     }
+
+    const lang = detectRecipeLanguage(title, currentIngredients, currentDirections);
+    const isEnglish = (lang === 'en');
+    const targetLangName = isEnglish ? 'BAHASA INGGRIS (English)' : 'BAHASA INDONESIA';
 
     const prompt = `Anda adalah Food Editor dan Culinary Expert profesional untuk aplikasi mobile resep Android.
 Tugas Anda adalah MEMOLES, MENSTANDARISASI, dan MENYEMPURNAKAN data resep masakan yang sudah ada berikut menjadi standar editorial tinggi:
@@ -20,19 +25,26 @@ ${currentIngredients && currentIngredients.trim() ? currentIngredients.trim() : 
 Langkah Memasak yang Sudah Ada:
 ${currentDirections && currentDirections.trim() ? currentDirections.trim() : '(Belum ada langkah terstruktur)'}
 
+ATURAN BAHASA MUTLAK (SMART LANGUAGE ALIGNMENT):
+- Bahasa asal resep ini terdeteksi sebagai: ${targetLangName}.
+- Anda WAJIB menghasilkan seluruh teks output ("summary", "directions", "base_ingredients", dan nama kelompok pada "ingredient_groups") dalam ${targetLangName}.
+${isEnglish ? `
+* KARENA RESEP ASALNYA BERBAHASA INGGRIS: DILARANG KERAS MENERJEMAHKAN KE BAHASA INDONESIA!
+* Tuliskan "summary", "directions", dan "base_ingredients" 100% dalam Bahasa Inggris yang elegan, appetizing, dan memikat pembaca mobile app.
+* Format grup bahan: { "name": "For the [component] :", "items": [...] }.
+` : `
+* KARENA RESEP ASALNYA BERBAHASA INDONESIA: Tuliskan seluruh "summary", "directions", dan "base_ingredients" 100% dalam Bahasa Indonesia yang baku, komunikatif, dan menggugah selera.
+* Format grup bahan: { "name": "Untuk [komponen] :", "items": [...] }.
+`}
+- Pengecualian: Khusus field "t2i_prompt_4_3" SELALU ditulis dalam bahasa Inggris (standar AI food photography prompt).
+
 ATURAN PEMOLESAN & STANDARISASI EDITORIAL:
-1. PERTAHANKAN BAHAN ASLI: Jika sudah ada bahan-bahan di atas, pertahankan bahan dan takaran aslinya! Rapikan penulisan takaran (contoh: "1 tbsp", "900 g", dsb) tanpa mengurangi bahan penting.
-2. PERTAHANKAN LANGKAH ASLI: Jika sudah ada langkah-langkah di atas, pertahankan urutan instruksinya. Poles kalimatnya agar terstruktur, instruktif, dan enak dibaca di layar ponsel.
+1. PERTAHANKAN BAHAN ASLI: Pertahankan bahan dan takaran aslinya! Rapikan penulisan takaran tanpa mengurangi bahan penting.
+2. PERTAHANKAN LANGKAH ASLI: Pertahankan urutan instruksinya. Poles kalimatnya agar terstruktur, instruktif, dan nyaman dibaca di layar smartphone.
 3. BUATKAN "summary": 3-5 kalimat naratif sensory copywriting yang menggugah selera pembaca, mendeskripsikan aroma, tekstur/kerenyahan, profil rasa hidangan, serta tips penyajian atau keunggulan praktisnya.
 4. ATURAN PENGELOMPOKAN BAHAN (ADAPTIF):
    - Jika masakan adalah olahan satu kesatuan tanpa saus/komponen terpisah, letakkan SELURUH bahan di dalam "base_ingredients" dan biarkan "ingredient_groups": [].
-   - HANYA buat kelompok di "ingredient_groups" jika resep memang memiliki bagian terpisah alami, misalnya:
-     * Saus / Sambal: "For the sauce :" atau "For the dipping sauce :"
-     * Bumbu Marinasi: "For the marinade :"
-     * Salad Dressing: "For the dressing :"
-     * Adonan / Isian Kue: "For the dough :" atau "For the filling :"
-     * Kuah / Kaldu: "For the soup base :" atau "For the broth :"
-     * Topping / Bumbu Tabur: "For the seasoning / topping :" (hanya bila benar-benar ada)
+   - HANYA buat kelompok di "ingredient_groups" jika resep memang memiliki bagian terpisah alami (saus/marinasi/topping/adonan).
 5. BUATKAN "t2i_prompt_4_3": Prompt food photography rasio landscape 4:3 yang menampilkan sajian akhir hidangan secara menggoda, fotorealistik, eye-level 45-degree angle, rustic styling, natural appetizing lighting, shallow depth of field --ar 4:3 --stylize 250.
 
 Hasilkan output JSON valid persis dengan struktur berikut:
@@ -45,7 +57,7 @@ Hasilkan output JSON valid persis dengan struktur berikut:
   ],
   "ingredient_groups": [
     // Kosongkan [] jika resep tidak memiliki komponen terpisah.
-    // Jika ada kelompok: { "name": "For the [nama komponen] :", "items": ["item A...", "item B..."] }
+    // Jika ada kelompok: { "name": "For the [component] :", "items": ["item A...", "item B..."] }
   ],
   "directions": [
     "Langkah 1 secara terperinci...",
