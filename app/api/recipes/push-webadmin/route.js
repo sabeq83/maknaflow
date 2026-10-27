@@ -92,6 +92,22 @@ export async function POST(req) {
       }, { status: pushRes.status || 500 });
     }
 
+    // Rekam audit trail ekspor resep ke database
+    try {
+      const { recordRecipeExport } = await import('@/lib/recipe-export-records');
+      await recordRecipeExport({
+        source: body.source || 'labs',
+        sourceItemId: body.sourceItemId || body.id || '',
+        recipeTitle: recipeTitle.trim(),
+        targetApp: body.targetApp || body.targetAppName || 'Android Webadmin',
+        categoryName: categoryName || '',
+        webadminRecipeId: pushData.recipe_id || pushData.id || null,
+        videoUrl: videoUrl || null
+      });
+    } catch (auditErr) {
+      console.warn('[Audit Log Warning] Gagal menyimpan log ekspor:', auditErr.message);
+    }
+
     return NextResponse.json({
       success: true,
       recipeId: pushData.recipe_id || pushData.id,

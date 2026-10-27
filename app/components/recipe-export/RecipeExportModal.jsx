@@ -260,7 +260,10 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
           categoryName: effectiveCategory,
           recipeDescriptionHtml: currentHtmlDescription,
           videoUrl: videoR2Url || null,
-          imageUrl: coverImageUrl
+          imageUrl: coverImageUrl,
+          source: recipe?.sourceType || (recipe?.source && recipe.source.includes('Campaign') ? 'campaign' : 'labs'),
+          sourceItemId: recipe?.id || '',
+          targetApp: activePreset.name
         })
       });
       const data = await res.json();
@@ -342,6 +345,27 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
           
           {/* PANE KIRI: TUNING & CONTROLS */}
           <div className="recipe-pane-tuning">
+
+            {recipe?.isExported && (
+              <div style={{
+                padding: '10px 14px',
+                background: 'var(--status-success-soft)',
+                border: '1px solid var(--status-success)',
+                borderRadius: 'var(--radius-sm)',
+                color: 'var(--status-success)',
+                fontSize: '0.8rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <span style={{ fontSize: '1rem' }}>✓</span>
+                <div>
+                  Resep ini sebelumnya telah diekspor ke <strong>{recipe.lastExportTarget || 'Android Webadmin'}</strong>
+                  {recipe.lastExportedAt ? ` pada ${new Date(recipe.lastExportedAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}` : ''}
+                  {recipe.exportCount > 1 ? ` (${recipe.exportCount}x total ekspor)` : ''}.
+                </div>
+              </div>
+            )}
 
             {/* 1. Preset Target Box */}
             <div className="recipe-preset-box">

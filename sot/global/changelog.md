@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.95 — Penyempurnaan Recipe Exporter Hub dan Status Ekspor (27/10/2026)
+- Penyematan Sidebar Navigasi Standar pada Recipe Exporter Hub
+- Live Data Ingestion dari Database via GET /api/recipes
+- Penandaan Resep yang Sudah Diekspor ke Android Apps
+- Audit Log Riwayat Ekspor di recipe_export_records
+
 ## V2.32.94 — Modul Export Recipe ke Android Apps & Cloudflare R2 Sync (27/10/2026)
 - Modul Recipe Exporter di Sidebar dan Recipe Labs/Planner
 - 1-Klik AI Auto Enrich 4 Elemen adaptif
