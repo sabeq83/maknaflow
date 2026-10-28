@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.99 — Register 3 Visual Identity Presets (Dapur Botani, Nutribake, Siasat Sehat) (28/10/2026)
+- Register Dapur Botani Earthy Apothecary 3D preset in Staging & Dev
+- Register Nutribake Clean Modern Baking preset with anti-marble guarantee
+- Register Siasat Sehat Clinical Biohack 3D Anatomy preset
+- Add automated unit tests and interactive mockup showcase
+
 ## V2.32.98 — Recipe Exporter Multi-Tenant & Zero-Budget AI Key Pool (28/10/2026)
 - Enforce Free Gemini Key Pool (Rp 0) per tenant di endpoint auto-enrich resep
 - Integrasikan resep kampanye Multiplier Lab ke katalog Recipe Exporter
