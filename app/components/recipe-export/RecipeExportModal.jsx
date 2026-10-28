@@ -86,8 +86,45 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
   const [aiEnriching, setAiEnriching] = useState(false);
   const [pushing, setPushing] = useState(false);
   const [pushToast, setPushToast] = useState(null);
+  const [savingDraft, setSavingDraft] = useState(false);
+  const [dbSyncToast, setDbSyncToast] = useState(null);
 
   const pixelDeviceRef = useRef(null);
+
+  // Helper copy universal yang bekerja di HTTP / non-secure context
+  function safeCopyToClipboard(text, e) {
+    if (!text) return;
+    const doFallback = () => {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      try {
+        document.execCommand('copy');
+      } catch (err) {
+        console.error('Fallback execCommand copy error:', err);
+      }
+      document.body.removeChild(textarea);
+    };
+
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      navigator.clipboard.writeText(text).catch(doFallback);
+    } else {
+      doFallback();
+    }
+
+    if (e && e.currentTarget) {
+      const btn = e.currentTarget;
+      const originalText = btn.innerText;
+      btn.innerText = '✅ Disalin!';
+      setTimeout(() => {
+        if (btn) btn.innerText = originalText;
+      }, 1500);
+    }
+  }
 
   // Keyboard escape listener
   useEffect(() => {
@@ -133,7 +170,84 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
 
   const effectiveCategory = customCategoryMode && customCategoryText.trim() ? customCategoryText.trim() : category;
 
-  // AI Auto Enrich (1-Klik)
+  // Simpan Naskah & Media ke Database Sumber
+  async function handleSaveRecipeToDb(silent = false) {
+    setSavingDraft(true);
+    if (!silent) setDbSyncToast({ type: 'loading', msg: 'Menyimpan ke database...' });
+    try {
+      const res = await fetch('/api/recipes/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipeId: recipe?.id,
+          sourceType: recipe?.sourceType,
+          originType: recipe?.origin_type,
+          title,
+          time,
+          category: effectiveCategory,
+          summary,
+          baseIngredients,
+          ingredientGroups,
+          directions,
+          t2iPrompt43,
+          coverImageUrl,
+          videoR2Url
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setDbSyncToast({ type: 'success', msg: '✅ Berhasil disimpan ke database!' });
+        if (!silent) alert('✓ Data resep berhasil disimpan permanen ke database!');
+      } else {
+        setDbSyncToast({ type: 'error', msg: `Gagal: ${data.error}` });
+        if (!silent) alert(`Gagal menyimpan: ${data.error}`);
+      }
+    } catch (err) {
+      setDbSyncToast({ type: 'error', msg: `Gagal: ${err.message}` });
+      if (!silent) alert(`Gagal menyimpan: ${err.message}`);
+    } finally {
+      setSavingDraft(false);
+    }
+  }
+
+  // Generate Cover 4:3 via G-Labs Worker
+  async function handleGenerateCoverImage() {
+    if (!t2iPrompt43 || !t2iPrompt43.trim()) {
+      alert('Prompt T2I masih kosong. Harap isi prompt atau jalankan AI Auto Enrich terlebih dahulu.');
+      return;
+    }
+    setGeneratingCover(true);
+    setDbSyncToast({ type: 'loading', msg: 'Mengirim tugas render cover 4:3 ke G-Labs...' });
+    try {
+      const res = await fetch('/api/recipes/generate-cover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipeId: recipe?.id,
+          sourceType: recipe?.sourceType,
+          originType: recipe?.origin_type,
+          prompt: t2iPrompt43
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.imageUrl) {
+        setCoverImageUrl(data.imageUrl);
+        setPixelMediaTab('photo');
+        setDbSyncToast({ type: 'success', msg: '✓ Cover Resep 4:3 berhasil dirender & disimpan!' });
+        alert('✓ Cover Resep 4:3 berhasil digenerate dari G-Labs!');
+      } else {
+        setDbSyncToast({ type: 'error', msg: `Gagal: ${data.error || 'Terjadi kesalahan'}` });
+        alert(`Gagal generate cover: ${data.error || 'Terjadi kesalahan'}`);
+      }
+    } catch (err) {
+      setDbSyncToast({ type: 'error', msg: `Gagal: ${err.message}` });
+      alert(`Gagal generate cover: ${err.message}`);
+    } finally {
+      setGeneratingCover(false);
+    }
+  }
+
+  // AI Auto Enrich (1-Klik) dengan Auto-Save ke Database
   async function handleAiAutoEnrich() {
     setAiEnriching(true);
     try {
@@ -149,18 +263,44 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
       });
       const json = await res.json();
       if (json.success && json.data) {
-        if (json.data.recipe_time) setTime(json.data.recipe_time);
-        if (json.data.summary) setSummary(json.data.summary);
-        if (Array.isArray(json.data.base_ingredients)) {
-          setBaseIngredients(json.data.base_ingredients.join('\n'));
-        }
-        if (Array.isArray(json.data.ingredient_groups)) {
-          setIngredientGroups(json.data.ingredient_groups);
-        }
-        if (Array.isArray(json.data.directions)) {
-          setDirections(json.data.directions.join('\n'));
-        }
-        if (json.data.t2i_prompt_4_3) setT2iPrompt43(json.data.t2i_prompt_4_3);
+        const enrichedTime = json.data.recipe_time || time;
+        const enrichedSummary = json.data.summary || summary;
+        const enrichedBase = Array.isArray(json.data.base_ingredients) ? json.data.base_ingredients.join('\n') : baseIngredients;
+        const enrichedGroups = Array.isArray(json.data.ingredient_groups) ? json.data.ingredient_groups : ingredientGroups;
+        const enrichedDirections = Array.isArray(json.data.directions) ? json.data.directions.join('\n') : directions;
+        const enrichedT2i = json.data.t2i_prompt_4_3 || t2iPrompt43;
+
+        if (json.data.recipe_time) setTime(enrichedTime);
+        if (json.data.summary) setSummary(enrichedSummary);
+        if (Array.isArray(json.data.base_ingredients)) setBaseIngredients(enrichedBase);
+        if (Array.isArray(json.data.ingredient_groups)) setIngredientGroups(enrichedGroups);
+        if (Array.isArray(json.data.directions)) setDirections(enrichedDirections);
+        if (json.data.t2i_prompt_4_3) setT2iPrompt43(enrichedT2i);
+
+        // Auto-save naskah yang baru di-enrich ke database tabel sumber
+        fetch('/api/recipes/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            recipeId: recipe?.id,
+            sourceType: recipe?.sourceType,
+            originType: recipe?.origin_type,
+            title,
+            time: enrichedTime,
+            category: effectiveCategory,
+            summary: enrichedSummary,
+            baseIngredients: enrichedBase,
+            ingredientGroups: enrichedGroups,
+            directions: enrichedDirections,
+            t2iPrompt43: enrichedT2i,
+            coverImageUrl,
+            videoR2Url
+          })
+        }).then(r => r.json()).then(d => {
+          if (d.success) {
+            setDbSyncToast({ type: 'success', msg: '✨ AI Auto Enrich selesai & otomatis disimpan ke database!' });
+          }
+        }).catch(() => {});
       } else {
         alert(`Gagal AI Auto Enrich: ${json.error || 'Respon AI tidak valid'}`);
       }
@@ -791,10 +931,7 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
                       type="button"
                       className="btn btn-outline"
                       style={{ padding: '2px 8px', fontSize: '0.7rem' }}
-                      onClick={() => {
-                        navigator.clipboard.writeText(videoR2Url);
-                        alert('URL Video CDN berhasil disalin!');
-                      }}
+                      onClick={(e) => safeCopyToClipboard(videoR2Url, e)}
                     >
                       📋 Salin URL
                     </button>
@@ -862,21 +999,28 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
 
                 {/* T2I Prompt 4:3 Box */}
                 <div className="recipe-t2i-prompt-box">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--text-primary)' }}>📷 T2I_PROMPT_4_3 (Landscape Food Photography)</span>
                       <span className="recipe-t2i-prompt-badge">Rasio 4:3</span>
                     </div>
                     <div style={{ display: 'flex', gap: '6px' }}>
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        style={{ padding: '2px 10px', fontSize: '0.72rem' }}
+                        disabled={generatingCover}
+                        onClick={handleGenerateCoverImage}
+                      >
+                        <span>{generatingCover ? '⏳' : '🎨'}</span>
+                        <span>{generatingCover ? 'Merender di G-Labs...' : 'Generate Cover (4:3)'}</span>
+                      </button>
                       {t2iPrompt43 && (
                         <button
                           type="button"
                           className="btn btn-outline"
                           style={{ padding: '2px 8px', fontSize: '0.72rem' }}
-                          onClick={() => {
-                            navigator.clipboard.writeText(t2iPrompt43);
-                            alert('Prompt T2I 4:3 disalin!');
-                          }}
+                          onClick={(e) => safeCopyToClipboard(t2iPrompt43, e)}
                         >
                           📋 Salin Prompt
                         </button>
@@ -981,10 +1125,7 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
                     type="button"
                     className="btn btn-outline"
                     style={{ padding: '2px 8px', fontSize: '0.72rem' }}
-                    onClick={() => {
-                      navigator.clipboard.writeText(currentHtmlDescription);
-                      alert('HTML resep berhasil disalin!');
-                    }}
+                    onClick={(e) => safeCopyToClipboard(currentHtmlDescription, e)}
                   >
                     📋 Salin HTML
                   </button>
@@ -1004,10 +1145,7 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
                     type="button"
                     className="btn btn-outline"
                     style={{ padding: '2px 8px', fontSize: '0.72rem' }}
-                    onClick={() => {
-                      navigator.clipboard.writeText(`${title}\n\nSUMMARY:\n${summary}\n\nINGREDIENTS:\n${baseIngredients}\n\nDIRECTIONS:\n${directions}`);
-                      alert('Teks polos disalin!');
-                    }}
+                    onClick={(e) => safeCopyToClipboard(`${title}\n\nSUMMARY:\n${summary}\n\nINGREDIENTS:\n${baseIngredients}\n\nDIRECTIONS:\n${directions}`, e)}
                   >
                     📋 Salin Teks
                   </button>
@@ -1127,7 +1265,12 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
         {/* Modal Footer */}
         <div className="recipe-modal-footer">
           <div>
-            {pushToast && (
+            {dbSyncToast && (
+              <span style={{ fontSize: '0.78rem', fontWeight: 600, color: dbSyncToast.type === 'success' ? 'var(--status-success)' : (dbSyncToast.type === 'error' ? 'var(--status-danger)' : 'var(--status-warning)') }}>
+                {dbSyncToast.msg}
+              </span>
+            )}
+            {pushToast && !dbSyncToast && (
               <span style={{ fontSize: '0.78rem', fontWeight: 600, color: pushToast.type === 'success' ? 'var(--status-success)' : (pushToast.type === 'error' ? 'var(--status-danger)' : 'var(--text-muted)') }}>
                 {pushToast.msg}
               </span>
@@ -1135,7 +1278,16 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
           </div>
           <div style={{ display: 'flex', gap: '10px' }}>
             <button type="button" className="btn btn-secondary" onClick={onClose}>Batal</button>
-            <button type="button" className="btn btn-outline" onClick={handleDownloadJson}>💾 Unduh JSON</button>
+            <button
+              type="button"
+              className="btn btn-outline"
+              onClick={() => handleSaveRecipeToDb(false)}
+              disabled={savingDraft}
+            >
+              <span>{savingDraft ? '⏳' : '💾'}</span>
+              <span>{savingDraft ? 'Menyimpan...' : 'Simpan Draft'}</span>
+            </button>
+            <button type="button" className="btn btn-outline" onClick={handleDownloadJson}>Unduh JSON</button>
             <button
               type="button"
               className="btn btn-primary"

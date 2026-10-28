@@ -93,7 +93,7 @@ export const POST = withTenantContext(async (req) => {
       }, { status: pushRes.status || 500 });
     }
 
-    // Rekam audit trail ekspor resep ke database
+    // Rekam audit trail ekspor resep ke database & update tabel sumber
     try {
       const { recordRecipeExport } = await import('@/lib/recipe-export-records');
       await recordRecipeExport({
@@ -105,8 +105,47 @@ export const POST = withTenantContext(async (req) => {
         webadminRecipeId: pushData.recipe_id || pushData.id || null,
         videoUrl: videoUrl || null
       });
+
+      // Update data resep final dan media ke tabel sumber database
+      const { getDb } = await import('@/lib/db');
+      const db = getDb();
+      const itemId = body.sourceItemId || body.id;
+      if (itemId) {
+        if (body.source === 'labs') {
+          try {
+            await db.prepare(`
+              UPDATE recipe_items
+              SET recipe_title = ?, recipe_markdown_text = ?,
+                  img_grid_path = COALESCE(?, img_grid_path)
+              WHERE id = ?
+            `).run(recipeTitle.trim(), recipeDescriptionHtml || '', imageUrl || null, itemId);
+          } catch (e) {
+            console.warn('[Push Webadmin Labs Update Warning]:', e.message);
+          }
+        } else if (body.source === 'campaign' || body.originType === 'pillar') {
+          const item = await db.prepare('SELECT result_json FROM pillar_campaign_items WHERE id = ?').get(itemId);
+          if (item) {
+            let parsed = {};
+            try { parsed = JSON.parse(item.result_json || '{}'); } catch (_) {}
+            parsed.recipe = {
+              ...(parsed.recipe || {}),
+              title: recipeTitle.trim(),
+              is_exported: true,
+              last_export_target: body.targetApp || 'Android Webadmin',
+              last_exported_at: new Date().toISOString()
+            };
+            await db.prepare(`
+              UPDATE pillar_campaign_items
+              SET result_json = ?,
+                  ffmpeg_output_path = COALESCE(?, ffmpeg_output_path),
+                  t2i_start_frame_path = COALESCE(?, t2i_start_frame_path)
+              WHERE id = ?
+            `).run(JSON.stringify(parsed), videoUrl || null, imageUrl || null, itemId);
+          }
+        }
+      }
     } catch (auditErr) {
-      console.warn('[Audit Log Warning] Gagal menyimpan log ekspor:', auditErr.message);
+      console.warn('[Audit/Sync Warning] Gagal mengupdate data sumber resep:', auditErr.message);
     }
 
     return NextResponse.json({

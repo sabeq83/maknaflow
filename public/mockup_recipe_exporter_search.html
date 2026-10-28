@@ -216,6 +216,34 @@
       color: var(--text-secondary);
       border: 1px solid var(--border-subtle);
     }
+    .badge-exported-solid {
+      background: var(--status-success);
+      color: #ffffff;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      letter-spacing: 0.3px;
+    }
+    .badge-unexported {
+      background: var(--surface-interactive);
+      color: var(--text-muted);
+      border: 1px dashed var(--border-strong);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .recipe-card.is-exported {
+      border: 1.5px solid var(--status-success);
+    }
     .card-body {
       padding: 16px;
       flex: 1;
@@ -573,11 +601,16 @@
                            item.origin_type === 'planner' ? 'badge-planner' : 'badge-labs';
         
         const card = document.createElement('div');
-        card.className = 'recipe-card';
+        card.className = `recipe-card ${item.isExported ? 'is-exported' : ''}`;
         card.innerHTML = `
           <div class="card-header">
             <span class="badge-origin ${badgeClass}">● ${item.origin_label}</span>
-            <span style="font-size:0.75rem; color:var(--text-muted);">#${item.id}</span>
+            <div style="display:flex; align-items:center; gap:6px;">
+              ${item.isExported 
+                ? `<span class="badge-exported-solid">✅ SUDAH DIEKSPOR</span>`
+                : `<span class="badge-unexported">⏳ Belum Diekspor</span>`}
+              <span style="font-size:0.75rem; color:var(--text-muted);">#${item.id}</span>
+            </div>
           </div>
           <div class="card-body">
             <div class="card-campaign-ref">🏷️ ${item.campaign_id}</div>
@@ -589,8 +622,8 @@
           </div>
           <div class="card-footer">
             <span style="color:var(--text-muted);">⏱️ ${item.time} • ${item.category}</span>
-            <span style="font-weight:600; color:${item.isExported ? 'var(--status-success)' : 'var(--status-warning)'}">
-              ${item.isExported ? '✓ Sudah Diekspor' : '⏳ Belum Diekspor'}
+            <span style="font-weight:700; font-size:0.78rem; color:${item.isExported ? 'var(--status-success)' : 'var(--text-muted)'}">
+              ${item.isExported ? '✓ Terkirim ke Webadmin' : '—'}
             </span>
           </div>
         `;

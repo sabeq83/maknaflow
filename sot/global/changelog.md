@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.105 — Penyempurnaan Recipe Exporter: Badge Exported Jelas, Clipboard Fallback, Cover 4:3 T2I & Database Persistence (28/10/2026)
+- Badge exported tampak jauh lebih jelas dan tegas dengan solid fill hijau, aksen border kartu dan status terkirim
+- Tombol salin URL R2 dan prompt dilengkapi helper safeCopyToClipboard dengan fallback execCommand untuk non-HTTPS
+- Tombol Generate Cover 4:3 via G-Labs worker pada box prompt T2I
+- Persistensi database: auto-save hasil AI Auto Enrich, tombol Simpan Draft, dan sinkronisasi naskah final saat push webadmin
+
 ## V2.32.104 — Fitur Pencarian Dinamis, Filter Asal Kampanye & Setting Bahasa Recipe Exporter (28/10/2026)
 - Fix SQL tenant query pillar_campaign_items dan mapping metadata asal
 - Filter chip asal kampanye dan dynamic selector di UI

@@ -314,13 +314,13 @@ export default function RecipeExporterPage() {
                   key={item.id}
                   style={{
                     background: 'var(--surface)',
-                    border: '1px solid var(--border-subtle)',
+                    border: item.isExported ? '1.5px solid var(--status-success)' : '1px solid var(--border-subtle)',
                     borderRadius: 'var(--radius-md)',
                     overflow: 'hidden',
                     display: 'flex',
                     flexDirection: 'column',
-                    boxShadow: 'var(--shadow-card)',
-                    transition: 'transform var(--transition)'
+                    boxShadow: item.isExported ? '0 0 0 1px var(--status-success), var(--shadow-card)' : 'var(--shadow-card)',
+                    transition: 'all var(--transition)'
                   }}
                 >
                   {/* Media Cover */}
@@ -337,14 +337,34 @@ export default function RecipeExporterPage() {
                       {item.source}
                     </span>
 
-                    <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '6px' }}>
+                    <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '6px', alignItems: 'center' }}>
                       {item.isExported && (
-                        <span style={{ background: 'var(--status-success-soft)', color: 'var(--status-success)', border: '1px solid var(--status-success)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.68rem', fontWeight: 700 }}>
-                          ✓ Exported
+                        <span style={{
+                          background: 'var(--status-success)',
+                          color: '#ffffff',
+                          padding: '3px 10px',
+                          borderRadius: '4px',
+                          fontSize: '0.74rem',
+                          fontWeight: 800,
+                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.35)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          letterSpacing: '0.3px'
+                        }}>
+                          ✅ SUDAH DIEKSPOR
                         </span>
                       )}
                       {item.hasVideo && (
-                        <span style={{ background: 'var(--status-warning-soft)', color: 'var(--status-warning)', border: '1px solid var(--status-warning)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.68rem', fontWeight: 700 }}>
+                        <span style={{
+                          background: 'var(--status-warning)',
+                          color: '#ffffff',
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          boxShadow: '0 2px 6px rgba(0, 0, 0, 0.25)'
+                        }}>
                           🎬 Video
                         </span>
                       )}
@@ -398,9 +418,28 @@ export default function RecipeExporterPage() {
 
                     {/* Export Status Badge info */}
                     {item.isExported ? (
-                      <div style={{ padding: '6px 10px', background: 'var(--status-success-soft)', borderRadius: '4px', border: '1px solid var(--status-success)', fontSize: '0.72rem', color: 'var(--status-success)', marginTop: '4px' }}>
-                        ✓ Terkirim ke <strong>{item.lastExportTarget || 'Android Webadmin'}</strong>
-                        {item.lastExportedAt ? ` • ${new Date(item.lastExportedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}` : ''}
+                      <div style={{
+                        padding: '8px 12px',
+                        background: 'var(--status-success-soft)',
+                        borderRadius: '6px',
+                        border: '1.5px solid var(--status-success)',
+                        fontSize: '0.75rem',
+                        color: 'var(--status-success)',
+                        fontWeight: 600,
+                        marginTop: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span>✅</span>
+                          <span>Terkirim ke <strong>{item.lastExportTarget || 'Android Webadmin'}</strong></span>
+                        </div>
+                        {item.lastExportedAt && (
+                          <span style={{ fontSize: '0.7rem', opacity: 0.9 }}>
+                            {new Date(item.lastExportedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        )}
                       </div>
                     ) : null}
 

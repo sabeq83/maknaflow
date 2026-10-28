@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Recipe Export Modal — Clipboard, T2I Cover & Database Persistence</title>
+  <link rel="stylesheet" href="/theme.css">
+  <style>
+    :root {
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #f1f5f9;
+      --surface-subtle: #e2e8f0;
+      --border-subtle: #cbd5e1;
+      --border-strong: #94a3b8;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --action-primary: #2563eb;
+      --action-primary-hover: #1d4ed8;
+      --on-action-primary: #ffffff;
+      --status-success: #16a34a;
+      --status-success-soft: #dcfce7;
+      --status-warning: #ea580c;
+      --status-warning-soft: #ffedd5;
+      --status-info: #0284c7;
+      --status-info-soft: #e0f2fe;
+      --radius-sm: 8px;
+      --radius-xs: 4px;
+      --shadow-modal: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --surface: #0f172a;
+        --surface-raised: #1e293b;
+        --surface-interactive: #334155;
+        --surface-subtle: #475569;
+        --border-subtle: #334155;
+        --border-strong: #64748b;
+        --text-primary: #f8fafc;
+        --text-secondary: #cbd5e1;
+        --text-muted: #94a3b8;
+        --action-primary: #3b82f6;
+        --action-primary-hover: #2563eb;
+        --on-action-primary: #ffffff;
+        --status-success: #22c55e;
+        --status-success-soft: rgba(34, 197, 94, 0.15);
+        --status-warning: #f97316;
+        --status-warning-soft: rgba(249, 115, 22, 0.15);
+        --status-info: #38bdf8;
+        --status-info-soft: rgba(56, 189, 248, 0.15);
+        --shadow-modal: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+      }
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .modal-container {
+      width: 100%;
+      max-width: 960px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-modal);
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .modal-header {
+      padding: 16px 20px;
+      background: var(--surface-raised);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-body {
+      padding: 20px;
+      max-height: 75vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .section-box {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      padding: 14px;
+      background: var(--surface-interactive);
+    }
+    .section-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+    .btn-outline {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+    .btn-outline:hover {
+      background: var(--surface-interactive);
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+    .btn-success {
+      background: var(--status-success);
+      color: #ffffff;
+    }
+    .textarea-box {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px 10px;
+      background: var(--surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      font-family: inherit;
+      font-size: 0.78rem;
+      line-height: 1.4;
+      resize: vertical;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+    .badge-info {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+    }
+    .badge-success {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+    }
+    .modal-footer {
+      padding: 14px 20px;
+      background: var(--surface-raised);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .toast-pill {
+      font-size: 0.76rem;
+      padding: 4px 10px;
+      border-radius: var(--radius-xs);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <div style="max-width:960px; width:100%; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+    <div>
+      <h2 style="margin:0 0 4px 0; font-size:1.2rem;">Simulasi UI: Recipe Export Modal</h2>
+      <p style="margin:0; font-size:0.8rem; color:var(--text-muted);">
+        Menguji tombol salin non-HTTPS, tombol <strong>🎨 Generate Cover (4:3)</strong> via G-Labs, dan tombol <strong>💾 Simpan Draft</strong> ke database.
+      </p>
+    </div>
+    <span class="badge badge-info">v2.32.105 Mockup</span>
+  </div>
+
+  <div class="modal-container">
+    <!-- Header Modal -->
+    <div class="modal-header">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:1.1rem;">📦</span>
+        <div>
+          <div style="font-weight:700; font-size:0.95rem;">Export Resep ke Webadmin / APK</div>
+          <div style="font-size:0.75rem; color:var(--text-muted);">ID: #item_101 • Sumber: Pillar Campaign (opc_261026_rdsm89)</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <span id="dbSyncStatus" class="toast-pill" style="background:var(--status-info-soft); color:var(--status-info);">
+          ☁️ Database Sync: Ready
+        </span>
+      </div>
+    </div>
+
+    <!-- Body Modal -->
+    <div class="modal-body">
+
+      <!-- AI Auto Enrich Toolbar -->
+      <div class="section-box" style="background:var(--surface);">
+        <div class="section-title">
+          <span>✨ AI Auto Enrich & Generator (Gemini Waterfall)</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <label style="font-size:0.75rem; color:var(--text-secondary);">Bahasa Target:</label>
+            <select id="selLang" style="padding:3px 8px; font-size:0.75rem; border-radius:var(--radius-xs); border:1px solid var(--border-subtle); background:var(--surface); color:var(--text-primary);">
+              <option value="auto">🌐 Otomatis (Deteksi Bahasa Resep)</option>
+              <option value="id" selected>🇮🇩 Bahasa Indonesia (Resep Nusantara)</option>
+              <option value="en">🇬🇧 English (Global Recipe)</option>
+            </select>
+            <button class="btn btn-primary" onclick="simulateAiEnrich()">⚡ AI Auto Enrich & Simpan</button>
+          </div>
+        </div>
+        <div style="font-size:0.75rem; color:var(--text-muted);">
+          Memoles ringkasan, membersihkan format gramatur bahan, dan menghasilkan prompt T2I 4:3 siap render. Hasil enrich otomatis disimpan ke database.
+        </div>
+      </div>
+
+      <!-- Video & R2 CDN Box -->
+      <div class="section-box">
+        <div class="section-title">
+          <span>🎥 Video Media & Cloudflare R2 CDN</span>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-outline" onclick="safeCopy(document.getElementById('videoR2Url').value, this)">
+              📋 Salin URL R2
+            </button>
+          </div>
+        </div>
+        <input type="text" id="videoR2Url" class="textarea-box" style="height:32px;" value="https://r2.maknaflow.com/recipes/video_high_protein_curry_final.mp4">
+        <div style="font-size:0.7rem; color:var(--text-muted); margin-top:4px;">
+          *Tombol salin telah dilengkapi fallback universal <code>document.execCommand('copy')</code> sehingga aman berfungsi di HTTP/Tailscale IP.
+        </div>
+      </div>
+
+      <!-- T2I Prompt 4:3 Box & Generate Cover Button -->
+      <div class="section-box">
+        <div class="section-title">
+          <span>🎨 T2I Prompt (Aspect Ratio 4:3 untuk Cover Resep)</span>
+          <div style="display:flex; gap:6px;">
+            <button id="btnGenCover" class="btn btn-primary" onclick="simulateGenerateCover(this)">
+              🎨 Generate Cover (4:3)
+            </button>
+            <button class="btn btn-outline" onclick="safeCopy(document.getElementById('t2iPrompt').value, this)">
+              📋 Salin Prompt
+            </button>
+          </div>
+        </div>
+        <textarea id="t2iPrompt" class="textarea-box" rows="3">A high quality commercial culinary photo of Indonesian High Protein Tahu Telur Curry, garnished with freshly chopped scallions and fried shallots, 4:3 horizontal aspect ratio, warm lighting, cinematic depth of field, food photography 8k.</textarea>
+        
+        <!-- Preview Cover Rendered -->
+        <div id="coverPreviewBox" style="margin-top:10px; display:flex; align-items:center; gap:12px; padding:10px; background:var(--surface); border:1px dashed var(--border-strong); border-radius:var(--radius-xs);">
+          <div id="coverImgHolder" style="width:120px; height:90px; background:var(--surface-interactive); border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; color:var(--text-muted); text-align:center; overflow:hidden;">
+            <span id="coverPlaceholderText">Cover 4:3<br>Belum Ada</span>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:0.8rem; font-weight:700;" id="coverStatusTitle">Cover Status: Menggunakan Placeholder</div>
+            <div style="font-size:0.72rem; color:var(--text-muted);" id="coverStatusSub">Klik tombol <strong>🎨 Generate Cover (4:3)</strong> untuk meminta worker G-Labs merender gambar resolusi tinggi.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recipe Form Details -->
+      <div class="section-box">
+        <div class="section-title">
+          <span>📝 Ringkasan & Naskah Bahan</span>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div>
+            <label style="font-size:0.75rem; font-weight:600; color:var(--text-secondary);">Judul Resep</label>
+            <input type="text" id="recipeTitle" class="textarea-box" style="height:32px; margin-top:4px;" value="Tahu Telur Kari Tinggi Protein">
+          </div>
+          <div>
+            <label style="font-size:0.75rem; font-weight:600; color:var(--text-secondary);">Waktu Memasak</label>
+            <input type="text" id="recipeTime" class="textarea-box" style="height:32px; margin-top:4px;" value="25 mins">
+          </div>
+        </div>
+        <div style="margin-top:10px;">
+          <label style="font-size:0.75rem; font-weight:600; color:var(--text-secondary);">Ringkasan Singkat (Summary)</label>
+          <textarea id="recipeSummary" class="textarea-box" rows="2" style="margin-top:4px;">Sajian lezat tinggi protein berbahan dasar tahu sutra dan telur berpadu dengan kuah kari gurih kaya rempah nusantara.</textarea>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer Modal -->
+    <div class="modal-footer">
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="btn btn-outline" onclick="simulateSaveDraft(this)">
+          💾 Simpan Draft ke Database
+        </button>
+        <span style="font-size:0.72rem; color:var(--text-muted);">
+          *Menyimpan naskah, cover, dan prompt ke tabel sumber tanpa mengubah webadmin
+        </span>
+      </div>
+
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-outline" onclick="alert('Modal ditutup.')">Batal</button>
+        <button class="btn btn-success" onclick="simulatePushWebadmin(this)">🚀 Push ke Webadmin & Simpan Database</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Universal Clipboard Copy with Fallback
+    function safeCopy(text, btnElement) {
+      if (!text) {
+        alert('Tidak ada teks untuk disalin.');
+        return;
+      }
+      
+      const doFallback = () => {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        try {
+          document.execCommand('copy');
+        } catch (err) {
+          console.error('Fallback execCommand copy error:', err);
+        }
+        document.body.removeChild(textarea);
+      };
+
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        navigator.clipboard.writeText(text).catch(doFallback);
+      } else {
+        doFallback();
+      }
+
+      if (btnElement) {
+        const originalText = btnElement.innerText;
+        btnElement.innerText = '✅ Disalin!';
+        btnElement.style.borderColor = 'var(--status-success)';
+        btnElement.style.color = 'var(--status-success)';
+        setTimeout(() => {
+          btnElement.innerText = originalText;
+          btnElement.style.borderColor = '';
+          btnElement.style.color = '';
+        }, 1500);
+      }
+    }
+
+    // Simulasi AI Auto Enrich
+    function simulateAiEnrich() {
+      const lang = document.getElementById('selLang').value;
+      const statusPill = document.getElementById('dbSyncStatus');
+      statusPill.innerHTML = '⏳ AI Menghasilkan & Menyimpan...';
+      statusPill.style.background = 'var(--status-warning-soft)';
+      statusPill.style.color = 'var(--status-warning)';
+
+      setTimeout(() => {
+        if (lang === 'en') {
+          document.getElementById('recipeTitle').value = 'High Protein Tofu & Egg Curry';
+          document.getElementById('recipeSummary').value = 'A savory, nutrient-packed dish featuring soft tofu and eggs simmered in rich Indonesian curry spices.';
+        } else {
+          document.getElementById('recipeTitle').value = 'Tahu Telur Kari Tinggi Protein Super Lembut';
+          document.getElementById('recipeSummary').value = 'Olahan tahu telur berprotein tinggi dengan kuah kari rempah kuning yang gurih alami dan ramah diet sehat.';
+        }
+        statusPill.innerHTML = '✅ Tersimpan di Database';
+        statusPill.style.background = 'var(--status-success-soft)';
+        statusPill.style.color = 'var(--status-success)';
+        alert('✨ AI Auto Enrich selesai dan hasil pemolesan telah otomatis disimpan ke database (tabel sumber)!');
+      }, 1000);
+    }
+
+    // Simulasi Generate Cover via G-Labs
+    function simulateGenerateCover(btn) {
+      const prompt = document.getElementById('t2iPrompt').value;
+      if (!prompt.trim()) {
+        alert('Prompt T2I kosong!');
+        return;
+      }
+      btn.disabled = true;
+      btn.innerText = '⏳ Merender di G-Labs (4:3)...';
+
+      const holder = document.getElementById('coverImgHolder');
+      const title = document.getElementById('coverStatusTitle');
+      const sub = document.getElementById('coverStatusSub');
+      holder.innerHTML = '⏳ 4:3';
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerText = '🎨 Generate Cover (4:3)';
+        holder.innerHTML = '<img src="/uploads/recipes/sample_cover_4_3.jpg" style="width:100%; height:100%; object-fit:cover;" onerror="this.src=\'data:image/svg+xml;utf8,<svg xmlns=\\\'http://www.w3.org/2000/svg\\\' width=\\\'120\\\' height=\\\'90\\\' viewBox=\\\'0 0 120 90\\\'><rect width=\\\'120\\\' height=\\\'90\\\' fill=\\\'%232563eb\\\'/><text x=\\\'60\\\' y=\\\'50\\\' fill=\\\'white\\\' font-size=\\\'12\\\' text-anchor=\\\'middle\\\' font-family=\\\'sans-serif\\\'>G-Labs 4:3</text></svg>\'">';
+        title.innerHTML = '✓ Cover 4:3 Berhasil Dirender & Disimpan';
+        title.style.color = 'var(--status-success)';
+        sub.innerHTML = 'File disimpan di <code>/public/uploads/recipes/recipe_cover_101_sample.jpg</code> dan database telah diperbarui.';
+        alert('🎨 G-Labs berhasil merender cover rasio 4:3! Cover telah dihubungkan ke resep ini.');
+      }, 1500);
+    }
+
+    // Simulasi Simpan Draft
+    function simulateSaveDraft(btn) {
+      btn.disabled = true;
+      btn.innerText = '⏳ Menyimpan...';
+      const statusPill = document.getElementById('dbSyncStatus');
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerText = '💾 Simpan Draft ke Database';
+        statusPill.innerHTML = '✅ Draft Tersimpan';
+        statusPill.style.background = 'var(--status-success-soft)';
+        statusPill.style.color = 'var(--status-success)';
+        alert('✓ Seluruh data resep (judul, naskah bahan, cover, prompt) berhasil disimpan permanen ke database!');
+      }, 800);
+    }
+
+    // Simulasi Push ke Webadmin
+    function simulatePushWebadmin(btn) {
+      btn.disabled = true;
+      btn.innerText = '⏳ Menerbitkan ke Webadmin...';
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerText = '🚀 Push ke Webadmin & Simpan Database';
+        alert('🎉 Resep berhasil diterbitkan ke Webadmin (ID: #Sync109) dan database sumber telah diperbarui dengan status: Sudah Diekspor!');
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
