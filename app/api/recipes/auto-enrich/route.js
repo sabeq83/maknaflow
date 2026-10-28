@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { executeWithKeyPool } from '@/lib/gemini';
-import { withTenantContext } from '@/lib/auth';
-import { detectRecipeLanguage } from '@/lib/recipe-export-helper';
+import { NextResponse } from 'next/server.js';
+import { getGeminiModel } from '../../../../lib/gemini.js';
+import { parseGeminiJSON } from '../../../../lib/json-parser.js';
+import { withTenantContext } from '../../../../lib/auth.js';
+import { detectRecipeLanguage } from '../../../../lib/recipe-export-helper.js';
 
 export const POST = withTenantContext(async (req) => {
   try {
@@ -67,40 +67,14 @@ Hasilkan output JSON valid persis dengan struktur berikut:
   "t2i_prompt_4_3": "Award-winning 4:3 food photography of [dish], eye-level 45-degree angle, rustic styling, natural appetizing lighting, shallow depth of field --ar 4:3 --stylize 250"
 }`;
 
-    // Zero-Budget AI Engine: Wajib 100% menggunakan Free Key Pool milik tenant aktif (Rp 0)
-    const rawResponse = await executeWithKeyPool(1, async (activeApiKey) => {
-      const genAI = new GoogleGenerativeAI(activeApiKey);
-      const model = genAI.getGenerativeModel({
-        model: 'gemini-3.6-flash',
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 2048,
-          responseMimeType: 'application/json'
-        }
-      });
+    // Resilient AI Engine (Pillar & Multiplier Standard: Waterfall Cascade + Key Pool Rotation)
+    const model = await getGeminiModel();
+    const res = await model.generateContent(prompt);
+    const rawResponse = res.response.text();
 
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('AI Auto Enrich timed out setelah 20 detik')), 20000)
-      );
-
-      const res = await Promise.race([model.generateContent(prompt), timeoutPromise]);
-      return res.response.text();
-    }, { enforceFreePool: true });
-
-    const cleanJson = String(rawResponse || '')
-      .replace(/```json\n?|\n?```/g, '')
-      .trim();
-
-    let result;
-    try {
-      result = JSON.parse(cleanJson);
-    } catch (e) {
-      const jsonMatch = cleanJson.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        result = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error('Gagal mem-parsing respon AI sebagai format JSON resep valid.');
-      }
+    const result = parseGeminiJSON(rawResponse);
+    if (!result || typeof result !== 'object') {
+      throw new Error('Gagal mem-parsing respon AI sebagai format JSON resep valid.');
     }
 
     return NextResponse.json({

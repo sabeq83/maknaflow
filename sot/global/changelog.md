@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.103 — Penyelarasan AI Auto Enrich Recipe Exporter ke Resilient Gemini Waterfall Engine (28/10/2026)
+- Ganti manual Gemini call dengan getGeminiModel cascade
+- Hapus timeout 20 detik
+- Gunakan parseGeminiJSON
+
 ## V2.32.102 — Upgrade Multiplier Prompt Engine to Pillar Cinema Standard (28/10/2026)
 - Phase One 150MP macro optics standard
 - Direct anchor and distinct blurred wardrobe lock
