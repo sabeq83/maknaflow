@@ -105,6 +105,18 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
     }
   }, [audioMode]);
 
+  // Load persistent presets for active tenant from tenant_settings
+  useEffect(() => {
+    fetch('/api/recipes/presets')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && d.presets && typeof d.presets === 'object') {
+          setPresets(prev => ({ ...prev, ...d.presets }));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // Build Standard HTML Description
   const activeBaseArray = baseIngredients.split('\n').map(s => s.trim()).filter(Boolean);
   const activeDirectionsArray = directions.split('\n').map(s => s.trim()).filter(Boolean);
@@ -534,12 +546,26 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
                     type="button"
                     className="btn btn-primary"
                     style={{ alignSelf: 'flex-end', padding: '4px 12px', fontSize: '0.72rem' }}
-                    onClick={() => {
+                    onClick={async () => {
+                      try {
+                        const res = await fetch('/api/recipes/presets', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ presets })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                          alert('Konfigurasi preset berhasil disimpan untuk tenant ini!');
+                        } else {
+                          alert(`Gagal menyimpan preset: ${data.error}`);
+                        }
+                      } catch (e) {
+                        alert(`Gagal menyimpan preset: ${e.message}`);
+                      }
                       setEditPresetOpen(false);
-                      alert('Konfigurasi preset berhasil disimpan sementara!');
                     }}
                   >
-                    Tutup & Simpan
+                    Simpan Konfigurasi Tenant
                   </button>
                 </div>
               )}

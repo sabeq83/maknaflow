@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.98 — Recipe Exporter Multi-Tenant & Zero-Budget AI Key Pool (28/10/2026)
+- Enforce Free Gemini Key Pool (Rp 0) per tenant di endpoint auto-enrich resep
+- Integrasikan resep kampanye Multiplier Lab ke katalog Recipe Exporter
+- Simpan preset Webadmin per tenant di tenant_settings via API presets
+- Amankan seluruh pipeline resep dengan withTenantContext
+
 ## V2.32.97 — Perbaikan Video Mute Lokal, Smart Language Alignment & Perataan Textbox (28/10/2026)
 - Membaca Video Lokal Mac Mini Langsung untuk FFmpeg Mute
 - Upload Otomatis ke Cloudflare R2 Mengikuti Setting

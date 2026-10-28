@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getGeminiModel } from '@/lib/gemini';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { executeWithKeyPool } from '@/lib/gemini';
 import { withTenantContext } from '@/lib/auth';
 import { detectRecipeLanguage } from '@/lib/recipe-export-helper';
 
@@ -66,10 +67,25 @@ Hasilkan output JSON valid persis dengan struktur berikut:
   "t2i_prompt_4_3": "Award-winning 4:3 food photography of [dish], eye-level 45-degree angle, rustic styling, natural appetizing lighting, shallow depth of field --ar 4:3 --stylize 250"
 }`;
 
-    // Otomatis membaca API Key dari tenant_settings / gemini_key_pool / .env
-    const model = await getGeminiModel();
-    const response = await model.generateContent(prompt);
-    const rawResponse = response.response.text();
+    // Zero-Budget AI Engine: Wajib 100% menggunakan Free Key Pool milik tenant aktif (Rp 0)
+    const rawResponse = await executeWithKeyPool(1, async (activeApiKey) => {
+      const genAI = new GoogleGenerativeAI(activeApiKey);
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-3.6-flash',
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 2048,
+          responseMimeType: 'application/json'
+        }
+      });
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('AI Auto Enrich timed out setelah 20 detik')), 20000)
+      );
+
+      const res = await Promise.race([model.generateContent(prompt), timeoutPromise]);
+      return res.response.text();
+    }, { enforceFreePool: true });
 
     const cleanJson = String(rawResponse || '')
       .replace(/```json\n?|\n?```/g, '')

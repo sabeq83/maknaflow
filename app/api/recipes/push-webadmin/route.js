@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
+import { withTenantContext } from '@/lib/auth';
 
-export async function POST(req) {
+export const POST = withTenantContext(async (req) => {
   try {
     const body = await req.json();
     const {
@@ -118,4 +119,4 @@ export async function POST(req) {
   } catch (err) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
-}
+});

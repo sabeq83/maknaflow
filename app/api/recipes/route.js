@@ -93,7 +93,7 @@ export const GET = withTenantContext(async (req) => {
     }
 
     // Source: Campaign (Pillar Campaign Items & Content Planner Rows)
-    // 1. Ambil dari pillar_campaign_items (Pillar Campaign Pipeline yang telah diproduksi)
+    // 1. Ambil dari pillar_campaign_items dengan filter tenant_id ketat
     let pillarRows = [];
     try {
       pillarRows = await db.prepare(`
@@ -111,12 +111,13 @@ export const GET = withTenantContext(async (req) => {
           pc.content_pillar
         FROM pillar_campaign_items pci
         LEFT JOIN pillar_campaigns pc ON pci.campaign_id = pc.id
-        WHERE (pci.content_kind = 'recipe_campaign' 
+        WHERE (pci.tenant_id = ? OR pc.tenant_id = ? OR pci.tenant_id = 'default_tenant')
+          AND (pci.content_kind = 'recipe_campaign' 
                OR pci.result_json LIKE '%"recipe":%' 
                OR pci.row_creative_payload LIKE '%recipe_idea%')
         ORDER BY pci.id DESC
-        LIMIT 200
-      `).all();
+        LIMIT 100
+      `).all(tenantId, tenantId);
     } catch (e) {
       console.warn('[API /api/recipes] Failed to query pillar_campaign_items:', e.message);
       pillarRows = [];
@@ -312,8 +313,78 @@ export const GET = withTenantContext(async (req) => {
       };
     });
 
-    // Gabungkan: letakkan item pilar yang telah diproduksi di baris awal
-    const combinedCampaign = [...mappedPillar, ...mappedPlanner];
+    // 3. Ambil dari re_multiplier_tasks (Multiplier Lab yang menghasilkan resep)
+    let multiplierRows = [];
+    try {
+      multiplierRows = await db.prepare(`
+        SELECT 
+          id, batch_id, campaign_name, yt_title, new_caption,
+          remake_storyboard_json, ffmpeg_output_path, t2i_images_json, created_at
+        FROM re_multiplier_tasks
+        WHERE (tenant_id = ? OR tenant_id = 'default_tenant') 
+          AND generate_recipe = 1
+        ORDER BY created_at DESC
+        LIMIT 100
+      `).all(tenantId);
+    } catch (e) {
+      console.warn('[API /api/recipes] Failed to query re_multiplier_tasks:', e.message);
+      multiplierRows = [];
+    }
+
+    const mappedMultiplier = (multiplierRows || []).map(row => {
+      const exports = exportMap.get(row.id) || exportMap.get(`mult_${row.id}`) || [];
+      const isExported = exports.length > 0;
+      const lastExport = isExported ? exports[0] : null;
+
+      const rawCaption = row.new_caption || '';
+      const parsed = parseRecipeDescriptionHtml(rawCaption);
+
+      let images = [];
+      try {
+        if (row.t2i_images_json) {
+          images = typeof row.t2i_images_json === 'string' ? JSON.parse(row.t2i_images_json) : row.t2i_images_json;
+        }
+      } catch (_) {}
+      const firstImage = Array.isArray(images) && images.length > 0 ? images[0] : '';
+
+      const rawVideo = row.ffmpeg_output_path || '';
+      const isR2Url = Boolean(rawVideo && (rawVideo.includes('.r2.cloudflarestorage.com') || rawVideo.includes('video.ast402.my.id') || rawVideo.includes('pub-r2')));
+      const videoMutedReady = Boolean(isR2Url || (rawVideo && rawVideo.includes('_muted.mp4')));
+
+      const title = row.yt_title || (row.campaign_name ? row.campaign_name.replace(/^\[.*?\]\s*-\s*/, '') : 'Resep Multiplier Lab');
+      const hasSummary = Boolean(parsed.summary && parsed.summary.trim().length > 0);
+
+      return {
+        id: row.id,
+        sourceType: 'campaign',
+        source: `Multiplier Lab (${row.campaign_name || row.batch_id || 'Batch'} #${row.id})`,
+        title,
+        time: '15 mins prep | 20 mins cook',
+        category: 'Healthy Food',
+        image: firstImage,
+        summary: parsed.summary || '',
+        baseIng: (parsed.baseIngredients || []).join('\n'),
+        groups: parsed.ingredientGroups || [],
+        directions: (parsed.directions || []).join('\n'),
+        rawMarkdown: rawCaption,
+        hasSummary,
+        hasVideo: Boolean(rawVideo),
+        hasLocalVideo: Boolean(rawVideo && !rawVideo.startsWith('http')),
+        videoMutedReady,
+        sourceVideoPath: rawVideo,
+        video_url: rawVideo,
+        media_url: rawVideo,
+        videoR2Url: isR2Url ? rawVideo : '',
+        isExported,
+        lastExportTarget: lastExport ? lastExport.target_app : null,
+        lastExportedAt: lastExport ? lastExport.exported_at : null,
+        exportCount: exports.length,
+        created_at: row.created_at
+      };
+    });
+
+    // Gabungkan: letakkan item Multiplier Lab & Pilar yang telah diproduksi di baris awal
+    const combinedCampaign = [...mappedMultiplier, ...mappedPillar, ...mappedPlanner];
 
     return NextResponse.json({ success: true, data: combinedCampaign, source: 'campaign' });
   } catch (err) {

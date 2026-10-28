@@ -5,10 +5,11 @@ import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { uploadVideoBufferToR2 } from '@/lib/cloudflare-r2-client';
 import { getActiveTenantId } from '@/lib/tenant-context';
+import { withTenantContext } from '@/lib/auth';
 
 const execFileAsync = promisify(execFile);
 
-export async function POST(req) {
+export const POST = withTenantContext(async (req) => {
   let tmpMutedPath = null;
   let tmpSource = null;
   try {
@@ -139,5 +140,5 @@ export async function POST(req) {
     }
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
-}
+});
 
