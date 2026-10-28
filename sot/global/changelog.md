@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.100 — Fix Multiplier Lab Visual Identity V2 Resolution (28/10/2026)
+- Authoritative V2 preset resolution in re-multiplier-worker
+- Clean hardcoded hijab wardrobe in prompts.js
+- Prevent legacy syari fallback in MultiplierConfigurationForm
+
 ## V2.32.99 — Register 3 Visual Identity Presets (Dapur Botani, Nutribake, Siasat Sehat) (28/10/2026)
 - Register Dapur Botani Earthy Apothecary 3D preset in Staging & Dev
 - Register Nutribake Clean Modern Baking preset with anti-marble guarantee
