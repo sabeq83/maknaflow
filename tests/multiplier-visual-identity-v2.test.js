@@ -62,6 +62,13 @@ test('1. Multiplier Prompt Builder injects V2 Nutribake environment, wardrobe, a
   assert.ok(prompt.includes('syari dress'), 'Larangan busana syari wajib tercantum');
   assert.ok(prompt.includes('white marble veining'), 'Larangan marmer wajib tercantum');
 
+  // Verifikasi Pillar Cinema Parity: Optics 150MP, Food Truth, Cookware Truth
+  assert.ok(prompt.includes('Phase One XF IQ4 (150MP)'), 'Kamera Phase One 150MP wajib ada');
+  assert.ok(prompt.includes('Top-down 45-degree tabletop macro'), 'Angle 45 derajat makro wajib ada');
+  assert.ok(prompt.includes('(Food Truth:'), 'Slot Food Truth wajib ada');
+  assert.ok(prompt.includes('(Cookware Truth:'), 'Slot Cookware Truth wajib ada');
+  assert.ok(!prompt.includes('(Micro-Expression:'), 'Micro-Expression DILARANG ada pada mode kuliner/faceless');
+
   // Verifikasi pembersihan total elemen syari/hijab lama
   assert.ok(!prompt.includes('[Hijab/Wardrobe Style]'), 'String hardcoded [Hijab/Wardrobe Style] DILARANG ada');
   assert.ok(!prompt.includes('syari_classic'), 'Kunci syari_classic DILARANG ada');

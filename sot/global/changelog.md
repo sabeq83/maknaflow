@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.102 — Upgrade Multiplier Prompt Engine to Pillar Cinema Standard (28/10/2026)
+- Phase One 150MP macro optics standard
+- Direct anchor and distinct blurred wardrobe lock
+- Food Truth and Cookware Truth slots
+- Removal of micro-expression in faceless mode
+
 ## V2.32.101 — Fix ESM module specifiers in re-multiplier-worker (28/10/2026)
 - Add .js extension to all relative dynamic imports in re-multiplier-worker
 
