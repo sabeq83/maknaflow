@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.32.106 — MiniMax TTS Resiliency: Multi-Gateway Failover Pool & Gemini Fallback (29/10/2026)
+- Multi-gateway failover pool untuk mengatasi 503 gateway
+- Auto retry dengan exponential backoff
+- Automatic fallback ke Gemini TTS pada processPillarTts
+
 ## V2.32.105 — Penyempurnaan Recipe Exporter: Badge Exported Jelas, Clipboard Fallback, Cover 4:3 T2I & Database Persistence (28/10/2026)
 - Badge exported tampak jauh lebih jelas dan tegas dengan solid fill hijau, aksen border kartu dan status terkirim
 - Tombol salin URL R2 dan prompt dilengkapi helper safeCopyToClipboard dengan fallback execCommand untuk non-HTTPS
