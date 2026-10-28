@@ -1,5 +1,8 @@
 # Changelog
 
+## V2.32.101 — Fix ESM module specifiers in re-multiplier-worker (28/10/2026)
+- Add .js extension to all relative dynamic imports in re-multiplier-worker
+
 ## V2.32.100 — Fix Multiplier Lab Visual Identity V2 Resolution (28/10/2026)
 - Authoritative V2 preset resolution in re-multiplier-worker
 - Clean hardcoded hijab wardrobe in prompts.js
