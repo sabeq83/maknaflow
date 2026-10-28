@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Fitur Pencarian Dinamis & Filter Asal Kampanye — Recipe Exporter</title>
+  <link rel="stylesheet" href="/theme.css">
+  <style>
+    :root {
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #f1f5f9;
+      --surface-subtle: #e2e8f0;
+      --border-subtle: #cbd5e1;
+      --border-strong: #94a3b8;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --action-primary: #2563eb;
+      --action-primary-hover: #1d4ed8;
+      --on-action-primary: #ffffff;
+      --status-success: #16a34a;
+      --status-success-soft: #dcfce7;
+      --status-warning: #ea580c;
+      --status-warning-soft: #ffedd5;
+      --status-info: #0284c7;
+      --status-info-soft: #e0f2fe;
+      --status-purple: #7c3aed;
+      --status-purple-soft: #f3e8ff;
+      --radius-sm: 8px;
+      --radius-xs: 4px;
+      --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --surface: #0f172a;
+        --surface-raised: #1e293b;
+        --surface-interactive: #334155;
+        --surface-subtle: #475569;
+        --border-subtle: #334155;
+        --border-strong: #64748b;
+        --text-primary: #f8fafc;
+        --text-secondary: #cbd5e1;
+        --text-muted: #94a3b8;
+        --action-primary: #3b82f6;
+        --action-primary-hover: #2563eb;
+        --on-action-primary: #ffffff;
+        --status-success: #22c55e;
+        --status-success-soft: rgba(34, 197, 94, 0.15);
+        --status-warning: #f97316;
+        --status-warning-soft: rgba(249, 115, 22, 0.15);
+        --status-info: #38bdf8;
+        --status-info-soft: rgba(56, 189, 248, 0.15);
+        --status-purple: #a855f7;
+        --status-purple-soft: rgba(168, 85, 247, 0.15);
+        --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.25);
+      }
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 24px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .header-box {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-card);
+    }
+    .filter-panel {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 18px 20px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .row-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .origin-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .chip-btn {
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .chip-btn:hover {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+    }
+    .chip-btn.active {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+      border-color: var(--action-primary);
+    }
+    .search-input-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 280px;
+      max-width: 450px;
+    }
+    .search-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 9px 36px 9px 12px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      font-size: 0.85rem;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: var(--action-primary);
+    }
+    .search-clear {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .campaign-select {
+      padding: 9px 12px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      background: var(--surface-raised);
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      min-width: 260px;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 20px;
+    }
+    .recipe-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s;
+    }
+    .recipe-card:hover {
+      transform: translateY(-2px);
+    }
+    .card-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .badge-origin {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+    .badge-pillar {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+    }
+    .badge-multiplier {
+      background: var(--status-warning-soft);
+      color: var(--status-warning);
+      border: 1px solid var(--status-warning);
+    }
+    .badge-planner {
+      background: var(--status-purple-soft);
+      color: var(--status-purple);
+      border: 1px solid var(--status-purple);
+    }
+    .badge-labs {
+      background: var(--surface-interactive);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+    }
+    .card-body {
+      padding: 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+      line-height: 1.4;
+    }
+    .card-campaign-ref {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      font-family: monospace;
+      background: var(--surface-interactive);
+      padding: 3px 6px;
+      border-radius: 3px;
+      display: inline-block;
+      width: fit-content;
+    }
+    .card-desc {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin: 4px 0 0 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .card-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      background: var(--surface);
+      border: 1px dashed var(--border-subtle);
+      border-radius: var(--radius-sm);
+      grid-column: 1 / -1;
+    }
+    .pill-count {
+      background: var(--surface-interactive);
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div>
+          <h1 style="margin:0 0 6px 0; font-size:1.4rem;">🔍 Simulasi Filter & Pencarian Dinamis Recipe Exporter</h1>
+          <div style="font-size:0.85rem; color:var(--text-muted);">
+            Memisahkan dan menyaring resep berdasarkan <strong>Jenis Kampanye Asal</strong> (Pillar vs Multiplier vs Planner) serta pencarian langsung via <strong>ID Kampanye</strong> (contoh: <code>opc_261026_rdsm89</code>).
+          </div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="chip-btn" onclick="quickFill('opc_261026_rdsm89')">🧪 Coba Ketik: opc_261026_rdsm89</button>
+          <button class="chip-btn" onclick="quickFill('chicken breast')">🍗 Coba Ketik: chicken breast</button>
+          <button class="chip-btn" onclick="quickFill('banana')">🍌 Coba Ketik: banana</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter & Search Panel -->
+    <div class="filter-panel">
+      <!-- Row 1: Asal Kampanye (Origin Type Chips) -->
+      <div class="row-controls">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:0.8rem; font-weight:700; color:var(--text-secondary);">JENIS KAMPANYE:</span>
+          <div class="origin-chips" id="originChips">
+            <button class="chip-btn active" data-origin="all" onclick="setOrigin('all')">
+              🌟 Semua Asal <span class="pill-count" id="countAll">0</span>
+            </button>
+            <button class="chip-btn" data-origin="pillar" onclick="setOrigin('pillar')">
+              🏛️ Pillar Campaign (OPC) <span class="pill-count" id="countPillar">0</span>
+            </button>
+            <button class="chip-btn" data-origin="multiplier" onclick="setOrigin('multiplier')">
+              ⚡ Multiplier Lab <span class="pill-count" id="countMultiplier">0</span>
+            </button>
+            <button class="chip-btn" data-origin="planner" onclick="setOrigin('planner')">
+              📅 Content Planner <span class="pill-count" id="countPlanner">0</span>
+            </button>
+            <button class="chip-btn" data-origin="labs" onclick="setOrigin('labs')">
+              🧪 Recipe Labs <span class="pill-count" id="countLabs">0</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2: Search Input & Dropdown Pemilih Kampanye Spesifik -->
+      <div class="row-controls" style="border-top: 1px solid var(--border-subtle); padding-top: 12px;">
+        <!-- Smart Search Input -->
+        <div class="search-input-wrapper">
+          <input
+            type="text"
+            id="searchInput"
+            class="search-input"
+            placeholder="Ketik ID Kampanye (opc_...), judul resep, atau bahan..."
+            oninput="handleSearch(this.value)"
+          />
+          <button class="search-clear" id="btnClearSearch" onclick="clearSearch()" style="display:none;">✕</button>
+        </div>
+
+        <!-- Dynamic Campaign Dropdown -->
+        <div style="display:flex; align-items:center; gap:8px;">
+          <label style="font-size:0.8rem; font-weight:600; color:var(--text-secondary); white-space:nowrap;">Pilih Kampanye:</label>
+          <select id="campaignSelect" class="campaign-select" onchange="handleSelectCampaign(this.value)">
+            <option value="all">-- Semua Kampanye Terdaftar --</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Filter Summary -->
+    <div id="filterSummary" style="font-size:0.82rem; color:var(--text-muted); margin-bottom:16px;"></div>
+
+    <!-- Cards Grid -->
+    <div class="card-grid" id="cardGrid"></div>
+  </div>
+
+  <script>
+    // Data simulasi realistis dari database
+    const mockData = [
+      {
+        id: 1898,
+        origin_type: 'pillar',
+        origin_label: 'Pillar Campaign (OPC)',
+        campaign_id: 'opc_261026_rdsm89',
+        campaign_name: '[ Recipe OPC 20261026 ] - habitfolk - air fryer chicken breast',
+        title: 'Juicy Garlic Butter Air Fryer Chicken Breast',
+        category: 'Healthy Food / Air Fryer',
+        time: '20 mins',
+        summary: 'Dada ayam juicy air fryer dengan lelehan garlic butter gurih, permukaan keemasan dan bumbu meresap sempurna.',
+        hasVideo: true,
+        isExported: false
+      },
+      {
+        id: 1899,
+        origin_type: 'pillar',
+        origin_label: 'Pillar Campaign (OPC)',
+        campaign_id: 'opc_261026_rdsm89',
+        campaign_name: '[ Recipe OPC 20261026 ] - habitfolk - air fryer chicken breast',
+        title: 'Crispy Parmesan Crusted Air Fryer Chicken Breast',
+        category: 'High Protein / Low Carb',
+        time: '18 mins',
+        summary: 'Baluran keju parmesan renyah gurih menyelimuti dada ayam empuk tanpa minyak berlebih.',
+        hasVideo: true,
+        isExported: true
+      },
+      {
+        id: 1900,
+        origin_type: 'pillar',
+        origin_label: 'Pillar Campaign (OPC)',
+        campaign_id: 'opc_261026_rdsm89',
+        campaign_name: '[ Recipe OPC 20261026 ] - habitfolk - air fryer chicken breast',
+        title: 'Spicy Honey Glazed Air Fryer Chicken Breast',
+        category: 'Sweet & Spicy',
+        time: '22 mins',
+        summary: 'Kombinasi madu murni dan cabai bakar menciptakan karamelisasi memikat pada permukaan fillet ayam.',
+        hasVideo: true,
+        isExported: false
+      },
+      {
+        id: 2041,
+        origin_type: 'multiplier',
+        origin_label: 'Multiplier Lab',
+        campaign_id: 'mul_261028_kf70ki',
+        campaign_name: '[Nutribake] - Healthy Banana Cake Multiplier Batch',
+        title: 'Gluten-Free Moist Banana Bread with Walnuts',
+        category: 'Healthy Bakery',
+        time: '35 mins',
+        summary: 'Kue pisang lembut bebas gluten kaya serat dengan taburan kenari renyah beraroma kayu manis.',
+        hasVideo: true,
+        isExported: false
+      },
+      {
+        id: 2042,
+        origin_type: 'multiplier',
+        origin_label: 'Multiplier Lab',
+        campaign_id: 'mul_261028_kf70ki',
+        campaign_name: '[Nutribake] - Healthy Banana Cake Multiplier Batch',
+        title: 'Honey Caramelized Banana Oat Muffins',
+        category: 'Breakfast Bake',
+        time: '25 mins',
+        summary: 'Muffin oat gandum dengan potongan pisang manis terkaramelisasi madu murni alami.',
+        hasVideo: false,
+        isExported: false
+      },
+      {
+        id: 501,
+        origin_type: 'planner',
+        origin_label: 'Content Planner',
+        campaign_id: 'pln_b935c763',
+        campaign_name: 'Perencanaan Konten Kuliner Diet Seimbang Nov 2026',
+        title: 'High-Protein Tofu Scramble Bowl',
+        category: 'Plant-Based Protein',
+        time: '15 mins',
+        summary: 'Orak-arik tahu bumbu kunyit gurih dengan sayuran tumis segar untuk sarapan berenergi.',
+        hasVideo: false,
+        isExported: false
+      },
+      {
+        id: 88,
+        origin_type: 'labs',
+        origin_label: 'Recipe Labs',
+        campaign_id: 'rcl_718291',
+        campaign_name: 'Studio Lab Resep Tradisional Nusantara',
+        title: 'Sop Buntut Bakar Madu Gurih',
+        category: 'Traditional Indonesian',
+        time: '60 mins',
+        summary: 'Buntut sapi empuk dibakar dengan olesan kecap madu disajikan bersama kuah kaldu rempah bening gurih.',
+        hasVideo: true,
+        isExported: true
+      }
+    ];
+
+    let currentOrigin = 'all';
+    let currentSearch = '';
+    let currentCampaign = 'all';
+
+    function init() {
+      renderCampaignDropdown();
+      updateCounts();
+      renderCards();
+    }
+
+    function updateCounts() {
+      document.getElementById('countAll').innerText = mockData.length;
+      document.getElementById('countPillar').innerText = mockData.filter(d => d.origin_type === 'pillar').length;
+      document.getElementById('countMultiplier').innerText = mockData.filter(d => d.origin_type === 'multiplier').length;
+      document.getElementById('countPlanner').innerText = mockData.filter(d => d.origin_type === 'planner').length;
+      document.getElementById('countLabs').innerText = mockData.filter(d => d.origin_type === 'labs').length;
+    }
+
+    function renderCampaignDropdown() {
+      const select = document.getElementById('campaignSelect');
+      select.innerHTML = '<option value="all">-- Semua Kampanye Terdaftar --</option>';
+
+      // Kelompokkan unik berdasarkan campaign_id
+      const campaigns = [];
+      const seen = new Set();
+      mockData.forEach(item => {
+        if (!seen.has(item.campaign_id)) {
+          seen.add(item.campaign_id);
+          campaigns.push({
+            id: item.campaign_id,
+            name: item.campaign_name,
+            origin: item.origin_label,
+            origin_type: item.origin_type
+          });
+        }
+      });
+
+      campaigns.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.innerText = `[${c.origin}] ${c.name} (${c.id})`;
+        select.appendChild(opt);
+      });
+    }
+
+    function setOrigin(origin) {
+      currentOrigin = origin;
+      document.querySelectorAll('#originChips .chip-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.origin === origin);
+      });
+      renderCards();
+    }
+
+    function handleSearch(val) {
+      currentSearch = (val || '').trim().toLowerCase();
+      document.getElementById('btnClearSearch').style.display = currentSearch ? 'block' : 'none';
+      renderCards();
+    }
+
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      currentSearch = '';
+      document.getElementById('btnClearSearch').style.display = 'none';
+      renderCards();
+    }
+
+    function handleSelectCampaign(val) {
+      currentCampaign = val;
+      renderCards();
+    }
+
+    function quickFill(term) {
+      document.getElementById('searchInput').value = term;
+      handleSearch(term);
+    }
+
+    function renderCards() {
+      const grid = document.getElementById('cardGrid');
+      grid.innerHTML = '';
+
+      const filtered = mockData.filter(item => {
+        // Filter Asal
+        if (currentOrigin !== 'all' && item.origin_type !== currentOrigin) return false;
+
+        // Filter Kampanye Spesifik Dropdown
+        if (currentCampaign !== 'all' && item.campaign_id !== currentCampaign) return false;
+
+        // Filter Pencarian Teks Dinamis (Smart Multi-Field Match)
+        if (currentSearch) {
+          const matchTitle = (item.title || '').toLowerCase().includes(currentSearch);
+          const matchCampId = (item.campaign_id || '').toLowerCase().includes(currentSearch);
+          const matchCampName = (item.campaign_name || '').toLowerCase().includes(currentSearch);
+          const matchCategory = (item.category || '').toLowerCase().includes(currentSearch);
+          const matchSummary = (item.summary || '').toLowerCase().includes(currentSearch);
+          const matchId = String(item.id).includes(currentSearch);
+
+          if (!matchTitle && !matchCampId && !matchCampName && !matchCategory && !matchSummary && !matchId) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      // Update Summary Text
+      document.getElementById('filterSummary').innerHTML = `Menampilkan <strong>${filtered.length} resep</strong> dari total ${mockData.length} data.`;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div style="font-size:2.5rem; margin-bottom:8px;">🔎</div>
+            <div style="font-size:1rem; font-weight:700; color:var(--text-primary); margin-bottom:4px;">Tidak Ada Resep yang Cocok</div>
+            <div style="font-size:0.82rem; color:var(--text-muted); margin-bottom:12px;">
+              Kata kunci "<strong>${currentSearch}</strong>" tidak ditemukan pada kategori asal "${currentOrigin}".
+            </div>
+            <button class="chip-btn" onclick="clearSearch(); setOrigin('all'); handleSelectCampaign('all');">🔄 Reset Semua Filter</button>
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(item => {
+        const badgeClass = item.origin_type === 'pillar' ? 'badge-pillar' :
+                           item.origin_type === 'multiplier' ? 'badge-multiplier' :
+                           item.origin_type === 'planner' ? 'badge-planner' : 'badge-labs';
+        
+        const card = document.createElement('div');
+        card.className = 'recipe-card';
+        card.innerHTML = `
+          <div class="card-header">
+            <span class="badge-origin ${badgeClass}">● ${item.origin_label}</span>
+            <span style="font-size:0.75rem; color:var(--text-muted);">#${item.id}</span>
+          </div>
+          <div class="card-body">
+            <div class="card-campaign-ref">🏷️ ${item.campaign_id}</div>
+            <h3 class="card-title">${item.title}</h3>
+            <div style="font-size:0.76rem; color:var(--text-secondary); margin-top:2px;">
+              📂 <strong>${item.campaign_name}</strong>
+            </div>
+            <p class="card-desc">${item.summary}</p>
+          </div>
+          <div class="card-footer">
+            <span style="color:var(--text-muted);">⏱️ ${item.time} • ${item.category}</span>
+            <span style="font-weight:600; color:${item.isExported ? 'var(--status-success)' : 'var(--status-warning)'}">
+              ${item.isExported ? '✓ Sudah Diekspor' : '⏳ Belum Diekspor'}
+            </span>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>

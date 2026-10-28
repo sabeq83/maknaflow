@@ -9,6 +9,8 @@ import '@/app/components/recipe-export/recipe-export.css';
 export default function RecipeExporterPage() {
   const [source, setSource] = useState('labs'); // 'labs' | 'campaign'
   const [filter, setFilter] = useState('all'); // 'all' | 'exported' | 'unexported' | 'ready' | 'legacy' | 'video'
+  const [originFilter, setOriginFilter] = useState('all'); // 'all' | 'pillar' | 'multiplier' | 'planner' | 'labs'
+  const [campaignFilter, setCampaignFilter] = useState('all'); // 'all' | <campaign_id>
   const [searchQuery, setSearchQuery] = useState('');
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -43,19 +45,51 @@ export default function RecipeExporterPage() {
       })
       .catch(() => {});
 
+    setOriginFilter('all');
+    setCampaignFilter('all');
     fetchRecipes(source);
   }, [source]);
 
+  // Kumpulkan daftar kampanye unik untuk dropdown
+  const uniqueCampaigns = React.useMemo(() => {
+    const map = new Map();
+    recipes.forEach(r => {
+      const cId = r.campaign_id;
+      if (cId && !map.has(cId)) {
+        map.set(cId, {
+          id: cId,
+          name: r.campaign_name || cId,
+          origin: r.origin_label || r.origin_type || 'Campaign',
+          origin_type: r.origin_type
+        });
+      }
+    });
+    return Array.from(map.values());
+  }, [recipes]);
+
   const filteredRecipes = recipes.filter(r => {
-    // Search query
+    // 1. Filter Asal Kampanye (Origin Filter)
+    if (originFilter !== 'all' && r.origin_type !== originFilter) return false;
+
+    // 2. Filter Dropdown Kampanye Spesifik
+    if (campaignFilter !== 'all' && r.campaign_id !== campaignFilter) return false;
+
+    // 3. Smart Universal Search (Title, Campaign ID, Campaign Name, Category, Summary, Recipe ID)
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       const matchTitle = (r.title || '').toLowerCase().includes(q);
+      const matchCampId = (r.campaign_id || '').toLowerCase().includes(q);
+      const matchCampName = (r.campaign_name || '').toLowerCase().includes(q);
       const matchCategory = (r.category || '').toLowerCase().includes(q);
       const matchSummary = (r.summary || '').toLowerCase().includes(q);
-      if (!matchTitle && !matchCategory && !matchSummary) return false;
+      const matchId = String(r.id || '').toLowerCase().includes(q);
+
+      if (!matchTitle && !matchCampId && !matchCampName && !matchCategory && !matchSummary && !matchId) {
+        return false;
+      }
     }
 
+    // 4. Status Filter
     if (filter === 'exported') return r.isExported;
     if (filter === 'unexported') return !r.isExported;
     if (filter === 'ready') return r.hasSummary;
@@ -69,6 +103,10 @@ export default function RecipeExporterPage() {
   const countReady = recipes.filter(r => r.hasSummary).length;
   const countLegacy = recipes.filter(r => !r.hasSummary).length;
   const countVideo = recipes.filter(r => r.hasVideo || r.videoR2Url).length;
+
+  const countPillar = recipes.filter(r => r.origin_type === 'pillar').length;
+  const countMultiplier = recipes.filter(r => r.origin_type === 'multiplier').length;
+  const countPlanner = recipes.filter(r => r.origin_type === 'planner').length;
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
@@ -134,6 +172,53 @@ export default function RecipeExporterPage() {
             </div>
           </div>
 
+          {/* Origin Filter Row (Khusus jika di Recipe Campaign) */}
+          {source === 'campaign' && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '14px', padding: '10px 14px', background: 'var(--surface-raised)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>ASAL KAMPANYE:</span>
+                {[
+                  { id: 'all', label: `🌟 Semua Asal (${recipes.length})` },
+                  { id: 'pillar', label: `🏛️ Pillar Campaign (${countPillar})` },
+                  { id: 'multiplier', label: `⚡ Multiplier Lab (${countMultiplier})` },
+                  { id: 'planner', label: `📅 Content Planner (${countPlanner})` }
+                ].map(o => (
+                  <button
+                    key={o.id}
+                    type="button"
+                    className={`btn btn-sm ${originFilter === o.id ? 'btn-primary' : 'btn-secondary'}`}
+                    style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '999px' }}
+                    onClick={() => { setOriginFilter(o.id); setCampaignFilter('all'); }}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Dynamic Campaign Selector Dropdown */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                  Pilih Kampanye:
+                </label>
+                <select
+                  value={campaignFilter}
+                  onChange={e => setCampaignFilter(e.target.value)}
+                  className="form-control"
+                  style={{ fontSize: '0.78rem', padding: '4px 8px', maxWidth: '320px', background: 'var(--surface)' }}
+                >
+                  <option value="all">-- Semua Kampanye --</option>
+                  {uniqueCampaigns
+                    .filter(c => originFilter === 'all' || c.origin_type === originFilter)
+                    .map(c => (
+                      <option key={c.id} value={c.id}>
+                        [{c.origin}] {c.name} ({c.id})
+                      </option>
+                    ))}
+                </select>
+              </div>
+            </div>
+          )}
+
           {/* Search Bar & Filter Tabs */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -156,10 +241,10 @@ export default function RecipeExporterPage() {
               ))}
             </div>
 
-            <div style={{ position: 'relative', width: '280px' }}>
+            <div style={{ position: 'relative', width: '320px' }}>
               <input
                 type="text"
-                placeholder="Cari judul resep atau kategori..."
+                placeholder="Cari ID Kampanye (opc_...), judul, atau kategori..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="form-control"
@@ -268,9 +353,38 @@ export default function RecipeExporterPage() {
 
                   {/* Card Content */}
                   <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {/* Origin Badge & Campaign ID */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      <span
+                        style={{
+                          fontSize: '0.68rem',
+                          fontWeight: 700,
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          border: '1px solid',
+                          background: item.origin_type === 'pillar' ? 'var(--status-info-soft)' : item.origin_type === 'multiplier' ? 'var(--status-warning-soft)' : item.origin_type === 'planner' ? 'var(--status-info-soft)' : 'var(--surface-interactive)',
+                          color: item.origin_type === 'pillar' ? 'var(--status-info)' : item.origin_type === 'multiplier' ? 'var(--status-warning)' : item.origin_type === 'planner' ? 'var(--status-info)' : 'var(--text-secondary)',
+                          borderColor: item.origin_type === 'pillar' ? 'var(--status-info)' : item.origin_type === 'multiplier' ? 'var(--status-warning)' : item.origin_type === 'planner' ? 'var(--status-info)' : 'var(--border-subtle)'
+                        }}
+                      >
+                        ● {item.origin_label || 'Campaign'}
+                      </span>
+                      {item.campaign_id && (
+                        <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontFamily: 'monospace', background: 'var(--surface-interactive)', padding: '2px 6px', borderRadius: '4px' }}>
+                          🏷️ {item.campaign_id}
+                        </span>
+                      )}
+                    </div>
+
                     <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0, lineHeight: 1.4 }}>
                       {item.title}
                     </h3>
+
+                    {item.campaign_name && (
+                      <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        📂 {item.campaign_name}
+                      </div>
+                    )}
                     
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                       <span className="recipe-pixel-chip">⏱️ {item.time}</span>

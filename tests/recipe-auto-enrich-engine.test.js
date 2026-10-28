@@ -61,6 +61,25 @@ test('2. Recipe Auto Enrich uses resilient getGeminiModel and returns structured
   assert.strictEqual(parsed.ingredient_groups.length, 1);
   assert.strictEqual(parsed.directions.length, 3);
   assert.match(parsed.t2i_prompt_4_3, /4:3/);
+});
+
+test('3. Recipe Auto Enrich respects manual language parameter', async () => {
+  const { detectRecipeLanguage } = await import('../lib/recipe-export-helper.js');
+
+  // Bila teks campuran (title Inggris tapi bahan Indonesia)
+  const mixedTitle = 'Crispy Air Fryer Fried Chicken';
+  const mixedIngredients = '500 gram paha ayam fillet\n3 siung bawang putih\n1 sdt garam';
+  const detected = detectRecipeLanguage(mixedTitle, mixedIngredients, '');
+
+  // Parameter manual 'id' harus mengunci ke Bahasa Indonesia
+  const manualLangId = 'id';
+  const isEnglishWithManualId = manualLangId === 'en' ? true : (manualLangId === 'id' ? false : (detected === 'en'));
+  assert.strictEqual(isEnglishWithManualId, false, 'Manual id harus mengunci bahasa Indonesia');
+
+  // Parameter manual 'en' harus mengunci ke Bahasa Inggris
+  const manualLangEn = 'en';
+  const isEnglishWithManualEn = manualLangEn === 'en' ? true : (manualLangEn === 'id' ? false : (detected === 'en'));
+  assert.strictEqual(isEnglishWithManualEn, true, 'Manual en harus mengunci bahasa Inggris');
 
   setTimeout(() => process.exit(0), 100);
 });

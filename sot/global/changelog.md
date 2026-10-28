@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.104 — Fitur Pencarian Dinamis, Filter Asal Kampanye & Setting Bahasa Recipe Exporter (28/10/2026)
+- Fix SQL tenant query pillar_campaign_items dan mapping metadata asal
+- Filter chip asal kampanye dan dynamic selector di UI
+- Smart search multi-field (campaign_id, nama, judul resep)
+- Setting bahasa manual (auto/id/en) pada AI Auto Enrich
+
 ## V2.32.103 — Penyelarasan AI Auto Enrich Recipe Exporter ke Resilient Gemini Waterfall Engine (28/10/2026)
 - Ganti manual Gemini call dengan getGeminiModel cascade
 - Hapus timeout 20 detik

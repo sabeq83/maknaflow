@@ -1,12 +1,12 @@
-import { NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
-import { withTenantContext } from '@/lib/auth';
-import { getExportRecordsByTenant } from '@/lib/recipe-export-records';
-import { parseRecipeDescriptionHtml } from '@/lib/recipe-export-helper';
+import { NextResponse } from 'next/server.js';
+import { getDb } from '../../../lib/db.js';
+import { withTenantContext } from '../../../lib/auth.js';
+import { getExportRecordsByTenant } from '../../../lib/recipe-export-records.js';
+import { parseRecipeDescriptionHtml } from '../../../lib/recipe-export-helper.js';
 
 export const GET = withTenantContext(async (req) => {
   try {
-    const { getActiveTenantId } = await import('@/lib/tenant-context');
+    const { getActiveTenantId } = await import('../../../lib/tenant-context.js');
     const tenantId = getActiveTenantId() || 'default_tenant';
     const { searchParams } = new URL(req.url);
     const source = searchParams.get('source') || 'labs';
@@ -63,6 +63,10 @@ export const GET = withTenantContext(async (req) => {
         return {
           id: item.id,
           sourceType: 'labs',
+          origin_type: 'labs',
+          origin_label: 'Recipe Labs',
+          campaign_id: item.campaign_id ? String(item.campaign_id) : `labs_${item.id}`,
+          campaign_name: item.campaign_name || item.category || 'Recipe Labs Studio',
           source: `Recipe Labs (${item.campaign_name || item.category || 'Studio'})`,
           title: item.recipe_title || 'Resep Kuliner Tanpa Judul',
           time: '30 mins',
@@ -111,13 +115,13 @@ export const GET = withTenantContext(async (req) => {
           pc.content_pillar
         FROM pillar_campaign_items pci
         LEFT JOIN pillar_campaigns pc ON pci.campaign_id = pc.id
-        WHERE (pci.tenant_id = ? OR pc.tenant_id = ? OR pci.tenant_id = 'default_tenant')
+        WHERE (pc.tenant_id = ? OR pc.tenant_id = 'default_tenant' OR pc.tenant_id IS NULL)
           AND (pci.content_kind = 'recipe_campaign' 
                OR pci.result_json LIKE '%"recipe":%' 
                OR pci.row_creative_payload LIKE '%recipe_idea%')
         ORDER BY pci.id DESC
         LIMIT 100
-      `).all(tenantId, tenantId);
+      `).all(tenantId);
     } catch (e) {
       console.warn('[API /api/recipes] Failed to query pillar_campaign_items:', e.message);
       pillarRows = [];
@@ -188,7 +192,11 @@ export const GET = withTenantContext(async (req) => {
       return {
         id: item.id,
         sourceType: 'campaign',
-        source: `Recipe Campaign (${item.campaign_name || item.content_pillar || 'Pillar'} #${item.id})`,
+        origin_type: 'pillar',
+        origin_label: 'Pillar Campaign (OPC)',
+        campaign_id: item.campaign_id || '',
+        campaign_name: item.campaign_name || item.content_pillar || 'Pillar Campaign',
+        source: `Pillar Campaign (${item.campaign_name || item.content_pillar || 'Pillar'} #${item.id})`,
         title,
         time: recipeObj.cook_minutes ? `${recipeObj.cook_minutes} mins` : (idea.cook_minutes ? `${idea.cook_minutes} mins` : '20 mins'),
         category: payload.category || idea.category || 'Healthy Food',
@@ -218,7 +226,7 @@ export const GET = withTenantContext(async (req) => {
     let plannerRows = [];
     try {
       plannerRows = await db.prepare(`
-        SELECT cpr.*, cp.name AS planner_name, cp.category AS planner_category, cp.target_audience
+        SELECT cpr.*, cp.title AS planner_name, cp.target_audience
         FROM content_planner_rows cpr
         JOIN content_planners cp ON cpr.planner_id = cp.id
         WHERE cp.planner_focus = 'recipe_campaign' 
@@ -287,7 +295,11 @@ export const GET = withTenantContext(async (req) => {
       return {
         id: row.id,
         sourceType: 'campaign',
-        source: `Recipe Campaign (${row.planner_name || 'Content Planner'} #${row.sequence || 1})`,
+        origin_type: 'planner',
+        origin_label: 'Content Planner',
+        campaign_id: row.planner_id ? String(row.planner_id) : `pln_${row.id}`,
+        campaign_name: row.planner_name || 'Content Planner Kuliner',
+        source: `Content Planner (${row.planner_name || 'Planner'} #${row.sequence || 1})`,
         title,
         time: idea.cook_minutes ? `${idea.cook_minutes} mins` : '25 mins',
         category: idea.category || row.planner_category || 'Healthy Food',
@@ -327,8 +339,17 @@ export const GET = withTenantContext(async (req) => {
         LIMIT 100
       `).all(tenantId);
     } catch (e) {
-      console.warn('[API /api/recipes] Failed to query re_multiplier_tasks:', e.message);
-      multiplierRows = [];
+      console.warn('[API /api/recipes] Failed to query re_multiplier_tasks with specific columns:', e.message);
+      try {
+        multiplierRows = await db.prepare(`
+          SELECT * FROM re_multiplier_tasks
+          WHERE (tenant_id = ? OR tenant_id = 'default_tenant')
+          ORDER BY created_at DESC
+          LIMIT 100
+        `).all(tenantId);
+      } catch (_) {
+        multiplierRows = [];
+      }
     }
 
     const mappedMultiplier = (multiplierRows || []).map(row => {
@@ -357,6 +378,10 @@ export const GET = withTenantContext(async (req) => {
       return {
         id: row.id,
         sourceType: 'campaign',
+        origin_type: 'multiplier',
+        origin_label: 'Multiplier Lab',
+        campaign_id: row.batch_id || (row.campaign_name ? row.campaign_name.replace(/^\[.*?\]\s*-\s*/, '') : `mul_${row.id}`),
+        campaign_name: row.campaign_name || row.batch_id || 'Multiplier Batch',
         source: `Multiplier Lab (${row.campaign_name || row.batch_id || 'Batch'} #${row.id})`,
         title,
         time: '15 mins prep | 20 mins cook',

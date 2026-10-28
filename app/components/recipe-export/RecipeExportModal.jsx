@@ -68,6 +68,7 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
   const [t2iPrompt43, setT2iPrompt43] = useState(recipe?.t2i_prompt_4_3 || '');
   const [coverImageUrl, setCoverImageUrl] = useState(recipe?.image || recipe?.cover_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80');
   const [generatingCover, setGeneratingCover] = useState(false);
+  const [enrichLanguage, setEnrichLanguage] = useState('auto'); // 'auto' | 'id' | 'en'
 
   // 4. Video Pipeline State
   const [videoMutedReady, setVideoMutedReady] = useState(Boolean(recipe?.videoMutedReady || recipe?.video_url || recipe?.videoR2Url));
@@ -142,7 +143,8 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
         body: JSON.stringify({
           title,
           currentIngredients: baseIngredients,
-          currentDirections: directions
+          currentDirections: directions,
+          language: enrichLanguage
         })
       });
       const json = await res.json();
@@ -577,15 +579,28 @@ export default function RecipeExportModal({ recipe, onClose, onSuccess }) {
                 <strong>✨ AI Auto Enrich (1-Klik Lengkap)</strong>
                 Menghasilkan otomatis 4 elemen standar: <strong>SUMMARY</strong>, <strong>INGREDIENTS</strong> (Sub-Kelompok Adaptif), <strong>DIRECTIONS</strong>, dan <strong>T2I_PROMPT_4_3</strong> untuk foto resep mobile.
               </div>
-              <button
-                type="button"
-                className="btn-ai-magic"
-                onClick={handleAiAutoEnrich}
-                disabled={aiEnriching}
-              >
-                <span>{aiEnriching ? '⏳' : '✨'}</span>
-                <span>{aiEnriching ? 'Memproses...' : 'AI Auto Enrich'}</span>
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <select
+                  value={enrichLanguage}
+                  onChange={e => setEnrichLanguage(e.target.value)}
+                  className="form-control"
+                  style={{ fontSize: '0.78rem', padding: '6px 10px', width: 'auto', background: 'var(--surface)' }}
+                  title="Pilih bahasa target untuk naskah editorial dan summary AI"
+                >
+                  <option value="auto">🌐 Bahasa: Otomatis</option>
+                  <option value="id">🇮🇩 Bahasa: Indonesia</option>
+                  <option value="en">🇬🇧 Bahasa: English</option>
+                </select>
+                <button
+                  type="button"
+                  className="btn-ai-magic"
+                  onClick={handleAiAutoEnrich}
+                  disabled={aiEnriching}
+                >
+                  <span>{aiEnriching ? '⏳' : '✨'}</span>
+                  <span>{aiEnriching ? 'Memproses...' : 'AI Auto Enrich'}</span>
+                </button>
+              </div>
             </div>
 
             {/* 3. Video Pipeline Box */}

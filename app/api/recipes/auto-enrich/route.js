@@ -6,14 +6,22 @@ import { detectRecipeLanguage } from '../../../../lib/recipe-export-helper.js';
 
 export const POST = withTenantContext(async (req) => {
   try {
-    const { title, currentIngredients, currentDirections } = await req.json();
+    const { title, currentIngredients, currentDirections, language } = await req.json();
 
     if (!title || !title.trim()) {
       return NextResponse.json({ success: false, error: 'Judul resep wajib diisi.' }, { status: 400 });
     }
 
-    const lang = detectRecipeLanguage(title, currentIngredients, currentDirections);
-    const isEnglish = (lang === 'en');
+    // Manual Language Setting or Fallback to Auto Detection
+    let isEnglish = false;
+    if (language === 'en') {
+      isEnglish = true;
+    } else if (language === 'id') {
+      isEnglish = false;
+    } else {
+      const lang = detectRecipeLanguage(title, currentIngredients, currentDirections);
+      isEnglish = (lang === 'en');
+    }
     const targetLangName = isEnglish ? 'BAHASA INGGRIS (English)' : 'BAHASA INDONESIA';
 
     const prompt = `Anda adalah Food Editor dan Culinary Expert profesional untuk aplikasi mobile resep Android.
