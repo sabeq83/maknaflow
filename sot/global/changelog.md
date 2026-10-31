@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.32.107 — Dual-Realm Dynamic Visual Identity Orchestration di Multiplier Lab (31/10/2026)
+- Ekstraksi visual_signature dan mechanism mode di Multiplier Worker
+- Dual-Realm Narrative Orchestration di buildMultiplierPhase2Prompt untuk 3D bio-cellular cutaways
+- Template prompt berlayer polimorfik antara adegan meja fisik dan simulasi 3D
+- Unit test komprehensif untuk Dapur Botani, Siasat Sehat, dan Nutribake
+
 ## V2.32.106 — MiniMax TTS Resiliency: Multi-Gateway Failover Pool & Gemini Fallback (29/10/2026)
 - Multi-gateway failover pool untuk mengatasi 503 gateway
 - Auto retry dengan exponential backoff
